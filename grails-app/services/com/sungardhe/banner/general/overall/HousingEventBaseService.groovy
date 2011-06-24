@@ -1,6 +1,5 @@
-
-/*******************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+/** *****************************************************************************
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -8,12 +7,11 @@
  AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
  NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
  WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- *******************************************************************************/
+ ****************************************************************************** */
 
 package com.sungardhe.banner.general.overall
 
-import com.sungardhe.banner.general.overall.HousingEventBase
-import com.sungardhe.banner.service.DomainManagementMethodsInjector
+import com.sungardhe.banner.service.ServiceBase
 
 // NOTE:
 // This service is injected with create, update, and delete methods that may throw runtime exceptions (listed below).  
@@ -23,12 +21,10 @@ import com.sungardhe.banner.service.DomainManagementMethodsInjector
 // update and delete may throw org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException a runtime exception if an optimistic lock failure occurs
 // create, update, and delete may throw grails.validation.ValidationException a runtime exception when there is a validation failure
 
-class HousingEventBaseService {
+class HousingEventBaseService extends ServiceBase{
 
     boolean transactional = true
 
-	static defaultCrudMethods = true
-    
     /**
      * Please put all the custom methods in this protected section to protect the code
      * from being overwritten on re-generation

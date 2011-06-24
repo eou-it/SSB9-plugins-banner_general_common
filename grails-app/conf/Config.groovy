@@ -30,7 +30,7 @@ grails.config.locations = [] // leave this initialized to an empty list, and add
 
 def locationAdder = ConfigFinder.&addLocation.curry(grails.config.locations)
 
-[bannerGrailsAppConfig: "${userHome}/.grails/banner_on_grails-local-config.groovy",
+[bannerGrailsAppConfig: "${userHome}/.grails/banner_configuration.groovy",
         customRepresentationConfig: "grails-app/conf/CustomRepresentationConfig.groovy",
 ].each { envName, defaultFileName -> locationAdder(envName, defaultFileName) }
 

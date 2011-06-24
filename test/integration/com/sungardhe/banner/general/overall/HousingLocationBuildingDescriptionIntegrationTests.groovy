@@ -1,5 +1,5 @@
 /** *****************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -15,20 +15,9 @@
 package com.sungardhe.banner.general.overall
 
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
-import com.sungardhe.banner.exceptions.ApplicationException
 import groovy.sql.Sql
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
-import com.sungardhe.banner.general.system.Building
-import com.sungardhe.banner.general.system.Campus
-import com.sungardhe.banner.general.system.RoomRate
-import com.sungardhe.banner.general.system.PhoneRate
-import com.sungardhe.banner.general.system.Site
-import com.sungardhe.banner.general.system.State
-import com.sungardhe.banner.general.system.County
-import com.sungardhe.banner.general.system.College
-import com.sungardhe.banner.general.system.Department
-import com.sungardhe.banner.general.system.Partition
-
+import com.sungardhe.banner.general.system.*
 
 class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
@@ -219,7 +208,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     void testCreateValidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
-        housingLocationBuildingDescription.save( failOnError: true, flush: true )
+        housingLocationBuildingDescription.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull housingLocationBuildingDescription.id
     }
@@ -235,7 +224,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     void testUpdateValidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
-        housingLocationBuildingDescription.save( failOnError: true, flush: true )
+        housingLocationBuildingDescription.save(failOnError: true, flush: true)
         assertNotNull housingLocationBuildingDescription.id
         assertEquals 0L, housingLocationBuildingDescription.version
         assertEquals i_success_capacity, housingLocationBuildingDescription.capacity
@@ -289,7 +278,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         housingLocationBuildingDescription.department = u_success_department
 
         housingLocationBuildingDescription.partition = u_success_partition
-        housingLocationBuildingDescription.save( failOnError: true, flush: true )
+        housingLocationBuildingDescription.save(failOnError: true, flush: true)
         //Asset for sucessful update
         housingLocationBuildingDescription = HousingLocationBuildingDescription.get(housingLocationBuildingDescription.id)
         assertEquals 1L, housingLocationBuildingDescription?.version
@@ -332,7 +321,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     void testUpdateInvalidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
-        housingLocationBuildingDescription.save( failOnError: true, flush: true )
+        housingLocationBuildingDescription.save(failOnError: true, flush: true)
         assertNotNull housingLocationBuildingDescription.id
         assertEquals 0L, housingLocationBuildingDescription.version
         assertEquals i_success_capacity, housingLocationBuildingDescription.capacity
@@ -394,7 +383,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     void testOptimisticLock() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
-        housingLocationBuildingDescription.save( failOnError: true, flush: true )
+        housingLocationBuildingDescription.save(failOnError: true, flush: true)
 
         def sql
         try {
@@ -428,7 +417,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     void testDeleteHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
-        housingLocationBuildingDescription.save( failOnError: true, flush: true )
+        housingLocationBuildingDescription.save(failOnError: true, flush: true)
         def id = housingLocationBuildingDescription.id
         assertNotNull id
         housingLocationBuildingDescription.delete()

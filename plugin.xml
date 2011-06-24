@@ -1,4 +1,4 @@
-<plugin name='banner-general-common' version='0.2-SNAPSHOT' grailsVersion='1.3.5 &gt; *'>
+<plugin name='banner-general-common' version='0.0.2' grailsVersion='1.3.5 &gt; *'>
   <author>SunGard Higher Education</author>
   <authorEmail>horizon-support@sungardhe.com</authorEmail>
   <title>BannerGeneralOverall Plugin</title>
@@ -20,6 +20,7 @@
     <resource>com.sungardhe.banner.general.overall.HousingLocationBuildingDescriptionService</resource>
     <resource>com.sungardhe.banner.general.overall.HousingRoomDescriptionService</resource>
     <resource>com.sungardhe.banner.general.overall.IntegrationPartnerSystemRuleService</resource>
+    <resource>com.sungardhe.banner.general.overall.SectionCrossListSectionService</resource>
     <resource>com.sungardhe.banner.general.overall.SectionMeetingTimeService</resource>
   </resources>
   <dependencies>

@@ -1,5 +1,5 @@
 /** *****************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -14,31 +14,9 @@
  */
 package com.sungardhe.banner.general.overall
 
-import com.sungardhe.banner.general.system.Term
-import com.sungardhe.banner.general.system.DayOfWeek
-import com.sungardhe.banner.general.system.Building
-import com.sungardhe.banner.general.system.Function
-import com.sungardhe.banner.general.system.CommitteeAndServiceType
-import com.sungardhe.banner.general.system.ScheduleToolStatus
-import com.sungardhe.banner.general.system.MeetingType
 import com.sungardhe.banner.service.DatabaseModifiesState
-
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.Table
-import javax.persistence.Version
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.Transient
-import javax.persistence.GenerationType
-import javax.persistence.SequenceGenerator
-import javax.persistence.JoinColumn
-import javax.persistence.JoinColumns
-import javax.persistence.ManyToOne
-
-import org.hibernate.annotations.GenericGenerator
+import com.sungardhe.banner.general.system.*
+import javax.persistence.*
 
 /**
  * Section Meeting Times model.
@@ -420,54 +398,30 @@ class SectionMeetingTime implements Serializable {
         beginTime(nullable: true, minSize: 4, maxSize: 4,
                 validator: {val, obj ->
                     if ((val != null) && ((val < "0000") || (val > "2359") || (val.toString().substring(2, 3) > "59")))
-                        return 'invalid.begin_time'
+                        return "invalid.begin_time"
                     if ((val != null) && (obj.endTime == null))
-                        return 'invalid.begin_end_time'
+                        return "invalid.begin_end_time"
                     if ((val != null) && (obj.endTime != null) && (val >= obj.endTime))
-                        return 'invalid.begin_time_greater_than_end_time'
+                        return "invalid.begin_time_greater_than_end_time"
                 })
         endTime(nullable: true, minSize: 4, maxSize: 4,
                 validator: {val, obj ->
                     if ((val != null) && ((val < "0000") || (val > "2359") || (val.toString().substring(2, 3) > "59")))
-                        return 'invalid.end_time'
+                        return "invalid.end_time"
                     if ((val != null) && (obj.beginTime == null))
-                        return 'invalid.begin_end_time'
+                        return "invalid.begin_end_time"
                 })
-        building(nullable: true,
-                validator: {val, obj ->
-                    if ((val != null) && (obj.room != null) &&
-                            (((obj.beginTime == null) && (obj.endTime == null)) ||
-                                    ((obj.monday == null) && (obj.tuesday == null) &&
-                                            (obj.wednesday == null) && (obj.thursday == null) &&
-                                            (obj.friday == null) && (obj.saturday == null) &&
-                                            (obj.sunday == null))
-                            )
-                    )
-                        return 'invalid.day_and_time_missing'
-                    if ((val == null) && (obj.room != null))
-                        return 'invalid.building_missing'
-                })
-        room(nullable: true, maxSize: 10,
-                validator: {val, obj ->
-                    if ((val != null) && (obj.building != null) &&
-                            (((obj.beginTime == null) && (obj.endTime == null)) ||
-                                    ((obj.monday == null) && (obj.tuesday == null) &&
-                                            (obj.wednesday == null) && (obj.thursday == null) &&
-                                            (obj.friday == null) && (obj.saturday == null) &&
-                                            (obj.sunday == null))
-                            )
-                    )
-                        return 'invalid.day_and_time_missing'
-                })
+        building(nullable: true)
+        room(nullable: true, maxSize: 10)
         startDate(nullable: false,
                 validator: {val, obj ->
                     if ((val != null) && (val > obj.endDate))
-                        return 'invalid.start_greater_than_end_date'
+                        return "invalid.start_greater_than_end_date"
                 })
         endDate(nullable: false,
                 validator: {val, obj ->
                     if ((val != null) && (val < obj.startDate))
-                        return 'invalid.end_less_than_start_date'
+                        return "invalid.end_less_than_start_date"
                 })
         category(nullable: true, maxSize: 2)
         sunday(nullable: true, maxSize: 1, inList: ["U"])
@@ -493,7 +447,7 @@ class SectionMeetingTime implements Serializable {
                                     (val.code == 'VSM') || (val.code == '5SM') || (val.code == '5XM'))
                             &&
                             ((obj.building == null) || (obj.room == null)))
-                        return 'invalid.schedule_requires_building_room'
+                        return "invalid.schedule_requires_building_room"
                 })
         meetingType(nullable: true)
         lastModified(nullable: true)

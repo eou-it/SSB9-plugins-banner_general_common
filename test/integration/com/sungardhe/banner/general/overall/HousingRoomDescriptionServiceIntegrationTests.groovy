@@ -1,6 +1,6 @@
 /** *****************************************************************************
 
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -45,11 +45,9 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         def housingRoomDescription = newHousingRoomDescription()
 
         def keyBlockMap = [termEffective: "201410", building: "LAW", room: "102"]
-        def map = [keyBlock: keyBlockMap,
-                domainModel: housingRoomDescription]
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
         assertNotNull "HousingRoomDescription ID is null in HousingRoomDescription Service Tests Create", housingRoomDescription.id
-         assertNotNull housingRoomDescription.lastModified
+        assertNotNull housingRoomDescription.lastModified
         assertNotNull "HousingRoomDescription department is null in HousingRoomDescription Service Tests", housingRoomDescription.department
         assertNull "HousingRoomDescription partition is not null in HousingRoomDescription Service Tests", housingRoomDescription.partition
         assertNotNull "HousingRoomDescription building is null in HousingRoomDescription Service Tests", housingRoomDescription.building
@@ -180,13 +178,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
          * This area is being protected to preserve the customization on regeneration
          */
         /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
-        def idepartment = Department.findByCode("LAW")
-        def ipartition = null
         def ibuilding = Building.findByCode("HUM")
-        def iroomStatus = RoomStatus.findByCode("AC")
-        def iroomRate = null
-        def iphoneRate = null
-        def icollege = College.findByCode("LW")
         /*PROTECTED REGION END*/
         // change the values
         housingRoomDescription.roomNumber = iroomNumber

@@ -1,5 +1,5 @@
 /** *****************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -52,7 +52,7 @@ class SectionMeetingTimeService extends ServiceBase {
     private void validateCodes(SectionMeetingTime sectionMeetingTime) {
         validateTerm(sectionMeetingTime.term)
         //If section meeting time, the hoursWeek is required
-
+        validateTimes(sectionMeetingTime)
         if (!sectionMeetingTime.hoursWeek && sectionMeetingTime.term != "EVENT"){
             throw new ApplicationException(SectionMeetingTime, "@@r1:missing_hours_week@@")
         }
@@ -69,11 +69,42 @@ class SectionMeetingTimeService extends ServiceBase {
     }
 
 
+    private void validateTimes(sectionMeetingTime) {
+
+        if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && ((sectionMeetingTime.beginTime < "0000") || (sectionMeetingTime.beginTime > "2359") ||
+                (sectionMeetingTime.beginTime.toString().substring(2, 3) > "59")))
+            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_time@@")
+        if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && (sectionMeetingTime.endTime == null))
+            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_end_time@@")
+        if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && (sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") &&
+                (sectionMeetingTime.beginTime >= sectionMeetingTime.endTime))
+            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_time_greater_than_end_time@@")
+        if ((sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") && ((sectionMeetingTime.endTime < "0000") || (sectionMeetingTime.endTime > "2359") ||
+                (sectionMeetingTime.endTime.toString().substring(2, 3) > "59")))
+            throw new ApplicationException(SectionMeetingTime, "@@r1:end_time@@")
+        if ((sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") && (sectionMeetingTime.beginTime == null))
+            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_end_time@@")
+    }
+
+
     public static boolean isMeetingTimesForSession(String term, String crn, String category) {
         def meetingTimes = SectionMeetingTime.findAllWhere(term: term,
                 courseReferenceNumber: crn,
                 category: category)
         return (meetingTimes.size() > 0)
+    }
+
+
+    public boolean isBuildingRoomAndNoTimeDays(SectionMeetingTime sectionMeetingTime) {
+        if ((sectionMeetingTime.building && sectionMeetingTime.room)
+                && ((!sectionMeetingTime.beginTime && !sectionMeetingTime.endTime)
+                || (!sectionMeetingTime.monday && !sectionMeetingTime.tuesday && !sectionMeetingTime.wednesday &&
+                !sectionMeetingTime.thursday && !sectionMeetingTime.friday && !sectionMeetingTime.saturday &&
+                !sectionMeetingTime.sunday))) {
+            return true
+        }
+        return false
+
     }
     /*PROTECTED REGION END*/
 }

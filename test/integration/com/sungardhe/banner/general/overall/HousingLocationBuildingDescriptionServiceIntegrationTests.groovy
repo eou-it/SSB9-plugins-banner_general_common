@@ -1,6 +1,6 @@
 /** *****************************************************************************
 
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -46,7 +46,6 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
 
     void testHousingLocationBuildingDescriptionCreate() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
-        def keyBlockMap = [code: "GRANT"]
 
         // 'success test'
         housingLocationBuildingDescription = housingLocationBuildingDescriptionService.create([domainModel: housingLocationBuildingDescription])
@@ -183,16 +182,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
          * This area is being protected to preserve the customization on regeneration
          */
         /*PROTECTED REGION ID(housinglocationbuildingdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
-        def ibuilding = Building.findByCode("AHO")
-        def icampus = Campus.findByCode("M")
-        def iroomRate = RoomRate.findByCode("SGD")
-        def iphoneRate = PhoneRate.findByCode("PTYD")
-        def isite = Site.findByCode("ONS")
-        def istate = State.findByCode("NY")
-        def icounty = County.findByCode("180")
-        def icollege = College.findByCode("AS")
-        def idepartment = Department.findByCode("ENGL")
-        def ipartition = Partition.findByCode("AM")
+         def ibuilding = Building.findByCode("AHO")
         /*PROTECTED REGION END*/
         // change the values
         housingLocationBuildingDescription.building = ibuilding

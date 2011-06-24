@@ -1,5 +1,5 @@
 /*******************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -14,36 +14,9 @@
  */
 package com.sungardhe.banner.general.overall
 
-
-import com.sungardhe.banner.general.system.Building
-import com.sungardhe.banner.general.system.Campus
-import com.sungardhe.banner.general.system.RoomRate
-import com.sungardhe.banner.general.system.PhoneRate
-import com.sungardhe.banner.general.system.Site
-import com.sungardhe.banner.general.system.State
-import com.sungardhe.banner.general.system.County
-import com.sungardhe.banner.general.system.College
-import com.sungardhe.banner.general.system.Department
-import com.sungardhe.banner.general.system.Partition
 import com.sungardhe.banner.service.DatabaseModifiesState
-
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.Table
-import javax.persistence.Version
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.Transient
-import javax.persistence.GenerationType
-import javax.persistence.SequenceGenerator
-import javax.persistence.JoinColumn
-import javax.persistence.JoinColumns
-import javax.persistence.ManyToOne
-
-import org.hibernate.annotations.GenericGenerator
-
+import com.sungardhe.banner.general.system.*
+import javax.persistence.*
 
 /**
  * Location/Building Description Table

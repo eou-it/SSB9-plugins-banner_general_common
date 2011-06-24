@@ -1,6 +1,6 @@
 /** *****************************************************************************
 
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ © 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -12,9 +12,9 @@
 
 package com.sungardhe.banner.general.overall
 
-import com.sungardhe.banner.general.system.*
-import com.sungardhe.banner.testing.BaseIntegrationTestCase
 import com.sungardhe.banner.exceptions.ApplicationException
+import com.sungardhe.banner.testing.BaseIntegrationTestCase
+import com.sungardhe.banner.general.system.*
 
 class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -346,6 +346,47 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+    void testIsBuildingRoomAndNoTime() {
+        def sectionMeetingTime = newSectionMeetingTime()
+        sectionMeetingTime.building = Building.findByCode("ADAMS")
+        sectionMeetingTime.room = "101"
+        sectionMeetingTime.beginTime = null
+        sectionMeetingTime.endTime = null
+
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+
+        sectionMeetingTime = sectionMeetingTimeService.create(map)
+
+        assertTrue sectionMeetingTimeService.isBuildingRoomAndNoTimeDays(sectionMeetingTime)
+    }
+
+
+    void testIsBuildingRoomAndNoDays() {
+        def sectionMeetingTime = newSectionMeetingTime()
+        sectionMeetingTime.building = Building.findByCode("ADAMS")
+        sectionMeetingTime.room = "101"
+        sectionMeetingTime.monday = null
+        sectionMeetingTime.tuesday = null
+        sectionMeetingTime.wednesday = null
+        sectionMeetingTime.thursday = null
+        sectionMeetingTime.friday = null
+        sectionMeetingTime.saturday = null
+        sectionMeetingTime.sunday = null
+
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+
+        sectionMeetingTime = sectionMeetingTimeService.create(map)
+
+        assertTrue sectionMeetingTimeService.isBuildingRoomAndNoTimeDays(sectionMeetingTime)
+    }
+
+
     private def newSectionMeetingTime() {
         /**
          * Please use the appropriate finder methods to load the references here
@@ -354,39 +395,35 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         /*PROTECTED REGION ID(sectionmeetingtime_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def iterm = Term.findByCode("201410")
         def idayOfWeek = DayOfWeek.findByCode("T")
-        def ibuilding = Building.findByCode("HUM")
         def ischeduleType = "L"  //Unable to access ScheduleType
-        def ifunction = null  //Not used in student courses
-        def icommittee = null //Not used in student courses
-        def ischeduleToolStatus = null
         def imeetingType = MeetingType.findByCode("CLAS")
         /*PROTECTED REGION END*/
 
         return new SectionMeetingTime(term: iterm.code,
-                                      courseReferenceNumber: "20431",
-                                      dayOfWeek: idayOfWeek,
-                                      dayNumber: 1,
-                                      beginTime: "0100",
-                                      endTime: "0200",
-                                      startDate: iterm.startDate,
-                                      endDate: iterm.endDate,
-                                      category: "03",
-                                      sunday: null,
-                                      monday: "M",
-                                      tuesday: "T",
-                                      wednesday: "W",
-                                      thursday: "R",
-                                      friday: "F",
-                                      saturday: null,
-                                      override: null,
-                                      creditHourSession: 1,
-                                      meetNumber: 1,
-                                      hoursWeek: 1,
-                                      lastModified: new Date(),
-                                      lastModifiedBy: "test",
-                                      dataOrigin: "Banner",
-                                      scheduleType: ischeduleType,
-                                      meetingType: imeetingType)
+                courseReferenceNumber: "20431",
+                dayOfWeek: idayOfWeek,
+                dayNumber: 1,
+                beginTime: "0100",
+                endTime: "0200",
+                startDate: iterm.startDate,
+                endDate: iterm.endDate,
+                category: "03",
+                sunday: null,
+                monday: "M",
+                tuesday: "T",
+                wednesday: "W",
+                thursday: "R",
+                friday: "F",
+                saturday: null,
+                override: null,
+                creditHourSession: 1,
+                meetNumber: 1,
+                hoursWeek: 1,
+                lastModified: new Date(),
+                lastModifiedBy: "test",
+                dataOrigin: "Banner",
+                scheduleType: ischeduleType,
+                meetingType: imeetingType)
 
     }
 
@@ -399,39 +436,35 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         /*PROTECTED REGION ID(sectionmeetingtime_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def iterm = Term.findByCode("201410")
         def idayOfWeek = DayOfWeek.findByCode("T")
-        def ibuilding = Building.findByCode("HUM")
         def ischeduleType = "L"  //Unable to access ScheduleType
-        def ifunction = null  //Not used in student courses
-        def icommittee = null //Not used in student courses
-        def ischeduleToolStatus = null
         def imeetingType = MeetingType.findByCode("CLAS")
         /*PROTECTED REGION END*/
 
         return new SectionMeetingTime(term: iterm.code,
-                                      courseReferenceNumber: "20349",
-                                      dayOfWeek: idayOfWeek,
-                                      dayNumber: 1,
-                                      beginTime: "0100",
-                                      endTime: "0200",
-                                      startDate: iterm.startDate,
-                                      endDate: iterm.endDate,
-                                      category: "03",
-                                      sunday: null,
-                                      monday: "M",
-                                      tuesday: "T",
-                                      wednesday: "W",
-                                      thursday: "R",
-                                      friday: "F",
-                                      saturday: null,
-                                      override: null,
-                                      creditHourSession: 1,
-                                      meetNumber: 1,
-                                      hoursWeek: 1,
-                                      lastModified: new Date(),
-                                      lastModifiedBy: "test",
-                                      dataOrigin: "Banner",
-                                      scheduleType: ischeduleType,
-                                      meetingType: imeetingType)
+                courseReferenceNumber: "20349",
+                dayOfWeek: idayOfWeek,
+                dayNumber: 1,
+                beginTime: "0100",
+                endTime: "0200",
+                startDate: iterm.startDate,
+                endDate: iterm.endDate,
+                category: "03",
+                sunday: null,
+                monday: "M",
+                tuesday: "T",
+                wednesday: "W",
+                thursday: "R",
+                friday: "F",
+                saturday: null,
+                override: null,
+                creditHourSession: 1,
+                meetNumber: 1,
+                hoursWeek: 1,
+                lastModified: new Date(),
+                lastModifiedBy: "test",
+                dataOrigin: "Banner",
+                scheduleType: ischeduleType,
+                meetingType: imeetingType)
 
     }
 
@@ -444,13 +477,12 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         /*PROTECTED REGION ID(sectionmeetingtime_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def iterm = "EVENT"
         def idayOfWeek = DayOfWeek.findByCode("T")
-        def ibuilding = Building.findByCode("HUM")
         def ischeduleType = "L"  //Unable to access ScheduleType
         def ifunction = new Function(code: "TTTTT",
-                                     description: "TTTTT",
-                                     etypCode: "TTTT",
-                                     lastModified: new Date(),
-                                     lastModifiedBy: "test", dataOrigin: "Banner")
+                description: "TTTTT",
+                etypCode: "TTTT",
+                lastModified: new Date(),
+                lastModifiedBy: "test", dataOrigin: "Banner")
         save ifunction
         def icommittee = CommitteeAndServiceType.findByCode("GRAD")
         def myFormat = 'MM/dd/yyyy'
@@ -458,38 +490,38 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def iendDate = Date.parse(myFormat, '06/03/2009')
 
         def ieventCRN = new HousingEventBase(courseReferenceNumber: "TTTTT",
-                                             event: "TTTT",
-                                             description: "TTTTT",
-                                             committeeIndicator: true,
-                                             lastModified: new Date(),
-                                             lastModifiedBy: "test",
-                                             dataOrigin: "Banner")
+                event: "TTTT",
+                description: "TTTTT",
+                committeeIndicator: true,
+                lastModified: new Date(),
+                lastModifiedBy: "test",
+                dataOrigin: "Banner")
         save ieventCRN
 
         /*PROTECTED REGION END*/
 
 
         return new SectionMeetingTime(term: iterm,
-                                      courseReferenceNumber: ieventCRN.courseReferenceNumber,
-                                      dayOfWeek: idayOfWeek,
-                                      dayNumber: 1,
-                                      beginTime: "0100",
-                                      endTime: "0200",
-                                      startDate: istartDate,
-                                      endDate: iendDate,
-                                      sunday: null,
-                                      monday: "M",
-                                      tuesday: "T",
-                                      wednesday: "W",
-                                      thursday: "R",
-                                      friday: "F",
-                                      saturday: null,
-                                      override: null,
-                                      meetNumber: 1,
-                                      committee: icommittee,
-                                      function: ifunction,
-                                      scheduleType: ischeduleType,
-                                      category: 1)
+                courseReferenceNumber: ieventCRN.courseReferenceNumber,
+                dayOfWeek: idayOfWeek,
+                dayNumber: 1,
+                beginTime: "0100",
+                endTime: "0200",
+                startDate: istartDate,
+                endDate: iendDate,
+                sunday: null,
+                monday: "M",
+                tuesday: "T",
+                wednesday: "W",
+                thursday: "R",
+                friday: "F",
+                saturday: null,
+                override: null,
+                meetNumber: 1,
+                committee: icommittee,
+                function: ifunction,
+                scheduleType: ischeduleType,
+                category: 1)
     }
 
 /**
