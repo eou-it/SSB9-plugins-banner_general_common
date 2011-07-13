@@ -146,7 +146,7 @@ class HousingEventBaseIntegrationTests extends BaseIntegrationTestCase {
         housingEventBase.lastModifiedBy = "test"
         housingEventBase.dataOrigin = "Banner"
         shouldFail(OptimisticLock) {
-            housingEventBase.save(flush: true)
+            housingEventBase.save(flush:true, failOnError:true)
         }
     }
 

@@ -45,7 +45,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     void testUpdateIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         assertTrue integrationPartnerSystemRule.validate()
-        integrationPartnerSystemRule.save(flush: true)
+        integrationPartnerSystemRule.save(flush:true, failOnError:true)
 
         assertNotNull integrationPartnerSystemRule.id
         assertEquals(0L, integrationPartnerSystemRule.version)
@@ -60,7 +60,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         integrationPartnerSystemRule.dataOrigin = "Banner"
         assertTrue integrationPartnerSystemRule.validate()
 
-        integrationPartnerSystemRule.save(flush: true)
+        integrationPartnerSystemRule.save(flush:true, failOnError:true)
         integrationPartnerSystemRule = IntegrationPartnerSystemRule.get(integrationPartnerSystemRule.id)
         assertEquals new Long(1), integrationPartnerSystemRule?.version
         assertEquals("UUUUU", integrationPartnerSystemRule.description)
@@ -89,7 +89,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         integrationPartnerSystemRule.lastModifiedBy = "test"
         integrationPartnerSystemRule.dataOrigin = "Banner"
         shouldFail(HibernateOptimisticLockingFailureException) {
-            integrationPartnerSystemRule.save(flush: true)
+            integrationPartnerSystemRule.save(flush:true, failOnError:true)
         }
     }
 
@@ -135,7 +135,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     private def newIntegrationPartnerSystemRule() {
         def intp = new IntegrationPartner(code: "TTTTT", description: "TTTTT", lastModified: new Date(),
                 lastModifiedBy: "test", dataOrigin: "Banner")
-        intp.save(flush: true)
+        intp.save(flush:true, failOnError:true)
         new IntegrationPartnerSystemRule(code: "TTTTT",
                 description: "TTTTT",
                 integrationPartner: intp,

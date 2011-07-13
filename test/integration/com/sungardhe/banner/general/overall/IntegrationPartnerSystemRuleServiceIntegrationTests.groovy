@@ -69,7 +69,7 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
   private def newIntegrationPartnerSystemRule() {
     def intp =  new IntegrationPartner(code: "TTTTT", description: "TTTTT" , lastModified: new Date(),
 			lastModifiedBy: "test", dataOrigin: "Banner" )
-    intp.save(flush:true)
+    intp.save(flush:true, failOnError:true)
     def integration =  new IntegrationPartnerSystemRule(code: "TTTTT",
             description: "TTTTT",
             integrationPartner: intp //,

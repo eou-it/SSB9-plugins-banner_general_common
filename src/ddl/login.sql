@@ -1,0 +1,12 @@
+-- login.sql
+define DBEU_PASSWORD  = 'u_pick_it'
+define SYSTEM_PASSWORD  = 'u_pick_it'
+define WTAILOR_PASSWORD  = 'u_pick_it'
+define BANINST1_PASSWORD = 'u_pick_it'
+define GENERAL_PASSWORD  = 'u_pick_it'
+define SATURN_PASSWORD   = 'u_pick_it'
+define FIMSMGR_PASSWORD  = 'u_pick_it'
+define TAISMGR_PASSWORD  = 'u_pick_it'
+define DEFAULT_SPOOL_DIR = './temp_output'
+define META_DIR = '.\meta'
+define ID_COLUMN_SUFFIX = 'surrogate_id'
