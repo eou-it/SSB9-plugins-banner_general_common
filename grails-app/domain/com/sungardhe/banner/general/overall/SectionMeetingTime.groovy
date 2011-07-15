@@ -393,7 +393,7 @@ class SectionMeetingTime implements Serializable {
         /*PROTECTED REGION ID(sectionmeetingtime_custom_constraints) ENABLED START*/
         term(nullable: false, maxSize: 6)
         courseReferenceNumber(nullable: false, maxSize: 5)
-        dayOfWeek(nullable: true, maxSize: 1)
+        dayOfWeek(nullable: true)
         dayNumber(nullable: true, min: 0, max: 9)
         beginTime(nullable: true, minSize: 4, maxSize: 4,
                 validator: {val, obj ->
@@ -431,7 +431,6 @@ class SectionMeetingTime implements Serializable {
         thursday(nullable: true, maxSize: 1, inList: ["R"])
         friday(nullable: true, maxSize: 1, inList: ["F"])
         saturday(nullable: true, maxSize: 1, inList: ["S"])
-        dayOfWeek(nullable: true)
         scheduleType(nullable: true, maxSize: 3)
         override(nullable: true, maxSize: 1, inList: ["T", "O", "R"])
         creditHourSession(nullable: true, scale: 3, min: 0.000D, max: 9999.999D)

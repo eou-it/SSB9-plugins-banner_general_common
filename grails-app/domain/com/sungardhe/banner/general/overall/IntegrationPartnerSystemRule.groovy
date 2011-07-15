@@ -133,7 +133,7 @@ class IntegrationPartnerSystemRule implements Serializable {
     static constraints = {
 		code(nullable:false, maxSize:5)
 		description(nullable:false, maxSize:30)
-		integrationPartner(nullable:false, maxSize:5)
+		integrationPartner(nullable:false)
 		lastModifiedBy(nullable:true, maxSize:30)
 		lastModified(nullable:true)
 		dataOrigin(nullable:true, maxSize:30)
