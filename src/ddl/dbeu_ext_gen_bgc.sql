@@ -24,6 +24,7 @@ whenever oserror exit rollback;
 whenever sqlerror exit rollback;
 REM connect dbeu_owner/&&dbeu_password
 execute dbeu_util.extend_table('GENERAL','GORINTG','G',TRUE);
+execute dbeu_util.extend_table('PAYROLL','PTRTENR','P',FALSE);
 
 
 
