@@ -1,4 +1,5 @@
 -- login.sql
+define BANSECR_PASSWORD = 'u_pick_it'
 define DBEU_PASSWORD  = 'u_pick_it'
 define SYSTEM_PASSWORD  = 'u_pick_it'
 define WTAILOR_PASSWORD  = 'u_pick_it'
