@@ -1,10 +1,20 @@
+/** *****************************************************************************
+ � 2011 SunGard Higher Education.  All Rights Reserved.
+
+ CONFIDENTIAL BUSINESS INFORMATION
+
+ THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
+ AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
+ NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
+ WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
+ ****************************************************************************** */
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
-grails.project.test.reports.dir	= "target/test-reports"
+grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
-    inherits( "global" ) {
+    inherits("global") {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
@@ -29,13 +39,17 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
 
-      plugins {
-       compile 'com.sungardhe:banner-core:0.3.1'   // Note: Also update version within 'application.properties'
-       compile 'com.sungardhe:spring-security-core:1.0.1'
-       compile 'com.sungardhe:spring-security-cas:1.0.2'
-       compile 'com.sungardhe:banner-general-validation-common:0.0.3'
 
+    plugins {
+        compile 'com.sungardhe:banner-core:0.3.1'   // Note: Also update version within 'application.properties'
+        compile 'com.sungardhe:spring-security-core:1.0.1'
+        compile 'com.sungardhe:spring-security-cas:1.0.2'
+        compile 'com.sungardhe:banner-general-validation-common:0.0.4'
+
+        compile 'com.sungardhe:banner-db-main:0.0.7'
     }
+
+
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
