@@ -1,5 +1,5 @@
 /** *****************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ ï¿½ 2010 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -20,7 +20,7 @@
  * for Banner web applications.
  * */
 /** *****************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
+ ï¿½ 2010 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -50,7 +50,7 @@ class BannerGeneralCommonGrailsPlugin {
     // more control on 'when' a grails app is updated to use a newer plugin version, and therefore 'could' allow delayed testing within those apps
     // independent of deploying a new plugin build to Nexus.
     //
-    String version = "0.0.5"
+    String version = "0.0.6"
 //    String version = "0.1.0"
 
     // the version or versions of Grails the plugin is designed for
