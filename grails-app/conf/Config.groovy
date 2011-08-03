@@ -1,5 +1,5 @@
 /** *****************************************************************************
- © 2011 SunGard Higher Education.  All Rights Reserved.
+ ï¿½ 2011 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -136,3 +136,4 @@ log4j = {
     off 'com.sungardhe.banner.student.system'
 }
 
+seedDataTarget =  ['bgc': ['/src/groovy/com/sungardhe/banner/seeddata/Data/banner_general_common.xml']]
