@@ -10,7 +10,7 @@
  *******************************************************************************/
 /**
  Banner Automator Version: 0.1.1
- Generated: Fri Feb 11 16:36:47 EST 2011 
+ Generated: Fri Feb 11 16:36:47 EST 2011
  */
 package com.sungardhe.banner.general.overall
 
@@ -55,12 +55,15 @@ query = """FROM  HousingRoomDescription a
                       where  b.building =  a.building
                      and b.roomNumber = a.roomNumber
                      and b.termEffective <= :termEffective )
-            """)
+            """),
+@NamedQuery(name = "HousingRoomDescription.fetchTermTo",
+query = """select NVL(MIN(termEffective),'999999') FROM  HousingRoomDescription a
+           WHERE a.building.code = :buildingCode and a.roomNumber = :roomNumber  and a.termEffective > :termEffective """)
 
 ])
-@DatabaseModifiesState 
+@DatabaseModifiesState
 class HousingRoomDescription implements Serializable {
-	
+
 	/**
 	 * Surrogate ID for SLBRDEF
 	 */
@@ -114,7 +117,7 @@ class HousingRoomDescription implements Serializable {
 	Double utilityRate
 
 	/**
-	 * This field defines the time period the utility rate is associated with the room 
+	 * This field defines the time period the utility rate is associated with the room
 	 */
 	@Column(name = "SLBRDEF_UTILITY_RATE_PERIOD", length = 2)
 	String utilityRatePeriod
@@ -184,7 +187,7 @@ class HousingRoomDescription implements Serializable {
 	 */
 	// Note: If width and length are set, the GB_ROOMDEFINITION procedures will persist a calculated value versus one set here
 	@Column(name = "SLBRDEF_AREA", precision = 10, scale = 2)
-	Double area 
+	Double area
 
 	/**
 	 * COUNTRY CODE: Telephone code that designates the region and country.
@@ -210,7 +213,7 @@ class HousingRoomDescription implements Serializable {
 	@Column(name = "SLBRDEF_DATA_ORIGIN", length = 30)
 	String dataOrigin
 
-	
+
 	/**
 	 * Foreign Key : FKV_SLBRDEF_INV_STVDEPT_CODE
 	 */
@@ -274,43 +277,43 @@ class HousingRoomDescription implements Serializable {
 		])
 	College college
 
-	
+
 	public String toString() {
 		"""HousingRoomDescription[
-					id=$id, 
-					version=$version, 
-					roomNumber=$roomNumber, 
-					termEffective=$termEffective, 
-					description=$description, 
-					capacity=$capacity, 
-					maximumCapacity=$maximumCapacity, 
-					utilityRate=$utilityRate, 
-					utilityRatePeriod=$utilityRatePeriod, 
-					phoneArea=$phoneArea, 
-					phoneNumber=$phoneNumber, 
-					phoneExtension=$phoneExtension, 
-					benefitCategory=$benefitCategory, 
-					sex=$sex, 
-					roomType=$roomType, 
-					priority=$priority, 
-					keyNumber=$keyNumber, 
-					width=$width, 
-					length=$length, 
-					area=$area, 
-					countryPhone=$countryPhone, 
-					lastModified=$lastModified, 
-					lastModifiedBy=$lastModifiedBy, 
-					dataOrigin=$dataOrigin, 
-					department=$department, 
-					partition=$partition, 
-					building=$building, 
-					roomStatus=$roomStatus, 
-					roomRate=$roomRate, 
-					phoneRate=$phoneRate, 
+					id=$id,
+					version=$version,
+					roomNumber=$roomNumber,
+					termEffective=$termEffective,
+					description=$description,
+					capacity=$capacity,
+					maximumCapacity=$maximumCapacity,
+					utilityRate=$utilityRate,
+					utilityRatePeriod=$utilityRatePeriod,
+					phoneArea=$phoneArea,
+					phoneNumber=$phoneNumber,
+					phoneExtension=$phoneExtension,
+					benefitCategory=$benefitCategory,
+					sex=$sex,
+					roomType=$roomType,
+					priority=$priority,
+					keyNumber=$keyNumber,
+					width=$width,
+					length=$length,
+					area=$area,
+					countryPhone=$countryPhone,
+					lastModified=$lastModified,
+					lastModifiedBy=$lastModifiedBy,
+					dataOrigin=$dataOrigin,
+					department=$department,
+					partition=$partition,
+					building=$building,
+					roomStatus=$roomStatus,
+					roomRate=$roomRate,
+					phoneRate=$phoneRate,
 					college=$college]"""
 	}
 
-	
+
 	boolean equals(o) {
 	    if (this.is(o)) return true
 	    if (!(o instanceof HousingRoomDescription)) return false
@@ -339,17 +342,17 @@ class HousingRoomDescription implements Serializable {
         if(lastModified != that.lastModified) return false
         if(lastModifiedBy != that.lastModifiedBy) return false
         if(dataOrigin != that.dataOrigin) return false
-        if(department != that.department) return false      
-        if(partition != that.partition) return false      
-        if(building != that.building) return false      
-        if(roomStatus != that.roomStatus) return false      
-        if(roomRate != that.roomRate) return false      
-        if(phoneRate != that.phoneRate) return false      
-        if(college != that.college) return false      
+        if(department != that.department) return false
+        if(partition != that.partition) return false
+        if(building != that.building) return false
+        if(roomStatus != that.roomStatus) return false
+        if(roomRate != that.roomRate) return false
+        if(phoneRate != that.phoneRate) return false
+        if(college != that.college) return false
         return true
     }
 
-	
+
 	int hashCode() {
 		int result
 	    result = (id != null ? id.hashCode() : 0)
@@ -421,28 +424,36 @@ class HousingRoomDescription implements Serializable {
 	     * from being overwritten on re-generation
 	     */
 	    /*PROTECTED REGION ID(housingroomdescription_custom_constraints) ENABLED START*/
-	    
+
 	    /*PROTECTED REGION END*/
     }
-    
+
     /*PROTECTED REGION ID(housingroomdescription_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = [ 'roomNumber', 'termEffective', 'building' ]
-    /*PROTECTED REGION END*/        
+    /*PROTECTED REGION END*/
     /**
      * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
      * from being overwritten on re-generation
      */
     /*PROTECTED REGION ID(housingroomdescription_custom_attributes) ENABLED START*/
-    
+
     /*PROTECTED REGION END*/
-        
+
     /**
      * Please put all the custom methods/code in this protected section to protect the code
      * from being overwritten on re-generation
      */
     /*PROTECTED REGION ID(housingroomdescription_custom_methods) ENABLED START*/
 
+    public static String fetchTermToOfRoom(String buildingCode, String roomNumber, String termEffective) {
+        HousingRoomDescription.withSession { session ->
+            session.getNamedQuery('HousingRoomDescription.fetchTermTo').
+                    setString('buildingCode', buildingCode).
+                    setString('roomNumber', roomNumber).
+                    setString('termEffective', termEffective).list()[0]
+        }
+    }
 
     public static Object fetchBySomeHousingRoomDescriptionRoom() {
         def returnObj = [list: HousingRoomDescription.list().sort {it.roomNumber}]

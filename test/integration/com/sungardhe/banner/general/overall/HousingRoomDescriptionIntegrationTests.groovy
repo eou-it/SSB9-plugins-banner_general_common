@@ -10,7 +10,7 @@
  ****************************************************************************** */
 /**
  Banner Automator Version: 0.1.1
- Generated: Fri Feb 11 16:39:35 EST 2011 
+ Generated: Fri Feb 11 16:39:35 EST 2011
  */
 package com.sungardhe.banner.general.overall
 
@@ -23,6 +23,7 @@ import com.sungardhe.banner.general.system.RoomStatus
 import com.sungardhe.banner.general.system.RoomRate
 import com.sungardhe.banner.general.system.PhoneRate
 import com.sungardhe.banner.general.system.College
+import org.junit.Ignore
 
 
 class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
@@ -513,6 +514,17 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         housingRoomDescription.building = null
         assertFalse housingRoomDescription.validate()
         assertLocalizedError housingRoomDescription, 'nullable', /.*Field.*building.*of class.*HousingRoomDescription.*cannot be null.*/, 'building'
+    }
+
+    @Ignore
+    void testFetchTermTo() {
+        //Seed data
+        // BuildingCode B00A	RoomNumber R00A	    TermCode200010
+        //BuildingCode B00A	RoomNumber R00A	    TermCode201070
+        //So when fetchTermTo will call be called for B00A,R00A,200010 expected result is 201070
+        String termFetched = HousingRoomDescription.fetchTermToOfRoom("B00A","R00A","200010")
+        assertEquals "201070", termFetched
+
     }
 
 
