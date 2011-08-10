@@ -59,7 +59,7 @@ class SectionCrossListSectionService extends ServiceBase {
     private def checkSectionAlreadyExists(map) {
         SectionCrossListSection ssr = SectionCrossListSection.findByTermAndCourseReferenceNumber(map.term, map?.courseReferenceNumber)
         if (ssr)
-            throw new ApplicationException(SectionCrossListSection, "@@r1:section_already_cross_listed:${ssr.xlstGroup}@@")
+            throw new ApplicationException(SectionCrossListSection, "@@r1:section_already_cross_listed:${map?.courseReferenceNumber}:${ssr.xlstGroup}@@")
 
     }
 
