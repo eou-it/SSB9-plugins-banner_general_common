@@ -16,6 +16,7 @@ package com.sungardhe.banner.general.overall
 
 import com.sungardhe.banner.service.DatabaseModifiesState
 import com.sungardhe.banner.general.system.*
+import org.hibernate.annotations.Type
 import javax.persistence.*
 
 /**
@@ -199,6 +200,7 @@ class HousingRoomDescription implements Serializable {
 	 * This field identifies the date the record was created or last updated
 	 */
 	@Column(name = "SLBRDEF_ACTIVITY_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
 	Date lastModified
 
 	/**

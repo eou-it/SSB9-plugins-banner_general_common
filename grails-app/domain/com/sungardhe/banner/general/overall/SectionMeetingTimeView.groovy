@@ -19,6 +19,9 @@ import javax.persistence.Table
 import javax.persistence.Version
 import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Type
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
+
 
 /**
  * Section Meeting Time View model.

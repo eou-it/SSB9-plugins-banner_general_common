@@ -79,6 +79,7 @@ class FacultyTenureStatus implements Serializable {
      * The date of the last insert or update of this record
      */
     @Column(name = "PTRTENR_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**

@@ -16,6 +16,7 @@ package com.sungardhe.banner.general.overall
 
 import com.sungardhe.banner.service.DatabaseModifiesState
 import com.sungardhe.banner.general.system.*
+import org.hibernate.annotations.Type
 import javax.persistence.*
 
 /**
@@ -171,6 +172,7 @@ class SectionMeetingTime implements Serializable {
      * This field specifies the most current date record was created or updated.
      */
     @Column(name = "SSRMEET_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**

@@ -24,7 +24,10 @@ import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 import com.sungardhe.banner.general.system.Term
 import javax.persistence.GenerationType
+import org.hibernate.annotations.Type
 import javax.persistence.SequenceGenerator
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 /**
  * Cross List Section Repeating Table
@@ -73,6 +76,7 @@ class SectionCrossListSection implements Serializable {
 	 * This field identifies the most recent date a record was created or updated.
 	 */
 	@Column(name="SSRXLST_ACTIVITY_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
 	Date lastModified
 
 	/**

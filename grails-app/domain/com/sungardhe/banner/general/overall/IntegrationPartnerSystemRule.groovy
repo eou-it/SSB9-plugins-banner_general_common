@@ -23,7 +23,10 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.GenerationType
 import javax.persistence.ManyToOne
 import javax.persistence.JoinColumns
+import org.hibernate.annotations.Type
 import javax.persistence.JoinColumn
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 /**
  * Integration Partner System Rule Table.
@@ -74,6 +77,7 @@ class IntegrationPartnerSystemRule implements Serializable {
 	 * ACTIVITY DATE: The date that the information for the row was inserted or updated in the GORINTG table.
 	 */
 	@Column(name="GORINTG_ACTIVITY_DATE" )
+	@Temporal(TemporalType.TIMESTAMP)
 	Date lastModified
 
 	/**

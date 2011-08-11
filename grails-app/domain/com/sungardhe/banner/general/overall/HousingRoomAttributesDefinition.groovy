@@ -28,7 +28,10 @@ import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
+import org.hibernate.annotations.Type
 import javax.persistence.Version
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 /**
  * Room Attributes Definition Table
@@ -81,6 +84,7 @@ class HousingRoomAttributesDefinition implements Serializable {
      * This field identifies the date the record was created or last updated
      */
     @Column(name = "SLRRDEF_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**

@@ -25,7 +25,10 @@ import javax.persistence.JoinColumns
 import javax.persistence.ManyToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
+import org.hibernate.annotations.Type
 import javax.persistence.Version
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 /**
  * Room Usage Restriction Table
@@ -139,6 +142,7 @@ class HousingRoomUsageRestriction implements Serializable {
      * This field identifies the date the record was created or last updated
      */
     @Column(name = "SLRRUSE_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**

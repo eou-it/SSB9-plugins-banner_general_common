@@ -20,6 +20,8 @@ import javax.persistence.Version
 import org.hibernate.annotations.Type
 import javax.persistence.GenerationType
 import javax.persistence.SequenceGenerator
+import javax.persistence.Temporal
+import javax.persistence.TemporalType
 
 /**
  * Event Base Table
@@ -98,6 +100,7 @@ class HousingEventBase implements Serializable {
 	 * This field identifies the date the record was created or last updated
 	 */
 	@Column(name="SLBEVNT_ACTIVITY_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
 	Date lastModified
 
 	/**
