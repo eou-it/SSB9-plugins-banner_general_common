@@ -15,6 +15,7 @@ package com.sungardhe.banner.general.overall
 import com.sungardhe.banner.exceptions.ApplicationException
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
 import com.sungardhe.banner.general.system.*
+import groovy.sql.Sql
 
 class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -489,20 +490,28 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def istartDate = Date.parse(myFormat, '02/03/2009')
         def iendDate = Date.parse(myFormat, '06/03/2009')
 
-        def ieventCRN = new HousingEventBase(courseReferenceNumber: "TTTTT",
-                event: "TTTT",
-                description: "TTTTT",
-                committeeIndicator: true,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner")
-        save ieventCRN
+        def isql = """insert into SLBEVNT ( slbevnt_crn,
+                                            slbevnt_etyp_code,
+                                            slbevnt_desc,
+                                            slbevnt_comm_ind,
+                                            slbevnt_activity_date )
+                              values ( 'TTTTT',
+                                       'TTTT',
+                                       'Event Description',
+                                       'Y', sysdate ) """
+        def sql
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.executeUpdate(isql)
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
 
         /*PROTECTED REGION END*/
 
 
         return new SectionMeetingTime(term: iterm,
-                courseReferenceNumber: ieventCRN.courseReferenceNumber,
+                courseReferenceNumber: "TTTTT",
                 dayOfWeek: idayOfWeek,
                 dayNumber: 1,
                 beginTime: "0100",
