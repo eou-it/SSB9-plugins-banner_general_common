@@ -1,4 +1,4 @@
-<plugin name='banner-general-common' version='0.0.12' grailsVersion='1.3.5 &gt; *'>
+<plugin name='banner-general-common' version='0.0.13' grailsVersion='1.3.5 &gt; *'>
   <author>SunGard Higher Education</author>
   <authorEmail>horizon-support@sungardhe.com</authorEmail>
   <title>BannerGeneralOverall Plugin</title>
@@ -28,8 +28,6 @@
     <resource>com.sungardhe.banner.general.overall.SectionMeetingTimeService</resource>
     <resource>com.sungardhe.banner.general.overall.SequenceNumberBaseService</resource>
   </resources>
-  <dependencies>
-    <plugin name='springSecurityCore' version='1.2' />
-  </dependencies>
+  <dependencies />
   <behavior />
 </plugin>
