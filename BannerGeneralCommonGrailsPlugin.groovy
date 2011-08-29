@@ -57,7 +57,7 @@ class BannerGeneralCommonGrailsPlugin {
     def grailsVersion = "1.3.5 > *"
 
     // the other plugins this plugin depends on
-    def dependsOn = ['springSecurityCore': '1.2']
+//    def dependsOn = ['springSecurityCore': '1.2']
 
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
