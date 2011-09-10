@@ -29,6 +29,8 @@ import org.hibernate.annotations.Type
 import javax.persistence.Version
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 
 /**
  * Room Usage Restriction Table
@@ -48,6 +50,17 @@ import javax.persistence.TemporalType
 /*PROTECTED REGION END*/
 @Entity
 @Table(name = "SLRRUSE")
+@NamedQueries( value = [
+@NamedQuery( name="HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation",
+            query=""" select count(hrur.id) from HousingRoomUsageRestriction hrur where hrur.building.code = :buildingCode
+                            and  hrur.roomNumber = :roomNumber
+                            AND (
+                                hrur.startDate BETWEEN :beginDate AND :endDate
+                                OR  (hrur.endDate is not null AND hrur.endDate BETWEEN :beginDate AND :endDate)
+                                OR  (hrur.endDate is not null AND hrur.startDate <= :beginDate AND hrur.endDate >= :endDate)
+                                OR  (hrur.endDate is null AND hrur.startDate <= :endDate)
+                            )""")
+] )
 class HousingRoomUsageRestriction implements Serializable {
 
     /**
@@ -280,5 +293,16 @@ class HousingRoomUsageRestriction implements Serializable {
      */
     /*PROTECTED REGION ID(housingroomusagerestriction_custom_methods) ENABLED START*/
 
+    /**
+     * For a given criteria if usage restrictions exists it returns the count
+     */
+    public static int fetchCountOfUsageRestrictionsByDateAndLocation(Date beginDate, Date endDate, String roomNumber, String buildingCode) {
+        int count = 0
+        HousingRoomUsageRestriction.withSession {session ->
+            count = session.getNamedQuery(
+                    'HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation').setDate('beginDate', beginDate).setDate('endDate', endDate).setString('roomNumber', roomNumber).setString('buildingCode', buildingCode).list()[0]
+        }
+        return count
+    }
     /*PROTECTED REGION END*/
 }

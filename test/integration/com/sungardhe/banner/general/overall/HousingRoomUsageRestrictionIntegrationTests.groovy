@@ -284,6 +284,35 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
 	    assertLocalizedError housingRoomUsageRestriction, 'nullable', /.*Field.*building.*of class.*HousingRoomUsageRestriction.*cannot be null.*/, 'building'
 	}
 
+    void testFetchCountOfUsageRestrictionsByDateAndLocation() {
+        def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
+        Calendar startDatecal = Calendar.instance
+        startDatecal.set(1998,8,21)
+        Calendar endDateCal = Calendar.instance
+        endDateCal.set(1998, 9, 21)
+        housingRoomUsageRestriction.startDate=startDatecal.getTime()
+        housingRoomUsageRestriction.endDate=endDateCal.getTime()
+
+		save housingRoomUsageRestriction
+		//Test if the generated entity now has an id assigned
+        assertNotNull housingRoomUsageRestriction.id
+
+        int count = HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation(startDatecal.getTime(),endDateCal.getTime(), "TTTTT", "NORTH")
+        assertTrue "Expected is atleast one record found", count>0
+
+        startDatecal.set(1998, 8, 24)
+        count = HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation(startDatecal.getTime(),endDateCal.getTime(), "TTTTT", "NORTH")
+        assertTrue "Expected is atleast one record found", count>0
+
+        endDateCal.set(1998, 9, 14)
+        count = HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation(startDatecal.getTime(),endDateCal.getTime(), "TTTTT", "NORTH")
+        assertTrue "Expected is atleast one record found", count>0
+
+        startDatecal.set(1998, 9, 25)
+        endDateCal.set(1998, 9, 28)
+        count = HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation(startDatecal.getTime(),endDateCal.getTime(), "TTTTT", "NORTH")
+        assertFalse "Expected no usage restriction to be found for the given date", count>0
+    }
 
 	private def newValidForCreateHousingRoomUsageRestriction() {
 		def housingRoomUsageRestriction = new HousingRoomUsageRestriction(

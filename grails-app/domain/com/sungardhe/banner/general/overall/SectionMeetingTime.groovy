@@ -25,13 +25,19 @@ import javax.persistence.*
 @Entity
 @Table( name = "SV_SSRMEET" )
 @NamedQueries( value = [
+@NamedQuery( name="SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation",
+            query="""select count(smt.id) from SectionMeetingTime smt
+                      where ((smt.beginTime between :beginTime and :endTime or smt.endTime between :beginTime and :endTime) or (:beginTime between smt.beginTime and smt.endTime))
+                      and ((smt.startDate between :beginDate and :endDate or smt.endDate between :beginDate and :endDate) or (:beginDate between smt.startDate and smt.endDate))
+                      and smt.building.code = :buildingCode and smt.room = :roomNumber and smt.building.code is not null and smt.room is not null
+                      and (smt.monday = :monday or smt.tuesday = :tuesday or smt.wednesday = :wednesday or smt.thursday = :thursday or smt.friday = :friday or smt.saturday = :saturday or smt.sunday = :sunday)"""),
 @NamedQuery( name = "SectionMeetingTime.fetchByTermAndCourseReferenceNumber",
              query = """FROM SectionMeetingTime a
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
 ] )
-@DatabaseModifiesState 
+@DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
 
     /**
@@ -487,5 +493,29 @@ class SectionMeetingTime implements Serializable {
         return sectionMeetingTimes
     }
 
+
+    public static int fetchCountOfSchedulesByDateTimeAndLocation(String beginTime, String endTime, Date beginDate, Date endDate,
+                                                                 String buildingCode, String roomNumber, String monday, String tuesday,
+                                                                 String wednesday, String thursday, String friday, String saturday, String sunday)   {
+        //if any of days are null put # for the search criteria. This is required as namedquery will look for the parameter and if not sent will result in error.
+        if (!monday){ monday="#" }
+        if (!tuesday){ tuesday="#" }
+        if (!wednesday){ wednesday="#" }
+        if (!thursday){ thursday="#" }
+        if (!friday){ friday="#" }
+        if (!saturday){ saturday="#" }
+        if (!sunday){ sunday="#" }
+        int count = 0
+        SectionMeetingTime.withSession {session ->
+            count = session.getNamedQuery(
+                    'SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation').setDate('beginDate', beginDate).setDate('endDate', endDate).
+                    setString('roomNumber', roomNumber).setString('buildingCode', buildingCode).
+                    setString('beginTime', beginTime).setString('endTime', endTime).
+                    setString('monday', monday).setString('tuesday', tuesday).
+                    setString('wednesday', wednesday).setString('thursday', thursday).
+                    setString('friday', friday).setString('saturday', saturday).setString('sunday', sunday).list()[0]
+        }
+        return count
+    }
     /*PROTECTED REGION END*/
 }

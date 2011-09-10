@@ -445,8 +445,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test delete of a new record
-
-
     void testDeleteSectionMeetingTime() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         save sectionMeetingTime
@@ -457,16 +455,12 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test that a valid record is validate
-
-
     void testValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         assertTrue "SectionMeetingTime could not be validated as expected due to ${sectionMeetingTime.errors}", sectionMeetingTime.validate()
     }
 
     //Test that not null fields fail validation
-
-
     void testNullValidationFailure() {
         def sectionMeetingTime = new SectionMeetingTime()
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
@@ -506,8 +500,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test that exceeding maximum size of fields causes failure
-
-
     void testMaxSizeValidationFailures() {
         def sectionMeetingTime = new SectionMeetingTime(
                 term: "XXXXXXX",
@@ -529,9 +521,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertErrorsFor sectionMeetingTime, 'maxSize', ['term', 'courseReferenceNumber', 'beginTime', 'endTime', 'room', 'category', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'override', 'scheduleType']
     }
 
+
     //Test the validation messages on not nullable fields
-
-
     void testValidationMessages() {
         def sectionMeetingTime = newInvalidForCreateSectionMeetingTime()
         sectionMeetingTime.courseReferenceNumber = null
@@ -549,8 +540,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Create a valid section meeting time record
-
-
     private def newValidForCreateSectionMeetingTime() {
         def sectionMeetingTime = new SectionMeetingTime(
                 courseReferenceNumber: i_success_courseReferenceNumber,
@@ -587,9 +576,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         return sectionMeetingTime
     }
 
+
     //Create an invalid section meeting time record
-
-
     private def newInvalidForCreateSectionMeetingTime() {
         def sectionMeetingTime = new SectionMeetingTime(
                 courseReferenceNumber: i_failure_courseReferenceNumber,
@@ -633,8 +621,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     /*PROTECTED REGION ID(sectionmeetingtime_custom_integration_test_methods) ENABLED START*/
 
     // Confirm that only the values in the inList are accepted.
-
-
     void testInListValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         //set the inList fields to invalid values
@@ -659,8 +645,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the BigDecimal fields fail when exceed the maximum size.
-
-
     void testScaleMaxSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.creditHourSession = 9999.9999
@@ -669,9 +653,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertErrorsFor(sectionMeetingTime, 'max',
                 ['creditHourSession', 'hoursWeek'])
     }
+
     // Test the BigDecimal fields fail when it is smaller than minimum size.
-
-
     void testScaleMinSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.creditHourSession = -1
@@ -681,9 +664,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
                 ['creditHourSession', 'hoursWeek'])
     }
 
+
     // Test the Integer fields fail validation when maximum size is exceeded.
-
-
     void testIntegerMaxSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.dayNumber = 99
@@ -694,9 +676,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
                 ['dayNumber', 'meetNumber'])
     }
 
+
     // Test the Integer fields fail validation when maximum size is exceeded.
-
-
     void testIntegerMinSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.dayNumber = -1
@@ -708,8 +689,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Local method for testing the beginTime validator.
-
-
     private testBeginTime(String begin) {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.beginTime = begin
@@ -718,9 +697,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertErrorsFor(sectionMeetingTime, 'validator', ['beginTime'])
     }
 
+
     // Local method for testing the endTime validator.
-
-
     private testEndTime(String end) {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.endTime = end
@@ -729,9 +707,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertErrorsFor(sectionMeetingTime, 'validator', ['endTime'])
     }
 
+
     // Local method for testing the beginTime and endTime combinations with failures on beginTime.
-
-
     private testInvalidCombinationFailOnBeginTime(String begin, String end) {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         if (begin == 'null')
@@ -746,8 +723,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Local method for testing the beginTime and endTime combinations with failures on endTime.
-
-
     private testInvalidCombinationFailOnEndTime(String begin, String end) {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         if (begin == 'null')
@@ -762,8 +737,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Execute a test for the begin and end times to make sure they correspond to valid times in range of '0000'..'2359'
-
-
     void testBeginAndEndTimes() {
 
         //test begin times being > "2359"
@@ -794,8 +767,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
 
 
     // Execute a test for start date
-
-
     void testStartDate() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         //set the start date after the end date
@@ -807,8 +778,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Execute a test for end date
-
-
     void testEndDate() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         //set the end date before the start date
@@ -821,8 +790,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the ScheduleToolStatus and requirement for building and room.
-
-
     void testScheduleToolStatusRequireBuildingRoom() {
         //test a code which requires the building and room
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
@@ -835,8 +802,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the ScheduleToolStatus when it does not require building and room.
-
-
     void testScheduleToolStatusNotRequireBuildingRoom() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.scheduleToolStatus = ScheduleToolStatus.findByCode('NSM')
@@ -845,9 +810,9 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
 
         assertTrue sectionMeetingTime.validate()
     }
+
+
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
-
-
     void testFetchByTermAndCourseReferenceNumberNewRecord() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         save sectionMeetingTime
@@ -863,9 +828,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_endTime, result[0].endTime
     }
 
+
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
-
-
     void testFetchByTermAndCourseReferenceNumberExistingRecord() {
         def result = SectionMeetingTime.fetchByTermAndCourseReferenceNumber(
                 u_success_existing_term, u_success_existing_courseReferenceNumber)
@@ -877,6 +841,48 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "01", result[0].category
         assertEquals "0900", result[0].beginTime
         assertEquals "1000", result[0].endTime
+    }
+
+    void testFetchCountOfSchedulesByDateTimeAndLocation() {
+         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
+        save sectionMeetingTime
+        //Test if the generated entity now has an id assigned
+        assertNotNull sectionMeetingTime.id
+        //Exact date as in previous schedule
+        int count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0950",  Term.findByCode(i_success_term).startDate, Term.findByCode(i_success_term).endDate,
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertTrue "Expected atleast one schedule exist matching the schedule", count>0
+        Date startDate = Term.findByCode(i_success_term).startDate
+        Calendar startCal = Calendar.instance
+        startCal.setTime(startDate)
+        startCal.add(Calendar.DAY_OF_MONTH, 4)
+        Date endDate = Term.findByCode(i_success_term).endDate
+        Calendar endCal = Calendar.instance
+        endCal.setTime(endDate)
+        //start date less than the previous schedule
+        count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0950",  startCal.getTime(), endCal.getTime(),
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertTrue "Expected atleast one schedule exist matching the schedule", count>0
+        //startDate same as previous schedule but end date less than previous schedule
+        count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0950",  Term.findByCode(i_success_term).startDate, startCal.getTime(),
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertTrue "Expected atleast one schedule exist matching the schedule", count>0
+        //starttime and endtime overlapping
+         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0850", "1000",  Term.findByCode(i_success_term).startDate, startCal.getTime(),
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertTrue "Expected atleast one schedule exist matching the schedule", count>0
+         //starttime and endtime overlapping
+         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0930", "1030",  Term.findByCode(i_success_term).startDate, startCal.getTime(),
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertTrue "Expected atleast one schedule exist matching the schedule", count>0
+        //starttime and endtime overlapping
+         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0930",  Term.findByCode(i_success_term).startDate, startCal.getTime(),
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertTrue "Expected atleast one schedule exist matching the schedule", count>0
+        //starttime and endtime overlapping
+         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("1100", "1200",  Term.findByCode(i_success_term).startDate, startCal.getTime(),
+                                          "BIOL", "101", "M", null,"W", null, null, null, null)
+        assertFalse "Schedule does not exist with this time ", count>0
     }
 
     /*PROTECTED REGION END*/
