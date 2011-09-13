@@ -1,14 +1,14 @@
 
-/*******************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- *******************************************************************************/
+/*********************************************************************************
+ Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
+ This copyrighted software contains confidential and proprietary information of 
+ SunGard Higher Education and its subsidiaries. Any use of this software is limited 
+ solely to SunGard Higher Education licensees, and is further subject to the terms 
+ and conditions of one or more written license agreements between SunGard Higher 
+ Education and the licensee in question. SunGard, Banner and Luminis are either 
+ registered trademarks or trademarks of SunGard Higher Education in the U.S.A. 
+ and/or other regions and/or countries.
+ **********************************************************************************/
 /**
  Banner Automator Version: 1.21
  Generated: Fri Jul 01 19:13:33 IST 2011
@@ -180,21 +180,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
 		assertErrorsFor housingRoomAttributesDefinition, 'maxSize', [ 'mustMatch' ]
     }
 
-	void testValidationMessages() {
-	    def housingRoomAttributesDefinition = newInvalidForCreateHousingRoomAttributesDefinition()
-	    housingRoomAttributesDefinition.roomNumber = null
-	    assertFalse housingRoomAttributesDefinition.validate()
-	    assertLocalizedError housingRoomAttributesDefinition, 'nullable', /.*Field.*roomNumber.*of class.*HousingRoomAttributesDefinition.*cannot be null.*/, 'roomNumber'
-	    housingRoomAttributesDefinition.termEffective = null
-	    assertFalse housingRoomAttributesDefinition.validate()
-	    assertLocalizedError housingRoomAttributesDefinition, 'nullable', /.*Field.*termEffective.*of class.*HousingRoomAttributesDefinition.*cannot be null.*/, 'termEffective'
-	    housingRoomAttributesDefinition.building = null
-	    assertFalse housingRoomAttributesDefinition.validate()
-	    assertLocalizedError housingRoomAttributesDefinition, 'nullable', /.*Field.*building.*of class.*HousingRoomAttributesDefinition.*cannot be null.*/, 'building'
-	    housingRoomAttributesDefinition.buildingAndRoomAttribute = null
-	    assertFalse housingRoomAttributesDefinition.validate()
-	    assertLocalizedError housingRoomAttributesDefinition, 'nullable', /.*Field.*buildingAndRoomAttribute.*of class.*HousingRoomAttributesDefinition.*cannot be null.*/, 'buildingAndRoomAttribute'
-	}
+
 
 
     void testFetchByBuildingRoomNumberAndTermEffective() {

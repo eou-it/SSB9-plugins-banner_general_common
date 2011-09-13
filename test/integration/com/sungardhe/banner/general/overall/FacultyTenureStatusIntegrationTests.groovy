@@ -1,13 +1,13 @@
-/** *****************************************************************************
- © 2010 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- ****************************************************************************** */
+/*********************************************************************************
+ Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
+ This copyrighted software contains confidential and proprietary information of 
+ SunGard Higher Education and its subsidiaries. Any use of this software is limited 
+ solely to SunGard Higher Education licensees, and is further subject to the terms 
+ and conditions of one or more written license agreements between SunGard Higher 
+ Education and the licensee in question. SunGard, Banner and Luminis are either 
+ registered trademarks or trademarks of SunGard Higher Education in the U.S.A. 
+ and/or other regions and/or countries.
+ **********************************************************************************/
 /**
  Banner Automator Version: 1.21
  Generated: Wed Jul 20 14:02:47 EDT 2011 
@@ -202,24 +202,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testValidationMessages() {
-        def facultyTenureStatus = newInvalidForCreateFacultyTenureStatus()
-        facultyTenureStatus.code = null
-        assertFalse facultyTenureStatus.validate()
-        assertLocalizedError facultyTenureStatus, 'nullable', /.*Field.*code.*of class.*FacultyTenureStatus.*cannot be null.*/, 'code'
-        facultyTenureStatus.description = null
-        assertFalse facultyTenureStatus.validate()
-        assertLocalizedError facultyTenureStatus, 'nullable', /.*Field.*description.*of class.*FacultyTenureStatus.*cannot be null.*/, 'description'
-        facultyTenureStatus.dateIndicator = null
-        assertFalse facultyTenureStatus.validate()
-        assertLocalizedError facultyTenureStatus, 'nullable', /.*Field.*dateIndicator.*of class.*FacultyTenureStatus.*cannot be null.*/, 'dateIndicator'
-        facultyTenureStatus.reviewDateIndicator = null
-        assertFalse facultyTenureStatus.validate()
-        assertLocalizedError facultyTenureStatus, 'nullable', /.*Field.*reviewDateIndicator.*of class.*FacultyTenureStatus.*cannot be null.*/, 'reviewDateIndicator'
-        facultyTenureStatus.eeoTenureIndicator = null
-        assertFalse facultyTenureStatus.validate()
-        assertLocalizedError facultyTenureStatus, 'nullable', /.*Field.*eeoTenureIndicator.*of class.*FacultyTenureStatus.*cannot be null.*/, 'eeoTenureIndicator'
-    }
+
 
 
     private def newValidForCreateFacultyTenureStatus() {

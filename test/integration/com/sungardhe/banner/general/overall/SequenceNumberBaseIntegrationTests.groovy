@@ -1,14 +1,14 @@
 
-/*******************************************************************************
- © 2011 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- *******************************************************************************/
+/*********************************************************************************
+ Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
+ This copyrighted software contains confidential and proprietary information of 
+ SunGard Higher Education and its subsidiaries. Any use of this software is limited 
+ solely to SunGard Higher Education licensees, and is further subject to the terms 
+ and conditions of one or more written license agreements between SunGard Higher 
+ Education and the licensee in question. SunGard, Banner and Luminis are either 
+ registered trademarks or trademarks of SunGard Higher Education in the U.S.A. 
+ and/or other regions and/or countries.
+ **********************************************************************************/
 /**
  Banner Automator Version: 1.24
  Generated: Tue Aug 09 14:09:48 IST 2011
@@ -182,15 +182,6 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
 		assertErrorsFor sequenceNumberBase, 'maxSize', [ 'sequenceNumberPrefix' ]
     }
 
-	void testValidationMessages() {
-	    def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
-	    sequenceNumberBase.function = null
-	    assertFalse sequenceNumberBase.validate()
-	    assertLocalizedError sequenceNumberBase, 'nullable', /.*Field.*function.*of class.*SequenceNumberBase.*cannot be null.*/, 'function'
-	    sequenceNumberBase.maximumSequenceNumber = null
-	    assertFalse sequenceNumberBase.validate()
-	    assertLocalizedError sequenceNumberBase, 'nullable', /.*Field.*maximumSequenceNumber.*of class.*SequenceNumberBase.*cannot be null.*/, 'maximumSequenceNumber'
-	}
 
 
 	private def newValidForCreateSequenceNumberBase() {
