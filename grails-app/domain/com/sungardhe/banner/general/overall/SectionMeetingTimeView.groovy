@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,21 +8,13 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 package com.sungardhe.banner.general.overall
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.Table
-import javax.persistence.Version
+import com.sungardhe.banner.query.DynamicFinder
 import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Type
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
-
+import javax.persistence.*
 
 /**
  * Section Meeting Time View model.
@@ -247,18 +239,18 @@ class SectionMeetingTimeView {
      * Query finder for advanced search SSAMATX
      */
 
-//    def static countAll(filterData) {
-    //        finderByAll().count(filterData)
-    //    }
-    //
-    //
-    //    def static fetchSearch(filterData, pagingAndSortParams) {
-    //        finderByAll().find(filterData, pagingAndSortParams)
-    //    }
-    //
-    //
-    //    def private static finderByAll = {
-    //        def query = """FROM  SectionMeetingTimeView a   """
-    //        return new com.sungardhe.query.DynamicFinder(SectionMeetingTimeView.class, query, "a")
-    //    }
+    def static countAll(filterData) {
+        finderByAll().count(filterData)
+    }
+
+
+    def static fetchSearch(filterData, pagingAndSortParams) {
+        finderByAll().find(filterData, pagingAndSortParams)
+    }
+
+
+    def private static finderByAll = {
+        def query = """FROM  SectionMeetingTimeView a   """
+        return new DynamicFinder(SectionMeetingTimeView.class, query, "a")
+    }
 }
