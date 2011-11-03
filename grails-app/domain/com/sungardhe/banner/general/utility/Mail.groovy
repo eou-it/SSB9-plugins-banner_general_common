@@ -22,9 +22,6 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.Table
 import javax.persistence.Version
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.Transient
 
 import javax.persistence.GenerationType
 import javax.persistence.SequenceGenerator
@@ -32,18 +29,12 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.JoinColumn
 import javax.persistence.JoinColumns
 import javax.persistence.ManyToOne
-import org.hibernate.annotations.GenericGenerator
-
-import org.hibernate.annotations.Type
 
 import com.sungardhe.banner.general.system.Term
 import com.sungardhe.banner.general.system.LetterProcessLetter
 import com.sungardhe.banner.general.system.Initials
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
-//TODO: The general common plugin cannot have a dependency on a student package. This needs to be resolved after discussions
-//import com.sungardhe.banner.student.system.CommunicationPlan
-
 
 /**
  * Mail Table
@@ -51,19 +42,6 @@ import javax.persistence.TemporalType
 /*PROTECTED REGION ID(mail_namedqueries) ENABLED START*/
 //TODO: NamedQueries that needs to be ported:
  /**
-    * Where clause on this entity present in forms:
-  * Form Name: AUAMAIL
-  *  where gurmail_pidm = :pidm and gurmail_system_ind = 'A'
-
-  * Form Name: GUIMAIL
-  *  where gurmail_pidm = :pidm
-
-  * Form Name: FUAMAIL
-  *  where gurmail_pidm = :pidm and gurmail_system_ind = 'F'
-
-  * Form Name: SUAMAIL
-  *  where gurmail_pidm = :pidm and gurmail_system_ind = 'S'
-
   * Form Name: RUAMAIL
   *  where gurmail_pidm = :pidm and gurmail_system_ind = 'R' and ((gurmail_aidy_code = :keyblck_aidy_code and :keyblck_aidy_code is not null) or :keyblck_aidy_code is null)
 and ROKFGAC.F_FIND_IF_FINAID(:pidm, gurmail_aidy_code) = 'Y'
@@ -74,9 +52,6 @@ and ROKFGAC.F_FIND_IF_FINAID(:pidm, gurmail_aidy_code) = 'Y'
 
   * Form Name: GUIMAIL
   *  order by gurmail_system_ind, gurmail_term_code desc, gurmail_module_code, gurmail_letr_code
-
-  * Form Name: FUAMAIL
-  *  order by gurmail_system_ind, gurmail_letr_code
 
   * Form Name: SUAMAIL
   *  order by gurmail_system_ind, gurmail_term_code desc, gurmail_module_code, gurmail_letr_code
@@ -252,18 +227,6 @@ class Mail implements Serializable {
 		])
 	Initials initials
 
-
-    //TODO: This field needs to have a ManyToOne relationship with the CommunicationPlan domain
-    /**
-	 * Foreign Key : FKV_GURMAIL_INV_STVCPLN_CODE
-	 */
-    /*
-	@ManyToOne
-	@JoinColumns([
-		@JoinColumn(name="GURMAIL_CPLN_CODE", referencedColumnName="STVCPLN_CODE")
-		])
-	CommunicationPlan communicationPlan
-    */
     @Column(name = "GURMAIL_CPLN_CODE", length = 4)
     String communicationPlan
 

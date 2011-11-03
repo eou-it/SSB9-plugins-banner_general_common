@@ -16,7 +16,6 @@
  */
 package com.sungardhe.banner.general.overall
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
-import com.sungardhe.banner.exceptions.ApplicationException
 import com.sungardhe.banner.general.system.Building
 
 
@@ -194,10 +193,6 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 		assertEquals u_success_saturday, housingRoomUsageRestriction.saturday
 		assertEquals u_success_building, housingRoomUsageRestriction.building
 	}
-
-
-
-
 
 	void testHousingRoomUsageRestrictionDelete() {
 		def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()

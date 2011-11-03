@@ -37,18 +37,6 @@ import javax.persistence.NamedQuery
  * Room Usage Restriction Table
  */
 /*PROTECTED REGION ID(housingroomusagerestriction_namedqueries) ENABLED START*/
-//TODO: NamedQueries that needs to be ported:
-/**
- * Where clause on this entity present in forms:
- * Form Name: SLARDEF
- *  where slrruse_bldg_code = :slbrdef.slbrdef_bldg_code and slrruse_room_number = :slbrdef.slbrdef_room_number
-
- * Order by clause on this entity present in forms:
- * Form Name: SLARDEF
- *  slrruse_start_date
-
- */
-/*PROTECTED REGION END*/
 @Entity
 @Table(name = "SLRRUSE")
 @NamedQueries( value = [
@@ -62,6 +50,7 @@ import javax.persistence.NamedQuery
                                 OR  (hrur.endDate is null AND hrur.startDate <= :endDate)
                             )""")
 ] )
+/*PROTECTED REGION END*/
 class HousingRoomUsageRestriction implements Serializable {
 
     /**

@@ -15,11 +15,8 @@ package com.sungardhe.banner.general.overall
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
 
 import com.sungardhe.banner.general.system.Department
-import com.sungardhe.banner.general.system.Partition
 import com.sungardhe.banner.general.system.Building
 import com.sungardhe.banner.general.system.RoomStatus
-import com.sungardhe.banner.general.system.RoomRate
-import com.sungardhe.banner.general.system.PhoneRate
 import com.sungardhe.banner.general.system.College
 import com.sungardhe.banner.exceptions.ApplicationException
 
@@ -44,7 +41,6 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     void testHousingRoomDescriptionCreate() {
         def housingRoomDescription = newHousingRoomDescription()
 
-        def keyBlockMap = [termEffective: "201410", building: "LAW", room: "102"]
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
         assertNotNull "HousingRoomDescription ID is null in HousingRoomDescription Service Tests Create", housingRoomDescription.id
         assertNotNull housingRoomDescription.lastModified

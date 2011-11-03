@@ -22,25 +22,14 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.Table
 import javax.persistence.Version
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.Transient
-
 import javax.persistence.GenerationType
 import javax.persistence.SequenceGenerator
-
-import org.hibernate.annotations.GenericGenerator
 
 
 /**
  * Sequence Number Base Table
  */
 /*PROTECTED REGION ID(sequencenumberbase_namedqueries) ENABLED START*/
-//TODO: NamedQueries that needs to be ported:
- /**
-    * Where clause on this entity present in forms:
-  * Order by clause on this entity present in forms:
-*/
 /*PROTECTED REGION END*/
 @Entity
 @Table(name = "SOBSEQN")

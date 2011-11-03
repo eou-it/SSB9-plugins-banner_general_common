@@ -12,8 +12,6 @@
 
 package com.sungardhe.banner.general.overall
 
-import com.sungardhe.banner.testing.BaseIntegrationTestCase
-
 import java.text.SimpleDateFormat
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 

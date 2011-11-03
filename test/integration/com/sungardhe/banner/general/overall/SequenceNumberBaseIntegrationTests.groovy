@@ -17,7 +17,6 @@
 package com.sungardhe.banner.general.overall
 
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
-import com.sungardhe.banner.exceptions.ApplicationException
 import groovy.sql.Sql
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import grails.validation.ValidationException
