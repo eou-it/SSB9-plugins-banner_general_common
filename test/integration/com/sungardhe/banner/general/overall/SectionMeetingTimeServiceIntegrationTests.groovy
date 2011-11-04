@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 
 package com.sungardhe.banner.general.overall
 
@@ -163,6 +163,104 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         }
     }
 
+
+
+    void testEventMeetingTimeInvalidBeginTime() {
+
+        def sectionMeetingTime = newEventMeetingTime()
+        //set the begin time to something invalid
+        sectionMeetingTime.beginTime = "0060"
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+        try {
+            sectionMeetingTimeService.create(map)
+            fail "Should have failed with @@r1:begin_time@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "begin_time"
+        }
+    }
+
+
+    void testEventMeetingTimeInvalidEndTime() {
+
+        def sectionMeetingTime = newEventMeetingTime()
+        //set the begin time to something invalid
+        sectionMeetingTime.endTime = "2400"
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+        try {
+            sectionMeetingTimeService.create(map)
+            fail "Should have failed with @@r1:end_time@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "end_time"
+        }
+    }
+
+
+    void testEventMeetingTimeInvalidMissingBeginTime() {
+
+        def sectionMeetingTime = newEventMeetingTime()
+        //set the begin time to something invalid
+        sectionMeetingTime.beginTime = ""
+        sectionMeetingTime.endTime = "1100"
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+        try {
+            sectionMeetingTimeService.create(map)
+            fail "Should have failed with @@r1:begin_end_time@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "begin_end_time"
+        }
+    }
+
+
+    void testEventMeetingTimeInvalidMissingEndTime() {
+
+        def sectionMeetingTime = newEventMeetingTime()
+        //set the begin time to something invalid
+        sectionMeetingTime.beginTime = "0900"
+        sectionMeetingTime.endTime = ""
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+        try {
+            sectionMeetingTimeService.create(map)
+            fail "Should have failed with @@r1:begin_end_time@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "begin_end_time"
+        }
+    }
+
+
+    void testEventMeetingTimeInvalidBeginTimeGreaterThanEndTime() {
+
+        def sectionMeetingTime = newEventMeetingTime()
+        //set the begin time to something invalid
+        sectionMeetingTime.endTime = "0001"
+        sectionMeetingTime.beginTime = "0100"
+        def keyBlockMap = [term: sectionMeetingTime.term,
+                courseReferenceNumber: sectionMeetingTime.courseReferenceNumber]
+        def map = [keyBlock: keyBlockMap,
+                domainModel: sectionMeetingTime]
+        try {
+            sectionMeetingTimeService.create(map)
+            fail "Should have failed with @@r1:begin_time_greater_than_end_time@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "begin_time_greater_than_end_time"
+        }
+    }
 
 
     void testSectionMeetingTimeMissingHoursWeek() {
@@ -401,30 +499,30 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         /*PROTECTED REGION END*/
 
         return new SectionMeetingTime(term: iterm.code,
-                courseReferenceNumber: "20431",
-                dayOfWeek: idayOfWeek,
-                dayNumber: 1,
-                beginTime: "0100",
-                endTime: "0200",
-                startDate: iterm.startDate,
-                endDate: iterm.endDate,
-                category: "03",
-                sunday: null,
-                monday: "M",
-                tuesday: "T",
-                wednesday: "W",
-                thursday: "R",
-                friday: "F",
-                saturday: null,
-                override: null,
-                creditHourSession: 1,
-                meetNumber: 1,
-                hoursWeek: 1,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner",
-                scheduleType: ischeduleType,
-                meetingType: imeetingType)
+                                      courseReferenceNumber: "20431",
+                                      dayOfWeek: idayOfWeek,
+                                      dayNumber: 1,
+                                      beginTime: "0100",
+                                      endTime: "0200",
+                                      startDate: iterm.startDate,
+                                      endDate: iterm.endDate,
+                                      category: "03",
+                                      sunday: null,
+                                      monday: "M",
+                                      tuesday: "T",
+                                      wednesday: "W",
+                                      thursday: "R",
+                                      friday: "F",
+                                      saturday: null,
+                                      override: null,
+                                      creditHourSession: 1,
+                                      meetNumber: 1,
+                                      hoursWeek: 1,
+                                      lastModified: new Date(),
+                                      lastModifiedBy: "test",
+                                      dataOrigin: "Banner",
+                                      scheduleType: ischeduleType,
+                                      meetingType: imeetingType)
 
     }
 
@@ -442,30 +540,30 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         /*PROTECTED REGION END*/
 
         return new SectionMeetingTime(term: iterm.code,
-                courseReferenceNumber: "20349",
-                dayOfWeek: idayOfWeek,
-                dayNumber: 1,
-                beginTime: "0100",
-                endTime: "0200",
-                startDate: iterm.startDate,
-                endDate: iterm.endDate,
-                category: "03",
-                sunday: null,
-                monday: "M",
-                tuesday: "T",
-                wednesday: "W",
-                thursday: "R",
-                friday: "F",
-                saturday: null,
-                override: null,
-                creditHourSession: 1,
-                meetNumber: 1,
-                hoursWeek: 1,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner",
-                scheduleType: ischeduleType,
-                meetingType: imeetingType)
+                                      courseReferenceNumber: "20349",
+                                      dayOfWeek: idayOfWeek,
+                                      dayNumber: 1,
+                                      beginTime: "0100",
+                                      endTime: "0200",
+                                      startDate: iterm.startDate,
+                                      endDate: iterm.endDate,
+                                      category: "03",
+                                      sunday: null,
+                                      monday: "M",
+                                      tuesday: "T",
+                                      wednesday: "W",
+                                      thursday: "R",
+                                      friday: "F",
+                                      saturday: null,
+                                      override: null,
+                                      creditHourSession: 1,
+                                      meetNumber: 1,
+                                      hoursWeek: 1,
+                                      lastModified: new Date(),
+                                      lastModifiedBy: "test",
+                                      dataOrigin: "Banner",
+                                      scheduleType: ischeduleType,
+                                      meetingType: imeetingType)
 
     }
 
@@ -480,10 +578,10 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def idayOfWeek = DayOfWeek.findByCode("T")
         def ischeduleType = "L"  //Unable to access ScheduleType
         def ifunction = new Function(code: "TTTTT",
-                description: "TTTTT",
-                etypCode: "TTTT",
-                lastModified: new Date(),
-                lastModifiedBy: "test", dataOrigin: "Banner")
+                                     description: "TTTTT",
+                                     etypCode: "TTTT",
+                                     lastModified: new Date(),
+                                     lastModifiedBy: "test", dataOrigin: "Banner")
         save ifunction
         def icommittee = CommitteeAndServiceType.findByCode("GRAD")
         def myFormat = 'MM/dd/yyyy'
@@ -511,26 +609,26 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
         return new SectionMeetingTime(term: iterm,
-                courseReferenceNumber: "TTTTT",
-                dayOfWeek: idayOfWeek,
-                dayNumber: 1,
-                beginTime: "0100",
-                endTime: "0200",
-                startDate: istartDate,
-                endDate: iendDate,
-                sunday: null,
-                monday: "M",
-                tuesday: "T",
-                wednesday: "W",
-                thursday: "R",
-                friday: "F",
-                saturday: null,
-                override: null,
-                meetNumber: 1,
-                committee: icommittee,
-                function: ifunction,
-                scheduleType: ischeduleType,
-                category: 1)
+                                      courseReferenceNumber: "TTTTT",
+                                      dayOfWeek: idayOfWeek,
+                                      dayNumber: 1,
+                                      beginTime: "0100",
+                                      endTime: "0200",
+                                      startDate: istartDate,
+                                      endDate: iendDate,
+                                      sunday: null,
+                                      monday: "M",
+                                      tuesday: "T",
+                                      wednesday: "W",
+                                      thursday: "R",
+                                      friday: "F",
+                                      saturday: null,
+                                      override: null,
+                                      meetNumber: 1,
+                                      committee: icommittee,
+                                      function: ifunction,
+                                      scheduleType: ischeduleType,
+                                      category: 1)
     }
 
 /**
