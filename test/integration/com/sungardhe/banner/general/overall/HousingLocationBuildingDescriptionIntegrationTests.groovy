@@ -596,9 +596,9 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         assertTrue housingLocationBuildingDescriptionList.list.size() > 20
 
         //expects a parameter map with Building object
-        housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding([building: Building.findByCode("B00A")])
+        housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding([building: Building.findByCode("AA")])
         assertEquals housingLocationBuildingDescriptionList.list.size(), 1
-        assertEquals "B00A", housingLocationBuildingDescriptionList.list[0].building.code
+        assertEquals "AA", housingLocationBuildingDescriptionList.list[0].building.code
 
         //expects a String
         housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding("AA")
@@ -609,8 +609,8 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     void testFetchValidBuilding() {
         //expects the Building object
-        def housingLocationBuildingDescriptionRec = HousingLocationBuildingDescription.fetchValidBuilding(Building.findByCode("B00A"))
-        assertEquals "B00A", housingLocationBuildingDescriptionRec.building.code
+        def housingLocationBuildingDescriptionRec = HousingLocationBuildingDescription.fetchValidBuilding(Building.findByCode("AA"))
+        assertEquals "AA", housingLocationBuildingDescriptionRec.building.code
 
         //expects a String
         housingLocationBuildingDescriptionRec = HousingLocationBuildingDescription.fetchValidBuilding("AA")
