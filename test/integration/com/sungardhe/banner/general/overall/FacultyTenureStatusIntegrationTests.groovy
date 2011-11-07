@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 /**
  Banner Automator Version: 1.21
  Generated: Wed Jul 20 14:02:47 EDT 2011 
@@ -203,7 +203,21 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testInListValidationFailure() {
+        def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
+        facultyTenureStatus.eeoTenureIndicator = i_failure_eeoTenureIndicator
+        assertFalse "FacultyTenureStatus should have failed validation", facultyTenureStatus.validate()
+        assertErrorsFor facultyTenureStatus, 'inList', ['eeoTenureIndicator']
+    }
 
+
+    void testMaxSizeValidationFailures() {
+        def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
+        facultyTenureStatus.code = i_failure_code
+        facultyTenureStatus.description = i_failure_description
+        assertFalse "FacultyTenureStatus should have failed validation", facultyTenureStatus.validate()
+        assertErrorsFor facultyTenureStatus, 'maxSize', ['code', 'description']
+    }
 
 
     private def newValidForCreateFacultyTenureStatus() {

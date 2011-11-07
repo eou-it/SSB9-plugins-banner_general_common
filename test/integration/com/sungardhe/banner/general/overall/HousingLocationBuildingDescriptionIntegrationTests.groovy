@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 /**
  Banner Automator Version: 0.1.1
  Generated: Fri Feb 11 16:39:35 EST 2011 
@@ -436,36 +436,62 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         def housingLocationBuildingDescription = new HousingLocationBuildingDescription()
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
         assertErrorsFor housingLocationBuildingDescription, 'nullable',
-                [
+                        [
                         'capacity',
                         'building',
                         'campus'
-                ]
+                        ]
         assertNoErrorsFor housingLocationBuildingDescription,
-                [
-                        'maximumCapacity',
-                        'streetLine1',
-                        'streetLine2',
-                        'streetLine3',
-                        'city',
-                        'zip',
-                        'phoneArea',
-                        'phoneNumber',
-                        'phoneExtension',
-                        'sex',
-                        'keyNumber',
-                        'countryPhone',
-                        'houseNumber',
-                        'streetLine4',
-                        'roomRate',
-                        'phoneRate',
-                        'site',
-                        'state',
-                        'county',
-                        'college',
-                        'department',
-                        'partition'
-                ]
+                          [
+                          'maximumCapacity',
+                          'streetLine1',
+                          'streetLine2',
+                          'streetLine3',
+                          'city',
+                          'zip',
+                          'phoneArea',
+                          'phoneNumber',
+                          'phoneExtension',
+                          'sex',
+                          'keyNumber',
+                          'countryPhone',
+                          'houseNumber',
+                          'streetLine4',
+                          'roomRate',
+                          'phoneRate',
+                          'site',
+                          'state',
+                          'county',
+                          'college',
+                          'department',
+                          'partition'
+                          ]
+    }
+
+
+    void testMaxValueValidationFailure() {
+        def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
+        housingLocationBuildingDescription.capacity = 100000
+        housingLocationBuildingDescription.maximumCapacity = 100000
+        assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
+        assertErrorsFor housingLocationBuildingDescription, 'max',
+                        [
+                        'capacity',
+                        'maximumCapacity'
+                        ]
+    }
+
+
+    void testMinValueValidationFailure() {
+        def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
+        housingLocationBuildingDescription.capacity = -100000
+        housingLocationBuildingDescription.maximumCapacity = -100000
+        assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
+        assertErrorsFor housingLocationBuildingDescription, 'min',
+                        [
+                        'capacity',
+                        'maximumCapacity'
+                        ]
     }
 
 
@@ -487,8 +513,6 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
         assertErrorsFor housingLocationBuildingDescription, 'maxSize', ['streetLine1', 'streetLine2', 'streetLine3', 'city', 'zip', 'phoneArea', 'phoneNumber', 'phoneExtension', 'sex', 'keyNumber', 'countryPhone', 'houseNumber', 'streetLine4']
     }
-
-
 
 
     private def newValidForCreateHousingLocationBuildingDescription() {
@@ -565,5 +589,33 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
      * from being overwritten on re-generation
      */
     /*PROTECTED REGION ID(housinglocationbuildingdescription_custom_integration_test_methods) ENABLED START*/
+
+
+    void testFetchByBuilding() {
+        def housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding()
+        assertTrue housingLocationBuildingDescriptionList.list.size() > 20
+
+        //expects a parameter map with Building object
+        housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding([building: Building.findByCode("B00A")])
+        assertEquals housingLocationBuildingDescriptionList.list.size(), 1
+        assertEquals "B00A", housingLocationBuildingDescriptionList.list[0].building.code
+
+        //expects a String
+        housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding("AA")
+        assertEquals housingLocationBuildingDescriptionList.list.size(), 1
+        assertEquals "AA", housingLocationBuildingDescriptionList.list[0].building.code
+    }
+
+
+    void testFetchValidBuilding() {
+        //expects the Building object
+        def housingLocationBuildingDescriptionRec = HousingLocationBuildingDescription.fetchValidBuilding(Building.findByCode("B00A"))
+        assertEquals "B00A", housingLocationBuildingDescriptionRec.building.code
+
+        //expects a String
+        housingLocationBuildingDescriptionRec = HousingLocationBuildingDescription.fetchValidBuilding("AA")
+        assertEquals "AA", housingLocationBuildingDescriptionRec.building.code
+    }
+
     /*PROTECTED REGION END*/
 }
