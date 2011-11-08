@@ -125,6 +125,9 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
 		save housingRoomUsageRestriction
 		//Test if the generated entity now has an id assigned
         assertNotNull housingRoomUsageRestriction.id
+        assertNotNull housingRoomUsageRestriction.lastModified
+        assertNotNull housingRoomUsageRestriction.lastModifiedBy
+        assertNotNull housingRoomUsageRestriction.dataOrigin
 	}
 
 
@@ -315,10 +318,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
 			thursday: i_success_thursday,
 			friday: i_success_friday,
 			saturday: i_success_saturday,
-			building: i_success_building,
-        	lastModified: new Date(),
-			lastModifiedBy: "test",
-			dataOrigin: "Banner"
+			building: i_success_building
 	    )
 		return housingRoomUsageRestriction
 	}
@@ -337,10 +337,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
 			thursday: i_failure_thursday,
 			friday: i_failure_friday,
 			saturday: i_failure_saturday,
-			building: i_failure_building,
-        	lastModified: new Date(),
-			lastModifiedBy: "test",
-			dataOrigin: "Banner"
+			building: i_failure_building
 		)
 		return housingRoomUsageRestriction
 	}

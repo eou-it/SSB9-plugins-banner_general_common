@@ -39,6 +39,9 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         save integrationPartnerSystemRule
         //Test if the generated entity now has an id assigned
         assertNotNull integrationPartnerSystemRule.id
+        assertNotNull integrationPartnerSystemRule.lastModified
+        assertNotNull integrationPartnerSystemRule.lastModifiedBy
+        assertNotNull integrationPartnerSystemRule.dataOrigin
     }
 
 
@@ -139,10 +142,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         intp.save(flush:true, failOnError:true)
         new IntegrationPartnerSystemRule(code: "TTTTT",
                 description: "TTTTT",
-                integrationPartner: intp,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner")
+                integrationPartner: intp)
 
     }
 

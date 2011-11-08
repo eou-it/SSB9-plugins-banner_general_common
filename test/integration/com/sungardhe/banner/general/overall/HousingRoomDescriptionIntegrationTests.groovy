@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 /**
  Banner Automator Version: 0.1.1
  Generated: Fri Feb 11 16:39:35 EST 2011
@@ -211,6 +211,9 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         housingRoomDescription.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull housingRoomDescription.id
+        assertNotNull housingRoomDescription.lastModified
+        assertNotNull housingRoomDescription.lastModifiedBy
+        assertNotNull housingRoomDescription.dataOrigin
     }
 
 
@@ -265,21 +268,15 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         housingRoomDescription.length = u_success_length
         housingRoomDescription.area = u_success_area
         housingRoomDescription.countryPhone = u_success_countryPhone
-
-
         housingRoomDescription.department = u_success_department
-
         housingRoomDescription.partition = u_success_partition
-
         housingRoomDescription.roomStatus = u_success_roomStatus
-
         housingRoomDescription.roomRate = u_success_roomRate
-
         housingRoomDescription.phoneRate = u_success_phoneRate
-
         housingRoomDescription.college = u_success_college
+
         housingRoomDescription.save(failOnError: true, flush: true)
-        //Asset for sucessful update
+        //Assert for successful update
         housingRoomDescription = HousingRoomDescription.get(housingRoomDescription.id)
         assertEquals 1L, housingRoomDescription?.version
         assertEquals u_success_description, housingRoomDescription.description
@@ -299,19 +296,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals u_success_length, housingRoomDescription.length
         assertEquals u_success_area, housingRoomDescription.area
         assertEquals u_success_countryPhone, housingRoomDescription.countryPhone
-
-
-        housingRoomDescription.department = u_success_department
-
-        housingRoomDescription.partition = u_success_partition
-
-        housingRoomDescription.roomStatus = u_success_roomStatus
-
-        housingRoomDescription.roomRate = u_success_roomRate
-
-        housingRoomDescription.phoneRate = u_success_phoneRate
-
-        housingRoomDescription.college = u_success_college
     }
 
 
@@ -358,18 +342,11 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         housingRoomDescription.length = u_failure_length
         housingRoomDescription.area = u_failure_area
         housingRoomDescription.countryPhone = u_failure_countryPhone
-
-
         housingRoomDescription.department = u_failure_department
-
         housingRoomDescription.partition = u_failure_partition
-
         housingRoomDescription.roomStatus = u_failure_roomStatus
-
         housingRoomDescription.roomRate = u_failure_roomRate
-
         housingRoomDescription.phoneRate = u_failure_phoneRate
-
         housingRoomDescription.college = u_failure_college
         shouldFail {
             housingRoomDescription.save(failOnError: true, flush: true)
@@ -428,62 +405,50 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertTrue "HousingRoomDescription could not be validated as expected due to ${housingRoomDescription.errors}", housingRoomDescription.validate()
     }
 
-    void testFetchBySomeHousingRoomDescriptionRoom()
-    {
-        def map = [building:u_success_building]
-        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom("102",map)
-        assertNotNull housings
-    }
-
-    void testFetchBySomeHousingRoomDescriptionRoomBuilding()
-    {
-        def buildings = [building:u_success_building]
-        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom(buildings)
-        assertNotNull housings
-    }
-
 
     void testNullValidationFailure() {
         def housingRoomDescription = new HousingRoomDescription()
         assertFalse "HousingRoomDescription should have failed validation", housingRoomDescription.validate()
         assertErrorsFor housingRoomDescription, 'nullable',
-                [
+                        [
                         'roomNumber',
                         'termEffective',
                         'capacity',
                         'roomType',
                         'building'
-                ]
+                        ]
         assertNoErrorsFor housingRoomDescription,
-                [
-                        'description',
-                        'maximumCapacity',
-                        'utilityRate',
-                        'utilityRatePeriod',
-                        'phoneArea',
-                        'phoneNumber',
-                        'phoneExtension',
-                        'benefitCategory',
-                        'sex',
-                        'priority',
-                        'keyNumber',
-                        'width',
-                        'length',
-                        'area',
-                        'countryPhone',
-                        'department',
-                        'partition',
-                        'roomStatus',
-                        'roomRate',
-                        'phoneRate',
-                        'college'
-                ]
+                          [
+                          'description',
+                          'maximumCapacity',
+                          'utilityRate',
+                          'utilityRatePeriod',
+                          'phoneArea',
+                          'phoneNumber',
+                          'phoneExtension',
+                          'benefitCategory',
+                          'sex',
+                          'priority',
+                          'keyNumber',
+                          'width',
+                          'length',
+                          'area',
+                          'countryPhone',
+                          'department',
+                          'partition',
+                          'roomStatus',
+                          'roomRate',
+                          'phoneRate',
+                          'college'
+                          ]
     }
 
 
     void testMaxSizeValidationFailures() {
         def housingRoomDescription = new HousingRoomDescription(
                 description: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+                roomNumber: '01234567891',
+                termEffective: '1234567',
                 utilityRatePeriod: 'XXXX',
                 phoneArea: 'XXXXXXXX',
                 phoneNumber: 'XXXXXXXXXXXXXX',
@@ -494,19 +459,106 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
                 keyNumber: 'XXXXXXX',
                 countryPhone: 'XXXXXX')
         assertFalse "HousingRoomDescription should have failed validation", housingRoomDescription.validate()
-        assertErrorsFor housingRoomDescription, 'maxSize', ['description', 'utilityRatePeriod', 'phoneArea', 'phoneNumber', 'phoneExtension', 'benefitCategory', 'sex', 'priority', 'keyNumber', 'countryPhone']
+        assertErrorsFor housingRoomDescription, 'maxSize', ['description', 'roomNumber', 'termEffective', 'utilityRatePeriod', 'phoneArea', 'phoneNumber', 'phoneExtension', 'benefitCategory', 'sex', 'priority', 'keyNumber', 'countryPhone']
     }
 
 
-    @Ignore
+    void testMaxValueValidationFailure() {
+        def housingRoomDescription = newValidForCreateHousingRoomDescription()
+        housingRoomDescription.capacity = 100000
+        housingRoomDescription.maximumCapacity = 100000
+        housingRoomDescription.utilityRate = 100000.999
+        housingRoomDescription.width = 19999.99
+        housingRoomDescription.length = 10000.99
+        housingRoomDescription.area = 100000000.99
+
+        assertFalse "HousingLocationBuildingDescription should have failed validation", housingRoomDescription.validate()
+        assertErrorsFor housingRoomDescription, 'max',
+                        [
+                        'capacity',
+                        'maximumCapacity',
+                        'utilityRate',
+                        'width',
+                        'length',
+                        'area'
+                        ]
+    }
+
+
+    void testMinValueValidationFailure() {
+        def housingRoomDescription = newValidForCreateHousingRoomDescription()
+        housingRoomDescription.capacity = -100000
+        housingRoomDescription.maximumCapacity = -100000
+        housingRoomDescription.utilityRate = -100000.999
+        housingRoomDescription.width = -10000.99
+        housingRoomDescription.length = -10000.99
+        housingRoomDescription.area = -100000000.99
+
+        assertFalse "HousingLocationBuildingDescription should have failed validation", housingRoomDescription.validate()
+        assertErrorsFor housingRoomDescription, 'min',
+                        [
+                        'capacity',
+                        'maximumCapacity',
+                        'utilityRate',
+                        'width',
+                        'length',
+                        'area'
+                        ]
+    }
+
+
     void testFetchTermTo() {
         //Seed data
         // BuildingCode B00A	RoomNumber R00A	    TermCode200010
         //BuildingCode B00A	RoomNumber R00A	    TermCode201070
         //So when fetchTermTo will call be called for B00A,R00A,200010 expected result is 201070
-        String termFetched = HousingRoomDescription.fetchTermToOfRoom("B00A","R00A","200010")
+        String termFetched = HousingRoomDescription.fetchTermToOfRoom("B00A", "R00A", "200010")
         assertEquals "201070", termFetched
+    }
 
+
+    void testFetchBySomeHousingRoomDescriptionRoom() {
+        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom()
+        assertNotNull housings
+        assertTrue housings.list.size() > 3
+    }
+
+
+    void testFetchBySomeHousingRoomDescriptionRoomBuilding() {
+        def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
+        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom(map)
+        assertEquals 'ADAMS', housings.list[0].building.code
+    }
+
+
+    void testFetchBySomeHousingRoomDescriptionRoomFilter() {
+        def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
+        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('1', map)
+        assertTrue housings.list.size() > 0
+    }
+
+
+    void testFetchValidRoomAndBuilding() {
+        def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
+        def housings = HousingRoomDescription.fetchValidRoomAndBuilding("100", map)
+        assertNotNull housings
+        assertEquals 'ADAMS', housings.building.code
+    }
+
+
+    void testFetchValidSomeRoomAndBuilding() {
+        def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
+        def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)
+        assertNotNull housings
+        assertEquals 'ADAMS', housings.building.code
+    }
+
+
+    void testFetchValidSomeRoomAndBuildingWithoutBuildingParam() {
+        def map = [termEffective: '200110']
+        def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)
+        assertNotNull housings
+        assertEquals '100', housings.roomNumber
     }
 
 
@@ -537,10 +589,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
                 roomStatus: i_success_roomStatus,
                 roomRate: i_success_roomRate,
                 phoneRate: i_success_phoneRate,
-                college: i_success_college,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                college: i_success_college
         )
         return housingRoomDescription
     }
@@ -573,10 +622,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
                 roomStatus: i_failure_roomStatus,
                 roomRate: i_failure_roomRate,
                 phoneRate: i_failure_phoneRate,
-                college: i_failure_college,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                college: i_failure_college
         )
         return housingRoomDescription
     }

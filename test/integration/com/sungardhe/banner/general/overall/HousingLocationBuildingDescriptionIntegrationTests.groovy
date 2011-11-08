@@ -212,6 +212,9 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull housingLocationBuildingDescription.id
+        assertNotNull housingLocationBuildingDescription.lastModified
+        assertNotNull housingLocationBuildingDescription.lastModifiedBy
+        assertNotNull housingLocationBuildingDescription.dataOrigin
     }
 
 
@@ -541,10 +544,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
                 county: i_success_county,
                 college: i_success_college,
                 department: i_success_department,
-                partition: i_success_partition,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                partition: i_success_partition
         )
         return housingLocationBuildingDescription
     }
@@ -576,10 +576,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
                 county: i_failure_county,
                 college: i_failure_college,
                 department: i_failure_department,
-                partition: i_failure_partition,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                partition: i_failure_partition
         )
         return housingLocationBuildingDescription
     }

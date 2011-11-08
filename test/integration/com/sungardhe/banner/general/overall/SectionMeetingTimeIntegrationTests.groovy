@@ -240,6 +240,9 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         save sectionMeetingTime
         //Test if the generated entity now has an id assigned
         assertNotNull sectionMeetingTime.id
+        assertNotNull sectionMeetingTime.dataOrigin
+        assertNotNull sectionMeetingTime.lastModified
+        assertNotNull sectionMeetingTime.lastModifiedBy
     }
 
     //Test creation of an invalid record
@@ -553,10 +556,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
                 function: i_success_function,
                 committee: i_success_committeeAndServiceType,
                 scheduleToolStatus: i_success_scheduleToolStatus,
-                meetingType: i_success_meetingType,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                meetingType: i_success_meetingType
         )
         return sectionMeetingTime
     }
@@ -591,10 +591,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
                 function: i_failure_function,
                 committee: i_failure_committeeAndServiceType,
                 scheduleToolStatus: i_failure_scheduleToolStatus,
-                meetingType: i_failure_meetingType,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                meetingType: i_failure_meetingType
         )
         return sectionMeetingTime
     }

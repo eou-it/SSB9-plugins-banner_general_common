@@ -38,6 +38,9 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         save sectionCrossListSection
         //Test if the generated entity now has an id assigned
         assertNotNull sectionCrossListSection.id
+        assertNotNull sectionCrossListSection.lastModified
+        assertNotNull sectionCrossListSection.lastModifiedBy
+        assertNotNull sectionCrossListSection.dataOrigin
     }
 
 
@@ -131,10 +134,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         def sectionCrossListSection = new SectionCrossListSection(
                 xlstGroup: "TT",
                 courseReferenceNumber: "TTTTT",
-                term: term,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
+                term: term
         )
         return sectionCrossListSection
     }

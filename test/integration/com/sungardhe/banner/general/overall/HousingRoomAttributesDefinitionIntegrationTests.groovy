@@ -1,5 +1,4 @@
-
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -9,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 /**
  Banner Automator Version: 1.21
  Generated: Fri Jul 01 19:13:33 IST 2011
@@ -26,88 +25,91 @@ import org.junit.Ignore
 
 class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTestCase {
 
-	/*PROTECTED REGION ID(housingroomattributesdefinition_domain_integration_test_data) ENABLED START*/
-	//Test data for creating new domain instance
-	//Valid test data (For success tests)
-	def i_success_building
-	def i_success_buildingAndRoomAttribute
+    /*PROTECTED REGION ID(housingroomattributesdefinition_domain_integration_test_data) ENABLED START*/
+    //Test data for creating new domain instance
+    //Valid test data (For success tests)
+    def i_success_building
+    def i_success_buildingAndRoomAttribute
 
-	def i_success_roomNumber = "101"
-	def i_success_termEffective = "200410"
-	def i_success_mustMatch = "Y"
-	//Invalid test data (For failure tests)
-	def i_failure_building
-	def i_failure_buildingAndRoomAttribute
+    def i_success_roomNumber = "101"
+    def i_success_termEffective = "200410"
+    def i_success_mustMatch = "Y"
+    //Invalid test data (For failure tests)
+    def i_failure_building
+    def i_failure_buildingAndRoomAttribute
 
-	def i_failure_roomNumber = "TTTTT"
-	def i_failure_termEffective = "TTTTT"
-	def i_failure_mustMatch = "N"
+    def i_failure_roomNumber = "TTTTT"
+    def i_failure_termEffective = "TTTTT"
+    def i_failure_mustMatch = "N"
 
-	//Test data for creating updating domain instance
-	//Valid test data (For success tests)
-	def u_success_building
-	def u_success_buildingAndRoomAttribute
+    //Test data for creating updating domain instance
+    //Valid test data (For success tests)
+    def u_success_building
+    def u_success_buildingAndRoomAttribute
 
-	def u_success_roomNumber = "201"
-	def u_success_termEffective = "YYYYY"
-	def u_success_mustMatch = "N"
-	//Valid test data (For failure tests)
-	def u_failure_building
-	def u_failure_buildingAndRoomAttribute
+    def u_success_roomNumber = "201"
+    def u_success_termEffective = "YYYYY"
+    def u_success_mustMatch = "N"
+    //Valid test data (For failure tests)
+    def u_failure_building
+    def u_failure_buildingAndRoomAttribute
 
-	def u_failure_roomNumber = "TTTTT"
-	def u_failure_termEffective = "TTTTT"
-	def u_failure_mustMatch = null
-	/*PROTECTED REGION END*/
+    def u_failure_roomNumber = "TTTTT"
+    def u_failure_termEffective = "TTTTT"
+    def u_failure_mustMatch = null
+    /*PROTECTED REGION END*/
 
-	protected void setUp() {
-		formContext = ['SLARDEF'] // Since we are not testing a controller, we need to explicitly set this
-		super.setUp()
-		initializeTestDataForReferences()
-	}
 
-	//This method is used to initialize test data for references.
-	//A method is required to execute database calls as it requires a active transaction
-	void initializeTestDataForReferences() {
-		/*PROTECTED REGION ID(housingroomattributesdefinition_domain_integration_test_data_initialization) ENABLED START*/
-		//Valid test data (For success tests)
-    	i_success_building = Building.findWhere(code:"HUM")
-    	i_success_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code:"AUD")
+    protected void setUp() {
+        formContext = ['SLARDEF'] // Since we are not testing a controller, we need to explicitly set this
+        super.setUp()
+        initializeTestDataForReferences()
+    }
 
-		//Invalid test data (For failure tests)
-	    i_failure_building = Building.findWhere(code:"SOUTH")
-	    i_failure_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code:"LAB")
+    //This method is used to initialize test data for references.
+    //A method is required to execute database calls as it requires a active transaction
+    void initializeTestDataForReferences() {
+        /*PROTECTED REGION ID(housingroomattributesdefinition_domain_integration_test_data_initialization) ENABLED START*/
+        //Valid test data (For success tests)
+        i_success_building = Building.findWhere(code: "HUM")
+        i_success_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code: "AUD")
 
-		//Valid test data (For success tests)
-	    u_success_building = Building.findWhere(code:"BIOL")
-	    u_success_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code:"GYM")
+        //Invalid test data (For failure tests)
+        i_failure_building = Building.findWhere(code: "SOUTH")
+        i_failure_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code: "LAB")
 
-		//Valid test data (For failure tests)
-    	u_failure_building = Building.findWhere(code:"MENDAL")
-    	u_failure_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code:"GCL")
+        //Valid test data (For success tests)
+        u_success_building = Building.findWhere(code: "BIOL")
+        u_success_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code: "GYM")
 
-		//Test data for references for custom tests
-		/*PROTECTED REGION END*/
-	}
+        //Valid test data (For failure tests)
+        u_failure_building = Building.findWhere(code: "MENDAL")
+        u_failure_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code: "GCL")
 
-	protected void tearDown() {
-		super.tearDown()
-	}
+        //Test data for references for custom tests
+        /*PROTECTED REGION END*/
+    }
 
-	void testCreateValidHousingRoomAttributesDefinition() {
-		def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
-		save housingRoomAttributesDefinition
-		//Test if the generated entity now has an id assigned
+
+    protected void tearDown() {
+        super.tearDown()
+    }
+
+
+    void testCreateValidHousingRoomAttributesDefinition() {
+        def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
+        housingRoomAttributesDefinition.save(flush: true, failOnError: true)
+        //Test if the generated entity now has an id assigned
         assertNotNull housingRoomAttributesDefinition.id
-	}
-
-
+        assertNotNull housingRoomAttributesDefinition.lastModified
+        assertNotNull housingRoomAttributesDefinition.lastModifiedBy
+        assertNotNull housingRoomAttributesDefinition.dataOrigin
+    }
 
     @Ignore
-	void testUpdateValidHousingRoomAttributesDefinition() {
-		def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
-		housingRoomAttributesDefinition.save(flush:true, failOnError:true)
-//        housingRoomAttributesDefinition.refresh()
+    void testUpdateValidHousingRoomAttributesDefinition() {
+        def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
+        housingRoomAttributesDefinition.save(flush: true, failOnError: true)
 
         assertNotNull housingRoomAttributesDefinition.id
         assertEquals 0L, housingRoomAttributesDefinition.version
@@ -115,117 +117,114 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
         assertEquals i_success_termEffective, housingRoomAttributesDefinition.termEffective
         assertEquals i_success_mustMatch, housingRoomAttributesDefinition.mustMatch
 
-		//Update the entity
-		housingRoomAttributesDefinition.mustMatch = u_success_mustMatch
-        housingRoomAttributesDefinition.save(flush:true, failOnError:true)
+        //TODO - KMH there is an issue with the dbeu_ext_stu_bgc script which is setting this table up as if it has an API
+        //Update the entity
+        housingRoomAttributesDefinition.mustMatch = u_success_mustMatch
+        housingRoomAttributesDefinition.save(flush: true, failOnError: true)
 
-		//Asset for sucessful update
-        housingRoomAttributesDefinition = HousingRoomAttributesDefinition.get( housingRoomAttributesDefinition.id )
+        //Assert for successful update
+        housingRoomAttributesDefinition = HousingRoomAttributesDefinition.get(housingRoomAttributesDefinition.id)
         assertEquals 1L, housingRoomAttributesDefinition?.version
         assertEquals u_success_mustMatch, housingRoomAttributesDefinition.mustMatch
-
-	}
+    }
 
 
     void testOptimisticLock() {
-		def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
-		save housingRoomAttributesDefinition
+        def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
+        housingRoomAttributesDefinition.save(flush: true, failOnError: true)
 
         def sql
         try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.executeUpdate( "update SLRRDEF set SLRRDEF_VERSION = 999 where SLRRDEF_SURROGATE_ID = ?", [ housingRoomAttributesDefinition.id ] )
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.executeUpdate("update SLRRDEF set SLRRDEF_VERSION = 999 where SLRRDEF_SURROGATE_ID = ?", [housingRoomAttributesDefinition.id])
         } finally {
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
-		//Try to update the entity
-		//Update the entity
-		housingRoomAttributesDefinition.mustMatch = u_success_mustMatch
-        shouldFail( HibernateOptimisticLockingFailureException ) {
-            housingRoomAttributesDefinition.save( failOnError: true, flush: true )
+        //Try to update the entity
+        //Update the entity
+        housingRoomAttributesDefinition.mustMatch = u_success_mustMatch
+        shouldFail(HibernateOptimisticLockingFailureException) {
+            housingRoomAttributesDefinition.save(failOnError: true, flush: true)
         }
     }
 
 
-	void testDeleteHousingRoomAttributesDefinition() {
-		def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
-		save housingRoomAttributesDefinition
-		def id = housingRoomAttributesDefinition.id
-		assertNotNull id
-		housingRoomAttributesDefinition.delete()
-		assertNull HousingRoomAttributesDefinition.get( id )
-	}
+    void testDeleteHousingRoomAttributesDefinition() {
+        def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
+        housingRoomAttributesDefinition.save(flush: true, failOnError: true)
+        def id = housingRoomAttributesDefinition.id
+        assertNotNull id
+        housingRoomAttributesDefinition.delete()
+        assertNull HousingRoomAttributesDefinition.get(id)
+    }
 
 
     void testNullValidationFailure() {
         def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition()
         assertFalse "HousingRoomAttributesDefinition should have failed validation", housingRoomAttributesDefinition.validate()
         assertErrorsFor housingRoomAttributesDefinition, 'nullable',
-                                               [
-                                                 'roomNumber',
-                                                 'termEffective',
-                                                 'building',
-                                                 'buildingAndRoomAttribute'
-                                               ]
+                        [
+                        'roomNumber',
+                        'termEffective',
+                        'building',
+                        'buildingAndRoomAttribute'
+                        ]
         assertNoErrorsFor housingRoomAttributesDefinition,
-        									   [
-             									 'mustMatch'
-											   ]
+                          [
+                          'mustMatch'
+                          ]
     }
+
 
     void testMaxSizeValidationFailures() {
         def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
-        mustMatch:'XXX' )
-		assertFalse "HousingRoomAttributesDefinition should have failed validation", housingRoomAttributesDefinition.validate()
-		assertErrorsFor housingRoomAttributesDefinition, 'maxSize', [ 'mustMatch' ]
+                mustMatch: 'XXX',
+                termEffective: '1234567',
+                roomNumber: '01234567891')
+        assertFalse "HousingRoomAttributesDefinition should have failed validation", housingRoomAttributesDefinition.validate()
+        assertErrorsFor housingRoomAttributesDefinition, 'maxSize', ['mustMatch', 'termEffective', 'roomNumber']
     }
-
-
 
 
     void testFetchByBuildingRoomNumberAndTermEffective() {
         def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
-		save housingRoomAttributesDefinition
-        def lst = HousingRoomAttributesDefinition.fetchByBuildingRoomNumberAndTermEffective(i_success_building.code,i_success_roomNumber,i_success_termEffective)
+        housingRoomAttributesDefinition.save(flush: true, failOnError: true)
+        def lst = HousingRoomAttributesDefinition.fetchByBuildingRoomNumberAndTermEffective(i_success_building.code, i_success_roomNumber, i_success_termEffective)
         assertNotNull lst
         assertTrue "List is not empty", !lst.isEmpty()
         def resultAttributes = []
-        for (HousingRoomAttributesDefinition attr:lst)  {
+        for (HousingRoomAttributesDefinition attr: lst) {
             resultAttributes.add(attr.buildingAndRoomAttribute)
         }
         BuildingAndRoomAttribute audBuilding = BuildingAndRoomAttribute.findByCode("AUD")
         assertTrue resultAttributes.contains(audBuilding)
     }
 
-	private def newValidForCreateHousingRoomAttributesDefinition() {
-		def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
-			roomNumber: i_success_roomNumber,
-			termEffective: i_success_termEffective,
-			mustMatch: i_success_mustMatch,
-			building: i_success_building,
-			buildingAndRoomAttribute: i_success_buildingAndRoomAttribute,
-        	lastModified: new Date(),
-			lastModifiedBy: "test",
-			dataOrigin: "Banner"
-	    )
-		return housingRoomAttributesDefinition
-	}
 
-	private def newInvalidForCreateHousingRoomAttributesDefinition() {
-		def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
-			roomNumber: i_failure_roomNumber,
-			termEffective: i_failure_termEffective,
-			mustMatch: i_failure_mustMatch,
-			building: i_failure_building,
-			buildingAndRoomAttribute: i_failure_buildingAndRoomAttribute,
-        	lastModified: new Date(),
-			lastModifiedBy: "test",
-			dataOrigin: "Banner"
-		)
-		return housingRoomAttributesDefinition
-	}
+    private def newValidForCreateHousingRoomAttributesDefinition() {
+        def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
+                roomNumber: i_success_roomNumber,
+                termEffective: i_success_termEffective,
+                mustMatch: i_success_mustMatch,
+                building: i_success_building,
+                buildingAndRoomAttribute: i_success_buildingAndRoomAttribute
+        )
+        return housingRoomAttributesDefinition
+    }
 
-   /**
+
+    private def newInvalidForCreateHousingRoomAttributesDefinition() {
+        def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
+                roomNumber: i_failure_roomNumber,
+                termEffective: i_failure_termEffective,
+                mustMatch: i_failure_mustMatch,
+                building: i_failure_building,
+                buildingAndRoomAttribute: i_failure_buildingAndRoomAttribute
+        )
+        return housingRoomAttributesDefinition
+    }
+
+    /**
      * Please put all the custom tests in this protected section to protect the code
      * from being overwritten on re-generation
      */

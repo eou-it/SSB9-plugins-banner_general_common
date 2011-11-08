@@ -81,6 +81,9 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
 		sequenceNumberBase.save( failOnError: true, flush: true )
 		//Test if the generated entity now has an id assigned
         assertNotNull sequenceNumberBase.id
+        assertNotNull sequenceNumberBase.lastModified
+        assertNotNull sequenceNumberBase.lastModifiedBy
+        assertNotNull sequenceNumberBase.dataOrigin
 	}
 
 	void testCreateInvalidSequenceNumberBase() {
