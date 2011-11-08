@@ -512,8 +512,8 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         // BuildingCode B00A	RoomNumber R00A	    TermCode200010
         //BuildingCode B00A	RoomNumber R00A	    TermCode201070
         //So when fetchTermTo will call be called for B00A,R00A,200010 expected result is 201070
-        String termFetched = HousingRoomDescription.fetchTermToOfRoom("B00A", "R00A", "200010")
-        assertEquals "201070", termFetched
+        String termFetched = HousingRoomDescription.fetchTermToOfRoom("ADAMS", "100", "200010")
+        assertEquals "200110", termFetched
     }
 
 
