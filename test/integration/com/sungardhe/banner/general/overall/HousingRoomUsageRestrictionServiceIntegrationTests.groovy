@@ -89,17 +89,10 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 	def u_failure_thursday = "#"
 	def u_failure_friday = "#"
 	def u_failure_saturday = "#"
-
-	//TODO: Create keyblock map for insert (For success tests)
+    //keyblock maps may be null for these tests
 	def i_success_keyBlockMap = [:]
-
-	//TODO: Create keyblock map for insert (For failure tests)
-	def i_failure_keyBlockMap = [:]
-
-	//TODO: Create keyblock map for update (If success required)
+    def i_failure_keyBlockMap = [:]
 	def u_success_keyBlockMap = [:]
-
-	//TODO: Create keyblock map for update (If failure required)
 	def u_failure_keyBlockMap = [:]
 
 	/*PROTECTED REGION END*/
@@ -146,7 +139,6 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 		assertNotNull housingRoomUsageRestriction.lastModifiedBy
 	    assertNotNull housingRoomUsageRestriction.lastModified
     }
-
 
 
 	void testHousingRoomUsageRestrictionValidUpdate() {
@@ -222,10 +214,7 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 			thursday: i_success_thursday,
 			friday: i_success_friday,
 			saturday: i_success_saturday,
-			building: i_success_building,
-        	lastModified: new Date(),
-			lastModifiedBy: "test",
-			dataOrigin: "Banner"
+			building: i_success_building
 	    )
 		return housingRoomUsageRestriction
 	}
@@ -244,10 +233,7 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 			thursday: i_failure_thursday,
 			friday: i_failure_friday,
 			saturday: i_failure_saturday,
-			building: i_failure_building,
-        	lastModified: new Date(),
-			lastModifiedBy: "test",
-			dataOrigin: "Banner"
+			building: i_failure_building
 		)
 		return housingRoomUsageRestriction
 	}

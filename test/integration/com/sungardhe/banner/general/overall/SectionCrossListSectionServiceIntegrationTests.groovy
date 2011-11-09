@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 
 package com.sungardhe.banner.general.overall
 
@@ -86,7 +86,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
         def term = Term.findWhere(code: "201410")
 
         def sectionCrossListSection = new SectionCrossListSection(
-                xlstGroup: "B1" ,
+                xlstGroup: "B1",
                 term: term
         )
         def keyBlockMap = [term: "201410", xlstGroup: "B1"]
@@ -215,6 +215,14 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
         catch (ApplicationException ae) {
             assertApplicationException ae, "readonlyFieldsCannotBeModified"
         }
+    }
+
+
+    private def testFetchByTermAndCrossListGroupIndicator() {
+        def sectionCrossListSections = SectionCrossListSection.fetchByTermAndXlstGroup('201410', 'B1')
+        assertTrue sectionCrossListSections.size() >= 1
+        assertEquals sectionCrossListSections[0].courseReferenceNumber, '20165'
+        assertEquals sectionCrossListSections[1].courseReferenceNumber, '20334'
     }
 
 

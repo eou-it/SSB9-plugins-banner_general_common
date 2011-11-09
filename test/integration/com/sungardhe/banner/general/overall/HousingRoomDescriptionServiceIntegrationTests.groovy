@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 
 package com.sungardhe.banner.general.overall
 
@@ -163,12 +163,53 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-    void testReadOnly() {
+    void testReadOnlyRoomNumber() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
-        // create new values for the fields
+        /**
+         * Please use the appropriate finder methods to load the references here
+         * This area is being protected to preserve the customization on regeneration
+         */
+        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
         def iroomNumber = "104"
+        /*PROTECTED REGION END*/
+        // change the values
+        housingRoomDescription.roomNumber = iroomNumber
+        try {
+            housingRoomDescriptionService.update([domainModel: housingRoomDescription])
+            fail "Should have failed with @@r1:readonlyFieldsCannotBeModified"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
+    void testReadOnlyTermEffective() {
+        def housingRoomDescription = newHousingRoomDescription()
+        housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
+        /**
+         * Please use the appropriate finder methods to load the references here
+         * This area is being protected to preserve the customization on regeneration
+         */
+        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
         def itermEffective = "201420"
+        /*PROTECTED REGION END*/
+        // change the values
+        housingRoomDescription.termEffective = itermEffective
+        try {
+            housingRoomDescriptionService.update([domainModel: housingRoomDescription])
+            fail "Should have failed with @@r1:readonlyFieldsCannotBeModified"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
+    void testReadOnlyBuilding() {
+        def housingRoomDescription = newHousingRoomDescription()
+        housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
         /**
          * Please use the appropriate finder methods to load the references here
          * This area is being protected to preserve the customization on regeneration
@@ -177,8 +218,6 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         def ibuilding = Building.findByCode("HUM")
         /*PROTECTED REGION END*/
         // change the values
-        housingRoomDescription.roomNumber = iroomNumber
-        housingRoomDescription.termEffective = itermEffective
         housingRoomDescription.building = ibuilding
         try {
             housingRoomDescriptionService.update([domainModel: housingRoomDescription])

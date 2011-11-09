@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 
 package com.sungardhe.banner.general.overall
 
@@ -182,7 +182,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
          * This area is being protected to preserve the customization on regeneration
          */
         /*PROTECTED REGION ID(housinglocationbuildingdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
-         def ibuilding = Building.findByCode("AHO")
+        def ibuilding = Building.findByCode("AHO")
         /*PROTECTED REGION END*/
         // change the values
         housingLocationBuildingDescription.building = ibuilding

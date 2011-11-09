@@ -518,12 +518,8 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
                                       creditHourSession: 1,
                                       meetNumber: 1,
                                       hoursWeek: 1,
-                                      lastModified: new Date(),
-                                      lastModifiedBy: "test",
-                                      dataOrigin: "Banner",
                                       scheduleType: ischeduleType,
                                       meetingType: imeetingType)
-
     }
 
 
@@ -559,12 +555,8 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
                                       creditHourSession: 1,
                                       meetNumber: 1,
                                       hoursWeek: 1,
-                                      lastModified: new Date(),
-                                      lastModifiedBy: "test",
-                                      dataOrigin: "Banner",
                                       scheduleType: ischeduleType,
                                       meetingType: imeetingType)
-
     }
 
 
@@ -579,9 +571,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def ischeduleType = "L"  //Unable to access ScheduleType
         def ifunction = new Function(code: "TTTTT",
                                      description: "TTTTT",
-                                     etypCode: "TTTT",
-                                     lastModified: new Date(),
-                                     lastModifiedBy: "test", dataOrigin: "Banner")
+                                     etypCode: "TTTT")
         save ifunction
         def icommittee = CommitteeAndServiceType.findByCode("GRAD")
         def myFormat = 'MM/dd/yyyy'
