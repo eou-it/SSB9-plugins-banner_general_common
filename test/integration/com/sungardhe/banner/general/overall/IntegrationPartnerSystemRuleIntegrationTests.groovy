@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 package com.sungardhe.banner.general.overall
 
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
@@ -36,7 +36,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
 
     void testCreateIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
-        save integrationPartnerSystemRule
+        integrationPartnerSystemRule.save(flush: true, failOnError: true)
         //Test if the generated entity now has an id assigned
         assertNotNull integrationPartnerSystemRule.id
         assertNotNull integrationPartnerSystemRule.lastModified
@@ -45,11 +45,10 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-    @Ignore
     void testUpdateIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         assertTrue integrationPartnerSystemRule.validate()
-        integrationPartnerSystemRule.save(flush:true, failOnError:true)
+        integrationPartnerSystemRule.save(flush: true, failOnError: true)
 
         assertNotNull integrationPartnerSystemRule.id
         assertEquals(0L, integrationPartnerSystemRule.version)
@@ -64,7 +63,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         integrationPartnerSystemRule.dataOrigin = "Banner"
         assertTrue integrationPartnerSystemRule.validate()
 
-        integrationPartnerSystemRule.save(flush:true, failOnError:true)
+        integrationPartnerSystemRule.save(flush: true, failOnError: true)
         integrationPartnerSystemRule = IntegrationPartnerSystemRule.get(integrationPartnerSystemRule.id)
         assertEquals new Long(1), integrationPartnerSystemRule?.version
         assertEquals("UUUUU", integrationPartnerSystemRule.description)
@@ -74,7 +73,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
 
     void testOptimisticLock() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
-        save integrationPartnerSystemRule
+        integrationPartnerSystemRule.save(flush: true, failOnError: true)
 
         def sql
         try {
@@ -93,14 +92,14 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         integrationPartnerSystemRule.lastModifiedBy = "test"
         integrationPartnerSystemRule.dataOrigin = "Banner"
         shouldFail(HibernateOptimisticLockingFailureException) {
-            integrationPartnerSystemRule.save(flush:true, failOnError:true)
+            integrationPartnerSystemRule.save(flush: true, failOnError: true)
         }
     }
 
 
     void testDeleteIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
-        save integrationPartnerSystemRule
+        integrationPartnerSystemRule.save(flush: true, failOnError: true)
         def id = integrationPartnerSystemRule.id
         assertNotNull id
         integrationPartnerSystemRule.delete()
@@ -130,20 +129,14 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-    void testValidationMessages() {
-//    def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
-
-    }
-
-
     private def newIntegrationPartnerSystemRule() {
-        def intp = new IntegrationPartner(code: "TTTTT", description: "TTTTT", lastModified: new Date(),
-                lastModifiedBy: "test", dataOrigin: "Banner")
-        intp.save(flush:true, failOnError:true)
+        def intp = new IntegrationPartner(
+                code: "TTTTT",
+                description: "TTTTT")
+        intp.save(flush: true, failOnError: true)
         new IntegrationPartnerSystemRule(code: "TTTTT",
-                description: "TTTTT",
-                integrationPartner: intp)
-
+                                         description: "TTTTT",
+                                         integrationPartner: intp)
     }
 
     /**

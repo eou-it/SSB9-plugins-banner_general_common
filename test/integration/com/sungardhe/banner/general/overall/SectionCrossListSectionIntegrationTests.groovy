@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 
 package com.sungardhe.banner.general.overall
 
@@ -16,7 +16,6 @@ import com.sungardhe.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import com.sungardhe.banner.general.system.Term
-
 
 
 class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
@@ -35,7 +34,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
     void testCreateSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
-        save sectionCrossListSection
+        sectionCrossListSection.save(flush: true, failOnError: true)
         //Test if the generated entity now has an id assigned
         assertNotNull sectionCrossListSection.id
         assertNotNull sectionCrossListSection.lastModified
@@ -46,7 +45,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
     void testUpdateSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
-        save sectionCrossListSection
+        sectionCrossListSection.save(flush: true, failOnError: true)
 
         assertNotNull sectionCrossListSection.id
         assertEquals 0L, sectionCrossListSection.version
@@ -60,7 +59,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         sectionCrossListSection.lastModified = testDate
         sectionCrossListSection.lastModifiedBy = "test"
         sectionCrossListSection.dataOrigin = "Banner"
-        save sectionCrossListSection
+        sectionCrossListSection.save(flush: true, failOnError: true)
 
         sectionCrossListSection = SectionCrossListSection.get(sectionCrossListSection.id)
         assertEquals 1L, sectionCrossListSection?.version
@@ -71,7 +70,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
     void testOptimisticLock() {
         def sectionCrossListSection = newSectionCrossListSection()
-        save sectionCrossListSection
+        sectionCrossListSection.save(flush: true, failOnError: true)
 
         def sql
         try {
@@ -94,7 +93,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
     void testDeleteSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
-        save sectionCrossListSection
+        sectionCrossListSection.save(flush: true, failOnError: true)
         def id = sectionCrossListSection.id
         assertNotNull id
         sectionCrossListSection.delete()
@@ -109,14 +108,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
 
     void testNullValidationFailure() {
-        def sectionCrossListSection = new SectionCrossListSection(
-                xlstGroup: null,
-                courseReferenceNumber: null,
-                term: null,
-                lastModified: new Date(),
-                lastModifiedBy: "test",
-                dataOrigin: "Banner"
-        )
+        def sectionCrossListSection = new SectionCrossListSection()
         assertFalse "SectionCrossListSection should have failed validation", sectionCrossListSection.validate()
         assertErrorsFor sectionCrossListSection, 'nullable',
                         [
@@ -126,6 +118,18 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
                         ]
     }
 
+
+    void testMaxSizeValidationFailures() {
+        def sectionCrossListSection = new SectionCrossListSection(
+                xlstGroup: 'XXX',
+                courseReferenceNumber: 'XXXXXX')
+        assertFalse "SectionCrossListSection should have failed validation", sectionCrossListSection.validate()
+        assertErrorsFor sectionCrossListSection, 'maxSize',
+                        [
+                        'xlstGroup',
+                        'courseReferenceNumber'
+                        ]
+    }
 
 
     private def newSectionCrossListSection() {

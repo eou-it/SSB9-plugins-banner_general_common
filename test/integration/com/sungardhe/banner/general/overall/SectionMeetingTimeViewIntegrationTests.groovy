@@ -1,4 +1,4 @@
-/*********************************************************************************
+/** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
  This copyrighted software contains confidential and proprietary information of 
  SunGard Higher Education and its subsidiaries. Any use of this software is limited 
@@ -8,7 +8,7 @@
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+ ********************************************************************************* */
 
 package com.sungardhe.banner.general.overall
 
@@ -29,7 +29,6 @@ class SectionMeetingTimeViewIntegrationTests extends com.sungardhe.banner.testin
 
 
     void testFetchByTermAndCourseReferenceNumberExistingRecord() {
-
         def findResults = SectionMeetingTimeView.findAllByTermAndCourseReferenceNumber(
                 "201410", "20001")
         assertNotNull findResults[0]
@@ -86,40 +85,39 @@ class SectionMeetingTimeViewIntegrationTests extends com.sungardhe.banner.testin
         def newDate = "2010-09-01"
         def df1 = new SimpleDateFormat("yyyy-MM-dd")
         def startDate = df1.parse(newDate)
-        def meetings = SectionMeetingTimeView.findAllByTermAndStartDate("201410", startDate )
+        def meetings = SectionMeetingTimeView.findAllByTermAndStartDate("201410", startDate)
         assertTrue meetings.size() > 0
 
         def starts = verifyFilterForField("startDate", "startDate", startDate, "equals")
         assertEquals meetings.size(), starts
 
         def andDate = df1.parse("2010-09-30")
-        verifyFilterForField("startDate", "startDate", startDate, "between", andDate )
-        verifyFilterForField("startDate", "startDate", startDate, "greaterthan"  )
-        verifyFilterForField("startDate", "startDate", startDate, "lessthan"  )
+        verifyFilterForField("startDate", "startDate", startDate, "between", andDate)
+        verifyFilterForField("startDate", "startDate", startDate, "greaterthan")
+        verifyFilterForField("startDate", "startDate", startDate, "lessthan")
 
         // 10-MAR-2014 00:00:00  test end dates
-        def endDate = df1.parse("2014-03-10") 
-        meetings = SectionMeetingTimeView.findAllByTermAndEndDate("201410", endDate )
+        def endDate = df1.parse("2014-03-10")
+        meetings = SectionMeetingTimeView.findAllByTermAndEndDate("201410", endDate)
         assertTrue meetings.size() > 0
         def ends = verifyFilterForField("endDate", "endDate", endDate, "equals")
         assertEquals meetings.size(), ends
-        verifyFilterForField("endDate", "endDate", df1.parse("2014-03-01"), "greaterthan"  )
-        verifyFilterForField("endDate", "endDate", endDate, "lessthan"  )
+        verifyFilterForField("endDate", "endDate", df1.parse("2014-03-01"), "greaterthan")
+        verifyFilterForField("endDate", "endDate", endDate, "lessthan")
         andDate = df1.parse("2013-12-31")
-        verifyFilterForField("endDate", "endDate", andDate, "between", endDate )
+        verifyFilterForField("endDate", "endDate", andDate, "between", endDate)
     }
 
 
     private def verifyFilterForField(String fieldName, String binding, def value, String operator, def andValue = null) {
-
         def pagingAndSortParams = [:]
         Map paramsMap = [:]
-        if ( andValue ) {
+        if (andValue) {
             def andFieldName = fieldName + "_and"
-            paramsMap = [term: "201410", (fieldName): value, (andFieldName) : andValue]
+            paramsMap = [term: "201410", (fieldName): value, (andFieldName): andValue]
         }
         else {
-          paramsMap = [term: "201410", (fieldName): value]
+            paramsMap = [term: "201410", (fieldName): value]
         }
         def criteriaMap = [[key: "term", binding: "term", operator: "equals"],
                 [key: fieldName, binding: binding, operator: operator]]
@@ -144,7 +142,6 @@ class SectionMeetingTimeViewIntegrationTests extends com.sungardhe.banner.testin
         shouldFail(InvalidDataAccessResourceUsageException) {
             newSectionList.save(flush: true, onError: true)
         }
-
     }
 
 
@@ -167,6 +164,5 @@ class SectionMeetingTimeViewIntegrationTests extends com.sungardhe.banner.testin
             existingSection.delete(flush: true, onError: true)
         }
     }
-
 
 }
