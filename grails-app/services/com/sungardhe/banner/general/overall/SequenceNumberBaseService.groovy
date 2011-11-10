@@ -30,8 +30,6 @@ class SequenceNumberBaseService extends ServiceBase {
 
     boolean transactional = true
 
-	static defaultCrudMethods = true
-
     /**
      * Please put all the custom methods in this protected section to protect the code
      * from being overwritten on re-generation

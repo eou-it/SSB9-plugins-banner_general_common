@@ -24,7 +24,6 @@ import com.sungardhe.banner.general.system.RoomStatus
 import com.sungardhe.banner.general.system.RoomRate
 import com.sungardhe.banner.general.system.PhoneRate
 import com.sungardhe.banner.general.system.College
-import org.junit.Ignore
 
 
 class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {

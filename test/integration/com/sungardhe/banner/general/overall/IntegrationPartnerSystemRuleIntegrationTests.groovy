@@ -16,7 +16,6 @@ import groovy.sql.Sql
 
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import com.sungardhe.banner.general.system.IntegrationPartner
-import org.junit.Ignore
 
 class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCase {
 

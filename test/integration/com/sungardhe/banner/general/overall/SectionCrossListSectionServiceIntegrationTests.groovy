@@ -218,7 +218,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
-    private def testFetchByTermAndCrossListGroupIndicator() {
+    void testFetchByTermAndCrossListGroupIndicator() {
         def sectionCrossListSections = SectionCrossListSection.fetchByTermAndXlstGroup('201410', 'B1')
         assertTrue sectionCrossListSections.size() >= 1
         assertEquals sectionCrossListSections[0].courseReferenceNumber, '20165'
