@@ -23,7 +23,6 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 import com.sungardhe.banner.general.system.Building
 import grails.validation.ValidationException
 import java.text.SimpleDateFormat
-import org.junit.Ignore
 
 
 class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestCase {
@@ -39,7 +38,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	def i_failure_building
 
 	def i_failure_code = "TTTT"
-	def i_failure_description = "insert_failure_description"
+	def i_failure_description = "insert failure description field with a string of more than 30 characters"
 
 	//Test data for creating updating domain instance
 	//Valid test data (For success tests)
@@ -51,7 +50,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	def u_failure_building
 
 	def u_failure_code = "TTTT"
-	def u_failure_description = "updated failure description"
+	def u_failure_description = "update failure description field with a string of more than 30 characters"
 	/*PROTECTED REGION END*/
 
 	protected void setUp() {
@@ -65,16 +64,20 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	void initializeTestDataForReferences() {
 		/*PROTECTED REGION ID(housingroomcatagorydefinition_domain_integration_test_data_initialization) ENABLED START*/
 		//Valid test data (For success tests)
-    	i_success_building = Building.findWhere(code : "B00A") //TODO: fill in the query condition
+    	i_success_building = new Building(code : "AAAA", description: "Building A description")
+        i_success_building.save(failOnError: true, flush: true)
 
 		//Invalid test data (For failure tests)
-	    i_failure_building = Building.findWhere(code : "ABCD") //TODO: fill in the query condition
+	    i_failure_building = new Building(code : "BBBB", description: "Building B description")
+        i_failure_building.save(failOnError: true, flush: true)
 
 		//Valid test data (For success tests)
-	    u_success_building = Building.findWhere(code : "B00G") //TODO: fill in the query condition
+	    u_success_building = new Building(code : "CCCC", description: "Building C description")
+        u_success_building.save(failOnError: true, flush: true)
 
 		//Valid test data (For failure tests)
-    	u_failure_building = Building.findWhere(code : "PQRS") //TODO: fill in the query condition
+    	u_failure_building = new Building(code : "DDDD", description: "Building D description")
+        u_failure_building.save(failOnError: true, flush: true)
 
 		//Test data for references for custom tests
 		/*PROTECTED REGION END*/
@@ -85,7 +88,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-    @Ignore
 	void testCreateValidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -101,7 +103,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-    @Ignore
 	void testUpdateValidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -122,7 +123,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-    @Ignore
 	void testUpdateInvalidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -141,7 +141,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-    @Ignore
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -163,7 +162,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 
     }
 
-    @Ignore
+
     void testOptimisticLock() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -183,7 +182,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
         }
     }
 
-    @Ignore
+
 	void testDeleteHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )

@@ -19,8 +19,6 @@ package com.sungardhe.banner.general.overall
 import com.sungardhe.banner.testing.BaseIntegrationTestCase
 import com.sungardhe.banner.exceptions.ApplicationException
 import com.sungardhe.banner.general.system.Building
-import org.junit.Ignore
-
 
 
 class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -38,7 +36,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 	//Invalid test data (For failure tests)
     def i_failure_building
 	def i_failure_code = "TTTT"
-	def i_failure_description = "insert_failure_description"
+	def i_failure_description = "insert failure description field with a string of more than 30 characters"
 
 
 	//Test data for creating updating domain instance
@@ -51,7 +49,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 	//Valid test data (For failure tests)
     def u_failure_building
 	def u_failure_code = "TTTT"
-	def u_failure_description = "update description field with a string of more than 30 characters"
+	def u_failure_description = "update failure description field with a string of more than 30 characters"
 
 	//TODO: Create keyblock map for insert (For success tests)
 	def i_success_keyBlockMap = [:]
@@ -78,13 +76,16 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 	void initializeTestDataForReferences() {
 		/*PROTECTED REGION ID(housingroomcatagorydefinition_domain_service_integration_test_data_initialization) ENABLED START*/
 		//Valid test data (For success tests)
-    	i_success_building = Building.findWhere(code : "B00A")
+    	i_success_building = new Building(code : "AAAA", description: "Building A description")
+        i_success_building.save(failOnError: true, flush: true)
 
 		//Invalid test data (For failure tests)
-	    i_failure_building = Building.findWhere(code : "ABCD")
+	    i_failure_building = new Building(code : "BBBB", description: "Building B description")
+        i_failure_building.save(failOnError: true, flush: true)
 
 		//Valid test data (For success tests)
-	    u_success_building = Building.findWhere(code : "B00G")
+	    u_success_building = new Building(code : "CCCC", description: "Building C description")
+        u_success_building.save(failOnError: true, flush: true)
 
 		//Valid test data (For failure tests)
     	u_failure_building = Building.findWhere(code : "PQRS")
@@ -97,7 +98,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 		super.tearDown()
 	}
 
-    @Ignore
+
 	void testHousingRoomCatagoryDefinitionValidCreate() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		def map = [keyBlock: i_success_keyBlockMap,
@@ -121,7 +122,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
-    @Ignore
+
 	void testHousingRoomCatagoryDefinitionValidUpdate() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		def map = [keyBlock: i_success_keyBlockMap,
@@ -143,7 +144,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 		assertEquals u_success_description, housingRoomCatagoryDefinition.description
 	}
 
-    @Ignore
+
 	void testHousingRoomCatagoryDefinitionInvalidUpdate() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		def map = [keyBlock: i_success_keyBlockMap,
@@ -166,7 +167,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 	}
 
 
-    @Ignore
+
 	void testHousingRoomCatagoryDefinitionDelete() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		def map = [keyBlock: i_success_keyBlockMap,
@@ -181,7 +182,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
   	}
 
 
-    @Ignore
+
 	void testReadOnly() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		def map = [keyBlock: i_success_keyBlockMap,
