@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sungardhe</groupId>
   <artifactId>banner-general-common</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <packaging>zip</packaging>
   <description>banner-general-common</description>
   <distributionManagement>
