@@ -9,24 +9,21 @@
 -- * Banner and Luminis are either registered trademarks or trademarks of SunGard Higher   *
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
-
-
-
-
 /** *****************************************************************************
- © 2011 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
+ ï¿½ 2011 SunGard Higher Education.  All Rights Reserved.
+  CONFIDENTIAL BUSINESS INFORMATION
+  THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
+  AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
+  NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
+  WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
  ****************************************************************************** */
 /**
 View behind the SSAMATX query only page for advanced query of available meeting times
  */
-
+# Script Name : svq_ssvmeet.sql
+# AUDIT TRAIL   9.0
+# Generated view for Horizon API support
+# Audit Trail End
 CREATE OR REPLACE FORCE VIEW SVQ_SSVMEET
 (ssrmeet_surrogate_id,
 ssrmeet_version ,

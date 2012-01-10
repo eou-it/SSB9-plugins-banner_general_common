@@ -9,10 +9,6 @@
 -- * Banner and Luminis are either registered trademarks or trademarks of SunGard Higher   *
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
-
-
-
-
 -- login.sql
 define BANSECR_PASSWORD = 'u_pick_it'
 define DBEU_PASSWORD  = 'u_pick_it'

@@ -9,10 +9,14 @@
 -- * Banner and Luminis are either registered trademarks or trademarks of SunGard Higher   *
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
-
-
-
-
+REM
+REM gv_gorintg.sql
+REM
+REM AUDIT TRAIL: 9.0
+REM 1. Horizon
+REM Generated view for Horizon API support
+REM AUDIT TRAIL END
+REM
 CREATE OR REPLACE FORCE VIEW gv_gorintg AS SELECT
       gorintg_integration_cde,
       gorintg_desc,

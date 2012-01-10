@@ -1,8 +1,5 @@
---
--- dbeu_table_extends.sql
---
+-- dbeu_ext_stu_bgc.sql
 -- V8.1
---
 -- *****************************************************************************************
 -- * Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.                    *
 -- * This copyrighted software contains confidential and proprietary information of        *
@@ -14,15 +11,17 @@
 -- * Banner and Luminis are either registered trademarks or trademarks of SunGard Higher   *
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
-
-
---
+REM
+REM dbeu_ext_stu_bgc.sql
+REM
+REM AUDIT TRAIL: 9.0
+REM 1. Horizon
+REM Generated for Horizon API support
+REM AUDIT TRAIL END
+REM
 whenever oserror exit rollback;
 whenever sqlerror exit rollback;
 REM connect dbeu_owner/&&dbeu_password
 execute dbeu_util.extend_table('GENERAL','GORINTG','G',TRUE);
 execute dbeu_util.extend_table('GENERAL','GURMAIL','G',FALSE);
 execute dbeu_util.extend_table('PAYROLL','PTRTENR','P',FALSE);
-
-
-
