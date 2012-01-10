@@ -36,6 +36,12 @@ import javax.persistence.*
              query = """FROM SectionMeetingTime a
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery( name = "SectionMeetingTime.fetchByTermCRNAndCategory",
+             query = """FROM SectionMeetingTime a
+		                WHERE a.term = :term
+		                AND a.courseReferenceNumber = :courseReferenceNumber
+		                AND a.category = :category
 		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
 ] )
 @DatabaseModifiesState
@@ -494,6 +500,20 @@ class SectionMeetingTime implements Serializable {
         return sectionMeetingTimes
     }
 
+    /**
+     * This fetchBy is used to retrieve all meeting times for a given term and crn.
+     * A NamedQuery is required because there are multiple fields in the order by.
+     */
+
+    public static List fetchByTermCRNAndCategory(String term,
+                                                           String courseReferenceNumber, String category) {
+        def sectionMeetingTimes
+        SectionMeetingTime.withSession {session ->
+            sectionMeetingTimes = session.getNamedQuery(
+                    'SectionMeetingTime.fetchByTermCRNAndCategory').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).setString('category', category).list()
+        }
+        return sectionMeetingTimes
+    }
 
     public static int fetchCountOfSchedulesByDateTimeAndLocation(String beginTime, String endTime, Date beginDate, Date endDate,
                                                                  String buildingCode, String roomNumber, String monday, String tuesday,
