@@ -9,28 +9,28 @@
 -- * Banner and Luminis are either registered trademarks or trademarks of SunGard Higher   *
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
-
-
-
-
---
---  Create views.
---
+REM
+REM studbpr_bgc.sql
+REM
+REM AUDIT TRAIL: 9.0
+REM 1. Horizon
+REM Generated view for Horizon API support
+REM AUDIT TRAIL END
+REM
 whenever oserror exit rollback;
 whenever sqlerror exit rollback;
 REM connect baninst1/&&baninst1_password
 REM
 REM Create triggers
 REM
-
 start sv_slbbldg_del_trg
 start sv_slbbldg_ins_trg
 start sv_slbbldg_upd_trg
-
+REM
 start sv_slbrdef_del_trg
 start sv_slbrdef_ins_trg
 start sv_slbrdef_upd_trg
-
+REM
 start sv_ssrmeet_del_trg
 start sv_ssrmeet_ins_trg
 start sv_ssrmeet_upd_trg

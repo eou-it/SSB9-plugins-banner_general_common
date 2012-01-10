@@ -17,13 +17,14 @@
   NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
   WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
  ****************************************************************************** */
-/**
-View behind the SSAMATX query only page for advanced query of available meeting times
- */
-# Script Name : svq_ssvmeet.sql
-# AUDIT TRAIL   9.0
-# Generated view for Horizon API support
-# Audit Trail End
+REM
+REM svq_ssvmeet.sql
+REM
+REM AUDIT TRAIL: 9.0
+REM 1. Horizon
+REM View behind the SSAMATX query only page for advanced query of available meeting times
+REM AUDIT TRAIL END
+REM
 CREATE OR REPLACE FORCE VIEW SVQ_SSVMEET
 (ssrmeet_surrogate_id,
 ssrmeet_version ,
