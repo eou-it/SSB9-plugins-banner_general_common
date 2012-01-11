@@ -1,8 +1,3 @@
---
--- dbeu_ext_stu_bgc.sql
---
--- V8.1
---
 -- *****************************************************************************************
 -- * Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.                    *
 -- * This copyrighted software contains confidential and proprietary information of        *
