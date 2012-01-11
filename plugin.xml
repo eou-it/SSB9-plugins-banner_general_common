@@ -13,6 +13,7 @@
     <resource>com.sungardhe.banner.general.overall.FacultyTenureStatus</resource>
     <resource>com.sungardhe.banner.general.overall.HousingLocationBuildingDescription</resource>
     <resource>com.sungardhe.banner.general.overall.HousingRoomAttributesDefinition</resource>
+    <resource>com.sungardhe.banner.general.overall.HousingRoomCatagoryDefinition</resource>
     <resource>com.sungardhe.banner.general.overall.HousingRoomDescription</resource>
     <resource>com.sungardhe.banner.general.overall.HousingRoomUsageRestriction</resource>
     <resource>com.sungardhe.banner.general.overall.IntegrationPartnerSystemRule</resource>
@@ -22,12 +23,15 @@
     <resource>com.sungardhe.banner.general.overall.SequenceNumberBase</resource>
     <resource>com.sungardhe.banner.general.utility.Mail</resource>
     <resource>com.sungardhe.banner.general.overall.HousingLocationBuildingDescriptionService</resource>
+    <resource>com.sungardhe.banner.general.overall.HousingRoomCatagoryDefinitionService</resource>
     <resource>com.sungardhe.banner.general.overall.HousingRoomDescriptionService</resource>
     <resource>com.sungardhe.banner.general.overall.HousingRoomUsageRestrictionService</resource>
     <resource>com.sungardhe.banner.general.overall.IntegrationPartnerSystemRuleService</resource>
     <resource>com.sungardhe.banner.general.overall.SectionCrossListSectionService</resource>
     <resource>com.sungardhe.banner.general.overall.SectionMeetingTimeService</resource>
     <resource>com.sungardhe.banner.general.overall.SequenceNumberBaseService</resource>
+    <resource>com.sungardhe.banner.DateUtility</resource>
+    <resource>com.sungardhe.banner.MessageUtility</resource>
   </resources>
   <dependencies />
   <behavior />

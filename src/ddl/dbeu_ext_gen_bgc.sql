@@ -1,4 +1,4 @@
--- dbeu_ext_stu_bgc.sql
+-- dbeu_ext_gen_bgc.sql
 -- V8.1
 -- *****************************************************************************************
 -- * Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.                    *
@@ -12,7 +12,7 @@
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
 REM
-REM dbeu_ext_stu_bgc.sql
+REM dbeu_ext_gen_bgc.sql
 REM
 REM AUDIT TRAIL: 9.0
 REM 1. Horizon
