@@ -1,4 +1,4 @@
-<plugin name='banner-general-common' version='1.0.4' grailsVersion='1.3.7 &gt; *'>
+<plugin name='banner-general-common' version='1.0.5' grailsVersion='1.3.7 &gt; *'>
   <author>SunGard Higher Education</author>
   <authorEmail>horizon-support@sungardhe.com</authorEmail>
   <title>BannerGeneralOverall Plugin</title>
