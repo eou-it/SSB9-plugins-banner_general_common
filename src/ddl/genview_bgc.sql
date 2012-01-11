@@ -10,7 +10,7 @@
 -- * Education in the U.S.A. and/or other regions and/or countries.                        *
 -- *****************************************************************************************
 REM
-REM banner_upgrade.sql
+REM genview_bgc.sql
 REM
 REM AUDIT TRAIL: 9.0
 REM 1. Horizon
