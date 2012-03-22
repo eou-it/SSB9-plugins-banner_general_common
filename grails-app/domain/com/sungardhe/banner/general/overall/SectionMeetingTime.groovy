@@ -100,12 +100,14 @@ class SectionMeetingTime implements Serializable {
      * Section Meeting Start Date.
      */
     @Column(name = "SSRMEET_START_DATE", nullable = false)
+    @Temporal(TemporalType.DATE)
     Date startDate
 
     /**
      * Section End Date.
      */
     @Column(name = "SSRMEET_END_DATE", nullable = false)
+    @Temporal(TemporalType.DATE)
     Date endDate
 
     /**

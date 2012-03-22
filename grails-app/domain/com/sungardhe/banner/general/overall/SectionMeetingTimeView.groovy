@@ -94,12 +94,14 @@ class SectionMeetingTimeView {
  * Section Meeting Start Date.
  */
     @Column(name = "SSRMEET_START_DATE")
+    @Temporal(TemporalType.DATE)
     Date startDate
 
 /**
  * Section End Date.
  */
     @Column(name = "SSRMEET_END_DATE")
+    @Temporal(TemporalType.DATE)
     Date endDate
 
     /**

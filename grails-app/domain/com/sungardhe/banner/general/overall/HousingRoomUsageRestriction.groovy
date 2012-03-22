@@ -79,12 +79,14 @@ class HousingRoomUsageRestriction implements Serializable {
      * This field identifies the starting date of the room usage restriction
      */
     @Column(name = "SLRRUSE_START_DATE", nullable = false)
+    @Temporal(TemporalType.DATE)
     Date startDate
 
     /**
      * This field identifies the ending date of the room usage restriction
      */
     @Column(name = "SLRRUSE_END_DATE")
+    @Temporal(TemporalType.DATE)
     Date endDate
 
     /**
