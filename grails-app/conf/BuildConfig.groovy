@@ -13,6 +13,13 @@ grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
+
+grails.plugin.location.'banner-core'="../banner_core.git"
+grails.plugin.location.'banner-codenarc'="../banner_codenarc.git"
+grails.plugin.location.'banner-general-validation-common'="../banner_general_validation_common.git"
+grails.plugin.location.'banner-db-main'="../banner_db_main.git"
+grails.plugin.location.'banner-seeddata-catalog'="../banner_seeddata_catalog.git"
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -22,9 +29,6 @@ grails.project.dependency.resolution = {
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
 
-        mavenRepo "http://m038083.sungardhe.com:8081/nexus/content/repositories/releases/"
-        mavenRepo "http://m038083.sungardhe.com:8081/nexus/content/repositories/snapshots/"
-        mavenRepo "http://m038083.sungardhe.com:8081/nexus/content/repositories/thirdparty/"
         grailsPlugins()
         grailsHome()
         grailsCentral()
@@ -42,15 +46,6 @@ grails.project.dependency.resolution = {
 
 
     plugins {
-        compile 'com.sungardhe:banner-core:1.0.49'   // Note: Also update version within 'application.properties'
-
-        compile 'com.sungardhe:banner-general-validation-common:1.0.5'
-
-        compile 'com.sungardhe:banner-db-main:1.0.16'
-        compile 'com.sungardhe:banner-seeddata-catalog:1.0.39'
-
-        provided 'com.sungardhe:banner-codenarc:0.1.4'// Note: Also update version within 'application.properties'
-        provided 'com.sungardhe:code-coverage:1.2'    // Note: Also update version within 'application.properties'
     }
 
 
