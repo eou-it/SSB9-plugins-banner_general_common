@@ -1,14 +1,15 @@
 /** *******************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
+ Copyright 2009-2012 SunGard Higher Education. All Rights Reserved.
+ This copyrighted software contains confidential and proprietary information of
+ SunGard Higher Education and its subsidiaries. Any use of this software is limited
+ solely to SunGard Higher Education licensees, and is further subject to the terms
+ and conditions of one or more written license agreements between SunGard Higher
  Education and the licensee in question. SunGard is either a registered trademark or
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
+ Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
  Education in the U.S.A. and/or other regions and/or countries.
  ********************************************************************************* */
+
 /**
  Banner Automator Version: 1.24
  Generated: Tue Aug 09 14:09:56 IST 2011
@@ -213,15 +214,139 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testGetNextSequenceNumberBase() {
-        def sequenceNumberBase = new SequenceNumberBase(function: "TEST", sequenceNumberPrefix: "A", maximumSequenceNumber: 25)
-        save sequenceNumberBase
-
         String function = "TEST"
-        Integer maximumSequence = 9999
-        String expectedSequence = "A0026"
+        char sequenceNumberPrefix = 'A'
+        Integer maximumSequence = 9
+
+        def sequenceNumberBase = new SequenceNumberBase(function: function, sequenceNumberPrefix: sequenceNumberPrefix, maximumSequenceNumber: 0)
+        sequenceNumberBase = sequenceNumberBaseService.create([domainModel: sequenceNumberBase])
+
+        //case: maximum digits allowed is one, 1 -> 9
+        //case a new sequence is starting from zero for prefix A
+        def previousNumber = 0
+        String expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber) //A1
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
-        maximumSequence = 26
-        expectedSequence = "B01"
+        expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber)   //A2
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //the last sequence number is reached, the next call should begin with new prefix and sequence of 1
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = maximumSequence
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+
+        previousNumber = 0
+        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //B
+        assertEquals "B", sequenceNumberPrefix
+        expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber) //B1
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber) //B2
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //case: maximum digits allowed is two, 01 -> 99
+        maximumSequence = 99
+
+        expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber) //B03
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber) //B04
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //the last sequence number is reached, the next call should begin with new prefix and sequence of 01
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = maximumSequence
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+
+        previousNumber = 0
+        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //C
+        assertEquals "C", sequenceNumberPrefix
+        expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C01
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C02
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //case: maximum digits allowed is three, 001 -> 999
+        maximumSequence = 999
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = 0
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+
+        //case a new sequence is starting from zero for prefix C
+        previousNumber = 0
+        expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //C001
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //C002
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = 9
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+        expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C010
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C011
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = 99
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+        expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber)   //C100
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber)   //C101
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //the last sequence number is reached, the next call should begin with new prefix and sequence of 01
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = maximumSequence
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+
+        previousNumber = 0
+        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1)     //D
+        assertEquals "D", sequenceNumberPrefix
+        expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //D001
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //D002
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //case: maximum digits allowed is four, 0001 -> 9999
+        maximumSequence = 9999
+
+        //case a new sequence is starting from zero for prefix C
+        expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //D0003
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //D0004
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //the last sequence number is reached, the next call should begin with new prefix and sequence of 0001
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = maximumSequence
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+
+        previousNumber = 0
+        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //E
+        assertEquals "E", sequenceNumberPrefix
+        expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //E0001
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //E0002
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //case: maximum digits allowed is five, 00001 -> 99999
+        maximumSequence = 99999
+
+        //case a new sequence is starting from zero for prefix E
+        expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //E00003
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //E00004
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+
+        //the last sequence number is reached, the next call should begin with new prefix and sequence of 0001
+        sequenceNumberBase = SequenceNumberBase.findByFunction(function)
+        sequenceNumberBase.maximumSequenceNumber = previousNumber = maximumSequence
+        sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
+
+        previousNumber = 0
+        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //F
+        assertEquals "F", sequenceNumberPrefix
+        expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //F00001
+        assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
+        expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //F00002
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
     }
 
