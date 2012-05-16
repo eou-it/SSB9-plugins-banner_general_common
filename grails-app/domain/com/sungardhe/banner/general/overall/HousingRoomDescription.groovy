@@ -30,15 +30,16 @@ import javax.persistence.*
 @NamedQueries(value = [
 @NamedQuery(name = "HousingRoomDescription.fetchAllByBuilding",
 query = """FROM  HousingRoomDescription a
-          where  a.building like  :building
-           and a.roomNumber like :roomNumber
+           WHERE  (a.roomNumber like :filter
+	  	           OR UPPER(a.description) like :filter)
+           and  a.building like  :building
            and a.roomType = 'C' and a.roomStatus.inactiveIndicator is null
            and a.termEffective =  ( select max(b.termEffective)
                    from HousingRoomDescription b
-                      where  b.building =  a.building
+                     where  b.building =  a.building
                      and b.roomNumber = a.roomNumber
                      and b.termEffective <= :termEffective )
-                                  order by  a.roomNumber """),
+                     order by  a.roomNumber """),
 @NamedQuery(name = "HousingRoomDescription.fetchValidateRoomAndBuilding",
 query = """FROM  HousingRoomDescription a
            WHERE a.building = :building
@@ -470,19 +471,17 @@ class HousingRoomDescription implements Serializable {
         else
             buildingCode = "%"
         def rooms = HousingRoomDescription.withSession {session ->
-            session.getNamedQuery('HousingRoomDescription.fetchAllByBuilding').setString('building',buildingCode).setString('termEffective', params?.termEffective).setString('roomNumber',"%").list()
+            session.getNamedQuery('HousingRoomDescription.fetchAllByBuilding').setString('building',buildingCode).setString('termEffective', params?.termEffective).setString('filter',"%").list()
         }
         return [list:rooms]
     }
 
     public static Object fetchBySomeHousingRoomDescriptionRoom(String filter) {
         def rooms = HousingRoomDescription.withSession {session ->
-            session.getNamedQuery('HousingRoomDescription.fetchAllByBuilding').setString('building', "%").setString('roomNumber',"%" + filter + "%").list()
+            session.getNamedQuery('HousingRoomDescription.fetchAllByBuilding').setString('building', "%").setString('filter',"%${filter?.toUpperCase()}%").list()
         }
         return [list:rooms]
     }
-
-
 
     public static Object fetchBySomeHousingRoomDescriptionRoom(String filter, Map params) {
         def buildingCode
@@ -490,8 +489,8 @@ class HousingRoomDescription implements Serializable {
             buildingCode = "%"+params?.building?.code+"%"
         else
             buildingCode = "%"
-        def rooms = HousingRoomDescription.withSession {session ->
-            session.getNamedQuery('HousingRoomDescription.fetchAllByBuilding').setString('building',buildingCode).setString('termEffective', params?.termEffective).setString('roomNumber',"%" + filter + "%").list()
+         def rooms = HousingRoomDescription.withSession {session ->
+            session.getNamedQuery('HousingRoomDescription.fetchAllByBuilding').setString('building',buildingCode).setString('termEffective', params?.termEffective).setString('filter',"%${filter?.toUpperCase()}%").list()
         }
         return [list:rooms]
     }
@@ -518,5 +517,18 @@ class HousingRoomDescription implements Serializable {
 
         return room[0]
     }
+
+    // Used for simple room look up without dependency on building
+    public static Object fetchByRoomNumberOrDescription(String filter) {
+           def roomList
+           if (filter) {
+                roomList = HousingRoomDescription.findAllByRoomNumberIlikeOrDescriptionIlike("%" + filter + "%", "%" + filter + "%", [sort: "roomNumber", order: "asc"])
+             } else {
+               roomList = HousingRoomDescription.findAll([sort: "roomNumber", order: "asc"])
+           }
+           return [list: roomList]
+       }
+
+
     /*PROTECTED REGION END*/
 }
