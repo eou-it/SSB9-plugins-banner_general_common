@@ -26,6 +26,7 @@ import com.sungardhe.banner.general.system.PhoneRate
 import com.sungardhe.banner.general.system.College
 
 
+
 class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
     /*PROTECTED REGION ID(housingroomdescription_domain_integration_test_data) ENABLED START*/
@@ -534,6 +535,28 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('1', map)
         assertTrue housings.list.size() > 0
+    }
+
+    //Test by passing room number or description as filters
+     void testFetchBySomeHousingRoomDescription() {
+         //Test by passing room description as filter
+         def map = [termEffective: '200110']
+         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('lecture hall', map)
+         assertNotNull housings
+         assertTrue housings.list.size() > 0
+         def descList = housings.list*.description
+         descList.each { it ->
+              assertTrue(it.contains('Lecture Hall'))
+         }
+         //Test by passing room number as filter
+         def map2 = [termEffective: '200110']
+         def housings2 = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('100', map2)
+         assertNotNull housings2
+         assertTrue housings2.list.size() > 0
+         def roomNumberList = housings2.list*.roomNumber
+           roomNumberList.each { it ->
+              assertTrue(it.contains('100'))
+         }
     }
 
 
