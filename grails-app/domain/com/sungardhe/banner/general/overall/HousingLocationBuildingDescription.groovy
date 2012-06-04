@@ -30,7 +30,7 @@ import javax.persistence.*
 @NamedQueries( value = [
 @NamedQuery( name = "HousingLocationBuildingDescription.fetchAllByBuilding",
              query = """FROM  HousingLocationBuildingDescription a
-                        where  a.building like  :building
+                        where  (a.building.code like :building OR upper(a.building.description) like :building )
 	  	                order by  a.building """),
 @NamedQuery( name = "HousingLocationBuildingDescription.fetchValidateBuilding",
              query = """FROM  HousingLocationBuildingDescription a
