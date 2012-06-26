@@ -18,3 +18,4 @@ REM Main common project schema maintenance script.
 REM AUDIT TRAIL END
 REM
 start gv_gorintg.sql
+start gvq_ssrmeet.sql
