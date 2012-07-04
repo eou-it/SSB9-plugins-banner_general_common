@@ -27,18 +27,22 @@ class DateUtility {
      * @param String dateFormat
      */
 
-    public static boolean validateDateFormat(dateString, dateFormat = null) {
+    public static validateDateFormat = {dateString, dateFormat = null ->
 
-       boolean result = true
-       try{
-           if (!dateFormat){
-               dateFormat = MessageUtility.message("default.date.format")
+        boolean result = true
+        try {
+            if (!dateFormat) {
+                dateFormat = MessageUtility.message("default.date.format")
             }
-           result = dateString.equals(Date.parse(dateFormat,dateString).format(dateFormat))?: false
-       } catch(Exception e) {
+            result = dateString.equals(Date.parse(dateFormat, dateString).format(dateFormat)) ?: false
+        } catch (Exception e) {
             result = false
-       }
-       return result
+        }
+
+        if (dateFormat.length() != dateString.length()) {
+            result = false
+        }
+        return result
     }
 
 
