@@ -11,9 +11,9 @@
  ********************************************************************************* */
 package com.sungardhe.banner.general.overall
 
+import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 import org.hibernate.annotations.Type
 import javax.persistence.*
-import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 
 // TODO move object to general common once this app has settled down
 /**
@@ -267,7 +267,7 @@ class MeetingTimeSearch {
             return delegate.replace("\n", "").replaceAll(/  */, " ")
         }
 
-        def stringKeys = ["courseReferenceNumber", "term","category", "building"]
+        def stringKeys = ["courseReferenceNumber", "term", "category", "building"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
         def query = """FROM  MeetingTimeSearch a  """
@@ -313,10 +313,10 @@ class MeetingTimeSearch {
             else if (booleanKeys.contains(param.key)) {
                 query += " a.${param.key} is ${param.value}   "
             }
-            else if ( param.key == "beginTime") {
+            else if (param.key == "beginTime") {
                 query += " nvl(a.beginTime,'0000') >= '${param.value}' "
             }
-              else if ( param.key == "endTime") {
+            else if (param.key == "endTime") {
                 query += " nvl(a.endTime,'0000') <= '${param.value}' "
             }
         }
@@ -326,5 +326,62 @@ class MeetingTimeSearch {
     }
 
 
+    def static parseQueryString(def meetingFilter, String prefix) {
+
+        def stringKeys = ["courseReferenceNumber", "term", "category", "building"]
+        def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+
+        def query = ""
+        def cnt = 0
+        meetingFilter.each { param ->
+            def grailsDomainClass = new DefaultGrailsDomainClass(MeetingTimeSearch)
+            def fields = grailsDomainClass.properties
+            def field = fields.find { it.name == param.key}
+            def fieldType = null
+            if (field?.type?.name) fieldType = field.type.name
+            else fieldType = "java.lang.String"
+            if (field?.oneToOne) fieldType = "java.lang.String"
+
+            if (cnt > 0) query += " and "
+            cnt += 1
+            if (stringKeys.contains(param.key)) {
+                if (param.value instanceof Collection) {
+                    def inClause = null
+                    if (fieldType == "java.lang.String") {
+                        param.value.each { val ->
+                            if (inClause) inClause += ",'" + val + "'"
+                            else inClause = "'" + val + "'"
+                        }
+                    }
+                    else {
+                        param.value.each { val ->
+                            if (inClause) inClause += "," + val
+                            else inClause = val
+                        }
+                    }
+                    if (field?.oneToOne) {
+                        query += " ${prefix}.${param.key}.code  in (${inClause}) "
+                    }
+                    else {
+                        query += " ${prefix}.${param.key} in (${inClause}) "
+                    }
+                }
+                else {
+                    query += " ${prefix}.${param.key}  = '${param.value}'  "
+                }
+            }
+            else if (booleanKeys.contains(param.key)) {
+                query += " ${prefix}.${param.key} is ${param.value}   "
+            }
+            else if (param.key == "beginTime") {
+                query += " nvl(${prefix}.beginTime,'0000') >= '${param.value}' "
+            }
+            else if (param.key == "endTime") {
+                query += " nvl(${prefix}.endTime,'0000') <= '${param.value}' "
+            }
+        }
+
+        return query
+    }
 
 }

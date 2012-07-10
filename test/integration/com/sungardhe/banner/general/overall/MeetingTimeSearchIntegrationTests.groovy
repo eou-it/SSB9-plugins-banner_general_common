@@ -45,7 +45,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testFetch() {
+    void testFetchWithParseQuery() {
         Map filterData = [courseReferenceNumber: "20199", term: "201410"]
         def meetings = MeetingTimeSearch.fetchSearch(filterData)
         assertEquals meetings.size(), 2
@@ -55,15 +55,15 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         def countMeetings = MeetingTimeSearch.countAll(filterData)
         assertEquals countMeetings, 2
 
-        filterData = [monday: true, wednesday: true, beginTime: "0800", endTime: '0900',  term: "201410"]
+        filterData = [monday: true, wednesday: true, beginTime: "0800", endTime: '0900', term: "201410"]
         meetings = MeetingTimeSearch.fetchSearch(filterData)
         meetings.each { meet ->
             assertTrue meet.monday
             assertTrue meet.wednesday
-            assertTrue meet.beginTime >=  "0800" && meet.endTime <= "0900"
+            assertTrue meet.beginTime >= "0800" && meet.endTime <= "0900"
         }
 
-        filterData = [monday: true, wednesday: true, friday:"not true", term: "201410"]
+        filterData = [monday: true, wednesday: true, friday: "not true", term: "201410"]
         meetings = MeetingTimeSearch.fetchSearch(filterData)
         meetings.each { meet ->
             assertTrue meet.monday
@@ -71,12 +71,12 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
             assertFalse meet.friday
         }
 
-        filterData = [tuesday: true, thursday: true, beginTime: "1000",  endTime: "1100", term: "201410"]
+        filterData = [tuesday: true, thursday: true, beginTime: "1000", endTime: "1100", term: "201410"]
         meetings = MeetingTimeSearch.fetchSearch(filterData)
         meetings.each { meet ->
             assertTrue meet.tuesday
             assertTrue meet.thursday
-            assertTrue meet.beginTime >=  "1000" && meet.endTime <= "1100"
+            assertTrue meet.beginTime >= "1000" && meet.endTime <= "1100"
         }
         filterData = [friday: true, term: "201410"]
         meetings = MeetingTimeSearch.fetchSearch(filterData)
@@ -90,6 +90,80 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         }
         filterData = [sunday: true, term: "201410"]
         meetings = MeetingTimeSearch.fetchSearch(filterData)
+        meetings.each { meet ->
+            assertTrue meet.sunday
+        }
+    }
+
+
+    void testFetchWithParseQueryString() {
+        String.metaClass.flattenString = {
+            return delegate.replace("\n", "").replaceAll(/  */, " ")
+        }
+        Map filterData = [courseReferenceNumber: "20199", term: "201410"]
+        def meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        def query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        def meetings = MeetingTimeSearch.findAll(query.flattenString())
+        assertEquals meetings.size(), 2
+        assertEquals meetings[0].category, "03"
+        assertEquals meetings[1].category, "04"
+
+        def countMeetings = MeetingTimeSearch.countAll(filterData)
+        assertEquals countMeetings, 2
+
+        filterData = [monday: true, wednesday: true, beginTime: "0800", endTime: '0900', term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        meetings.each { meet ->
+            assertTrue meet.monday
+            assertTrue meet.wednesday
+            assertTrue meet.beginTime >= "0800" && meet.endTime <= "0900"
+        }
+
+        filterData = [monday: true, wednesday: true, friday: "not true", term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        meetings.each { meet ->
+            assertTrue meet.monday
+            assertTrue meet.wednesday
+            assertFalse meet.friday
+        }
+
+        filterData = [tuesday: true, thursday: true, beginTime: "1000", endTime: "1100", term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        meetings.each { meet ->
+            assertTrue meet.tuesday
+            assertTrue meet.thursday
+            assertTrue meet.beginTime >= "1000" && meet.endTime <= "1100"
+        }
+        filterData = [friday: true, term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        meetings.each { meet ->
+            assertTrue meet.friday
+        }
+        filterData = [saturday: true, term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        meetings = MeetingTimeSearch.findAll("from MeetingTimeSearch sr where ${meetingQuery}")
+        meetings.each { meet ->
+            assertTrue meet.saturday
+        }
+        filterData = [sunday: true, term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString())
         meetings.each { meet ->
             assertTrue meet.sunday
         }
