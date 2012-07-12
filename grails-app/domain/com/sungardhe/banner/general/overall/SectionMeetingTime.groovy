@@ -432,12 +432,12 @@ class SectionMeetingTime implements Serializable {
         room(nullable: true, maxSize: 10)
         startDate(nullable: false,
                 validator: {val, obj ->
-                    if ((val != null) && (val > obj.endDate))
+                    if ((val != null && obj.endDate != null) && (val > obj.endDate))
                         return "invalid.start_greater_than_end_date"
                 })
         endDate(nullable: false,
                 validator: {val, obj ->
-                    if ((val != null) && (val < obj.startDate))
+                    if ((val != null && obj.startDate != null) && (val < obj.startDate))
                         return "invalid.end_less_than_start_date"
                 })
         category(nullable: true, maxSize: 2)
