@@ -11,7 +11,7 @@
  **********************************************************************************/
 
 
-import com.sungardhe.banner.configuration.ApplicationConfigurationUtils as ConfigFinder
+import net.hedtech.banner.configuration.ApplicationConfigurationUtils as ConfigFinder
 import grails.plugins.springsecurity.SecurityConfigType
 
 // ******************************************************************************
@@ -37,7 +37,7 @@ def locationAdder = ConfigFinder.&addLocation.curry(grails.config.locations)
 
 
 
-grails.project.groupId = "com.sungardhe" // used when deploying to a maven repo
+grails.project.groupId = "net.hedtech" // used when deploying to a maven repo
 
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -96,13 +96,13 @@ log4j = {
     }
 
     // Configure logging for other classes (e.g., in src/ or grails-app/utils/) here:
-    // info 'com.sungardhe.banner.representations'
-    // info 'com.sungardhe.banner.supplemental.SupplementalDataService'
-    off  'com.sungardhe.banner.security'
-    off  'com.sungardhe.banner.db'
-    off  'com.sungardhe.banner.student'
-    off  'com.sungardhe.banner.general.system.CollegeController'
-    off  'com.sungardhe.banner.general.system.CollegeService'
+    // info 'net.hedtech.banner.representations'
+    // info 'net.hedtech.banner.supplemental.SupplementalDataService'
+    off  'net.hedtech.banner.security'
+    off  'net.hedtech.banner.db'
+    off  'net.hedtech.banner.student'
+    off  'net.hedtech.banner.general.system.CollegeController'
+    off  'net.hedtech.banner.general.system.CollegeService'
 
     // Grails framework classes
     off  'org.codehaus.groovy.grails.web.servlet'        // controllers
@@ -123,7 +123,7 @@ log4j = {
     // Unfortunately, this configuration is not effective when 'mixing in' methods that perform logging.
     // Therefore, for controllers and services it is recommended that you enable logging using the controller
     // or service class name (see above 'class name' based configurations).  For example:
-    //     all  'com.sungardhe.banner.testing.FooController' // turns on all logging for the FooController
+    //     all  'net.hedtech.banner.testing.FooController' // turns on all logging for the FooController
     //
     off 'grails.app' // apply to all artefacts
     // off 'grails.app.<artefactType>.ClassName // where artefactType is in:
@@ -134,7 +134,7 @@ log4j = {
     //  controller // Not effective with mixins -- see comment above
     //  domain     - For domain entities
 
-    off 'com.sungardhe.banner.student.system'
+    off 'net.hedtech.banner.student.system'
 }
 
-seedDataTarget =  ['bgc': ['/src/groovy/com/sungardhe/banner/seeddata/Data/banner_general_common.xml']]
+seedDataTarget =  ['bgc': ['/src/groovy/net/hedtech/banner/seeddata/Data/banner_general_common.xml']]

@@ -19,7 +19,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.sungardhe</groupId>
+  <groupId>net.hedtech</groupId>
   <artifactId>banner-general-common</artifactId>
   <version>1.0.10</version>
   <packaging>zip</packaging>
@@ -38,7 +38,7 @@
   </distributionManagement>
    <dependencies>
 <!--    <dependency>
-         <groupId>com.sungardhe</groupId>
+         <groupId>net.hedtech</groupId>
          <artifactId>sghe-zk-core</artifactId>
          <type>zip</type>
          <version>0.1.0</version>

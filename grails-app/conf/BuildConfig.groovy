@@ -19,6 +19,7 @@ grails.plugin.location.'banner-codenarc' = "../banner_codenarc.git"
 grails.plugin.location.'banner-general-validation-common' = "../banner_general_validation_common.git"
 grails.plugin.location.'banner-db-main' = "../banner_db_main.git"
 grails.plugin.location.'banner-seeddata-catalog' = "../banner_seeddata_catalog.git"
+grails.plugin.location.'i18n-core' = "../i18n_core.git"
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies

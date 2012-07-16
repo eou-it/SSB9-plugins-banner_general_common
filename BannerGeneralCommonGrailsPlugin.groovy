@@ -31,7 +31,7 @@ class BannerGeneralCommonGrailsPlugin {
     // Note: the groupId 'should' be used when deploying this plugin via the 'grails maven-deploy --repository=snapshots' command,
     // however it is not being picked up.  Consequently, a pom.xml file is added to the root directory with the correct groupId
     // and will be removed when the maven-publisher plugin correctly sets the groupId based on the following field.
-    String groupId = "com.sungardhe"
+    String groupId = "net.hedtech"
 
     // Note: Using '0.1-SNAPSHOT' (to put a timestamp on the artifact) is not used due to GRAILS-5624 see: http://jira.codehaus.org/browse/GRAILS-5624
     // Until this is resolved, Grails application's that use a SNAPSHOT plugin do not check for a newer plugin release, so that the
