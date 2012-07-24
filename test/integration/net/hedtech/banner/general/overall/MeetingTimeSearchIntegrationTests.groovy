@@ -167,6 +167,16 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         meetings.each { meet ->
             assertTrue meet.sunday
         }
+
+        filterData = [ termCourseReferenceNumber:  ["20141020001", "20141020002"] , term: "201410"]
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        assertNotNull meetingQuery
+        query = "from MeetingTimeSearch sr where ${meetingQuery}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        meetings.each { meet ->
+            assertTrue meet.term == "201410" && (meet.courseReferenceNumber == "20001" ||
+                       meet.courseReferenceNumber == '20002')
+        }
     }
 
     /**

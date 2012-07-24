@@ -199,6 +199,9 @@ class MeetingTimeSearch {
     @Column(name = "SSRMEET_SCHD_CODE")
     String scheduleType
 
+    @Column(name="ssrmeet_term_crn")
+    String termCourseReferenceNumber
+
 
     public String toString() {
         """MeetingTimeSearch[
@@ -228,7 +231,8 @@ class MeetingTimeSearch {
                    meetNumber=$meetNumber,
                    creditHoursSession=$creditHourSession   ,
                    dayOfWeek=$dayOfWeek,
-                   scheduleType=$scheduleType
+                   scheduleType=$scheduleType ,
+                   termCourseReferenceNumber=$termCourseReferenceNumber
                    ]"""
     }
 
@@ -267,7 +271,7 @@ class MeetingTimeSearch {
             return delegate.replace("\n", "").replaceAll(/  */, " ")
         }
 
-        def stringKeys = ["courseReferenceNumber", "term", "category", "building"]
+        def stringKeys = ["courseReferenceNumber", "term", "category", "building","termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
         def query = """FROM  MeetingTimeSearch a  """
@@ -328,7 +332,7 @@ class MeetingTimeSearch {
 
     def static parseQueryString(def meetingFilter, String prefix) {
 
-        def stringKeys = ["courseReferenceNumber", "term", "category", "building"]
+        def stringKeys = ["courseReferenceNumber", "term", "category", "building","termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
         def query = ""

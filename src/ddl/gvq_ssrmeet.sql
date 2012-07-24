@@ -42,7 +42,8 @@ ssrmeet_schd_code   ,
 ssrmeet_mtyp_code  ,
 ssrmeet_credit_hr_sess ,
 ssrmeet_meet_no,
-ssrmeet_hrs_week)
+ssrmeet_hrs_week,
+ssrmeet_term_crn)
 AS
   SELECT ssrmeet.ssrmeet_surrogate_id,
     ssrmeet.ssrmeet_version ,
@@ -76,7 +77,8 @@ AS
     SSRMEET_MTYP_CODE  ,
     SSRMEET_CREDIT_HR_SESS     ,
     SSRMEET_MEET_NO,
-    SSRMEET_HRS_WEEK
+    SSRMEET_HRS_WEEK  ,
+    ssrmeet_term_code || ssrmeet_crn
   FROM     SSRMEET
   WITH READ ONLY
    ;
