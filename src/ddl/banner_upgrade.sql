@@ -18,7 +18,7 @@ REM Main common project schema maintenance script.
 REM AUDIT TRAIL END
 REM
 set scan on echo on termout on;
-REM spool horizon_upgrade.lis
+spool horizon_upgrade_bgc.lis
 connect bansecr/&&bansecr_password
  insert into gurucls ( gurucls_userid, gurucls_class_code, gurucls_activity_date,
                       gurucls_user_id)
