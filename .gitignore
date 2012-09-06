@@ -18,5 +18,5 @@ out/
 grails-*.zip
 *.sha1
 plugin.xml
-src/ddl/horizon_upgrade.lis
+src/ddl/horizon_upgrade_bgc.lis
 
