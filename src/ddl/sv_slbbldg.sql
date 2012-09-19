@@ -49,5 +49,5 @@ CREATE OR REPLACE FORCE VIEW sv_slbbldg AS SELECT
       slbbldg_data_origin,
       slbbldg_activity_date,
       ROWID slbbldg_v_rowid
-  FROM saturn.slbbldg;
+  FROM  slbbldg;
 CREATE OR REPLACE PUBLIC SYNONYM sv_slbbldg FOR sv_slbbldg;

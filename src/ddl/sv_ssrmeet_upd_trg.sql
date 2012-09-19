@@ -19,7 +19,7 @@ REM AUDIT TRAIL END
 REM
 create or replace
 TRIGGER ssrmeet_view_update_trg
-  INSTEAD OF UPDATE ON baninst1.sv_ssrmeet
+  INSTEAD OF UPDATE ON sv_ssrmeet
 BEGIN
   gfksjpa.setId(:OLD.ssrmeet_surrogate_id);
   gfksjpa.setVersion(:NEW.ssrmeet_version);

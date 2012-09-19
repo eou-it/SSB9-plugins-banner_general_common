@@ -19,7 +19,7 @@ REM AUDIT TRAIL END
 REM
 create or replace
 TRIGGER ssrmeet_view_create_trg
-  INSTEAD OF INSERT ON baninst1.sv_ssrmeet
+  INSTEAD OF INSERT ON sv_ssrmeet
 DECLARE
   p_rowid_v VARCHAR2(100);
 BEGIN

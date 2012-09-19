@@ -27,5 +27,5 @@ CREATE OR REPLACE FORCE VIEW gv_gorintg AS SELECT
       gorintg_data_origin,
       gorintg_activity_date,
       ROWID gorintg_v_rowid
-  FROM general.gorintg;
+  FROM gorintg;
 CREATE OR REPLACE PUBLIC SYNONYM gv_gorintg FOR gv_gorintg;

@@ -51,5 +51,5 @@ CREATE OR REPLACE FORCE VIEW sv_ssrmeet AS SELECT
       ssrmeet_data_origin,
       ssrmeet_activity_date,
       ROWID ssrmeet_v_rowid
-  FROM saturn.ssrmeet;
-CREATE OR REPLACE PUBLIC SYNONYM sv_ssrmeet FOR baninst1.sv_ssrmeet;
+  FROM  ssrmeet;
+CREATE OR REPLACE PUBLIC SYNONYM sv_ssrmeet FOR sv_ssrmeet;

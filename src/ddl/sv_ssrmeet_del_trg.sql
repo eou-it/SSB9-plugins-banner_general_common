@@ -18,7 +18,7 @@ REM Generated trigger for Horizon API support
 REM AUDIT TRAIL END
 REM
 CREATE OR REPLACE TRIGGER ssrmeet_view_delete_trg
-  INSTEAD OF DELETE ON baninst1.sv_ssrmeet
+  INSTEAD OF DELETE ON sv_ssrmeet
 BEGIN
   gb_classtimes.p_delete
     (p_rowid => :OLD.ssrmeet_v_rowid);

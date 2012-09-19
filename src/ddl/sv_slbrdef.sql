@@ -50,5 +50,5 @@ CREATE OR REPLACE FORCE VIEW sv_slbrdef AS SELECT
       slbrdef_data_origin,
       slbrdef_activity_date,
       ROWID slbrdef_v_rowid
-  FROM saturn.slbrdef;
+  FROM  slbrdef;
 CREATE OR REPLACE PUBLIC SYNONYM sv_slbrdef FOR sv_slbrdef;
