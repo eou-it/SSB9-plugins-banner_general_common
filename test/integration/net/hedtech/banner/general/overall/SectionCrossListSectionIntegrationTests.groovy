@@ -43,6 +43,14 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+     void testFetchByTermAndCourseReferenceNumber() {
+        def sectionCrossListSection = newSectionCrossListSection()
+        sectionCrossListSection.save(flush: true, failOnError: true)
+
+        def sections = SectionCrossListSection.fetchByTermAndCourseReferenceNumber("201410", sectionCrossListSection.courseReferenceNumber)
+        assertTrue sections.size() == 1
+    }
+
     void testUpdateSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
         sectionCrossListSection.save(flush: true, failOnError: true)
@@ -133,7 +141,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
 
     private def newSectionCrossListSection() {
-        def term = Term.findWhere(code: "201410")
+        def term = Term.findByCode ( "201410")
 
         def sectionCrossListSection = new SectionCrossListSection(
                 xlstGroup: "TT",
@@ -143,10 +151,5 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         return sectionCrossListSection
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sectioncrosslistsection_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
+
 }
