@@ -23,8 +23,6 @@ import javax.persistence.*
 /**
  * Location/Building Description Table
  */
-/*PROTECTED REGION ID(housinglocationbuildingdescription_namedqueries) ENABLED START*/
-/*PROTECTED REGION END*/
 @Entity
 @Table( name = "SV_SLBBLDG" )
 @NamedQueries( value = [
@@ -34,7 +32,8 @@ import javax.persistence.*
 	  	                order by  a.building """),
 @NamedQuery( name = "HousingLocationBuildingDescription.fetchValidateBuilding",
              query = """FROM  HousingLocationBuildingDescription a
-                        WHERE a.building = :building """ )
+                        WHERE a.building = :building
+                        order by  a.building """ )
 ])
 @DatabaseModifiesState 
 class HousingLocationBuildingDescription implements Serializable {
@@ -393,39 +392,15 @@ class HousingLocationBuildingDescription implements Serializable {
 		college(nullable:true)
 		department(nullable:true)
 		partition(nullable:true)
-		/**
-	     * Please put all the custom constraints in this protected section to protect the code
-	     * from being overwritten on re-generation
-	     */
-	    /*PROTECTED REGION ID(housinglocationbuildingdescription_custom_constraints) ENABLED START*/
-	    
-	    /*PROTECTED REGION END*/
-    }
+	}
     
-    /*PROTECTED REGION ID(housinglocationbuildingdescription_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = [ 'building' ]
-    /*PROTECTED REGION END*/        
-    /**
-     * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housinglocationbuildingdescription_custom_attributes) ENABLED START*/
-    
-    /*PROTECTED REGION END*/
-        
-    /**
-     * Please put all the custom methods/code in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housinglocationbuildingdescription_custom_methods) ENABLED START*/
-
 
     public static Object fetchBySomeHousingLocationBuildingDescriptionBuilding() {
-        def returnObj = [list: HousingLocationBuildingDescription.list().sort {it.building}]
+        def returnObj = [list: HousingLocationBuildingDescription.list(sort: "building.code", order: "asc")]
         return returnObj
     }
-
 
     public static Object fetchBySomeHousingLocationBuildingDescriptionBuilding(Map params) {
         def building = HousingLocationBuildingDescription.withSession {session ->
@@ -456,5 +431,4 @@ class HousingLocationBuildingDescription implements Serializable {
 
         return validBuilding[0]
     }
-    /*PROTECTED REGION END*/
 }
