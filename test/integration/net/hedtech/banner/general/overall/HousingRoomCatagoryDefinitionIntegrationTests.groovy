@@ -54,7 +54,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	/*PROTECTED REGION END*/
 
 	protected void setUp() {
-		formContext = ['SLABLDG', 'SLQBCAT'] // Since we are not testing a controller, we need to explicitly set this
+		formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
 		super.setUp()
 		initializeTestDataForReferences()
 	}

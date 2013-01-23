@@ -91,7 +91,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
 
 
     protected void setUp() {
-        formContext = ['SLARDEF'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
     }

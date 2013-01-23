@@ -123,7 +123,7 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
 
 
     protected void setUp() {
-        formContext = ['AUAMAIL', 'SAAADMS', 'FUAMAIL', 'GUIMAIL', 'SAADCRV', 'RUAMAIL', 'SUAMAIL'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
     }

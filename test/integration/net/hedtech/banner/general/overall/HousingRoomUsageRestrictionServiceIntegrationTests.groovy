@@ -98,7 +98,7 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 	/*PROTECTED REGION END*/
 
 	protected void setUp() {
-		formContext = ['SLARDEF']
+		formContext = ['SSASECT']
 		super.setUp()
         initializeTestDataForReferences()
 	}

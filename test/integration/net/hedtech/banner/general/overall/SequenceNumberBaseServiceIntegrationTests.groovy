@@ -59,7 +59,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
     protected void setUp() {
-        formContext = ['GEAFUNC']
+        formContext = ['SLQEVNT']
         super.setUp()
     }
 

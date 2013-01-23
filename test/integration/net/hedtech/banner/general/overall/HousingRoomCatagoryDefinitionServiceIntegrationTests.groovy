@@ -66,7 +66,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 	/*PROTECTED REGION END*/
 
 	protected void setUp() {
-		formContext = ['SLABLDG', 'SLQBCAT']
+		formContext = ['SSASECT']
 		super.setUp()
         initializeTestDataForReferences()
 	}
