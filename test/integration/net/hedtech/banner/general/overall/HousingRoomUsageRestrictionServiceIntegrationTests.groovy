@@ -10,10 +10,6 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.21
- Generated: Fri Jul 01 19:13:49 IST 2011
- */
 package net.hedtech.banner.general.overall
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.general.system.Building
@@ -24,7 +20,6 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 
   def housingRoomUsageRestrictionService
 
-	/*PROTECTED REGION ID(housingroomusagerestriction_service_integration_test_data) ENABLED START*/
 	//Test data for creating new domain instance
 	//Valid test data (For success tests)
     def i_success_building
@@ -95,7 +90,6 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 	def u_success_keyBlockMap = [:]
 	def u_failure_keyBlockMap = [:]
 
-	/*PROTECTED REGION END*/
 
 	protected void setUp() {
 		formContext = ['SSASECT']
@@ -120,7 +114,6 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
     	u_failure_building = Building.findWhere(code:"MENDAL")
 
 		//Test data for references for custom tests
-		/*PROTECTED REGION END*/
 	}
 
 	protected void tearDown() {
@@ -219,30 +212,4 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 		return housingRoomUsageRestriction
 	}
 
-	private def newInvalidForCreateHousingRoomUsageRestriction() {
-		def housingRoomUsageRestriction = new HousingRoomUsageRestriction(
-			roomNumber: i_failure_roomNumber,
-			startDate: i_failure_startDate,
-			endDate: i_failure_endDate,
-			beginTime: i_failure_beginTime,
-			endTime: i_failure_endTime,
-			sunday: i_failure_sunday,
-			monday: i_failure_monday,
-			tuesday: i_failure_tuesday,
-			wednesday: i_failure_wednesday,
-			thursday: i_failure_thursday,
-			friday: i_failure_friday,
-			saturday: i_failure_saturday,
-			building: i_failure_building
-		)
-		return housingRoomUsageRestriction
-	}
-
-	/**
-	 * Please put all the custom service tests in this protected section to protect the code
-     * from being overwritten on re-generation
-	*/
-	/*PROTECTED REGION ID(housingroomusagerestriction_custom_service_integration_test_methods) ENABLED START*/
-
-	/*PROTECTED REGION END*/
 }

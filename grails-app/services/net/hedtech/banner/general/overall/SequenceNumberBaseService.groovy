@@ -10,31 +10,14 @@
  Education in the U.S.A. and/or other regions and/or countries.
  **********************************************************************************/
 
-/**
- Banner Automator Version: 1.24
- Generated: Tue Aug 09 14:09:55 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.service.ServiceBase
-
-// NOTE:
-// This service is injected with create, update, and delete methods that may throw runtime exceptions (listed below).
-// These exceptions must be caught and handled by the controller using this service.
-//
-// update and delete may throw net.hedtech.banner.exceptions.NotFoundException if the entity cannot be found in the database
-// update and delete may throw org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException a runtime exception if an optimistic lock failure occurs
-// create, update, and delete may throw grails.validation.ValidationException a runtime exception when there is a validation failure
 
 class SequenceNumberBaseService extends ServiceBase {
 
     boolean transactional = true
 
-    /**
-     * Please put all the custom methods in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sequencenumberbase_custom_service_methods) ENABLED START*/
     /**
      * Function to get next sequence numbers(used for ids) for multiple domains
      * from SequenceNumberBase(SOBSEQN).
@@ -71,13 +54,4 @@ class SequenceNumberBaseService extends ServiceBase {
         service.createOrUpdate(map)
     }
 
-    /**
-     *  Delete  domain
-     */
-    private void deleteDomain(domainEntry, service, Map keyBlockMap) {
-        domainEntry.each { comment ->
-            service.delete([keyBlock: keyBlockMap, domainModel: comment])
-        }
-    }
-    /*PROTECTED REGION END*/
 }

@@ -9,10 +9,6 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
  ********************************************************************************* */
-/**
- Banner Automator Version: 1.21
- Generated: Fri Jul 01 19:13:33 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -25,7 +21,6 @@ import org.junit.Ignore
 
 class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(housingroomattributesdefinition_domain_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_building
@@ -213,21 +208,4 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
-    private def newInvalidForCreateHousingRoomAttributesDefinition() {
-        def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
-                roomNumber: i_failure_roomNumber,
-                termEffective: i_failure_termEffective,
-                mustMatch: i_failure_mustMatch,
-                building: i_failure_building,
-                buildingAndRoomAttribute: i_failure_buildingAndRoomAttribute
-        )
-        return housingRoomAttributesDefinition
-    }
-
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomattributesdefinition_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

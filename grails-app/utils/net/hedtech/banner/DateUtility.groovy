@@ -10,10 +10,6 @@
  ****************************************************************************** */
 package net.hedtech.banner
 
-import net.hedtech.banner.exceptions.ApplicationException
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
-import org.springframework.context.MessageSource
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import java.text.SimpleDateFormat
 
 /**

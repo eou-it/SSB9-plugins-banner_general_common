@@ -9,11 +9,6 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
  Education in the U.S.A. and/or other regions and/or countries.
  ********************************************************************************* */
-
-/**
- Banner Automator Version: 1.24
- Generated: Tue Aug 09 14:09:56 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -26,7 +21,6 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
     def sequenceNumberBaseService
 
-    /*PROTECTED REGION ID(sequencenumberbase_service_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_function = "TTTTT"
@@ -55,28 +49,10 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     def u_success_keyBlockMap = [:]
     def u_failure_keyBlockMap = [:]
 
-    /*PROTECTED REGION END*/
-
 
     protected void setUp() {
-        formContext = ['SLQEVNT']
+        formContext = ['SCACRSE']
         super.setUp()
-    }
-
-    //This method is used to initialize test data for references.
-    //A method is required to execute database calls as it requires a active transaction
-    void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(sequencenumberbase_domain_service_integration_test_data_initialization) ENABLED START*/
-        //Valid test data (For success tests)
-
-        //Invalid test data (For failure tests)
-
-        //Valid test data (For success tests)
-
-        //Valid test data (For failure tests)
-
-        //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 
@@ -349,6 +325,4 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //F00002
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
     }
-
-    /*PROTECTED REGION END*/
 }

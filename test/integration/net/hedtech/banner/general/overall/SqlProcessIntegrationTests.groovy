@@ -10,24 +10,18 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
  Education in the U.S.A. and/or other regions and/or countries.
  ****************************************************************************** */
-/**
- Banner Automator Version: 1.29
- Generated: Sun May 20 17:49:13 IST 2012
- */
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.general.system.EntriesForSql
-import net.hedtech.banner.general.system.EntriesForSqlProcesss
-import net.hedtech.banner.testing.BaseIntegrationTestCase
 import grails.validation.ValidationException
 import groovy.sql.Sql
 import java.text.SimpleDateFormat
+import net.hedtech.banner.general.system.EntriesForSql
+import net.hedtech.banner.general.system.EntriesForSqlProcesss
+import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
-import net.hedtech.banner.general.overall.SqlProcess
 
 class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(sqlprocess_domain_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_entriesForSqlProcesss
@@ -366,10 +360,4 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
         return sqlProcess
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sqlprocess_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

@@ -9,10 +9,6 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
  ********************************************************************************* */
-/**
- Banner Automator Version: 1.21
- Generated: Fri Jul 01 19:13:33 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -23,7 +19,6 @@ import net.hedtech.banner.general.system.Building
 
 class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(housingroomusagerestriction_domain_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_building
@@ -87,7 +82,6 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     def u_failure_thursday = "#"
     def u_failure_friday = "#"
     def u_failure_saturday = "#"
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
@@ -113,7 +107,6 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
         u_failure_building = Building.findWhere(code: "MENDAL")
 
         //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 
@@ -183,7 +176,6 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
         assertEquals u_success_thursday, housingRoomUsageRestriction.thursday
         assertEquals u_success_friday, housingRoomUsageRestriction.friday
         assertEquals u_success_saturday, housingRoomUsageRestriction.saturday
-
 
         housingRoomUsageRestriction.building = u_success_building
     }
@@ -323,29 +315,4 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-    private def newInvalidForCreateHousingRoomUsageRestriction() {
-        def housingRoomUsageRestriction = new HousingRoomUsageRestriction(
-                roomNumber: i_failure_roomNumber,
-                startDate: i_failure_startDate,
-                endDate: i_failure_endDate,
-                beginTime: i_failure_beginTime,
-                endTime: i_failure_endTime,
-                sunday: i_failure_sunday,
-                monday: i_failure_monday,
-                tuesday: i_failure_tuesday,
-                wednesday: i_failure_wednesday,
-                thursday: i_failure_thursday,
-                friday: i_failure_friday,
-                saturday: i_failure_saturday,
-                building: i_failure_building
-        )
-        return housingRoomUsageRestriction
-    }
-
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomusagerestriction_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

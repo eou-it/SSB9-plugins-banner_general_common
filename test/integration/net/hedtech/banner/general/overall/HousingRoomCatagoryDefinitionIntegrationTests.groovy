@@ -10,24 +10,17 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
  Education in the U.S.A. and/or other regions and/or countries.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.29
- Generated: Tue Nov 22 15:43:35 IST 2011
- */
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.testing.BaseIntegrationTestCase
-import net.hedtech.banner.exceptions.ApplicationException
-import groovy.sql.Sql
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
-import net.hedtech.banner.general.system.Building
 import grails.validation.ValidationException
+import groovy.sql.Sql
 import java.text.SimpleDateFormat
-
+import net.hedtech.banner.general.system.Building
+import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestCase {
 
-	/*PROTECTED REGION ID(housingroomcatagorydefinition_domain_integration_test_data) ENABLED START*/
 	//Test data for creating new domain instance
 	//Valid test data (For success tests)
 	def i_success_building
@@ -62,7 +55,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	//This method is used to initialize test data for references.
 	//A method is required to execute database calls as it requires a active transaction
 	void initializeTestDataForReferences() {
-		/*PROTECTED REGION ID(housingroomcatagorydefinition_domain_integration_test_data_initialization) ENABLED START*/
 		//Valid test data (For success tests)
     	i_success_building = new Building(code : "AAAA", description: "Building A description")
         i_success_building.save(failOnError: true, flush: true)
@@ -79,8 +71,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
     	u_failure_building = new Building(code : "DDDD", description: "Building D description")
         u_failure_building.save(failOnError: true, flush: true)
 
-		//Test data for references for custom tests
-		/*PROTECTED REGION END*/
 	}
 
 	protected void tearDown() {
@@ -158,8 +148,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
     	// test date values -
     	assertEquals date.format(today), date.format(housingRoomCatagoryDefinition.lastModified)
     	assertEquals hour.format(today), hour.format(housingRoomCatagoryDefinition.lastModified)
-
-
     }
 
 
@@ -227,11 +215,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 		return housingRoomCatagoryDefinition
 	}
 
-   /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomcatagorydefinition_custom_integration_test_methods) ENABLED START*/
 
    void testFetchByCodeOrDescription() {
        //test to verify all records are returned when filter is not provided
@@ -249,5 +232,4 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
        assertFalse result.get("list").size() > 0
    }
 
-    /*PROTECTED REGION END*/
 }

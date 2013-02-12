@@ -9,10 +9,6 @@
  Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
  Education in the U.S.A. and/or other regions and/or countries.
  ********************************************************************************* */
-/**
- Banner Automator Version: 1.24
- Generated: Tue Aug 09 14:09:48 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -23,7 +19,6 @@ import grails.validation.ValidationException
 
 class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(sequencenumberbase_domain_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
 
@@ -47,29 +42,11 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_function = "TTTTT"
     def u_failure_sequenceNumberPrefix = "##"
     def u_failure_maximumSequenceNumber = 1
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
-        formContext = ['SLQEVNT'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
-        initializeTestDataForReferences()
-    }
-
-    //This method is used to initialize test data for references.
-    //A method is required to execute database calls as it requires a active transaction
-    void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(sequencenumberbase_domain_integration_test_data_initialization) ENABLED START*/
-        //Valid test data (For success tests)
-
-        //Invalid test data (For failure tests)
-
-        //Valid test data (For success tests)
-
-        //Valid test data (For failure tests)
-
-        //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 
@@ -232,10 +209,4 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
         return sequenceNumberBase
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sequencenumberbase_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }
