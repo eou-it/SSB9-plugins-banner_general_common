@@ -58,48 +58,46 @@ class SectionMeetingTimeView {
      * The term normally has a many to one with stvterm, but the term is filled with the word
      * EVENT if this entity is from the general Event module
      */
-
-
     @Column(name = "SSRMEET_TERM_CODE")
     String term
 
-/**
- * This field is not displayed on the form (page 0).  It defines the day number as defined on the STVDAYS Validation Form
- * Day number does not appear to be saved to the table.  A local form variable is used to associate a numeric value to
- * each of the day codes.  This numeric value of 1..7 is then used to make sure that the selected meeting days fall between
- * the start and end dates.
- */
+    /**
+     * This field is not displayed on the form (page 0).  It defines the day number as defined on the STVDAYS Validation Form
+     * Day number does not appear to be saved to the table.  A local form variable is used to associate a numeric value to
+     * each of the day codes.  This numeric value of 1..7 is then used to make sure that the selected meeting days fall between
+     * the start and end dates.
+     */
     @Column(name = "SSRMEET_DAY_NUMBER")
     Integer dayNumber
 
-/**
- * This field defines the Begin Time of the course section being scheduled.  It is a required field and is in the format HHMM using military times.  The SSRSECT (Schedule of Classes) converts this time to standard times.
- */
+    /**
+     * This field defines the Begin Time of the course section being scheduled.  It is a required field and is in the format HHMM using military times.  The SSRSECT (Schedule of Classes) converts this time to standard times.
+     */
     @Column(name = "SSrMEET_BEGIN_TIME")
     String beginTime
 
-/**
- * This field defines the End Time of the course section being scheduled.  It is a required field and is in the format HHMM using military times.  The SSRSECT (Schedule of Classes) converts this time to standard times.
- */
+    /**
+     * This field defines the End Time of the course section being scheduled.  It is a required field and is in the format HHMM using military times.  The SSRSECT (Schedule of Classes) converts this time to standard times.
+     */
     @Column(name = "SSRMEET_END_TIME")
     String endTime
 
-/**
- * This field defines the Room where the course section will be scheduled.  It is not required when scheduling course section meeting times.  It is required when scheduling a course section meeting building.
- */
+    /**
+     * This field defines the Room where the course section will be scheduled.  It is not required when scheduling course section meeting times.  It is required when scheduling a course section meeting building.
+     */
     @Column(name = "SSRMEET_ROOM_CODE")
     String room
 
-/**
- * Section Meeting Start Date.
- */
+    /**
+     * Section Meeting Start Date.
+     */
     @Column(name = "SSRMEET_START_DATE")
     @Temporal(TemporalType.DATE)
     Date startDate
 
-/**
- * Section End Date.
- */
+    /**
+     * Section End Date.
+     */
     @Column(name = "SSRMEET_END_DATE")
     @Temporal(TemporalType.DATE)
     Date endDate
@@ -107,72 +105,81 @@ class SectionMeetingTimeView {
     /**
      * Foreign Key : FK1_SSRMEET_INV_STVBLDG_CODE
      */
-
     @Column(name = "SSRMEET_BLDG_CODE")
     String building
 
-/**
- *  Foreign Key : FKV_SSRMEET_INV_GTVFUNC_CODEection End Date.
- */
-
+    /**
+     *  Foreign Key : FKV_SSRMEET_INV_GTVFUNC_CODEection End Date.
+     */
     @Column(name = "SSRMEET_FUNC_CODE")
     String function
-/**
- * Section Meeting Time Sunday Indicator.
- */
+
+    /**
+     * USER ID: User who inserted or last update the data
+     */
+    @Column(name = "SSRMEET_USER_ID", length = 30)
+    String lastModifiedBy
+
+    /**
+     * This field specifies the most current date record was created or updated.
+     */
+    @Column(name = "SSRMEET_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date lastModified
+
+    /**
+     * Section Meeting Time Sunday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_SUN_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean sunday
 
-/**
- * Section Meeting Time Monday Indicator.
- */
+    /**
+     * Section Meeting Time Monday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_MON_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean monday
 
-/**
- * Section Meeting Time Tuesday Indicator.
- */
-
+    /**
+     * Section Meeting Time Tuesday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_TUE_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean tuesday
-/**
- * Section Meeting Time Wednesday Indicator.
- */
 
+    /**
+     * Section Meeting Time Wednesday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_WED_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean wednesday
 
-/**
- * Section Meeting Time Thrusday Indicator.
- */
-
+    /**
+     * Section Meeting Time Thrusday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_THU_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean thursday
 
-/**
- * Section Meeting Time Friday Indicator.
- */
-
+    /**
+     * Section Meeting Time Friday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_FRI_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean friday
 
-/**
- * Section Meeting Time Saturday Indicator.
- */
-
+    /**
+     * Section Meeting Time Saturday Indicator.
+     */
     @Formula(value = "decode(nvl(SSRMEET_SAT_DAY,'N'),'N','N','Y')")
     @Type(type = "yes_no")
     Boolean saturday
 
-/**
- * Section Time Conflict Override Indicator.
- */
+
+    /**
+     * Section Time Conflict Override Indicator.
+     */
     @Column(name = "SSRMEET_OVER_RIDE")
     String override
 
@@ -217,16 +224,19 @@ class SectionMeetingTimeView {
                    courseReferenceNumber=$courseReferenceNumber,
                    xlstGroup=$xlstGroup,
                    function=$function,
+                   lastModifiedBy=$lastModifiedBy,
+                   lastModified=$lastModified,
                    dayNumber=$dayNumber,
                    override=$override,
                    partOfTerm=$partOfTerm
                    ]"""
     }
+
+
     /**
      * This fetchBy is used to retrieve all meeting times for a given term and crn.
      * A NamedQuery is required because there are multiple fields in the order by.
      */
-
     public static List fetchByTermAndCourseReferenceNumber(String term,
                                                            String courseReferenceNumber) {
         def sectionMeetingTimes = []
@@ -237,10 +247,10 @@ class SectionMeetingTimeView {
         return sectionMeetingTimes
     }
 
+
     /**
      * Query finder for advanced search SSAMATX
      */
-
     def static countAll(filterData) {
         finderByAll().count(filterData)
     }
