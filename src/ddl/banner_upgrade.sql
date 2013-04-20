@@ -37,4 +37,10 @@ connect baninst1/&&baninst1_password
 start gendbpr_bgc
 connect baninst1/&&baninst1_password
 start studbpr_bgc
+REM
+REM Recompile invalid objects before doing seed data
+REM
+conn sys/u_pick_it as sysdba
+execute utl_recomp.recomp_parallel();
+start showinv
 spool off;
