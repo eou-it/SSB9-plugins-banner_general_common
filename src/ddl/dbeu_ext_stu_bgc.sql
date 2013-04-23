@@ -28,3 +28,7 @@ execute dbeu_util.extend_table('SATURN','SSRMEET','S',TRUE);
 execute dbeu_util.extend_table('SATURN','SSRXLST','S',FALSE);
 execute dbeu_util.extend_table('SATURN','SOBSEQN','S',FALSE);
 execute dbeu_util.extend_table('SATURN','SLRBCAT','S',FALSE);
+
+execute dbeu_util.extend_table('SATURN','SOBSBGI','S',FALSE);
+execute dbeu_util.extend_table('SATURN','SORBCMT','S',FALSE);
+execute dbeu_util.extend_table('SATURN','SORBCNT','S',FALSE);
