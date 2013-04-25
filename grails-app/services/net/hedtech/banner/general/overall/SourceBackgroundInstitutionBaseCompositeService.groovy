@@ -42,35 +42,12 @@ class SourceBackgroundInstitutionBaseCompositeService {
 
 
     /**
-     *  Delete  domain
+     *  Delete domain
      */
     private void deleteDomain(sourceAndBackgroundInstitution, domainClass, service) {
-        def records = domainClass.findAllBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution)
+        def records = domainClass.findAllWhere(sourceAndBackgroundInstitution: sourceAndBackgroundInstitution)
         records.each {
             service.delete([domainModel: it])
         }
     }
-
-//    private def deleteBase(SourceBackgroundInstitutionBase domain) {
-//        def records = SourceBackgroundInstitutionBase.findAllBySourceAndBackgroundInstitution(domain.sourceAndBackgroundInstitution)
-//        records.each {
-//            sourceBackgroundInstitutionBaseService.delete([domainModel: it])
-//        }
-//    }
-//
-//
-//    private def deleteComments(SourceBackgroundInstitutionBase domain) {
-//        def records = SourceBackgroundInstitutionComment.findAllBySourceAndBackgroundInstitution(domain.sourceAndBackgroundInstitution)
-//        records.each {
-//            sourceBackgroundInstitutionCommentService.delete([domainModel: it])
-//        }
-//    }
-//
-//
-//    private def deleteContacts(SourceBackgroundInstitutionBase domain) {
-//        def records = SourceBackgroundInstitutionContactPerson.findAllBySourceAndBackgroundInstitution(domain.sourceAndBackgroundInstitution)
-//        records.each {
-//            sourceBackgroundInstitutionContactPersonService.delete([domainModel: it])
-//        }
-//    }
 }

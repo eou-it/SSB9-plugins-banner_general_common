@@ -51,6 +51,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
         }
     }
 
+
     private def doUpdate(sourceBackgroundInstitutionBase) {
         //Update the entity
         sourceBackgroundInstitutionBase.streetLine1 = "1234567890UPDATE1"
@@ -166,15 +167,15 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
                 ['city', 'sourceAndBackgroundInstitution']
         assertNoErrorsFor sourceBackgroundInstitutionBase,
                 [
-                'streetLine1',
-                'streetLine2',
-                'streetLine3',
-                'zip',
-                'houseNumber',
-                'streetLine4',
-                'state',
-                'county',
-                'nation'
+                        'streetLine1',
+                        'streetLine2',
+                        'streetLine3',
+                        'zip',
+                        'houseNumber',
+                        'streetLine4',
+                        'state',
+                        'county',
+                        'nation'
                 ]
     }
 

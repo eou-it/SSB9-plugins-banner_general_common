@@ -25,8 +25,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
 
     void testSourceBackgroundInstitutionCommentValidCreate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
-        def map = [domainModel: sourceBackgroundInstitutionComment]
-        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create(map)
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
 
         assertNotNull "SourceBackgroundInstitutionComment ID is null in SourceBackgroundInstitutionComment Service Tests Create",
                 sourceBackgroundInstitutionComment.id
@@ -42,21 +41,18 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
 
     void testSourceBackgroundInstitutionCommentInvalidCreate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newInvalidForCreateSourceBackgroundInstitutionComment()
-        def map = [domainModel: sourceBackgroundInstitutionComment]
         shouldFail(ApplicationException) {
-            sourceBackgroundInstitutionCommentService.create(map)
+            sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
         }
     }
 
 
     void testSourceBackgroundInstitutionCommentValidUpdate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
-        def map = [domainModel: sourceBackgroundInstitutionComment]
-        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create(map)
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
 
         sourceBackgroundInstitutionComment.commentData = "1234567890..1234567890UPDATE"
-        map.domainModel = sourceBackgroundInstitutionComment
-        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.update(map)
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.update([domainModel: sourceBackgroundInstitutionComment])
 
         assertEquals "1234567890..1234567890UPDATE", sourceBackgroundInstitutionComment.commentData
     }
@@ -64,26 +60,22 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
 
     void testSourceBackgroundInstitutionCommentInvalidUpdate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
-        def map = [domainModel: sourceBackgroundInstitutionComment]
-        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create(map)
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
 
         sourceBackgroundInstitutionComment.sequenceNumber = null
-        map.domainModel = sourceBackgroundInstitutionComment
         shouldFail(ApplicationException) {
-            sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.update(map)
+            sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.update([domainModel: sourceBackgroundInstitutionComment])
         }
     }
 
 
     void testSourceBackgroundInstitutionCommentDelete() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
-        def map = [domainModel: sourceBackgroundInstitutionComment]
-        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create(map)
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
         assertNotNull "SourceBackgroundInstitutionComment ID is null in SourceBackgroundInstitutionComment Service Tests Create", sourceBackgroundInstitutionComment.id
 
         def id = sourceBackgroundInstitutionComment.id
-        map.domainModel = sourceBackgroundInstitutionComment
-        sourceBackgroundInstitutionCommentService.delete(map)
+        sourceBackgroundInstitutionCommentService.delete([domainModel: sourceBackgroundInstitutionComment])
         assertNull "SourceBackgroundInstitutionComment should have been deleted", sourceBackgroundInstitutionComment.get(id)
     }
 
@@ -92,7 +84,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
                 sequenceNumber: null,
                 commentData: "1234567890..1234567890",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "443361")
+                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999")
         )
         return sourceBackgroundInstitutionComment
     }
@@ -102,7 +94,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
                 sequenceNumber: null,
                 commentData: "1234567890..1234567890",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "000000") // Not in SourceBackgroundInstitutionBase
+                sourceAndBackgroundInstitution: null
         )
         return sourceBackgroundInstitutionComment
     }

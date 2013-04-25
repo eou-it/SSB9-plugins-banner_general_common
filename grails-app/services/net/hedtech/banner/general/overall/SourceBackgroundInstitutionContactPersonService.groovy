@@ -8,16 +8,17 @@ import net.hedtech.banner.service.ServiceBase
 
 class SourceBackgroundInstitutionContactPersonService extends ServiceBase {
 
-    def preCreate(map) {
-        validateCodes(map.domainModel)
-    }
-
-
-    /**
-     * Validate: a SourceBackgroundInstitutionBase record must exists which is not enforced with a foreign key constraint
-     */
-    private def validateCodes(SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson) {
-        def rec = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: sourceBackgroundInstitutionContactPerson.sourceAndBackgroundInstitution)
-        if (!rec)
-            throw new ApplicationException(SectionMeetingTime, "@@r1:invalid_SourceBackgroundInstitutionBase_code@@")
-    }}
+//    def preCreate(map) {
+//        validateCodes(map.domainModel)
+//    }
+//
+//
+//    /**
+//     * Validate: a SourceBackgroundInstitutionBase record must exists which is not enforced with a foreign key constraint
+//     */
+//    private def validateCodes(SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson) {
+//        def rec = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: sourceBackgroundInstitutionContactPerson.sourceAndBackgroundInstitution)
+//        if (!rec)
+//            throw new ApplicationException(SectionMeetingTime, "@@r1:invalid_SourceBackgroundInstitutionBase_code@@")
+//    }
+}

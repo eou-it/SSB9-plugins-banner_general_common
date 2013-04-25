@@ -56,7 +56,6 @@ class SourceBackgroundInstitutionCommentIntegrationTests extends BaseIntegration
         sourceBackgroundInstitutionComment = SourceBackgroundInstitutionComment.get(sourceBackgroundInstitutionComment.id)
         assertEquals 1L, sourceBackgroundInstitutionComment?.version
         assertEquals "1234567890..1234567890UPDATE", sourceBackgroundInstitutionComment.commentData
-
     }
 
 
@@ -149,7 +148,7 @@ class SourceBackgroundInstitutionCommentIntegrationTests extends BaseIntegration
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
                 sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(),
                 commentData: "1234567890..1234567890",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "000000"),
+                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
         )
         return sourceBackgroundInstitutionComment
     }
