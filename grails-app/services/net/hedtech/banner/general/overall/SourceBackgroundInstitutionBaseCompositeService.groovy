@@ -16,38 +16,71 @@ class SourceBackgroundInstitutionBaseCompositeService {
 
     def createOrUpdate(map) {
         if (map?.deleteSourceBackgroundInstitutionBases) {
-            def sourceAndBackgroundInstitution = map.deleteSourceBackgroundInstitutionBases.sourceAndBackgroundInstitution
+            map.deleteSourceBackgroundInstitutionBases.each { sourceBackgroundInstitutionBase ->
+                def sourceAndBackgroundInstitution = sourceBackgroundInstitutionBase.sourceAndBackgroundInstitution
 
-            // Before deleting the Master record do cascade deletions
-            deleteDomain(sourceAndBackgroundInstitution, SourceBackgroundInstitutionComment, sourceBackgroundInstitutionCommentService)
-            deleteDomain(sourceAndBackgroundInstitution, SourceBackgroundInstitutionContactPerson, sourceBackgroundInstitutionContactPersonService)
+                // Before deleting the Master record do cascade deletions
+                deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionComment, sourceBackgroundInstitutionCommentService)
+                deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionContactPerson, sourceBackgroundInstitutionContactPersonService)
 
-            // Delete Master
-            deleteDomain(sourceAndBackgroundInstitution, SourceBackgroundInstitutionBase, sourceBackgroundInstitutionBaseService)
+                // Delete Master
+                deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionBase, sourceBackgroundInstitutionBaseService)
+            }
 
         } else {
             // Delete detailed records that are marked for deletions
-            if (map?.deleteSourceBackgroundInstitutionComments) {
-                map.deleteSourceBackgroundInstitutionComments.each {
-                    sourceBackgroundInstitutionCommentService.delete([domainModel: it])
-                }
-            }
-            if (map?.deleteSourceBackgroundInstitutionContactPersons) {
-                map.deleteSourceBackgroundInstitutionContactPersons.each {
-                    sourceBackgroundInstitutionContactPersonService.delete([domainModel: it])
-                }
-            }
+            if (map?.deleteSourceBackgroundInstitutionComments)
+                deleteDomain(map.deleteSourceBackgroundInstitutionComments, sourceBackgroundInstitutionCommentService)
+
+            if (map?.deleteSourceBackgroundInstitutionContactPersons)
+                deleteDomain(map.deleteSourceBackgroundInstitutionContactPersons, sourceBackgroundInstitutionContactPersonService)
+        }
+
+        if (map?.sourceBackgroundInstitutionBases)
+            map.sourceBackgroundInstitutionBases =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionBases, sourceBackgroundInstitutionBaseService)
+
+        if (map?.sourceBackgroundInstitutionComments)
+            map.sourceBackgroundInstitutionComments =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionComments, sourceBackgroundInstitutionCommentService)
+
+        if (map?.sourceBackgroundInstitutionContactPersons)
+            map.sourceBackgroundInstitutionContactPersons =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionContactPersons, sourceBackgroundInstitutionContactPersonService)
+    }
+
+
+    /**
+     *  Delete all domains associated with the sourceAndBackgroundInstitution
+     */
+    private void deleteDomainAll(sourceAndBackgroundInstitution, domainClass, service) {
+        def domains = domainClass.findAllWhere(sourceAndBackgroundInstitution: sourceAndBackgroundInstitution)
+        domains.each { domain ->
+            service.delete([domainModel: domain])
         }
     }
 
 
     /**
-     *  Delete domain
+     *  Delete domains
      */
-    private void deleteDomain(sourceAndBackgroundInstitution, domainClass, service) {
-        def records = domainClass.findAllWhere(sourceAndBackgroundInstitution: sourceAndBackgroundInstitution)
-        records.each {
-            service.delete([domainModel: it])
+    private void deleteDomain(domains, service) {
+        domains.each { domain ->
+            if (domain.id)
+                service.delete([domainModel: domain])
+        }
+    }
+
+
+    /**
+     *  Create or Update domains
+     */
+    private void createOrUpdateDomain(domains, service) {
+        domains.each { domain ->
+            if (domain.id)
+                service.update([domainModel: domain])
+            else
+                service.create([domainModel: domain])
         }
     }
 }
