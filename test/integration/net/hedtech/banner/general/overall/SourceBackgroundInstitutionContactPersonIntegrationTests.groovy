@@ -178,6 +178,40 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+    void testFetchSearch() {
+        // Create 3 contacts
+        def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
+        sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
+        assertNotNull sourceBackgroundInstitutionContactPerson.id
+        assertEquals 0L, sourceBackgroundInstitutionContactPerson.version
+
+        def sourceAndBackgroundInstitution = sourceBackgroundInstitutionContactPerson.sourceAndBackgroundInstitution
+
+        sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
+                name: "Don Johnson",
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
+        )
+        sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
+
+        sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
+                name: "Larry Johnson",
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
+        )
+        sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
+
+        def pagingAndSortParams = [sortColumn: "name", sortDirection: "asc", max: 5, offset: 0]
+        Map paramsMap = [sourceAndBackgroundInstitutionCode: sourceAndBackgroundInstitution.code, name: "%Johnson%"]
+        def criteriaMap = [[key: "name", binding: "name", operator: "contains"]]
+        def filterData = [params: paramsMap, criteria: criteriaMap]
+
+        def records = SourceBackgroundInstitutionContactPerson.fetchSearch(filterData, pagingAndSortParams)
+        assertTrue records.size() == 2
+        records.each { record ->
+            assertTrue record.name.indexOf("Johnson") >= 0 // -1 is a failed search
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionContactPerson() {
         def personType = newValidPersonType("TTTT", "TTTT")
         personType.save(failOnError: true, flush: true)

@@ -84,7 +84,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
                 sequenceNumber: null,
                 commentData: "1234567890..1234567890",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999")
+                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "443361")
         )
         return sourceBackgroundInstitutionComment
     }

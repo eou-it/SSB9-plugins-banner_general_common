@@ -116,7 +116,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
                 phoneNumber: "123456789012",
                 phoneExtension: "1234567890",
                 countryPhone: "1234",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
+                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "443361"),
                 personType: personType,
         )
         return sourceBackgroundInstitutionContactPerson

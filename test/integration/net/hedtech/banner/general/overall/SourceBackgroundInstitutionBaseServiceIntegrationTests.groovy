@@ -8,6 +8,7 @@ import net.hedtech.banner.general.system.County
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.general.system.State
+import net.hedtech.banner.general.system.Zip
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -116,12 +117,14 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
 
 
     private def newValidForCreateSourceBackgroundInstitutionBase() {
+        def zip = newValidForCreateZip()
+
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
                 streetLine1: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 streetLine2: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 streetLine3: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 city: "12345678901234567890123456789012345678901234567890",
-                zip: "123456789012345678901234567890",
+                zip: zip.code,
                 houseNumber: "1234567890",
                 streetLine4: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
@@ -141,4 +144,16 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
         return sourceBackgroundInstitutionBase
     }
 
+
+    private def newValidForCreateZip() {
+        def zip = new Zip(
+                code: "123456789012345678901234567890",
+                city: "12345678901234567890123456789012345678901234567890",
+                state: State.findWhere(code: "PA"),
+                county: County.findWhere(code: "001"),
+                nation: Nation.findWhere(code: "1"),
+        )
+        zip.save(flush: true, failOnError: true)
+        return zip
+    }
 }
