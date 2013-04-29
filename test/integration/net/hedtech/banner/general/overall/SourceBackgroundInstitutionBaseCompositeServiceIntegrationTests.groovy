@@ -139,12 +139,15 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
 
 
     private def newValidForCreateSourceBackgroundInstitutionBase() {
+        def zip = newValidForCreateZip()
+        zip.save(failOnError: true, flush: true)
+
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
                 streetLine1: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 streetLine2: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 streetLine3: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 city: "12345678901234567890123456789012345678901234567890",
-                zip: "123456789012345678901234567890",
+                zip: zip.code,
                 houseNumber: "1234567890",
                 streetLine4: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
@@ -186,5 +189,17 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
     private def newValidPersonType(code, description) {
         def personType = new PersonType(code: code, description: description)
         return personType
+    }
+
+
+    private def newValidForCreateZip() {
+        def zip = new Zip(
+                code: "123456789012345678901234567890",
+                city: "12345678901234567890123456789012345678901234567890",
+                state: State.findWhere(code: "PA"),
+                county: County.findWhere(code: "001"),
+                nation: Nation.findWhere(code: "1"),
+        )
+        return zip
     }
 }
