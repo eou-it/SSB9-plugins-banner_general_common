@@ -132,7 +132,7 @@ class SourceBackgroundInstitutionCommentIntegrationTests extends BaseIntegration
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment()
         assertFalse "SourceBackgroundInstitutionComment should have failed validation", sourceBackgroundInstitutionComment.validate()
         assertErrorsFor sourceBackgroundInstitutionComment, 'nullable', ['sequenceNumber', 'sourceAndBackgroundInstitution']
-        assertNoErrorsFor sourceBackgroundInstitutionComment,['commentData']
+        assertNoErrorsFor sourceBackgroundInstitutionComment, ['commentData']
     }
 
 
@@ -144,11 +144,66 @@ class SourceBackgroundInstitutionCommentIntegrationTests extends BaseIntegration
     }
 
 
+    private def doCreateComments() {
+        // Create 3 comments
+        def sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
+        sourceBackgroundInstitutionComment.save(failOnError: true, flush: true)
+        assertNotNull sourceBackgroundInstitutionComment.id
+        assertEquals 0L, sourceBackgroundInstitutionComment.version
+
+        def sourceAndBackgroundInstitution = sourceBackgroundInstitutionComment.sourceAndBackgroundInstitution
+
+        sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
+                sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(sourceAndBackgroundInstitution),
+                commentData: "Test comment two",
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
+        )
+        sourceBackgroundInstitutionComment.save(failOnError: true, flush: true)
+
+        sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
+                sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(sourceAndBackgroundInstitution),
+                commentData: "Test comment three",
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
+        )
+        sourceBackgroundInstitutionComment.save(failOnError: true, flush: true)
+
+        return sourceAndBackgroundInstitution
+    }
+
+
+    void testFetchSearch() {
+        def sourceAndBackgroundInstitution = doCreateComments()
+
+        def pagingAndSortParams = [sortColumn: "commentData", sortDirection: "asc", max: 5, offset: 0]
+        Map paramsMap = [sourceAndBackgroundInstitutionCode: sourceAndBackgroundInstitution.code, commentData: "%comment%"]
+        def criteriaMap = [[key: "commentData", binding: "commentData", operator: "contains"]]
+        def filterData = [params: paramsMap, criteria: criteriaMap]
+
+        def records = SourceBackgroundInstitutionComment.fetchSearch(filterData, pagingAndSortParams)
+        assertTrue records.size() == 2
+        records.each { record ->
+            assertTrue record.commentData.indexOf("comment") >= 0 // -1 is a failed search
+        }
+    }
+
+
+    void testFetchBySourceAndBackgroundInstitution() {
+        def sourceAndBackgroundInstitution = doCreateComments()
+
+        def records = SourceBackgroundInstitutionComment.fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution)
+        assertTrue records.size() == 3
+        records.each { record ->
+            assertEquals sourceAndBackgroundInstitution.code,  record.sourceAndBackgroundInstitution.code
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionComment() {
+        def sourceAndBackgroundInstitution =  SourceAndBackgroundInstitution.findWhere(code: "999999")
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
-                sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(),
+                sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(sourceAndBackgroundInstitution),
                 commentData: "1234567890..1234567890",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
         )
         return sourceBackgroundInstitutionComment
     }

@@ -11,16 +11,16 @@ class SourceBackgroundInstitutionCommentService extends ServiceBase {
     def preCreate(map) {
         map?.domainModel?.sequenceNumber =
             SourceBackgroundInstitutionComment.fetchNextSequenceNumber(map?.domainModel?.sourceAndBackgroundInstitution.code)
-//        validateCodes(map.domainModel)
+        validateCodes(map.domainModel)
     }
 
 
     /**
      * Validate the SourceBackgroundInstitutionBase record must exists which is not enforced with a foreign key constraint
      */
-//    private def validateCodes(SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment) {
-//        def rec = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: sourceBackgroundInstitutionComment.sourceAndBackgroundInstitution)
-//        if (!rec)
-//            throw new ApplicationException(SectionMeetingTime, "@@r1:invalid_SourceBackgroundInstitutionBase_code@@")
-//    }
+    private def validateCodes(SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment) {
+        def rec = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: sourceBackgroundInstitutionComment.sourceAndBackgroundInstitution)
+        if (!rec)
+            throw new ApplicationException(SectionMeetingTime, "@@r1:invalidSourceBase@@")
+    }
 }

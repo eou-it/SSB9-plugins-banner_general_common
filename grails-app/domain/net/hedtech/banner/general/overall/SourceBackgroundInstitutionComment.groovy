@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
+import net.hedtech.banner.query.DynamicFinder
 
 import javax.persistence.*
 
@@ -16,6 +17,12 @@ import javax.persistence.*
         query = """SELECT NVL(MAX(a.sequenceNumber),0) + 1
                      FROM SourceBackgroundInstitutionComment a
                     WHERE a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode""")
+,
+@NamedQuery(
+        name = "SourceBackgroundInstitutionComment.fetchBySourceAndBackgroundInstitution",
+        query = """  FROM SourceBackgroundInstitutionComment a
+                    WHERE a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
+                    ORDER BY a.sequenceNumber asc""")
 ])
 
 @Entity
@@ -135,11 +142,50 @@ class SourceBackgroundInstitutionComment implements Serializable {
     public static readonlyProperties = ['sequenceNumber', 'sourceAndBackgroundInstitution']
 
 
-    public static int fetchNextSequenceNumber(sourceAndBackgroundInstitutionCode) {
-        def nextSequenceNumber = SourceBackgroundInstitutionComment.withSession {session ->
+    static int fetchNextSequenceNumber(String sourceAndBackgroundInstitutionCode) {
+        def nextSequenceNumber = SourceBackgroundInstitutionComment.withSession { session ->
             session.getNamedQuery('SourceBackgroundInstitutionComment.fetchNextSequenceNumber')
-                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode).list()
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .list()
         }
         return nextSequenceNumber[0]
+    }
+
+
+    static int fetchNextSequenceNumber(SourceAndBackgroundInstitution sourceAndBackgroundInstitution) {
+        fetchNextSequenceNumber(sourceAndBackgroundInstitution.code)
+    }
+
+
+    static def fetchBySourceAndBackgroundInstitution(String sourceAndBackgroundInstitutionCode) {
+        def list = SourceBackgroundInstitutionComment.withSession { session ->
+            session.getNamedQuery('SourceBackgroundInstitutionComment.fetchBySourceAndBackgroundInstitution')
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .list()
+        }
+        return list
+    }
+
+
+    static def fetchBySourceAndBackgroundInstitution(SourceAndBackgroundInstitution sourceAndBackgroundInstitution) {
+        fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution.code)
+    }
+
+
+    def static countAll(filterData) {
+        finderByAll().count(filterData)
+    }
+
+
+    def static fetchSearch(filterData, pagingAndSortParams) {
+        finderByAll().find(filterData, pagingAndSortParams)
+    }
+
+
+    def private static finderByAll = {
+        def query = """ FROM SourceBackgroundInstitutionComment a
+	                   WHERE a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
+	            	"""
+        return new DynamicFinder(SourceBackgroundInstitutionComment.class, query, "a")
     }
 }
