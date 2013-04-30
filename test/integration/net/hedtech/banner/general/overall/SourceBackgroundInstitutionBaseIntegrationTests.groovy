@@ -194,6 +194,27 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+    void testFetchBySourceAndBackgroundInstitution() {
+        // Create 2 bases
+        def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
+        sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
+        assertNotNull sourceBackgroundInstitutionBase.id
+        assertEquals 0L, sourceBackgroundInstitutionBase.version
+
+        def sourceAndBackgroundInstitution = sourceBackgroundInstitutionBase.sourceAndBackgroundInstitution
+
+        sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
+                city: "CITY2",
+                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999998"),
+        )
+        sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
+
+        def records = SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution)
+        assertTrue records.size() == 1
+        assertEquals sourceAndBackgroundInstitution.code,  records[0].sourceAndBackgroundInstitution.code
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
                 streetLine1: "123456789012345678901234567890123456789012345678901234567890123456789012345",

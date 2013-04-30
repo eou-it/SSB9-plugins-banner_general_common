@@ -160,10 +160,11 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
 
 
     private def newValidForCreateSourceBackgroundInstitutionComment() {
+        def sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "999999")
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
-                sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(),
+                sequenceNumber: SourceBackgroundInstitutionComment.fetchNextSequenceNumber(sourceAndBackgroundInstitution),
                 commentData: "1234567890..1234567890",
-                sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
         )
         return sourceBackgroundInstitutionComment
     }

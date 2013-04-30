@@ -13,6 +13,13 @@ import javax.persistence.*
 /**
  * Source/Background Institution Base Table
  */
+@NamedQueries(value = [
+@NamedQuery(
+        name = "SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution",
+        query = """  FROM SourceBackgroundInstitutionBase a
+                    WHERE a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode""")
+])
+
 @Entity
 @Table(name = "SOBSBGI")
 class SourceBackgroundInstitutionBase implements Serializable {
@@ -218,4 +225,18 @@ class SourceBackgroundInstitutionBase implements Serializable {
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['sourceAndBackgroundInstitution']
 
+
+    static def fetchBySourceAndBackgroundInstitution(String sourceAndBackgroundInstitutionCode) {
+        def list = SourceBackgroundInstitutionBase.withSession { session ->
+            session.getNamedQuery('SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution')
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .list()
+        }
+        return list
+    }
+
+
+    static def fetchBySourceAndBackgroundInstitution(SourceAndBackgroundInstitution sourceAndBackgroundInstitution) {
+        fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution.code)
+    }
 }
