@@ -3,9 +3,12 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import grails.validation.ValidationException
 import net.hedtech.banner.general.system.DiplomaType
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+
+import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseIntegrationTestCase {
 
@@ -27,113 +30,88 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
         assertNotNull sourceBackgroundInstitutionDiplomasOffered.id
     }
 
-//    void testCreateInvalidSourceBackgroundInstitutionDiplomasOffered() {
-//        def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//        shouldFail(ValidationException) {
-//            sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        }
-//    }
-//
-//
-//    void testUpdateValidSourceBackgroundInstitutionDiplomasOffered() {
-//        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        assertNotNull sourceBackgroundInstitutionDiplomasOffered.id
-//        assertEquals 0L, sourceBackgroundInstitutionDiplomasOffered.version
-//        assertEquals i_success_demographicYear, sourceBackgroundInstitutionDiplomasOffered.demographicYear
-//
-//        //Update the entity
-//
-//        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        //Assert for sucessful update
-//        sourceBackgroundInstitutionDiplomasOffered = SourceBackgroundInstitutionDiplomasOffered.get(sourceBackgroundInstitutionDiplomasOffered.id)
-//        assertEquals 1L, sourceBackgroundInstitutionDiplomasOffered?.version
-//
-//    }
-//
-//
-//    void testUpdateInvalidSourceBackgroundInstitutionDiplomasOffered() {
-//        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        assertNotNull sourceBackgroundInstitutionDiplomasOffered.id
-//        assertEquals 0L, sourceBackgroundInstitutionDiplomasOffered.version
-//        assertEquals i_success_demographicYear, sourceBackgroundInstitutionDiplomasOffered.demographicYear
-//
-//        //Update the entity with invalid values
-//
-//        shouldFail(ValidationException) {
-//            sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        }
-//    }
-//
-//
-//    void testDates() {
-//        def time = new SimpleDateFormat('HHmmss')
-//        def hour = new SimpleDateFormat('HH')
-//        def date = new SimpleDateFormat('yyyy-M-d')
-//        def today = new Date()
-//
-//        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//
-//
-//
-//        sourceBackgroundInstitutionDiplomasOffered.save(flush: true, failOnError: true)
-//        sourceBackgroundInstitutionDiplomasOffered.refresh()
-//        assertNotNull "SourceBackgroundInstitutionDiplomasOffered should have been saved", sourceBackgroundInstitutionDiplomasOffered.id
-//
-//        // test date values -
-//        assertEquals date.format(today), date.format(sourceBackgroundInstitutionDiplomasOffered.lastModified)
-//        assertEquals hour.format(today), hour.format(sourceBackgroundInstitutionDiplomasOffered.lastModified)
-//
-//
-//    }
-//
-//
-//    void testOptimisticLock() {
-//        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//
-//        def sql
-//        try {
-//            sql = new Sql(sessionFactory.getCurrentSession().connection())
-//            sql.executeUpdate("update SORBDPL set SORBDPL_VERSION = 999 where SORBDPL_SURROGATE_ID = ?", [sourceBackgroundInstitutionDiplomasOffered.id])
-//        } finally {
-//            sql?.close() // note that the test will close the connection, since it's our current session's connection
-//        }
-//        //Try to update the entity
-//        //Update the entity
-//        shouldFail(HibernateOptimisticLockingFailureException) {
-//            sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        }
-//    }
-//
-//
-//    void testDeleteSourceBackgroundInstitutionDiplomasOffered() {
-//        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
-//        def id = sourceBackgroundInstitutionDiplomasOffered.id
-//        assertNotNull id
-//        sourceBackgroundInstitutionDiplomasOffered.delete()
-//        assertNull SourceBackgroundInstitutionDiplomasOffered.get(id)
-//    }
-//
-//
-//    void testValidation() {
-//        def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
-//        assertFalse "SourceBackgroundInstitutionDiplomasOffered could not be validated as expected due to ${sourceBackgroundInstitutionDiplomasOffered.errors}", sourceBackgroundInstitutionDiplomasOffered.validate()
-//    }
-//
-//
-//    void testNullValidationFailure() {
-//        def sourceBackgroundInstitutionDiplomasOffered = new SourceBackgroundInstitutionDiplomasOffered()
-//        assertFalse "SourceBackgroundInstitutionDiplomasOffered should have failed validation", sourceBackgroundInstitutionDiplomasOffered.validate()
-//        assertErrorsFor sourceBackgroundInstitutionDiplomasOffered, 'nullable',
-//                [
-//                        'demographicYear',
-//                        'sourceAndBackgroundInstitution',
-//                        'diplomaType'
-//                ]
-//    }
+
+    void testCreateInvalidSourceBackgroundInstitutionDiplomasOffered() {
+        def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        shouldFail(ValidationException) {
+            sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
+        }
+    }
+
+    // NOTE: No Updates are allowed
+
+    void testDates() {
+        def time = new SimpleDateFormat('HHmmss')
+        def hour = new SimpleDateFormat('HH')
+        def date = new SimpleDateFormat('yyyy-M-d')
+        def today = new Date()
+
+        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        sourceBackgroundInstitutionDiplomasOffered.save(flush: true, failOnError: true)
+        sourceBackgroundInstitutionDiplomasOffered.refresh()
+        assertNotNull "SourceBackgroundInstitutionDiplomasOffered should have been saved", sourceBackgroundInstitutionDiplomasOffered.id
+
+        // test date values -
+        assertEquals date.format(today), date.format(sourceBackgroundInstitutionDiplomasOffered.lastModified)
+        assertEquals hour.format(today), hour.format(sourceBackgroundInstitutionDiplomasOffered.lastModified)
+    }
+
+
+    void testDeleteSourceBackgroundInstitutionDiplomasOffered() {
+        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
+        def id = sourceBackgroundInstitutionDiplomasOffered.id
+        assertNotNull id
+        sourceBackgroundInstitutionDiplomasOffered.delete()
+        assertNull SourceBackgroundInstitutionDiplomasOffered.get(id)
+    }
+
+
+    void testValidation() {
+        def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        assertFalse "SourceBackgroundInstitutionDiplomasOffered could not be validated as expected due to ${sourceBackgroundInstitutionDiplomasOffered.errors}", sourceBackgroundInstitutionDiplomasOffered.validate()
+    }
+
+
+    void testNullValidationFailure() {
+        def sourceBackgroundInstitutionDiplomasOffered = new SourceBackgroundInstitutionDiplomasOffered()
+        assertFalse "SourceBackgroundInstitutionDiplomasOffered should have failed validation", sourceBackgroundInstitutionDiplomasOffered.validate()
+        assertErrorsFor sourceBackgroundInstitutionDiplomasOffered, 'nullable',
+                [
+                        'demographicYear',
+                        'sourceAndBackgroundInstitution',
+                        'diplomaType'
+                ]
+    }
+
+
+    void testFetchSearch() {
+        // Create 2 diplomas
+        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
+        assertNotNull sourceBackgroundInstitutionDiplomasOffered.id
+        assertEquals 0L, sourceBackgroundInstitutionDiplomasOffered.version
+
+        def sourceAndBackgroundInstitution = sourceBackgroundInstitutionDiplomasOffered.sourceAndBackgroundInstitution
+
+        sourceBackgroundInstitutionDiplomasOffered = new SourceBackgroundInstitutionDiplomasOffered(
+                demographicYear: 2013,
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
+                diplomaType: DiplomaType.findWhere(code: "TT"),
+        )
+        sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
+
+        def pagingAndSortParams = [sortColumn: "demographicYear", sortDirection: "asc", max: 5, offset: 0]
+        Map paramsMap = [sourceAndBackgroundInstitutionCode: sourceAndBackgroundInstitution.code, demographicYear: 2013]
+        def criteriaMap = [[key: "demographicYear", binding: "demographicYear", operator: "equals"]]
+        def filterData = [params: paramsMap, criteria: criteriaMap]
+
+        def records = SourceBackgroundInstitutionDiplomasOffered.fetchSearch(filterData, pagingAndSortParams)
+        assertTrue records.size() == 1
+        records.each { record ->
+            assertTrue record.demographicYear == 2013
+        }
+    }
 
 
     private def newValidForCreateSourceBackgroundInstitutionDiplomasOffered() {
@@ -165,5 +143,4 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
         )
         return diplomaType
     }
-
 }

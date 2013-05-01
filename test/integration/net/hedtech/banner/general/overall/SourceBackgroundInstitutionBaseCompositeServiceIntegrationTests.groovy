@@ -40,7 +40,7 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
         // do the update
         sourceBackgroundInstitutionBaseCompositeService.createOrUpdate(
                 [
-                        sourceBackgroundInstitutionBases: [map.sourceBackgroundInstitutionBase],
+                        sourceBackgroundInstitutionBase: map.sourceBackgroundInstitutionBase,
                         sourceBackgroundInstitutionComments: [map.sourceBackgroundInstitutionComment],
                         sourceBackgroundInstitutionContactPersons: [map.sourceBackgroundInstitutionContactPerson],
                 ])
@@ -65,7 +65,7 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
         def map = createAll()
 
         // delete master record
-        sourceBackgroundInstitutionBaseCompositeService.createOrUpdate([deleteSourceBackgroundInstitutionBases: [map.sourceBackgroundInstitutionBase]])
+        sourceBackgroundInstitutionBaseCompositeService.createOrUpdate([deleteSourceBackgroundInstitutionBase: map.sourceBackgroundInstitutionBase])
 
         // comfirm both master and detail records were deleted
         def sourceBackgroundInstitutionBase = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
@@ -111,7 +111,7 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
 
         sourceBackgroundInstitutionBaseCompositeService.createOrUpdate(
                 [
-                        sourceBackgroundInstitutionBases: [sourceBackgroundInstitutionBase],
+                        sourceBackgroundInstitutionBase: sourceBackgroundInstitutionBase,
                         sourceBackgroundInstitutionComments: [sourceBackgroundInstitutionComment],
                         sourceBackgroundInstitutionContactPersons: [sourceBackgroundInstitutionContactPerson],
                 ])

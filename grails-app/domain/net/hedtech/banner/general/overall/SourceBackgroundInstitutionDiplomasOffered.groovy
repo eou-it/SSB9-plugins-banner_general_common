@@ -128,6 +128,7 @@ class SourceBackgroundInstitutionDiplomasOffered implements Serializable {
         diplomaType(nullable: false)
     }
 
+    //No Updates are allowed
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['demographicYear', 'sourceAndBackgroundInstitution', 'diplomaType']
 

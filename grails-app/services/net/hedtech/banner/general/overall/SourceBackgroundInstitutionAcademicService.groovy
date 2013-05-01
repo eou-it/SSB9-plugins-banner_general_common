@@ -4,21 +4,20 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.system.Zip
 import net.hedtech.banner.service.ServiceBase
 
-class SourceBackgroundInstitutionBaseService extends ServiceBase {
+class SourceBackgroundInstitutionAcademicService extends ServiceBase {
 
     def preCreate(map) {
         validateCodes(map.domainModel)
     }
 
     /**
-     * Validate the Zip record must exists which is not enforced with a foreign key constraint
+     * Validate: a SourceBackgroundInstitutionBase record must exists which is not enforced with a foreign key constraint
      */
-    private def validateCodes(SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase) {
-        def rec = Zip.findWhere(code: sourceBackgroundInstitutionBase.zip)
+    private def validateCodes(domain) {
+        def rec = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: domain.sourceAndBackgroundInstitution)
         if (!rec)
-            throw new ApplicationException(SectionMeetingTime, "@@r1:invalidZip@@")
+            throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:invalidSourceBase@@")
     }
 }

@@ -14,7 +14,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SORBTST")
-class SourceBackroundInstitutionTestScore implements Serializable {
+class SourceBackgroundInstitutionTestScore implements Serializable {
 
     /**
      * Surrogate ID for SORBTST
@@ -83,7 +83,7 @@ class SourceBackroundInstitutionTestScore implements Serializable {
 
 
     public String toString() {
-        """SourceBackroundInstitutionTestScore[
+        """SourceBackgroundInstitutionTestScore[
 					id=$id, 
 					version=$version, 
 					demographicYear=$demographicYear, 
@@ -98,8 +98,8 @@ class SourceBackroundInstitutionTestScore implements Serializable {
 
     boolean equals(o) {
         if (this.is(o)) return true
-        if (!(o instanceof SourceBackroundInstitutionTestScore)) return false
-        SourceBackroundInstitutionTestScore that = (SourceBackroundInstitutionTestScore) o
+        if (!(o instanceof SourceBackgroundInstitutionTestScore)) return false
+        SourceBackgroundInstitutionTestScore that = (SourceBackgroundInstitutionTestScore) o
         if (id != that.id) return false
         if (version != that.version) return false
         if (demographicYear != that.demographicYear) return false
@@ -139,7 +139,7 @@ class SourceBackroundInstitutionTestScore implements Serializable {
     }
 
     //Read Only fields that should be protected against update
-    public static readonlyProperties = ['demographicYear', 'sourceAndBackgroundInstitution', 'meanTestScore', 'testScore']
+    public static readonlyProperties = ['demographicYear', 'sourceAndBackgroundInstitution', 'testScore']
 
 
     def static countAll(filterData) {
@@ -153,9 +153,9 @@ class SourceBackroundInstitutionTestScore implements Serializable {
 
 
     def private static finderByAll = {
-        def query = """ FROM SourceBackroundInstitutionTestScore a
+        def query = """ FROM SourceBackgroundInstitutionTestScore a
 	                   WHERE a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
 	            	"""
-        return new DynamicFinder(SourceBackroundInstitutionTestScore.class, query, "a")
+        return new DynamicFinder(SourceBackgroundInstitutionTestScore.class, query, "a")
     }
 }

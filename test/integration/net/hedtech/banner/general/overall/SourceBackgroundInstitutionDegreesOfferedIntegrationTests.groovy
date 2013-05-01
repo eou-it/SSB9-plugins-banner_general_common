@@ -3,11 +3,12 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
-import groovy.sql.Sql
+import grails.validation.ValidationException
 import net.hedtech.banner.general.system.Degree
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+
+import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseIntegrationTestCase {
 
@@ -30,113 +31,87 @@ class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseInte
     }
 
 
-//    void testCreateInvalidSourceBackgroundInstitutionDegreesOffered() {
-//        def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
-//        shouldFail(ValidationException) {
-//            sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        }
-//    }
-//
-//
-//    void testUpdateValidSourceBackgroundInstitutionDegreesOffered() {
-//        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
-//        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        assertNotNull sourceBackgroundInstitutionDegreesOffered.id
-//        assertEquals 0L, sourceBackgroundInstitutionDegreesOffered.version
-//        assertEquals i_success_demographicYear, sourceBackgroundInstitutionDegreesOffered.demographicYear
-//
-//        //Update the entity
-//
-//        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        //Assert for sucessful update
-//        sourceBackgroundInstitutionDegreesOffered = SourceBackgroundInstitutionDegreesOffered.get(sourceBackgroundInstitutionDegreesOffered.id)
-//        assertEquals 1L, sourceBackgroundInstitutionDegreesOffered?.version
-//
-//    }
-//
-//
-//    void testUpdateInvalidSourceBackgroundInstitutionDegreesOffered() {
-//        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
-//        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        assertNotNull sourceBackgroundInstitutionDegreesOffered.id
-//        assertEquals 0L, sourceBackgroundInstitutionDegreesOffered.version
-//        assertEquals i_success_demographicYear, sourceBackgroundInstitutionDegreesOffered.demographicYear
-//
-//        //Update the entity with invalid values
-//
-//        shouldFail(ValidationException) {
-//            sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        }
-//    }
-//
-//
-//    void testDates() {
-//        def time = new SimpleDateFormat('HHmmss')
-//        def hour = new SimpleDateFormat('HH')
-//        def date = new SimpleDateFormat('yyyy-M-d')
-//        def today = new Date()
-//
-//        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
-//
-//
-//
-//        sourceBackgroundInstitutionDegreesOffered.save(flush: true, failOnError: true)
-//        sourceBackgroundInstitutionDegreesOffered.refresh()
-//        assertNotNull "SourceBackgroundInstitutionDegreesOffered should have been saved", sourceBackgroundInstitutionDegreesOffered.id
-//
-//        // test date values -
-//        assertEquals date.format(today), date.format(sourceBackgroundInstitutionDegreesOffered.lastModified)
-//        assertEquals hour.format(today), hour.format(sourceBackgroundInstitutionDegreesOffered.lastModified)
-//
-//
-//    }
-//
-//
-//    void testOptimisticLock() {
-//        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
-//        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//
-//        def sql
-//        try {
-//            sql = new Sql(sessionFactory.getCurrentSession().connection())
-//            sql.executeUpdate("update SORBDEG set SORBDEG_VERSION = 999 where SORBDEG_SURROGATE_ID = ?", [sourceBackgroundInstitutionDegreesOffered.id])
-//        } finally {
-//            sql?.close() // note that the test will close the connection, since it's our current session's connection
-//        }
-//        //Try to update the entity
-//        //Update the entity
-//        shouldFail(HibernateOptimisticLockingFailureException) {
-//            sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        }
-//    }
-//
-//
-//    void testDeleteSourceBackgroundInstitutionDegreesOffered() {
-//        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
-//        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
-//        def id = sourceBackgroundInstitutionDegreesOffered.id
-//        assertNotNull id
-//        sourceBackgroundInstitutionDegreesOffered.delete()
-//        assertNull SourceBackgroundInstitutionDegreesOffered.get(id)
-//    }
-//
-//
-//    void testValidation() {
-//        def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
-//        assertFalse "SourceBackgroundInstitutionDegreesOffered could not be validated as expected due to ${sourceBackgroundInstitutionDegreesOffered.errors}", sourceBackgroundInstitutionDegreesOffered.validate()
-//    }
-//
-//
-//    void testNullValidationFailure() {
-//        def sourceBackgroundInstitutionDegreesOffered = new SourceBackgroundInstitutionDegreesOffered()
-//        assertFalse "SourceBackgroundInstitutionDegreesOffered should have failed validation", sourceBackgroundInstitutionDegreesOffered.validate()
-//        assertErrorsFor sourceBackgroundInstitutionDegreesOffered, 'nullable',
-//                [
-//                        'demographicYear',
-//                        'sourceAndBackgroundInstitution',
-//                        'degree'
-//                ]
-//    }
+    void testCreateInvalidSourceBackgroundInstitutionDegreesOffered() {
+        def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
+        shouldFail(ValidationException) {
+            sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
+        }
+    }
+
+    // NOTE: No Updates are allowed
+
+    void testDates() {
+        def time = new SimpleDateFormat('HHmmss')
+        def hour = new SimpleDateFormat('HH')
+        def date = new SimpleDateFormat('yyyy-M-d')
+        def today = new Date()
+
+        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
+        sourceBackgroundInstitutionDegreesOffered.save(flush: true, failOnError: true)
+        sourceBackgroundInstitutionDegreesOffered.refresh()
+        assertNotNull "SourceBackgroundInstitutionDegreesOffered should have been saved", sourceBackgroundInstitutionDegreesOffered.id
+
+        // test date values -
+        assertEquals date.format(today), date.format(sourceBackgroundInstitutionDegreesOffered.lastModified)
+        assertEquals hour.format(today), hour.format(sourceBackgroundInstitutionDegreesOffered.lastModified)
+    }
+
+
+    void testDeleteSourceBackgroundInstitutionDegreesOffered() {
+        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
+        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
+        def id = sourceBackgroundInstitutionDegreesOffered.id
+        assertNotNull id
+        sourceBackgroundInstitutionDegreesOffered.delete()
+        assertNull SourceBackgroundInstitutionDegreesOffered.get(id)
+    }
+
+
+    void testValidation() {
+        def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
+        assertFalse "SourceBackgroundInstitutionDegreesOffered could not be validated as expected due to ${sourceBackgroundInstitutionDegreesOffered.errors}", sourceBackgroundInstitutionDegreesOffered.validate()
+    }
+
+
+    void testNullValidationFailure() {
+        def sourceBackgroundInstitutionDegreesOffered = new SourceBackgroundInstitutionDegreesOffered()
+        assertFalse "SourceBackgroundInstitutionDegreesOffered should have failed validation", sourceBackgroundInstitutionDegreesOffered.validate()
+        assertErrorsFor sourceBackgroundInstitutionDegreesOffered, 'nullable',
+                [
+                        'demographicYear',
+                        'sourceAndBackgroundInstitution',
+                        'degree'
+                ]
+    }
+
+
+    void testFetchSearch() {
+        // Create 2 degrees
+        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
+        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
+        assertNotNull sourceBackgroundInstitutionDegreesOffered.id
+        assertEquals 0L, sourceBackgroundInstitutionDegreesOffered.version
+
+        def sourceAndBackgroundInstitution = sourceBackgroundInstitutionDegreesOffered.sourceAndBackgroundInstitution
+
+        sourceBackgroundInstitutionDegreesOffered = new SourceBackgroundInstitutionDegreesOffered(
+                demographicYear: 2013,
+                sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
+                degree: Degree.findWhere(code: "PHD"),
+        )
+        sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
+
+        def pagingAndSortParams = [sortColumn: "demographicYear", sortDirection: "asc", max: 5, offset: 0]
+        Map paramsMap = [sourceAndBackgroundInstitutionCode: sourceAndBackgroundInstitution.code, demographicYear: 2013]
+        def criteriaMap = [[key: "demographicYear", binding: "demographicYear", operator: "equals"]]
+        def filterData = [params: paramsMap, criteria: criteriaMap]
+
+        def records = SourceBackgroundInstitutionDegreesOffered.fetchSearch(filterData, pagingAndSortParams)
+        assertTrue records.size() == 1
+        records.each { record ->
+            assertTrue record.demographicYear == 2013
+        }
+    }
 
 
     private def newValidForCreateSourceBackgroundInstitutionDegreesOffered() {
