@@ -80,6 +80,24 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
+    void testReadOnly() {
+        def sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
+        def map = [domainModel: sourceBackgroundInstitutionComment]
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create(map)
+        assertNotNull "SourceBackgroundInstitutionComment ID is null in SourceBackgroundInstitutionComment Service Tests Create", sourceBackgroundInstitutionComment.id
+
+        sourceBackgroundInstitutionComment.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionComment.sequenceNumber = 99
+        try {
+            sourceBackgroundInstitutionCommentService.update([domainModel: sourceBackgroundInstitutionComment])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionComment() {
         def sourceBackgroundInstitutionComment = new SourceBackgroundInstitutionComment(
                 sequenceNumber: null,

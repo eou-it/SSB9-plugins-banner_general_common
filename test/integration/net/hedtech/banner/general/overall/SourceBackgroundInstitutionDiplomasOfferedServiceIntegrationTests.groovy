@@ -37,25 +37,48 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
         assertNotNull sourceBackgroundInstitutionDiplomasOffered.lastModified
     }
 
-	void testSourceBackgroundInstitutionDiplomasOfferedInvalidCreate() {
-		def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
-		def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
-		shouldFail(ApplicationException) {
-			sourceBackgroundInstitutionDiplomasOfferedService.create(map)
-		}
+
+    void testSourceBackgroundInstitutionDiplomasOfferedInvalidCreate() {
+        def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
+        shouldFail(ApplicationException) {
+            sourceBackgroundInstitutionDiplomasOfferedService.create(map)
+        }
     }
 
     // NOTE: No Updates are allowed
 
-	void testSourceBackgroundInstitutionDiplomasOfferedDelete() {
-		def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
-		def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
+    void testSourceBackgroundInstitutionDiplomasOfferedDelete() {
+        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
         sourceBackgroundInstitutionDiplomasOffered = sourceBackgroundInstitutionDiplomasOfferedService.create(map)
-		assertNotNull "SourceBackgroundInstitutionDiplomasOffered ID is null in SourceBackgroundInstitutionDiplomasOffered Service Tests Create", sourceBackgroundInstitutionDiplomasOffered.id
-		def id = sourceBackgroundInstitutionDiplomasOffered.id
-		sourceBackgroundInstitutionDiplomasOfferedService.delete( [domainModel: sourceBackgroundInstitutionDiplomasOffered] )
-		assertNull "SourceBackgroundInstitutionDiplomasOffered should have been deleted", sourceBackgroundInstitutionDiplomasOffered.get(id)
-  	}
+        assertNotNull "SourceBackgroundInstitutionDiplomasOffered ID is null in SourceBackgroundInstitutionDiplomasOffered Service Tests Create", sourceBackgroundInstitutionDiplomasOffered.id
+        def id = sourceBackgroundInstitutionDiplomasOffered.id
+        sourceBackgroundInstitutionDiplomasOfferedService.delete([domainModel: sourceBackgroundInstitutionDiplomasOffered])
+        assertNull "SourceBackgroundInstitutionDiplomasOffered should have been deleted", sourceBackgroundInstitutionDiplomasOffered.get(id)
+    }
+
+
+    void testReadOnly() {
+        def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
+        def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
+        sourceBackgroundInstitutionDiplomasOffered = sourceBackgroundInstitutionDiplomasOfferedService.create(map)
+        assertNotNull "SourceBackgroundInstitutionDiplomasOffered ID is null in SourceBackgroundInstitutionDiplomasOffered Service Tests Create", sourceBackgroundInstitutionDiplomasOffered.id
+
+        sourceBackgroundInstitutionDiplomasOffered.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionDiplomasOffered.diplomaType = new DiplomaType(
+                code: "ZZ",
+                description: "ZZZZ"
+        )
+        sourceBackgroundInstitutionDiplomasOffered.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionDiplomasOfferedService.update([domainModel: sourceBackgroundInstitutionDiplomasOffered])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
 
 
     private def newValidForCreateSourceBackgroundInstitutionDiplomasOffered() {

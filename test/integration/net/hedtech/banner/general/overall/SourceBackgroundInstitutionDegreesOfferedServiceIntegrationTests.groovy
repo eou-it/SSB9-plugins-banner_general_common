@@ -13,7 +13,6 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     def sourceBackgroundInstitutionDegreesOfferedService
 
 
-
     protected void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
@@ -39,25 +38,45 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
         assertNotNull sourceBackgroundInstitutionDegreesOffered.lastModified
     }
 
-	void testSourceBackgroundInstitutionDegreesOfferedInvalidCreate() {
-		def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
-		def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
-		shouldFail(ApplicationException) {
-			sourceBackgroundInstitutionDegreesOfferedService.create(map)
-		}
+
+    void testSourceBackgroundInstitutionDegreesOfferedInvalidCreate() {
+        def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
+        def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
+        shouldFail(ApplicationException) {
+            sourceBackgroundInstitutionDegreesOfferedService.create(map)
+        }
     }
 
     // NOTE: No Updates are allowed
 
-	void testSourceBackgroundInstitutionDegreesOfferedDelete() {
-		def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
-		def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
+    void testSourceBackgroundInstitutionDegreesOfferedDelete() {
+        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
+        def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
         sourceBackgroundInstitutionDegreesOffered = sourceBackgroundInstitutionDegreesOfferedService.create(map)
-		assertNotNull "SourceBackgroundInstitutionDegreesOffered ID is null in SourceBackgroundInstitutionDegreesOffered Service Tests Create", sourceBackgroundInstitutionDegreesOffered.id
-		def id = sourceBackgroundInstitutionDegreesOffered.id
-		sourceBackgroundInstitutionDegreesOfferedService.delete( [domainModel: sourceBackgroundInstitutionDegreesOffered] )
-		assertNull "SourceBackgroundInstitutionDegreesOffered should have been deleted", sourceBackgroundInstitutionDegreesOffered.get(id)
-  	}
+        assertNotNull "SourceBackgroundInstitutionDegreesOffered ID is null in SourceBackgroundInstitutionDegreesOffered Service Tests Create", sourceBackgroundInstitutionDegreesOffered.id
+        def id = sourceBackgroundInstitutionDegreesOffered.id
+        sourceBackgroundInstitutionDegreesOfferedService.delete([domainModel: sourceBackgroundInstitutionDegreesOffered])
+        assertNull "SourceBackgroundInstitutionDegreesOffered should have been deleted", sourceBackgroundInstitutionDegreesOffered.get(id)
+    }
+
+
+    void testReadOnly() {
+        def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
+        def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
+        sourceBackgroundInstitutionDegreesOffered = sourceBackgroundInstitutionDegreesOfferedService.create(map)
+        assertNotNull "SourceBackgroundInstitutionDegreesOffered ID is null in SourceBackgroundInstitutionDegreesOffered Service Tests Create", sourceBackgroundInstitutionDegreesOffered.id
+
+        sourceBackgroundInstitutionDegreesOffered.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionDegreesOffered.degree = Degree.findWhere(code: "MA")
+        sourceBackgroundInstitutionDegreesOffered.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionDegreesOfferedService.update([domainModel: sourceBackgroundInstitutionDegreesOffered])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
 
 
     private def newValidForCreateSourceBackgroundInstitutionDegreesOffered() {

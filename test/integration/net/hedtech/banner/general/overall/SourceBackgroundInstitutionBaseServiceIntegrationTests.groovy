@@ -4,11 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.system.County
-import net.hedtech.banner.general.system.Nation
-import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
-import net.hedtech.banner.general.system.State
-import net.hedtech.banner.general.system.Zip
+import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -113,6 +109,23 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
         def id = sourceBackgroundInstitutionBase.id
         sourceBackgroundInstitutionBaseService.delete([domainModel: sourceBackgroundInstitutionBase])
         assertNull "SourceBackgroundInstitutionBase should have been deleted", sourceBackgroundInstitutionBase.get(id)
+    }
+
+
+    void testReadOnly() {
+        def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
+        def map = [domainModel: sourceBackgroundInstitutionBase]
+        sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create(map)
+        assertNotNull "SourceBackgroundInstitutionBase ID is null in SourceBackgroundInstitutionBase Service Tests Create", sourceBackgroundInstitutionBase.id
+
+        sourceBackgroundInstitutionBase.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        try {
+            sourceBackgroundInstitutionBaseService.update([domainModel: sourceBackgroundInstitutionBase])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
     }
 
 

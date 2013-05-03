@@ -10,44 +10,46 @@ class SourceBackgroundInstitutionBaseCompositeService {
     def sourceBackgroundInstitutionBaseService
 
     // Details (singular)
-//    def sourceBackgroundInstitutionAcademicService
-//    def sourceBackgroundInstitutionCharacteristicService
+    def sourceBackgroundInstitutionAcademicService
+    def sourceBackgroundInstitutionCharacteristicService
 
     // Details (repeating)
     def sourceBackgroundInstitutionCommentService
     def sourceBackgroundInstitutionContactPersonService
-//    def sourceBackgroundInstitutionDegreesOfferedService
-//    def sourceBackgroundInstitutionDemographicService
-//    def sourceBackgroundInstitutionDiplomasOfferedService
-//    def sourceBackgroundInstitutionEthnicMakeUpService
-//    def sourceBackgroundInstitutionTestScoreService
+    def sourceBackgroundInstitutionDegreesOfferedService
+    def sourceBackgroundInstitutionDemographicService
+    def sourceBackgroundInstitutionDiplomasOfferedService
+    def sourceBackgroundInstitutionEthnicMakeUpService
+    def sourceBackgroundInstitutionTestScoreService
 
 
     def createOrUpdate(map) {
+
+        // Deletions
         if (map?.deleteSourceBackgroundInstitutionBase) {
             def sourceAndBackgroundInstitution = map.deleteSourceBackgroundInstitutionBase.sourceAndBackgroundInstitution
 
             // Before deleting the Master record do cascade deletions
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionAcademic, sourceBackgroundInstitutionAcademicService)
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionCharacteristic, sourceBackgroundInstitutionCharacteristicService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionAcademic, sourceBackgroundInstitutionAcademicService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionCharacteristic, sourceBackgroundInstitutionCharacteristicService)
             deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionComment, sourceBackgroundInstitutionCommentService)
             deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionContactPerson, sourceBackgroundInstitutionContactPersonService)
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionDegreesOffered, sourceBackgroundInstitutionDegreesOfferedService)
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionDemographic, sourceBackgroundInstitutionDemographicService)
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionDiplomasOffered, sourceBackgroundInstitutionDiplomasOfferedService)
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionEthnicMakeUp, sourceBackgroundInstitutionEthnicMakeUpService)
-//            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionTestScore, sourceBackgroundInstitutionTestScoreService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionDegreesOffered, sourceBackgroundInstitutionDegreesOfferedService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionDemographic, sourceBackgroundInstitutionDemographicService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionDiplomasOffered, sourceBackgroundInstitutionDiplomasOfferedService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionEthnicMakeUp, sourceBackgroundInstitutionEthnicMakeUpService)
+            deleteDomainAll(sourceAndBackgroundInstitution, SourceBackgroundInstitutionTestScore, sourceBackgroundInstitutionTestScoreService)
 
             // Delete Master
             deleteDomain([map.deleteSourceBackgroundInstitutionBase], sourceBackgroundInstitutionBaseService)
 
         } else { // Delete detailed records that are marked for deletions
             // singular
-//            if (map?.deleteSourceBackgroundInstitutionAcademic)
-//                deleteDomain([map.deleteSourceBackgroundInstitutionAcademic], sourceBackgroundInstitutionAcademicService)
-//
-//            if (map?.deleteSourceBackgroundInstitutionCharacteristic)
-//                deleteDomain([map.deleteSourceBackgroundInstitutionCharacteristic], sourceBackgroundInstitutionCharacteristicService)
+            if (map?.deleteSourceBackgroundInstitutionAcademic)
+                deleteDomain([map.deleteSourceBackgroundInstitutionAcademic], sourceBackgroundInstitutionAcademicService)
+
+            if (map?.deleteSourceBackgroundInstitutionCharacteristic)
+                deleteDomain([map.deleteSourceBackgroundInstitutionCharacteristic], sourceBackgroundInstitutionCharacteristicService)
 
             // repeating
             if (map?.deleteSourceBackgroundInstitutionComments)
@@ -56,35 +58,36 @@ class SourceBackgroundInstitutionBaseCompositeService {
             if (map?.deleteSourceBackgroundInstitutionContactPersons)
                 deleteDomain(map.deleteSourceBackgroundInstitutionContactPersons, sourceBackgroundInstitutionContactPersonService)
 
-//            if (map?.deleteSourceBackgroundInstitutionDegreesOffereds)
-//                deleteDomain(map.deleteSourceBackgroundInstitutionDegreesOffereds, sourceBackgroundInstitutionDegreesOfferedService)
-//
-//            if (map?.deleteSourceBackgroundInstitutionDemographics)
-//                deleteDomain(map.deleteSourceBackgroundInstitutionDemographics, sourceBackgroundInstitutionDemographicService)
-//
-//            if (map?.deleteSourceBackgroundInstitutionDiplomasOffereds)
-//                deleteDomain(map.deleteSourceBackgroundInstitutionDiplomasOffereds, sourceBackgroundInstitutionDiplomasOfferedService)
-//
-//            if (map?.deleteSourceBackgroundInstitutionEthnicMakeUps)
-//                deleteDomain(map.deleteSourceBackgroundInstitutionEthnicMakeUps, sourceBackgroundInstitutionEthnicMakeUpService)
-//
-//            if (map?.deleteSourceBackgroundInstitutionTestScores)
-//                deleteDomain(map.deleteSourceBackgroundInstitutionTestScores, sourceBackgroundInstitutionTestScoreService)
+            if (map?.deleteSourceBackgroundInstitutionDegreesOffereds)
+                deleteDomain(map.deleteSourceBackgroundInstitutionDegreesOffereds, sourceBackgroundInstitutionDegreesOfferedService)
+
+            if (map?.deleteSourceBackgroundInstitutionDemographics)
+                deleteDomain(map.deleteSourceBackgroundInstitutionDemographics, sourceBackgroundInstitutionDemographicService)
+
+            if (map?.deleteSourceBackgroundInstitutionDiplomasOffereds)
+                deleteDomain(map.deleteSourceBackgroundInstitutionDiplomasOffereds, sourceBackgroundInstitutionDiplomasOfferedService)
+
+            if (map?.deleteSourceBackgroundInstitutionEthnicMakeUps)
+                deleteDomain(map.deleteSourceBackgroundInstitutionEthnicMakeUps, sourceBackgroundInstitutionEthnicMakeUpService)
+
+            if (map?.deleteSourceBackgroundInstitutionTestScores)
+                deleteDomain(map.deleteSourceBackgroundInstitutionTestScores, sourceBackgroundInstitutionTestScoreService)
         }
 
+        // Create or Update
         // singular
         if (map?.sourceBackgroundInstitutionBase)
             map.sourceBackgroundInstitutionBase =
                 createOrUpdateDomain([map.sourceBackgroundInstitutionBase], sourceBackgroundInstitutionBaseService)
 
-//        if (map?.sourceBackgroundInstitutionAcademic)
-//            map.sourceBackgroundInstitutionAcademic =
-//                createOrUpdateDomain([map.sourceBackgroundInstitutionAcademic], sourceBackgroundInstitutionAcademicService)
-//
-//        if (map?.sourceBackgroundInstitutionCharacteristic)
-//            map.sourceBackgroundInstitutionCharacteristic =
-//                createOrUpdateDomain([map.sourceBackgroundInstitutionCharacteristic], sourceBackgroundInstitutionCharacteristicService)
-//
+        if (map?.sourceBackgroundInstitutionAcademic)
+            map.sourceBackgroundInstitutionAcademic =
+                createOrUpdateDomain([map.sourceBackgroundInstitutionAcademic], sourceBackgroundInstitutionAcademicService)
+
+        if (map?.sourceBackgroundInstitutionCharacteristic)
+            map.sourceBackgroundInstitutionCharacteristic =
+                createOrUpdateDomain([map.sourceBackgroundInstitutionCharacteristic], sourceBackgroundInstitutionCharacteristicService)
+
         // repeating
         if (map?.sourceBackgroundInstitutionComments)
             map.sourceBackgroundInstitutionComments =
@@ -94,25 +97,25 @@ class SourceBackgroundInstitutionBaseCompositeService {
             map.sourceBackgroundInstitutionContactPersons =
                 createOrUpdateDomain(map.sourceBackgroundInstitutionContactPersons, sourceBackgroundInstitutionContactPersonService)
 
-//        if (map?.sourceBackgroundInstitutionDegreesOffereds)
-//            map.sourceBackgroundInstitutionDegreesOffereds =
-//                createOrUpdateDomain(map.sourceBackgroundInstitutionDegreesOffereds, sourceBackgroundInstitutionDegreesOfferedService)
-//
-//        if (map?.sourceBackgroundInstitutionDemographics)
-//            map.sourceBackgroundInstitutionDemographics =
-//                createOrUpdateDomain(map.sourceBackgroundInstitutionDemographics, sourceBackgroundInstitutionDemographicService)
-//
-//        if (map?.sourceBackgroundInstitutionDiplomasOffereds)
-//            map.sourceBackgroundInstitutionDiplomasOffereds =
-//                createOrUpdateDomain(map.sourceBackgroundInstitutionDiplomasOffereds, sourceBackgroundInstitutionDiplomasOfferedService)
-//
-//        if (map?.sourceBackgroundInstitutionEthnicMakeUps)
-//            map.sourceBackgroundInstitutionEthnicMakeUps =
-//                createOrUpdateDomain(map.sourceBackgroundInstitutionEthnicMakeUps, sourceBackgroundInstitutionEthnicMakeUpService)
-//
-//        if (map?.sourceBackgroundInstitutionTestScores)
-//            map.sourceBackgroundInstitutionTestScores =
-//                createOrUpdateDomain(map.sourceBackgroundInstitutionTestScores, sourceBackgroundInstitutionTestScoreService)
+        if (map?.sourceBackgroundInstitutionDegreesOffereds)
+            map.sourceBackgroundInstitutionDegreesOffereds =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionDegreesOffereds, sourceBackgroundInstitutionDegreesOfferedService)
+
+        if (map?.sourceBackgroundInstitutionDemographics)
+            map.sourceBackgroundInstitutionDemographics =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionDemographics, sourceBackgroundInstitutionDemographicService)
+
+        if (map?.sourceBackgroundInstitutionDiplomasOffereds)
+            map.sourceBackgroundInstitutionDiplomasOffereds =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionDiplomasOffereds, sourceBackgroundInstitutionDiplomasOfferedService)
+
+        if (map?.sourceBackgroundInstitutionEthnicMakeUps)
+            map.sourceBackgroundInstitutionEthnicMakeUps =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionEthnicMakeUps, sourceBackgroundInstitutionEthnicMakeUpService)
+
+        if (map?.sourceBackgroundInstitutionTestScores)
+            map.sourceBackgroundInstitutionTestScores =
+                createOrUpdateDomain(map.sourceBackgroundInstitutionTestScores, sourceBackgroundInstitutionTestScoreService)
     }
 
     /**

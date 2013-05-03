@@ -90,15 +90,35 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
         }
     }
 
-	void testSourceBackgroundInstitutionTestScoreDelete() {
-		def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
-		def map = [domainModel: sourceBackgroundInstitutionTestScore]
+
+    void testSourceBackgroundInstitutionTestScoreDelete() {
+        def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
+        def map = [domainModel: sourceBackgroundInstitutionTestScore]
         sourceBackgroundInstitutionTestScore = sourceBackgroundInstitutionTestScoreService.create(map)
-		assertNotNull "SourceBackgroundInstitutionTestScore ID is null in SourceBackgroundInstitutionTestScore Service Tests Create", sourceBackgroundInstitutionTestScore.id
-		def id = sourceBackgroundInstitutionTestScore.id
-        sourceBackgroundInstitutionTestScore.delete( map )
-		assertNull "SourceBackgroundInstitutionTestScore should have been deleted", sourceBackgroundInstitutionTestScore.get(id)
-  	}
+        assertNotNull "SourceBackgroundInstitutionTestScore ID is null in SourceBackgroundInstitutionTestScore Service Tests Create", sourceBackgroundInstitutionTestScore.id
+        def id = sourceBackgroundInstitutionTestScore.id
+        sourceBackgroundInstitutionTestScore.delete(map)
+        assertNull "SourceBackgroundInstitutionTestScore should have been deleted", sourceBackgroundInstitutionTestScore.get(id)
+    }
+
+
+    void testReadOnly() {
+        def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
+        def map = [domainModel: sourceBackgroundInstitutionTestScore]
+        sourceBackgroundInstitutionTestScore = sourceBackgroundInstitutionTestScoreService.create(map)
+        assertNotNull "SourceBackgroundInstitutionTestScore ID is null in SourceBackgroundInstitutionTestScore Service Tests Create", sourceBackgroundInstitutionTestScore.id
+
+        sourceBackgroundInstitutionTestScore.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionTestScore.testScore = TestScore.findWhere(code: "IT")
+        sourceBackgroundInstitutionTestScore.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionTestScoreService.update([domainModel: sourceBackgroundInstitutionTestScore])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
 
 
     private def newValidForCreateSourceBackgroundInstitutionTestScore() {

@@ -103,6 +103,24 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     }
 
 
+    void testReadOnly() {
+        def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
+        def map = [domainModel: sourceBackgroundInstitutionDemographic]
+        sourceBackgroundInstitutionDemographic = sourceBackgroundInstitutionDemographicService.create(map)
+        assertNotNull "SourceBackgroundInstitutionDemographic ID is null in SourceBackgroundInstitutionDemographic Service Tests Create", sourceBackgroundInstitutionDemographic.id
+
+        sourceBackgroundInstitutionDemographic.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionDemographic.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionDemographicService.update([domainModel: sourceBackgroundInstitutionDemographic])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = new SourceBackgroundInstitutionDemographic(
                 demographicYear: 2014,

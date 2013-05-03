@@ -13,12 +13,10 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     def sourceBackgroundInstitutionEthnicMakeUpService
 
 
-
     protected void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
-
 
 
     protected void tearDown() {
@@ -100,6 +98,25 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
         def id = sourceBackgroundInstitutionEthnicMakeUp.id
         sourceBackgroundInstitutionEthnicMakeUpService.delete([domainModel: sourceBackgroundInstitutionEthnicMakeUp])
         assertNull "SourceBackgroundInstitutionEthnicMakeUp should have been deleted", sourceBackgroundInstitutionEthnicMakeUp.get(id)
+    }
+
+
+    void testReadOnly() {
+        def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
+        def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]
+        sourceBackgroundInstitutionEthnicMakeUp = sourceBackgroundInstitutionEthnicMakeUpService.create(map)
+        assertNotNull "SourceBackgroundInstitutionEthnicMakeUp ID is null in SourceBackgroundInstitutionEthnicMakeUp Service Tests Create", sourceBackgroundInstitutionEthnicMakeUp.id
+
+        sourceBackgroundInstitutionEthnicMakeUp.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionEthnicMakeUp.ethnicity = Ethnicity.findWhere(code: "2")
+        sourceBackgroundInstitutionEthnicMakeUp.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionEthnicMakeUpService.update([domainModel: sourceBackgroundInstitutionEthnicMakeUp])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
     }
 
 

@@ -103,6 +103,24 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     }
 
 
+    void testReadOnly() {
+        def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
+        def map = [domainModel: sourceBackgroundInstitutionAcademic]
+        sourceBackgroundInstitutionAcademic = sourceBackgroundInstitutionAcademicService.create(map)
+        assertNotNull "SourceBackgroundInstitutionAcademic ID is null in SourceBackgroundInstitutionAcademic Service Tests Create", sourceBackgroundInstitutionAcademic.id
+
+        sourceBackgroundInstitutionAcademic.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionAcademic.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionAcademicService.update([domainModel: sourceBackgroundInstitutionAcademic])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = new SourceBackgroundInstitutionAcademic(
                 demographicYear: 2014,

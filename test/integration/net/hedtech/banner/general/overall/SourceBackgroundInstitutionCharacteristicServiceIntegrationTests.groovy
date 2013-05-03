@@ -60,6 +60,28 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     }
 
 
+    void testReadOnly() {
+        def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
+        def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
+        sourceBackgroundInstitutionCharacteristic = sourceBackgroundInstitutionCharacteristicService.create(map)
+        assertNotNull "SourceBackgroundInstitutionCharacteristic ID is null in SourceBackgroundInstitutionCharacteristic Service Tests Create", sourceBackgroundInstitutionCharacteristic.id
+
+        sourceBackgroundInstitutionCharacteristic.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionCharacteristic.backgroundInstitutionCharacteristic = new BackgroundInstitutionCharacteristic(
+                code: "Z",
+                description: "ZZZZ",
+        )
+        map.domainModel.demographicYear = 2013
+        try {
+            sourceBackgroundInstitutionCharacteristicService.update([domainModel: sourceBackgroundInstitutionCharacteristic])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionCharacteristic() {
         def backgroundInstitutionCharacteristic = newBackgroundInstitutionCharacteristic()
         backgroundInstitutionCharacteristic.save(failOnError: true, flush: true)

@@ -106,6 +106,24 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
+    void testReadOnly() {
+        def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
+        def map = [domainModel: sourceBackgroundInstitutionContactPerson]
+        sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create(map)
+        assertNotNull "SourceBackgroundInstitutionContactPerson ID is null in SourceBackgroundInstitutionContactPerson Service Tests Create", sourceBackgroundInstitutionContactPerson.id
+
+        sourceBackgroundInstitutionContactPerson.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
+        sourceBackgroundInstitutionContactPerson.name = "UPDATENAME"
+        try {
+            sourceBackgroundInstitutionContactPersonService.update([domainModel: sourceBackgroundInstitutionContactPerson])
+            fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "readonlyFieldsCannotBeModified"
+        }
+    }
+
+
     private def newValidForCreateSourceBackgroundInstitutionContactPerson() {
         def personType = newValidPersonType("TTTT", "TTTT")
         personType.save(failOnError: true, flush: true)
