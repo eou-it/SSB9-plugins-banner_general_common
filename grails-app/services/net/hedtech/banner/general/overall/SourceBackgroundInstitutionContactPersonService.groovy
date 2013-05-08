@@ -4,6 +4,8 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.system.PersonType
+import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.service.ServiceBase
 
 class SourceBackgroundInstitutionContactPersonService extends ServiceBase {
@@ -12,12 +14,17 @@ class SourceBackgroundInstitutionContactPersonService extends ServiceBase {
         validateCodes(map.domainModel)
     }
 
-    /**
-     * Validate the SourceBackgroundInstitutionBase record must exists which is not enforced with a foreign key constraint
-     */
-    private def validateCodes(domain) {
-        def rec = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: domain.sourceAndBackgroundInstitution)
-        if (!rec)
-            throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:invalidSourceBase@@")
+    private void validateCodes(domain) {
+        if (domain?.sourceAndBackgroundInstitution?.code) {
+            SourceAndBackgroundInstitution sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findByCode(domain.sourceAndBackgroundInstitution.code)
+            if (!sourceAndBackgroundInstitution)
+                throw new ApplicationException(SourceBackgroundInstitutionContactPerson, "@@r1:invalidSourceAndBackgroundInstitution@@")
+        }
+
+        if (domain?.personType?.code) {
+            PersonType personType = PersonType.findByCode(domain.personType.code)
+            if (!personType)
+                throw new ApplicationException(SourceBackgroundInstitutionContactPerson, "@@r1:invalidPersonType@@")
+        }
     }
 }
