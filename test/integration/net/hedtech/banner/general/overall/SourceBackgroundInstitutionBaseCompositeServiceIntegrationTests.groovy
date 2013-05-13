@@ -11,6 +11,22 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
 
     def sourceBackgroundInstitutionBaseCompositeService
 
+    // Master (singular)
+    def sourceBackgroundInstitutionBaseService
+
+    // Details (singular)
+    def sourceBackgroundInstitutionAcademicService
+    def sourceBackgroundInstitutionCharacteristicService
+
+    // Details (repeating)
+    def sourceBackgroundInstitutionCommentService
+    def sourceBackgroundInstitutionContactPersonService
+    def sourceBackgroundInstitutionDegreesOfferedService
+    def sourceBackgroundInstitutionDemographicService
+    def sourceBackgroundInstitutionDiplomasOfferedService
+    def sourceBackgroundInstitutionEthnicMakeUpService
+    def sourceBackgroundInstitutionTestScoreService
+
 
     protected void setUp() {
         formContext = ['GUAGMNU']
@@ -23,84 +39,12 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
     }
 
 
-    void testSourceBackgroundInstitutionBaseCompositeCreate() {
-        // create and test new base and detail records
-        createAll()
-    }
-
-
-    void testSourceBackgroundInstitutionBaseCompositeUpdate() {
-        // create and test new base and detail records
-        def map = createAll()
-
-        // update some property of each record
-        map.sourceBackgroundInstitutionBase.streetLine1 = "UPDATE"
-        map.sourceBackgroundInstitutionAcademic.accreditationType = "UPDT"
-        map.sourceBackgroundInstitutionComment.commentData = "UPDATE"
-        map.sourceBackgroundInstitutionContactPerson.name = "UPDATE"
-        map.sourceBackgroundInstitutionDemographic.enrollment = 101
-        map.sourceBackgroundInstitutionEthnicMakeUp.ethnicPercent = 51
-        map.sourceBackgroundInstitutionTestScore.meanTestScore = "B"
-
-        /*
-         NOTE: these domains have no fields that are updateable
-           SourceBackgroundInstitutionCharacteristic
-           SourceBackgroundInstitutionDegreesOffered
-           SourceBackgroundInstitutionDiplomasOffered
-        */
-
-        // do the update
-        sourceBackgroundInstitutionBaseCompositeService.createOrUpdate(
-                [
-                        // single
-                        sourceBackgroundInstitutionBase: map.sourceBackgroundInstitutionBase,
-                        sourceBackgroundInstitutionAcademic: map.sourceBackgroundInstitutionAcademic,
-
-                        // repeating
-                        sourceBackgroundInstitutionComments: [map.sourceBackgroundInstitutionComment],
-                        sourceBackgroundInstitutionContactPersons: [map.sourceBackgroundInstitutionContactPerson],
-                        sourceBackgroundInstitutionDemographics: [map.sourceBackgroundInstitutionDemographic],
-                        sourceBackgroundInstitutionEthnicMakeUps: [map.sourceBackgroundInstitutionEthnicMakeUp],
-                        sourceBackgroundInstitutionTestScores: [map.sourceBackgroundInstitutionTestScore],
-                ])
-
-        // test that the update worked
-        def sourceBackgroundInstitutionBase = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionBase.version
-        assertEquals "UPDATE", sourceBackgroundInstitutionBase.streetLine1
-
-        def sourceBackgroundInstitutionAcademic = SourceBackgroundInstitutionAcademic.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionAcademic.version
-        assertEquals "UPDT", sourceBackgroundInstitutionAcademic.accreditationType
-
-        def sourceBackgroundInstitutionComment = SourceBackgroundInstitutionComment.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionComment.version
-        assertEquals "UPDATE", sourceBackgroundInstitutionComment.commentData
-
-        def sourceBackgroundInstitutionContactPerson = SourceBackgroundInstitutionContactPerson.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionContactPerson.version
-        assertEquals "UPDATE", sourceBackgroundInstitutionContactPerson.name
-
-        def sourceBackgroundInstitutionDemographic = SourceBackgroundInstitutionDemographic.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionDemographic.version
-        assertEquals 101, sourceBackgroundInstitutionDemographic.enrollment
-
-        def sourceBackgroundInstitutionEthnicMakeUp = SourceBackgroundInstitutionEthnicMakeUp.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionEthnicMakeUp.version
-        assertEquals 51, sourceBackgroundInstitutionEthnicMakeUp.ethnicPercent
-
-        def sourceBackgroundInstitutionTestScore = SourceBackgroundInstitutionTestScore.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertEquals 1L, sourceBackgroundInstitutionTestScore.version
-        assertEquals "B", sourceBackgroundInstitutionTestScore.meanTestScore
-    }
-
-
     void testSourceBackgroundInstitutionBaseCompositeDeleteAll() {
         // create and test new base and detail records
         def map = createAll()
 
         // delete master record
-        sourceBackgroundInstitutionBaseCompositeService.createOrUpdate([deleteSourceBackgroundInstitutionBase: map.sourceBackgroundInstitutionBase])
+        sourceBackgroundInstitutionBaseCompositeService.deleteAll(SourceAndBackgroundInstitution.findWhere(code: "999999"))
 
         // comfirm both master and detail records were deleted
         def sourceBackgroundInstitutionBase = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
@@ -135,65 +79,14 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
     }
 
 
-    void testSourceBackgroundInstitutionBaseCompositeDelete() {
-        // create and test new base and detail records
-        def map = createAll()
-
-        // delete ONLY the detail records
-        sourceBackgroundInstitutionBaseCompositeService.createOrUpdate([
-                // single
-                deleteSourceBackgroundInstitutionAcademic: map.sourceBackgroundInstitutionAcademic,
-                deleteSourceBackgroundInstitutionCharacteristic: map.sourceBackgroundInstitutionCharacteristic,
-
-                // repeating
-                deleteSourceBackgroundInstitutionComments: [map.sourceBackgroundInstitutionComment],
-                deleteSourceBackgroundInstitutionContactPersons: [map.sourceBackgroundInstitutionContactPerson],
-                deleteSourceBackgroundInstitutionDegreesOffereds: [map.sourceBackgroundInstitutionDegreesOffered],
-                deleteSourceBackgroundInstitutionDemographics: [map.sourceBackgroundInstitutionDemographic],
-                deleteSourceBackgroundInstitutionDiplomasOffereds: [map.sourceBackgroundInstitutionDiplomasOffered],
-                deleteSourceBackgroundInstitutionEthnicMakeUps: [map.sourceBackgroundInstitutionEthnicMakeUp],
-                deleteSourceBackgroundInstitutionTestScores: [map.sourceBackgroundInstitutionTestScore],
-        ])
-
-        // confirm the master record still exists
-        def sourceBackgroundInstitutionBase = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNotNull sourceBackgroundInstitutionBase
-
-        // comfirm detail records were deleted
-        def sourceBackgroundInstitutionAcademic = SourceBackgroundInstitutionAcademic.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionAcademic
-
-        def sourceBackgroundInstitutionCharacteristic = SourceBackgroundInstitutionCharacteristic.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionCharacteristic
-
-        def sourceBackgroundInstitutionComment = SourceBackgroundInstitutionComment.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionComment
-
-        def sourceBackgroundInstitutionContactPerson = SourceBackgroundInstitutionContactPerson.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionContactPerson
-
-        def sourceBackgroundInstitutionDegreesOffered = SourceBackgroundInstitutionDegreesOffered.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionDegreesOffered
-
-        def sourceBackgroundInstitutionDemographic = SourceBackgroundInstitutionDemographic.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionDemographic
-
-        def sourceBackgroundInstitutionDiplomasOffered = SourceBackgroundInstitutionDiplomasOffered.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionDiplomasOffered
-
-        def sourceBackgroundInstitutionEthnicMakeUp = SourceBackgroundInstitutionEthnicMakeUp.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionEthnicMakeUp
-
-        def sourceBackgroundInstitutionTestScore = SourceBackgroundInstitutionTestScore.findWhere(sourceAndBackgroundInstitution: map.sourceAndBackgroundInstitution)
-        assertNull sourceBackgroundInstitutionTestScore
-    }
-
     // -----------------------------------------------------------------------------------------------------------------
     // Setup
     // -----------------------------------------------------------------------------------------------------------------
 
     private def createAll() {
-        // create new base and detail records
+        def sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "999999")
+
+        // Instantiate needed domains
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
@@ -205,26 +98,19 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
 
-        def sourceAndBackgroundInstitution = sourceBackgroundInstitutionBase.sourceAndBackgroundInstitution
+        // Save the domains
+        sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
+        sourceBackgroundInstitutionAcademic = sourceBackgroundInstitutionAcademicService.create([domainModel: sourceBackgroundInstitutionAcademic])
+        sourceBackgroundInstitutionCharacteristic = sourceBackgroundInstitutionCharacteristicService.create([domainModel: sourceBackgroundInstitutionCharacteristic])
+        sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
+        sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
+        sourceBackgroundInstitutionDegreesOffered = sourceBackgroundInstitutionDegreesOfferedService.create([domainModel: sourceBackgroundInstitutionDegreesOffered])
+        sourceBackgroundInstitutionDemographic = sourceBackgroundInstitutionDemographicService.create([domainModel: sourceBackgroundInstitutionDemographic])
+        sourceBackgroundInstitutionDiplomasOffered = sourceBackgroundInstitutionDiplomasOfferedService.create([domainModel: sourceBackgroundInstitutionDiplomasOffered])
+        sourceBackgroundInstitutionEthnicMakeUp = sourceBackgroundInstitutionEthnicMakeUpService.create([domainModel: sourceBackgroundInstitutionEthnicMakeUp])
+        sourceBackgroundInstitutionTestScore = sourceBackgroundInstitutionTestScoreService.create([domainModel: sourceBackgroundInstitutionTestScore])
 
-        sourceBackgroundInstitutionBaseCompositeService.createOrUpdate(
-                [
-                        // single
-                        sourceBackgroundInstitutionBase: sourceBackgroundInstitutionBase,
-                        sourceBackgroundInstitutionAcademic: sourceBackgroundInstitutionAcademic,
-                        sourceBackgroundInstitutionCharacteristic: sourceBackgroundInstitutionCharacteristic,
-
-                        // repeating
-                        sourceBackgroundInstitutionComments: [sourceBackgroundInstitutionComment],
-                        sourceBackgroundInstitutionContactPersons: [sourceBackgroundInstitutionContactPerson],
-                        sourceBackgroundInstitutionDegreesOffereds: [sourceBackgroundInstitutionDegreesOffered],
-                        sourceBackgroundInstitutionDemographics: [sourceBackgroundInstitutionDemographic],
-                        sourceBackgroundInstitutionDiplomasOffereds: [sourceBackgroundInstitutionDiplomasOffered],
-                        sourceBackgroundInstitutionEthnicMakeUps: [sourceBackgroundInstitutionEthnicMakeUp],
-                        sourceBackgroundInstitutionTestScores: [sourceBackgroundInstitutionTestScore],
-                ])
-
-        // comfirm these records exists
+        // Confirm these records exists
         sourceBackgroundInstitutionBase = SourceBackgroundInstitutionBase.findWhere(sourceAndBackgroundInstitution: sourceAndBackgroundInstitution)
         assertNotNull sourceBackgroundInstitutionBase.version
 
@@ -257,7 +143,6 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
 
         def map =
             [
-                    sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
                     sourceBackgroundInstitutionBase: sourceBackgroundInstitutionBase,
                     sourceBackgroundInstitutionAcademic: sourceBackgroundInstitutionAcademic,
                     sourceBackgroundInstitutionCharacteristic: sourceBackgroundInstitutionCharacteristic,
