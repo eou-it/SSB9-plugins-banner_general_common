@@ -89,7 +89,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
         assertNotNull sourceBackgroundInstitutionContactPerson.lastModified
 
         //Update the entity with new invalid values
-        sourceBackgroundInstitutionContactPerson.name = null
+        sourceBackgroundInstitutionContactPerson.personName = null
         shouldFail(ApplicationException) {
             sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.update([domainModel: sourceBackgroundInstitutionContactPerson])
         }
@@ -113,7 +113,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
         assertNotNull "SourceBackgroundInstitutionContactPerson ID is null in SourceBackgroundInstitutionContactPerson Service Tests Create", sourceBackgroundInstitutionContactPerson.id
 
         sourceBackgroundInstitutionContactPerson.sourceAndBackgroundInstitution = SourceAndBackgroundInstitution.findWhere(code: "5815")
-        sourceBackgroundInstitutionContactPerson.name = "UPDATENAME"
+        sourceBackgroundInstitutionContactPerson.personName = "UPDATENAME"
         try {
             sourceBackgroundInstitutionContactPersonService.update([domainModel: sourceBackgroundInstitutionContactPerson])
             fail("This should have failed with @@r1:readonlyFieldsCannotBeModified")
@@ -129,7 +129,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
         personType.save(failOnError: true, flush: true)
 
         def sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
-                name: "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                personName: "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
                 phoneArea: "123456",
                 phoneNumber: "123456789012",
                 phoneExtension: "1234567890",

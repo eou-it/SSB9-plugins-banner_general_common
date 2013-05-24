@@ -15,8 +15,8 @@ import javax.persistence.*
  */
 @NamedQueries(value = [
 @NamedQuery(
-        name = "SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution",
-        query = """  FROM SourceBackgroundInstitutionBase a
+name = "SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution",
+query = """  FROM SourceBackgroundInstitutionBase a
                     WHERE a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode""")
 ])
 
@@ -209,7 +209,13 @@ class SourceBackgroundInstitutionBase implements Serializable {
         streetLine1(nullable: true, maxSize: 75)
         streetLine2(nullable: true, maxSize: 75)
         streetLine3(nullable: true, maxSize: 75)
-        city(nullable: false, maxSize: 50)
+        city(nullable: false, maxSize: 50,
+                validator: { field ->
+                    if (field.trim().isEmpty()) {
+                        return "default.null.message"
+                    }
+                }
+        )
         zip(nullable: true, maxSize: 30)
         houseNumber(nullable: true, maxSize: 10)
         streetLine4(nullable: true, maxSize: 75)

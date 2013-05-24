@@ -36,7 +36,7 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
      * This field identifies the name of the contact at the source.
      */
     @Column(name = "SORBCNT_NAME")
-    String name
+    String personName
 
     /**
      * This field identifies the area code associated with the telephone number of     the contact person at the source.
@@ -104,7 +104,7 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
         """SourceBackgroundInstitutionContactPerson[
 					id=$id, 
 					version=$version, 
-					name=$name, 
+					personName=$personName,
 					phoneArea=$phoneArea, 
 					phoneNumber=$phoneNumber, 
 					phoneExtension=$phoneExtension, 
@@ -123,7 +123,7 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
         SourceBackgroundInstitutionContactPerson that = (SourceBackgroundInstitutionContactPerson) o
         if (id != that.id) return false
         if (version != that.version) return false
-        if (name != that.name) return false
+        if (personName != that.personName) return false
         if (phoneArea != that.phoneArea) return false
         if (phoneNumber != that.phoneNumber) return false
         if (phoneExtension != that.phoneExtension) return false
@@ -141,7 +141,7 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
         int result
         result = (id != null ? id.hashCode() : 0)
         result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (name != null ? name.hashCode() : 0)
+        result = 31 * result + (personName != null ? personName.hashCode() : 0)
         result = 31 * result + (phoneArea != null ? phoneArea.hashCode() : 0)
         result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0)
         result = 31 * result + (phoneExtension != null ? phoneExtension.hashCode() : 0)
@@ -156,7 +156,7 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
 
 
     static constraints = {
-        name(nullable: false, maxSize: 230)
+        personName(nullable: false, maxSize: 230)
         phoneArea(nullable: true, maxSize: 6)
         phoneNumber(nullable: true, maxSize: 12)
         phoneExtension(nullable: true, maxSize: 10)
@@ -169,7 +169,7 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
     }
 
     //Read Only fields that should be protected against update
-    public static readonlyProperties = ['name', 'sourceAndBackgroundInstitution']
+    public static readonlyProperties = ['sourceAndBackgroundInstitution']
 
 
     def static countAll(filterData) {

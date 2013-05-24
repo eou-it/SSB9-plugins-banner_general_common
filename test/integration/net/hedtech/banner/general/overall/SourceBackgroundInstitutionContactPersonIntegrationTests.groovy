@@ -47,7 +47,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
         assertNotNull sourceBackgroundInstitutionContactPerson.id
         assertEquals 0L, sourceBackgroundInstitutionContactPerson.version
         assertEquals "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-                sourceBackgroundInstitutionContactPerson.name
+                sourceBackgroundInstitutionContactPerson.personName
         assertEquals "123456", sourceBackgroundInstitutionContactPerson.phoneArea
         assertEquals "123456789012", sourceBackgroundInstitutionContactPerson.phoneNumber
         assertEquals "1234567890", sourceBackgroundInstitutionContactPerson.phoneExtension
@@ -64,7 +64,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
         sourceBackgroundInstitutionContactPerson.personType = newValidPersonType("UPDT", "UPDTDESC")
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
 
-        //Assert for sucessful update
+        //Assert for successful update
         sourceBackgroundInstitutionContactPerson = SourceBackgroundInstitutionContactPerson.get(sourceBackgroundInstitutionContactPerson.id)
         assertEquals 1L, sourceBackgroundInstitutionContactPerson?.version
         assertEquals "UPDATE", sourceBackgroundInstitutionContactPerson.phoneArea
@@ -81,14 +81,14 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
         assertNotNull sourceBackgroundInstitutionContactPerson.id
         assertEquals 0L, sourceBackgroundInstitutionContactPerson.version
         assertEquals "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-                sourceBackgroundInstitutionContactPerson.name
+                sourceBackgroundInstitutionContactPerson.personName
         assertEquals "123456", sourceBackgroundInstitutionContactPerson.phoneArea
         assertEquals "123456789012", sourceBackgroundInstitutionContactPerson.phoneNumber
         assertEquals "1234567890", sourceBackgroundInstitutionContactPerson.phoneExtension
         assertEquals "1234", sourceBackgroundInstitutionContactPerson.countryPhone
 
         //Update the entity with invalid values
-        sourceBackgroundInstitutionContactPerson.name = null
+        sourceBackgroundInstitutionContactPerson.personName = null
         shouldFail(ValidationException) {
             sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
         }
@@ -153,7 +153,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
         assertFalse "SourceBackgroundInstitutionContactPerson should have failed validation", sourceBackgroundInstitutionContactPerson.validate()
         assertErrorsFor sourceBackgroundInstitutionContactPerson, 'nullable',
                 [
-                        'name',
+                        'personName',
                         'sourceAndBackgroundInstitution'
                 ]
         assertNoErrorsFor sourceBackgroundInstitutionContactPerson,
@@ -188,26 +188,26 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
         def sourceAndBackgroundInstitution = sourceBackgroundInstitutionContactPerson.sourceAndBackgroundInstitution
 
         sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
-                name: "Don Johnson",
+                personName: "Don Johnson",
                 sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
         )
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
 
         sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
-                name: "Larry Johnson",
+                personName: "Larry Johnson",
                 sourceAndBackgroundInstitution: sourceAndBackgroundInstitution,
         )
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
 
-        def pagingAndSortParams = [sortColumn: "name", sortDirection: "asc", max: 5, offset: 0]
-        Map paramsMap = [sourceAndBackgroundInstitutionCode: sourceAndBackgroundInstitution.code, name: "%Johnson%"]
-        def criteriaMap = [[key: "name", binding: "name", operator: "contains"]]
+        def pagingAndSortParams = [sortColumn: "personName", sortDirection: "asc", max: 5, offset: 0]
+        Map paramsMap = [sourceAndBackgroundInstitutionCode: sourceAndBackgroundInstitution.code, personName: "%Johnson%"]
+        def criteriaMap = [[key: "personName", binding: "personName", operator: "contains"]]
         def filterData = [params: paramsMap, criteria: criteriaMap]
 
         def records = SourceBackgroundInstitutionContactPerson.fetchSearch(filterData, pagingAndSortParams)
         assertTrue records.size() == 2
         records.each { record ->
-            assertTrue record.name.indexOf("Johnson") >= 0 // -1 is a failed search
+            assertTrue record.personName.indexOf("Johnson") >= 0 // -1 is a failed search
         }
     }
 
@@ -217,7 +217,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
         personType.save(failOnError: true, flush: true)
 
         def sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
-                name: "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                personName: "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
                 phoneArea: "123456",
                 phoneNumber: "123456789012",
                 phoneExtension: "1234567890",
