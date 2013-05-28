@@ -46,18 +46,82 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+    void testSourceBackgroundInstitutionBaseMissingAddressInfoCreate() {
+        def zip = newValidForCreateZip()
+        def sourceBackgroundInstitutionBase
+
+        // Test no entry of zip, state, or nation
+        sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
+                city: "TTTTTTTTTT",
+        )
+
+        try {
+            sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
+            fail "Should have failed with @@r1:missingStateAndZipAndNation@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "missingStateAndZipAndNation"
+        }
+
+        // Test entry of zip with no state and nation
+        sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
+                zip: zip.code,
+                city: "TTTTTTTTTT",
+        )
+        try {
+            sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
+            fail "Should have failed with @@r1:missingStateAndNation@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "missingStateAndNation"
+        }
+
+
+        // Test entry of state with no zip
+        sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
+                state: State.findByCode("PA"),
+                city: "TTTTTTTTTT",
+        )
+        try {
+            sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
+            fail "Should have failed with @@r1:missingZip@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "missingZip"
+        }
+    }
+
+
+    void testSourceBackgroundInstitutionBaseMissingAddressInfoUpdate() {
+        SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
+        sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
+
+        sourceBackgroundInstitutionBase.zip = null
+        sourceBackgroundInstitutionBase.state = null
+        sourceBackgroundInstitutionBase.nation = null
+
+        try {
+            sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
+            fail "Should have failed with @@r1:missingStateAndZipAndNation@@"
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "missingStateAndZipAndNation"
+        }
+    }
+
+
     private def doUpdate(sourceBackgroundInstitutionBase) {
         //Update the entity
         sourceBackgroundInstitutionBase.streetLine1 = "1234567890UPDATE1"
         sourceBackgroundInstitutionBase.streetLine2 = "1234567890UPDATE2"
         sourceBackgroundInstitutionBase.streetLine3 = "1234567890UPDATE3"
         sourceBackgroundInstitutionBase.city = "CITYNEW"
-        sourceBackgroundInstitutionBase.zip = "ZIPNEW"
+        sourceBackgroundInstitutionBase.zip = "19355"
         sourceBackgroundInstitutionBase.houseNumber = "NUMNEW"
         sourceBackgroundInstitutionBase.streetLine4 = "1234567890UPDATE4"
-        sourceBackgroundInstitutionBase.state = State.findWhere(code: "NJ")
-        sourceBackgroundInstitutionBase.county = County.findWhere(code: "002")
-        sourceBackgroundInstitutionBase.nation = Nation.findWhere(code: "2")
+        sourceBackgroundInstitutionBase.state = State.findByCode("NJ")
+        sourceBackgroundInstitutionBase.county = County.findByCode("002")
+        sourceBackgroundInstitutionBase.nation = Nation.findByCode("2")
     }
 
 
@@ -81,7 +145,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
         assertEquals "1234567890UPDATE2", sourceBackgroundInstitutionBase.streetLine2
         assertEquals "1234567890UPDATE3", sourceBackgroundInstitutionBase.streetLine3
         assertEquals "CITYNEW", sourceBackgroundInstitutionBase.city
-        assertEquals "ZIPNEW", sourceBackgroundInstitutionBase.zip
+        assertEquals "19355", sourceBackgroundInstitutionBase.zip
         assertEquals "NUMNEW", sourceBackgroundInstitutionBase.houseNumber
         assertEquals "1234567890UPDATE4", sourceBackgroundInstitutionBase.streetLine4
         assertEquals "NJ", sourceBackgroundInstitutionBase.state.code
@@ -141,9 +205,9 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
                 houseNumber: "1234567890",
                 streetLine4: "123456789012345678901234567890123456789012345678901234567890123456789012345",
                 sourceAndBackgroundInstitution: SourceAndBackgroundInstitution.findWhere(code: "999999"),
-                state: State.findWhere(code: "PA"),
-                county: County.findWhere(code: "001"),
-                nation: Nation.findWhere(code: "1"),
+                state: State.findByCode("PA"),
+                county: County.findByCode("001"),
+                nation: Nation.findByCode("1"),
         )
         return sourceBackgroundInstitutionBase
     }
@@ -162,9 +226,9 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
         def zip = new Zip(
                 code: "123456789012345678901234567890",
                 city: "12345678901234567890123456789012345678901234567890",
-                state: State.findWhere(code: "PA"),
-                county: County.findWhere(code: "001"),
-                nation: Nation.findWhere(code: "1"),
+                state: State.findByCode("PA"),
+                county: County.findByCode("001"),
+                nation: Nation.findByCode("1"),
         )
         zip.save(flush: true, failOnError: true)
         return zip

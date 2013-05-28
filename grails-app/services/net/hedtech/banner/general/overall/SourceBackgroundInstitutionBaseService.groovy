@@ -12,6 +12,13 @@ class SourceBackgroundInstitutionBaseService extends ServiceBase {
 
     def preCreate(map) {
         validateCodes(map.domainModel)
+        checkAddress(map.domainModel)
+    }
+
+
+    def preUpdate(map) {
+        validateCodes(map.domainModel)
+        checkAddress(map.domainModel)
     }
 
 
@@ -21,11 +28,27 @@ class SourceBackgroundInstitutionBaseService extends ServiceBase {
             if (!sourceAndBackgroundInstitution)
                 throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:invalidSourceAndBackgroundInstitution@@")
         }
+    }
 
-        if (domain?.zip) {
-            def zip = Zip.findAllByCode(domain.zip)
-            if (zip.size() < 1)
-                throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:invalidZip@@")
+
+    private void checkAddress(domain) {
+
+        if (domain?.state
+                && !domain?.zip) {
+            throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:missingZip@@")
+        }
+
+        if (domain?.zip
+                && !domain?.state
+                && !domain?.nation) {
+            throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:missingStateAndNation@@")
+        }
+
+        if (!domain?.zip
+                && !domain?.state
+                && !domain?.nation) {
+            throw new ApplicationException(SourceBackgroundInstitutionBase, "@@r1:missingStateAndZipAndNation@@")
         }
     }
+
 }
