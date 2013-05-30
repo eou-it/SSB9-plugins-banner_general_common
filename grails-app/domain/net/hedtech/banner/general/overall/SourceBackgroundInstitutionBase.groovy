@@ -238,7 +238,11 @@ class SourceBackgroundInstitutionBase implements Serializable {
                     .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
                     .list()
         }
-        return list
+
+        if (list.size > 0)
+            return list[0]
+        else
+            return null
     }
 
 

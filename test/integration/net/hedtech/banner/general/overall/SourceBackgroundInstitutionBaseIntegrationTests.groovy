@@ -209,9 +209,9 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
         )
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
 
-        def records = SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution)
-        assertTrue records.size() == 1
-        assertEquals sourceAndBackgroundInstitution.code,  records[0].sourceAndBackgroundInstitution.code
+        def record = SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution)
+        assertNotNull record
+        assertEquals sourceAndBackgroundInstitution.code,  record.sourceAndBackgroundInstitution.code
     }
 
 

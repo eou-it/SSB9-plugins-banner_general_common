@@ -3,6 +3,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.general.system.Zip
@@ -19,6 +20,19 @@ class SourceBackgroundInstitutionBaseService extends ServiceBase {
     def preUpdate(map) {
         validateCodes(map.domainModel)
         checkAddress(map.domainModel)
+    }
+
+
+    def getEnrollmentPlanningServiceCode(sourceAndBackgroundInstitution) {
+        def sbgi = SourceBackgroundInstitutionBase.fetchBySourceAndBackgroundInstitution(sourceAndBackgroundInstitution)
+        def epsCode
+
+        if (sbgi) {
+            Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.call("{$Sql.VARCHAR = call f_EpscCode(${sbgi?.state?.code}, ${sbgi?.zip}, ${sbgi?.county?.code})}") { epsCode = it }
+        }
+
+        return epsCode
     }
 
 
