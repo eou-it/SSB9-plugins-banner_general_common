@@ -14,6 +14,21 @@ import javax.persistence.*
 /**
  * Prior College Degree Table
  */
+@NamedQueries(value = [
+@NamedQuery(
+        name = "PriorCollegeDegree.fetchNextDegreeSequenceNumber",
+        query = """SELECT NVL(MAX(a.degreeSequenceNumber),0) + 1
+                     FROM PriorCollegeDegree a
+                    WHERE a.pidm = :pidm
+                      AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode""")
+,
+@NamedQuery(
+        name = "PriorCollegeDegree.fetchByPidmAndSourceAndBackgroundInstitution",
+        query = """  FROM PriorCollegeDegree a
+                    WHERE a.pidm = :pidm
+                      AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode""")
+])
+
 @Entity
 @Table(name = "SV_SORDEGR")
 class PriorCollegeDegree implements Serializable {
@@ -159,6 +174,9 @@ class PriorCollegeDegree implements Serializable {
     @Column(name = "SORDEGR_EGOL_CODE")
     String educationGoal
 
+    @Transient
+    Integer tempDegreeSeqNo = 0
+
 
     public String toString() {
         """PriorCollegeDegree[
@@ -264,6 +282,38 @@ class PriorCollegeDegree implements Serializable {
     public static readonlyProperties = ['pidm', 'sourceAndBackgroundInstitution']
 
 
+    static def fetchNextDegreeSequenceNumber(Integer pidm, String sourceAndBackgroundInstitutionCode) {
+        def nextSequenceNumber = PriorCollegeDegree.withSession { session ->
+            session.getNamedQuery('PriorCollegeDegree.fetchNextDegreeSequenceNumber')
+                    .setInteger('pidm', pidm)
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .list()
+        }
+        return nextSequenceNumber[0]
+    }
+
+
+    static def fetchNextDegreeSequenceNumber(Integer pidm, SourceAndBackgroundInstitution sourceAndBackgroundInstitution) {
+        return fetchNextDegreeSequenceNumber(pidm, sourceAndBackgroundInstitution.code)
+    }
+
+
+    static def fetchByPidmAndSourceAndBackgroundInstitution(Integer pidm, String sourceAndBackgroundInstitutionCode) {
+        def priorCollegeDegrees = PriorCollegeDegree.withSession { session ->
+            session.getNamedQuery('PriorCollegeDegree.fetchByPidmAndSourceAndBackgroundInstitution')
+                    .setInteger('pidm', pidm)
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .list()
+        }
+        return priorCollegeDegrees
+    }
+
+
+    static def fetchByPidmAndSourceAndBackgroundInstitution(Integer pidm, SourceAndBackgroundInstitution sourceAndBackgroundInstitution) {
+        return fetchByPidmAndSourceAndBackgroundInstitution(pidm, sourceAndBackgroundInstitution.code)
+    }
+
+
     def static countAll(filterData) {
         finderByAll().count(filterData)
     }
@@ -276,7 +326,8 @@ class PriorCollegeDegree implements Serializable {
 
     def private static finderByAll = {
         def query = """ FROM PriorCollegeDegree a
-	                   WHERE a.pidm = :pidm AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
+	                   WHERE a.pidm = :pidm
+	                     AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
 	            	"""
         return new DynamicFinder(PriorCollegeDegree.class, query, "a")
     }

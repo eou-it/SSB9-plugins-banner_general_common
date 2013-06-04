@@ -7,6 +7,8 @@ import net.hedtech.banner.service.ServiceBase
 
 class PriorCollegeDegreeService extends ServiceBase {
     def preCreate(map) {
-        map?.domainModel?.degreeSequenceNumber = 0 // 0 means a new seq will be created by the PL/SQL API
+        def rec = map?.domainModel
+        map?.domainModel?.degreeSequenceNumber =
+            PriorCollegeDegree.fetchNextDegreeSequenceNumber(rec?.pidm, rec?.sourceAndBackgroundInstitution)
     }
 }
