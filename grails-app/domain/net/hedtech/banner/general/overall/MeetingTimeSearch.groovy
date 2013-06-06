@@ -15,8 +15,7 @@ import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 import org.hibernate.annotations.Type
 import javax.persistence.*
 
-// TODO move object to general common once this app has settled down
-/**
+ /**
  * Meeting Time  model.
  */
 @Entity
@@ -110,6 +109,9 @@ class MeetingTimeSearch {
 
     @Column(name = "SSRMEET_BLDG_CODE")
     String building
+
+    @Column(name= "ssrmeet_bldg_desc")
+    String buildingDescription
 
 /**
  *  Foreign Key : FKV_SSRMEET_INV_GTVFUNC_CODEection End Date.
@@ -211,6 +213,7 @@ class MeetingTimeSearch {
                    courseReferenceNumber=$courseReferenceNumber,
                    category=$category,
                    building=$building,
+                   buildingDescription=$buildingDescription,
                    room=$room,
                    campus=$campus,
                    monday=$monday,
