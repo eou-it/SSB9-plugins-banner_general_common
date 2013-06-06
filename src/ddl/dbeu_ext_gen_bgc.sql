@@ -27,3 +27,5 @@ execute dbeu_util.extend_table('GENERAL','GURMAIL','G',FALSE);
 execute dbeu_util.extend_table('PAYROLL','PTRTENR','P',FALSE);
 
 execute dbeu_util.extend_table('GENERAL','GORRSQL','G',FALSE);
+execute dbeu_util.extend_table('GENERAL','GORCMSC','G',TRUE);
+

@@ -19,3 +19,4 @@ REM AUDIT TRAIL END
 REM
 start gv_gorintg.sql
 start gvq_ssrmeet.sql
+start gv_gorcmsc.sql
