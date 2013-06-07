@@ -24,3 +24,6 @@ REM
 start gv_gorintg_del_trg
 start gv_gorintg_ins_trg
 start gv_gorintg_upd_trg
+start gv_gorcmsc_del_trg
+start gv_gorcmsc_ins_trg
+start gv_gorcmsc_upd_trg
