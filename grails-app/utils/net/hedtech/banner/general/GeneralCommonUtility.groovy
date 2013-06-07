@@ -27,7 +27,7 @@ class GeneralCommonUtility {
         def gtvsdaxValue = gtvsdaxList?.find { it.key == internal }?.value
 
         if (!gtvsdaxValue) {
-            gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external[0]
+            gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
             gtvsdaxList.put(internal, gtvsdaxValue)
             SCH.servletContext.setAttribute("gtvsdax", gtvsdaxList)
         }
