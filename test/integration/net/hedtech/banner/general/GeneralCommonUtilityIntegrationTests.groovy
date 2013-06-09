@@ -25,12 +25,12 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     void testGtvsdaxSet() {
         SCH.servletContext.removeAttribute("gtvsdax")
 
-        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external[0]
+        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
         def schByDate = GeneralCommonUtility.gtvsdaxForSession('SCHBYDATE', 'WEBREG')
         assertEquals schByDate, gtvsdaxValue
         def sdaxList = SCH.servletContext.getAttribute("gtvsdax")
         assertNotNull sdaxList
-        assertTrue sdaxList.containsKey("SCHBYDATE")
+        assertNotNull sdaxList.find { it.key == "SCHBYDATEWEBREG"}
 
     }
 }

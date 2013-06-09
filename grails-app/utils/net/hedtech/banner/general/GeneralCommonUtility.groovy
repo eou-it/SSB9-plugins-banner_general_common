@@ -24,11 +24,12 @@ class GeneralCommonUtility {
     public static gtvsdaxForSession(def internal, def internalGroup) {
         def gtvsdaxList = SCH.servletContext.getAttribute("gtvsdax")
         if (!gtvsdaxList) gtvsdaxList = [:]
-        def gtvsdaxValue = gtvsdaxList?.find { it.key == internal }?.value
+        def keycode = "${internal}${internalGroup}"
+        def gtvsdaxValue = gtvsdaxList?.find { it.key == keycode }?.value
 
         if (!gtvsdaxValue) {
             gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
-            gtvsdaxList.put(internal, gtvsdaxValue)
+            gtvsdaxList.put(keycode, gtvsdaxValue)
             SCH.servletContext.setAttribute("gtvsdax", gtvsdaxList)
         }
         return gtvsdaxValue
