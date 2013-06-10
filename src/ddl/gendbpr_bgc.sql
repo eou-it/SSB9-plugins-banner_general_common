@@ -27,3 +27,9 @@ start gv_gorintg_upd_trg
 start gv_gorcmsc_del_trg
 start gv_gorcmsc_ins_trg
 start gv_gorcmsc_upd_trg
+start gv_gorcmsp_del_trg
+start gv_gorcmsp_ins_trg
+start gv_gorcmsp_upd_trg
+start gv_gorcmdo_del_trg
+start gv_gorcmdo_ins_trg
+start gv_gorcmdo_upd_trg

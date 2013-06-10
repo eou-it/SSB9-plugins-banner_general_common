@@ -129,7 +129,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    @Ignore
+
     void testOptimisticLock() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule = commonMatchingSourceRule.save(failOnError: true, flush: true)
@@ -142,7 +142,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
-        commonMatchingSourceRule.entity = "P"
+        commonMatchingSourceRule.entity = "C"
 
         shouldFail(HibernateOptimisticLockingFailureException) {
             commonMatchingSourceRule.save(failOnError: true, flush: true)

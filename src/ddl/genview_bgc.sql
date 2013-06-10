@@ -20,3 +20,6 @@ REM
 start gv_gorintg.sql
 start gvq_ssrmeet.sql
 start gv_gorcmsc.sql
+start gv_gorcmsp.sql
+start gv_gorcmdo.sql
+start gv_gorcmsp.sql

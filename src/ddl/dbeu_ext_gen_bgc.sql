@@ -28,4 +28,6 @@ execute dbeu_util.extend_table('PAYROLL','PTRTENR','P',FALSE);
 
 execute dbeu_util.extend_table('GENERAL','GORRSQL','G',FALSE);
 execute dbeu_util.extend_table('GENERAL','GORCMSC','G',TRUE);
+execute dbeu_util.extend_table('GENERAL','GORCMDO','G',TRUE);
+execute dbeu_util.extend_table('GENERAL','GORCMSP','G',TRUE)
 
