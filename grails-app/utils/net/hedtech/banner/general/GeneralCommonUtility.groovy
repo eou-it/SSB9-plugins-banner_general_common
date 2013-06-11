@@ -18,20 +18,21 @@ class GeneralCommonUtility {
      * Store gtvsdax values in  application variable to minimize trips to the DB
      * @param internal
      * @param internalGroup
-     * @return
+     * @return external value
      */
 
     public static gtvsdaxForSession(def internal, def internalGroup) {
         def gtvsdaxList = SCH.servletContext.getAttribute("gtvsdax")
         if (!gtvsdaxList) gtvsdaxList = [:]
-        def keycode = "${internal}${internalGroup}"
-        def gtvsdaxValue = gtvsdaxList?.find { it.key == keycode }?.value
+        def keycode =  internal + internalGroup
+        def gtvsdaxValue = gtvsdaxList[keycode]
 
         if (!gtvsdaxValue) {
             gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
-            gtvsdaxList.put(keycode, gtvsdaxValue)
+            gtvsdaxList.put((keycode), gtvsdaxValue)
             SCH.servletContext.setAttribute("gtvsdax", gtvsdaxList)
         }
+
         return gtvsdaxValue
     }
 
