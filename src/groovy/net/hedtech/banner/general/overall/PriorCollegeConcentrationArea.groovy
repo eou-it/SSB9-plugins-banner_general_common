@@ -121,7 +121,7 @@ class PriorCollegeConcentrationArea implements Serializable {
         if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
         if (degree != that.degree) return false
         if (concentration != that.concentration) return false
-        if (beforeUpdate != that.beforeUpdate) return false;
+//        if (beforeUpdate != that.beforeUpdate) return false;
         return true
     }
 
@@ -138,7 +138,7 @@ class PriorCollegeConcentrationArea implements Serializable {
         result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
         result = 31 * result + (degree != null ? degree.hashCode() : 0)
         result = 31 * result + (concentration != null ? concentration.hashCode() : 0)
-        result = 31 * result + (beforeUpdate != null ? beforeUpdate.hashCode() : 0);
+//        result = 31 * result + (beforeUpdate != null ? beforeUpdate.hashCode() : 0);
         return result
     }
 
