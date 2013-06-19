@@ -3,11 +3,12 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
-import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
-import net.hedtech.banner.general.system.Zip
 import net.hedtech.banner.service.ServiceBase
+
+import java.sql.CallableStatement
+import java.sql.SQLException
 
 class SourceBackgroundInstitutionBaseService extends ServiceBase {
 
@@ -28,8 +29,25 @@ class SourceBackgroundInstitutionBaseService extends ServiceBase {
         def epsCode
 
         if (sbgi) {
-            Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
-            sql.call("{$Sql.VARCHAR = call f_EpscCode(${sbgi?.state?.code}, ${sbgi?.zip}, ${sbgi?.county?.code})}") { epsCode = it }
+            try {
+                CallableStatement sqlCall = sessionFactory.getCurrentSession().connection().prepareCall("{? = call f_EpscCode(?, ?, ?)}")
+                sqlCall.registerOutParameter(1, java.sql.Types.VARCHAR)
+                sqlCall.setString(2, sbgi?.state?.code)
+                sqlCall.setString(3, sbgi?.zip)
+                sqlCall.setString(4, sbgi?.county?.code)
+                sqlCall.executeUpdate()
+                epsCode = sqlCall.getString(1)
+            }
+            catch (SQLException ae) {
+                log.debug "SqlException in getEnrollmentPlanningServiceCode exception ${ae}"
+                log.debug ae.stackTrace
+                throw ae
+            }
+            catch (Exception ae) {
+                log.debug "Exception in getEnrollmentPlanningServiceCode ${ae} "
+                log.debug ae.stackTrace
+                throw ae
+            }
         }
 
         return epsCode
