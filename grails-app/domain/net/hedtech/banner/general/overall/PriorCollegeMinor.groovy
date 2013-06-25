@@ -13,6 +13,16 @@ import javax.persistence.*
 /**
  * Prior college minor repeating table
  */
+@NamedQueries(value = [
+@NamedQuery(
+        name = "PriorCollegeMinor.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree",
+        query = """  FROM PriorCollegeMinor a
+                    WHERE a.pidm = :pidm
+                      AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
+                      AND a.degreeSequenceNumber = :degreeSequenceNumber
+                      AND a.degree.code = :degreeCode""")
+])
+
 @Entity
 @Table(name = "SV_SORMINR")
 class PriorCollegeMinor implements Serializable {
@@ -156,6 +166,24 @@ class PriorCollegeMinor implements Serializable {
 
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['pidm', 'sourceAndBackgroundInstitution']
+
+
+    static def fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+            Integer pidm,
+            String sourceAndBackgroundInstitutionCode,
+            Integer degreeSequenceNumber,
+            String degreeCode) {
+
+        def priorCollegeMinors = PriorCollegeMinor.withSession { session ->
+            session.getNamedQuery('PriorCollegeMinor.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree')
+                    .setInteger('pidm', pidm)
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .setInteger('degreeSequenceNumber', degreeSequenceNumber)
+                    .setString('degreeCode', degreeCode)
+                    .list()
+        }
+        return priorCollegeMinors
+    }
 
 
     transient beforeUpdate = {

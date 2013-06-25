@@ -13,6 +13,16 @@ import javax.persistence.*
 /**
  * Prior college concentration area repeating table
  */
+@NamedQueries(value = [
+@NamedQuery(
+        name = "PriorCollegeConcentrationArea.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree",
+        query = """  FROM PriorCollegeConcentrationArea a
+                    WHERE a.pidm = :pidm
+                      AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
+                      AND a.degreeSequenceNumber = :degreeSequenceNumber
+                      AND a.degree.code = :degreeCode""")
+])
+
 @Entity
 @Table(name = "SV_SORCONC")
 class PriorCollegeConcentrationArea implements Serializable {
@@ -156,6 +166,24 @@ class PriorCollegeConcentrationArea implements Serializable {
 
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['pidm', 'sourceAndBackgroundInstitution']
+
+
+    static def fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+            Integer pidm,
+            String sourceAndBackgroundInstitutionCode,
+            Integer degreeSequenceNumber,
+            String degreeCode) {
+
+        def priorCollegeConcentrationAreas = PriorCollegeConcentrationArea.withSession { session ->
+            session.getNamedQuery('PriorCollegeConcentrationArea.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree')
+                    .setInteger('pidm', pidm)
+                    .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
+                    .setInteger('degreeSequenceNumber', degreeSequenceNumber)
+                    .setString('degreeCode', degreeCode)
+                    .list()
+        }
+        return priorCollegeConcentrationAreas
+    }
 
 
     transient beforeUpdate = {
