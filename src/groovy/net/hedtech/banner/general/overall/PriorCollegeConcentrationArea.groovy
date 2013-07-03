@@ -11,12 +11,12 @@ import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import javax.persistence.*
 
 /**
- * Prior college major repeating table
+ * Prior college concentration area repeating table
  */
 @NamedQueries(value = [
 @NamedQuery(
-        name = "PriorCollegeMajor.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree",
-        query = """  FROM PriorCollegeMajor a
+        name = "PriorCollegeConcentrationArea.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree",
+        query = """  FROM PriorCollegeConcentrationArea a
                     WHERE a.pidm = :pidm
                       AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
                       AND a.degreeSequenceNumber = :degreeSequenceNumber
@@ -24,86 +24,86 @@ import javax.persistence.*
 ])
 
 @Entity
-@Table(name = "SV_SORMAJR")
-class PriorCollegeMajor implements Serializable {
+@Table(name = "SV_SORCONC")
+class PriorCollegeConcentrationArea implements Serializable {
 
     /**
-     * Surrogate ID for SORMAJR
+     * Surrogate ID for SORCONC
      */
     @Id
-    @Column(name = "SORMAJR_SURROGATE_ID")
-    @SequenceGenerator(name = "SORMAJR_SEQ_GEN", allocationSize = 1, sequenceName = "SORMAJR_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SORMAJR_SEQ_GEN")
+    @Column(name = "SORCONC_SURROGATE_ID")
+    @SequenceGenerator(name = "SORCONC_SEQ_GEN", allocationSize = 1, sequenceName = "SORCONC_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SORCONC_SEQ_GEN")
     Long id
 
     /**
-     * Optimistic lock token for SORMAJR
+     * Optimistic lock token for SORCONC
      */
     @Version
-    @Column(name = "SORMAJR_VERSION")
+    @Column(name = "SORCONC_VERSION")
     Long version
 
     /**
      * PIDM: The pidm of the person
      */
-    @Column(name = "SORMAJR_PIDM")
+    @Column(name = "SORCONC_PIDM")
     Integer pidm
 
     /**
      * DEGREE SEQUENCE NUMBER: Prior college degree seq no
      */
-    @Column(name = "SORMAJR_DEGR_SEQ_NO")
+    @Column(name = "SORCONC_DEGR_SEQ_NO")
     Integer degreeSequenceNumber
 
     /**
      * ACTIVITY DATE: Most current date record was created or changed
      */
-    @Column(name = "SORMAJR_ACTIVITY_DATE")
+    @Column(name = "SORCONC_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**
      * USER ID: The Oracle user ID of the user who changed the record
      */
-    @Column(name = "SORMAJR_USER_ID")
+    @Column(name = "SORCONC_USER_ID")
     String lastModifiedBy
 
     /**
      * DATA ORIGIN: Source system that created or updated the row
      */
-    @Column(name = "SORMAJR_DATA_ORIGIN")
+    @Column(name = "SORCONC_DATA_ORIGIN")
     String dataOrigin
 
     /**
-     * Foreign Key : FK1_SORMAJR_INV_STVSBGI_CODE
+     * Foreign Key : FK1_SORCONC_INV_STVSBGI_CODE
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "SORMAJR_SBGI_CODE", referencedColumnName = "STVSBGI_CODE")
+    @JoinColumn(name = "SORCONC_SBGI_CODE", referencedColumnName = "STVSBGI_CODE")
     ])
     SourceAndBackgroundInstitution sourceAndBackgroundInstitution
 
     /**
-     * Foreign Key : FK1_SORMAJR_INV_STVDEGC_CODE
+     * Foreign Key : FK1_SORCONC_INV_STVDEGC_CODE
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "SORMAJR_DEGC_CODE", referencedColumnName = "STVDEGC_CODE")
+    @JoinColumn(name = "SORCONC_DEGC_CODE", referencedColumnName = "STVDEGC_CODE")
     ])
     Degree degree
 
     /**
-     * Foreign Key : FK1_SORMAJR_INV_STVMAJR_CODE
+     * Foreign Key : FK1_SORCONC_INV_STVMAJR_CODE
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "SORMAJR_MAJR_CODE_MAJOR", referencedColumnName = "STVMAJR_CODE")
+    @JoinColumn(name = "SORCONC_MAJR_CODE_CONC", referencedColumnName = "STVMAJR_CODE")
     ])
-    MajorMinorConcentration majorMinorConcentrationMajor
+    MajorMinorConcentration concentration
 
 
     public String toString() {
-        """PriorCollegeMajor[
+        """PriorCollegeConcentrationArea[
 					id=$id,
 					version=$version,
 					pidm=$pidm,
@@ -113,14 +113,14 @@ class PriorCollegeMajor implements Serializable {
 					dataOrigin=$dataOrigin,
 					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution,
 					degree=$degree,
-					majorMinorConcentrationMajor=$majorMinorConcentrationMajor]"""
+					concentration=$concentration]"""
     }
 
 
     boolean equals(o) {
         if (this.is(o)) return true
-        if (!(o instanceof PriorCollegeMajor)) return false
-        PriorCollegeMajor that = (PriorCollegeMajor) o
+        if (!(o instanceof PriorCollegeConcentrationArea)) return false
+        PriorCollegeConcentrationArea that = (PriorCollegeConcentrationArea) o
         if (id != that.id) return false
         if (version != that.version) return false
         if (pidm != that.pidm) return false
@@ -130,8 +130,8 @@ class PriorCollegeMajor implements Serializable {
         if (dataOrigin != that.dataOrigin) return false
         if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
         if (degree != that.degree) return false
-        if (majorMinorConcentrationMajor != that.majorMinorConcentrationMajor) return false
-        if (beforeUpdate != that.beforeUpdate) return false;
+        if (concentration != that.concentration) return false
+//        if (beforeUpdate != that.beforeUpdate) return false;
         return true
     }
 
@@ -147,8 +147,8 @@ class PriorCollegeMajor implements Serializable {
         result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
         result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
         result = 31 * result + (degree != null ? degree.hashCode() : 0)
-        result = 31 * result + (majorMinorConcentrationMajor != null ? majorMinorConcentrationMajor.hashCode() : 0)
-        result = 31 * result + (beforeUpdate != null ? beforeUpdate.hashCode() : 0);
+        result = 31 * result + (concentration != null ? concentration.hashCode() : 0)
+//        result = 31 * result + (beforeUpdate != null ? beforeUpdate.hashCode() : 0);
         return result
     }
 
@@ -161,7 +161,7 @@ class PriorCollegeMajor implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
         sourceAndBackgroundInstitution(nullable: false)
         degree(nullable: true)
-        majorMinorConcentrationMajor(nullable: false)
+        concentration(nullable: false)
     }
 
     //Read Only fields that should be protected against update
@@ -174,24 +174,19 @@ class PriorCollegeMajor implements Serializable {
             Integer degreeSequenceNumber,
             String degreeCode) {
 
-        def priorCollegeMajors = PriorCollegeMajor.withSession { session ->
-            session.getNamedQuery('PriorCollegeMajor.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree')
+        def priorCollegeConcentrationAreas = PriorCollegeConcentrationArea.withSession { session ->
+            session.getNamedQuery('PriorCollegeConcentrationArea.fetchByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree')
                     .setInteger('pidm', pidm)
                     .setString('sourceAndBackgroundInstitutionCode', sourceAndBackgroundInstitutionCode)
                     .setInteger('degreeSequenceNumber', degreeSequenceNumber)
                     .setString('degreeCode', degreeCode)
                     .list()
         }
-        return priorCollegeMajors
-    }
-
-
-    static def fetchByPidmAndSourceAndBackgroundInstitution(Integer pidm, SourceAndBackgroundInstitution sourceAndBackgroundInstitution) {
-        return fetchByPidmAndSourceAndBackgroundInstitution(pidm, sourceAndBackgroundInstitution.code)
+        return priorCollegeConcentrationAreas
     }
 
 
     transient beforeUpdate = {
-        throw new ApplicationException(PriorCollegeMajor, "@@r1:unsupported.operation@@")
+        throw new ApplicationException(PriorCollegeConcentrationArea, "@@r1:unsupported.operation@@")
     }
 }
