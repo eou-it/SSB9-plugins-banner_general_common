@@ -450,9 +450,9 @@ class SectionMeetingTime implements Serializable {
         saturday(nullable: true, maxSize: 1, inList: ["S"])
         scheduleType(nullable: true, maxSize: 3)
         override(nullable: true, maxSize: 1, inList: ["T", "O", "R"])
-        creditHourSession(nullable: true, scale: 3, min: 0.000D, max: 9999.999D)
+        creditHourSession(nullable: true, min: 0.000D, max: 9999.999D)
         meetNumber(nullable: true, min: 0, max: 9999)
-        hoursWeek(nullable: true, scale: 2, min: 0.00D, max: 999.99D)
+        hoursWeek(nullable: true, min: 0.00D, max: 999.99D)
         function(nullable: true)
         committee(nullable: true)
         scheduleToolStatus(nullable: true,
