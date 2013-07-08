@@ -19,10 +19,11 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import net.hedtech.banner.general.system.*
+import org.junit.Test
+import org.apache.commons.lang.StringUtils
 
 class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(housinglocationbuildingdescription_domain_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_building
@@ -134,7 +135,6 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     def u_failure_countryPhone = "TTTT"
     def u_failure_houseNumber = "TTTTT"
     def u_failure_streetLine4 = "TTTTT"
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
@@ -207,6 +207,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testCreateValidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -218,6 +219,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testCreateInvalidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newInvalidForCreateHousingLocationBuildingDescription()
         shouldFail {
@@ -226,6 +228,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testUpdateValidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -323,6 +326,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testUpdateInvalidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -385,6 +389,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testOptimisticLock() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -419,6 +424,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testDeleteHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -429,49 +435,52 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testValidation() {
         def housingLocationBuildingDescription = newInvalidForCreateHousingLocationBuildingDescription()
         assertTrue "HousingLocationBuildingDescription could not be validated as expected due to ${housingLocationBuildingDescription.errors}", housingLocationBuildingDescription.validate()
     }
 
 
+    @Test
     void testNullValidationFailure() {
         def housingLocationBuildingDescription = new HousingLocationBuildingDescription()
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
         assertErrorsFor housingLocationBuildingDescription, 'nullable',
                         [
-                        'capacity',
-                        'building',
-                        'campus'
+                                'capacity',
+                                'building',
+                                'campus'
                         ]
         assertNoErrorsFor housingLocationBuildingDescription,
                           [
-                          'maximumCapacity',
-                          'streetLine1',
-                          'streetLine2',
-                          'streetLine3',
-                          'city',
-                          'zip',
-                          'phoneArea',
-                          'phoneNumber',
-                          'phoneExtension',
-                          'sex',
-                          'keyNumber',
-                          'countryPhone',
-                          'houseNumber',
-                          'streetLine4',
-                          'roomRate',
-                          'phoneRate',
-                          'site',
-                          'state',
-                          'county',
-                          'college',
-                          'department',
-                          'partition'
+                                  'maximumCapacity',
+                                  'streetLine1',
+                                  'streetLine2',
+                                  'streetLine3',
+                                  'city',
+                                  'zip',
+                                  'phoneArea',
+                                  'phoneNumber',
+                                  'phoneExtension',
+                                  'sex',
+                                  'keyNumber',
+                                  'countryPhone',
+                                  'houseNumber',
+                                  'streetLine4',
+                                  'roomRate',
+                                  'phoneRate',
+                                  'site',
+                                  'state',
+                                  'county',
+                                  'college',
+                                  'department',
+                                  'partition'
                           ]
     }
 
 
+    @Test
     void testMaxValueValidationFailure() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.capacity = 100000
@@ -479,12 +488,13 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
         assertErrorsFor housingLocationBuildingDescription, 'max',
                         [
-                        'capacity',
-                        'maximumCapacity'
+                                'capacity',
+                                'maximumCapacity'
                         ]
     }
 
 
+    @Test
     void testMinValueValidationFailure() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.capacity = -100000
@@ -492,12 +502,13 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingLocationBuildingDescription.validate()
         assertErrorsFor housingLocationBuildingDescription, 'min',
                         [
-                        'capacity',
-                        'maximumCapacity'
+                                'capacity',
+                                'maximumCapacity'
                         ]
     }
 
 
+    @Test
     void testMaxSizeValidationFailures() {
         def housingLocationBuildingDescription = new HousingLocationBuildingDescription(
                 streetLine1: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
@@ -581,13 +592,8 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         return housingLocationBuildingDescription
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housinglocationbuildingdescription_custom_integration_test_methods) ENABLED START*/
 
-
+    @Test
     void testFetchByBuilding() {
         def housingLocationBuildingDescriptionList = HousingLocationBuildingDescription.fetchBySomeHousingLocationBuildingDescriptionBuilding()
         assertTrue housingLocationBuildingDescriptionList.list.size() > 20
@@ -604,6 +610,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
     void testFetchValidBuilding() {
         //expects the Building object
         def housingLocationBuildingDescriptionRec = HousingLocationBuildingDescription.fetchValidBuilding(Building.findByCode("AA"))
@@ -614,5 +621,30 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         assertEquals "AA", housingLocationBuildingDescriptionRec.building.code
     }
 
-    /*PROTECTED REGION END*/
+
+    @Test
+    void testFetchAllByBuilding() {
+        String filter = "API"
+        def buildings = HousingLocationBuildingDescription.fetchAllByBuilding(formatWildCard(filter))
+        assertNotNull buildings
+        buildings.each { building ->
+            assertTrue building[0].contains(filter)
+        }
+    }
+
+    /**
+     * add wildcard and change to upper case for searching
+     * @param filter
+     * @return filter
+     */
+
+    static String formatWildCard(filter) {
+        def wildCard = "%"
+        if (StringUtils.isBlank(filter)) {
+            filter = wildCard
+        } else if (!(filter =~ /%/)) {
+            filter = wildCard + filter.toUpperCase() + wildCard
+        } else filter = filter.toUpperCase()
+        return filter
+    }
 }
