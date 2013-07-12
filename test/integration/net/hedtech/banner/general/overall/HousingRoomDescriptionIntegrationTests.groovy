@@ -1,18 +1,6 @@
-/** *******************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of
- SunGard Higher Education and its subsidiaries. Any use of this software is limited
- solely to SunGard Higher Education licensees, and is further subject to the terms
- and conditions of one or more written license agreements between SunGard Higher
- Education and the licensee in question. SunGard is either a registered trademark or
- trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
- Education in the U.S.A. and/or other regions and/or countries.
- ********************************************************************************* */
-/**
- Banner Automator Version: 0.1.1
- Generated: Fri Feb 11 16:39:35 EST 2011
- */
+/** *****************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -27,10 +15,8 @@ import net.hedtech.banner.general.system.College
 import org.junit.Ignore
 
 
-
 class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(housingroomdescription_domain_integration_test_data) ENABLED START*/
     //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_department
@@ -146,7 +132,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_length = 1
     def u_failure_area = 1
     def u_failure_countryPhone = "TTTT"
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
@@ -155,12 +140,10 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         initializeTestDataForReferences()
     }
 
+
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
-
-
     void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(housingroomdescription_domain_integration_test_data_initialization) ENABLED START*/
         //Valid test data (For success tests)
         i_success_department = Department.findByCode("HIST")
         i_success_partition = null
@@ -198,7 +181,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         u_failure_college = College.findByCode("AS")
 
         //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 
@@ -366,8 +348,8 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         } finally {
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
+
         //Try to update the entity
-        //Update the entity
         housingRoomDescription.description = u_success_description
         housingRoomDescription.capacity = u_success_capacity
         housingRoomDescription.maximumCapacity = u_success_maximumCapacity
@@ -464,7 +446,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    @Ignore //validation error test fails due to presence of scale constraint in the domain
     void testMaxValueValidationFailure() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.capacity = 100000
@@ -487,7 +468,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    @Ignore //validation error test fails due to presence of scale constraint in the domain
     void testMinValueValidationFailure() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.capacity = -100000
@@ -652,10 +632,5 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         return housingRoomDescription
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomdescription_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
+
 }

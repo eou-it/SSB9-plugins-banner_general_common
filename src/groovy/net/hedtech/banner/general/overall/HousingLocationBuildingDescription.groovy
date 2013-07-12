@@ -15,9 +15,9 @@
  */
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.service.DatabaseModifiesState
 import net.hedtech.banner.general.system.*
-import org.hibernate.annotations.Type
+import net.hedtech.banner.service.DatabaseModifiesState
+
 import javax.persistence.*
 
 /**
@@ -33,7 +33,13 @@ import javax.persistence.*
 @NamedQuery( name = "HousingLocationBuildingDescription.fetchValidateBuilding",
              query = """FROM  HousingLocationBuildingDescription a
                         WHERE a.building = :building
-                        order by  a.building """ )
+                        order by  a.building """ ),
+@NamedQuery( name = "HousingLocationBuildingDescription.fetchAllByBuildingLookup",
+             query = """SELECT a.building.code,
+                               a.building.description
+                          FROM  HousingLocationBuildingDescription a
+                         WHERE a.building like :building
+                         ORDER BY a.building """ )
 ])
 @DatabaseModifiesState 
 class HousingLocationBuildingDescription implements Serializable {
@@ -397,10 +403,12 @@ class HousingLocationBuildingDescription implements Serializable {
     //Read Only fields that should be protected against update
     public static readonlyProperties = [ 'building' ]
 
+
     public static Object fetchBySomeHousingLocationBuildingDescriptionBuilding() {
         def returnObj = [list: HousingLocationBuildingDescription.list(sort: "building.code", order: "asc")]
         return returnObj
     }
+
 
     public static Object fetchBySomeHousingLocationBuildingDescriptionBuilding(Map params) {
         def building = HousingLocationBuildingDescription.withSession {session ->
@@ -408,6 +416,7 @@ class HousingLocationBuildingDescription implements Serializable {
         }
         return [list:building]
     }
+
 
     public static Object fetchBySomeHousingLocationBuildingDescriptionBuilding(String filter) {
         def building = HousingLocationBuildingDescription.withSession {session ->
@@ -424,6 +433,8 @@ class HousingLocationBuildingDescription implements Serializable {
 
         return building[0]
     }
+
+
     public static Object fetchValidBuilding(Building building) {
         def validBuilding = HousingLocationBuildingDescription.withSession {session ->
             session.getNamedQuery('HousingLocationBuildingDescription.fetchValidateBuilding').setString('building', building.code).list()
@@ -431,4 +442,13 @@ class HousingLocationBuildingDescription implements Serializable {
 
         return validBuilding[0]
     }
+
+
+    public static List fetchAllByBuilding(String filter) {
+         def buildings = HousingLocationBuildingDescription.withSession { session ->
+             session.getNamedQuery('HousingLocationBuildingDescription.fetchAllByBuildingLookup').setString('building', filter).list()
+         }
+         return buildings
+     }
+
 }
