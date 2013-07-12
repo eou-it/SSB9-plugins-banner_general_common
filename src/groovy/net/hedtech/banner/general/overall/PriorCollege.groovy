@@ -9,6 +9,17 @@ import net.hedtech.banner.query.DynamicFinder
 
 import javax.persistence.*
 
+@NamedQueries(value = [
+@NamedQuery(name = "PriorCollege.fetchByPidmAndAdmrExcludingID",
+        query = """FROM PriorCollege a
+          WHERE a.pidm = :pidm
+            AND a.admissionRequest.code = :admissionRequest
+            AND a.id <> :id""")   ,
+@NamedQuery(name = "PriorCollege.fetchByPidmAndAdmr",
+        query = """FROM PriorCollege a
+          WHERE a.pidm = :pidm
+            AND a.admissionRequest.code = :admissionRequest""")
+])
 /**
  * Prior College Table
  */
@@ -179,5 +190,24 @@ class PriorCollege implements Serializable {
 	                   WHERE a.pidm = :pidm
 	            	"""
         return new DynamicFinder(PriorCollege.class, query, "a")
+    }
+
+
+    static def fetchByPidmAndAdmrExcludingID(Map map)  {
+        if (map.pidm) {
+            if (map.id) {
+                PriorCollege.withSession { session ->
+                List priorColleges = session.getNamedQuery('PriorCollege.fetchByPidmAndAdmrExcludingID').setInteger('pidm', map?.pidm).setString('admissionRequest',map?.admissionRequest.code).setLong('id',map?.id).list()
+                return [list:priorColleges]
+                }
+            }else {
+                    PriorCollege.withSession { session ->
+                    List priorColleges = session.getNamedQuery('PriorCollege.fetchByPidmAndAdmr').setInteger('pidm', map?.pidm).setString('admissionRequest',map?.admissionRequest.code).list()
+                    return [list:priorColleges]
+                }
+            }
+        } else {
+            return null
+        }
     }
 }
