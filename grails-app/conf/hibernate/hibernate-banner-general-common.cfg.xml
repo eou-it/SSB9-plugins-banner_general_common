@@ -43,6 +43,7 @@
         <mapping class="net.hedtech.banner.general.overall.PriorCollegeMinor"/>
         <mapping class="net.hedtech.banner.general.overall.SectionCrossListSection"/>
         <mapping class="net.hedtech.banner.general.overall.SectionMeetingTime"/>
+        <mapping class="net.hedtech.banner.general.overall.SectionMeetingTimeConflictView"/>
         <mapping class="net.hedtech.banner.general.overall.SectionMeetingTimeView"/>
         <mapping class="net.hedtech.banner.general.overall.SequenceNumberBase"/>
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionAcademic"/>
