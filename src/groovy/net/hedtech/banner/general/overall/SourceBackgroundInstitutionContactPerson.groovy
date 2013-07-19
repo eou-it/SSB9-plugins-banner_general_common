@@ -156,7 +156,13 @@ class SourceBackgroundInstitutionContactPerson implements Serializable {
 
 
     static constraints = {
-        personName(nullable: false, maxSize: 230)
+        personName(nullable: false, maxSize: 230,
+                validator: { field ->
+                    if (field.trim().isEmpty()) {
+                        return "default.null.message"
+                    }
+                }
+        )
         phoneArea(nullable: true, maxSize: 6)
         phoneNumber(nullable: true, maxSize: 12)
         phoneExtension(nullable: true, maxSize: 10)
