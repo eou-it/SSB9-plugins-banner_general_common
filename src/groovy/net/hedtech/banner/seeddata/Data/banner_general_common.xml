@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!-- *****************************************************************************
+Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ ********************************************************************************* -->
 <BANNER_GENERAL_COMMON>
     <STVINIT>
         <STVINIT_CODE>RCS0</STVINIT_CODE>

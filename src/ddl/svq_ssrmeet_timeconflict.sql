@@ -1,5 +1,5 @@
 -- *****************************************************************************************
--- * Copyright 2012 Ellucian Company L.P. and its affiliates.                              *
+-- * Copyright 2013 Ellucian Company L.P. and its affiliates.                              *
 -- *****************************************************************************************
 --
 -- SVQ_SSRMEET_TIMECONFLICT.sql

@@ -1,6 +1,8 @@
 -- *****************************************************************************************
--- * Copyright 2009-2013 Ellucian Company L.P. and its affiliates.                         *
+-- * Copyright 2010-2013 Ellucian Company L.P. and its affiliates.                         *
 -- *****************************************************************************************
+
+
 REM
 REM dbeu_ext_stu_bgc.sql
 REM

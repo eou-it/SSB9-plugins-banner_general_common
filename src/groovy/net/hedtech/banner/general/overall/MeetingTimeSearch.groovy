@@ -1,26 +1,25 @@
-/** *******************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
- Education and the licensee in question. SunGard is either a registered trademark or
- trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
- Education in the U.S.A. and/or other regions and/or countries.
- ********************************************************************************* */
+/*********************************************************************************
+  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.overall
 
 import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
 import org.hibernate.annotations.Type
+
 import javax.persistence.*
 
- /**
+/**
  * Meeting Time  model.
  */
 @Entity
 @Table(name = "GVQ_SSRMEET")
-
+@NamedQueries(value = [
+@NamedQuery(name = "MeetingTimeSearch.fetchByTermAndCourseReferenceNumber",
+        query = """FROM  MeetingTimeSearch a
+           WHERE a.term = :term
+           and a.courseReferenceNumber = :crn
+           order by a.term, a.courseReferenceNumber, a.startDate, a.monday, a.tuesday, a.wednesday,
+            a.thursday, a.friday, a.saturday, a.sunday, a.beginTime """)])
 class MeetingTimeSearch {
 
     /**
@@ -110,7 +109,7 @@ class MeetingTimeSearch {
     @Column(name = "SSRMEET_BLDG_CODE")
     String building
 
-    @Column(name= "ssrmeet_bldg_desc")
+    @Column(name = "ssrmeet_bldg_desc")
     String buildingDescription
 
 /**
@@ -201,7 +200,7 @@ class MeetingTimeSearch {
     @Column(name = "SSRMEET_SCHD_CODE")
     String scheduleType
 
-    @Column(name="ssrmeet_term_crn")
+    @Column(name = "ssrmeet_term_crn")
     String termCourseReferenceNumber
 
 
@@ -274,7 +273,7 @@ class MeetingTimeSearch {
             return delegate.replace("\n", "").replaceAll(/  */, " ")
         }
 
-        def stringKeys = ["courseReferenceNumber", "term", "category", "building","termCourseReferenceNumber"]
+        def stringKeys = ["courseReferenceNumber", "term", "category", "building", "termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
         def query = """FROM  MeetingTimeSearch a  """
@@ -282,7 +281,7 @@ class MeetingTimeSearch {
         meetingFilter.each { param ->
             def grailsDomainClass = new DefaultGrailsDomainClass(MeetingTimeSearch)
             def fields = grailsDomainClass.properties
-            def field = fields.find { it.name == param.key}
+            def field = fields.find { it.name == param.key }
             def fieldType = null
             if (field?.type?.name) fieldType = field.type.name
             else fieldType = "java.lang.String"
@@ -299,8 +298,7 @@ class MeetingTimeSearch {
                             if (inClause) inClause += ",'" + val + "'"
                             else inClause = "'" + val + "'"
                         }
-                    }
-                    else {
+                    } else {
                         param.value.each { val ->
                             if (inClause) inClause += "," + val
                             else inClause = val
@@ -308,22 +306,17 @@ class MeetingTimeSearch {
                     }
                     if (field?.oneToOne) {
                         query += " a.${param.key}.code  in (${inClause}) "
-                    }
-                    else {
+                    } else {
                         query += " a.${param.key} in (${inClause}) "
                     }
-                }
-                else {
+                } else {
                     query += " a.${param.key}  = '${param.value}'  "
                 }
-            }
-            else if (booleanKeys.contains(param.key)) {
+            } else if (booleanKeys.contains(param.key)) {
                 query += " a.${param.key} is ${param.value}   "
-            }
-            else if (param.key == "beginTime") {
+            } else if (param.key == "beginTime") {
                 query += " nvl(a.beginTime,'0000') >= '${param.value}' "
-            }
-            else if (param.key == "endTime") {
+            } else if (param.key == "endTime") {
                 query += " nvl(a.endTime,'0000') <= '${param.value}' "
             }
         }
@@ -335,7 +328,7 @@ class MeetingTimeSearch {
 
     def static parseQueryString(def meetingFilter, String prefix) {
 
-        def stringKeys = ["courseReferenceNumber", "term", "category", "building","termCourseReferenceNumber"]
+        def stringKeys = ["courseReferenceNumber", "term", "category", "building", "termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
         def query = ""
@@ -343,7 +336,7 @@ class MeetingTimeSearch {
         meetingFilter.each { param ->
             def grailsDomainClass = new DefaultGrailsDomainClass(MeetingTimeSearch)
             def fields = grailsDomainClass.properties
-            def field = fields.find { it.name == param.key}
+            def field = fields.find { it.name == param.key }
             def fieldType = null
             if (field?.type?.name) fieldType = field.type.name
             else fieldType = "java.lang.String"
@@ -359,8 +352,7 @@ class MeetingTimeSearch {
                             if (inClause) inClause += ",'" + val + "'"
                             else inClause = "'" + val + "'"
                         }
-                    }
-                    else {
+                    } else {
                         param.value.each { val ->
                             if (inClause) inClause += "," + val
                             else inClause = val
@@ -368,27 +360,31 @@ class MeetingTimeSearch {
                     }
                     if (field?.oneToOne) {
                         query += " ${prefix}.${param.key}.code  in (${inClause}) "
-                    }
-                    else {
+                    } else {
                         query += " ${prefix}.${param.key} in (${inClause}) "
                     }
-                }
-                else {
+                } else {
                     query += " ${prefix}.${param.key}  = '${param.value}'  "
                 }
-            }
-            else if (booleanKeys.contains(param.key)) {
+            } else if (booleanKeys.contains(param.key)) {
                 query += " ${prefix}.${param.key} is ${param.value}   "
-            }
-            else if (param.key == "beginTime") {
+            } else if (param.key == "beginTime") {
                 query += " nvl(${prefix}.beginTime,'0000') >= '${param.value}' "
-            }
-            else if (param.key == "endTime") {
+            } else if (param.key == "endTime") {
                 query += " nvl(${prefix}.endTime,'0000') <= '${param.value}' "
             }
         }
 
         return query
+    }
+
+
+    public static List fetchByTermAndCourseReferenceNumber(String term, String crn) {
+        def meetingTimeSearchList = MeetingTimeSearch.withSession { session ->
+            session.getNamedQuery(
+                    'MeetingTimeSearch.fetchByTermAndCourseReferenceNumber').setString('term', term).setString('crn', crn).list()
+        }
+        return meetingTimeSearchList
     }
 
 }

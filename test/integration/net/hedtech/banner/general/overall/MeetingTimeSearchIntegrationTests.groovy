@@ -1,14 +1,6 @@
-/** *******************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of
- SunGard Higher Education and its subsidiaries. Any use of this software is limited
- solely to SunGard Higher Education licensees, and is further subject to the terms
- and conditions of one or more written license agreements between SunGard Higher
- Education and the licensee in question. SunGard is either a registered trademark or
- trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
- Education in the U.S.A. and/or other regions and/or countries.
- ********************************************************************************* */
+/*********************************************************************************
+  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 
 package net.hedtech.banner.general.overall
 
@@ -18,7 +10,7 @@ import org.springframework.jdbc.UncategorizedSQLException
 class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
 
     protected void setUp() {
-        formContext = ['SSASECQ']
+        formContext = ['GUAGMNU']
         super.setUp()
     }
 
@@ -168,14 +160,14 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
             assertTrue meet.sunday
         }
 
-        filterData = [ termCourseReferenceNumber:  ["20141020001", "20141020002"] , term: "201410"]
+        filterData = [termCourseReferenceNumber: ["20141020001", "20141020002"], term: "201410"]
         meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
         assertNotNull meetingQuery
         query = "from MeetingTimeSearch sr where ${meetingQuery}"
         meetings = MeetingTimeSearch.findAll(query.flattenString())
         meetings.each { meet ->
             assertTrue meet.term == "201410" && (meet.courseReferenceNumber == "20001" ||
-                       meet.courseReferenceNumber == '20002')
+                    meet.courseReferenceNumber == '20002')
         }
     }
 
@@ -215,4 +207,17 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
+    void testFetch() {
+        def term = "201410"
+        def courseReferenceNumber = "20001"
+        def list = MeetingTimeSearch.fetchByTermAndCourseReferenceNumber(term, courseReferenceNumber)
+        assertEquals 1, list.size()
+    }
+
+
+    void testMultipleInCrn() {
+        def list = MeetingTimeSearch.fetchByTermAndCourseReferenceNumber("201110", "8007")
+        assertEquals 2, list.size()
+    }
 }
