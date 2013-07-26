@@ -21,6 +21,7 @@
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourcePriority"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule"/>
         <mapping class="net.hedtech.banner.general.overall.CommonMatchingMatchEntryGlobalTemporary"/>
+        <mapping class="net.hedtech.banner.general.overall.DocumentInformation"/>
         <mapping class="net.hedtech.banner.general.overall.FacultyTenureStatus"/>
         <mapping class="net.hedtech.banner.general.overall.HousingLocationBuildingDescription"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomAttributesDefinition"/>
@@ -50,6 +51,8 @@
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionEthnicMakeUp"/>
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionTestScore"/>
         <mapping class="net.hedtech.banner.general.overall.SqlProcess"/>
+        <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
+        <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
    
    </session-factory>
