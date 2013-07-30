@@ -19,3 +19,4 @@ start gv_gorcmdo.sql
 start gv_gorcmsp.sql
 
 start gv_gorvisa.sql
+start gvq_gordmsk.sql
