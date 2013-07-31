@@ -57,7 +57,7 @@
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionTestScore"/>
         <mapping class="net.hedtech.banner.general.overall.SqlProcess"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
-   
+        <mapping class="net.hedtech.banner.general.utility.InformationText"/>
    </session-factory>
    </hibernate-configuration>
    
