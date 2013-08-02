@@ -7,6 +7,9 @@ import net.hedtech.banner.query.DynamicFinder
 
 import javax.persistence.*
 
+/**
+ * Information Text table.
+ */
 @Entity
 @Table(name = "GURINFO")
 class InformationText implements Serializable {
@@ -17,55 +20,96 @@ class InformationText implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GURINFO_SEQ_GEN")
     Long id
 
-    @Column(name = "GURINFO_PAGE_NAME")//Should this be nullable false
+    /**
+     * PAGE NAME: Name of associated page.
+     */
+    @Column(name = "GURINFO_PAGE_NAME")
     String pageName
 
-    //Types - Notification, tooltip, Panel, Header
-    @Column(name = "GURINFO_TEXT_TYPE")//Should this be nullable false
+    /**
+     * LABEL: Short label, used to select which set of text items to print for a page.
+     */
+    @Column(name = "GURINFO_LABEL")
+    String label
+
+    /**
+     * TEXT TYPE: Type of text.    Types - Notification, tooltip, Panel, Header
+     */
+    @Column(name = "GURINFO_TEXT_TYPE")
     String textType
 
-
-    @Column(name = "GURINFO_SEQUENCE_NUMBER")//Should this be nullable false
+    /**
+     * SEQUENCE NUMBER : Sequence number for this text item.
+     */
+    @Column(name = "GURINFO_SEQUENCE_NUMBER")
     Integer sequenceNumber
 
-    @Column(name = "GURINFO_PERSONA")//Should this be nullable false
+    /**
+     * ROLE CODE: Role associated with the text.
+     */
+    @Column(name = "GURINFO_ROLE_CODE")
     String persona
 
+    /**
+     * TEXT: Text to be displayed on web page when this item is selected.
+     */
     @Column(name = "GURINFO_TEXT")
     String text
 
-    //Default to English
+    /**
+     * LOCALE: Locale of the text
+     */
     @Column(name = "GURINFO_LOCALE")
     String locale
 
-    //Webtailor length is 120
-    @Column(name = "GURINFO_COMMENT")//Should this be made nullable false
+    /**
+     * COMMENT: Comment about this text item.
+     */
+    @Column(name = "GURINFO_COMMENT")
     String comment
 
-    //Start Date for info text. can be null.
+    /**
+     * START DATE: The date from when the text should be displayed.
+     */
     @Column(name = "GURINFO_START_DATE")
     @Temporal(TemporalType.DATE)
     Date startDate
 
-    //End Date for info text. can be null
+    /**
+     * END DATE: The date until when the text should be displayed.
+     */
     @Column(name = "GURINFO_END_DATE")
     @Temporal(TemporalType.DATE)
     Date endDate
 
-    //Baseline or Local - B or L
-    @Column(name = "GURINFO_SOURCE_INDICATOR")//Should this be made nullable false?
-    String sourceIndicator
+    /**
+     * SOURCE INDICATOR : Source Indicator: This field indicates if the row is (B)aseline or (L)ocal. The default value is B.
+     */
+    @Column(name = "GURINFO_SOURCE_INDICATOR")
+    String sourceIndicator = 'B'
 
-    @Column(name = "GURINFO_DATA_ORIGIN")//Should this be made nullable false?
+    /**
+     * DATA ORIGIN: Source system that created or updated the data.
+     */
+    @Column(name = "GURINFO_DATA_ORIGIN")
     String dataOrigin
 
+    /**
+     * ACTIVITY DATE: The date that information in this record was entered or last updated.
+     */
     @Column(name = "GURINFO_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
+    /**
+     * USER ID: The user ID of the person who inserted or last updated this record.
+     */
     @Column(name = "GURINFO_USER_ID")
     String lastModifiedBy
 
+    /**
+     * VERSION: Optimistic lock token.
+     */
     @Version
     @Column(name = "GURINFO_VERSION",precision = 19)
     Long version
@@ -74,6 +118,7 @@ class InformationText implements Serializable {
         """InformationText[
 					id=$id,
 					pageName=$pageName,
+                    label=$label,
 					textType=$textType,
 					sequenceNumber=$sequenceNumber,
 					persona=$persona,
@@ -95,6 +140,7 @@ class InformationText implements Serializable {
         InformationText that = (InformationText) o
         if (id != that.id) return false
         if (pageName != that.pageName) return false
+        if (label != that.label) return false
         if (textType != that.textType) return false
         if (sequenceNumber != that.sequenceNumber) return false
         if (persona != that.persona) return false
@@ -115,6 +161,7 @@ class InformationText implements Serializable {
         int result
         result = (id != null ? id.hashCode() : 0)
         result = 31 * result + (pageName != null ? pageName.hashCode() : 0)
+        result = 31 * result + (label != null ? label.hashCode() : 0)
         result = 31 * result + (textType != null ? textType.hashCode() : 0)
         result = 31 * result + (sequenceNumber != null ? sequenceNumber.hashCode() : 0)
         result = 31 * result + (persona != null ? persona.hashCode() : 0)
@@ -133,9 +180,10 @@ class InformationText implements Serializable {
 
     static constraints = {
         pageName(nullable: false, maxSize: 20)
+        label(nullable: false, maxSize: 20)
         textType(nullable: false, maxSize: 20)
         sequenceNumber(nullable: false, min: 0, max: 99999)
-        persona(nullable: false, maxSize: 100)
+        persona(nullable: false, maxSize: 30)
         text(nullable: false, maxSize: 4000)
         locale(nullable: false, maxSize: 20)
         comment(nullable: false, maxSize: 200)

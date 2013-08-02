@@ -33,7 +33,8 @@ start grevtab_bgc
 
 REM Security scripts
 connect bansecr/&&bansecr_password
-start gurinfo_bs_090000.sql
+start gguraobji_080602.sql
+start gguruobji_080602.sql
 
 connect dbeu_owner/&&dbeu_password
 start dbeu_ext_gen_bgc

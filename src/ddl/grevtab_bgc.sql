@@ -6,14 +6,16 @@ REM
 set echo off
 whenever oserror exit rollback;
 whenever sqlerror exit rollback;
-connect general/&&general_password
 
-start msmltab.sql
+start mmedinx.sql
 start msmlinx.sql
-
+start msmltab.sql
 
 start gurinfo_teardown_ext.sql
-start gurinfo_090000_01.sql
-start gurinfo_090000_02.sql
+
+connect general/&&general_password
+start gurinfo_080602_01.sql
+start gurinfo_080602_02.sql
+start gurinfo_080602_03.sql
 
 
