@@ -20,3 +20,5 @@ grails-*.zip
 plugin.xml
 src/ddl/horizon_upgrade_bgc.lis
 *.ser
+*.
+
