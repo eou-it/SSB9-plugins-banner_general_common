@@ -32,22 +32,22 @@ class InformationTextService extends ServiceBase {
     void preCreate(map) {
         validatePageNameForCreateUpdate(map.domainModel)
         validateLabelForCreateUpdate(map.domainModel)
-        validateTextTypeForCreateUpdate(map.domainModel)
         validateSequenceNumberForCreateUpdate(map.domainModel)
+        validateTextTypeForCreateUpdate(map.domainModel)
         validatePersonaNumberForCreateUpdate(map.domainModel)
-        validateTextForCreateUpdate(map.domainModel)
         validateLocaleForCreateUpdate(map.domainModel)
+        validateTextForCreateUpdate(map.domainModel)
     }
 
 
     void preUpdate(map) {
         validatePageNameForCreateUpdate(map.domainModel)
         validateLabelForCreateUpdate(map.domainModel)
-        validateTextTypeForCreateUpdate(map.domainModel)
         validateSequenceNumberForCreateUpdate(map.domainModel)
+        validateTextTypeForCreateUpdate(map.domainModel)
         validatePersonaNumberForCreateUpdate(map.domainModel)
-        validateTextForCreateUpdate(map.domainModel)
         validateLocaleForCreateUpdate(map.domainModel)
+        validateTextForCreateUpdate(map.domainModel)
     }
 
 
