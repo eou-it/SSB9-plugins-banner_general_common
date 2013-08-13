@@ -29,4 +29,62 @@ class InformationTextService extends ServiceBase {
 
     boolean transactional =  true
 
+    void preCreate(map) {
+        validatePageNameForCreateUpdate(map.domainModel)
+        validateLabelForCreateUpdate(map.domainModel)
+        validateTextTypeForCreateUpdate(map.domainModel)
+        validateSequenceNumberForCreateUpdate(map.domainModel)
+        validatePersonaNumberForCreateUpdate(map.domainModel)
+        validateTextForCreateUpdate(map.domainModel)
+        validateLocaleForCreateUpdate(map.domainModel)
+    }
+
+
+    void preUpdate(map) {
+        validatePageNameForCreateUpdate(map.domainModel)
+        validateLabelForCreateUpdate(map.domainModel)
+        validateTextTypeForCreateUpdate(map.domainModel)
+        validateSequenceNumberForCreateUpdate(map.domainModel)
+        validatePersonaNumberForCreateUpdate(map.domainModel)
+        validateTextForCreateUpdate(map.domainModel)
+        validateLocaleForCreateUpdate(map.domainModel)
+    }
+
+
+
+    private void validatePageNameForCreateUpdate(informationText) {
+        if (informationText.pageName == null || informationText.pageName == "") {
+            throw new ApplicationException(InformationText, "@@r1:pageName.nullable.error@@")
+        }
+    }
+    private void validateLabelForCreateUpdate(informationText) {
+        if (informationText.label == null || informationText.label == "") {
+            throw new ApplicationException(InformationText, "@@r1:label.nullable.error@@")
+        }
+    }
+    private void validateTextTypeForCreateUpdate(informationText) {
+        if (informationText.textType == null || informationText.textType == "") {
+            throw new ApplicationException(InformationText, "@@r1:textType.nullable.error@@")
+        }
+    }
+    private void validateSequenceNumberForCreateUpdate(informationText) {
+        if (informationText.sequenceNumber == null || informationText.sequenceNumber == "") {
+            throw new ApplicationException(InformationText, "@@r1:sequenceNumber.nullable.error@@")
+        }
+    }
+    private void validatePersonaNumberForCreateUpdate(informationText) {
+        if (informationText.persona == null || informationText.persona == "") {
+            throw new ApplicationException(InformationText, "@@r1:persona.nullable.error@@")
+        }
+    }
+    private void validateTextForCreateUpdate(informationText) {
+        if (informationText.text == null || informationText.text == "") {
+            throw new ApplicationException(InformationText, "@@r1:text.nullable.error@@")
+        }
+    }
+    private void validateLocaleForCreateUpdate(informationText) {
+        if (informationText.locale == null || informationText.locale == "") {
+            throw new ApplicationException(InformationText, "@@r1:locale.nullable.error@@")
+        }
+    }
 }
