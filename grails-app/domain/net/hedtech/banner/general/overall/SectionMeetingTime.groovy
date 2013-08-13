@@ -1,13 +1,5 @@
 /*********************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
- Education and the licensee in question. SunGard is either a registered trademark or
- trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
- Education in the U.S.A. and/or other regions and/or countries.
+  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 /**
  Banner Automator Version: 0.1.1
@@ -42,7 +34,12 @@ import javax.persistence.*
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                AND a.category = :category
-		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery(name = "SectionMeetingTime.fetchByTermAndCourseReferenceNumberStartAndEndDate",
+query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
+		                WHERE a.term = :term
+		                AND a.courseReferenceNumber = :courseReferenceNumber
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""")
 ] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
@@ -515,6 +512,22 @@ class SectionMeetingTime implements Serializable {
                     'SectionMeetingTime.fetchByTermCRNAndCategory').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).setString('category', category).list()
         }
         return sectionMeetingTimes
+    }
+
+
+    /**
+     * This fetchBy is used to retrieve Start Date and End Date for a given term and crn.
+     *
+     */
+    public static SectionMeetingTime fetchByTermAndCourseReferenceNumberStartAndEndDate(String term,
+                                                                                        String courseReferenceNumber) {
+        def sectionMeetingDates
+        SectionMeetingTime.withSession { session ->
+            sectionMeetingDates = session.getNamedQuery(
+                    'SectionMeetingTime.fetchByTermAndCourseReferenceNumberStartAndEndDate').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).list()[0]
+        }
+
+        return new SectionMeetingTime(startDate: sectionMeetingDates[0], endDate: sectionMeetingDates[1])
     }
 
     public static int fetchCountOfSchedulesByDateTimeAndLocation(String beginTime, String endTime, Date beginDate, Date endDate,
