@@ -6,9 +6,18 @@ package net.hedtech.banner.general.utility
 import groovy.sql.Sql
 import org.apache.commons.lang.StringUtils
 
+import java.text.ParseException
+import java.text.SimpleDateFormat
+
 class InformationTextPersonaListService {
     def sessionFactory
 
+    def static webTailorRoleList
+
+
+    static {
+        webTailorRoleList = new ConfigSlurper().parse(InformationTextPersonaListService.classLoader.loadClass("WebTailorRoleInformation"))
+    }
 
     public List fetchInformationTextPersonas( String filter ) {
         def sql
@@ -20,31 +29,78 @@ class InformationTextPersonaListService {
         }finally {
             sql?.close()
         }
-        if(!(result?.tableExists as boolean)) return []
+        if(!(result?.tableExists as boolean)) {
+            return []
+        }
 
         if (StringUtils.isBlank( filter )) {
             filter = "%"
-        }
-        else if (!(filter =~ /%/)) {
+        } else if (!(filter =~ /%/)) {
             filter += "%"
         }
 
-        def selSql = """SELECT TWTVROLE_CODE as code, TWTVROLE_DESC as description,
-                               TWTVROLE_USER_ID as lastModifiedBy, TWTVROLE_ACTIVITY_DATE as lastModified
-                        FROM TWTVROLE
-                        WHERE TWTVROLE_CODE like ?
-                        ORDER BY TWTVROLE_CODE asc, TWTVROLE_DESC asc, TWTVROLE_ACTIVITY_DATE desc"""
+        List filteredWebTailorRoleList = filterAndOrderWebTailorRoleList (webTailorRoleList, filter)
 
-        def informationTextPersonaList = []
-        try {
-            sql = new Sql( sessionFactory.currentSession.connection() )
-            sql.eachRow( selSql, [filter] ) {
-                informationTextPersonaList << new InformationTextPersona( [code: it.toRowResult().CODE, description: it.toRowResult().DESCRIPTION,
-                        lastModifiedBy: it.toRowResult().LASTMODIFIEDBY, lastModified: it.toRowResult().LASTMODIFIED] )
-            }
-        } finally {
-            sql?.close()
+        List informationTextPersonaList = []
+        filteredWebTailorRoleList?.each { webTailorRole ->
+            informationTextPersonaList << new InformationTextPersona(
+                                                [
+                                                        code: webTailorRole.code,
+                                                        description: webTailorRole.description,
+                                                        lastModifiedBy: webTailorRole.lastModifiedBy,
+                                                        lastModified: getDate (webTailorRole.lastModified, "dd-MMM-yy")
+                                                ] )
+
         }
+
         return informationTextPersonaList
+    }
+
+    private List filterAndOrderWebTailorRoleList(Map webTailorRoleList, String filter) {
+        String filterColumn = "code"
+
+        String regEx = this.getRegEx(filter)
+
+        List filteredResults
+        filteredResults = webTailorRoleList.values().toList().get(0).findAll {
+            it."$filterColumn".toString().toLowerCase().matches(regEx)
+        }
+
+        //apply order by
+        def orderByCodeDescLastMod = new OrderBy([{ it.code }, { it.description }, { it.lastModified }])
+        filteredResults.sort(orderByCodeDescLastMod)
+
+        return filteredResults
+    }
+
+    private String getRegEx(String val) {
+        val = val.toLowerCase()
+
+        if (!val.startsWith("%")) {
+            val = "%" + val
+        }
+        if (!val.endsWith("%")) {
+            val = val + "%"
+        }
+
+        val = val.replaceAll("%", "\\\\E" + ".*" + "\\\\Q")
+        val = val.replaceAll("_", "\\\\E" + "." + "\\\\Q")
+        val = "\\Q" + val + "\\E"
+
+        String regEx = val
+
+        return regEx
+    }
+
+    private Date getDate (String dateString, String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format)
+        sdf.setLenient(false)
+        try {
+            return sdf.parse(dateString)
+        } catch (ParseException e) {
+            // Ignore because its not the right format.
+            log.warn (" Date was not in the $format format" )
+        }
+        return null
     }
 }
