@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -173,12 +173,6 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         return sequenceNumberBase
     }
 
-    /**
-     * Please put all the custom service tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sequencenumberbase_custom_service_integration_test_methods) ENABLED START*/
-
 
     @Test
     void testGetNextSequenceNumberBase() {
@@ -203,7 +197,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
 
         previousNumber = 0
-        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //B
+        sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //B
         assertEquals "B", sequenceNumberPrefix
         expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber) //B1
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
@@ -224,7 +218,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
 
         previousNumber = 0
-        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //C
+        sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //C
         assertEquals "C", sequenceNumberPrefix
         expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C01
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
@@ -266,7 +260,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
 
         previousNumber = 0
-        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1)     //D
+        sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1)     //D
         assertEquals "D", sequenceNumberPrefix
         expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //D001
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
@@ -288,7 +282,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
 
         previousNumber = 0
-        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //E
+        sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //E
         assertEquals "E", sequenceNumberPrefix
         expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //E0001
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
@@ -310,7 +304,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
         sequenceNumberBase = sequenceNumberBaseService.update([domainModel: sequenceNumberBase])
 
         previousNumber = 0
-        sequenceNumberPrefix = (char)(sequenceNumberPrefix + 1) //F
+        sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //F
         assertEquals "F", sequenceNumberPrefix
         expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //F00001
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)

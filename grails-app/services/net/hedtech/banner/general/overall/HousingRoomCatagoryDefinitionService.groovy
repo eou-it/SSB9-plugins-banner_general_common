@@ -1,19 +1,6 @@
-
-/*********************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
- Education and the licensee in question. SunGard is either a registered trademark or
- trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
- Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
-/**
- Banner Automator Version: 1.29
- Generated: Tue Nov 22 15:43:56 IST 2011
- */
+/*******************************************************************************
+ Copyright 2013 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.service.ServiceBase
@@ -28,10 +15,4 @@ import net.hedtech.banner.service.ServiceBase
 
 class HousingRoomCatagoryDefinitionService extends ServiceBase {
 
-    /**
-     * Please put all the custom methods in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomcatagorydefinition_custom_service_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

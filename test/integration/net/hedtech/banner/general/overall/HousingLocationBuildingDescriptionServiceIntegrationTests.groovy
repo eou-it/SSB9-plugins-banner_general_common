@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -81,11 +81,6 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
         def icountryPhone = "XXXX"
         def ihouseNumber = "XXXXX"
         def istreetLine4 = "XXXXX"
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housinglocationbuildingdescription_service_integration_tests_update_test_data_fetch_for_references) ENABLED START*/
         def ibuilding = Building.findByCode("GRANT")
         def icampus = Campus.findByCode("M")
         def iroomRate = RoomRate.findByCode("SGD")
@@ -96,7 +91,6 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
         def icollege = College.findByCode("AS")
         def idepartment = Department.findByCode("ENGL")
         def ipartition = Partition.findByCode("AM")
-        /*PROTECTED REGION END*/
         // change the values
         housingLocationBuildingDescriptionUpdate.capacity = icapacity
         housingLocationBuildingDescriptionUpdate.maximumCapacity = imaximumCapacity
@@ -169,13 +163,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         housingLocationBuildingDescription = housingLocationBuildingDescriptionService.create([domainModel: housingLocationBuildingDescription])
         // create new values for the fields
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housinglocationbuildingdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
         def ibuilding = Building.findByCode("AHO")
-        /*PROTECTED REGION END*/
         // change the values
         housingLocationBuildingDescription.building = ibuilding
         try {
@@ -189,11 +177,6 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
 
 
     private def newHousingLocationBuildingDescription() {
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housinglocationbuildingdescription_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def ibuilding = Building.findByCode("GRANT")
         def icampus = Campus.findByCode("M")
         def iroomRate = RoomRate.findByCode("STND")
@@ -204,7 +187,6 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
         def icollege = College.findByCode("BU")
         def idepartment = Department.findByCode("HIST")
         def ipartition = null
-        /*PROTECTED REGION END*/
         def housingLocationBuildingDescription = new HousingLocationBuildingDescription(
                 capacity: 1,
                 maximumCapacity: 1,
@@ -235,11 +217,4 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
         return housingLocationBuildingDescription
     }
 
-    /**
-     * Please put all the custom service tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housinglocationbuildingdescription_custom_service_integration_test_methods) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-}  
+}

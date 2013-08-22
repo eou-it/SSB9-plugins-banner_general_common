@@ -1,10 +1,6 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.26
- Generated: Thu Aug 11 12:05:30 EDT 2011
- */
 package net.hedtech.banner.general.utility
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -19,8 +15,6 @@ import grails.validation.ValidationException
 
 class MailIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(mail_domain_integration_test_data) ENABLED START*/
-    //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_term
     def i_success_letterProcessLetter
@@ -111,7 +105,6 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_miscellaneousVc2 = "TTTTT"
     def u_failure_miscellaneousDate = new Date()
     def u_failure_miscellaneousNumber = 1
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
@@ -123,7 +116,6 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(mail_domain_integration_test_data_initialization) ENABLED START*/
         //Valid test data (For success tests)
         i_success_term = Term.findWhere(code: "200320")
         i_success_letterProcessLetter = LetterProcessLetter.findWhere(code: "E_GIFT_ACK")
@@ -147,9 +139,6 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
         u_failure_letterProcessLetter = LetterProcessLetter.findWhere(code: "E_GIFT_ACK")
         u_failure_initials = Initials.findWhere(code: "RCS0")
         u_failure_communicationPlan = "WW"
-
-        //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 
@@ -398,31 +387,31 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
         def mail = new Mail()
         assertFalse "Mail should have failed validation", mail.validate()
         assertErrorsFor mail, 'nullable',
-                        [
+                [
                         'pidm',
                         'systemIndicator'
-                        ]
+                ]
         assertNoErrorsFor mail,
-                          [
-                          'module',
-                          'adminIdentifier',
-                          'materialMod',
-                          'dateInitial',
-                          'datePrinted',
-                          'userData',
-                          'waitDays',
-                          'publishedGenerated',
-                          'originalIndicator',
-                          'aidYear',
-                          'quantity',
-                          'miscellaneousVc2',
-                          'miscellaneousDate',
-                          'miscellaneousNumber',
-                          'term',
-                          'letterProcessLetter',
-                          'initials',
-                          'communicationPlan'
-                          ]
+                [
+                        'module',
+                        'adminIdentifier',
+                        'materialMod',
+                        'dateInitial',
+                        'datePrinted',
+                        'userData',
+                        'waitDays',
+                        'publishedGenerated',
+                        'originalIndicator',
+                        'aidYear',
+                        'quantity',
+                        'miscellaneousVc2',
+                        'miscellaneousDate',
+                        'miscellaneousNumber',
+                        'term',
+                        'letterProcessLetter',
+                        'initials',
+                        'communicationPlan'
+                ]
     }
 
 
@@ -526,11 +515,4 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
         )
         return mail
     }
-
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(mail_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

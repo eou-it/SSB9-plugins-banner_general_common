@@ -1,10 +1,6 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.21
- Generated: Wed Jul 20 14:02:45 EDT 2011 
- */
 package net.hedtech.banner.general.overall
 
 import org.hibernate.annotations.Type
@@ -13,9 +9,6 @@ import javax.persistence.*
 /**
  * Faculty Member Tenure Status Code Table
  */
-/*PROTECTED REGION ID(facultytenurestatus_namedqueries) ENABLED START*/
-
-/*PROTECTED REGION END*/
 @Entity
 @Table(name = "PTRTENR")
 class FacultyTenureStatus implements Serializable {
@@ -147,32 +140,8 @@ class FacultyTenureStatus implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        /**
-         * Please put all the custom constraints in this protected section to protect the code
-         * from being overwritten on re-generation
-         */
-        /*PROTECTED REGION ID(facultytenurestatus_custom_constraints) ENABLED START*/
-
-        /*PROTECTED REGION END*/
     }
 
-    /*PROTECTED REGION ID(facultytenurestatus_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['code']
-    /*PROTECTED REGION END*/
-    /**
-     * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(facultytenurestatus_custom_attributes) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-
-    /**
-     * Please put all the custom methods/code in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(facultytenurestatus_custom_methods) ENABLED START*/
-
-    /*PROTECTED REGION END*/
 }

@@ -7,8 +7,8 @@ REM
 REM dbeu_ext_stu_bgc.sql
 REM
 REM AUDIT TRAIL: 9.0
-REM 1. Horizon
-REM Generated for Horizon API support
+REM 1. Banner XE
+REM Generated for Banner XE API support
 REM AUDIT TRAIL END
 REM
 whenever oserror exit rollback;

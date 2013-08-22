@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -479,91 +479,74 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
     private def newSectionMeetingTime() {
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(sectionmeetingtime_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def iterm = Term.findByCode("201410")
         def idayOfWeek = DayOfWeek.findByCode("T")
         def ischeduleType = "L"  //Unable to access ScheduleType
         def imeetingType = MeetingType.findByCode("CLAS")
-        /*PROTECTED REGION END*/
 
         return new SectionMeetingTime(term: iterm.code,
-                                      courseReferenceNumber: "20431",
-                                      dayOfWeek: idayOfWeek,
-                                      dayNumber: 1,
-                                      beginTime: "0100",
-                                      endTime: "0200",
-                                      startDate: iterm.startDate,
-                                      endDate: iterm.endDate,
-                                      category: "03",
-                                      sunday: null,
-                                      monday: "M",
-                                      tuesday: "T",
-                                      wednesday: "W",
-                                      thursday: "R",
-                                      friday: "F",
-                                      saturday: null,
-                                      override: null,
-                                      creditHourSession: 1,
-                                      meetNumber: 1,
-                                      hoursWeek: 1,
-                                      scheduleType: ischeduleType,
-                                      meetingType: imeetingType)
+                courseReferenceNumber: "20431",
+                dayOfWeek: idayOfWeek,
+                dayNumber: 1,
+                beginTime: "0100",
+                endTime: "0200",
+                startDate: iterm.startDate,
+                endDate: iterm.endDate,
+                category: "03",
+                sunday: null,
+                monday: "M",
+                tuesday: "T",
+                wednesday: "W",
+                thursday: "R",
+                friday: "F",
+                saturday: null,
+                override: null,
+                creditHourSession: 1,
+                meetNumber: 1,
+                hoursWeek: 1,
+                scheduleType: ischeduleType,
+                meetingType: imeetingType)
     }
 
 
     private def newSectionMeetingTimeOLR() {
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(sectionmeetingtime_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def iterm = Term.findByCode("201410")
         def idayOfWeek = DayOfWeek.findByCode("T")
         def ischeduleType = "L"  //Unable to access ScheduleType
         def imeetingType = MeetingType.findByCode("CLAS")
-        /*PROTECTED REGION END*/
 
         return new SectionMeetingTime(term: iterm.code,
-                                      courseReferenceNumber: "20349",
-                                      dayOfWeek: idayOfWeek,
-                                      dayNumber: 1,
-                                      beginTime: "0100",
-                                      endTime: "0200",
-                                      startDate: iterm.startDate,
-                                      endDate: iterm.endDate,
-                                      category: "03",
-                                      sunday: null,
-                                      monday: "M",
-                                      tuesday: "T",
-                                      wednesday: "W",
-                                      thursday: "R",
-                                      friday: "F",
-                                      saturday: null,
-                                      override: null,
-                                      creditHourSession: 1,
-                                      meetNumber: 1,
-                                      hoursWeek: 1,
-                                      scheduleType: ischeduleType,
-                                      meetingType: imeetingType)
+                courseReferenceNumber: "20349",
+                dayOfWeek: idayOfWeek,
+                dayNumber: 1,
+                beginTime: "0100",
+                endTime: "0200",
+                startDate: iterm.startDate,
+                endDate: iterm.endDate,
+                category: "03",
+                sunday: null,
+                monday: "M",
+                tuesday: "T",
+                wednesday: "W",
+                thursday: "R",
+                friday: "F",
+                saturday: null,
+                override: null,
+                creditHourSession: 1,
+                meetNumber: 1,
+                hoursWeek: 1,
+                scheduleType: ischeduleType,
+                meetingType: imeetingType)
     }
 
 
     private def newEventMeetingTime() {
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(sectionmeetingtime_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def iterm = "EVENT"
         def idayOfWeek = DayOfWeek.findByCode("T")
         def ischeduleType = "L"  //Unable to access ScheduleType
         def ifunction = new Function(code: "TTTTT",
-                                     description: "TTTTT",
-                                     etypCode: "TTTT")
+                description: "TTTTT",
+                etypCode: "TTTT")
         save ifunction
         def icommittee = CommitteeAndServiceType.findByCode("GRAD")
         def myFormat = 'MM/dd/yyyy'
@@ -587,37 +570,29 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
-        /*PROTECTED REGION END*/
-
 
         return new SectionMeetingTime(term: iterm,
-                                      courseReferenceNumber: "TTTTT",
-                                      dayOfWeek: idayOfWeek,
-                                      dayNumber: 1,
-                                      beginTime: "0100",
-                                      endTime: "0200",
-                                      startDate: istartDate,
-                                      endDate: iendDate,
-                                      sunday: null,
-                                      monday: "M",
-                                      tuesday: "T",
-                                      wednesday: "W",
-                                      thursday: "R",
-                                      friday: "F",
-                                      saturday: null,
-                                      override: null,
-                                      meetNumber: 1,
-                                      committee: icommittee,
-                                      function: ifunction,
-                                      scheduleType: ischeduleType,
-                                      category: 1)
+                courseReferenceNumber: "TTTTT",
+                dayOfWeek: idayOfWeek,
+                dayNumber: 1,
+                beginTime: "0100",
+                endTime: "0200",
+                startDate: istartDate,
+                endDate: iendDate,
+                sunday: null,
+                monday: "M",
+                tuesday: "T",
+                wednesday: "W",
+                thursday: "R",
+                friday: "F",
+                saturday: null,
+                override: null,
+                meetNumber: 1,
+                committee: icommittee,
+                function: ifunction,
+                scheduleType: ischeduleType,
+                category: 1)
     }
-
-/**
- * Please put all the custom service tests in this protected section to protect the code
- * from being overwritten on re-generation
- */
-/*PROTECTED REGION ID(sectionmeetingtime_custom_service_integration_test_methods) ENABLED START*/
 
 
     void testSectionMeetingTimeForSessionExists() {
@@ -632,7 +607,5 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def sectionMeetingTimeForSession = SectionMeetingTimeService.isMeetingTimesForSession("201410", "20431", "02")
         assertFalse sectionMeetingTimeForSession
     }
-
-/*PROTECTED REGION END*/
 
 }

@@ -1,21 +1,15 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.21
- Generated: Wed Jul 20 14:02:47 EDT 2011 
- */
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.testing.BaseIntegrationTestCase
 import grails.validation.ValidationException
 import groovy.sql.Sql
+import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
 
-    /*PROTECTED REGION ID(facultytenurestatus_domain_integration_test_data) ENABLED START*/
-    //Test data for creating new domain instance
     //Valid test data (For success tests)
 
     def i_success_code = "TT"
@@ -46,29 +40,10 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_dateIndicator = null
     def u_failure_reviewDateIndicator = null
     def u_failure_eeoTenureIndicator = "X"
-    /*PROTECTED REGION END*/
-
 
     protected void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
-        initializeTestDataForReferences()
-    }
-
-    //This method is used to initialize test data for references.
-    //A method is required to execute database calls as it requires a active transaction
-    void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(facultytenurestatus_domain_integration_test_data_initialization) ENABLED START*/
-        //Valid test data (For success tests)
-
-        //Invalid test data (For failure tests)
-
-        //Valid test data (For success tests)
-
-        //Valid test data (For failure tests)
-
-        //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 
@@ -185,13 +160,13 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
         def facultyTenureStatus = new FacultyTenureStatus()
         assertFalse "FacultyTenureStatus should have failed validation", facultyTenureStatus.validate()
         assertErrorsFor facultyTenureStatus, 'nullable',
-                        [
+                [
                         'code',
                         'description',
                         'dateIndicator',
                         'reviewDateIndicator',
                         'eeoTenureIndicator'
-                        ]
+                ]
     }
 
 
@@ -235,10 +210,4 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
         return facultyTenureStatus
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(facultytenurestatus_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

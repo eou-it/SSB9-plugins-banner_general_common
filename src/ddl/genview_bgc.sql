@@ -7,7 +7,7 @@ REM
 REM genview_bgc.sql
 REM
 REM AUDIT TRAIL: 9.0
-REM 1. Horizon
+REM 1. Banner XE
 REM Main common project schema maintenance script.
 REM AUDIT TRAIL END
 REM

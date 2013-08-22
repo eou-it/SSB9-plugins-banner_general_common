@@ -47,7 +47,6 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     def u_failure_roomNumber = "TTTTT"
     def u_failure_termEffective = "TTTTT"
     def u_failure_mustMatch = null
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
@@ -59,7 +58,6 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(housingroomattributesdefinition_domain_integration_test_data_initialization) ENABLED START*/
         //Valid test data (For success tests)
         i_success_building = Building.findWhere(code: "HUM")
         i_success_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code: "AUD")
@@ -75,9 +73,6 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
         //Valid test data (For failure tests)
         u_failure_building = Building.findWhere(code: "MENDAL")
         u_failure_buildingAndRoomAttribute = BuildingAndRoomAttribute.findWhere(code: "GCL")
-
-        //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 

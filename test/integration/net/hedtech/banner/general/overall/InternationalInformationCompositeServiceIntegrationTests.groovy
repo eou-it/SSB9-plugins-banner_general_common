@@ -81,9 +81,9 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
 
     def testCompositeServiceDuplicateDocument() {
         // create and test new records
-        def map = createAll()
+        createAll()
 
-        // create a duplcate document
+        // create a duplicate document
         def documentInformation = newValidForCreateDocumentInformation()
 
         try {

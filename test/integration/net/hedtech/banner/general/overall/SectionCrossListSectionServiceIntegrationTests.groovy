@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -244,10 +244,4 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
         return foundCrn
     }
 
-    /**
-     * Please put all the custom service tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sectioncrosslistsection_custom_service_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
-}  
+}

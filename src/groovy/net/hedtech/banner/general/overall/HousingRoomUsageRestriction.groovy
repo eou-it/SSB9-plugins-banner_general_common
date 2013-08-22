@@ -1,10 +1,6 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.21
- Generated: Fri Jul 01 19:13:07 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.Building
@@ -28,12 +24,11 @@ import javax.persistence.NamedQuery
 /**
  * Room Usage Restriction Table
  */
-/*PROTECTED REGION ID(housingroomusagerestriction_namedqueries) ENABLED START*/
 @Entity
 @Table(name = "SLRRUSE")
-@NamedQueries( value = [
-@NamedQuery( name="HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation",
-            query=""" select count(hrur.id) from HousingRoomUsageRestriction hrur where hrur.building.code = :buildingCode
+@NamedQueries(value = [
+@NamedQuery(name = "HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation",
+        query = """ select count(hrur.id) from HousingRoomUsageRestriction hrur where hrur.building.code = :buildingCode
                             and  hrur.roomNumber = :roomNumber
                             AND (
                                 hrur.startDate BETWEEN :beginDate AND :endDate
@@ -41,8 +36,7 @@ import javax.persistence.NamedQuery
                                 OR  (hrur.endDate is not null AND hrur.startDate <= :beginDate AND hrur.endDate >= :endDate)
                                 OR  (hrur.endDate is null AND hrur.startDate <= :endDate)
                             )""")
-] )
-/*PROTECTED REGION END*/
+])
 class HousingRoomUsageRestriction implements Serializable {
 
     /**
@@ -254,39 +248,17 @@ class HousingRoomUsageRestriction implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         building(nullable: false)
-        /**
-         * Please put all the custom constraints in this protected section to protect the code
-         * from being overwritten on re-generation
-         */
-        /*PROTECTED REGION ID(housingroomusagerestriction_custom_constraints) ENABLED START*/
-
-        /*PROTECTED REGION END*/
     }
-
-    /**
-     * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomusagerestriction_custom_attributes) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-
-    /**
-     * Please put all the custom methods/code in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomusagerestriction_custom_methods) ENABLED START*/
 
     /**
      * For a given criteria if usage restrictions exists it returns the count
      */
     public static int fetchCountOfUsageRestrictionsByDateAndLocation(Date beginDate, Date endDate, String roomNumber, String buildingCode) {
         int count = 0
-        HousingRoomUsageRestriction.withSession {session ->
+        HousingRoomUsageRestriction.withSession { session ->
             count = session.getNamedQuery(
                     'HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation').setDate('beginDate', beginDate).setDate('endDate', endDate).setString('roomNumber', roomNumber).setString('buildingCode', buildingCode).list()[0]
         }
         return count
     }
-    /*PROTECTED REGION END*/
 }

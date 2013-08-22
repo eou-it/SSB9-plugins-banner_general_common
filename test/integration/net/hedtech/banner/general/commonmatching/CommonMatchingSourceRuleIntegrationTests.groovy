@@ -1,4 +1,4 @@
- /** *****************************************************************************
+/** *****************************************************************************
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.commonmatching
@@ -10,7 +10,6 @@ import net.hedtech.banner.general.system.CommonMatchingSource
 import net.hedtech.banner.general.system.TelephoneType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
-import org.junit.Ignore
 
 class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
 
@@ -32,8 +31,6 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     def i_failure_addressType
     def i_failure_telephoneType
     def i_failure_emailType
-
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {

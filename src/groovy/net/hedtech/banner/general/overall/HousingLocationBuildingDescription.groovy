@@ -1,10 +1,6 @@
 /*********************************************************************************
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 0.1.1
- Generated: Fri Feb 11 16:36:47 EST 2011 
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.*

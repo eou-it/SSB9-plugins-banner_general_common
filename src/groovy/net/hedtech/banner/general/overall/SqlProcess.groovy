@@ -1,10 +1,6 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.29
- Generated: Sun May 20 17:49:09 IST 2012
- */
 
 package net.hedtech.banner.general.overall
 
@@ -28,7 +24,6 @@ import net.hedtech.banner.general.system.EntriesForSql
 /**
  * SQL Process Rules Table
  */
-/*PROTECTED REGION ID(sqlprocess_namedqueries) ENABLED START*/
 //TODO: NamedQueries that needs to be ported:
 /**
  * Where clause on this entity present in forms:
@@ -48,7 +43,6 @@ import net.hedtech.banner.general.system.EntriesForSql
  *  gorrsql_sqpr_code,gorrsql_sqru_code,gorrsql_seq_no
 
  */
-/*PROTECTED REGION END*/
 @Entity
 @Table(name = "GORRSQL")
 class SqlProcess implements Serializable {
@@ -158,7 +152,7 @@ class SqlProcess implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-        @JoinColumn(name = "GORRSQL_SQPR_CODE", referencedColumnName = "GTVSQPR_CODE")
+    @JoinColumn(name = "GORRSQL_SQPR_CODE", referencedColumnName = "GTVSQPR_CODE")
     ])
     EntriesForSqlProcesss entriesForSqlProcesss
 
@@ -167,7 +161,7 @@ class SqlProcess implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-        @JoinColumn(name = "GORRSQL_SQRU_CODE", referencedColumnName = "GTVSQRU_CODE")
+    @JoinColumn(name = "GORRSQL_SQRU_CODE", referencedColumnName = "GTVSQRU_CODE")
     ])
     EntriesForSql entriesForSql
 
@@ -258,31 +252,8 @@ class SqlProcess implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
         entriesForSqlProcesss(nullable: false)
         entriesForSql(nullable: false)
-        /**
-         * Please put all the custom constraints in this protected section to protect the code
-         * from being overwritten on re-generation
-         */
-        /*PROTECTED REGION ID(sqlprocess_custom_constraints) ENABLED START*/
-
-        /*PROTECTED REGION END*/
     }
 
-    /*PROTECTED REGION ID(sqlprocess_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['sequenceNumber', 'entriesForSqlProcesss', 'entriesForSql']
-    /*PROTECTED REGION END*/
-    /**
-     * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sqlprocess_custom_attributes) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-
-    /**
-     * Please put all the custom methods/code in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sqlprocess_custom_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }

@@ -8,7 +8,7 @@ Copyright 2013 Ellucian Company L.P. and its affiliates.
 -- AUDIT TRAIL: 9.0
 -- DBEU 06/06/2013
 --
---    Generated trigger for Horizon API support
+--    Generated trigger for Banner XE API support
 --
 -- AUDIT TRAIL END
 --

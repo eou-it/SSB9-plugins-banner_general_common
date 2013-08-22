@@ -134,23 +134,6 @@ class IntegrationPartnerSystemRule implements Serializable {
 		lastModifiedBy(nullable:true, maxSize:30)
 		lastModified(nullable:true)
 		dataOrigin(nullable:true, maxSize:30)
-
-
-
-		/**
-	     * Please put all the custom tests in this protected section to protect the code
-	     * from being overwritten on re-generation
-	     */
-	    /*PROTECTED REGION ID(integrationpartnersystemrule_custom_constraints) ENABLED START*/
-	    
-	    /*PROTECTED REGION END*/
     }
     
-    /**
-     * Please put all the custom methods/code in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(integrationpartnersystemrule_custom_methods) ENABLED START*/
-    
-    /*PROTECTED REGION END*/
 }

@@ -8,8 +8,8 @@ REM sv_sorconc_upd_trg.sql
 REM
 REM AUDIT TRAIL: 9.0
 REM 05/15/2013
-REM 1. Horizon
-REM Generated trigger for Horizon API support
+REM 1. Banner XE
+REM Generated trigger for Banner XE API support
 REM AUDIT TRAIL END
 REM
 CREATE OR REPLACE TRIGGER sorconc_view_update_trg

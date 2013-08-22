@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -72,7 +72,6 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_endDate = new Date()
     def u_failure_parsedSql = "TTTTT"
     def u_failure_systemRequiredIndicator = true
-    /*PROTECTED REGION END*/
 
 
     protected void setUp() {
@@ -84,7 +83,6 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(sqlprocess_domain_integration_test_data_initialization) ENABLED START*/
         //Valid test data (For success tests)
         def entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
         entriesForSqlProcesss.save(failOnError: true, flush: true)
@@ -108,7 +106,6 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
         //        u_failure_entriesForSql = EntriesForSql.findWhere()
 
         //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 

@@ -61,13 +61,11 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
         }
         catch (org.springframework.orm.hibernate3.HibernateJdbcException ae) {
 //            assertApplicationException ae, "unsupported.operation"
-
         }
     }
 
 
     void testDates() {
-        def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()

@@ -5,7 +5,7 @@
 REM svq_ssvmeet.sql
 REM
 REM AUDIT TRAIL: 9.0
-REM 1. Horizon
+REM 1. Banner XE
 REM View behind the SSAMATX query only page for advanced query of available meeting times
 REM AUDIT TRAIL END
 REM

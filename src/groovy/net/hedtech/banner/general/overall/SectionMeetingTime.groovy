@@ -1,10 +1,6 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 0.1.1
- Generated: Wed Feb 09 15:13:35 EST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.service.DatabaseModifiesState
@@ -16,26 +12,26 @@ import javax.persistence.*
  * Section Meeting Times model.
  */
 @Entity
-@Table( name = "SV_SSRMEET" )
-@NamedQueries( value = [
-@NamedQuery( name="SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation",
-            query="""select count(smt.id) from SectionMeetingTime smt
+@Table(name = "SV_SSRMEET")
+@NamedQueries(value = [
+@NamedQuery(name = "SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation",
+        query = """select count(smt.id) from SectionMeetingTime smt
                       where ((smt.beginTime between :beginTime and :endTime or smt.endTime between :beginTime and :endTime) or (:beginTime between smt.beginTime and smt.endTime))
                       and ((smt.startDate between :beginDate and :endDate or smt.endDate between :beginDate and :endDate) or (:beginDate between smt.startDate and smt.endDate))
                       and smt.building.code = :buildingCode and smt.room = :roomNumber and smt.building.code is not null and smt.room is not null
                       and (smt.monday = :monday or smt.tuesday = :tuesday or smt.wednesday = :wednesday or smt.thursday = :thursday or smt.friday = :friday or smt.saturday = :saturday or smt.sunday = :sunday)"""),
-@NamedQuery( name = "SectionMeetingTime.fetchByTermAndCourseReferenceNumber",
-             query = """FROM SectionMeetingTime a
+@NamedQuery(name = "SectionMeetingTime.fetchByTermAndCourseReferenceNumber",
+        query = """FROM SectionMeetingTime a
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
-		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
-@NamedQuery( name = "SectionMeetingTime.fetchByTermCRNAndCategory",
-             query = """FROM SectionMeetingTime a
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime"""),
+@NamedQuery(name = "SectionMeetingTime.fetchByTermCRNAndCategory",
+        query = """FROM SectionMeetingTime a
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                AND a.category = :category
-		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
-] )
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""")
+])
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
 
@@ -399,13 +395,12 @@ class SectionMeetingTime implements Serializable {
 
 
     static constraints = {
-        /*PROTECTED REGION ID(sectionmeetingtime_custom_constraints) ENABLED START*/
         term(nullable: false, maxSize: 6)
         courseReferenceNumber(nullable: false, maxSize: 5)
         dayOfWeek(nullable: true)
         dayNumber(nullable: true, min: 0, max: 9)
         beginTime(nullable: true, minSize: 4, maxSize: 4,
-                validator: {val, obj ->
+                validator: { val, obj ->
                     if ((val != null) && ((val < "0000") || (val > "2359") || (val.toString().substring(2, 3) > "59")))
                         return "invalid.begin_time"
                     if ((val != null) && (obj.endTime == null))
@@ -414,7 +409,7 @@ class SectionMeetingTime implements Serializable {
                         return "invalid.begin_time_greater_than_end_time"
                 })
         endTime(nullable: true, minSize: 4, maxSize: 4,
-                validator: {val, obj ->
+                validator: { val, obj ->
                     if ((val != null) && ((val < "0000") || (val > "2359") || (val.toString().substring(2, 3) > "59")))
                         return "invalid.end_time"
                     if ((val != null) && (obj.beginTime == null))
@@ -423,12 +418,12 @@ class SectionMeetingTime implements Serializable {
         building(nullable: true)
         room(nullable: true, maxSize: 10)
         startDate(nullable: false,
-                validator: {val, obj ->
+                validator: { val, obj ->
                     if ((val != null && obj.endDate != null) && (val > obj.endDate))
                         return "invalid.start_greater_than_end_date"
                 })
         endDate(nullable: false,
-                validator: {val, obj ->
+                validator: { val, obj ->
                     if ((val != null && obj.startDate != null) && (val < obj.startDate))
                         return "invalid.end_less_than_start_date"
                 })
@@ -448,7 +443,7 @@ class SectionMeetingTime implements Serializable {
         function(nullable: true)
         committee(nullable: true)
         scheduleToolStatus(nullable: true,
-                validator: {val, obj ->
+                validator: { val, obj ->
                     if (val != null
                             &&
                             ((val.code == 'ASM') || (val.code == 'AXM') || (val.code == 'HSM') ||
@@ -461,23 +456,10 @@ class SectionMeetingTime implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        /*PROTECTED REGION END*/
     }
 
-    /**
-     * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sectionmeetingtime_custom_attributes) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-
-    /*PROTECTED REGION ID(sectionmeetingtime_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = ["term", "courseReferenceNumber"]
-    /*PROTECTED REGION END*/
-
-    /*PROTECTED REGION ID(sectionmeetingtime_custom_methods) ENABLED START*/
 
     /**
      * This fetchBy is used to retrieve all meeting times for a given term and crn.
@@ -487,7 +469,7 @@ class SectionMeetingTime implements Serializable {
     public static List fetchByTermAndCourseReferenceNumber(String term,
                                                            String courseReferenceNumber) {
         def sectionMeetingTimes
-        SectionMeetingTime.withSession {session ->
+        SectionMeetingTime.withSession { session ->
             sectionMeetingTimes = session.getNamedQuery(
                     'SectionMeetingTime.fetchByTermAndCourseReferenceNumber').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).list()
         }
@@ -500,28 +482,43 @@ class SectionMeetingTime implements Serializable {
      */
 
     public static List fetchByTermCRNAndCategory(String term,
-                                                           String courseReferenceNumber, String category) {
+                                                 String courseReferenceNumber, String category) {
         def sectionMeetingTimes
-        SectionMeetingTime.withSession {session ->
+        SectionMeetingTime.withSession { session ->
             sectionMeetingTimes = session.getNamedQuery(
                     'SectionMeetingTime.fetchByTermCRNAndCategory').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).setString('category', category).list()
         }
         return sectionMeetingTimes
     }
 
+
     public static int fetchCountOfSchedulesByDateTimeAndLocation(String beginTime, String endTime, Date beginDate, Date endDate,
                                                                  String buildingCode, String roomNumber, String monday, String tuesday,
-                                                                 String wednesday, String thursday, String friday, String saturday, String sunday)   {
+                                                                 String wednesday, String thursday, String friday, String saturday, String sunday) {
         //if any of days are null put # for the search criteria. This is required as namedquery will look for the parameter and if not sent will result in error.
-        if (!monday){ monday="#" }
-        if (!tuesday){ tuesday="#" }
-        if (!wednesday){ wednesday="#" }
-        if (!thursday){ thursday="#" }
-        if (!friday){ friday="#" }
-        if (!saturday){ saturday="#" }
-        if (!sunday){ sunday="#" }
+        if (!monday) {
+            monday = "#"
+        }
+        if (!tuesday) {
+            tuesday = "#"
+        }
+        if (!wednesday) {
+            wednesday = "#"
+        }
+        if (!thursday) {
+            thursday = "#"
+        }
+        if (!friday) {
+            friday = "#"
+        }
+        if (!saturday) {
+            saturday = "#"
+        }
+        if (!sunday) {
+            sunday = "#"
+        }
         int count = 0
-        SectionMeetingTime.withSession {session ->
+        SectionMeetingTime.withSession { session ->
             count = session.getNamedQuery(
                     'SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation').setDate('beginDate', beginDate).setDate('endDate', endDate).
                     setString('roomNumber', roomNumber).setString('buildingCode', buildingCode).
@@ -532,5 +529,4 @@ class SectionMeetingTime implements Serializable {
         }
         return count
     }
-    /*PROTECTED REGION END*/
 }

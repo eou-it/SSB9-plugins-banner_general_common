@@ -36,7 +36,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 
 	def u_failure_code = "TTTT"
 	def u_failure_description = "update failure description field with a string of more than 30 characters"
-	/*PROTECTED REGION END*/
 
 	protected void setUp() {
 		formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
@@ -124,7 +123,6 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 
 
     void testDates() {
-        def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()

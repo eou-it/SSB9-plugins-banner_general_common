@@ -72,11 +72,6 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         def ilength = 9
         def iarea = 9
         def icountryPhone = "XXXX"
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_update_test_data_fetch_for_references) ENABLED START*/
         def idepartment = Department.findByCode("LAW")
         def ipartition = null
         def ibuilding = Building.findByCode("LAW")
@@ -84,7 +79,6 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         def iroomRate = null
         def iphoneRate = null
         def icollege = College.findByCode("LW")
-        /*PROTECTED REGION END*/
         // change the values
         housingRoomDescription.roomNumber = iroomNumber
         housingRoomDescription.termEffective = itermEffective
@@ -158,13 +152,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     void testReadOnlyRoomNumber() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
         def iroomNumber = "104"
-        /*PROTECTED REGION END*/
         // change the values
         housingRoomDescription.roomNumber = iroomNumber
         try {
@@ -180,13 +168,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     void testReadOnlyTermEffective() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
         def itermEffective = "201420"
-        /*PROTECTED REGION END*/
         // change the values
         housingRoomDescription.termEffective = itermEffective
         try {
@@ -202,13 +184,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     void testReadOnlyBuilding() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_readonly_test_data_fetch_for_references) ENABLED START*/
         def ibuilding = Building.findByCode("HUM")
-        /*PROTECTED REGION END*/
         // change the values
         housingRoomDescription.building = ibuilding
         try {
@@ -222,11 +198,6 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
 
 
     private def newHousingRoomDescription() {
-        /**
-         * Please use the appropriate finder methods to load the references here
-         * This area is being protected to preserve the customization on regeneration
-         */
-        /*PROTECTED REGION ID(housingroomdescription_service_integration_tests_data_fetch_for_references) ENABLED START*/
         def idepartment = Department.findByCode("LAW")
         def ipartition = null
         def ibuilding = Building.findByCode("LAW")
@@ -234,7 +205,6 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         def iroomRate = null
         def iphoneRate = null
         def icollege = College.findByCode("LW")
-        /*PROTECTED REGION END*/
         def housingRoomDescription = new HousingRoomDescription(
                 roomNumber: "102",
                 termEffective: "201410",
@@ -262,12 +232,4 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
                 college: icollege)
         return housingRoomDescription
     }
-
-    /**
-     * Please put all the custom service tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomdescription_custom_service_integration_test_methods) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-}  
+}

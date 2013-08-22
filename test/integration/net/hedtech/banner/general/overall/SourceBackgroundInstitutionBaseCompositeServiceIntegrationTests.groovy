@@ -6,7 +6,6 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 

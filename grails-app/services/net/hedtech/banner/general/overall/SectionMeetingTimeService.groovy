@@ -1,14 +1,6 @@
-/*********************************************************************************
- Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
- Education and the licensee in question. SunGard is either a registered trademark or
- trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
- Education in the U.S.A. and/or other regions and/or countries.
- **********************************************************************************/
+/*******************************************************************************
+ Copyright 2013 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 
 package net.hedtech.banner.general.overall
 
@@ -30,11 +22,6 @@ class SectionMeetingTimeService extends ServiceBase {
     boolean transactional = true
     def sessionFactory
 
-    /**
-     * Please put all the custom methods in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(sectionmeetingtime_custom_service_methods) ENABLED START*/
 
     def preCreate(Map map) {
         //Unable to validate against ScheduleUtility because this is in the General package.  API will enforce relationship.
@@ -54,7 +41,7 @@ class SectionMeetingTimeService extends ServiceBase {
         validateTerm(sectionMeetingTime.term)
         //If section meeting time, the hoursWeek is required
         validateTimes(sectionMeetingTime)
-        if (!sectionMeetingTime.hoursWeek && sectionMeetingTime.term != "EVENT"){
+        if (!sectionMeetingTime.hoursWeek && sectionMeetingTime.term != "EVENT") {
             throw new ApplicationException(SectionMeetingTime, "@@r1:missing_hours_week@@")
         }
     }
@@ -107,5 +94,4 @@ class SectionMeetingTimeService extends ServiceBase {
         return false
 
     }
-    /*PROTECTED REGION END*/
 }

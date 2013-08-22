@@ -6,17 +6,10 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
+import net.hedtech.banner.general.system.*
+import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
-import net.hedtech.banner.general.system.Department
-import net.hedtech.banner.general.system.Building
-import net.hedtech.banner.general.system.RoomStatus
-import net.hedtech.banner.general.system.RoomRate
-import net.hedtech.banner.general.system.PhoneRate
-import net.hedtech.banner.general.system.College
-import org.junit.Ignore
-
 
 class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 

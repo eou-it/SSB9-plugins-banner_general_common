@@ -5,7 +5,7 @@
 -- SVQ_SSRMEET_TIMECONFLICT.sql
 --
 -- AUDIT TRAIL: 9.0
---    Generated view for Horizon API support
+--    Generated view for Banner XE API support
 -- AUDIT TRAIL END
 --
 

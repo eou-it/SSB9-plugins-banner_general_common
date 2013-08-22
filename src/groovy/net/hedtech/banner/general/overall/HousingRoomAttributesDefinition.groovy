@@ -1,10 +1,6 @@
 /*********************************************************************************
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 1.21
- Generated: Fri Jul 01 19:13:07 IST 2011
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.Building
@@ -169,32 +165,10 @@ class HousingRoomAttributesDefinition implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
         building(nullable: false)
         buildingAndRoomAttribute(nullable: false)
-        /**
-         * Please put all the custom constraints in this protected section to protect the code
-         * from being overwritten on re-generation
-         */
-        /*PROTECTED REGION ID(housingroomattributesdefinition_custom_constraints) ENABLED START*/
-
-        /*PROTECTED REGION END*/
     }
 
-    /*PROTECTED REGION ID(housingroomattributesdefinition_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['roomNumber', 'termEffective', 'building', 'buildingAndRoomAttribute']
-    /*PROTECTED REGION END*/
-    /**
-     * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomattributesdefinition_custom_attributes) ENABLED START*/
-
-    /*PROTECTED REGION END*/
-
-    /**
-     * Please put all the custom methods/code in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(housingroomattributesdefinition_custom_methods) ENABLED START*/
 
 
     public static List fetchByBuildingRoomNumberAndTermEffective(String buildingCode, String roomNumber, String termEffective) {
@@ -203,5 +177,4 @@ class HousingRoomAttributesDefinition implements Serializable {
         }
         return lst
     }
-    /*PROTECTED REGION END*/
 }

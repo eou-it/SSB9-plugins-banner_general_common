@@ -7,8 +7,8 @@ REM
 REM gv_gorintg_ins_trg.sql
 REM
 REM AUDIT TRAIL: 9.0
-REM 1. Horizon
-REM Generated trigger for Horizon API support
+REM 1. Banner XE
+REM Generated trigger for Banner XE API support
 REM AUDIT TRAIL END
 REM
 CREATE OR REPLACE TRIGGER gorintg_view_create_trg

@@ -6,7 +6,6 @@ package net.hedtech.banner.general.overall
 import net.hedtech.banner.general.system.Document
 import net.hedtech.banner.general.system.VisaSource
 import net.hedtech.banner.general.system.VisaType
-import net.hedtech.banner.query.DynamicFinder
 
 import javax.persistence.*
 

@@ -1,10 +1,6 @@
 /*********************************************************************************
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/**
- Banner Automator Version: 0.1.1
- Generated: Fri Feb 11 16:39:35 EST 2011 
- */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -140,7 +136,6 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
 
     void initializeTestDataForReferences() {
-        /*PROTECTED REGION ID(housinglocationbuildingdescription_domain_integration_test_data_initialization) ENABLED START*/
         //Valid test data (For success tests)
         i_success_building = Building.findByCode("GRANT")
         i_success_campus = Campus.findByCode("M")
@@ -188,9 +183,6 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         u_failure_college = College.findByCode("AS")
         u_failure_department = Department.findByCode("ENGL")
         u_failure_partition = null
-
-        //Test data for references for custom tests
-        /*PROTECTED REGION END*/
     }
 
 

@@ -45,7 +45,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
         }
         Closure enrollmentDisplay = {
-            def enrollmentDisplay = GeneralCommonUtility.gtvsdaxForSession('DISPENROLL', 'WEBREG')[0]
+            GeneralCommonUtility.gtvsdaxForSession('DISPENROLL', 'WEBREG')[0]
             assertNotNull enrollmentDisplay
         }
 

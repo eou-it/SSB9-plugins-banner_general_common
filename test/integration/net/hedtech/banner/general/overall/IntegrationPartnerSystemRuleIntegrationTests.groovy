@@ -130,10 +130,4 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
                                          integrationPartner: intp)
     }
 
-    /**
-     * Please put all the custom tests in this protected section to protect the code
-     * from being overwritten on re-generation
-     */
-    /*PROTECTED REGION ID(integrationpartnersystemrule_custom_integration_test_methods) ENABLED START*/
-    /*PROTECTED REGION END*/
 }
