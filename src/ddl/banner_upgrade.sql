@@ -21,6 +21,15 @@ connect bansecr/&&bansecr_password
    where not exists (select 1 from gurucls
                       where gurucls_userid = 'GRAILS_USER'
                         and gurucls_class_code = 'BAN_PAYROLL_C');
+REM  Create tables
+connect general/&&general_password
+start grevtab_bgc
+
+REM Security scripts
+connect bansecr/&&bansecr_password
+start gguraobji_080602.sql
+start gguruobji_080602.sql
+
 connect dbeu_owner/&&dbeu_password
 start dbeu_ext_gen_bgc
 start dbeu_ext_stu_bgc
