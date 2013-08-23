@@ -5,6 +5,7 @@ import org.springframework.context.i18n.LocaleContextHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import groovy.sql.Sql
+import net.hedtech.banner.security.BannerUser
 /** *****************************************************************************
  © 2013 SunGard Higher Education.  All Rights Reserved.
 
@@ -19,7 +20,11 @@ class InformationTextUtility {
 
     public static String getMessages(String pageName, Locale locale = LocaleContextHolder.getLocale()) {
         String localeParam = locale.toString().toUpperCase();
-        List roles = getRoleFromAuthorities(SecurityContextHolder?.context?.authentication?.principal?.authorities)
+        List roles = getUserRoles()
+
+        if(roles == null) {
+            return "";
+        }
 
         def params = [pageName]
         def inClauseParams = null
@@ -92,7 +97,12 @@ class InformationTextUtility {
 
     public static String getMessage(String pageName, String label, Locale locale = LocaleContextHolder.getLocale()) {
         String localeParam = locale.toString().toUpperCase();
-        List roles = getRoleFromAuthorities(SecurityContextHolder?.context?.authentication?.principal?.authorities)
+        List roles = getUserRoles()
+
+        if(roles == null) {
+            return "";
+        }
+
         def params = [pageName]
         def inClauseParams = null
         roles.each { val ->
@@ -156,16 +166,21 @@ class InformationTextUtility {
         return infoText
     }
 
-    private static List getRoleFromAuthorities(Set authorities) {
-        List roles = new ArrayList();
-        //ROLE_SELFSERVICE-FACULTY_BAN_DEFAULT_M
-        //ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M
-        authorities.each {
-            String authority = it.authority
-            String role = authority.substring("ROLE_SELFSERVICE".length() + 1 )
-            role = role.split("_")[0]
-            roles << role
+    private static List getUserRoles() {
+        def user = SecurityContextHolder?.context?.authentication?.principal
+        List roles = null
+        if (user instanceof BannerUser) {
+            roles = new ArrayList();
+            Set authorities = user?.authorities
+
+            authorities.each {
+                String authority = it.authority
+                String role = authority.substring("ROLE_SELFSERVICE".length() + 1 )
+                role = role.split("_")[0]
+                roles << role
+            }
         }
         roles
     }
+
 }
