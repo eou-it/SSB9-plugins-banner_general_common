@@ -24,7 +24,8 @@ execute dbeu_util.extend_table('GENERAL','GORRSQL','G',FALSE);
 execute dbeu_util.extend_table('GENERAL','GORCMSC','G',TRUE);
 execute dbeu_util.extend_table('GENERAL','GORCMDO','G',TRUE);
 execute dbeu_util.extend_table('GENERAL','GORCMSP','G',TRUE);
-execute dbeu_util.extend_table('GENERAL','GOTCMME','G',FALSE)
+execute dbeu_util.extend_table('GENERAL','GOTCMME','G',FALSE);
+execute dbeu_util.extend_table('GENERAL','GURINFO','G',FALSE);
 
 execute dbeu_util.extend_table('GENERAL','GORVISA','G',TRUE)
 execute dbeu_util.extend_table('GENERAL','GORDOCM','G',FALSE)
