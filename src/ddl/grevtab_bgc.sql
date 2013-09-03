@@ -10,12 +10,3 @@ whenever sqlerror exit rollback;
 start mmedinx.sql
 start msmlinx.sql
 start msmltab.sql
-
-start gurinfo_teardown_ext.sql
-
-connect general/&&general_password
-start gurinfo_080602_01.sql
-start gurinfo_080602_02.sql
-start gurinfo_080602_03.sql
-
-
