@@ -1,4 +1,5 @@
 import net.hedtech.banner.loginworkflow.UserAgreementFlow
+import net.hedtech.banner.loginworkflow.SurveyFlow
 
 /*******************************************************************************
  Copyright 2013 Ellucian Company L.P. and its affiliates.
@@ -52,6 +53,10 @@ class BannerGeneralCommonGrailsPlugin {
 
     def doWithSpring = {
         userAgreementFlow(UserAgreementFlow){
+            sessionFactory = ref(sessionFactory)
+        }
+
+        surveyFlow(SurveyFlow) {
             sessionFactory = ref(sessionFactory)
         }
     }
