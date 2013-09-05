@@ -1,5 +1,6 @@
 import net.hedtech.banner.loginworkflow.UserAgreementFlow
 import net.hedtech.banner.loginworkflow.SurveyFlow
+import net.hedtech.banner.loginworkflow.SecurityQAFlow
 
 /*******************************************************************************
  Copyright 2013 Ellucian Company L.P. and its affiliates.
@@ -57,6 +58,10 @@ class BannerGeneralCommonGrailsPlugin {
         }
 
         surveyFlow(SurveyFlow) {
+            sessionFactory = ref(sessionFactory)
+        }
+
+        securityQAFlow(SecurityQAFlow) {
             sessionFactory = ref(sessionFactory)
         }
     }
