@@ -21,4 +21,12 @@ modules = {
         resource url: [plugin: 'banner-general-common', file: 'js/views/securityQA/securityQA.js']
     }
 
+    'survey' {
+        dependsOn "bannerSelfService, i18n-core"
+        defaultBundle environment == "development" ? false : "survey"
+        //defaultBundle false
+
+        resource url: [plugin: 'banner-general-common', file: 'css/views/survey/survey.css'], attrs: [media: 'screen, projection']
+        resource url: [plugin: 'banner-general-common', file: 'js/views/survey/survey.js']
+    }
 }
