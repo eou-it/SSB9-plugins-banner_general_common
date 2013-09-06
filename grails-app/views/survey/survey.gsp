@@ -8,6 +8,15 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <head>
     <title>Race and Ethnicity Survey</title>
     <meta name="layout" content="bannerSelfServicePage"/>
+    <meta name="menuEndPoint" content="${g.createLink(controller: 'selfServiceMenu', action: 'data')}"/>
+    <meta name="menuBaseURL" content="${createLink(uri: '/ssb')}" />
+    <meta name="menuDefaultBreadcrumbId" content=""/>
+    <script type="text/javascript">
+        document.getElementsByName('menuDefaultBreadcrumbId')[0].content = [
+            "<g:message code="survey.breadcrumb.bannerSelfService"/>",
+            "<g:message code="survey.breadcrumb.survey"/>"
+            ].join('_');
+    </script>
     <r:require modules="survey"/>
 </head>
 
