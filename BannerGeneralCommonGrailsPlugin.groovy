@@ -1,3 +1,7 @@
+import net.hedtech.banner.loginworkflow.UserAgreementFlow
+import net.hedtech.banner.loginworkflow.SurveyFlow
+import net.hedtech.banner.loginworkflow.SecurityQAFlow
+
 /*******************************************************************************
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
@@ -29,6 +33,7 @@ class BannerGeneralCommonGrailsPlugin {
     // the other plugins this plugin depends on
 //    def dependsOn = ['springSecurityCore': '1.2']
 
+    def dependsOn = [ 'bannerCore': '2.5.0 > *']
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -48,14 +53,27 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
+        userAgreementFlow(UserAgreementFlow){
+            sessionFactory = ref(sessionFactory)
+        }
+
+        surveyFlow(SurveyFlow) {
+            sessionFactory = ref(sessionFactory)
+        }
+
+        securityQAFlow(SecurityQAFlow) {
+            sessionFactory = ref(sessionFactory)
+        }
     }
 
 
     def doWithDynamicMethods = {
+
     }
 
     // Register Hibernate event listeners.
     def doWithApplicationContext = {
+
     }
 
 
