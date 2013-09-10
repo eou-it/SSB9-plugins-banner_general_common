@@ -55,8 +55,8 @@
         <mapping class="net.hedtech.banner.general.overall.SqlProcess"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
+        <mapping class="net.hedtech.banner.general.overall.AddressRolePrivileges"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
         <mapping class="net.hedtech.banner.general.utility.InformationText"/>
    </session-factory>
    </hibernate-configuration>
-   
