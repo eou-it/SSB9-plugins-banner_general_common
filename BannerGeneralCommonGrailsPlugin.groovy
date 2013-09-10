@@ -53,16 +53,26 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        userAgreementFlow(UserAgreementFlow){
+        userAgreementFlow(UserAgreementFlow){ bean ->
             sessionFactory = ref(sessionFactory)
-        }
 
-        surveyFlow(SurveyFlow) {
-            sessionFactory = ref(sessionFactory)
+            registerFlowClass = [
+                10: "userAgreementFlow"
+            ]
         }
 
         securityQAFlow(SecurityQAFlow) {
             sessionFactory = ref(sessionFactory)
+            registerFlowClass = [
+                    30: "securityQAFlow"
+            ]
+        }
+
+        surveyFlow(SurveyFlow) {
+            sessionFactory = ref(sessionFactory)
+            registerFlowClass = [
+                    50: "surveyFlow"
+            ]
         }
     }
 

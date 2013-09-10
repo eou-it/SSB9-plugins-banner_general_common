@@ -19,7 +19,7 @@ import java.sql.SQLException
  NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
  WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
  ****************************************************************************** */
-class SurveyFlow implements PostLoginWorkflow {
+class SurveyFlow extends PostLoginWorkflow {
 
     def sessionFactory
     private final log = Logger.getLogger(getClass())

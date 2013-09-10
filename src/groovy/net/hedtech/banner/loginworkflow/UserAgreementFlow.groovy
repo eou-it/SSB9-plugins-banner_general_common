@@ -19,7 +19,7 @@ import java.sql.SQLException
  WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
  ****************************************************************************** */
 
-class UserAgreementFlow implements PostLoginWorkflow {
+class UserAgreementFlow extends PostLoginWorkflow {
     def sessionFactory
 
     private final log = Logger.getLogger(getClass())

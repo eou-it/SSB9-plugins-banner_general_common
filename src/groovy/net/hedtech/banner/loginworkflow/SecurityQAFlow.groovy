@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import java.sql.SQLException
 
-class SecurityQAFlow implements PostLoginWorkflow {
+class SecurityQAFlow extends PostLoginWorkflow {
 
     def sessionFactory
     private final log = Logger.getLogger(getClass())
