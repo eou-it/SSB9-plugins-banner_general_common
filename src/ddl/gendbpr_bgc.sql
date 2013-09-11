@@ -31,3 +31,10 @@ start gv_gorcmdo_upd_trg
 start gv_gorvisa_del_trg
 start gv_gorvisa_ins_trg
 start gv_gorvisa_upd_trg
+
+start gv_gobqstn_ins_trg
+start gv_gobqstn_upd_trg
+start gv_gobqstn_del_trg
+start gv_gobansr_upd_trg
+start gv_gobansr_ins_trg
+start gv_gobansr_del_trg
