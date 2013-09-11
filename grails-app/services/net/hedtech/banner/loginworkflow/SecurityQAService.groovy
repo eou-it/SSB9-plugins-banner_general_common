@@ -25,7 +25,7 @@ class SecurityQAService {
         int cnt = 1
         boolean isValidPin = validatePin(pin,pidm)
         if(!isValidPin){
-            throw new ApplicationException("","Invalid PIN. Please re-enter PIN.")
+            throw new ApplicationException("","securityQA.invaild.pin")
         }
         lst.each {
             String question1 = it["question"]
@@ -138,7 +138,7 @@ class SecurityQAService {
 
     }
 
-    private def getQuestionMinimumLength(){
+    public def getQuestionMinimumLength(){
         def connection
         Sql sql
         try{
@@ -158,7 +158,7 @@ class SecurityQAService {
         }
     }
 
-    private def getAnswerMinimumLength(){
+    public def getAnswerMinimumLength(){
         def connection
             Sql sql
             try{
