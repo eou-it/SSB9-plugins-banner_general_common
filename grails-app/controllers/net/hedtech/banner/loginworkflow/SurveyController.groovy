@@ -57,7 +57,7 @@ class SurveyController {
 
 
     def done() {
-        String path = request.getSession().getAttribute("URI_ACCESSED")
+        String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"
         }
