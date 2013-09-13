@@ -86,19 +86,20 @@ $(document).ready(function () {
         } else if ($('#chkEthn_2').is(':checked')) {
             $('#ethinicitytxt').text(nothispanicLabel)
         }
-
+        $('#racetxt').text("");
         $('div[class="race-category-area"]').each(function (idx, element) {
             var descElement = element;
             var raceElement = element;
             var desc = $(descElement).find('div[class="race-category-header"]').text();
             var raceSelectedDesc = "";
+
             $(raceElement).find('div[class="races-content"] input:checkbox').each(function (idOfCheckBox, checkBoxElement) {
                 if ($(checkBoxElement).is(':checked')) {
                      raceSelectedDesc = raceSelectedDesc+ $("label[for=" + $(checkBoxElement).attr('id') + "]").text()+"<br />";
                 }
             });
             if (raceSelectedDesc != "") {
-                $('#racetxt').append('<div class="section-wrapper"><div>'+desc+':</div><div class="section-wrapper">'+ raceSelectedDesc+'</div></div>');
+                $('#racetxt').append('<div class="race-description">'+desc+':</div><div class="section-wrapper">'+ raceSelectedDesc+'</div><br />');
             }
 
         });

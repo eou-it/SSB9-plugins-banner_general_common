@@ -132,3 +132,7 @@
 .section-message {
     padding-left: 20px;
 }
+
+.race-description {
+    width: 150px;
+}
