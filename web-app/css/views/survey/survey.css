@@ -113,3 +113,22 @@
     border: 1px solid #FF3F3F;
     background-color: #EBCFCF;
 }
+
+
+.section-wrapper div {
+    display: inline-table;
+}
+
+.informationImage {
+    background-image: url("../../../images/information.png");
+    background-repeat: no-repeat;
+    background-size: auto auto;
+    height: 15px;
+    overflow: hidden;
+    position: absolute;
+    width: 23px;
+}
+
+.section-message {
+    padding-left: 20px;
+}
