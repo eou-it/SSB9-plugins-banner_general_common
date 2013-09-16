@@ -10,11 +10,11 @@
     </div>
 
     <div  class="container">
-        <div class="row race-header-label" id="raceHeadertxt">
-                <div id="raceLabelTxt" class="confirmation-content-label race-label column"><g:message code="survey.confirm.race.label"/></div>
-                <div  class="confirmation-content-label race-label column">&nbsp;</div>
+        <div class="header race-header-label" id="raceHeadertxt">
+                <div id="raceLabelTxt" class="confirmation-content-label race-label headerColumn"><g:message code="survey.confirm.race.label"/></div>
+                <div  class="confirmation-content-label race-label headerColumn">&nbsp;</div>
          </div>
-        <div id="race-content"></div>
+        <div id="race-content" class="rowGroup"></div>
     </div>
 </div>
 

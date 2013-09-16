@@ -164,3 +164,17 @@
     padding-bottom: 10px;
 }
 
+
+.header {
+    display:table-header-group;
+}
+
+.headerColumn  {
+    display: table-cell;
+}
+
+
+.rowGroup {
+    display:table-row-group;
+}
+
