@@ -24,7 +24,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <div id="content">
     <div id="bodyContainer" class="ui-layout-center inner-center">
         <div id="pageheader" class="level4">
-            <div id="pagetitle"><g:message code="survey.title" /></div>
+            <div id="pagetitle"><g:message code="survey.edit.title" /></div>
         </div>
         <div id="pagebody" class="level4">
             <div id="contentHolder">

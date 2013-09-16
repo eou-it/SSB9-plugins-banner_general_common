@@ -117,10 +117,11 @@
 
 .section-wrapper div {
     display: inline-table;
+    padding-bottom: 10px;
 }
 
 .informationImage {
-    background-image: url("../../../images/information.png");
+    background-image: url("../../../images/web_info.png");
     background-repeat: no-repeat;
     background-size: auto auto;
     height: 15px;
@@ -131,8 +132,34 @@
 
 .section-message {
     padding-left: 20px;
+    padding-bottom: 10px;
 }
 
-.race-description {
-    width: 150px;
+
+.race-label {
+    border: 1px solid #CCCCCC;
+    background-color: #E6E6E6;
+    border-color: #E6E6E6;
 }
+
+
+.confirmation-content-label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+.container {
+    display: table;
+    min-width: 200px;
+}
+
+.row {
+    display: table-row;
+    padding: 5px;
+}
+
+.column  {
+    display: table-cell;
+}
+
