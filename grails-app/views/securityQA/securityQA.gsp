@@ -6,7 +6,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 --%>
 <html>
 <head>
-    <title>Security Question and Answer</title>
+    <title><g:message code="securityQA.title"/></title>
     <meta name="layout" content="bannerSelfServicePage"/>
     <r:require modules="securityQA"/>
     <r:script disposition="head">
@@ -117,7 +117,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
                             <div class="select-wrapper">
                                 <select class="select" id="question" name="question">
-                                    <option value="question0">Not Selected</option>
+                                    <option value="question0"><g:message code="securityQA.selection.label"/></option>
                                     <g:each in="${questions}" status="j" var="innerQues">
                                         <option value="question${j + 1}">${innerQues}</option>
                                     </g:each>
