@@ -85,6 +85,7 @@ $(document).ready(function () {
     });
 
     function populateConfirmSurvey() {
+        $('#ethinicitytxt').text("");
         if ($('#chkEthn_1').is(':checked')) {
             $('#ethinicitytxt').text(hispanicLabel)
         } else if ($('#chkEthn_2').is(':checked')) {
