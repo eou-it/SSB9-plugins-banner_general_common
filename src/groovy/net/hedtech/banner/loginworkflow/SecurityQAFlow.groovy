@@ -2,12 +2,9 @@ package net.hedtech.banner.loginworkflow
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.security.BannerUser
-
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.context.ApplicationContext
-import org.springframework.security.core.context.SecurityContextHolder
 
 import java.sql.SQLException
 
@@ -70,18 +67,10 @@ class SecurityQAFlow extends PostLoginWorkflow {
     }
 
     private boolean isUserAlreadyAnsweredSecurityQA(noOfQuestions){
-        if(noOfQuestions > securityQAService.getNumberOfQuestionsAnswered(getPidm())) {
+        if(noOfQuestions > securityQAService.getNumberOfQuestionsAnswered(securityQAService.getPidm())) {
             return false
         }
 
         return true
-    }
-
-    public static String getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
     }
 }

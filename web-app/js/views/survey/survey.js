@@ -19,13 +19,15 @@ $(document).ready(function () {
         repeatUntil(rebindBreadCrumb, 100, 10);
     }
     fixBreadcrumbs();
-
+    $('#confirmSurvey').hide();
     var notificationMessages = new Array();
     var error = $.i18n.prop("survey.ethinicity.multiple.selection.invalid");
     var saveBtnLabel = $.i18n.prop("survey.confirm.button.save");
     var cancelBtnLabel = $.i18n.prop("survey.confirm.button.cancel");
     var askMeLaterBtnLabel = $.i18n.prop("survey.edit.button.askMeLater");
     var continueBtnLabel = $.i18n.prop("survey.edit.button.continue");
+    var confirmationPageTitle = $.i18n.prop("survey.confirm.title");
+    var editPageTitle = $.i18n.prop("survey.edit.title");
 
     //data
     var nothispanicLabel = $.i18n.prop("survey.ethnicity.nothispanic");
@@ -61,6 +63,7 @@ $(document).ready(function () {
                 $('#editSurvey').hide();
                 $('#confirmSurvey').show();
                 populateConfirmSurvey();
+                $('#pagetitle').text(confirmationPageTitle);
             }
         }
 
@@ -76,17 +79,20 @@ $(document).ready(function () {
             $("#save-btn").val(continueBtnLabel);
             $('#editSurvey').show();
             $('#confirmSurvey').hide();
+            $('#pagetitle').text(editPageTitle);
         }
 
     });
 
     function populateConfirmSurvey() {
+        $('#ethinicitytxt').text("");
         if ($('#chkEthn_1').is(':checked')) {
-            $('#ethinicitytxt').text(hispanicLabel)
-        } else if ($('#chkEthn_2').is(':checked')) {
             $('#ethinicitytxt').text(nothispanicLabel)
+        } else if ($('#chkEthn_2').is(':checked')) {
+            $('#ethinicitytxt').text(hispanicLabel)
         }
-        $('#racetxt').text("");
+        $('#race-content').text("");
+
         $('div[class="race-category-area"]').each(function (idx, element) {
             var descElement = element;
             var raceElement = element;
@@ -99,7 +105,7 @@ $(document).ready(function () {
                 }
             });
             if (raceSelectedDesc != "") {
-                $('#racetxt').append('<div class="race-description">'+desc+':</div><div class="section-wrapper">'+ raceSelectedDesc+'</div><br />');
+                $('#race-content').append('<div class="row"><div class="column">'+desc+':</div><div class="column">'+ raceSelectedDesc+'</div></div>');
             }
 
         });

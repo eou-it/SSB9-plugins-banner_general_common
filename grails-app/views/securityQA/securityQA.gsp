@@ -6,7 +6,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 --%>
 <html>
 <head>
-    <title>Security Question and Answer</title>
+    <title><g:message code="securityQA.title"/></title>
     <meta name="layout" content="bannerSelfServicePage"/>
     <r:require modules="securityQA"/>
     <r:script disposition="head">
@@ -92,7 +92,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
                     <div>
                         <span><i class="informationImage"></i></span><label><div
-                            class="section-message"><g:message
+                            class="section-message" id="aria-section-message"><g:message
                             code="securityQA.information"/></label></div>
                 </div>
                 <br/>
@@ -102,22 +102,22 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                       method='POST'>
                     <div class="section-wrapper">
                         <div class="question-label">
-                            <label><g:message code="securityQA.confirmpin.label"/></label>
+                            <label id="aria-confirm-pin"><g:message code="securityQA.confirmpin.label"/></label>
                         </div>
 
                         <div id="textLabel">
-                            <g:field name="pin" class="section-text" type="password"></g:field>
+                            <g:field name="pin" class="section-text" type="password" aria-labelledby="aria-confirm-pin" aria-describedby="aria-section-message"></g:field>
                         </div>
                     </div>
                 </br>
                     <g:each in="${1..noOfquestions}" status="i" var="ques">
                         <div class="section-wrapper">
-                            <div class="question-label"><label><g:message code="securityQA.question.label"
+                            <div class="question-label"><label id="aria-question-label${i}"><g:message code="securityQA.question.label"
                                                                           args="[i + 1]"/></label></div>
 
                             <div class="select-wrapper">
-                                <select class="select" id="question" name="question">
-                                    <option value="question0">Not Selected</option>
+                                <select class="select" id="question" name="question" aria-labelledby="aria-question-label${i}">
+                                    <option value="question0"><g:message code="securityQA.selection.label"/></option>
                                     <g:each in="${questions}" status="j" var="innerQues">
                                         <option value="question${j + 1}">${innerQues}</option>
                                     </g:each>
@@ -127,24 +127,24 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                                 <label><g:message code="securityQA.or.label"/></label>
 
                                 <div class="section-wrapper">
-                                    <div class="question-label"><label><g:message
+                                    <div class="question-label"><label id="aria-editable-question-label${i}"><g:message
                                             code="securityQA.userdefinedquestion.label"
                                             args="[i + 1]"/></label></div>
 
                                     <div><g:textField name="userDefinedQuestion" id="userDefinedQuestion"
                                                       value="${selectedUserDefinedQues[i]}"
-                                                      class="section-text"></g:textField></div>
+                                                      class="section-text" aria-labelledby="aria-editable-question-label${i}"></g:textField></div>
                                 </div>
                             </g:if>
                         </div>
                         <br/>
 
                         <div class="section-wrapper">
-                            <div class="question-label"><label><g:message code="securityQA.answer.label"
+                            <div class="question-label"><label id="aria-editable-answer-label${i}"><g:message code="securityQA.answer.label"
                                                                           args="[i + 1]"/></label></div>
 
                             <div><g:textField name="answer" class="section-text"
-                                              value="${selectedAns[i]}"></g:textField></div>
+                                              value="${selectedAns[i]}" aria-labelledby="aria-editable-answer-label${i}"></g:textField></div>
                         </div>
                         <br/>
                     </g:each>
