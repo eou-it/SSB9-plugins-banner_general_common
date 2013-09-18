@@ -46,6 +46,10 @@ class UserAgreementFlow extends PostLoginWorkflow {
         return "/ssb/userAgreement"
     }
 
+    public String getControllerName() {
+        return "userAgreement"
+    }
+
     public static String getPidm() {
         def user = SecurityContextHolder?.context?.authentication?.principal
         if (user instanceof BannerUser) {

@@ -55,6 +55,10 @@ class SurveyFlow extends PostLoginWorkflow {
         return "/ssb/survey/survey"
     }
 
+    public String getControllerName() {
+        return "survey"
+    }
+
 
     static def getPidm() {
         def user = SecurityContextHolder?.context?.authentication?.principal

@@ -36,6 +36,10 @@ class SecurityQAFlow extends PostLoginWorkflow {
         return "/ssb/securityQA"
     }
 
+    public String getControllerName() {
+        return "securityQA"
+    }
+
     private String getDisableForgetPinIndicator(){
         def connection
         Sql sql
