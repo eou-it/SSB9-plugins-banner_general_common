@@ -130,7 +130,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                              </div>
                             </div>
                             <g:if test="${userDefinedQuesFlag == 'Y'}">
-                                <label class="or-label "><g:message code="securityQA.or.label"/></label>
+                                <label class="or-label class="label-style"><g:message code="securityQA.or.label"/></label>
                                 <div class="question-wrapper">
                                     <div class="label-wrapper"><label id="aria-editable-question-label${i}" class="label-style"><g:message
                                             code="securityQA.userdefinedquestion.label"
@@ -144,15 +144,17 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
                         </div>
 
-                        <div class="answer-wrapper">
-                            <div class="label-wrapper"><label id="aria-editable-answer-label${i}"><g:message
-                                    code="securityQA.answer.label" class="label-style"
+                       <div class="section-wrapper">
+                         <div class="answer-wrapper">
+                            <div class="label-wrapper"><label id="aria-editable-answer-label${i}" class="label-style"><g:message
+                                    code="securityQA.answer.label"
                                     args="[i + 1]"/></label></div>
 
                             <div class="section-text-wrapper"><g:textField name="answer" class="section-text"
                                                                  value="${selectedAns[i]}"
                                                                  aria-labelledby="aria-editable-answer-label${i}"></g:textField></div>
-                        </div>
+                         </div>
+                       </div>
 
                     </g:each>
                     <div class="button-area">
