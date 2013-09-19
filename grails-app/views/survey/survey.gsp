@@ -17,7 +17,10 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
             "<g:message code="survey.breadcrumb.survey"/>"
             ].join('_');
     </script>
-    <r:require modules="survey"/>
+    <r:require module="survey"/>
+    <g:if test="${message(code: 'default.language.direction') == 'rtl'}">
+        <r:require module="surveyRTL"/>
+    </g:if>
 </head>
 
 <body>

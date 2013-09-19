@@ -7,8 +7,11 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <html>
 <head>
     <title><g:message code="securityQA.title"/></title>
+    <r:require module="securityQA"/>
+    <g:if test="${message(code: 'default.language.direction') == 'rtl'}">
+        <r:require module="securityQARTL"/>
+    </g:if>
     <meta name="layout" content="bannerSelfServicePage"/>
-    <r:require modules="securityQA"/>
     <r:script disposition="head">
                window.securityQAInitErrors = {
                    notification: "${notification}"

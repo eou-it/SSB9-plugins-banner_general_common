@@ -8,7 +8,10 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <head>
     <title><g:message code="net.hedtech.banner.termsofuse.title"/></title>
     <meta name="layout" content="bannerSelfServicePage"/>
-    <r:require modules="userAgreement"/>
+    <r:require module="userAgreement"/>
+    <g:if test="${message(code: 'default.language.direction') == 'rtl'}">
+        <r:require module="userAgreementRTL"/>
+    </g:if>
 </head>
 <body>
 <div id="content">
