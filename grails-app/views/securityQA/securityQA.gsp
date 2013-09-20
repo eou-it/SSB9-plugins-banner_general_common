@@ -130,7 +130,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                              </div>
                             </div>
                             <g:if test="${userDefinedQuesFlag == 'Y'}">
-                                <label class="or-label class="label-style"><g:message code="securityQA.or.label"/></label>
+                                <label class="or-label" class="label-style"><g:message code="securityQA.or.label"/></label>
                                 <div class="question-wrapper">
                                     <div class="label-wrapper"><label id="aria-editable-question-label${i}" class="label-style"><g:message
                                             code="securityQA.userdefinedquestion.label"
@@ -158,9 +158,9 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
                     </g:each>
                     <div class="button-area">
-                        <input type='button' value="Cancel" id="security-cancel-btn" class="secondary-button"
+                        <input type='button' value='<g:message code="securityQA.confirm.button.cancel"/>' id="security-cancel-btn" class="secondary-button"
                                x data-endpoint="${createLink(controller: "logout")}"/>
-                        <input type='button' value="Continue" id="security-save-btn" class="primary-button"/>
+                        <input type='button' value='<g:message code="securityQA.confirm.button.continue"/>' id="security-save-btn" class="primary-button"/>
                     </div>
                 </form>
             </div>

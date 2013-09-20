@@ -118,7 +118,7 @@
 }
 
 .select {
-   width: 95%;
+   width: 100%;
 }
 
 .section-text-wrapper{
@@ -127,7 +127,7 @@
 }
 
 .section-text {
-   width: 94%;
+   width: 99%;
    padding:0;
    margin: 0;
    height: 18px;
@@ -156,6 +156,7 @@
 
 .section-message {
     padding-left: 25px;
+    font-weight: bold;
 }
 
 .informationImage {

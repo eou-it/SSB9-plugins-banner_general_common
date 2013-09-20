@@ -37,9 +37,8 @@ $(document).ready(function () {
 
 
         if(userDefinedQuesFlag == 'Y') {
-
-
             $('input#userDefinedQuestion').each(function (j, selectElm) {
+                $(selectElm).parent().removeClass("notification-error");
                 var enteredText = $(selectElm).val();
                 var invalidcharacter = $.i18n.prop("securityQA.invalid.question");
                 var invalidqusetionlength = $.i18n.prop("securityQA.invalid.length.question", [questionMinimumLength]);
@@ -53,7 +52,6 @@ $(document).ready(function () {
                 }
                 if (enteredText.length > 0 && enteredText.length < questionMinimumLength) {
                     $(selectElm).parent().addClass("notification-error");
-
                     addAriaErrors(selectElm, invalidqusetionlength, "aria-invalid-question-"+j);
                     notificationMessages.push(invalidqusetionlength);
                 }
