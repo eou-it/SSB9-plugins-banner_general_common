@@ -65,7 +65,8 @@ width: 85%;
 
 #policy.terms-text-style {
     background:url(../../../images/web_info.png) no-repeat;
-    padding-right: 20px;
+    background-position: top left;
+    width: 2%;
 }
 
 
@@ -87,5 +88,9 @@ TABLE TD.terms-text-style {
     margin: 25px 0;
     padding: 0;
     width: 100%;
+}
+
+.button-area {
+    float: right;
 }
 

@@ -20,6 +20,7 @@ modules = {
         //defaultBundle false
 
         resource url: [plugin: 'banner-general-common', file: 'css/views/userAgreement/policy-rtl.css'], attrs: [media: 'screen, projection']
+        resource url: [plugin: 'banner-general-common', file: 'css/views/userAgreement/policy-rtl-patch.css'], attrs: [media: 'screen, projection']
         resource url: [plugin: 'banner-general-common', file: 'js/views/userAgreement/policy.js']
     }
 
@@ -52,6 +53,7 @@ modules = {
         //defaultBundle false
 
         resource url: [plugin: 'banner-general-common', file: 'css/views/survey/survey-rtl.css'], attrs: [media: 'screen, projection']
+        resource url: [plugin: 'banner-general-common', file: 'css/views/survey/survey-rtl-patch.css'], attrs: [media: 'screen, projection']
         resource url: [plugin: 'banner-general-common', file: 'js/views/survey/survey.js']
     }
 }

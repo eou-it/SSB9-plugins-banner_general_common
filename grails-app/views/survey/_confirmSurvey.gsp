@@ -1,7 +1,7 @@
 <div id="confirmSurvey">
     <div>
         <span><i class="informationImage"></i></span><label>
-        <div class="section-message confirmation-content">Review your choices and either Save or return to the previous page.</div></label>
+        <div class="section-message confirmation-content"><g:message code="survey.confirm.section.message"/></div></label>
     </div>
     <div id="ethnicity-header-label" class="section-wrapper" >
         <div class="confirmation-content-label"><g:message code="survey.confirm.ethnicity.label"/> : </div>
