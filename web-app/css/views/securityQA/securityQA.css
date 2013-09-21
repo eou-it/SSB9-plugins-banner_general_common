@@ -174,3 +174,8 @@
     border: 1px solid #FF3F3F;
     background-color: #EBCFCF;
 }
+
+.hide-aria-message {
+    position: absolute;
+    left: -9999px;
+}

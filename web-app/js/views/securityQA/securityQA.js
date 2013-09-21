@@ -1,3 +1,6 @@
+/** *****************************************************************************
+ Copyright 2013 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 $(document).ready(function () {
     $('#pin').focus();
     var ariaValid = false;
@@ -8,7 +11,7 @@ $(document).ready(function () {
             var n = new Notification({message:window.securityQAInitErrors.notification, type:"error"});
             notifications.addNotification(n);
 
-            $('body').append('<div role="alert" id="server-error" style="position: absolute;left: -9999px;">' + window.securityQAInitErrors.notification + '</div>');
+            $('body').append('<div role="alert" id="server-error" class="hide-aria-message">' + window.securityQAInitErrors.notification + '</div>');
         }
     });
     var notificationMessages = new Array();
@@ -129,7 +132,7 @@ $(document).ready(function () {
     function addAriaErrors(ielm, error, id) {
 
         setAriaInvalidTrueAndDescribedByError(ielm, id);
-        $('#' + id).append('<p style="position: absolute;left: -9999px;">' + error + '</p>');
+        $('#' + id).append('<p class="hide-aria-message">' + error + '</p>');
     }
 
     function removeAriaErrors(ielm, id) {
@@ -204,7 +207,7 @@ $(document).ready(function () {
             $('input#pin').parent().addClass("notification-error");
             setAriaInvalidTrueAndDescribedByError('input#pin', 'invalid-pin');
             $('#invalid-pin').remove();
-            $('body').append('<div role="alert" id="invalid-pin" style="position: absolute;left: -9999px;">' + error + '</div>');
+            $('body').append('<div role="alert" id="invalid-pin" class="hide-aria-message">' + error + '</div>');
         } else {
             notificationMessages.splice(notificationMessages.indexOf(error));
             $('input#pin').parent().removeClass("notification-error");
