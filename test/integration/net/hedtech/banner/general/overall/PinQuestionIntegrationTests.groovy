@@ -204,7 +204,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
 		return pinQuestion
 	}
 
-    void testFetchByQuestionId() {
+    void testFetchQuestions() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
         assertNotNull pinQuestion.pinQuestionId
@@ -212,7 +212,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         assertTrue fetchedPinQuestions.size()>0
     }
 
-    void testFetchQuestions(){
+    void testFetchByQuestionId (){
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
         assertNotNull pinQuestion.pinQuestionId

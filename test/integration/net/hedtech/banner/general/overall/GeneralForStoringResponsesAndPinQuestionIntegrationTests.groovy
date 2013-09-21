@@ -47,7 +47,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
 	def i_failure_pidm
 	def i_failure_number = -1
 	def i_failure_questionDescription = null
-	def i_failure_answerDescription = "AnswerFailure"
+	def i_failure_answerDescription = null
 	def i_failure_answerSalt = ""
 
 	//Test data for creating updating domain instance
@@ -88,19 +88,20 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
 		super.tearDown()
 	}
 
-	void testCreateValidGeneralForStoringResponsesAndPinQuestion() {
+	void testCreateValidUserEnteredPinQuestion() {
 		def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
 		generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
 		//Test if the generated entity now has an id assigned
         assertNotNull generalForStoringResponsesAndPinQuestion.id
+        assertEquals i_success_user_entered_questionDescription, generalForStoringResponsesAndPinQuestion.questionDescription
 	}
 
-    void testCreateValidUserEnteredPinQuestion() {
-   		def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
+    void testCreateValidGeneralForStoringResponsesAndPinQuestion() {
+   		def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
    		generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
    		//Test if the generated entity now has an id assigned
         assertNotNull generalForStoringResponsesAndPinQuestion.id
-        assertEquals i_success_user_entered_questionDescription, generalForStoringResponsesAndPinQuestion.questionDescription
+        assertEquals i_success_questionDescription, generalForStoringResponsesAndPinQuestion.questionDescription
    	}
 
 	void testCreateInvalidGeneralForStoringResponsesAndPinQuestion() {
