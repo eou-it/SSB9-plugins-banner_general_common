@@ -1,3 +1,6 @@
+/** *****************************************************************************
+ Copyright 2013 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 $(document).ready(function () {
     function fixBreadcrumbs() {
         function rebindBreadCrumb() {
@@ -20,6 +23,7 @@ $(document).ready(function () {
     }
     fixBreadcrumbs();
     $('#confirmSurvey').hide();
+    $('#chkEthn_1').focus();
     var notificationMessages = new Array();
     var error = $.i18n.prop("survey.ethinicity.multiple.selection.invalid");
     var saveBtnLabel = $.i18n.prop("survey.confirm.button.save");
@@ -44,13 +48,28 @@ $(document).ready(function () {
                         notifications.addNotification(n);
                     });
                 }
+
+                $('#ethnicity-race-wrapper').append('<div id="error-survey" role="alert" class="hide-aria-message">' + error + '</div>');
+                $('#chkEthn_1').attr('aria-invalid', 'true');
+                $('#chkEthn_1').attr('aria-describedby', 'error-survey');
+                $('#chkEthn_2').attr('aria-invalid', 'true');
+                $('#chkEthn_2').attr('aria-describedby', 'error-survey');
+
             } else {
                 notificationMessages.splice(notificationMessages.indexOf(error));
                 $('#ethnicity').removeClass("notification-error");
                 notifications.clearNotifications();
                 notificationCenter.removeNotification();
+
+                $('#chkEthn_1').attr('aria-invalid', 'false');
+                $('#chkEthn_2').attr('aria-invalid', 'false');
+                // identify and remove error-survey
+                $('#chkEthn_1').attr('aria-describedby','');
+                $('#chkEthn_2').attr('aria-describedby', '');
+
+                $('#error-survey').remove();
             }
-    });
+        });
 
     $("#save-btn").click(function () {
         if ($(this).val() == saveBtnLabel) {
@@ -61,8 +80,8 @@ $(document).ready(function () {
                 $(this).val(saveBtnLabel);
                 $("#ask-me-later-btn").val(cancelBtnLabel);
                 $('#editSurvey').hide();
-                $('#confirmSurvey').show();
                 populateConfirmSurvey();
+                $('#confirmSurvey').show();
                 $('#pagetitle').text(confirmationPageTitle);
             }
         }
@@ -78,10 +97,19 @@ $(document).ready(function () {
             $(this).val(askMeLaterBtnLabel);
             $("#save-btn").val(continueBtnLabel);
             $('#editSurvey').show();
+            $('#chkEthn_1').focus();
             $('#confirmSurvey').hide();
             $('#pagetitle').text(editPageTitle);
         }
 
+    });
+
+    $('.raceCheckbox:first').focusin(function() {
+        $('#race-wrapper').append('<div id="dummy" role="alert" class="hide-aria-message">' + $('#section-header-text2').text() + '</div>');
+    });
+
+    $('.raceCheckbox:first').focusout(function() {
+        $('#dummy').remove();
     });
 
     function populateConfirmSurvey() {
@@ -101,7 +129,7 @@ $(document).ready(function () {
 
             $(raceElement).find('div[class="races-content"] input:checkbox').each(function (idOfCheckBox, checkBoxElement) {
                 if ($(checkBoxElement).is(':checked')) {
-                     raceSelectedDesc = raceSelectedDesc+ $("label[for=" + $(checkBoxElement).attr('id') + "]").text()+"<br />";
+                    raceSelectedDesc = raceSelectedDesc+ $("label[for=" + $(checkBoxElement).attr('id') + "]").text()+"<br />";
                 }
             });
             if (raceSelectedDesc != "") {

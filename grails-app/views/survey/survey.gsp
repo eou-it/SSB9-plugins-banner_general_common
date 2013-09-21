@@ -15,7 +15,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
         document.getElementsByName('menuDefaultBreadcrumbId')[0].content = [
             "<g:message code="survey.breadcrumb.bannerSelfService"/>",
             "<g:message code="survey.breadcrumb.survey"/>"
-            ].join('_');
+        ].join('_');
     </script>
     <r:require module="survey"/>
     <g:if test="${message(code: 'default.language.direction') == 'rtl'}">
@@ -36,12 +36,12 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                     <div id="errorMessage"></div>
                     <form controller="survey" action="save" id='surveyForm' method='POST'>
                         <div id="ethnicity-race-wrapper">
-                           <!--  _editSurvey.gsp-->
+                            <!--  _editSurvey.gsp-->
                             <div id="editSurvey">
                                 <g:render template="editSurvey" model="${[personEthnicity: personEthnicity, regulatoryRace:regulatoryRace]}" />
                             </div>
 
-                            <div id="confirmSurvey">
+                            <div id="confirmSurvey" role="alert">
                                 <g:render template="confirmSurvey"
                                           model="${[personEthnicity: personEthnicity, regulatoryRace: regulatoryRace]}"/>
                             </div>

@@ -181,3 +181,8 @@
 .confirmation-content {
     font-size: 12px;
 }
+
+.hide-aria-message {
+    position: absolute;
+    left: -9999px;
+}
