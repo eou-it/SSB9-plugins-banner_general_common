@@ -56,7 +56,6 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
-        <mapping class="net.hedtech.banner.general.utility.InformationText"/>
         <mapping class="net.hedtech.banner.general.overall.PinQuestion"/>
         <mapping class="net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion"/>
     </session-factory>
