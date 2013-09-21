@@ -15,7 +15,7 @@ modules = {
     }
 
     'userAgreementRTL' {
-        dependsOn "bannerSelfServiceRTL, i18n-core"
+        dependsOn "bannerSelfServiceRTL, i18n-core, userAgreement"
         defaultBundle environment == "development" ? false : "userAgreementRTL"
         //defaultBundle false
 
@@ -32,7 +32,7 @@ modules = {
     }
 
     'securityQARTL' {
-        dependsOn "bannerSelfServiceRTL, i18n-core"
+        dependsOn "bannerSelfServiceRTL, i18n-core, securityQA"
         defaultBundle environment == "development" ? false : "securityQARTL"
         resource url: [plugin: 'banner-general-common', file: 'css/views/securityQA/securityQA-rtl.css'], attrs: [media: 'screen, projection']
         resource url: [plugin: 'banner-general-common', file: 'js/views/securityQA/securityQA.js']
@@ -48,7 +48,7 @@ modules = {
     }
 
     'surveyRTL' {
-        dependsOn "bannerSelfServiceRTL, i18n-core"
+        dependsOn "bannerSelfServiceRTL, i18n-core, survey"
         defaultBundle environment == "development" ? false : "surveyRTL"
         //defaultBundle false
 
