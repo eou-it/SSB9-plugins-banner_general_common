@@ -5,8 +5,6 @@ package net.hedtech.banner.loginworkflow
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.context.ApplicationContext
-
-import java.sql.SQLException
 import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 class SecurityQAFlow extends PostLoginWorkflow {

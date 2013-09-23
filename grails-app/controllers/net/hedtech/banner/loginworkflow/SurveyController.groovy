@@ -8,16 +8,15 @@ import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.general.system.Race
 import net.hedtech.banner.general.system.RegulatoryRace
-import net.hedtech.banner.security.BannerUser
-import org.springframework.security.core.context.SecurityContextHolder
 import net.hedtech.banner.general.utility.InformationTextUtility
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 class SurveyController {
     static defaultAction = "index"
     def surveyService
 
     def survey() {
-        def pidm = getPidm()
+        def pidm = BannerGrantedAuthorityService.getPidm()
         def raceMap = [:]
         def regulatoryRaces = RegulatoryRace.fetchRequiredRegulatoryRaces()
         regulatoryRaces.each { regulatoryRace ->
@@ -39,14 +38,14 @@ class SurveyController {
         def personEthnicity = personBasicPersonBase?.ethnic
         session.setAttribute("raceMap", raceMap)
         session.setAttribute("regulatoryRaces", regulatoryRaces)
-        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage("RESURVEY","ethnicity.header"), "race.header": InformationTextUtility.getMessage("RESURVEY","race.header")]
-        def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save",infoTexts: infoTexts]
+        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage("RESURVEY", "ethnicity.header"), "race.header": InformationTextUtility.getMessage("RESURVEY", "race.header")]
+        def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save", infoTexts: infoTexts]
         render view: "survey", model: model
     }
 
 
     def save = {
-        def pidm = getPidm()
+        def pidm = BannerGrantedAuthorityService.getPidm()
         surveyService.saveSurveyResponse(pidm, params.ethnicity, params.race)
         completed()
     }
@@ -64,14 +63,5 @@ class SurveyController {
             path = "/"
         }
         redirect uri: path
-    }
-
-
-    public static def getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
     }
 }

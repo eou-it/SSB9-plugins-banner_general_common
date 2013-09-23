@@ -8,10 +8,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion
 import net.hedtech.banner.general.overall.PinQuestion
-import net.hedtech.banner.security.BannerUser
 import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
-
 import java.sql.CallableStatement
 import java.sql.SQLException
 
@@ -233,13 +230,4 @@ class SecurityQAService {
         )
         generalForStoringResponsesAndPinQuestionService.create(generalForStoringResponsesAndPinQuestion)
     }
-
-    public String getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
-    }
-
 }
