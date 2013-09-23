@@ -31,7 +31,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                                     <td id="policy" class="terms-text-style">
                                     </td>
                                     <td  class="terms-text-style" id="terms-text-style">
-                                        ${infoText}<br/>
+                                        <sanitizeMarkdown:renderHtml text="${infoText}" /><br/>
                                         <br/>
                                     </td>
                                 </tr>
