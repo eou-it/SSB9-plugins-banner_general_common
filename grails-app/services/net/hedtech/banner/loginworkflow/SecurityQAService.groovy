@@ -26,7 +26,7 @@ class SecurityQAService {
 
 
     public def getNumberOfQuestionsAnswered(String pidm) {
-        return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm([pidm:Integer.valueOf(pidm)])
+        return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(Integer.valueOf(pidm))
     }
 
     public def getUserDefinedQuestionFlag() {
@@ -242,7 +242,7 @@ class SecurityQAService {
     }
 
     private void createDropDownQuestionAndAnswer(pidm, questionId, question_num, answer) {
-        def pinQuestion = PinQuestion.fetchQuestionOnId([pinQuestionId: questionId])
+        def pinQuestion = PinQuestion.fetchQuestionOnId(questionId)
         GeneralForStoringResponsesAndPinQuestion generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
                 pidm: pidm,
                 number: question_num,

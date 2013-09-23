@@ -160,7 +160,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         assertEquals 1, securityQAService.getNumberOfQuestions()
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:i_success_answer1,questionNo:pinQuestion.id]]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
-        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm([pidm: pidm])
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==1
 
     }
@@ -172,7 +172,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         assertEquals 1, securityQAService.getNumberOfQuestions()
         List quesAnsList = [[pidm: i_success_pidm,question:"",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""]]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
-        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm([pidm: pidm])
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==1
 
     }
@@ -189,7 +189,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
                                  [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:i_success_answer1,questionNo:""],
                                  [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
-        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm([pidm: pidm])
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==3
 
     }

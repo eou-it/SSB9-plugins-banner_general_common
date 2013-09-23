@@ -247,7 +247,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
         assertNotNull generalForStoringResponsesAndPinQuestion.id
         testCreateValidUserEnteredPinQuestion()
-        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm([pidm: generalForStoringResponsesAndPinQuestion.pidm])
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(generalForStoringResponsesAndPinQuestion.pidm)
         assertTrue ansrCount>1
     }
 

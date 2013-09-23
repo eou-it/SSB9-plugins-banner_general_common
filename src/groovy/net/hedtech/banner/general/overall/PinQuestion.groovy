@@ -154,11 +154,11 @@ class PinQuestion implements Serializable {
         return questions
     }
 
-    public static def fetchQuestionOnId(map) {
+    public static def fetchQuestionOnId(String pinQuestionId) {
 
         PinQuestion.withSession { session ->
             def question = session.getNamedQuery('PinQuestion.fetchQuestionOnId')
-                    .setString('pinQuestionId', map.pinQuestionId)
+                    .setString('pinQuestionId', pinQuestionId)
                     .list()[0]
             return question
         }

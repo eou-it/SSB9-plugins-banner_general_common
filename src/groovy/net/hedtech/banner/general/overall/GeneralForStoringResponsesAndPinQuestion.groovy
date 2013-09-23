@@ -182,10 +182,10 @@ class GeneralForStoringResponsesAndPinQuestion implements Serializable {
     //Read Only fields that should be protected against update
     public static readonlyProperties = [ 'pidm', 'number' ]
 
-    static def fetchCountOfAnswersForPidm(Map map) {
+    static def fetchCountOfAnswersForPidm(int pidm) {
         GeneralForStoringResponsesAndPinQuestion.withSession { session ->
             def generalForStoringResponsesAndPinQuestion = session.getNamedQuery('GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm')
-                    .setInteger('pidm', map.pidm)
+                    .setInteger('pidm', pidm)
                     .list()[0]
             return generalForStoringResponsesAndPinQuestion
         }

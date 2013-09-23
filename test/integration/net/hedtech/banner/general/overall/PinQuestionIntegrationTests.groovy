@@ -217,7 +217,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         pinQuestion.save( failOnError: true, flush: true )
         assertNotNull pinQuestion.pinQuestionId
         String pinQuestionId = pinQuestion.pinQuestionId
-        PinQuestion fetchedPinQuestion = PinQuestion.fetchQuestionOnId([pinQuestionId: pinQuestionId])
+        PinQuestion fetchedPinQuestion = PinQuestion.fetchQuestionOnId(pinQuestionId)
         assertNotNull fetchedPinQuestion.pinQuestionId
     }
 
