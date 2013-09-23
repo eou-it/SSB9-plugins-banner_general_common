@@ -6,7 +6,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <div id="editSurvey">
     <div id="ethnicity-wrapper" role="dialog" aria-describedby="section-header-text1">
         <div id="ethnicity-header" class="section-header">
-            <span class="section-header-text" id="section-header-text1" role="header"><g:message code="survey.ethnicity.header" /></span>
+            <span class="section-header-text" id="section-header-text1" role="header">${infoTexts."ethnicity.header"}%{--<g:message code="survey.ethnicity.header" />--}%</span>
         </div>
         <div id="ethnicity">
             <input id="chkEthn_1" name="ethnicity" role="checkbox" value="1" type="checkbox" <g:if test="${personEthnicity == '1'}">checked="true"</g:if> />
@@ -18,7 +18,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
     </div>
     <div id="race-wrapper">
         <div id="race-header" class="section-header">
-            <span class="section-header-text" role="alert" id="section-header-text2"><g:message code="survey.race.header" /></span>
+            <span class="section-header-text" role="alert" id="section-header-text2">${infoTexts."race.header"}%{--<g:message code="survey.race.header" />--}%</span>
         </div>
         <g:each in="${regulatoryRaces}" var="regulatoryRace">
             <div id="race-category_${regulatoryRace.code}" class="race-category-area">
