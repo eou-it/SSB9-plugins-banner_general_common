@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.loginworkflow
 
 import net.hedtech.banner.exceptions.ApplicationException
@@ -8,12 +11,12 @@ class SecurityQAController {
     static defaultAction = "index"
     def securityQAService
 
-    def noOfQuestions
-    def questions = [:]
-    def questionMinimumLength
-    def answerMinimumLength
-    def userDefinedQuesFlag
-    def questionList = []
+    int noOfQuestions
+    Map questions = [:]
+    int questionMinimumLength
+    int answerMinimumLength
+    String userDefinedQuesFlag
+    List questionList = []
 
     def index() {
         setGlobalVariables()
@@ -23,14 +26,18 @@ class SecurityQAController {
     private void setGlobalVariables() {
 
         questionList = loadQuestionList()
-        noOfQuestions = securityQAService.getNumberOfQuestions()
-        questionMinimumLength = securityQAService.getQuestionMinimumLength()
-        answerMinimumLength = securityQAService.getAnswerMinimumLength()
-        userDefinedQuesFlag = securityQAService.getUserDefinedQuestionFlag()
+        Map result = securityQAService.getUserDefinedPreference()
+        if(result != null) {
+            noOfQuestions = result.GUBPPRF_NO_OF_QSTNS?.intValue()
+            questionMinimumLength = result.GUBPPRF_QSTN_MIN_LENGTH?.intValue()
+            answerMinimumLength = result.GUBPPRF_ANSR_MIN_LENGTH?.intValue()
+            userDefinedQuesFlag = result.GUBPPRF_EDITQSTN_IND
+        }
+
     }
 
     private List loadQuestionList() {
-        def ques = PinQuestion.fetchQuestions()
+        List ques = PinQuestion.fetchQuestions()
         ques.each {
             questions.put(it.pinQuestionId, it.description)
         }
@@ -57,7 +64,7 @@ class SecurityQAController {
             selectedQA.each {
                 selectedDropdown.add("question" + (questionList.indexOf(it.question) + 1))
             }
-            def model = [:]
+            Map model = [:]
 
             model.put("questions", questionList)
             model.put("userDefinedQuesFlag", userDefinedQuesFlag)
@@ -83,15 +90,15 @@ class SecurityQAController {
         List selectedQA = []
 
         for (int index = 0; index < noOfQuestions; index++) {
-            def questionId
+            int questionId
             if(params.question instanceof String) {
                 questionId = params.question.split("question")[1].toInteger()
             } else {
                 questionId = params.question[index].split("question")[1].toInteger()
             }
 
-            def question
-            def questionNo
+            String question
+            String questionNo
             if (questionId != 0) {
                 question = questionList.get(questionId - 1)
                 questionNo = questions.find {it.value == question}?.key
@@ -100,7 +107,7 @@ class SecurityQAController {
                 question = null
                 questionNo = null
             }
-            def userDefinedQstn
+            String userDefinedQstn
             if(!userDefinedQuesFlag.equals("N")) {
                 if(params.userDefinedQuestion instanceof String) {
                     userDefinedQstn = params.userDefinedQuestion
@@ -111,13 +118,13 @@ class SecurityQAController {
                 userDefinedQstn = null
             }
 
-            def ansr
+            String answer
             if(params.answer instanceof String) {
-                ansr = params.answer
+                answer = params.answer
             } else {
-                ansr = params.answer[index]
+                answer = params.answer[index]
             }
-            def questionsAnswered = [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: ansr]
+            def questionsAnswered = [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: answer]
             selectedQA.add(questionsAnswered)
         }
         return selectedQA

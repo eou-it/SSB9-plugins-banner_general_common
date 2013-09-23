@@ -1,13 +1,6 @@
-/** *****************************************************************************
- © 2013 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- ****************************************************************************** */
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
@@ -33,17 +26,17 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     def pidm
 
     protected void setUp() {
-   		formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
-   		super.setUp()
-   		initializeTestDataForReferences()
-   	}
+        formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
+        super.setUp()
+        initializeTestDataForReferences()
+    }
 
-   	//This method is used to initialize test data for references.
-   	//A method is required to execute database calls as it requires a active transaction
-   	void initializeTestDataForReferences() {
-           pidm = PersonUtility.getPerson("HOSWEB017").pidm
-           i_success_pidm = pidm.toString()
-   	}
+    //This method is used to initialize test data for references.
+    //A method is required to execute database calls as it requires a active transaction
+    void initializeTestDataForReferences() {
+        pidm = PersonUtility.getPerson("HOSWEB017").pidm
+        i_success_pidm = pidm.toString()
+    }
 
     void testSaveQAResponseWithInvalidPassword(){
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
@@ -107,7 +100,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     }
 
     void testQuestionMinimumLength(){
-        def questionMinimumLength = securityQAService.getQuestionMinimumLength()
+        def questionMinimumLength = securityQAService.getUserDefinedPreference()?.GUBPPRF_QSTN_MIN_LENGTH
         if(questionMinimumLength>0){
             String generatedQuesString = generateString(questionMinimumLength)
             List quesAnsList = [[pidm: i_success_pidm,question: "",userDefinedQuestion:generatedQuesString,answer:i_success_answer1,questionNo:""]]
@@ -121,7 +114,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     }
 
     void testAnswerMinimumLength(){
-        def length = securityQAService.getAnswerMinimumLength()
+        def length = securityQAService.getUserDefinedPreference()?.GUBPPRF_ANSR_MIN_LENGTH
         if(length>0){
             String generatedAnsString = generateString(length)
             List quesAnsList = [[pidm: i_success_pidm,question:"",userDefinedQuestion:i_user_def_question1,answer:generatedAnsString,questionNo:""] ]
@@ -157,7 +150,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         assertNotNull pinQuestion.id
         String validPassword = "111111"
         setNumberOfQuestion(1)
-        assertEquals 1, securityQAService.getNumberOfQuestions()
+        assertEquals 1, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:i_success_answer1,questionNo:pinQuestion.id]]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
         int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
@@ -169,7 +162,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     {
         String validPassword = "111111"
         setNumberOfQuestion(1)
-        assertEquals 1, securityQAService.getNumberOfQuestions()
+        assertEquals 1, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
         List quesAnsList = [[pidm: i_success_pidm,question:"",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""]]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
         int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
@@ -184,10 +177,10 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         assertNotNull pinQuestion.id
         String validPassword = "111111"
         setNumberOfQuestion(3)
-        assertEquals 3, securityQAService.getNumberOfQuestions()
+        assertEquals 3, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:i_success_answer1,questionNo:pinQuestion.id],
-                                 [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:i_success_answer1,questionNo:""],
-                                 [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
+                [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:i_success_answer1,questionNo:""],
+                [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
         int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==3
@@ -196,13 +189,13 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     void testGetNumberOfQuestions()
     {
-        def numberOfQues =  securityQAService.getNumberOfQuestions()
+        def numberOfQues =  securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
         assertNotNull numberOfQues
     }
 
     void testGetUserDefinedQuestionFlag()
     {
-        def userDefinedFlag = securityQAService.getUserDefinedQuestionFlag()
+        def userDefinedFlag = securityQAService.getUserDefinedPreference()?.GUBPPRF_EDITQSTN_IND
         assertNotNull userDefinedFlag
     }
 
@@ -225,25 +218,25 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     }
 
     private def newValidForCreatePinQuestion(String pinQuestionId) {
-   		def pinQuestion = new PinQuestion(
-   			pinQuestionId: pinQuestionId,
-   			description: "What is your Favorite drink1?",
-   			displayIndicator: true,
-   		)
-   		return pinQuestion
-   	}
+        def pinQuestion = new PinQuestion(
+                pinQuestionId: pinQuestionId,
+                description: "What is your Favorite drink1?",
+                displayIndicator: true,
+        )
+        return pinQuestion
+    }
 
     private def newValidUserResponsesWithOutPinQuestion() {
-   		def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
-   			pidm: i_success_pidm,
-   			number: 1,
-   			questionDescription: i_user_def_question2,
-   			answerDescription: i_success_answer1,
-   			answerSalt: "DUMMY",
-   			pinQuestion: null,
-   		)
-   		return generalForStoringResponsesAndPinQuestion
-   	}
+        def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
+                pidm: i_success_pidm,
+                number: 1,
+                questionDescription: i_user_def_question2,
+                answerDescription: i_success_answer1,
+                answerSalt: "DUMMY",
+                pinQuestion: null,
+        )
+        return generalForStoringResponsesAndPinQuestion
+    }
 
     private void setNumberOfQuestion(int noOfQuestions){
         def sql

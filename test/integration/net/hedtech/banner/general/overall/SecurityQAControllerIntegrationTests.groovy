@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
@@ -7,9 +10,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken as UPAT
 import org.springframework.security.core.context.SecurityContextHolder
-/*******************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
- *******************************************************************************/
+
 class SecurityQAControllerIntegrationTests extends BaseIntegrationTestCase {
 
     def selfServiceBannerAuthenticationProvider
@@ -60,14 +61,14 @@ class SecurityQAControllerIntegrationTests extends BaseIntegrationTestCase {
         def securityQAData = controller?.response?.contentAsString
         assertNotNull securityQAData
         def ques = PinQuestion.fetchQuestions()
-        userDefinedQuesFlag = securityQAService.getUserDefinedQuestionFlag()
+        userDefinedQuesFlag = securityQAService.getUserDefinedPreference().GUBPPRF_EDITQSTN_IND
         ques.each {
             questions.put(it.pinQuestionId, it.description)
         }
         def questionList = questions.values().collect()
-        noOfQuestions = securityQAService.getNumberOfQuestions()
-        questionMinimumLength = securityQAService.getQuestionMinimumLength()
-        answerMinimumLength = securityQAService.getAnswerMinimumLength()
+        noOfQuestions = securityQAService.getUserDefinedPreference().GUBPPRF_NO_OF_QSTNS
+        questionMinimumLength = securityQAService.getUserDefinedPreference().GUBPPRF_QSTN_MIN_LENGTH
+        answerMinimumLength = securityQAService.getUserDefinedPreference().GUBPPRF_ANSR_MIN_LENGTH
         assertTrue !controller?.response?.contentAsString?.equals("[]")
         def fields = renderMap.model
         //assertEquals fields.noOfQuestions, noOfQuestions
@@ -94,7 +95,7 @@ class SecurityQAControllerIntegrationTests extends BaseIntegrationTestCase {
         }
         questionList = questions.values().collect()
         setNumberOfQuestion(3)
-        assertEquals 3, securityQAService.getNumberOfQuestions()
+        assertEquals 3, securityQAService.getUserDefinedPreference().GUBPPRF_NO_OF_QSTNS
 
         int question1Index = questionList.indexOf(pinQuestion1.getDescription())+1
         int question2Index = questionList.indexOf(pinQuestion2.getDescription()) +1
@@ -126,13 +127,13 @@ class SecurityQAControllerIntegrationTests extends BaseIntegrationTestCase {
     }
 
     private def newValidForCreatePinQuestion(String pinQuestionId,String desc) {
-   		def pinQuestion = new PinQuestion(
-   			pinQuestionId: pinQuestionId,
-   			description: desc,
-   			displayIndicator: true,
-   		)
-   		return pinQuestion
-   	}
+        def pinQuestion = new PinQuestion(
+                pinQuestionId: pinQuestionId,
+                description: desc,
+                displayIndicator: true,
+        )
+        return pinQuestion
+    }
 
     private def isSsbEnabled() {
         ConfigurationHolder.config.ssbEnabled instanceof Boolean ? ConfigurationHolder.config.ssbEnabled : false

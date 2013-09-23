@@ -62,7 +62,6 @@ class BannerGeneralCommonGrailsPlugin {
         }
 
         securityQAFlow(SecurityQAFlow) {
-            sessionFactory = ref(sessionFactory)
             registerFlowClass = [
                     30: "securityQAFlow"
             ]
