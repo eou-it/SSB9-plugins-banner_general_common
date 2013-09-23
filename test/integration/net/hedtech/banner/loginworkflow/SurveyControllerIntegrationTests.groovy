@@ -20,6 +20,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 /**
  * SurveyControllerIntegrationTests.
@@ -61,7 +62,7 @@ class SurveyControllerIntegrationTests extends BaseIntegrationTestCase {
 
     public void testSurvey() {
         loginForRegistration(i_success_banner_Id)
-        Integer pidm = controller.getPidm()
+        Integer pidm = BannerGrantedAuthorityService.getPidm()
         assertNotNull pidm
         Map raceMap = [:]
         List<RegulatoryRace> regulatoryRaces = RegulatoryRace.fetchRequiredRegulatoryRaces()
@@ -97,7 +98,7 @@ class SurveyControllerIntegrationTests extends BaseIntegrationTestCase {
 
     public void testSaveValid(){
         loginForRegistration(i_success_banner_Id)
-        Integer pidm = controller.getPidm()
+        Integer pidm = BannerGrantedAuthorityService.getPidm()
         controller.params.ethnicity=i_success_ethnicity
         controller.params.race=i_success_race
         controller.save()
