@@ -28,8 +28,8 @@ class SecurityQAService {
     private final Logger log = Logger.getLogger(getClass())
 
 
-    public def getNumberOfQuestionsAnswered(String pidm) {
-        return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(Integer.valueOf(pidm))
+    public def getNumberOfQuestionsAnswered(Integer pidm) {
+        return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
     }
 
     public Map getUserDefinedPreference() {
