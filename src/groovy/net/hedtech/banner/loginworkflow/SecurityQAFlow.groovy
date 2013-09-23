@@ -6,6 +6,9 @@ package net.hedtech.banner.loginworkflow
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.context.ApplicationContext
 
+import java.sql.SQLException
+import net.hedtech.banner.security.BannerGrantedAuthorityService
+
 class SecurityQAFlow extends PostLoginWorkflow {
 
     def securityQAService
@@ -52,7 +55,8 @@ class SecurityQAFlow extends PostLoginWorkflow {
     }
 
     private boolean isUserAlreadyAnsweredSecurityQA(noOfQuestions){
-        if(noOfQuestions > securityQAService.getNumberOfQuestionsAnswered(securityQAService.getPidm())) {
+
+        if(noOfQuestions > securityQAService.getNumberOfQuestionsAnswered(BannerGrantedAuthorityService.getPidm())) {
             return false
         }
 

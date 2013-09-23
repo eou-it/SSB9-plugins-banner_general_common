@@ -5,6 +5,7 @@ package net.hedtech.banner.loginworkflow
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.PinQuestion
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 class SecurityQAController {
 
@@ -50,7 +51,7 @@ class SecurityQAController {
 
         setGlobalVariables()
 
-        String pidm = securityQAService.getPidm()
+        String pidm = BannerGrantedAuthorityService.getPidm()
         List selectedQA = loadSelectedQuestionAnswerFromParams()
         String messages = null
 

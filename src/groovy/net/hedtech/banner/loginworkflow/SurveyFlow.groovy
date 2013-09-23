@@ -2,13 +2,11 @@ package net.hedtech.banner.loginworkflow
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.utility.DateUtility
 import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
-
 import java.sql.SQLException
 import java.sql.Timestamp
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 /** *****************************************************************************
  © 2013 SunGard Higher Education.  All Rights Reserved.
@@ -24,10 +22,13 @@ class SurveyFlow extends PostLoginWorkflow {
 
     def sessionFactory
     private final log = Logger.getLogger(getClass())
+    private static final STUDENT_ROLE = "SELFSERVICE-STUDENT"
+    private static final EMPLOYEE_ROLE = "SELFSERVICE-EMPLOYEE"
+    private static final CONFIRMATION_INDICATOR = "Y"
 
     @Override
     public boolean showPage(request) {
-        def pidm = getPidm()
+        def pidm = BannerGrantedAuthorityService.getPidm()
         def session = request.getSession()
         String isDone = session.getAttribute("surveydone")
         boolean pushSurvey = false
@@ -41,7 +42,7 @@ class SurveyFlow extends PostLoginWorkflow {
 
             // Survey start date is not null & Today is between Survey start and end dates
             if (surveyStartDate && (surveyStartDate <= today && today <= surveyEndDate)) {
-                if (getSurveyConfirmedIndicator(pidm) != 'Y') {
+                if (getSurveyConfirmedIndicator(pidm) != CONFIRMATION_INDICATOR) {
                     pushSurvey = true
                 }
             }
@@ -60,20 +61,10 @@ class SurveyFlow extends PostLoginWorkflow {
         return "survey"
     }
 
-
-    static def getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
-    }
-
-
     private static def isSurveyAvailableForUserAuthority() {
-        def authorities = SecurityContextHolder?.context?.authentication?.principal?.authorities
+        def authorities = BannerGrantedAuthorityService.getAuthorities()
         def userAuthorities = authorities?.collect { it.objectName }
-        return (userAuthorities?.contains('SELFSERVICE-STUDENT') || userAuthorities?.contains('SELFSERVICE-EMPLOYEE'))
+        return (userAuthorities?.contains(STUDENT_ROLE) || userAuthorities?.contains(EMPLOYEE_ROLE))
     }
 
     private def getSurveyConfirmedIndicator(pidm) {

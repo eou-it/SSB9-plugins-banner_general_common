@@ -2,11 +2,9 @@ package net.hedtech.banner.loginworkflow
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.security.BannerUser
 import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
-
 import java.sql.SQLException
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 /** *****************************************************************************
  © 2013 SunGard Higher Education.  All Rights Reserved.
@@ -23,17 +21,17 @@ class UserAgreementFlow extends PostLoginWorkflow {
     def sessionFactory
 
     private final log = Logger.getLogger(getClass())
+
     public boolean showPage(request) {
         def session = request.getSession();
         String isDone = session.getAttribute("useraggrementdone")
         boolean displayPage = false
-        if(isDone != "true"){
-            String pidm = getPidm()
+        if (isDone != "true") {
+            String pidm = BannerGrantedAuthorityService.getPidm()
             String displayStatus = getTermsOfUsageDisplayStatus()
-            if(displayStatus?.equals("Y"))
-            {
+            if (displayStatus?.equals("Y")) {
                 String usageIndicator = getUsageIndicator(pidm)
-                if(usageIndicator?.equals("N")){
+                if (usageIndicator?.equals("N")) {
                     displayPage = true
                 }
 
@@ -50,52 +48,44 @@ class UserAgreementFlow extends PostLoginWorkflow {
         return "userAgreement"
     }
 
-    public static String getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
-    }
-
-    private String getTermsOfUsageDisplayStatus(){
+    private String getTermsOfUsageDisplayStatus() {
         def connection
         Sql sql
-        try{
+        try {
             connection = sessionFactory.currentSession.connection()
             sql = new Sql(connection)
             GroovyRowResult row = sql.firstRow("""select TWGBWRUL_DISP_USAGE_IND from TWGBWRUL""")
             return row?.TWGBWRUL_DISP_USAGE_IND
-        }catch (SQLException ae) {
+        } catch (SQLException ae) {
             log.debug ae.stackTrace
             throw ae
         }
         catch (Exception ae) {
             log.debug ae.stackTrace
             throw ae
-        }finally{
+        } finally {
             connection.close()
         }
     }
 
-    private String getUsageIndicator(String pidm){
+    private String getUsageIndicator(String pidm) {
         def connection
         Sql sql
-        try{
+        try {
             connection = sessionFactory.currentSession.connection()
             sql = new Sql(connection)
             GroovyRowResult row = sql.firstRow("""select GOBTPAC_USAGE_ACCEPT_IND from GOBTPAC where GOBTPAC_PIDM = ${pidm}""")
             return row?.GOBTPAC_USAGE_ACCEPT_IND
-        }catch (SQLException ae) {
+        } catch (SQLException ae) {
             log.debug ae.stackTrace
             throw ae
         }
         catch (Exception ae) {
             log.debug ae.stackTrace
             throw ae
-        }finally{
+        } finally {
             connection.close()
-       }
+        }
     }
 
 
