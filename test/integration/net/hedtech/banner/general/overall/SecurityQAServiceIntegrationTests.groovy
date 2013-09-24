@@ -8,12 +8,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
-/**
- * SecurityQAServiceIntegrationTests.
- *
- * Date: 9/6/13
- * Time: 12:45 PM
- */
 class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     def securityQAService
     def i_success_pidm
