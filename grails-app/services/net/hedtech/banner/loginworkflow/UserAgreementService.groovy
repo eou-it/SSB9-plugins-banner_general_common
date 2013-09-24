@@ -13,6 +13,7 @@ package net.hedtech.banner.loginworkflow
 import groovy.sql.Sql
 import org.apache.log4j.Logger
 import java.sql.SQLException
+import net.hedtech.banner.general.utility.InformationTextUtility
 
 /**
  * UserAgreementService.
@@ -24,6 +25,10 @@ class UserAgreementService {
     static transactional = true
     def sessionFactory
     private final log = Logger.getLogger(getClass())
+
+    private static final String POLICY_PAGE_NAME='TERMSOFUSAGE'
+    private static final String LABEL='terms.of.usage'
+
     public void updateUsageIndicator(String pidm,String usageIndicator)
     {
         def connection
@@ -47,36 +52,7 @@ class UserAgreementService {
     }
 
     public String getTermsOfUseInfoText(){
-        def connection
-        Sql sql
-        try{
-            connection = sessionFactory.currentSession.connection()
-            sql = new Sql(connection)
-            String name = "twbkwbis.P_UsagePage"
-            String label = "DEFAULT"
-            def sqlQueryString = """select twgrinfo_text text from twgrinfo
-    	    					    where  twgrinfo_name = ${name}
-    	    					    and    twgrinfo_label = ${label}
-    	    						and twgrinfo_source_ind = 'B'
-    	       						"""
-
-    		def infoText = ""
-    		sql.rows(sqlQueryString).each {t -> infoText += t.text + "\n"}
-    		if(infoText == "null\n") {
-                infoText = ""
-            }
-            return infoText
-        }catch (SQLException ae) {
-            log.debug ae.stackTrace
-            throw ae
-        }
-        catch (Exception ae) {
-            log.debug ae.stackTrace
-           throw ae
-        }finally{
-            connection.close()
-        }
-
+        return InformationTextUtility.getMessage(POLICY_PAGE_NAME, LABEL)
     }
 
 }
