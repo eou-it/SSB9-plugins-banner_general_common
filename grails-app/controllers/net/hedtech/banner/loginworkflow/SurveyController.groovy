@@ -14,6 +14,10 @@ import net.hedtech.banner.security.BannerGrantedAuthorityService
 class SurveyController {
     static defaultAction = "index"
     def surveyService
+    String PAGE_NAME="RESURVEY"
+    String RACE_KEY="race.header"
+    String ETHNICITY_KEY="ethnicity.header"
+
 
     def survey() {
         def pidm = BannerGrantedAuthorityService.getPidm()
@@ -38,7 +42,7 @@ class SurveyController {
         def personEthnicity = personBasicPersonBase?.ethnic
         session.setAttribute("raceMap", raceMap)
         session.setAttribute("regulatoryRaces", regulatoryRaces)
-        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage("RESURVEY", "ethnicity.header"), "race.header": InformationTextUtility.getMessage("RESURVEY", "race.header")]
+        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage(PAGE_NAME,ETHNICITY_KEY), "race.header": InformationTextUtility.getMessage(PAGE_NAME,RACE_KEY)]
         def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save", infoTexts: infoTexts]
         render view: "survey", model: model
     }
