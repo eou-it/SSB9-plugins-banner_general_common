@@ -27,7 +27,7 @@ class SecurityQAControllerIntegrationTests extends BaseIntegrationTestCase {
     def i_user_question = "My First school"
     def i_question1 = "Fav destination?"
     def i_question2 = "Fav food?"
-    def pidm = '400720'
+    def pidm = 400720
     protected void setUp() {
 
         // For testing RESTful APIs, we don't want the default 'controller support' added by our base class.

@@ -204,7 +204,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
         assertNotNull generalForStoringResponsesAndPinQuestion.id
-        def count =  securityQAService.getNumberOfQuestionsAnswered(i_success_pidm)
+        def count =  securityQAService.getNumberOfQuestionsAnswered(pidm)
         assertTrue count>0
     }
 
