@@ -1,3 +1,7 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
+
 package net.hedtech.banner.loginworkflow
 
 import groovy.sql.GroovyRowResult
@@ -8,16 +12,6 @@ import java.sql.SQLException
 import java.sql.Timestamp
 import net.hedtech.banner.security.BannerGrantedAuthorityService
 
-/** *****************************************************************************
- © 2013 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- ****************************************************************************** */
 class SurveyFlow extends PostLoginWorkflow {
 
     def sessionFactory
@@ -30,10 +24,10 @@ class SurveyFlow extends PostLoginWorkflow {
     public boolean showPage(request) {
         def pidm = BannerGrantedAuthorityService.getPidm()
         def session = request.getSession()
-        String isDone = session.getAttribute("surveydone")
+        String isDone = session.getAttribute(SurveyController.SURVEY_ACTION)
         boolean pushSurvey = false
 
-        if (isSurveyAvailableForUserAuthority() && isDone != "true") {
+        if (isSurveyAvailableForUserAuthority() && isDone != SurveyController.ACTION_DONE) {
             // Survey is not yet taken.
             Map startAndEndDates = getStartAndEndDates()
             Timestamp surveyStartDate = startAndEndDates.startDate
