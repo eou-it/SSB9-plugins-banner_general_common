@@ -59,6 +59,25 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
+    void testSaveQAResponseWithNullQuestions(){
+        List quesAnsList = [[pidm: i_success_pidm,question:null,userDefinedQuestion:null,answer:i_success_answer1,questionNo:null] ]
+        String validPassword = "111111"
+        try{
+            securityQAService.saveSecurityQAResponse(i_success_pidm, quesAnsList, validPassword)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, "securityQA.error"
+        }
+    }
+
+    void testSaveQAResponseWithNullAnswer(){
+        List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:null,answer:null,questionNo:null] ]
+        String validPassword = "111111"
+        try{
+            securityQAService.saveSecurityQAResponse(i_success_pidm, quesAnsList, validPassword)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, "securityQA.error"
+        }
+    }
     void testSaveQAResponseWithEmptyQuestions(){
         List quesAnsList = [[pidm: i_success_pidm,question:"",userDefinedQuestion:"",answer:i_success_answer1,questionNo:""] ]
         String validPassword = "111111"
@@ -164,6 +183,21 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         setNumberOfQuestion(1)
         assertEquals 1, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
         List quesAnsList = [[pidm: i_success_pidm,question:"",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""]]
+        securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
+        assertTrue ansrCount==1
+
+    }
+
+    void testValidSaveSingleQAResponseWithUserDefinedAsNull()
+    {
+        def pinQuestion  = newValidForCreatePinQuestion("TT12")
+        pinQuestion.save( failOnError: true, flush: true )
+        assertNotNull pinQuestion.id
+        String validPassword = "111111"
+        setNumberOfQuestion(1)
+        assertEquals 1, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
+        List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:null,answer:i_success_answer1,questionNo:pinQuestion.id]]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
         int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==1
