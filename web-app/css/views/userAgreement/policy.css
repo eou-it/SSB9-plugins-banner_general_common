@@ -68,6 +68,7 @@ width: 85%;
     background:url(../../../images/web_info.png) no-repeat;
     background-position: top left;
     width: 5%;
+    min-width: 15px;
 }
 
 
