@@ -14,19 +14,22 @@ class UserAgreementFlow extends PostLoginWorkflow {
     def sessionFactory
 
     private final log = Logger.getLogger(getClass())
-    private static final USAGE_INDICATOR="N"
-    private static final DISPLAY_STATUS="Y"
+    public static final USER_AGREEMENT_ACTION = "useragreementdone"
+    public static final TERMS_OF_USAGE_NOT_ANSWERED = "N"
+    public static final TERMS_OF_USAGE_ANSWERED = "Y"
+    private static final DISPLAY_STATUS = "Y"
+
 
     public boolean isShowPage(request) {
         def session = request.getSession();
-        String isDone = session.getAttribute(UserAgreementController.USER_AGREEMENT_ACTION)
+        String isDone = session.getAttribute(USER_AGREEMENT_ACTION)
         boolean displayPage = false
         if (isDone != UserAgreementController.ACTION_DONE) {
             String pidm = BannerGrantedAuthorityService.getPidm()
             String displayStatus = getTermsOfUsageDisplayStatus()
             if (displayStatus?.equals(DISPLAY_STATUS)) {
                 String usageIndicator = getUsageIndicator(pidm)
-                if (usageIndicator?.equals(USAGE_INDICATOR)) {
+                if (usageIndicator?.equals(TERMS_OF_USAGE_NOT_ANSWERED)) {
                     displayPage = true
                 }
 

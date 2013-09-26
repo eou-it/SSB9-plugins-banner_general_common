@@ -53,17 +53,11 @@ class SurveyController {
     def save = {
         def pidm = BannerGrantedAuthorityService.getPidm()
         surveyService.saveSurveyResponse(pidm, params.ethnicity, params.race)
-        completed()
+        done()
     }
-
-
-    def completed() {
-        request.getSession().setAttribute(SURVEY_ACTION, ACTION_DONE)
-        done();
-    }
-
 
     def done() {
+        request.getSession().setAttribute(SURVEY_ACTION, ACTION_DONE)
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"

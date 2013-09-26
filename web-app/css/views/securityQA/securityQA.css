@@ -163,11 +163,8 @@
     background-image: url("../../../images/information.png");
     background-repeat: no-repeat;
     background-size: auto auto;
+    background-position: left 0;
     height: 15px;
-    overflow: hidden;
-    position: absolute;
-    width: 23px;
-    left:2%;
 }
 
 
