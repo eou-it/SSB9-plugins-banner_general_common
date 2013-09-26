@@ -124,11 +124,7 @@
     background-image: url("../../../images/web_info.png");
     background-repeat: no-repeat;
     background-size: auto auto;
-    height: 15px;
-    overflow: hidden;
-    width: 23px;
-    left:2%;
-    position: absolute;
+    background-position: left 0;
 }
 
 .section-message {
