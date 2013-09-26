@@ -93,8 +93,8 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
                     </div>
 
-                    <div>
-                        <span><i class="informationImage"></i></span><label><div
+                    <div class="informationImage">
+                        <label><div
                             class="section-message" id="aria-section-message"><g:message
                                 code="securityQA.information"/></div></label>
                     </div>

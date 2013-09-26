@@ -1,12 +1,5 @@
-/** *****************************************************************************
- © 2013 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
+/*******************************************************************************
+ Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
@@ -15,19 +8,13 @@ import org.apache.log4j.Logger
 import java.sql.SQLException
 import net.hedtech.banner.general.utility.InformationTextUtility
 
-/**
- * UserAgreementService.
- *
- * Date: 7/22/13
- * Time: 2:55 PM
- */
 class UserAgreementService {
     static transactional = true
     def sessionFactory
     private final log = Logger.getLogger(getClass())
 
     private static final String POLICY_PAGE_NAME='TERMSOFUSAGE'
-    private static final String LABEL='terms.of.usage'
+    private static final String TERMS_OF_USAGE_LABEL='terms.of.usage'
 
     public void updateUsageIndicator(String pidm,String usageIndicator)
     {
@@ -52,7 +39,7 @@ class UserAgreementService {
     }
 
     public String getTermsOfUseInfoText(){
-        return InformationTextUtility.getMessage(POLICY_PAGE_NAME, LABEL)
+        return InformationTextUtility.getMessage(POLICY_PAGE_NAME, TERMS_OF_USAGE_LABEL)
     }
 
 }
