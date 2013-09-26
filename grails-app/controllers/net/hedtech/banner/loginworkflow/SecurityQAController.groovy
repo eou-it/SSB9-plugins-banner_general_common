@@ -3,6 +3,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
+import net.hedtech.banner.configuration.HttpRequestUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.security.BannerGrantedAuthorityService
@@ -162,7 +163,22 @@ class SecurityQAController {
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"
+        }else{
+            path = checkPath(path)
         }
+        request.getSession().setAttribute(PostLoginWorkflow.URI_REDIRECTED, path)
         redirect uri: path
+    }
+
+    protected String checkPath(String path){
+        String controllerName = HttpRequestUtils.getControllerNameFromPath(path)
+        List<PostLoginWorkflow> listOfFlows =  PostLoginWorkflow.getListOfFlows()
+        for(PostLoginWorkflow flow:listOfFlows){
+            if(flow.getControllerName().equals(controllerName)){
+                path = "/"
+                return path
+            }
+        }
+        return path
     }
 }
