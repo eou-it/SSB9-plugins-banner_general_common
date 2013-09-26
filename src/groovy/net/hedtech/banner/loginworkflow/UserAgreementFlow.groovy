@@ -17,7 +17,7 @@ class UserAgreementFlow extends PostLoginWorkflow {
     private static final USAGE_INDICATOR="N"
     private static final DISPLAY_STATUS="Y"
 
-    public boolean showPage(request) {
+    public boolean isShowPage(request) {
         def session = request.getSession();
         String isDone = session.getAttribute(UserAgreementController.USER_AGREEMENT_ACTION)
         boolean displayPage = false

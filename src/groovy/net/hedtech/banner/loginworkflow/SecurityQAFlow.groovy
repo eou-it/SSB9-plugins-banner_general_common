@@ -12,7 +12,7 @@ class SecurityQAFlow extends PostLoginWorkflow {
     def securityQAService
     private static final FORGET_PIN_INDICATOR = "N"
 
-    public boolean showPage(request) {
+    public boolean isShowPage(request) {
         def session = request.getSession();
         String isDone = session.getAttribute(SecurityQAController.SECURITY_QA_ACTION)
         boolean displayPage = false
