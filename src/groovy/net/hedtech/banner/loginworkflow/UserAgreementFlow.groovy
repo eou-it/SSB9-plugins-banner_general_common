@@ -1,3 +1,7 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
+
 package net.hedtech.banner.loginworkflow
 
 import groovy.sql.GroovyRowResult
@@ -6,32 +10,23 @@ import org.apache.log4j.Logger
 import java.sql.SQLException
 import net.hedtech.banner.security.BannerGrantedAuthorityService
 
-/** *****************************************************************************
- © 2013 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- ****************************************************************************** */
-
 class UserAgreementFlow extends PostLoginWorkflow {
     def sessionFactory
 
     private final log = Logger.getLogger(getClass())
+    private static final USAGE_INDICATOR="N"
+    private static final DISPLAY_STATUS="Y"
 
     public boolean isShowPage(request) {
         def session = request.getSession();
-        String isDone = session.getAttribute("useraggrementdone")
+        String isDone = session.getAttribute(UserAgreementController.USER_AGREEMENT_ACTION)
         boolean displayPage = false
-        if (isDone != "true") {
+        if (isDone != UserAgreementController.ACTION_DONE) {
             String pidm = BannerGrantedAuthorityService.getPidm()
             String displayStatus = getTermsOfUsageDisplayStatus()
-            if (displayStatus?.equals("Y")) {
+            if (displayStatus?.equals(DISPLAY_STATUS)) {
                 String usageIndicator = getUsageIndicator(pidm)
-                if (usageIndicator?.equals("N")) {
+                if (usageIndicator?.equals(USAGE_INDICATOR)) {
                     displayPage = true
                 }
 

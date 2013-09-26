@@ -14,10 +14,11 @@ import net.hedtech.banner.security.BannerGrantedAuthorityService
 class SurveyController {
     static defaultAction = "index"
     def surveyService
-    String PAGE_NAME="RESURVEY"
-    String RACE_KEY="race.header"
-    String ETHNICITY_KEY="ethnicity.header"
-
+    String PAGE_NAME = "RESURVEY"
+    String RACE_KEY = "race.header"
+    String ETHNICITY_KEY = "ethnicity.header"
+    public static final SURVEY_ACTION = "surveydone"
+    public static final ACTION_DONE = "true"
 
     def survey() {
         def pidm = BannerGrantedAuthorityService.getPidm()
@@ -42,7 +43,7 @@ class SurveyController {
         def personEthnicity = personBasicPersonBase?.ethnic
         session.setAttribute("raceMap", raceMap)
         session.setAttribute("regulatoryRaces", regulatoryRaces)
-        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage(PAGE_NAME,ETHNICITY_KEY), "race.header": InformationTextUtility.getMessage(PAGE_NAME,RACE_KEY)]
+        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage(PAGE_NAME, ETHNICITY_KEY), "race.header": InformationTextUtility.getMessage(PAGE_NAME, RACE_KEY)]
         def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save", infoTexts: infoTexts]
         render view: "survey", model: model
     }
@@ -56,7 +57,7 @@ class SurveyController {
 
 
     def completed() {
-        request.getSession().setAttribute("surveydone", "true")
+        request.getSession().setAttribute(SURVEY_ACTION, ACTION_DONE)
         done();
     }
 

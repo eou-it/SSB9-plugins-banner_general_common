@@ -61,12 +61,14 @@ width: 85%;
 .termstexttable {
 	font-size: 0.98em;
 	line-height: 13pt;
+    border: none;
 }
 
 #policy.terms-text-style {
     background:url(../../../images/web_info.png) no-repeat;
     background-position: top left;
-    width: 2%;
+    width: 5%;
+    min-width: 15px;
 }
 
 

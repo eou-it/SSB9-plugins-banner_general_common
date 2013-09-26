@@ -1,11 +1,12 @@
 /*******************************************************************************
  Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
- *******************************************************************************/
+ ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.security.BannerGrantedAuthorityService
+
 
 class SecurityQAController {
 
@@ -18,17 +19,23 @@ class SecurityQAController {
     int answerMinimumLength
     String userDefinedQuesFlag
     List questionList = []
+    private static final QUESTION_LABEL = "question"
+    public static final SECURITY_QA_ACTION = "securityqadone"
+    public static final ACTION_DONE = "true"
+    private static final INVALID_ANSWER_LENGTH = "securityQA.invalid.length.answer"
+    private static final INVALID_QUESTION_LENGTH = "securityQA.invalid.length.question"
+
 
     def index() {
         setGlobalVariables()
-        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength,selectedQues: "", selectedAns: [], selectedUserDefinedQues: []]
+        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: []]
     }
 
     private void setGlobalVariables() {
 
         questionList = loadQuestionList()
         Map result = securityQAService.getUserDefinedPreference()
-        if(result != null) {
+        if (result != null) {
             noOfQuestions = result.GUBPPRF_NO_OF_QSTNS?.intValue()
             questionMinimumLength = result.GUBPPRF_QSTN_MIN_LENGTH?.intValue()
             answerMinimumLength = result.GUBPPRF_ANSR_MIN_LENGTH?.intValue()
@@ -63,7 +70,7 @@ class SecurityQAController {
 
             def selectedDropdown = []
             selectedQA.each {
-                selectedDropdown.add("question" + (questionList.indexOf(it.question) + 1))
+                selectedDropdown.add(QUESTION_LABEL + (questionList.indexOf(it.question) + 1))
             }
             Map model = [:]
 
@@ -92,10 +99,10 @@ class SecurityQAController {
 
         for (int index = 0; index < noOfQuestions; index++) {
             int questionId
-            if(params.question instanceof String) {
-                questionId = params.question.split("question")[1].toInteger()
+            if (params.question instanceof String) {
+                questionId = params.question.split(QUESTION_LABEL)[1].toInteger()
             } else {
-                questionId = params.question[index].split("question")[1].toInteger()
+                questionId = params.question[index].split(QUESTION_LABEL)[1].toInteger()
             }
 
             String question
@@ -109,8 +116,8 @@ class SecurityQAController {
                 questionNo = null
             }
             String userDefinedQstn
-            if(!userDefinedQuesFlag.equals("N")) {
-                if(params.userDefinedQuestion instanceof String) {
+            if (!userDefinedQuesFlag.equals("N")) {
+                if (params.userDefinedQuestion instanceof String) {
                     userDefinedQstn = params.userDefinedQuestion
                 } else {
                     userDefinedQstn = params.userDefinedQuestion[index]
@@ -120,7 +127,7 @@ class SecurityQAController {
             }
 
             String answer
-            if(params.answer instanceof String) {
+            if (params.answer instanceof String) {
                 answer = params.answer
             } else {
                 answer = params.answer[index]
@@ -135,9 +142,9 @@ class SecurityQAController {
         String message = message(code: msg)
 
         if (message.contains("{0}")) {
-            if (msg.equals("securityQA.invalid.length.question")) {
+            if (msg.equals(INVALID_QUESTION_LENGTH)) {
                 message = message.replace("{0}", questionMinimumLength.toString())
-            } else if (msg.equals("securityQA.invalid.length.answer")) {
+            } else if (msg.equals(INVALID_ANSWER_LENGTH)) {
                 message = message.replace("{0}", answerMinimumLength.toString())
             }
         }
@@ -147,7 +154,7 @@ class SecurityQAController {
 
 
     def completed() {
-        request.getSession().setAttribute("securityqadone", "true")
+        request.getSession().setAttribute(SECURITY_QA_ACTION, ACTION_DONE)
         done()
     }
 

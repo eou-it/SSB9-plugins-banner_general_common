@@ -9,11 +9,14 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
             <span class="section-header-text" id="section-header-text1" role="header">${infoTexts."ethnicity.header"}%{--<g:message code="survey.ethnicity.header" />--}%</span>
         </div>
         <div id="ethnicity">
-            <input id="chkEthn_1" name="ethnicity" role="checkbox" value="1" type="checkbox" <g:if test="${personEthnicity == '1'}">checked="true"</g:if> />
-            <label for="chkEthn_1" class="content-label"><g:message code="survey.ethnicity.nothispanic" /></label>
-            <br/>
-            <input id="chkEthn_2" name="ethnicity" role="checkbox" value="2" type="checkbox" <g:if test="${personEthnicity == '2'}">checked="true"</g:if> />
-            <label for="chkEthn_2" class="content-label"><g:message code="survey.ethnicity.hispanic" /></label>
+            <div>
+                <input id="chkEthn_1" name="ethnicity" role="checkbox" value="1" type="checkbox" <g:if test="${personEthnicity == '1'}">checked="true"</g:if> />
+                <label for="chkEthn_1" class="content-label"><g:message code="survey.ethnicity.nothispanic" /></label>
+            </div>
+            <div>
+                <input id="chkEthn_2" name="ethnicity" role="checkbox" value="2" type="checkbox" <g:if test="${personEthnicity == '2'}">checked="true"</g:if> />
+                <label for="chkEthn_2" class="content-label"><g:message code="survey.ethnicity.hispanic" /></label>
+            </div>
         </div>
     </div>
     <div id="race-wrapper">
@@ -25,9 +28,10 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                 <div id="race-category-desc" class="race-category-header">${regulatoryRace.description}</div>
                 <div id="races_${regulatoryRace.code}" class="races-content">
                     <g:each in="${raceMap[regulatoryRace.code]}" var="race">
-                        <input id="chkRace_${race.race}" class="raceCheckbox" role="checkbox" name="race" value="${race.race}" type="checkbox" <g:if test="${personRaceCodes.contains(race.race)}">checked="true"</g:if>/>
-                        <label for="chkRace_${race.race}" class="content-label">${race.description}</label>
-                        <br/>
+                        <div>
+                            <input id="chkRace_${race.race}" class="raceCheckbox" role="checkbox" name="race" value="${race.race}" type="checkbox" <g:if test="${personRaceCodes.contains(race.race)}">checked="true"</g:if>/>
+                            <label for="chkRace_${race.race}" class="content-label">${race.description}</label>
+                        </div>
                     </g:each>
                 </div>
             </div>

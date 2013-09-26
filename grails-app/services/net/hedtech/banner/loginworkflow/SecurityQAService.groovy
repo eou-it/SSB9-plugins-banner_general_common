@@ -151,12 +151,12 @@ class SecurityQAService {
     }
 
     private void checkAndRaiseExceptionForInvalidCharacter(String answer, String question) {
-        if(isInvalidCharacterEntered(question)) {
+        if(isValueEntered(question) && isInvalidCharacterEntered(question)) {
             log.error("Question may not contain the < or > characters.")
             throw new ApplicationException("","securityQA.invalid.question")
         }
 
-        if(isInvalidCharacterEntered(answer)) {
+        if(isValueEntered(answer) && isInvalidCharacterEntered(answer)) {
             log.error("Answer may not contain the < or > characters.")
             throw new ApplicationException("","securityQA.invalid.answer")
         }

@@ -126,8 +126,9 @@
     background-size: auto auto;
     height: 15px;
     overflow: hidden;
-    position: absolute;
     width: 23px;
+    left:2%;
+    position: absolute;
 }
 
 .section-message {
