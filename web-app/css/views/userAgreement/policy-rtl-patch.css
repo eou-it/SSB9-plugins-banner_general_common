@@ -1,4 +1,4 @@
-#policy.terms-text-style {
-    background:url(../../../images/web_info_rtl.png) no-repeat;
-    background-position: top right;
+#terms-text-style.terms-text-style {
+    background-image: url("../../../images/web_info_rtl.png");
+    height: 15px;
 }
