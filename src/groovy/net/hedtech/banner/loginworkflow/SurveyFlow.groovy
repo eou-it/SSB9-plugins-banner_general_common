@@ -27,7 +27,7 @@ class SurveyFlow extends PostLoginWorkflow {
     private static final CONFIRMATION_INDICATOR = "Y"
 
     @Override
-    public boolean showPage(request) {
+    public boolean isShowPage(request) {
         def pidm = BannerGrantedAuthorityService.getPidm()
         def session = request.getSession()
         String isDone = session.getAttribute("surveydone")

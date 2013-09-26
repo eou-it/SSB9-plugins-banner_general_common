@@ -22,7 +22,7 @@ class UserAgreementFlow extends PostLoginWorkflow {
 
     private final log = Logger.getLogger(getClass())
 
-    public boolean showPage(request) {
+    public boolean isShowPage(request) {
         def session = request.getSession();
         String isDone = session.getAttribute("useraggrementdone")
         boolean displayPage = false

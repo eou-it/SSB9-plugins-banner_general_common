@@ -11,7 +11,7 @@ class SecurityQAFlow extends PostLoginWorkflow {
 
     def securityQAService
 
-    public boolean showPage(request) {
+    public boolean isShowPage(request) {
         def session = request.getSession();
         String isDone = session.getAttribute("securityqadone")
         boolean displayPage = false
