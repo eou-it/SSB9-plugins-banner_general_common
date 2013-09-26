@@ -78,6 +78,9 @@ class SurveyFlow extends PostLoginWorkflow {
             log.debug ae.stackTrace
             throw ae
         }
+        finally {
+            connection.close()
+        }
     }
 
     private Map getStartAndEndDates() {
@@ -110,6 +113,9 @@ class SurveyFlow extends PostLoginWorkflow {
         catch (Exception ae) {
             log.debug ae.stackTrace
             throw ae
+        }
+        finally {
+            connection.close()
         }
     }
 

@@ -10,9 +10,7 @@ class UserAgreementController {
     def userAgreementService
 
     static defaultAction = "index"
-    public static final USER_AGREEMENT_ACTION = "useragreementdone"
     private static final ACTION_DONE = "true"
-    private static final USAGE_INDICATOR="Y"
 
     def index() {
         def infoText = userAgreementService.getTermsOfUseInfoText()
@@ -23,8 +21,8 @@ class UserAgreementController {
 
     def agreement() {
         String pidm = BannerGrantedAuthorityService.getPidm()
-        userAgreementService.updateUsageIndicator(pidm, USAGE_INDICATOR);
-        request.getSession().setAttribute(USER_AGREEMENT_ACTION, ACTION_DONE)
+        userAgreementService.updateUsageIndicator(pidm, UserAgreementFlow.TERMS_OF_USAGE_ANSWERED );
+        request.getSession().setAttribute(UserAgreementFlow.USER_AGREEMENT_ACTION, ACTION_DONE)
         done();
     }
 

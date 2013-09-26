@@ -22,8 +22,9 @@ class SecurityQAController {
     private static final QUESTION_LABEL = "question"
     public static final SECURITY_QA_ACTION = "securityqadone"
     public static final ACTION_DONE = "true"
-    private static final INVALID_ANSWER_LENGTH = "securityQA.invalid.length.answer"
-    private static final INVALID_QUESTION_LENGTH = "securityQA.invalid.length.question"
+    private static final INVALID_ANSWER_LENGTH_ERROR_KEY = "securityQA.invalid.length.answer"
+    private static final INVALID_QUESTION_LENGTH_ERROR_KEY = "securityQA.invalid.length.question"
+    private static final USER_DEFINED_QUESTION_FLAG="N"
 
 
     def index() {
@@ -47,9 +48,9 @@ class SecurityQAController {
     private List loadQuestionList() {
         List ques = PinQuestion.fetchQuestions()
         ques.each {
-            questions.put(it.pinQuestionId, it.description)
+            questions.put(it.description, it.pinQuestionId)
         }
-        questions.values().collect()
+        questions.keySet().collect()
     }
 
     def save() {
@@ -89,62 +90,58 @@ class SecurityQAController {
             render view: "securityQA", model: model
         }
         if (messages == null) {
-            completed()
+            done()
         }
 
     }
 
     private List loadSelectedQuestionAnswerFromParams() {
         List selectedQA = []
+        def question = params.question
+        def userDefinedQstn = params.userDefinedQuestion
+        def answer = params.answer
 
-        for (int index = 0; index < noOfQuestions; index++) {
-            int questionId
-            if (params.question instanceof String) {
-                questionId = params.question.split(QUESTION_LABEL)[1].toInteger()
-            } else {
-                questionId = params.question[index].split(QUESTION_LABEL)[1].toInteger()
-            }
-
-            String question
-            String questionNo
-            if (questionId != 0) {
-                question = questionList.get(questionId - 1)
-                questionNo = questions.find {it.value == question}?.key
-            }
-            else {
-                question = null
-                questionNo = null
-            }
-            String userDefinedQstn
-            if (!userDefinedQuesFlag.equals("N")) {
-                if (params.userDefinedQuestion instanceof String) {
-                    userDefinedQstn = params.userDefinedQuestion
-                } else {
-                    userDefinedQstn = params.userDefinedQuestion[index]
-                }
-            } else {
-                userDefinedQstn = null
-            }
-
-            String answer
-            if (params.answer instanceof String) {
-                answer = params.answer
-            } else {
-                answer = params.answer[index]
-            }
-            def questionsAnswered = [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: answer]
+        def questionsAnswered
+        if (noOfQuestions == 1) {
+            questionsAnswered = getAnsweredQuestions(question, userDefinedQstn, answer)
             selectedQA.add(questionsAnswered)
+        }
+        else {
+            for (int index = 0; index < noOfQuestions; index++) {
+                questionsAnswered = getAnsweredQuestions(question[index], userDefinedQstn[index], answer[index])
+                selectedQA.add(questionsAnswered)
+            }
         }
         return selectedQA
     }
+
+    private Map getAnsweredQuestions(questionlabel, userDefinedQstn, answer) {
+        def question = null
+        def questionNo = null
+        int questionId = questionlabel.split(QUESTION_LABEL)[1].toInteger()
+
+        if (questionId != 0) {
+            question = questionList.get(questionId - 1)
+            questionNo = questions.find {it.key == question}?.value
+        }
+
+        if (userDefinedQuesFlag.equals(USER_DEFINED_QUESTION_FLAG)) {
+            userDefinedQstn = null
+        }
+
+        return [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: answer]
+
+    }
+
+
 
     private def getErrorMessage(msg) {
         String message = message(code: msg)
 
         if (message.contains("{0}")) {
-            if (msg.equals(INVALID_QUESTION_LENGTH)) {
+            if (msg.equals(INVALID_QUESTION_LENGTH_ERROR_KEY)) {
                 message = message.replace("{0}", questionMinimumLength.toString())
-            } else if (msg.equals(INVALID_ANSWER_LENGTH)) {
+            } else if (msg.equals(INVALID_ANSWER_LENGTH_ERROR_KEY)) {
                 message = message.replace("{0}", answerMinimumLength.toString())
             }
         }
@@ -153,12 +150,8 @@ class SecurityQAController {
     }
 
 
-    def completed() {
-        request.getSession().setAttribute(SECURITY_QA_ACTION, ACTION_DONE)
-        done()
-    }
-
     def done() {
+        request.getSession().setAttribute(SECURITY_QA_ACTION, ACTION_DONE)
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"
