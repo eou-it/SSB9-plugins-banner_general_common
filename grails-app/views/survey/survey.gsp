@@ -46,7 +46,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                                           model="${[personEthnicity: personEthnicity, regulatoryRace: regulatoryRace]}"/>
                             </div>
                             <div class="button-area">
-                                <input type='button'  id="ask-me-later-btn" value= "<g:message code='survey.edit.button.askMeLater' />" class="secondary-button" data-endpoint="${createLink(controller: "survey", action: "completed")}"/>
+                                <input type='button'  id="ask-me-later-btn" value= "<g:message code='survey.edit.button.askMeLater' />" class="secondary-button" data-endpoint="${createLink(controller: "survey", action: "done")}"/>
                                 <input type='button'  id="save-btn" value="<g:message code='survey.edit.button.continue' />" class="primary-button" />
                             </div>
                         </div>
