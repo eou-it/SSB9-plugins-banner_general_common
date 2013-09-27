@@ -109,7 +109,15 @@ class SecurityQAController {
         }
         else {
             for (int index = 0; index < noOfQuestions; index++) {
-                questionsAnswered = getAnsweredQuestions(question[index], userDefinedQstn[index], answer[index])
+
+                def userDefQsn
+                if (userDefinedQuesFlag.equals(USER_DEFINED_QUESTION_FLAG)) {
+                    userDefQsn = null
+                }
+                else {
+                    userDefQsn = userDefinedQstn[index]
+                }
+                questionsAnswered = getAnsweredQuestions(question[index], userDefQsn, answer[index])
                 selectedQA.add(questionsAnswered)
             }
         }
