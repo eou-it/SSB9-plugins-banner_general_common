@@ -56,34 +56,21 @@ width: 85%;
 .termstextdiv {
 	border: 1px #ccc solid;
 	background-color: #fff;
+    font-size: 1.5em;
+    line-height: 13pt;
+    background-image: url("../../../images/web_info.png");
+    background-position: left 0;
+    background-repeat: no-repeat;
+    background-size: auto auto;
+    padding-left: 25px;
+    padding-right: 0;
+    vertical-align: top;
 }
 
 .termstexttable {
 	font-size: 0.98em;
 	line-height: 13pt;
     border: none;
-}
-
-#terms-text-style.terms-text-style {
-    background-image: url("../../../images/web_info.png");
-    background-repeat: no-repeat;
-    background-size: auto auto;
-    width:15px;
-}
-
-
-.termstexttable td {
-	padding: 3px 0px 4px 4px;
-}
-
-TABLE TD.terms-text-style {
-    color: #444455;
-    font-family: Verdana,arial,helvetica,sans-serif;
-    font-size: 1.4em;
-    font-style: normal;
-    font-weight: normal;
-    text-align: left;
-    vertical-align: top;
 }
 
 #pageheader {

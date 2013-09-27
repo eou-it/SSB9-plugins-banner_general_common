@@ -25,16 +25,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
                 <div class="pagebodydiv" style="display: block;">
                     <div role="dialog" aria-describedby="terms-text-style">
                         <div class="termstextdiv">
-                            <table class="termstexttable">
-                                <tbody>
-                                <tr>
-                                    <td  class="terms-text-style" id="terms-text-style">
-                                        <sanitizeMarkdown:renderHtml text="${infoText}" /><br/>
-                                        <br/>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <sanitizeMarkdown:renderHtml text="${infoText}" />
                         </div>
                         <div class="button-area">
                             <input type='button' value='<g:message code="net.hedtech.banner.termsofuse.button.continue"/>' id="policy-continue" class="secondary-button"
