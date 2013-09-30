@@ -25,12 +25,14 @@ class SecurityQAController {
     public static final ACTION_DONE = "true"
     private static final INVALID_ANSWER_LENGTH_ERROR_KEY = "securityQA.invalid.length.answer"
     private static final INVALID_QUESTION_LENGTH_ERROR_KEY = "securityQA.invalid.length.question"
-    private static final USER_DEFINED_QUESTION_FLAG="N"
+    private static final USER_DEFINED_QUESTION_FLAG = "N"
+    private static final DEFAULT_QUESTION_KEY = "securityQA.selection.label"
 
 
     def index() {
         setGlobalVariables()
-        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: []]
+        def defaultQuestion = message(code: DEFAULT_QUESTION_KEY)
+        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: [], defaultQuestion: defaultQuestion]
     }
 
     private void setGlobalVariables() {
@@ -133,13 +135,7 @@ class SecurityQAController {
             question = questionList.get(questionId - 1)
             questionNo = questions.find {it.key == question}?.value
         }
-
-        if (userDefinedQuesFlag.equals(USER_DEFINED_QUESTION_FLAG)) {
-            userDefinedQstn = null
-        }
-
         return [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: answer]
-
     }
 
 
@@ -164,18 +160,18 @@ class SecurityQAController {
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"
-        }else{
+        } else {
             path = checkPath(path)
         }
         request.getSession().setAttribute(PostLoginWorkflow.URI_REDIRECTED, path)
         redirect uri: path
     }
 
-    protected String checkPath(String path){
+    protected String checkPath(String path) {
         String controllerName = HttpRequestUtils.getControllerNameFromPath(path)
-        List<PostLoginWorkflow> listOfFlows =  PostLoginWorkflow.getListOfFlows()
-        for(PostLoginWorkflow flow:listOfFlows){
-            if(flow.getControllerName().equals(controllerName)){
+        List<PostLoginWorkflow> listOfFlows = PostLoginWorkflow.getListOfFlows()
+        for (PostLoginWorkflow flow : listOfFlows) {
+            if (flow.getControllerName().equals(controllerName)) {
                 path = "/"
                 return path
             }
