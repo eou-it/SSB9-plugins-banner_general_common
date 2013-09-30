@@ -25,7 +25,7 @@ class SecurityQAController {
     public static final ACTION_DONE = "true"
     private static final INVALID_ANSWER_LENGTH_ERROR_KEY = "securityQA.invalid.length.answer"
     private static final INVALID_QUESTION_LENGTH_ERROR_KEY = "securityQA.invalid.length.question"
-    private static final USER_DEFINED_QUESTION_FLAG = "N"
+    private static final USER_DEFINED_QUESTION_DISABLED = "N"
 
     def index() {
         setGlobalVariables()
@@ -110,7 +110,7 @@ class SecurityQAController {
             for (int index = 0; index < noOfQuestions; index++) {
 
                 def userDefQsn
-                if (userDefinedQuesFlag.equals(USER_DEFINED_QUESTION_FLAG)) {
+                if (USER_DEFINED_QUESTION_DISABLED.equals(userDefinedQuesFlag) ) {
                     userDefQsn = null
                 }
                 else {
