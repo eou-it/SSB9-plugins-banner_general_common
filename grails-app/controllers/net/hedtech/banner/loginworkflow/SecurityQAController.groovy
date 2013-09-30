@@ -26,13 +26,10 @@ class SecurityQAController {
     private static final INVALID_ANSWER_LENGTH_ERROR_KEY = "securityQA.invalid.length.answer"
     private static final INVALID_QUESTION_LENGTH_ERROR_KEY = "securityQA.invalid.length.question"
     private static final USER_DEFINED_QUESTION_FLAG = "N"
-    private static final DEFAULT_QUESTION_KEY = "securityQA.selection.label"
-
 
     def index() {
         setGlobalVariables()
-        def defaultQuestion = message(code: DEFAULT_QUESTION_KEY)
-        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: [], defaultQuestion: defaultQuestion]
+        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: []]
     }
 
     private void setGlobalVariables() {

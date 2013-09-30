@@ -22,7 +22,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <body>
 <script>
     var userDefinedQuesFlag = "${userDefinedQuesFlag}";
-    var defaultQuestuion = "${defaultQuestion}";
+    var defaultQuestuion = "<g:message code="securityQA.selection.label"/>";
     var questions = new Array();
     var selectedQues = new Array();
     questions.push(defaultQuestuion);
