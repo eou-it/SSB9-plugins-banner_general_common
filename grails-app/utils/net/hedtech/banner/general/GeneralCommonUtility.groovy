@@ -46,19 +46,23 @@ class GeneralCommonUtility {
      * @return map with the external value and the list
      */
     public static def getAppGtvsdax(def internal, def internalGroup, List appGtvsdaxList = []) {
-        def gtvsdaxValue
-        if (appGtvsdaxList?.size()) {
-            gtvsdaxValue = appGtvsdaxList.find { it.internal == internal && it.internalGroup == internalGroup }?.external
-            if (!gtvsdaxValue) {
-                gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
-                appGtvsdaxList << [internal: internal, external: gtvsdaxValue, internalGroup: internalGroup]
-            }
+        def gtvsdaxMap
+
+        def gtvsdaxValue = appGtvsdaxList?.find { it.internal == internal && it.internalGroup == internalGroup }?.external
+        if (!gtvsdaxValue) {
+            gtvsdaxMap = createSdaxMapForAppSessionList(internal, internalGroup, appGtvsdaxList)
         } else {
-            gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
-            appGtvsdaxList << [internal: internal, external: gtvsdaxValue, internalGroup: internalGroup]
+            gtvsdaxMap = [gtvsdaxValue: gtvsdaxValue, appGtvsdaxList: appGtvsdaxList]
         }
 
-        return [gtvsdaxValue: gtvsdaxValue, appGtvsdaxList: appGtvsdaxList]
+        return gtvsdaxMap
 
+    }
+
+
+    public static def createSdaxMapForAppSessionList(def internal, def internalGroup, List appGtvsdaxList) {
+        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
+        appGtvsdaxList << [internal: internal, external: gtvsdaxValue, internalGroup: internalGroup]
+        return [gtvsdaxValue: gtvsdaxValue, appGtvsdaxList: appGtvsdaxList]
     }
 }

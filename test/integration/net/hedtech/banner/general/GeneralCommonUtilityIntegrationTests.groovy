@@ -35,6 +35,16 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testCreateSdaxMapForAppSessionList() {
+        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
+        assertNotNull gtvsdaxValue
+        List sdaxList = []
+        def sdaxMap = GeneralCommonUtility.createSdaxMapForAppSessionList('SCHBYDATE', 'WEBREG', sdaxList)
+        assertEquals gtvsdaxValue, sdaxMap.gtvsdaxValue
+        assertEquals 1, sdaxMap.appGtvsdaxList.size()
+    }
+
+
     void testAppGtvsdaxNewValueNoList() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
         assertNotNull gtvsdaxValue
@@ -49,7 +59,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
     void testAppGtvsdaxNewValueExisingList() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
-        assertNotNull  gtvsdaxValue
+        assertNotNull gtvsdaxValue
         def sdaxList = []
         sdaxList << [internal: 'SCHBYDATE', internalGroup: 'WEBREG', external: gtvsdaxValue, testApp: "YES"]
 
@@ -65,7 +75,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
     void testAppGtvsdaxNewValueExisingListMultipleEntries() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
-        assertNotNull  gtvsdaxValue
+        assertNotNull gtvsdaxValue
         def sdaxList = []
         sdaxList << [internal: 'SCHBYDATE', internalGroup: 'WEBREG', external: gtvsdaxValue]
         def gtvsdaxValue2 = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('WEBALTPINA', 'WEBREG')[0]?.external
@@ -77,9 +87,9 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
         assertEquals termDate, value.gtvsdaxValue
         assertTrue value.appGtvsdaxList instanceof List
         assertEquals 3, value.appGtvsdaxList.size()
-        assertNotNull "WEBTRMDTE",   value.appGtvsdaxList.find { it.internal == "WEBTRMDTE"}
-        assertNotNull "SCHBYDATE",   value.appGtvsdaxList.find { it.internal == "SCHBYDATE"}
-        assertNotNull "WEBALTPINA",   value.appGtvsdaxList.find { it.internal == "WEBALTPINA"}
+        assertNotNull "WEBTRMDTE", value.appGtvsdaxList.find { it.internal == "WEBTRMDTE" }
+        assertNotNull "SCHBYDATE", value.appGtvsdaxList.find { it.internal == "SCHBYDATE" }
+        assertNotNull "WEBALTPINA", value.appGtvsdaxList.find { it.internal == "WEBALTPINA" }
 
     }
 
