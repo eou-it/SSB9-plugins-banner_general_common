@@ -16,27 +16,6 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
  */
 class GeneralCommonUtility {
 
-    /**
-     * Store gtvsdax values in  application variable to minimize trips to the DB
-     * @param internal
-     * @param internalGroup
-     * @return external value
-     */
-
-    public static gtvsdaxForSession(def internal, def internalGroup) {
-        def gtvsdaxList = SCH.servletContext.getAttribute("gtvsdax")
-        if (!gtvsdaxList) gtvsdaxList = [:]
-        def keycode = internal + internalGroup
-        def gtvsdaxValue = gtvsdaxList[keycode]
-
-        if (!gtvsdaxValue) {
-            gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
-            gtvsdaxList.put((keycode), gtvsdaxValue)
-            SCH.servletContext.setAttribute("gtvsdax", gtvsdaxList)
-        }
-
-        return gtvsdaxValue
-    }
 
     /**
      * Store the gtvsdax values used by an App in a list that gets passed and stored in the app session
@@ -49,20 +28,24 @@ class GeneralCommonUtility {
         def gtvsdaxMap
 
         def gtvsdaxValue = appGtvsdaxList?.find { it.internal == internal && it.internalGroup == internalGroup }?.external
-        if (!gtvsdaxValue) {
-            gtvsdaxMap = createSdaxMapForAppSessionList(internal, internalGroup, appGtvsdaxList)
-        } else {
+        if (gtvsdaxValue) {
             gtvsdaxMap = [gtvsdaxValue: gtvsdaxValue, appGtvsdaxList: appGtvsdaxList]
+        } else {
+            gtvsdaxMap = createSdaxMapForAppSessionList(internal, internalGroup, appGtvsdaxList)
         }
-
         return gtvsdaxMap
-
     }
 
 
     public static def createSdaxMapForAppSessionList(def internal, def internalGroup, List appGtvsdaxList) {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup(internal, internalGroup)[0]?.external
-        appGtvsdaxList << [internal: internal, external: gtvsdaxValue, internalGroup: internalGroup]
+        if (appGtvsdaxList?.size()) {
+            appGtvsdaxList << [internal: internal, external: gtvsdaxValue, internalGroup: internalGroup]
+
+        } else {
+            appGtvsdaxList = []
+            appGtvsdaxList.add([internal: internal, external: gtvsdaxValue, internalGroup: internalGroup])
+        }
         return [gtvsdaxValue: gtvsdaxValue, appGtvsdaxList: appGtvsdaxList]
     }
 }
