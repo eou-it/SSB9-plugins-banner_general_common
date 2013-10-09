@@ -1,12 +1,12 @@
 /*********************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
+ This copyrighted software contains confidential and proprietary information of
+ SunGard Higher Education and its subsidiaries. Any use of this software is limited
+ solely to SunGard Higher Education licensees, and is further subject to the terms
+ and conditions of one or more written license agreements between SunGard Higher
  Education and the licensee in question. SunGard is either a registered trademark or
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
+ Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
  Education in the U.S.A. and/or other regions and/or countries.
  **********************************************************************************/
 /**
@@ -42,7 +42,13 @@ import javax.persistence.*
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                AND a.category = :category
-		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery( name = "SectionMeetingTime.fetchEventByCRNAndFunction",
+              query = """FROM SectionMeetingTime a
+		                 WHERE a.term = :term
+		                 AND a.courseReferenceNumber = :eventCourseReferenceNumber
+		                 AND a.function.code = :functionCode
+		                 order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
 ] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
@@ -407,7 +413,7 @@ class SectionMeetingTime implements Serializable {
 
 
     static constraints = {
-        /*PROTECTED REGION ID(sectionmeetingtime_custom_constraints) ENABLED START*/
+
         term(nullable: false, maxSize: 6)
         courseReferenceNumber(nullable: false, maxSize: 5)
         dayOfWeek(nullable: true)
@@ -469,23 +475,16 @@ class SectionMeetingTime implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        /*PROTECTED REGION END*/
+
     }
 
     /**
      * Please put all the custom/transient attributes with @Transient annotations in this protected section to protect the code
      * from being overwritten on re-generation
      */
-    /*PROTECTED REGION ID(sectionmeetingtime_custom_attributes) ENABLED START*/
 
-    /*PROTECTED REGION END*/
-
-    /*PROTECTED REGION ID(sectionmeetingtime_readonly_properties) ENABLED START*/
     //Read Only fields that should be protected against update
     public static readonlyProperties = ["term", "courseReferenceNumber"]
-    /*PROTECTED REGION END*/
-
-    /*PROTECTED REGION ID(sectionmeetingtime_custom_methods) ENABLED START*/
 
     /**
      * This fetchBy is used to retrieve all meeting times for a given term and crn.
@@ -540,5 +539,18 @@ class SectionMeetingTime implements Serializable {
         }
         return count
     }
-    /*PROTECTED REGION END*/
+    /**
+     * This fetchBy is used to retrieve all meeting times for a given Event crn and function.
+     *
+     */
+
+    public static List fetchEventByCRNAndFunction(String eventCourseReferenceNumber,
+                                                  String function) {
+        def sectionMeetingTimes
+        SectionMeetingTime.withSession { session ->
+            sectionMeetingTimes = session.getNamedQuery(
+                    'SectionMeetingTime.fetchEventByCRNAndFunction').setString('term', 'EVENT').setString('eventCourseReferenceNumber', eventCourseReferenceNumber).setString('functionCode', function).list()
+        }
+        return sectionMeetingTimes
+    }
 }
