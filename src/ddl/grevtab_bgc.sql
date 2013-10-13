@@ -3,7 +3,7 @@
 -- *****************************************************************************************REM
 REM Upgrade GENERAL schema.
 REM
-set echo off
+
 whenever oserror exit rollback;
 whenever sqlerror exit rollback;
 
