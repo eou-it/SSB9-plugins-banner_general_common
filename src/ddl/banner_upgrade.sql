@@ -25,9 +25,6 @@ connect general/&&general_password
 start grevtab_bgc
 
 REM Security scripts
-connect bansecr/&&bansecr_password
-start gguraobji_080602.sql
-start gguruobji_080602.sql
 
 connect dbeu_owner/&&dbeu_password
 start dbeu_ext_gen_bgc

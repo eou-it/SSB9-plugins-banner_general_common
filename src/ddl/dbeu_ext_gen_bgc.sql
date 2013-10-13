@@ -35,3 +35,6 @@ execute dbeu_util.extend_table('GENERAL','GORADRL','G',FALSE);
 
 execute dbeu_util.extend_table('GENERAL','GORDMSK','G',TRUE)
 
+execute dbeu_util.extend_table('GENERAL','GOBQSTN','G',TRUE);
+execute dbeu_util.extend_table('GENERAL','GOBANSR','G',TRUE);
+
