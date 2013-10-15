@@ -43,7 +43,7 @@ import javax.persistence.*
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                AND a.category = :category
 		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
-@NamedQuery( name = "SectionMeetingTime.fetchEventByCRNAndFunction",
+@NamedQuery( name = "SectionMeetingTime.fetchByTermCRNAndFunction",
               query = """FROM SectionMeetingTime a
 		                 WHERE a.term = :term
 		                 AND a.courseReferenceNumber = :eventCourseReferenceNumber
@@ -539,17 +539,16 @@ class SectionMeetingTime implements Serializable {
         }
         return count
     }
-    /**
-     * This fetchBy is used to retrieve all meeting times for a given Event crn and function.
-     *
-     */
 
-    public static List fetchEventByCRNAndFunction(String eventCourseReferenceNumber,
-                                                  String function) {
-        def sectionMeetingTimes
-        SectionMeetingTime.withSession { session ->
-            sectionMeetingTimes = session.getNamedQuery(
-                    'SectionMeetingTime.fetchEventByCRNAndFunction').setString('term', 'EVENT').setString('eventCourseReferenceNumber', eventCourseReferenceNumber).setString('functionCode', function).list()
+
+    public static List fetchByTermCRNAndFunction(String term, String eventCourseReferenceNumber,
+                                                 String function) {
+        List sectionMeetingTimes = []
+        if (term && eventCourseReferenceNumber && function) {
+            SectionMeetingTime.withSession { session ->
+                sectionMeetingTimes = session.getNamedQuery(
+                        'SectionMeetingTime.fetchByTermCRNAndFunction').setString('term', term).setString('eventCourseReferenceNumber', eventCourseReferenceNumber).setString('functionCode', function).list()
+            }
         }
         return sectionMeetingTimes
     }

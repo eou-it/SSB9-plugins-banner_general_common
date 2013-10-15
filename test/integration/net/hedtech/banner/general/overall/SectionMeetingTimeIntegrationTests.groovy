@@ -1,12 +1,12 @@
 /** *******************************************************************************
  Copyright 2009-2011 SunGard Higher Education. All Rights Reserved.
- This copyrighted software contains confidential and proprietary information of 
- SunGard Higher Education and its subsidiaries. Any use of this software is limited 
- solely to SunGard Higher Education licensees, and is further subject to the terms 
- and conditions of one or more written license agreements between SunGard Higher 
+ This copyrighted software contains confidential and proprietary information of
+ SunGard Higher Education and its subsidiaries. Any use of this software is limited
+ solely to SunGard Higher Education licensees, and is further subject to the terms
+ and conditions of one or more written license agreements between SunGard Higher
  Education and the licensee in question. SunGard is either a registered trademark or
  trademark of SunGard Data Systems in the U.S.A. and/or other regions and/or countries.
- Banner and Luminis are either registered trademarks or trademarks of SunGard Higher 
+ Banner and Luminis are either registered trademarks or trademarks of SunGard Higher
  Education in the U.S.A. and/or other regions and/or countries.
  ********************************************************************************* */
 /**
@@ -15,11 +15,10 @@
  */
 package net.hedtech.banner.general.overall
 
-
-import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import net.hedtech.banner.general.system.*
+import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     /*PROTECTED REGION ID(sectionmeetingtime_domain_integration_test_data) ENABLED START*/
@@ -469,38 +468,38 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         def sectionMeetingTime = new SectionMeetingTime()
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
         assertErrorsFor sectionMeetingTime, 'nullable',
-                        [
+                [
                         'courseReferenceNumber',
                         'startDate',
                         'endDate',
                         'term'
-                        ]
+                ]
         assertNoErrorsFor sectionMeetingTime,
-                          [
-                          'dayNumber',
-                          'beginTime',
-                          'endTime',
-                          'room',
-                          'category',
-                          'sunday',
-                          'monday',
-                          'tuesday',
-                          'wednesday',
-                          'thursday',
-                          'friday',
-                          'saturday',
-                          'override',
-                          'creditHourSession',
-                          'meetNumber',
-                          'hoursWeek',
-                          'dayOfWeek',
-                          'building',
-                          'scheduleType',
-                          'function',
-                          'committee',
-                          'scheduleToolStatus',
-                          'meetingType'
-                          ]
+                [
+                        'dayNumber',
+                        'beginTime',
+                        'endTime',
+                        'room',
+                        'category',
+                        'sunday',
+                        'monday',
+                        'tuesday',
+                        'wednesday',
+                        'thursday',
+                        'friday',
+                        'saturday',
+                        'override',
+                        'creditHourSession',
+                        'meetNumber',
+                        'hoursWeek',
+                        'dayOfWeek',
+                        'building',
+                        'scheduleType',
+                        'function',
+                        'committee',
+                        'scheduleToolStatus',
+                        'meetingType'
+                ]
     }
 
     //Test that exceeding maximum size of fields causes failure
@@ -613,7 +612,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         sectionMeetingTime.override = 'X'
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'inList',
-                        ['sunday',
+                ['sunday',
                         'monday',
                         'tuesday',
                         'wednesday',
@@ -630,7 +629,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         sectionMeetingTime.hoursWeek = 999.999
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'max',
-                        ['creditHourSession', 'hoursWeek'])
+                ['creditHourSession', 'hoursWeek'])
     }
 
     // Test the BigDecimal fields fail when it is smaller than minimum size.
@@ -640,7 +639,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         sectionMeetingTime.hoursWeek = -1
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'min',
-                        ['creditHourSession', 'hoursWeek'])
+                ['creditHourSession', 'hoursWeek'])
     }
 
     // Test the Integer fields fail validation when maximum size is exceeded.
@@ -651,7 +650,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
 
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'max',
-                        ['dayNumber', 'meetNumber'])
+                ['dayNumber', 'meetNumber'])
     }
 
     // Test the Integer fields fail validation when maximum size is exceeded.
@@ -662,7 +661,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
 
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'min',
-                        ['dayNumber', 'meetNumber'])
+                ['dayNumber', 'meetNumber'])
     }
 
     // Local method for testing the beginTime validator.
@@ -747,7 +746,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         sectionMeetingTime.startDate = sectionMeetingTime.endDate + 1
 
         assertFalse "SectionMeetingTime should have failed validation",
-                    sectionMeetingTime.validate()
+                sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'validator', ['startDate'])
     }
 
@@ -759,7 +758,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         sectionMeetingTime.endDate = sectionMeetingTime.startDate - 1
 
         assertFalse "SectionMeetingTime should have failed validation",
-                    sectionMeetingTime.validate()
+                sectionMeetingTime.validate()
         assertErrorsFor(sectionMeetingTime, 'validator', ['endDate'])
     }
 
@@ -823,7 +822,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull sectionMeetingTime.id
         //Exact date as in previous schedule
         int count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0950", Term.findByCode(i_success_term).startDate, Term.findByCode(i_success_term).endDate,
-                                                                                  "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertTrue "Expected atleast one schedule exist matching the schedule", count > 0
         Date startDate = Term.findByCode(i_success_term).startDate
         Calendar startCal = Calendar.instance
@@ -834,29 +833,84 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         endCal.setTime(endDate)
         //start date less than the previous schedule
         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0950", startCal.getTime(), endCal.getTime(),
-                                                                              "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertTrue "Expected atleast one schedule exist matching the schedule", count > 0
         //startDate same as previous schedule but end date less than previous schedule
         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0950", Term.findByCode(i_success_term).startDate, startCal.getTime(),
-                                                                              "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertTrue "Expected atleast one schedule exist matching the schedule", count > 0
         //starttime and endtime overlapping
         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0850", "1000", Term.findByCode(i_success_term).startDate, startCal.getTime(),
-                                                                              "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertTrue "Expected atleast one schedule exist matching the schedule", count > 0
         //starttime and endtime overlapping
         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0930", "1030", Term.findByCode(i_success_term).startDate, startCal.getTime(),
-                                                                              "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertTrue "Expected atleast one schedule exist matching the schedule", count > 0
         //starttime and endtime overlapping
         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("0900", "0930", Term.findByCode(i_success_term).startDate, startCal.getTime(),
-                                                                              "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertTrue "Expected atleast one schedule exist matching the schedule", count > 0
         //starttime and endtime overlapping
         count = SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation("1100", "1200", Term.findByCode(i_success_term).startDate, startCal.getTime(),
-                                                                              "BIOL", "101", "M", null, "W", null, null, null, null)
+                "BIOL", "101", "M", null, "W", null, null, null, null)
         assertFalse "Schedule does not exist with this time ", count > 0
     }
 
-    /*PROTECTED REGION END*/
+    // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
+    void testFetchByTermCRNAndFunction() {
+        def sectionMeetingTime = newValidForCreateSectionMeetingTimeForEvent()
+        sectionMeetingTime.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull sectionMeetingTime.id
+        def results = SectionMeetingTime.fetchByTermCRNAndFunction(
+                "EVENT", sectionMeetingTime.courseReferenceNumber, sectionMeetingTime.function.code)
+
+        assertTrue results?.size() >= 1
+        results?.each { result ->
+            assertEquals "EVENT", result.term
+            assertEquals sectionMeetingTime.courseReferenceNumber, result.courseReferenceNumber
+            assertEquals sectionMeetingTime.function.code, result.function.code
+        }
+
+        /* Test for null values */
+        def result = SectionMeetingTime.fetchByTermCRNAndFunction(
+                null, null, null)
+
+        assertFalse "SectionMeetingTime does not exist for the Event and Function ", result?.size() > 0
+    }
+
+    //Create a valid section meeting time record for an Event and Function
+    private def newValidForCreateSectionMeetingTimeForEvent() {
+        def sectionMeetingTime = new SectionMeetingTime(
+                courseReferenceNumber: "E0007",
+                dayNumber: i_success_dayNumber,
+                beginTime: i_success_beginTime,
+                endTime: i_success_endTime,
+                room: i_success_room,
+                startDate: i_success_startDate,
+                endDate: i_success_endDate,
+                category: i_success_category,
+                sunday: i_success_sunday,
+                monday: i_success_monday,
+                tuesday: i_success_tuesday,
+                wednesday: i_success_wednesday,
+                thursday: i_success_thursday,
+                friday: i_success_friday,
+                saturday: i_success_saturday,
+                override: i_success_override,
+                creditHourSession: i_success_creditHourSession,
+                meetNumber: i_success_meetNumber,
+                hoursWeek: i_success_hoursWeek,
+                term: "EVENT",
+                dayOfWeek: i_success_dayOfWeek,
+                building: i_success_building,
+                scheduleType: i_success_scheduleType,
+                function: Function.findByCode("BREAK"),
+                committee: i_success_committeeAndServiceType,
+                scheduleToolStatus: i_success_scheduleToolStatus,
+                meetingType: i_success_meetingType
+        )
+        return sectionMeetingTime
+    }
 }
