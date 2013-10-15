@@ -1,30 +1,26 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
-import groovy.sql.GroovyRowResult
-import groovy.sql.Sql
-import net.hedtech.banner.security.BannerUser
-
-import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.context.ApplicationContext
-import org.springframework.security.core.context.SecurityContextHolder
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
-import java.sql.SQLException
+class SecurityQAFlow extends PostLoginWorkflow {
 
-class SecurityQAFlow implements PostLoginWorkflow {
-
-    def sessionFactory
-    private final log = Logger.getLogger(getClass())
     def securityQAService
+    private static final FORGET_PIN_INDICATOR = "N"
 
-    public boolean showPage(request) {
+    public boolean isShowPage(request) {
         def session = request.getSession();
-        String isDone = session.getAttribute("securityqadone")
+        String isDone = session.getAttribute(SecurityQAController.SECURITY_QA_ACTION)
         boolean displayPage = false
-        if(isDone != "true"){
+        if (isDone != SecurityQAController.ACTION_DONE) {
             initializeSecurityQAService()
-            def noOfQuestions = getNumberOfQuestions()
-            if(getDisableForgetPinIndicator().equals("N") && noOfQuestions > 0 && !isUserAlreadyAnsweredSecurityQA(noOfQuestions)) {
+            Map map = getUserDefinedPreference()
+            def noOfQuestions = getNumberOfQuestions(map)
+            if (getDisableForgetPinIndicator(map).equals(FORGET_PIN_INDICATOR) && noOfQuestions > 0 && !isUserAlreadyAnsweredSecurityQA(noOfQuestions)) {
                 displayPage = true
             }
         }
@@ -36,24 +32,8 @@ class SecurityQAFlow implements PostLoginWorkflow {
         return "/ssb/securityQA"
     }
 
-    private String getDisableForgetPinIndicator(){
-        def connection
-        Sql sql
-        try{
-            connection = sessionFactory.currentSession.connection()
-            sql = new Sql(connection)
-            GroovyRowResult row = sql.firstRow("""select GUBPPRF_DISABLE_FORGET_PIN_IND from GUBPPRF""")
-            return row?.GUBPPRF_DISABLE_FORGET_PIN_IND
-        }catch (SQLException ae) {
-            log.debug ae.stackTrace
-            throw ae
-        }
-        catch (Exception ae) {
-            log.debug ae.stackTrace
-            throw ae
-        }finally{
-            connection.close()
-        }
+    public String getControllerName() {
+        return "securityQA"
     }
 
     private void initializeSecurityQAService() {
@@ -61,23 +41,24 @@ class SecurityQAFlow implements PostLoginWorkflow {
         securityQAService = (SecurityQAService) ctx.getBean("securityQAService")
     }
 
-    private def getNumberOfQuestions(){
-        securityQAService.getNumberOfQuestions()
+    private Map getUserDefinedPreference() {
+        return securityQAService.getUserDefinedPreference()
     }
 
-    private boolean isUserAlreadyAnsweredSecurityQA(noOfQuestions){
-        if(noOfQuestions > securityQAService.getNumberOfQuestionsAnswered(getPidm())) {
+    private def getNumberOfQuestions(Map map) {
+        return map?.GUBPPRF_NO_OF_QSTNS
+    }
+
+    private String getDisableForgetPinIndicator(Map map) {
+        return map?.GUBPPRF_DISABLE_FORGET_PIN_IND
+    }
+
+    private boolean isUserAlreadyAnsweredSecurityQA(noOfQuestions) {
+
+        if (noOfQuestions > securityQAService.getNumberOfQuestionsAnswered(BannerGrantedAuthorityService.getPidm())) {
             return false
         }
 
         return true
-    }
-
-    public static String getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
     }
 }

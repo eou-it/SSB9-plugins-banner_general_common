@@ -1,14 +1,11 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general
 
-import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
-
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.junit.Ignore
 
 class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
@@ -24,44 +21,62 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testGtvsdaxSet() {
-        SCH.servletContext.removeAttribute("gtvsdax")
-
+    void testCreateSdaxMapForAppSessionList() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
-        def schByDate = GeneralCommonUtility.gtvsdaxForSession('SCHBYDATE', 'WEBREG')
-        assertEquals schByDate, gtvsdaxValue
-        def sdaxList = SCH.servletContext.getAttribute("gtvsdax")
-        assertNotNull sdaxList
-        assertNotNull sdaxList["SCHBYDATEWEBREG"]
+        assertNotNull gtvsdaxValue
+        List sdaxList = []
+        def sdaxMap = GeneralCommonUtility.createSdaxMapForAppSessionList('SCHBYDATE', 'WEBREG', sdaxList)
+        assertEquals gtvsdaxValue, sdaxMap.gtvsdaxValue
+        assertEquals 1, sdaxMap.appGtvsdaxList.size()
+    }
+
+
+    void testAppGtvsdaxNewValueNoList() {
+        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
+        assertNotNull gtvsdaxValue
+        def value = GeneralCommonUtility.getAppGtvsdax('SCHBYDATE', 'WEBREG')
+        assertEquals gtvsdaxValue, value.gtvsdaxValue
+        assertTrue value.appGtvsdaxList instanceof List
+        assertEquals 1, value.appGtvsdaxList.size()
+        assertEquals gtvsdaxValue, value.appGtvsdaxList[0].external
 
     }
 
-    @Ignore
-    void testTwoThreadsGtvsdax() {
-        SCH.servletContext.removeAttribute("gtvsdax")
-        Closure schedByDate = {
-            def schByDate = GeneralCommonUtility.gtvsdaxForSession('SCHBYDATE', 'WEBREG')
-            assertNotNull schByDate
 
-        }
-        Closure enrollmentDisplay = {
-            GeneralCommonUtility.gtvsdaxForSession('DISPENROLL', 'WEBREG')[0]
-            assertNotNull enrollmentDisplay
-        }
+    void testAppGtvsdaxNewValueExisingList() {
+        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
+        assertNotNull gtvsdaxValue
+        def sdaxList = []
+        sdaxList << [internal: 'SCHBYDATE', internalGroup: 'WEBREG', external: gtvsdaxValue, testApp: "YES"]
 
-        Thread registrationThread1 = new Thread(schedByDate as Runnable)
-        Thread registrationThread2 = new Thread(enrollmentDisplay as Runnable)
-        registrationThread1.start()
-        Thread.yield()
-        registrationThread2.start()
-        registrationThread1.join()
-        registrationThread2.join()
-        registrationThread1.interrupt()
-        registrationThread2.interrupt()
+        def value = GeneralCommonUtility.getAppGtvsdax('SCHBYDATE', 'WEBREG', sdaxList)
+        assertEquals gtvsdaxValue, value.gtvsdaxValue
+        assertTrue value.appGtvsdaxList instanceof List
+        assertEquals 1, value.appGtvsdaxList.size()
+        assertEquals gtvsdaxValue, value.appGtvsdaxList[0].external
+        assertEquals "YES", value.appGtvsdaxList[0].testApp
 
-        def sdaxList = SCH.servletContext.getAttribute("gtvsdax")
-        assertEquals 2, sdaxList.size()
-        assertNotNull sdaxList['SCHBYDATEWEBREG']
-        assertNotNull sdaxList['DISPENROLLWEBREG']
     }
+
+
+    void testAppGtvsdaxNewValueExisingListMultipleEntries() {
+        def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
+        assertNotNull gtvsdaxValue
+        def sdaxList = []
+        sdaxList << [internal: 'SCHBYDATE', internalGroup: 'WEBREG', external: gtvsdaxValue]
+        def gtvsdaxValue2 = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('WEBALTPINA', 'WEBREG')[0]?.external
+        sdaxList << [internal: 'WEBALTPINA', internalGroup: 'WEBREG', external: gtvsdaxValue]
+
+        def termDate = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('WEBTRMDTE', 'STUWEB')[0]?.external
+
+        def value = GeneralCommonUtility.getAppGtvsdax('WEBTRMDTE', 'STUWEB', sdaxList)
+        assertEquals termDate, value.gtvsdaxValue
+        assertTrue value.appGtvsdaxList instanceof List
+        assertEquals 3, value.appGtvsdaxList.size()
+        assertNotNull "WEBTRMDTE", value.appGtvsdaxList.find { it.internal == "WEBTRMDTE" }
+        assertNotNull "SCHBYDATE", value.appGtvsdaxList.find { it.internal == "SCHBYDATE" }
+        assertNotNull "WEBALTPINA", value.appGtvsdaxList.find { it.internal == "WEBALTPINA" }
+
+    }
+
 }

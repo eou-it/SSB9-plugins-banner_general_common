@@ -1,46 +1,43 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
+
 package net.hedtech.banner.loginworkflow
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.utility.DateUtility
 import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
-
 import java.sql.SQLException
+import java.sql.Timestamp
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
-/** *****************************************************************************
- © 2013 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- ****************************************************************************** */
-class SurveyFlow implements PostLoginWorkflow {
+class SurveyFlow extends PostLoginWorkflow {
 
     def sessionFactory
     private final log = Logger.getLogger(getClass())
-    public boolean showPage(request) {
-        def pidm = getPidm()
+    private static final STUDENT_ROLE = "SELFSERVICE-STUDENT"
+    private static final EMPLOYEE_ROLE = "SELFSERVICE-EMPLOYEE"
+    private static final CONFIRMATION_INDICATOR = "Y"
+
+    @Override
+    public boolean isShowPage(request) {
+        def pidm = BannerGrantedAuthorityService.getPidm()
         def session = request.getSession()
-        String isDone = session.getAttribute("surveydone")
-        def pushSurvey = false
-        if (isSurveyAvailableForUserAuthority() && isDone != "true") {
+        String isDone = session.getAttribute(SurveyController.SURVEY_ACTION)
+        boolean pushSurvey = false
+
+        if (isSurveyAvailableForUserAuthority() && isDone != SurveyController.ACTION_DONE) {
             // Survey is not yet taken.
-            def surveyStartDateRow = getSurveyStartDate()
-            def surveyEndDateRow = getSurveyEndDate()
-            if(!surveyStartDateRow.isEmpty() &&!surveyEndDateRow.isEmpty()) {
-                def today = DateUtility.getTodayDate()
-                def surveyStartDate = surveyStartDateRow[0]?.gtvsdax_reporting_date
-                def surveyEndDate = surveyEndDateRow[0]?.gtvsdax_reporting_date ?: today
-                // Survey start date is not null & Today is between Survey start and end dates
-                if (surveyStartDate && (surveyStartDate <= today && today <= surveyEndDate)) {
-                    if (getSurveyConfirmedIndicator(pidm) != 'Y') {
-                        pushSurvey = true
-                    }
+            Map startAndEndDates = getStartAndEndDates()
+            Timestamp surveyStartDate = startAndEndDates.startDate
+            Timestamp today = new Timestamp(DateUtility.getTodayDate().getTime())
+            Timestamp surveyEndDate = startAndEndDates.endDate ?: today
+
+            // Survey start date is not null & Today is between Survey start and end dates
+            if (surveyStartDate && (surveyStartDate <= today && today <= surveyEndDate)) {
+                if (getSurveyConfirmedIndicator(pidm) != CONFIRMATION_INDICATOR) {
+                    pushSurvey = true
                 }
             }
             return pushSurvey
@@ -50,76 +47,19 @@ class SurveyFlow implements PostLoginWorkflow {
         }
     }
 
-
     public String getControllerUri() {
         return "/ssb/survey/survey"
     }
 
-
-    static def getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
-        }
-        return null
+    public String getControllerName() {
+        return "survey"
     }
-
 
     private static def isSurveyAvailableForUserAuthority() {
-        def authorities = SecurityContextHolder?.context?.authentication?.principal?.authorities
+        def authorities = BannerGrantedAuthorityService.getAuthorities()
         def userAuthorities = authorities?.collect { it.objectName }
-        return (userAuthorities?.contains('SELFSERVICE-STUDENT') || userAuthorities?.contains('SELFSERVICE-EMPLOYEE'))
+        return (userAuthorities?.contains(STUDENT_ROLE) || userAuthorities?.contains(EMPLOYEE_ROLE))
     }
-
-    private def getSurveyStartDate() {
-        def connection
-        Sql sql
-        try {
-            connection = sessionFactory.currentSession.connection()
-            sql = new Sql(connection)
-            def surveyStartDateRow = sql.rows("""SELECT TRUNC(GTVSDAX_REPORTING_DATE) as GTVSDAX_REPORTING_DATE
-                               FROM GTVSDAX
-                              WHERE GTVSDAX_INTERNAL_CODE       = 'RESTARTDAT'
-                                AND GTVSDAX_INTERNAL_CODE_SEQNO = 1
-                                AND GTVSDAX_INTERNAL_CODE_GROUP = 'SSMREDATE'
-                                AND GTVSDAX_SYSREQ_IND          = 'Y'""")
-            return surveyStartDateRow
-        } catch (SQLException ae) {
-            sql.close()
-            log.debug ae.stackTrace
-            throw ae
-        }
-        catch (Exception ae) {
-            log.debug ae.stackTrace
-            throw ae
-        }
-    }
-
-
-    private def getSurveyEndDate() {
-        def connection
-        Sql sql
-        try {
-            connection = sessionFactory.currentSession.connection()
-            sql = new Sql(connection)
-            def surveyEndDateRow = sql.rows("""SELECT TRUNC(GTVSDAX_REPORTING_DATE) as GTVSDAX_REPORTING_DATE
-                               FROM GTVSDAX
-                              WHERE GTVSDAX_INTERNAL_CODE       = 'REENDDATE'
-                                AND GTVSDAX_INTERNAL_CODE_SEQNO = 1
-                                AND GTVSDAX_INTERNAL_CODE_GROUP = 'SSMREDATE'
-                                AND GTVSDAX_SYSREQ_IND          = 'Y'""")
-            return surveyEndDateRow
-        } catch (SQLException ae) {
-            sql.close()
-            log.debug ae.stackTrace
-            throw ae
-        }
-        catch (Exception ae) {
-            log.debug ae.stackTrace
-            throw ae
-        }
-    }
-
 
     private def getSurveyConfirmedIndicator(pidm) {
         def connection
@@ -137,6 +77,45 @@ class SurveyFlow implements PostLoginWorkflow {
         catch (Exception ae) {
             log.debug ae.stackTrace
             throw ae
+        }
+        finally {
+            connection.close()
+        }
+    }
+
+    private Map getStartAndEndDates() {
+        def connection
+        Sql sql
+        Map startAndEndDates = [:]
+        try {
+            connection = sessionFactory.currentSession.connection()
+            sql = new Sql(connection)
+            def startEndDateRows = sql.rows("""SELECT GTVSDAX_INTERNAL_CODE,TRUNC(GTVSDAX_REPORTING_DATE) as GTVSDAX_REPORTING_DATE
+                                       FROM GTVSDAX
+                                        WHERE GTVSDAX_INTERNAL_CODE_SEQNO = 1
+                                        AND GTVSDAX_INTERNAL_CODE_GROUP = 'SSMREDATE'
+                                        AND GTVSDAX_SYSREQ_IND          = 'Y'""")
+
+            startEndDateRows.each {
+                if (it.GTVSDAX_INTERNAL_CODE == "REENDDATE") {
+                    startAndEndDates.put("endDate", it.GTVSDAX_REPORTING_DATE)
+                }
+                else if (it.GTVSDAX_INTERNAL_CODE == "RESTARTDAT") {
+                    startAndEndDates.put("startDate", it.GTVSDAX_REPORTING_DATE)
+                }
+            }
+            return startAndEndDates
+        } catch (SQLException ae) {
+            sql.close()
+            log.debug ae.stackTrace
+            throw ae
+        }
+        catch (Exception ae) {
+            log.debug ae.stackTrace
+            throw ae
+        }
+        finally {
+            connection.close()
         }
     }
 

@@ -4,19 +4,25 @@
 
 package net.hedtech.banner.loginworkflow
 
+import net.hedtech.banner.configuration.HttpRequestUtils
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.general.system.Race
 import net.hedtech.banner.general.system.RegulatoryRace
-import net.hedtech.banner.security.BannerUser
-import org.springframework.security.core.context.SecurityContextHolder
+import net.hedtech.banner.general.utility.InformationTextUtility
+import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 class SurveyController {
     static defaultAction = "index"
     def surveyService
+    String PAGE_NAME = "RESURVEY"
+    String RACE_KEY = "race.header"
+    String ETHNICITY_KEY = "ethnicity.header"
+    public static final SURVEY_ACTION = "surveydone"
+    public static final ACTION_DONE = "true"
 
     def survey() {
-        def pidm = getPidm()
+        def pidm = BannerGrantedAuthorityService.getPidm()
         def raceMap = [:]
         def regulatoryRaces = RegulatoryRace.fetchRequiredRegulatoryRaces()
         regulatoryRaces.each { regulatoryRace ->
@@ -38,38 +44,39 @@ class SurveyController {
         def personEthnicity = personBasicPersonBase?.ethnic
         session.setAttribute("raceMap", raceMap)
         session.setAttribute("regulatoryRaces", regulatoryRaces)
-        def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save"]
+        def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage(PAGE_NAME, ETHNICITY_KEY), "race.header": InformationTextUtility.getMessage(PAGE_NAME, RACE_KEY)]
+        def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save", infoTexts: infoTexts]
         render view: "survey", model: model
     }
 
 
     def save = {
-        def pidm = getPidm()
+        def pidm = BannerGrantedAuthorityService.getPidm()
         surveyService.saveSurveyResponse(pidm, params.ethnicity, params.race)
-        completed()
+        done()
     }
-
-
-    def completed() {
-        request.getSession().setAttribute("surveydone", "true")
-        done();
-    }
-
 
     def done() {
-        String path = request.getSession().getAttribute("URI_ACCESSED")
+        request.getSession().setAttribute(SURVEY_ACTION, ACTION_DONE)
+        String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"
+        }else{
+            path = checkPath(path)
         }
+        request.getSession().setAttribute(PostLoginWorkflow.URI_REDIRECTED, path)
         redirect uri: path
     }
 
-
-    public static def getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
+    protected String checkPath(String path){
+        String controllerName = HttpRequestUtils.getControllerNameFromPath(path)
+        List<PostLoginWorkflow> listOfFlows =  PostLoginWorkflow.getListOfFlows()
+        for(PostLoginWorkflow flow:listOfFlows){
+            if(flow.getControllerName().equals(controllerName)){
+                path = "/"
+                return path
+            }
         }
-        return null
+        return path
     }
 }

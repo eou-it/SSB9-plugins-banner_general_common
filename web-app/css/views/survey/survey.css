@@ -113,3 +113,73 @@
     border: 1px solid #FF3F3F;
     background-color: #EBCFCF;
 }
+
+
+.section-wrapper div {
+    display: inline-table;
+    padding-bottom: 10px;
+}
+
+.informationImage {
+    background-image: url("../../../images/web_info.png");
+    background-repeat: no-repeat;
+    background-size: auto auto;
+    background-position: left 0;
+}
+
+.section-message {
+    padding-left: 25px;
+    padding-bottom: 10px;
+}
+
+
+.race-label {
+    border: 1px solid #CCCCCC;
+    background-color: #E6E6E6;
+    border-color: #E6E6E6;
+}
+
+
+.confirmation-content-label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+.container {
+    display: table;
+    min-width: 200px;
+}
+
+.row {
+    display: table-row;
+    padding: 5px;
+}
+
+.column  {
+    display: table-cell;
+    padding-bottom: 10px;
+}
+
+
+.header {
+    display:table-header-group;
+}
+
+.headerColumn  {
+    display: table-cell;
+}
+
+
+.rowGroup {
+    display:table-row-group;
+}
+
+.confirmation-content {
+    font-size: 12px;
+}
+
+.hide-aria-message {
+    position: absolute;
+    left: -9999px;
+}

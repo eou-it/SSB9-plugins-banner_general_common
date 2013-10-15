@@ -20,3 +20,7 @@ start gv_gorcmsp.sql
 
 start gv_gorvisa.sql
 start gvq_gordmsk.sql
+
+start gv_gobansr.sql
+start gv_gobqstn.sql
+

@@ -6,9 +6,12 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 --%>
 <html>
 <head>
-    <title>Security Question and Answer</title>
+    <title><g:message code="securityQA.title"/></title>
+    <r:require module="securityQA"/>
+    <g:if test="${message(code: 'default.language.direction') == 'rtl'}">
+        <r:require module="securityQARTL"/>
+    </g:if>
     <meta name="layout" content="bannerSelfServicePage"/>
-    <r:require modules="securityQA"/>
     <r:script disposition="head">
                window.securityQAInitErrors = {
                    notification: "${notification}"
@@ -19,9 +22,10 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 <body>
 <script>
     var userDefinedQuesFlag = "${userDefinedQuesFlag}";
+    var defaultQuestuion = "<g:message code="securityQA.selection.label"/>";
     var questions = new Array();
     var selectedQues = new Array();
-    questions.push("Not Selected");
+    questions.push(defaultQuestuion);
     <g:each var="ques" in="${questions}">
     questions.push("${ques}");
     </g:each>
@@ -90,74 +94,95 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
                     </div>
 
-                    <div>
-                        <span><i class="informationImage"></i></span><label><div
-                            class="section-message"><g:message
-                            code="securityQA.information"/></label></div>
-                </div>
-                <br/>
-                <br/>
-
-                <form action='${createLink(controller: "securityQA", action: "save")}' id='securityForm'
-                      method='POST'>
-                    <div class="section-wrapper">
-                        <div class="question-label">
-                            <label><g:message code="securityQA.confirmpin.label"/></label>
-                        </div>
-
-                        <div id="textLabel">
-                            <g:field name="pin" class="section-text" type="password"></g:field>
-                        </div>
+                    <div class="informationImage">
+                        <label><div
+                                class="section-message" id="aria-section-message"><g:message
+                                    code="securityQA.information"/></div></label>
                     </div>
-                </br>
-                    <g:each in="${1..noOfquestions}" status="i" var="ques">
+                    <br/>
+                    <br/>
+
+                    <form action='${createLink(controller: "securityQA", action: "save")}' id='securityForm'
+                          method='POST'>
                         <div class="section-wrapper">
-                            <div class="question-label"><label><g:message code="securityQA.question.label"
-                                                                          args="[i + 1]"/></label></div>
-
-                            <div class="select-wrapper">
-                                <select class="select" id="question" name="question">
-                                    <option value="question0">Not Selected</option>
-                                    <g:each in="${questions}" status="j" var="innerQues">
-                                        <option value="question${j + 1}">${innerQues}</option>
-                                    </g:each>
-                                </select>
-                            </div>
-                            <g:if test="${userDefinedQuesFlag == 'Y'}">
-                                <label><g:message code="securityQA.or.label"/></label>
-
-                                <div class="section-wrapper">
-                                    <div class="question-label"><label><g:message
-                                            code="securityQA.userdefinedquestion.label"
-                                            args="[i + 1]"/></label></div>
-
-                                    <div><g:textField name="userDefinedQuestion" id="userDefinedQuestion"
-                                                      value="${selectedUserDefinedQues[i]}"
-                                                      class="section-text"></g:textField></div>
+                            <div class="question-wrapper">
+                                <div class="label-wrapper">
+                                    <label id="aria-confirm-pin" class="label-style"><g:message
+                                            code="securityQA.confirmpin.label"/></label>
                                 </div>
-                            </g:if>
-                        </div>
-                        <br/>
 
-                        <div class="section-wrapper">
-                            <div class="question-label"><label><g:message code="securityQA.answer.label"
-                                                                          args="[i + 1]"/></label></div>
-
-                            <div><g:textField name="answer" class="section-text"
-                                              value="${selectedAns[i]}"></g:textField></div>
+                                <div id="textLabel" class="section-text-wrapper">
+                                    <g:field name="pin" class="section-text" autocomplete="off" type="password"
+                                             aria-labelledby="aria-confirm-pin"
+                                             aria-describedby="aria-section-message"></g:field>
+                                </div>
+                            </div>
                         </div>
-                        <br/>
-                    </g:each>
-                    <div class="button-area">
-                        <input type='button' value="Cancel" id="security-cancel-btn" class="secondary-button"
-                               x data-endpoint="${createLink(controller: "logout")}"/>
-                        <input type='button' value="Continue" id="security-save-btn" class="primary-button"/>
-                    </div>
-                </form>
+                        <g:each in="${1..noOfquestions}" status="i" var="ques">
+                            <div class="section-wrapper">
+                                <div class="question-wrapper">
+                                    <div class="label-wrapper"><label id="aria-question-label${i}"
+                                                                      class="label-style"><g:message
+                                                code="securityQA.question.label"
+                                                args="[i + 1]"/></label></div>
+
+                                    <div class="select-wrapper">
+                                        <select class="select" id="question" name="question"
+                                                aria-labelledby="aria-question-label${i}">
+                                            <option value="question0"><g:message
+                                                    code="securityQA.selection.label"/></option>
+                                            <g:each in="${questions}" status="j" var="innerQues">
+                                                <option value="question${j + 1}">${innerQues}</option>
+                                            </g:each>
+                                        </select>
+                                    </div>
+                                </div>
+                                <g:if test="${userDefinedQuesFlag == 'Y'}">
+                                    <label class="or-label" class="label-style"><g:message
+                                            code="securityQA.or.label"/></label>
+
+                                    <div class="question-wrapper">
+                                        <div class="label-wrapper"><label id="aria-editable-question-label${i}"
+                                                                          class="label-style"><g:message
+                                                    code="securityQA.userdefinedquestion.label"
+                                                    args="[i + 1]"/></label></div>
+
+                                        <div class="section-text-wrapper"><g:textField name="userDefinedQuestion"
+                                                                                       id="userDefinedQuestion"
+                                                                                       value="${selectedUserDefinedQues[i]}"
+                                                                                       class="section-text"
+                                                                                       aria-labelledby="aria-editable-question-label${i}"></g:textField></div>
+                                    </div>
+                                </g:if>
+
+                            </div>
+
+                            <div class="section-wrapper">
+                                <div class="answer-wrapper">
+                                    <div class="label-wrapper"><label id="aria-editable-answer-label${i}"
+                                                                      class="label-style"><g:message
+                                                code="securityQA.answer.label"
+                                                args="[i + 1]"/></label></div>
+
+                                    <div class="section-text-wrapper"><g:textField name="answer" class="section-text"
+                                                                                   value="${selectedAns[i]}"
+                                                                                   aria-labelledby="aria-editable-answer-label${i}"></g:textField></div>
+                                </div>
+                            </div>
+
+                        </g:each>
+                        <div class="button-area">
+                            <input type='button' value='<g:message code="securityQA.confirm.button.cancel"/>'
+                                   id="security-cancel-btn" class="secondary-button"
+                                   x data-endpoint="${createLink(controller: "logout")}"/>
+                            <input type='button' value='<g:message code="securityQA.confirm.button.continue"/>'
+                                   id="security-save-btn" class="primary-button"/>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 </body>
 </html>

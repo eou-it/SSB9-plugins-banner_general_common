@@ -1,151 +1,178 @@
+/*******************************************************************************
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
+import net.hedtech.banner.configuration.HttpRequestUtils
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.security.BannerUser
-import org.springframework.security.core.context.SecurityContextHolder
 import net.hedtech.banner.general.overall.PinQuestion
+import net.hedtech.banner.security.BannerGrantedAuthorityService
+
 
 class SecurityQAController {
 
     static defaultAction = "index"
     def securityQAService
-    static def noOfQuestions
-    static def questions = [:]
-    static List dataToView = []
-    static def questionMinimumLength
-    static def answerMinimumLength
-    static def userDefinedQuesFlag
-    static def questionList = []
-    static def selectedQues = []
+
+    int noOfQuestions
+    Map questions = [:]
+    int questionMinimumLength
+    int answerMinimumLength
+    String userDefinedQuesFlag
+    List questionList = []
+    private static final QUESTION_LABEL = "question"
+    public static final SECURITY_QA_ACTION = "securityqadone"
+    public static final ACTION_DONE = "true"
+    private static final INVALID_ANSWER_LENGTH_ERROR_KEY = "securityQA.invalid.length.answer"
+    private static final INVALID_QUESTION_LENGTH_ERROR_KEY = "securityQA.invalid.length.question"
+    private static final USER_DEFINED_QUESTION_DISABLED = "N"
 
     def index() {
-        List selectedAns = ["", "", ""]
-        List selectedUserDefinedQues = ["", "", ""]
-        def ques = PinQuestion.fetchQuestions()
-        userDefinedQuesFlag = securityQAService.getUserDefinedQuestionFlag()
-        ques.each {
-            questions.put(it.pinQuestionId, it.description)
+        setGlobalVariables()
+        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: []]
+    }
+
+    private void setGlobalVariables() {
+
+        questionList = loadQuestionList()
+        Map result = securityQAService.getUserDefinedPreference()
+        if (result != null) {
+            noOfQuestions = result.GUBPPRF_NO_OF_QSTNS?.intValue()
+            questionMinimumLength = result.GUBPPRF_QSTN_MIN_LENGTH?.intValue()
+            answerMinimumLength = result.GUBPPRF_ANSR_MIN_LENGTH?.intValue()
+            userDefinedQuesFlag = result.GUBPPRF_EDITQSTN_IND
         }
-        questionList = questions.values().collect()
-        noOfQuestions = securityQAService.getNumberOfQuestions()
-        questionMinimumLength = securityQAService.getQuestionMinimumLength()
-        answerMinimumLength = securityQAService.getAnswerMinimumLength()
-        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength,selectedQues: "", selectedAns: selectedAns, selectedUserDefinedQues: selectedUserDefinedQues]
+
+    }
+
+    private List loadQuestionList() {
+        List ques = PinQuestion.fetchQuestions()
+        ques.each {
+            questions.put(it.description, it.pinQuestionId)
+        }
+        questions.keySet().collect()
     }
 
     def save() {
-        def model = [:]
-        String messages = null
-        String pidm = getPidm()
-        List selectedQA = []
 
         log.info("save")
 
-        for (int index = 0; index < noOfQuestions; index++) {
-            def questionId
-            if(params.question instanceof String) {
-                questionId = params.question.split("question")[1].toInteger()
-            } else {
-                questionId = params.question[index].split("question")[1].toInteger()
-            }
+        setGlobalVariables()
 
-            def question
-            def questionNo
-            if (questionId != 0) {
-                question = questionList.get(questionId - 1)
-                questionNo = questions.find {it.value == question}?.key
-            }
-            else {
-                question = null
-                questionNo = null
-            }
-            selectedQues.add(questionId)
-            def userDefinedQstn
-            if(!userDefinedQuesFlag.equals("N")) {
-                if(params.userDefinedQuestion instanceof String) {
-                    userDefinedQstn = params.userDefinedQuestion
-                } else {
-                    userDefinedQstn = params.userDefinedQuestion[index]
-                }
-            } else {
-                userDefinedQstn = null
-            }
-
-            def ansr
-            if(params.answer instanceof String) {
-                ansr = params.answer
-            } else {
-                ansr = params.answer[index]
-            }
-            def questionsAnswered = [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: ansr]
-            selectedQA.add(questionsAnswered)
-        }
-
-        dataToView = selectedQA
+        String pidm = BannerGrantedAuthorityService.getPidm()
+        List selectedQA = loadSelectedQuestionAnswerFromParams()
+        String messages = null
 
         try {
             securityQAService.saveSecurityQAResponse(pidm, selectedQA, params.pin)
         } catch (ApplicationException ae) {
 
-            messages = message(code: ae.wrappedException.message)
-
-
-            if (messages.contains("{0}")) {
-                if (ae.wrappedException.message.equals("securityQA.invalid.length.question")) {
-                    messages = messages.replace("{0}", questionMinimumLength.toString())
-                } else if (ae.wrappedException.message.equals("securityQA.invalid.length.answer")) {
-                    messages = messages.replace("{0}", answerMinimumLength.toString())
-                }
-            }
+            messages = getErrorMessage(ae.wrappedException.message)
 
             def selectedDropdown = []
-            def selectedAns = []
-            def selectedUserDefinedQues = []
-            dataToView.each {
-                selectedDropdown.add("question" + (questionList.indexOf(it.question) + 1))
+            selectedQA.each {
+                selectedDropdown.add(QUESTION_LABEL + (questionList.indexOf(it.question) + 1))
             }
-            selectedAns = dataToView.answer
-            selectedUserDefinedQues = dataToView.userDefinedQuestion
+            Map model = [:]
+
             model.put("questions", questionList)
             model.put("userDefinedQuesFlag", userDefinedQuesFlag)
             model.put("noOfquestions", noOfQuestions)
             model.put("questionMinimumLength", questionMinimumLength)
             model.put("answerMinimumLength", answerMinimumLength)
-            model.put("dataToView", dataToView)
+            model.put("dataToView", selectedQA)
             model.put("notification", messages)
             model.put("selectedQues", selectedDropdown)
-            model.put("selectedAns", selectedAns)
-            model.put("selectedUserDefinedQues", selectedUserDefinedQues)
+            model.put("selectedAns", selectedQA.answer)
+            model.put("selectedUserDefinedQues", selectedQA.userDefinedQuestion)
 
 
             render view: "securityQA", model: model
         }
         if (messages == null) {
-            completed()
+            done()
         }
 
     }
 
-    public static String getPidm() {
-        def user = SecurityContextHolder?.context?.authentication?.principal
-        if (user instanceof BannerUser) {
-            return user.pidm
+    private List loadSelectedQuestionAnswerFromParams() {
+        List selectedQA = []
+        def question = params.question
+        def userDefinedQstn = params.userDefinedQuestion
+        def answer = params.answer
+
+        def questionsAnswered
+        if (noOfQuestions == 1) {
+            questionsAnswered = getAnsweredQuestions(question, userDefinedQstn, answer)
+            selectedQA.add(questionsAnswered)
         }
-        return null
+        else {
+            for (int index = 0; index < noOfQuestions; index++) {
+
+                def userDefQsn
+                if (USER_DEFINED_QUESTION_DISABLED.equals(userDefinedQuesFlag) ) {
+                    userDefQsn = null
+                }
+                else {
+                    userDefQsn = userDefinedQstn[index]
+                }
+                questionsAnswered = getAnsweredQuestions(question[index], userDefQsn, answer[index])
+                selectedQA.add(questionsAnswered)
+            }
+        }
+        return selectedQA
     }
 
-    def completed() {
-        request.getSession().setAttribute("securityqadone", "true")
-        done()
+    private Map getAnsweredQuestions(questionlabel, userDefinedQstn, answer) {
+        def question = null
+        def questionNo = null
+        int questionId = questionlabel.split(QUESTION_LABEL)[1].toInteger()
+
+        if (questionId != 0) {
+            question = questionList.get(questionId - 1)
+            questionNo = questions.find {it.key == question}?.value
+        }
+        return [question: question, questionNo: questionNo, userDefinedQuestion: userDefinedQstn, answer: answer]
     }
+
+
+
+    private def getErrorMessage(msg) {
+        String message = message(code: msg)
+
+        if (message.contains("{0}")) {
+            if (msg.equals(INVALID_QUESTION_LENGTH_ERROR_KEY)) {
+                message = message.replace("{0}", questionMinimumLength.toString())
+            } else if (msg.equals(INVALID_ANSWER_LENGTH_ERROR_KEY)) {
+                message = message.replace("{0}", answerMinimumLength.toString())
+            }
+        }
+
+        return message
+    }
+
 
     def done() {
-        String path = request.getSession().getAttribute("URI_ACCESSED")
+        request.getSession().setAttribute(SECURITY_QA_ACTION, ACTION_DONE)
+        String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
             path = "/"
+        } else {
+            path = checkPath(path)
         }
+        request.getSession().setAttribute(PostLoginWorkflow.URI_REDIRECTED, path)
         redirect uri: path
     }
 
-
+    protected String checkPath(String path) {
+        String controllerName = HttpRequestUtils.getControllerNameFromPath(path)
+        List<PostLoginWorkflow> listOfFlows = PostLoginWorkflow.getListOfFlows()
+        for (PostLoginWorkflow flow : listOfFlows) {
+            if (flow.getControllerName().equals(controllerName)) {
+                path = "/"
+                return path
+            }
+        }
+        return path
+    }
 }
