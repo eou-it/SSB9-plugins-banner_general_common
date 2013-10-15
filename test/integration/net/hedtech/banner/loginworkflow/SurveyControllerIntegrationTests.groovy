@@ -10,6 +10,7 @@ import net.hedtech.banner.general.system.Race
 import net.hedtech.banner.general.system.RegulatoryRace
 import net.hedtech.banner.security.SelfServiceBannerAuthenticationProvider
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -54,6 +55,7 @@ class SurveyControllerIntegrationTests extends BaseIntegrationTestCase {
     }
 
     public void testSurvey() {
+        if (!isSsbEnabled()) return
         loginForRegistration(i_success_banner_Id)
         Integer pidm = BannerGrantedAuthorityService.getPidm()
         assertNotNull pidm
@@ -90,6 +92,7 @@ class SurveyControllerIntegrationTests extends BaseIntegrationTestCase {
 
 
     public void testSaveValid(){
+        if (!isSsbEnabled()) return
         loginForRegistration(i_success_banner_Id)
         Integer pidm = BannerGrantedAuthorityService.getPidm()
         controller.params.ethnicity=i_success_ethnicity
@@ -101,6 +104,7 @@ class SurveyControllerIntegrationTests extends BaseIntegrationTestCase {
     }
 
     public void testSaveInValid(){
+        if (!isSsbEnabled()) return
         loginForRegistration(i_success_banner_Id)
 
         controller.params.ethnicity = i_failure_ethnicity
@@ -119,4 +123,9 @@ class SurveyControllerIntegrationTests extends BaseIntegrationTestCase {
             controller.save()
         }
     }
+
+    private def isSsbEnabled() {
+        ConfigurationHolder.config.ssbEnabled instanceof Boolean ? ConfigurationHolder.config.ssbEnabled : false
+    }
+
 }
