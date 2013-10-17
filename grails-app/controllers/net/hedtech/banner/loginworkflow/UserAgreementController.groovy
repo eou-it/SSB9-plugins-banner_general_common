@@ -3,7 +3,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
-import net.hedtech.banner.configuration.HttpRequestUtils
+import net.hedtech.banner.webutils.HttpRequestUtils
 import net.hedtech.banner.security.BannerGrantedAuthorityService
 
 class UserAgreementController {

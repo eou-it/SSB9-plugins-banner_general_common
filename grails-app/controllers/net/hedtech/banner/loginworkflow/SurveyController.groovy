@@ -4,7 +4,7 @@
 
 package net.hedtech.banner.loginworkflow
 
-import net.hedtech.banner.configuration.HttpRequestUtils
+import net.hedtech.banner.webutils.HttpRequestUtils
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.general.system.Race

@@ -3,7 +3,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
-import net.hedtech.banner.configuration.HttpRequestUtils
+import net.hedtech.banner.webutils.HttpRequestUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.security.BannerGrantedAuthorityService
