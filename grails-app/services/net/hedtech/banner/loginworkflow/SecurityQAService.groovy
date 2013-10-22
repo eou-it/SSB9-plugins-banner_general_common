@@ -8,6 +8,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion
 import net.hedtech.banner.general.overall.PinQuestion
+import net.hedtech.banner.general.utility.InformationTextUtility
 import org.apache.log4j.Logger
 import java.sql.CallableStatement
 import java.sql.SQLException
@@ -23,7 +24,8 @@ class SecurityQAService {
     This will be updated in domain with correct salt by the backed up triggers and api's for the domain */
     private final static String ANSWER_SALT_DUMMY = "ML3MTB80"
     private final Logger log = Logger.getLogger(getClass())
-
+    private static final String SECURITY_QA_PAGE_NAME = "SECURITYQA"
+    private static final String SECURITY_QA_INFO_TEXT = "security.qa.information"
 
     public def getNumberOfQuestionsAnswered(Integer pidm) {
         return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
@@ -229,5 +231,9 @@ class SecurityQAService {
                 pinQuestion: null
         )
         generalForStoringResponsesAndPinQuestionService.create(generalForStoringResponsesAndPinQuestion)
+    }
+
+    public String getDefaultQuestionInfoText(){
+        return InformationTextUtility.getMessage(SECURITY_QA_PAGE_NAME, SECURITY_QA_INFO_TEXT)
     }
 }
