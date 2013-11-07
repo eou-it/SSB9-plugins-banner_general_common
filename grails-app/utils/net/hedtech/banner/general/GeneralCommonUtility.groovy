@@ -9,6 +9,9 @@ package net.hedtech.banner.general
 
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
 import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+
+import java.sql.CallableStatement
 
 /**
  * This is a utilty class for all of Banner
@@ -47,5 +50,40 @@ class GeneralCommonUtility {
             appGtvsdaxList.add([internal: internal, external: gtvsdaxValue, internalGroup: internalGroup])
         }
         return [gtvsdaxValue: gtvsdaxValue, appGtvsdaxList: appGtvsdaxList]
+    }
+
+
+    public static Boolean validatePin(String pin,String pidm){
+        def ctx = SCH.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+        def sessionFactory = ctx.sessionFactory
+
+        def connection
+        boolean isValidPin = false
+        int funcRetValue
+        try {
+            connection = sessionFactory.currentSession.connection()
+            String queryString = "BEGIN " +
+                    "  ? := CASE gb_third_party_access.f_validate_pin(?,?,?,?) " +
+                    "         WHEN TRUE THEN 1 " +
+                    "         ELSE 0 " +
+                    "         END; " +
+                    "END; "
+            CallableStatement cs = connection.prepareCall( queryString )
+            cs.registerOutParameter( 1, java.sql.Types.INTEGER )
+            cs.setString( 2, pidm )
+            cs.setString( 3, pin )
+            cs.registerOutParameter( 4, java.sql.Types.VARCHAR )
+            cs.registerOutParameter( 5, java.sql.Types.VARCHAR )
+            cs.executeQuery()
+            funcRetValue = cs.getInt(1);
+            if (funcRetValue == 1) {
+                isValidPin = true;
+            } else {
+                isValidPin = false;
+            }
+        } finally {
+            connection.close()
+        }
+        return isValidPin
     }
 }

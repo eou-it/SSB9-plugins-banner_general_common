@@ -3,7 +3,6 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general
-
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
@@ -77,6 +76,13 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull "SCHBYDATE", value.appGtvsdaxList.find { it.internal == "SCHBYDATE" }
         assertNotNull "WEBALTPINA", value.appGtvsdaxList.find { it.internal == "WEBALTPINA" }
 
+    }
+
+
+    def testValidatePin() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("HOS00001").pidm
+        assertTrue GeneralCommonUtility.validatePin("111111", "" + pidm)
+        assertTrue !GeneralCommonUtility.validatePin("111112", "" + pidm)
     }
 
 }
