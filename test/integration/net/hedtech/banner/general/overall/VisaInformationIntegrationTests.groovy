@@ -48,7 +48,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
         visaInformation.save(failOnError: true, flush: true)
         assertNotNull visaInformation.id
         assertEquals 0L, visaInformation.version
-        assertEquals PersonUtility.getPerson("HOR000001").pidm, visaInformation.pidm
+        assertEquals PersonUtility.getPerson("HOR000008").pidm, visaInformation.pidm
         assertEquals 1, visaInformation.sequenceNumber
         assertEquals "123456789012345678", visaInformation.visaNumber
         assertEquals "1", visaInformation.nationIssue
@@ -84,7 +84,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
         visaInformation.save(failOnError: true, flush: true)
         assertNotNull visaInformation.id
         assertEquals 0L, visaInformation.version
-        assertEquals PersonUtility.getPerson("HOR000001").pidm, visaInformation.pidm
+        assertEquals PersonUtility.getPerson("HOR000008").pidm, visaInformation.pidm
         assertEquals 1, visaInformation.sequenceNumber
         assertEquals "123456789012345678", visaInformation.visaNumber
         assertEquals "1", visaInformation.nationIssue
@@ -204,7 +204,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 
     private def newValidForCreateVisaInformation() {
         def visaInformation = new VisaInformation(
-                pidm: PersonUtility.getPerson("HOR000001").pidm,
+                pidm: PersonUtility.getPerson("HOR000008").pidm,
                 sequenceNumber: 1,
                 visaNumber: "123456789012345678",
                 nationIssue: "1",
