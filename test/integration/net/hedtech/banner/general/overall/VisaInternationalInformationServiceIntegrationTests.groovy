@@ -163,7 +163,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
 
     void testMissingNationOfIssue() {
         def visaInternationalInformation = new VisaInternationalInformation(
-                pidm: PersonUtility.getPerson("HOR000001").pidm,
+                pidm: PersonUtility.getPerson("HOR000008").pidm,
                 spouseIndicator: "Y",
                 signatureIndicator: "N",
                 passportId: "1234567890123456789012345",
@@ -181,7 +181,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
 
     void testInvalidCertificationDate() {
         def visaInternationalInformation = new VisaInternationalInformation(
-                pidm: PersonUtility.getPerson("HOR000001").pidm,
+                pidm: PersonUtility.getPerson("HOR000008").pidm,
                 spouseIndicator: "Y",
                 signatureIndicator: "N",
                 certificateDateIssue: new Date(),
@@ -195,9 +195,19 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+    void testDefaultRequired() {
+        def visaInternationalInformation = new VisaInternationalInformation(
+                pidm: PersonUtility.getPerson("HOR000008").pidm,
+        )
+        visaInternationalInformation = visaInternationalInformationService.create([domainModel: visaInternationalInformation])
+        assertEquals "T", visaInternationalInformation.spouseIndicator
+        assertEquals "T", visaInternationalInformation.signatureIndicator
+    }
+
+
     private def newValidForCreateVisaInternationalInformation() {
         def visaInternationalInformation = new VisaInternationalInformation(
-                pidm: PersonUtility.getPerson("HOR000001").pidm,
+                pidm: PersonUtility.getPerson("HOR000008").pidm,
                 spouseIndicator: "Y",
                 signatureIndicator: "N",
                 passportId: "1234567890123456789012345",
