@@ -202,6 +202,21 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testCreateOverlappingExpireDateExists() {
+        def visaInformation = newValidForCreateVisaInformation()
+        visaInformation.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull visaInformation.id
+
+        // Date does not overlap
+        assertFalse VisaInformation.overlappingExpireDateExists(PersonUtility.getPerson("HOR000008").pidm, 2, new Date()+1, new Date()+1)
+
+        // Date that do overrlap
+        assertTrue VisaInformation.overlappingExpireDateExists(PersonUtility.getPerson("HOR000008").pidm, 2, new Date(), new Date()+1)
+        assertTrue VisaInformation.overlappingExpireDateExists(PersonUtility.getPerson("HOR000008").pidm, 2, new Date(), new Date())
+    }
+
+
     private def newValidForCreateVisaInformation() {
         def visaInformation = new VisaInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,
