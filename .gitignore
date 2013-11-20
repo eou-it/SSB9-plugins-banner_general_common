@@ -21,4 +21,8 @@ plugin.xml
 src/ddl/horizon_upgrade_bgc.lis
 *.ser
 *.
+web-app/css/views/securityQA/securityQA-rtl.css
+web-app/css/views/survey/survey-rtl.css
+web-app/css/views/userAgreement/policy-rtl.css
+
 

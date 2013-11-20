@@ -46,7 +46,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
         visaInternationalInformation.save(failOnError: true, flush: true)
         assertNotNull visaInternationalInformation.id
         assertEquals 0L, visaInternationalInformation.version
-        assertEquals PersonUtility.getPerson("HOR000001").pidm, visaInternationalInformation.pidm
+        assertEquals PersonUtility.getPerson("HOR000008").pidm, visaInternationalInformation.pidm
         assertEquals "Y", visaInternationalInformation.spouseIndicator
         assertEquals "N", visaInternationalInformation.signatureIndicator
         assertEquals "1234567890123456789012345", visaInternationalInformation.passportId
@@ -113,7 +113,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
         visaInternationalInformation.save(failOnError: true, flush: true)
         assertNotNull visaInternationalInformation.id
         assertEquals 0L, visaInternationalInformation.version
-        assertEquals PersonUtility.getPerson("HOR000001").pidm, visaInternationalInformation.pidm
+        assertEquals PersonUtility.getPerson("HOR000008").pidm, visaInternationalInformation.pidm
         assertEquals "Y", visaInternationalInformation.spouseIndicator
         assertEquals "N", visaInternationalInformation.signatureIndicator
         assertEquals "1234567890123456789012345", visaInternationalInformation.passportId
@@ -256,7 +256,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
 
     private def newValidForCreateVisaInternationalInformation() {
         def visaInternationalInformation = new VisaInternationalInformation(
-                pidm: PersonUtility.getPerson("HOR000001").pidm,
+                pidm: PersonUtility.getPerson("HOR000008").pidm,
                 spouseIndicator: "Y",
                 signatureIndicator: "N",
                 passportId: "1234567890123456789012345",

@@ -31,6 +31,7 @@ execute dbeu_util.extend_table('GENERAL','GORVISA','G',TRUE)
 execute dbeu_util.extend_table('GENERAL','GORDOCM','G',FALSE)
 execute dbeu_util.extend_table('GENERAL','GOBINTL','G',FALSE)
 execute dbeu_util.extend_table('GENERAL','GORDADD','G',FALSE);
+execute dbeu_util.extend_table('GENERAL','GORADRL','G',FALSE);
 
 execute dbeu_util.extend_table('GENERAL','GORDMSK','G',TRUE)
 

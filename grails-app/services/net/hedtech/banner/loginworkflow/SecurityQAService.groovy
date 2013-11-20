@@ -2,16 +2,15 @@
  Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.loginworkflow
-
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion
 import net.hedtech.banner.general.overall.PinQuestion
 import org.apache.log4j.Logger
-import java.sql.CallableStatement
-import java.sql.SQLException
 
+import java.sql.SQLException
 
 class SecurityQAService {
     static transactional = true
@@ -64,7 +63,7 @@ class SecurityQAService {
      *   */
     public void saveSecurityQAResponse(String pidm, List questionList, String pin) {
 
-        boolean isValidPin = validatePin(pin,pidm)
+        boolean isValidPin = GeneralCommonUtility.validatePin(pin,pidm)
         if(!isValidPin){
             throw new ApplicationException("", "securityQA.invaild.pin")
         }
@@ -92,39 +91,6 @@ class SecurityQAService {
         }
     }
 
-    private boolean validatePin(String pin,String pidm){
-        def connection
-        boolean isValidPin = false
-        int funcRetValue
-        try {
-            connection = sessionFactory.currentSession.connection()
-            String queryString = "BEGIN " +
-                    "  ? := CASE gb_third_party_access.f_validate_pin(?,?,?,?) " +
-                    "         WHEN TRUE THEN 1 " +
-                    "         ELSE 0 " +
-                    "         END; " +
-                    "END; "
-            CallableStatement cs = connection.prepareCall( queryString )
-            cs.registerOutParameter( 1, java.sql.Types.INTEGER )
-            cs.setString( 2, pidm )
-            cs.setString( 3, pin )
-            cs.registerOutParameter( 4, java.sql.Types.VARCHAR )
-            cs.registerOutParameter( 5, java.sql.Types.VARCHAR )
-            cs.executeQuery()
-            funcRetValue = cs.getInt(1);
-            if (funcRetValue == 1) {
-                isValidPin = true;
-            } else {
-                isValidPin = false;
-            }
-        } catch (Exception ae) {
-            log.debug ae.stackTrace
-            throw ae
-        } finally {
-            connection.close()
-        }
-        return isValidPin
-    }
 
     private void validateValueConstraints(String question1, String question2, String answer) {
         checkAndRaiseExceptionIfMoreThanOneQuestionEntered(question1, question2)

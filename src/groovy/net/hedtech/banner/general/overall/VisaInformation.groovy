@@ -20,6 +20,14 @@ import javax.persistence.*
         query = """SELECT NVL(MAX(a.sequenceNumber),0) + 1
                      FROM VisaInformation a
                     WHERE a.pidm = :pidm"""),
+@NamedQuery(
+        name = "VisaInformation.overlappingExpireDateExists",
+        query = """SELECT 'Y'
+                     FROM VisaInformation a
+                    WHERE a.pidm            = :pidm
+                      AND a.sequenceNumber <> :sequenceNumber
+                      AND (   (:visaStartDate  BETWEEN a.visaStartDate AND a.visaExpireDate)
+                           OR (:visaExpireDate BETWEEN a.visaStartDate AND a.visaExpireDate))"""),
 ])
 
 @Entity
@@ -256,7 +264,20 @@ class VisaInformation implements Serializable {
     public static readonlyProperties = ['pidm', 'sequenceNumber', 'visaType']
 
 
-    static def fetchNextSequenceNumber(Integer pidm) {
+    static boolean overlappingExpireDateExists(def pidm, def sequenceNumber, def visaStartDate, def visaExpireDate) {
+        def exists = VisaInformation.withSession { session ->
+            session.getNamedQuery('VisaInformation.overlappingExpireDateExists')
+                    .setInteger('pidm', pidm)
+                    .setInteger('sequenceNumber', sequenceNumber)
+                    .setDate('visaStartDate', visaStartDate)
+                    .setDate('visaExpireDate', visaExpireDate)
+                    .list()
+        }
+        return exists.size() > 0
+    }
+
+
+    static Integer fetchNextSequenceNumber(Integer pidm) {
         def nextSequenceNumber = VisaInformation.withSession { session ->
             session.getNamedQuery('VisaInformation.fetchNextSequenceNumber').setInteger('pidm', pidm).list()
         }
@@ -277,7 +298,7 @@ class VisaInformation implements Serializable {
     def private static finderByAll = {
         def query = """ FROM VisaInformation a
 	                   WHERE a.pidm = :pidm
-	            	"""
+                    """
         return new DynamicFinder(VisaInformation.class, query, "a")
     }
 }

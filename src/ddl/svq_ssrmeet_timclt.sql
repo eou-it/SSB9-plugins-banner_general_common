@@ -23,14 +23,14 @@ AS
        b.ssrmeet_crn
       From  Ssrmeet B,  Ssrmeet A
       Where    b.ssrmeet_term_code = a.ssrmeet_term_code
-        And  (((A.Ssrmeet_Start_Date Between
-           b.SSRMEET_START_DATE AND b.SSRMEET_END_DATE)
-         Or  (A.Ssrmeet_End_Date Between
-            B.Ssrmeet_Start_Date And B.Ssrmeet_End_Date ))
-         OR  ((b.SSRMEET_START_DATE BETWEEN
-            A.Ssrmeet_Start_Date And A.Ssrmeet_End_Date)
-         OR  (A.SSRMEET_END_DATE BETWEEN
-            A.Ssrmeet_Start_Date And A.Ssrmeet_End_Date)))
+        And  ((( TRUNC(A.Ssrmeet_Start_Date) Between
+                 TRUNC(B.SSRMEET_START_DATE) AND TRUNC(B.SSRMEET_END_DATE))
+         Or  ( TRUNC(A.Ssrmeet_End_Date) Between
+               TRUNC(B.Ssrmeet_Start_Date) And TRUNC(B.Ssrmeet_End_Date)))
+         OR  ((TRUNC(B.SSRMEET_START_DATE) BETWEEN
+               TRUNC(A.Ssrmeet_Start_Date) And TRUNC(A.Ssrmeet_End_Date))
+         OR  (TRUNC(B.SSRMEET_END_DATE) BETWEEN
+               TRUNC(A.Ssrmeet_Start_Date) And TRUNC(A.Ssrmeet_End_Date))))
         And  (Decode(A.Ssrmeet_Mon_Day, 'M', 'Y', 'X') = Decode(B.Ssrmeet_Mon_Day, 'M', 'Y', 'N')
          Or  Decode(A.Ssrmeet_Tue_Day, 'T', 'Y', 'X') = Decode(B.Ssrmeet_Tue_Day, 'T', 'Y', 'N')
          Or  Decode(A.Ssrmeet_Wed_Day, 'W', 'Y', 'X') = Decode(B.Ssrmeet_Wed_Day, 'W', 'Y', 'N')
