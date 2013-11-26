@@ -19,6 +19,7 @@ class SecurityQAController {
     int questionMinimumLength
     int answerMinimumLength
     String userDefinedQuesFlag
+    String securityQAInfo
     List questionList = []
     private static final QUESTION_LABEL = "question"
     public static final SECURITY_QA_ACTION = "securityqadone"
@@ -29,13 +30,14 @@ class SecurityQAController {
 
     def index() {
         setGlobalVariables()
-        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: []]
+        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: [],securityQAInfo: securityQAInfo]
     }
 
     private void setGlobalVariables() {
 
         questionList = loadQuestionList()
         Map result = securityQAService.getUserDefinedPreference()
+        securityQAInfo = securityQAService.getDefaultQuestionInfoText()
         if (result != null) {
             noOfQuestions = result.GUBPPRF_NO_OF_QSTNS?.intValue()
             questionMinimumLength = result.GUBPPRF_QSTN_MIN_LENGTH?.intValue()
@@ -85,7 +87,7 @@ class SecurityQAController {
             model.put("selectedQues", selectedDropdown)
             model.put("selectedAns", selectedQA.answer)
             model.put("selectedUserDefinedQues", selectedQA.userDefinedQuestion)
-
+            model.put("securityQAInfo",securityQAInfo)
 
             render view: "securityQA", model: model
         }
