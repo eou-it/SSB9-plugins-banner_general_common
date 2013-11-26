@@ -3,10 +3,10 @@
  ****************************************************************************** */
 package net.hedtech.banner.loginworkflow
 
-import net.hedtech.banner.webutils.HttpRequestUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.security.BannerGrantedAuthorityService
+import net.hedtech.banner.web.SsbURLRequest
 
 
 class SecurityQAController {
@@ -165,7 +165,8 @@ class SecurityQAController {
     }
 
     protected String checkPath(String path) {
-        String controllerName = HttpRequestUtils.getControllerNameFromPath(path)
+        SsbURLRequest ssbURLRequest=new SsbURLRequest()
+        String controllerName = ssbURLRequest.getControllerNameFromPath(path)
         List<PostLoginWorkflow> listOfFlows = PostLoginWorkflow.getListOfFlows()
         for (PostLoginWorkflow flow : listOfFlows) {
             if (flow.getControllerName().equals(controllerName)) {

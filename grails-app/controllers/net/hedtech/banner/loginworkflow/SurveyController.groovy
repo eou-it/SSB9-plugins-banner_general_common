@@ -4,13 +4,13 @@
 
 package net.hedtech.banner.loginworkflow
 
-import net.hedtech.banner.webutils.HttpRequestUtils
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.general.system.Race
 import net.hedtech.banner.general.system.RegulatoryRace
 import net.hedtech.banner.general.utility.InformationTextUtility
 import net.hedtech.banner.security.BannerGrantedAuthorityService
+import net.hedtech.banner.web.SsbURLRequest
 
 class SurveyController {
     static defaultAction = "index"
@@ -69,7 +69,8 @@ class SurveyController {
     }
 
     protected String checkPath(String path){
-        String controllerName = HttpRequestUtils.getControllerNameFromPath(path)
+        SsbURLRequest ssbURLRequest=new SsbURLRequest()
+        String controllerName = ssbURLRequest.getControllerNameFromPath(path)
         List<PostLoginWorkflow> listOfFlows =  PostLoginWorkflow.getListOfFlows()
         for(PostLoginWorkflow flow:listOfFlows){
             if(flow.getControllerName().equals(controllerName)){
