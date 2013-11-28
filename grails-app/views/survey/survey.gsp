@@ -6,7 +6,7 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 --%>
 <html>
 <head>
-    <title>Race and Ethnicity Survey</title>
+    <title><g:message code="survey.title"/></title>
     <meta name="layout" content="bannerSelfServicePage"/>
     <meta name="menuEndPoint" content="${g.createLink(controller: 'selfServiceMenu', action: 'data')}"/>
     <meta name="menuBaseURL" content="${createLink(uri: '/ssb')}" />
