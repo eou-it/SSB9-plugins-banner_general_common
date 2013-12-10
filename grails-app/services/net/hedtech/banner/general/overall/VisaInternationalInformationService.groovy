@@ -57,7 +57,7 @@ class VisaInternationalInformationService extends ServiceBase {
     }
 
 
-    public static void updateIntlChecklist(Integer pidm) {
+    private void updateIntlChecklist(Integer pidm) {
         def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
         def sessionFactory = ctx.sessionFactory
 
