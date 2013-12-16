@@ -10,7 +10,6 @@ import net.hedtech.banner.general.system.Race
 import net.hedtech.banner.general.system.RegulatoryRace
 import net.hedtech.banner.general.utility.InformationTextUtility
 import net.hedtech.banner.security.BannerGrantedAuthorityService
-import net.hedtech.banner.web.SsbURLRequest
 
 class SurveyController {
     static defaultAction = "index"
@@ -20,6 +19,9 @@ class SurveyController {
     String ETHNICITY_KEY = "ethnicity.header"
     public static final SURVEY_ACTION = "surveydone"
     public static final ACTION_DONE = "true"
+    private static final String SLASH = "/"
+    private static final String VIEW = "survey"
+    private def ssbURLRequest
 
     def survey() {
         def pidm = BannerGrantedAuthorityService.getPidm()
@@ -46,7 +48,7 @@ class SurveyController {
         session.setAttribute("regulatoryRaces", regulatoryRaces)
         def infoTexts = ["ethnicity.header": InformationTextUtility.getMessage(PAGE_NAME, ETHNICITY_KEY), "race.header": InformationTextUtility.getMessage(PAGE_NAME, RACE_KEY)]
         def model = [raceMap: raceMap, regulatoryRaces: regulatoryRaces, personRaceCodes: personRaceCodes, personEthnicity: personEthnicity, postUrl: "${request.contextPath}/survey/save", infoTexts: infoTexts]
-        render view: "survey", model: model
+        render view: VIEW, model: model
     }
 
 
@@ -60,21 +62,20 @@ class SurveyController {
         request.getSession().setAttribute(SURVEY_ACTION, ACTION_DONE)
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
-            path = "/"
-        }else{
+            path = SLASH
+        } else {
             path = checkPath(path)
         }
         request.getSession().setAttribute(PostLoginWorkflow.URI_REDIRECTED, path)
         redirect uri: path
     }
 
-    protected String checkPath(String path){
-        SsbURLRequest ssbURLRequest=new SsbURLRequest()
+    protected String checkPath(String path) {
         String controllerName = ssbURLRequest.getControllerNameFromPath(path)
-        List<PostLoginWorkflow> listOfFlows =  PostLoginWorkflow.getListOfFlows()
-        for(PostLoginWorkflow flow:listOfFlows){
-            if(flow.getControllerName().equals(controllerName)){
-                path = "/"
+        List<PostLoginWorkflow> listOfFlows = PostLoginWorkflow.getListOfFlows()
+        for (PostLoginWorkflow flow : listOfFlows) {
+            if (flow.getControllerName().equals(controllerName)) {
+                path = SLASH
                 return path
             }
         }

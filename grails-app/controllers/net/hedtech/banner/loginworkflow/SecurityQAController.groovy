@@ -6,8 +6,6 @@ package net.hedtech.banner.loginworkflow
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.security.BannerGrantedAuthorityService
-import net.hedtech.banner.web.SsbURLRequest
-
 
 class SecurityQAController {
 
@@ -27,10 +25,15 @@ class SecurityQAController {
     private static final INVALID_ANSWER_LENGTH_ERROR_KEY = "securityQA.invalid.length.answer"
     private static final INVALID_QUESTION_LENGTH_ERROR_KEY = "securityQA.invalid.length.question"
     private static final USER_DEFINED_QUESTION_DISABLED = "N"
+    private static final VIEW = "securityQA"
+    private static final MESSAGE_PLACE_HOLDER="{0}"
+    private static final String SLASH = "/"
+    private def ssbURLRequest
+
 
     def index() {
         setGlobalVariables()
-        render view: "securityQA", model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: [],securityQAInfo: securityQAInfo]
+        render view: VIEW, model: [questions: questionList, userDefinedQuesFlag: userDefinedQuesFlag, noOfquestions: noOfQuestions, questionMinimumLength: questionMinimumLength, answerMinimumLength: answerMinimumLength, selectedQues: "", selectedAns: [], selectedUserDefinedQues: [], securityQAInfo: securityQAInfo]
     }
 
     private void setGlobalVariables() {
@@ -87,9 +90,9 @@ class SecurityQAController {
             model.put("selectedQues", selectedDropdown)
             model.put("selectedAns", selectedQA.answer)
             model.put("selectedUserDefinedQues", selectedQA.userDefinedQuestion)
-            model.put("securityQAInfo",securityQAInfo)
+            model.put("securityQAInfo", securityQAInfo)
 
-            render view: "securityQA", model: model
+            render view: VIEW, model: model
         }
         if (messages == null) {
             done()
@@ -112,7 +115,7 @@ class SecurityQAController {
             for (int index = 0; index < noOfQuestions; index++) {
 
                 def userDefQsn
-                if (USER_DEFINED_QUESTION_DISABLED.equals(userDefinedQuesFlag) ) {
+                if (USER_DEFINED_QUESTION_DISABLED.equals(userDefinedQuesFlag)) {
                     userDefQsn = null
                 }
                 else {
@@ -142,11 +145,11 @@ class SecurityQAController {
     private def getErrorMessage(msg) {
         String message = message(code: msg)
 
-        if (message.contains("{0}")) {
+        if (message.contains(MESSAGE_PLACE_HOLDER)) {
             if (msg.equals(INVALID_QUESTION_LENGTH_ERROR_KEY)) {
-                message = message.replace("{0}", questionMinimumLength.toString())
+                message = message.replace(MESSAGE_PLACE_HOLDER, questionMinimumLength.toString())
             } else if (msg.equals(INVALID_ANSWER_LENGTH_ERROR_KEY)) {
-                message = message.replace("{0}", answerMinimumLength.toString())
+                message = message.replace(MESSAGE_PLACE_HOLDER, answerMinimumLength.toString())
             }
         }
 
@@ -158,7 +161,7 @@ class SecurityQAController {
         request.getSession().setAttribute(SECURITY_QA_ACTION, ACTION_DONE)
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
-            path = "/"
+            path = SLASH
         } else {
             path = checkPath(path)
         }
@@ -167,12 +170,11 @@ class SecurityQAController {
     }
 
     protected String checkPath(String path) {
-        SsbURLRequest ssbURLRequest=new SsbURLRequest()
         String controllerName = ssbURLRequest.getControllerNameFromPath(path)
         List<PostLoginWorkflow> listOfFlows = PostLoginWorkflow.getListOfFlows()
         for (PostLoginWorkflow flow : listOfFlows) {
             if (flow.getControllerName().equals(controllerName)) {
-                path = "/"
+                path = SLASH
                 return path
             }
         }

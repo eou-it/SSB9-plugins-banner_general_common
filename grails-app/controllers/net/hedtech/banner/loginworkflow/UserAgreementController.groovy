@@ -4,7 +4,6 @@
 package net.hedtech.banner.loginworkflow
 
 import net.hedtech.banner.security.BannerGrantedAuthorityService
-import net.hedtech.banner.web.SsbURLRequest
 
 class UserAgreementController {
 
@@ -12,12 +11,15 @@ class UserAgreementController {
 
     static defaultAction = "index"
     private static final ACTION_DONE = "true"
+    private static final String SLASH = "/"
+    private static final VIEW = "policy"
+    private def ssbURLRequest
 
     def index() {
         def infoText = userAgreementService.getTermsOfUseInfoText()
         def model = [infoText: infoText]
         log.info("rendering view")
-        render view: "policy", model: model
+        render view: VIEW, model: model
     }
 
     def agreement() {
@@ -30,7 +32,7 @@ class UserAgreementController {
     def done() {
         String path = request.getSession().getAttribute(PostLoginWorkflow.URI_ACCESSED)
         if (path == null) {
-            path = "/"
+            path = SLASH
         } else {
             path = checkPath(path)
         }
@@ -39,12 +41,11 @@ class UserAgreementController {
     }
 
     protected String checkPath(String path) {
-        SsbURLRequest ssbURLRequest = new SsbURLRequest()
         String controllerName = ssbURLRequest.getControllerNameFromPath(path)
         List<PostLoginWorkflow> listOfFlows = PostLoginWorkflow.getListOfFlows()
         for (PostLoginWorkflow flow : listOfFlows) {
             if (flow.getControllerName().equals(controllerName)) {
-                path = "/"
+                path = SLASH
                 return path
             }
         }
