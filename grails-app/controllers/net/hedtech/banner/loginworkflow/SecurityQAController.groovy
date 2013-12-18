@@ -28,7 +28,7 @@ class SecurityQAController {
     private static final VIEW = "securityQA"
     private static final MESSAGE_PLACE_HOLDER="{0}"
     private static final String SLASH = "/"
-    private def ssbURLRequest
+    def ssbURLRequest
 
 
     def index() {

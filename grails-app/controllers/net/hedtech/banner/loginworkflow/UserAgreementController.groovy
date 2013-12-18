@@ -13,7 +13,7 @@ class UserAgreementController {
     private static final ACTION_DONE = "true"
     private static final String SLASH = "/"
     private static final VIEW = "policy"
-    private def ssbURLRequest
+    def ssbURLRequest
 
     def index() {
         def infoText = userAgreementService.getTermsOfUseInfoText()

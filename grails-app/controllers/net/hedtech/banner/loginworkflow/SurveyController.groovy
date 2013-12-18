@@ -21,7 +21,7 @@ class SurveyController {
     public static final ACTION_DONE = "true"
     private static final String SLASH = "/"
     private static final String VIEW = "survey"
-    private def ssbURLRequest
+    def ssbURLRequest
 
     def survey() {
         def pidm = BannerGrantedAuthorityService.getPidm()
