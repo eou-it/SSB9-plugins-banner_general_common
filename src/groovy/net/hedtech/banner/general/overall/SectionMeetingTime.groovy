@@ -30,6 +30,11 @@ import javax.persistence.*
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                AND a.category = :category
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery(name = "SectionMeetingTime.fetchByTermAndCourseReferenceNumberStartAndEndDate",
+query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
+		                WHERE a.term = :term
+		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""")
 ])
 @DatabaseModifiesState
@@ -489,6 +494,22 @@ class SectionMeetingTime implements Serializable {
                     'SectionMeetingTime.fetchByTermCRNAndCategory').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).setString('category', category).list()
         }
         return sectionMeetingTimes
+    }
+
+
+    /**
+     * This fetchBy is used to retrieve Start Date and End Date for a given term and crn.
+     *
+     */
+    public static SectionMeetingTime fetchByTermAndCourseReferenceNumberStartAndEndDate(String term,
+                                                                                        String courseReferenceNumber) {
+        def sectionMeetingDates
+        SectionMeetingTime.withSession { session ->
+            sectionMeetingDates = session.getNamedQuery(
+                    'SectionMeetingTime.fetchByTermAndCourseReferenceNumberStartAndEndDate').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).list()[0]
+        }
+
+        return new SectionMeetingTime(startDate: sectionMeetingDates[0], endDate: sectionMeetingDates[1])
     }
 
 
