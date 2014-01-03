@@ -20,11 +20,13 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingDisplayOption"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourcePriority"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule"/>
+        <mapping class="net.hedtech.banner.general.overall.AddressRolePrivileges"/>
         <mapping class="net.hedtech.banner.general.overall.CommonMatchingMatchEntryGlobalTemporary"/>
-        <mapping class="net.hedtech.banner.general.overall.DocumentInformation"/>
         <mapping class="net.hedtech.banner.general.overall.DirectoryAddress"/>
         <mapping class="net.hedtech.banner.general.overall.DisplayMaskingColumnRuleView"/>
+        <mapping class="net.hedtech.banner.general.overall.DocumentInformation"/>
         <mapping class="net.hedtech.banner.general.overall.FacultyTenureStatus"/>
+        <mapping class="net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion"/>
         <mapping class="net.hedtech.banner.general.overall.HousingLocationBuildingDescription"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomAttributesDefinition"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomCatagoryDefinition"/>
@@ -32,6 +34,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.HousingRoomUsageRestriction"/>
         <mapping class="net.hedtech.banner.general.overall.IntegrationPartnerSystemRule"/>
         <mapping class="net.hedtech.banner.general.overall.MeetingTimeSearch"/>
+        <mapping class="net.hedtech.banner.general.overall.PinQuestion"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollege"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollegeConcentrationArea"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollegeDegree"/>
@@ -55,10 +58,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.SqlProcess"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
-        <mapping class="net.hedtech.banner.general.overall.AddressRolePrivileges"/>
-        <mapping class="net.hedtech.banner.general.utility.Mail"/> 
-        <mapping class="net.hedtech.banner.general.utility.InformationText"/> 
-        <mapping class="net.hedtech.banner.general.overall.PinQuestion"/>
-        <mapping class="net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion"/>
+        <mapping class="net.hedtech.banner.general.utility.Mail"/>
     </session-factory>
-</hibernate-configuration> 
+</hibernate-configuration>
+   
