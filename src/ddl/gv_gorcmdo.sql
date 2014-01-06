@@ -1,19 +1,14 @@
---
--- *****************************************************************************************
--- * Copyright 2010-2013 Ellucian Company L.P. and its affiliates.                         *
--- *****************************************************************************************
+REM *****************************************************************************************
+REM * Copyright 2010-2013 Ellucian Company L.P. and its affiliates.                         *
+REM *****************************************************************************************
+REM gv_gorcmdo.sql
+REM
+REM AUDIT TRAIL: 9.0
+REM RR 10-JUN-2013
+REM 1. Generated view for Horizon API support. 
+REM AUDIT TRAIL END 
+REM
 
-
---
--- gv_gorcmdo.sql
---
--- AUDIT TRAIL: 8.x
--- DBEU 06/06/2013
---
---    Generated view for Banner XE API support
---
--- AUDIT TRAIL END
---
 CREATE OR REPLACE FORCE VIEW gv_gorcmdo AS SELECT
       gorcmdo_cmsc_code,
       gorcmdo_objs_name,

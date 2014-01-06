@@ -35,8 +35,14 @@ import javax.persistence.*
 query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
-		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""")
-])
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery( name = "SectionMeetingTime.fetchByTermCRNAndFunction",
+              query = """FROM SectionMeetingTime a
+		                 WHERE a.term = :term
+		                 AND a.courseReferenceNumber = :eventCourseReferenceNumber
+		                 AND a.function.code = :functionCode
+		                 order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
+] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
 
@@ -549,5 +555,18 @@ class SectionMeetingTime implements Serializable {
                     setString('friday', friday).setString('saturday', saturday).setString('sunday', sunday).list()[0]
         }
         return count
+    }
+
+
+    public static List fetchByTermCRNAndFunction(String term, String eventCourseReferenceNumber,
+                                                 String function) {
+        List sectionMeetingTimes = []
+        if (term && eventCourseReferenceNumber && function) {
+            SectionMeetingTime.withSession { session ->
+                sectionMeetingTimes = session.getNamedQuery(
+                        'SectionMeetingTime.fetchByTermCRNAndFunction').setString('term', term).setString('eventCourseReferenceNumber', eventCourseReferenceNumber).setString('functionCode', function).list()
+            }
+        }
+        return sectionMeetingTimes
     }
 }

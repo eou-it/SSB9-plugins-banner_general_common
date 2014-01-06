@@ -1,7 +1,7 @@
 -- *****************************************************************************************
--- * Copyright 2010-2013 Ellucian Company L.P. and its affiliates.                         *
+-- * Copyright 2009-2013 Ellucian Company L.P. and its affiliates.                         *
 -- *****************************************************************************************
- REM
+REM
 REM svq_ssvmeet.sql
 REM
 REM AUDIT TRAIL: 9.0

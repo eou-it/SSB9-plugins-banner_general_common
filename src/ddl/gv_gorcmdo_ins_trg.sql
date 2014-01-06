@@ -1,17 +1,14 @@
+REM *****************************************************************************************
+REM * Copyright 2013 Ellucian Company L.P. and its affiliates.                              *
+REM *****************************************************************************************
+REM gv_gorcmdo_ins_trg.sql
+REM
+REM AUDIT TRAIL: 9.0
+REM RR 10-JUN-2013
+REM 1. Generated trigger for Horizon API support. 
+REM AUDIT TRAIL END 
+REM
 
---/*******************************************************************************
---Copyright 2013 Ellucian Company L.P. and its affiliates.
---*******************************************************************************/
---
--- gv_gorcmdo_ins_trg.sql
---
--- AUDIT TRAIL: 8.x
--- DBEU 06/06/2013
---
---    Generated trigger for Banner XE API support
---
--- AUDIT TRAIL END
---
 CREATE OR REPLACE TRIGGER gorcmdo_view_create_trg
   INSTEAD OF INSERT ON gv_gorcmdo
 DECLARE
