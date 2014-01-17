@@ -4,7 +4,7 @@ import net.hedtech.banner.loginworkflow.SecurityQAFlow
 import net.hedtech.banner.web.SsbURLRequest
 
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 
 /**
