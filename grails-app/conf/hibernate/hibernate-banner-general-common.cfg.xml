@@ -34,6 +34,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.HousingRoomUsageRestriction"/>
         <mapping class="net.hedtech.banner.general.overall.IntegrationPartnerSystemRule"/>
         <mapping class="net.hedtech.banner.general.overall.MeetingTimeSearch"/>
+        <mapping class="net.hedtech.banner.general.overall.PidmAndUDCIdMapping"/>
         <mapping class="net.hedtech.banner.general.overall.PinQuestion"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollege"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollegeConcentrationArea"/>

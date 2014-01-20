@@ -38,3 +38,8 @@ start gv_gobqstn_del_trg
 start gv_gobansr_upd_trg
 start gv_gobansr_ins_trg
 start gv_gobansr_del_trg
+
+start gv_gobumap_del_trg
+start gv_gobumap_ins_trg
+start gv_gobumap_upd_trg
+

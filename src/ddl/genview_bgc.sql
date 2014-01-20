@@ -24,3 +24,5 @@ start gvq_gordmsk.sql
 start gv_gobansr.sql
 start gv_gobqstn.sql
 
+start gv_gobumap.sql
+
