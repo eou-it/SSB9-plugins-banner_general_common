@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
-package net.hedtech.banner.loginworkflow
+package net.hedtech.banner.overall.loginworkflow
 
 import groovy.sql.Sql
 import org.apache.log4j.Logger
@@ -37,9 +37,4 @@ class UserAgreementService {
        }
 
     }
-
-    public String getTermsOfUseInfoText(){
-        return InformationTextUtility.getMessage(POLICY_PAGE_NAME, TERMS_OF_USAGE_LABEL)
-    }
-
 }

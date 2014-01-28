@@ -1,11 +1,9 @@
-import net.hedtech.banner.loginworkflow.UserAgreementFlow
-import net.hedtech.banner.loginworkflow.SurveyFlow
-import net.hedtech.banner.loginworkflow.SecurityQAFlow
-import net.hedtech.banner.web.SsbURLRequest
-
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
+****************************************************************************** */
+
+import net.hedtech.banner.loginworkflow.SurveyFlow
+import net.hedtech.banner.web.SsbURLRequest
 
 /**
  * A Grails Plugin providing cross cutting concerns such as security and database access
@@ -55,20 +53,6 @@ class BannerGeneralCommonGrailsPlugin {
 
     def doWithSpring = {
         ssbURLRequest(SsbURLRequest) {
-        }
-
-        userAgreementFlow(UserAgreementFlow) { bean ->
-            sessionFactory = ref(sessionFactory)
-
-            registerFlowClass = [
-                    10: "userAgreementFlow"
-            ]
-        }
-
-        securityQAFlow(SecurityQAFlow) {
-            registerFlowClass = [
-                    30: "securityQAFlow"
-            ]
         }
 
         surveyFlow(SurveyFlow) {
