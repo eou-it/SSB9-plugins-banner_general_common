@@ -2,9 +2,6 @@
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** */
 
-import net.hedtech.banner.loginworkflow.SurveyFlow
-import net.hedtech.banner.web.SsbURLRequest
-
 /**
  * A Grails Plugin providing cross cutting concerns such as security and database access
  * for Banner web applications.
@@ -32,7 +29,7 @@ class BannerGeneralCommonGrailsPlugin {
     // the other plugins this plugin depends on
 //    def dependsOn = ['springSecurityCore': '1.2']
 
-    def dependsOn = ['bannerCore': '2.5.0 > *']
+    def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -52,15 +49,7 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        ssbURLRequest(SsbURLRequest) {
-        }
 
-        surveyFlow(SurveyFlow) {
-            sessionFactory = ref(sessionFactory)
-            registerFlowClass = [
-                    50: "surveyFlow"
-            ]
-        }
     }
 
 
