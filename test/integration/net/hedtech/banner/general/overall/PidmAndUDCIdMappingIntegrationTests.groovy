@@ -3,12 +3,13 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.validation.ValidationException
 import groovy.sql.Sql
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
-import net.hedtech.banner.general.person.PersonUtility
+
 import java.text.SimpleDateFormat
-import grails.validation.ValidationException
 
 class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 
@@ -18,6 +19,9 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     def i_success_udcId = "TTTTT"
     def i_success_pidm = 1
     def i_success_createDate = new Date()
+    def i_success_udcId_2 = "ZZZZZ"
+    def i_success_pidm_2 = 2
+
     //Invalid test data (For failure tests)
 
     def i_failure_udcId = "TTTTT"
@@ -167,11 +171,11 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping()
         assertFalse "PidmAndUDCIdMapping should have failed validation", pidmAndUDCIdMapping.validate()
         assertErrorsFor pidmAndUDCIdMapping, 'nullable',
-                        [
-                                'udcId',
-                                'pidm',
-                                'createDate'
-                        ]
+        [
+            'udcId',
+            'pidm',
+            'createDate'
+        ]
     }
 
 
@@ -185,22 +189,45 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testFetchByUdcIdList() {
+        def pidmAndUDCIdMappings = newMultipleValidForCreatePidmAndUDCIdMapping()
+        pidmAndUDCIdMappings.each { it.save(failOnError: true, flush: true)}
+        def results = PidmAndUDCIdMapping.fetchByUdcList(pidmAndUDCIdMappings.udcId)
+
+        assertFalse results.empty
+        assertTrue results.size() > 1
+        assertTrue results[0] instanceof PidmAndUDCIdMapping
+    }
+
+
     private def newValidForCreatePidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping(
-                udcId: i_success_udcId,
-                pidm: i_success_pidm,
-                createDate: i_success_createDate,
-                )
+            udcId: i_success_udcId,
+            pidm: i_success_pidm,
+            createDate: i_success_createDate,
+        )
         return pidmAndUDCIdMapping
+    }
+
+
+    private def newMultipleValidForCreatePidmAndUDCIdMapping() {
+        def pidmAndUDCIdMappings = []
+        pidmAndUDCIdMappings.add(newValidForCreatePidmAndUDCIdMapping())
+        pidmAndUDCIdMappings.add(new PidmAndUDCIdMapping(
+            udcId: i_success_udcId_2,
+            pidm: i_success_pidm_2,
+            createDate: i_success_createDate)
+        )
+        return pidmAndUDCIdMappings
     }
 
 
     private def newInvalidForCreatePidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping(
-                udcId: i_failure_udcId,
-                pidm: i_failure_pidm,
-                createDate: i_failure_createDate,
-                )
+            udcId: i_failure_udcId,
+            pidm: i_failure_pidm,
+            createDate: i_failure_createDate,
+        )
         return pidmAndUDCIdMapping
     }
 

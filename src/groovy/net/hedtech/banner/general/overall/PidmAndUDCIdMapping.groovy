@@ -15,7 +15,12 @@ import javax.persistence.*
 @NamedQuery(name = "PidmAndUDCIdMapping.fetchByUdcId",
         query = """FROM  PidmAndUDCIdMapping a
            WHERE a.udcId = :udcId
-       """)])
+       """),
+@NamedQuery(name = "PidmAndUDCIdMapping.fetchByUdcList",
+    query = """ FROM PidmAndUDCIdMapping a
+        WHERE a.udcId IN :udcId
+    """)
+])
 
 class PidmAndUDCIdMapping implements Serializable {
 
@@ -136,4 +141,15 @@ class PidmAndUDCIdMapping implements Serializable {
         }
         return pidmAndUDCIdMapping
     }
+
+
+    public static List fetchByUdcList(List udcId) {
+        def pidmAndUDCIdMapping = PidmAndUDCIdMapping.withSession { session ->
+            session.getNamedQuery(
+                    'PidmAndUDCIdMapping.fetchByUdcList')
+                    .setParameterList('udcId', udcId).list()
+        }
+        return pidmAndUDCIdMapping
+    }
+
 }
