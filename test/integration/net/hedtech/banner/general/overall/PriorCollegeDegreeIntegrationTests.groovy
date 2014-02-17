@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 /*******************************************************************************
  Copyright 2013 Ellucian Company L.P. and its affiliates.
@@ -222,6 +222,18 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
                 primaryIndicator: 'XXX')
         assertFalse "PriorCollegeDegree should have failed validation", priorCollegeDegree.validate()
         assertErrorsFor priorCollegeDegree, 'maxSize', ['degreeYear', 'termDegree', 'primaryIndicator']
+    }
+
+
+    void testFetchByPidm() {
+        def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
+        priorCollegeDegree.save(failOnError: true, flush: true)
+
+        def priorCollegeDegreeList = PriorCollegeDegree.fetchByPidm(priorCollegeDegree.pidm)
+
+        assertNotNull priorCollegeDegreeList
+        assertFalse priorCollegeDegreeList.isEmpty()
+        assertTrue priorCollegeDegreeList.contains(priorCollegeDegree)
     }
 
 
