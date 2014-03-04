@@ -21,24 +21,14 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     def i_success_createDate = new Date()
     def i_success_udcId_2 = "ZZZZZ"
     def i_success_pidm_2 = 2
-
-    //Invalid test data (For failure tests)
-
-    def i_failure_udcId = "TTTTT"
-    def i_failure_pidm = 1
-    def i_failure_createDate = new Date()
+	def banner_ids = ["HOS00001","HOS00002"]
 
     //Test data for creating updating domain instance
     //Valid test data (For success tests)
 
     def u_success_udcId = "TTTTT"
-    def u_success_pidm = 1
+    def u_success_pidm = 2
     def u_success_createDate = new Date()
-    //Valid test data (For failure tests)
-
-    def u_failure_udcId = "TTTTT"
-    def u_failure_pidm = 1
-    def u_failure_createDate = new Date()
 
 
     protected void setUp() {
@@ -50,8 +40,21 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
-        i_success_pidm = PersonUtility.getPerson("HOS00001").pidm
-
+		[i_success_pidm, i_success_pidm_2].each { pidm ->
+			def deleteMe = PidmAndUDCIdMapping.findByPidm(pidm)
+			if (deleteMe) {
+				deleteMe = deleteMe.get(deleteMe.id).refresh()
+				deleteMe.delete()
+			}
+		}
+		def enterpriseIds = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
+		enterpriseIds.each { enterpriseId ->
+			def deleteMe = PidmAndUDCIdMapping.findByUdcId(enterpriseId)
+			if (deleteMe) {
+				deleteMe = deleteMe.get(deleteMe.id).refresh()
+				deleteMe.delete()
+			}
+		}
     }
 
 
@@ -184,8 +187,10 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
         def id = pidmAndUDCIdMapping.id
 
-        def udcId = PidmAndUDCIdMapping.fetchByUdcId(i_success_udcId)
-        assertNotNull udcId
+        def result = PidmAndUDCIdMapping.fetchByUdcId(i_success_udcId)
+        assertNotNull result
+		assertEquals i_success_udcId, result.udcId
+		assertEquals i_success_pidm, result.pidm
     }
 
 
@@ -193,12 +198,28 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
         def pidmAndUDCIdMappings = newMultipleValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMappings.each { it.save(failOnError: true, flush: true)}
         def results = PidmAndUDCIdMapping.fetchByUdcList(pidmAndUDCIdMappings.udcId)
-
-        assertFalse results.empty
-        assertTrue results.size() > 1
+        assertEquals 2, results.size()
         assertTrue results[0] instanceof PidmAndUDCIdMapping
     }
 
+
+	void testGenerateAndFetchEnterpriseIdsByBannerIdList() {
+		def enterpriseIds = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
+		enterpriseIds.each { enterpriseId ->
+			def deleteMe = PidmAndUDCIdMapping.findByUdcId(enterpriseId)
+			if (deleteMe) {
+				deleteMe = deleteMe.get(deleteMe.id).refresh()
+				deleteMe.delete()
+			}
+		}
+		def results = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
+		assertEquals 0, results.size()
+		PidmAndUDCIdMapping.generateByBannerIdList(banner_ids)
+		results = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
+		assertEquals 2, results.size()
+		assertTrue results[0] instanceof String
+	}
+	
 
     private def newValidForCreatePidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping(
@@ -219,16 +240,6 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
             createDate: i_success_createDate)
         )
         return pidmAndUDCIdMappings
-    }
-
-
-    private def newInvalidForCreatePidmAndUDCIdMapping() {
-        def pidmAndUDCIdMapping = new PidmAndUDCIdMapping(
-            udcId: i_failure_udcId,
-            pidm: i_failure_pidm,
-            createDate: i_failure_createDate,
-        )
-        return pidmAndUDCIdMapping
     }
 
 }

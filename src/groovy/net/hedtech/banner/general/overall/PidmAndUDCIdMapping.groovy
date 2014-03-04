@@ -21,6 +21,40 @@ import javax.persistence.*
         WHERE a.udcId IN :udcId
     """)
 ])
+@NamedNativeQueries(value = [
+@NamedNativeQuery(name = "PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList",
+    query = """select gobumap_udc_id
+  from gobumap
+  inner join spriden on spriden_pidm = gobumap_pidm
+ where spriden_id in (:banner_ids)
+   and spriden_change_ind is null""",
+    resultSetMapping="PidmAndUDCIdMapping.enterpriseId"),
+@NamedNativeQuery(name = "PidmAndUDCIdMapping.generateByBannerIdList",
+    query = """DECLARE
+  lv_rowid_out VARCHAR2(18);
+  CURSOR get_missing_udc_id_c IS
+    SELECT spriden_pidm
+      FROM spriden
+     INNER JOIN TABLE(string_nt(:banner_ids)) ON column_value = spriden_id
+                                             AND spriden_change_ind IS NULL
+     WHERE NOT EXISTS
+     (SELECT 'X' FROM gobumap WHERE gobumap_pidm = spriden.spriden_pidm);
+BEGIN
+  FOR result IN get_missing_udc_id_c LOOP
+    gb_gobumap.p_create(p_udc_id      => gokuuid.f_create_unique_id(),
+                        p_pidm        => result.spriden_pidm,
+                        p_create_date => SYSDATE,
+                        p_user_id     => gb_common.f_sct_user,
+                        p_data_origin => gb_common.data_origin,
+                        p_rowid_out   => lv_rowid_out);
+  END LOOP;
+END;""",
+    resultSetMapping="PidmAndUDCIdMapping.generate")
+])
+@SqlResultSetMappings(value = [
+@SqlResultSetMapping(name = "PidmAndUDCIdMapping.enterpriseId"),
+@SqlResultSetMapping(name = "PidmAndUDCIdMapping.generate")
+])
 
 class PidmAndUDCIdMapping implements Serializable {
 
@@ -122,7 +156,7 @@ class PidmAndUDCIdMapping implements Serializable {
     }
 
     static constraints = {
-        pidm(nullable: false, min: 0, max: 99999999)
+        pidm(nullable: false, min: -99999999, max: 99999999)
         createDate(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
@@ -151,5 +185,24 @@ class PidmAndUDCIdMapping implements Serializable {
         }
         return pidmAndUDCIdMapping
     }
+
+
+	public static List fetchEnterpriseIdsByBannerIdList(List bannerIds) {
+		def enterpriseIds = PidmAndUDCIdMapping.withSession { session ->
+			session.getNamedQuery(
+					'PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList')
+					.setParameterList('banner_ids', bannerIds).list()
+		}
+		return enterpriseIds
+	}
+	
+
+	public static void generateByBannerIdList(List bannerIds) {
+		PidmAndUDCIdMapping.withSession { session ->
+			session.getNamedQuery(
+					'PidmAndUDCIdMapping.generateByBannerIdList')
+					.setParameterList('banner_ids', bannerIds).executeUpdate()
+		}
+	}
 
 }
