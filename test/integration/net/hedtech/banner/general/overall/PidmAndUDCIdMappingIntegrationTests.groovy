@@ -44,7 +44,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 			def deleteMe = PidmAndUDCIdMapping.findByPidm(pidm)
 			if (deleteMe) {
 				deleteMe = deleteMe.get(deleteMe.id).refresh()
-				deleteMe.delete()
+				deleteMe.delete(failOnError: true, flush: true)
 			}
 		}
 		def enterpriseIds = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
@@ -52,7 +52,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 			def deleteMe = PidmAndUDCIdMapping.findByUdcId(enterpriseId)
 			if (deleteMe) {
 				deleteMe = deleteMe.get(deleteMe.id).refresh()
-				deleteMe.delete()
+				deleteMe.delete(failOnError: true, flush: true)
 			}
 		}
     }
@@ -159,7 +159,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
         def id = pidmAndUDCIdMapping.id
         def deleteMe = PidmAndUDCIdMapping.get(id)
         assertNotNull deleteMe
-        deleteMe.delete()
+        deleteMe.delete(failOnError: true, flush: true)
         assertNull PidmAndUDCIdMapping.get(id)
     }
 
@@ -204,14 +204,6 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 
 
 	void testGenerateAndFetchEnterpriseIdsByBannerIdList() {
-		def enterpriseIds = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
-		enterpriseIds.each { enterpriseId ->
-			def deleteMe = PidmAndUDCIdMapping.findByUdcId(enterpriseId)
-			if (deleteMe) {
-				deleteMe = deleteMe.get(deleteMe.id).refresh()
-				deleteMe.delete()
-			}
-		}
 		def results = PidmAndUDCIdMapping.fetchEnterpriseIdsByBannerIdList(banner_ids)
 		assertEquals 0, results.size()
 		PidmAndUDCIdMapping.generateByBannerIdList(banner_ids)
