@@ -7,6 +7,7 @@ package net.hedtech.banner.general.overall
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.Ignore
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
@@ -834,6 +835,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
+    @Ignore
     void testFetchByTermCRNAndFunction() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTimeForEvent()
         sectionMeetingTime.save(failOnError: true, flush: true)
