@@ -1,7 +1,8 @@
 /*******************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
- *******************************************************************************/
-package net.hedtech.banner.loginworkflow
+ Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
+*******************************************************************************/
+package net.hedtech.banner.overall.loginworkflow
+
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
@@ -22,7 +23,6 @@ class SecurityQAService {
     This will be updated in domain with correct salt by the backed up triggers and api's for the domain */
     private final static String ANSWER_SALT_DUMMY = "ML3MTB80"
     private final Logger log = Logger.getLogger(getClass())
-
 
     public def getNumberOfQuestionsAnswered(Integer pidm) {
         return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)

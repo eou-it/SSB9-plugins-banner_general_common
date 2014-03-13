@@ -1,10 +1,6 @@
-import net.hedtech.banner.loginworkflow.UserAgreementFlow
-import net.hedtech.banner.loginworkflow.SurveyFlow
-import net.hedtech.banner.loginworkflow.SecurityQAFlow
-
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
+ Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
+****************************************************************************** */
 
 /**
  * A Grails Plugin providing cross cutting concerns such as security and database access
@@ -33,7 +29,7 @@ class BannerGeneralCommonGrailsPlugin {
     // the other plugins this plugin depends on
 //    def dependsOn = ['springSecurityCore': '1.2']
 
-    def dependsOn = [ 'bannerCore': '2.5.0 > *']
+    def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"
@@ -53,26 +49,7 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        userAgreementFlow(UserAgreementFlow){ bean ->
-            sessionFactory = ref(sessionFactory)
 
-            registerFlowClass = [
-                10: "userAgreementFlow"
-            ]
-        }
-
-        securityQAFlow(SecurityQAFlow) {
-            registerFlowClass = [
-                    30: "securityQAFlow"
-            ]
-        }
-
-        surveyFlow(SurveyFlow) {
-            sessionFactory = ref(sessionFactory)
-            registerFlowClass = [
-                    50: "surveyFlow"
-            ]
-        }
     }
 
 

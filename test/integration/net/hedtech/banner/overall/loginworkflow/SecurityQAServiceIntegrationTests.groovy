@@ -1,10 +1,12 @@
 /*******************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
- *******************************************************************************/
-package net.hedtech.banner.general.overall
+ Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
+ ******************************************************************************/
+package net.hedtech.banner.overall.loginworkflow
 
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion
+import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
