@@ -835,7 +835,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
-    @Ignore
     void testFetchByTermCRNAndFunction() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTimeForEvent()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -861,7 +860,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     //Create a valid section meeting time record for an Event and Function
     private def newValidForCreateSectionMeetingTimeForEvent() {
         def sectionMeetingTime = new SectionMeetingTime(
-                courseReferenceNumber: "E0007",
+                courseReferenceNumber: "E0001",
                 dayNumber: i_success_dayNumber,
                 beginTime: i_success_beginTime,
                 endTime: i_success_endTime,
