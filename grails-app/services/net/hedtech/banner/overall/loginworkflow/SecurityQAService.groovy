@@ -34,7 +34,7 @@ class SecurityQAService {
         try {
             connection = sessionFactory.currentSession.connection()
             sql = new Sql(connection)
-            GroovyRowResult row = sql.firstRow("""select * from GUBPPRF""")
+            GroovyRowResult row = sql.firstRow("""select GUBPPRF_ANSR_MIN_LENGTH, GUBPPRF_QSTN_MIN_LENGTH, GUBPPRF_DISABLE_FORGET_PIN_IND, GUBPPRF_NO_OF_QSTNS,GUBPPRF_EDITQSTN_IND from GUBPPRF""")
             return row
         } catch (SQLException ae) {
             log.debug ae.stackTrace
