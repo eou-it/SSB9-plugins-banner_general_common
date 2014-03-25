@@ -1,6 +1,6 @@
 /*******************************************************************************
  Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
-*******************************************************************************/
+ *******************************************************************************/
 package net.hedtech.banner.overall.loginworkflow
 
 import groovy.sql.GroovyRowResult
@@ -22,7 +22,7 @@ class SecurityQAService {
     /* Dummy value for answer salt as the domain expects a not null and non empty value.
     This will be updated in domain with correct salt by the backed up triggers and api's for the domain */
     private final static String ANSWER_SALT_DUMMY = "ML3MTB80"
-    private final Logger log = Logger.getLogger(getClass())
+    private static final Logger log = Logger.getLogger(getClass())
 
     public def getNumberOfQuestionsAnswered(Integer pidm) {
         return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
@@ -34,7 +34,8 @@ class SecurityQAService {
         try {
             connection = sessionFactory.currentSession.connection()
             sql = new Sql(connection)
-            GroovyRowResult row = sql.firstRow("""select GUBPPRF_ANSR_MIN_LENGTH, GUBPPRF_QSTN_MIN_LENGTH, GUBPPRF_DISABLE_FORGET_PIN_IND, GUBPPRF_NO_OF_QSTNS,GUBPPRF_EDITQSTN_IND from GUBPPRF""")
+            GroovyRowResult row = sql.firstRow("""select GUBPPRF_ANSR_MIN_LENGTH, GUBPPRF_QSTN_MIN_LENGTH,GUBPPRF_DISABLE_FORGET_PIN_IND,
+                    GUBPPRF_NO_OF_QSTNS,GUBPPRF_EDITQSTN_IND from GUBPPRF""")
             return row
         } catch (SQLException ae) {
             log.debug ae.stackTrace
@@ -63,13 +64,13 @@ class SecurityQAService {
      *   */
     public void saveSecurityQAResponse(String pidm, List questionList, String pin) {
 
-        boolean isValidPin = GeneralCommonUtility.validatePin(pin,pidm)
-        if(!isValidPin){
+        boolean isValidPin = GeneralCommonUtility.validatePin(pin, pidm)
+        if (!isValidPin) {
             throw new ApplicationException("", "securityQA.invaild.pin")
         }
 
-        if(questionList.size() <= 0) {
-            throw new ApplicationException("","securityQA.error")
+        if (questionList.size() <= 0) {
+            throw new ApplicationException("", "securityQA.error")
         }
 
         int cnt = 1
@@ -77,13 +78,13 @@ class SecurityQAService {
 
             String dropDownQuestion = it["question"]
             String editableQuestion = it["userDefinedQuestion"]
-            String answer =  it["answer"]
+            String answer = it["answer"]
             String dropDownQuestionId = it["questionNo"]
             String questionNumber = cnt++
 
             validateValueConstraints(dropDownQuestion, editableQuestion, answer)
 
-            if(isDropDownQuestionAnswered(dropDownQuestion, answer)) {
+            if (isDropDownQuestionAnswered(dropDownQuestion, answer)) {
                 createDropDownQuestionAndAnswer(pidm, dropDownQuestionId, questionNumber, answer)
             } else {
                 createEditableQuestionAndAnswer(pidm, editableQuestion, questionNumber, answer)
@@ -100,31 +101,31 @@ class SecurityQAService {
     }
 
     private void checkAndRaiseExceptionIfMoreThanOneQuestionEntered(String question1, String question2) {
-        if(isValueEntered(question1) && isValueEntered(question2)) {
+        if (isValueEntered(question1) && isValueEntered(question2)) {
             log.error("Each question can be selected or defined, not both. Please choose a question from the drop down or define your own question.")
             throw new ApplicationException("", "securityQA.invalid.number.question")
         }
     }
 
     private void checkAndRaiseExceptionIfQuestionAnswerNotEntered(String question1, String question2, String answer) {
-        if(isValueEntered(answer) && !isValueEntered(question1) && !isValueEntered(question2)) {
+        if (isValueEntered(answer) && !isValueEntered(question1) && !isValueEntered(question2)) {
             log.error("Please enter Security Question and Answer.")
-            throw new ApplicationException("","securityQA.error")
-        }else if(!isValueEntered(answer) && (isValueEntered(question1) || isValueEntered(question2))) {
+            throw new ApplicationException("", "securityQA.error")
+        } else if (!isValueEntered(answer) && (isValueEntered(question1) || isValueEntered(question2))) {
             log.error("Please enter Security Question and Answer.")
-            throw new ApplicationException("","securityQA.error")
+            throw new ApplicationException("", "securityQA.error")
         }
     }
 
     private void checkAndRaiseExceptionForInvalidCharacter(String answer, String question) {
-        if(isValueEntered(question) && isInvalidCharacterEntered(question)) {
+        if (isValueEntered(question) && isInvalidCharacterEntered(question)) {
             log.error("Question may not contain the < or > characters.")
-            throw new ApplicationException("","securityQA.invalid.question")
+            throw new ApplicationException("", "securityQA.invalid.question")
         }
 
-        if(isValueEntered(answer) && isInvalidCharacterEntered(answer)) {
+        if (isValueEntered(answer) && isInvalidCharacterEntered(answer)) {
             log.error("Answer may not contain the < or > characters.")
-            throw new ApplicationException("","securityQA.invalid.answer")
+            throw new ApplicationException("", "securityQA.invalid.answer")
         }
     }
 
@@ -132,7 +133,7 @@ class SecurityQAService {
         List invalidCharList = ['<', '>']
         boolean invalidCharacterExists = false
         invalidCharList.each {
-            if(value.contains(it)) {
+            if (value.contains(it)) {
                 invalidCharacterExists = true
             }
         }
@@ -141,20 +142,20 @@ class SecurityQAService {
 
     private void checkAndRaiseExceptionForInvalidLength(String answer, String question) {
         def gubprfAnsrMinLength = getUserDefinedPreference()?.GUBPPRF_ANSR_MIN_LENGTH
-        if(isValueEntered(answer) && answer.length() < gubprfAnsrMinLength && gubprfAnsrMinLength > 0) {
+        if (isValueEntered(answer) && answer.length() < gubprfAnsrMinLength && gubprfAnsrMinLength > 0) {
             log.error("Answer has to be " + gubprfAnsrMinLength + " characters or more.")
-            throw new ApplicationException("","securityQA.invalid.length.answer")
+            throw new ApplicationException("", "securityQA.invalid.length.answer")
         }
 
         def gubprfQstnMinLength = getUserDefinedPreference()?.GUBPPRF_QSTN_MIN_LENGTH
-        if(isValueEntered(question) && question.length() < gubprfQstnMinLength && gubprfQstnMinLength > 0) {
+        if (isValueEntered(question) && question.length() < gubprfQstnMinLength && gubprfQstnMinLength > 0) {
             log.error("Question has to be " + gubprfQstnMinLength + " characters or more.")
-            throw new ApplicationException("","securityQA.invalid.length.question")
+            throw new ApplicationException("", "securityQA.invalid.length.question")
         }
     }
 
     private boolean isDropDownQuestionAnswered(String question1, String answer) {
-        if(isValueEntered(question1) && isValueEntered(answer)) {
+        if (isValueEntered(question1) && isValueEntered(answer)) {
             return true
         }
         return false
@@ -162,7 +163,7 @@ class SecurityQAService {
 
     private boolean isValueEntered(String value) {
         boolean isValueEntered = false;
-        if(value != null && !value.equals("")) {
+        if (value != null && !value.equals("")) {
             isValueEntered = true;
         }
         return isValueEntered;
@@ -182,9 +183,9 @@ class SecurityQAService {
     }
 
     private void createEditableQuestionAndAnswer(pidm, question, question_num, answer) {
-        if(GeneralForStoringResponsesAndPinQuestion.fetchCountOfSameQuestionForPidm([pidm: Integer.valueOf(pidm), questionDescription: question]) > 0) {
+        if (GeneralForStoringResponsesAndPinQuestion.fetchCountOfSameQuestionForPidm([pidm: Integer.valueOf(pidm), questionDescription: question]) > 0) {
             log.error("Question has to be Unique")
-            throw new ApplicationException("","securityQA.unique.question")
+            throw new ApplicationException("", "securityQA.unique.question")
         }
         GeneralForStoringResponsesAndPinQuestion generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
                 pidm: pidm,
