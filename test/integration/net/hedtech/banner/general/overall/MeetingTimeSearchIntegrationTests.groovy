@@ -220,4 +220,25 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         def list = MeetingTimeSearch.fetchByTermAndCourseReferenceNumber("201110", "8007")
         assertEquals 2, list.size()
     }
+
+
+    void testFetchListMeetingTimeDetailByTermAndCourseReferenceNumber()
+    {
+        String termCode = "201410"
+        Set setCRNs = new HashSet()
+        setCRNs.add("20199")
+        setCRNs.add("20408")
+        setCRNs.add("20001")
+        def list = MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber(termCode, setCRNs)
+
+        assertTrue list.size()>=3
+        list.each{
+           assertTrue setCRNs.contains(it.courseReferenceNumber)
+        }
+
+        setCRNs = new HashSet()
+        list = MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber(termCode, setCRNs)
+        assertTrue list.size()==0
+
+    }
 }
