@@ -22,7 +22,7 @@ import javax.persistence.*
             a.thursday, a.friday, a.saturday, a.sunday, a.beginTime """),
 @NamedQuery(name = "MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber",
         query = """FROM  MeetingTimeSearch a
-	  	   WHERE a.term= :termCode
+	  	   WHERE a.term IN (:termCode)
 		   AND   a.courseReferenceNumber IN (:courseReferenceNumbers)""")
 ])
 class MeetingTimeSearch {
@@ -392,9 +392,10 @@ class MeetingTimeSearch {
         return meetingTimeSearchList
     }
 
-    public static def fetchListMeetingTimeDetailByTermAndCourseReferenceNumber(String termCode, Set courseReferenceNumbers) {
+    public static def fetchListMeetingTimeDetailByTermAndCourseReferenceNumber(def termList, def courseReferenceNumbers) {
+        termList = termList.size()==1 ? termList[0] : termList
         def meetingTimeResultList = MeetingTimeSearch.withSession { session ->
-            session.getNamedQuery('MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber').setString('termCode', termCode).setParameterList('courseReferenceNumbers', courseReferenceNumbers.size()>0?courseReferenceNumbers:'').list()
+            session.getNamedQuery('MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber').setParameterList('termCode', termList).setParameterList('courseReferenceNumbers', courseReferenceNumbers.size()>0?courseReferenceNumbers:'').list()
         }
         return meetingTimeResultList
     }
