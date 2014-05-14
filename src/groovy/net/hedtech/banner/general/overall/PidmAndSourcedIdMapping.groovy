@@ -16,6 +16,14 @@ import javax.persistence.*
 @Table(name = "GOBSRID")
 @ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode(includeFields = true)
+@NamedQueries(value = [
+        @NamedQuery(name = "PidmAndSourcedIdMapping.fetchByPidm",
+                query = """FROM  PidmAndSourcedIdMapping a
+        WHERE a.pidm = :pidm  """),
+        @NamedQuery(name = "PidmAndSourcedIdMapping.fetchByPidmList",
+                query = """FROM  PidmAndSourcedIdMapping a
+        WHERE a.pidm IN :pidms  """)
+])
 class PidmAndSourcedIdMapping implements Serializable {
 
     /**
@@ -23,6 +31,8 @@ class PidmAndSourcedIdMapping implements Serializable {
      */
     @Id
     @Column(name = "GOBSRID_SURROGATE_ID")
+    @SequenceGenerator(name = "GOBSRID_SEQ_GEN", allocationSize = 1, sequenceName = "GOBSRID_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GOBSRID_SEQ_GEN")
     Long id
 
     /**
@@ -65,6 +75,7 @@ class PidmAndSourcedIdMapping implements Serializable {
 
     static constraints = {
         pidm(nullable: false, min: -99999999, max: 99999999)
+        sourcedId(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
@@ -73,4 +84,24 @@ class PidmAndSourcedIdMapping implements Serializable {
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['sourcedId']
 
+
+    // Methods to expose named queries
+
+    public static PidmAndSourcedIdMapping fetchByPidm (Integer pidm){
+        def sections
+        PidmAndSourcedIdMapping.withSession {
+            session ->
+                sections = session.getNamedQuery('PidmAndSourcedIdMapping.fetchByPidm').setInteger('pidm', pidm).uniqueResult()
+        }
+        return sections
+    }
+
+    public static List fetchByPidmList (List pidmList){
+        def sections
+        PidmAndSourcedIdMapping.withSession {
+            session ->
+                sections = session.getNamedQuery('PidmAndSourcedIdMapping.fetchByPidmList').setParameterList('pidms', pidmList).list()
+        }
+        return sections
+    }
 }
