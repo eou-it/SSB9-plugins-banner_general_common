@@ -331,7 +331,7 @@ class MeetingTimeSearch {
     }
 
 
-    def static parseQueryString(def meetingFilter, String prefix) {
+    def static parseQueryString(def meetingFilter, String prefix, Map filterCriteria) {
 
         def stringKeys = ["courseReferenceNumber", "term", "category", "building", "termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
@@ -364,23 +364,34 @@ class MeetingTimeSearch {
                         }
                     }
                     if (field?.oneToOne) {
-                        query += " ${prefix}.${param.key}.code  in (${inClause}) "
+                        query += " ${prefix}.${param.key}.code  in (:${param.key}) "
                     } else {
-                        query += " ${prefix}.${param.key} in (${inClause}) "
+                        query += " ${prefix}.${param.key} in (:${param.key}) "
                     }
+                    filterCriteria.put(param.key, param.value)
                 } else {
-                    query += " ${prefix}.${param.key}  = '${param.value}'  "
+                    query += " ${prefix}.${param.key}  = :${param.key}   "
+                    filterCriteria.put(param.key, param.value)
                 }
             } else if (booleanKeys.contains(param.key)) {
-                query += " ${prefix}.${param.key} is ${param.value}   "
+                if (param.value instanceof String && param.value =~ "not"){
+                    query += " ${prefix}.${param.key} is not :${param.key}   "
+                    filterCriteria.put(param.key, true)
+                }
+                else {
+                    query += " ${prefix}.${param.key} is :${param.key}   "
+                    filterCriteria.put(param.key, param.value)
+                }
             } else if (param.key == "beginTime") {
-                query += " nvl(${prefix}.beginTime,'0000') >= '${param.value}' "
+                query += " nvl(${prefix}.beginTime,'0000') >= :${param.key}  "
+                filterCriteria.put(param.key, param.value)
             } else if (param.key == "endTime") {
-                query += " nvl(${prefix}.endTime,'0000') <= '${param.value}' "
+                query += " nvl(${prefix}.endTime,'0000') <= :${param.key}  "
+                filterCriteria.put(param.key, param.value)
             }
         }
 
-        return query
+        return [query: query,  filter: filterCriteria]
     }
 
 

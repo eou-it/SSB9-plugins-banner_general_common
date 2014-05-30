@@ -93,10 +93,11 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
             return delegate.replace("\n", "").replaceAll(/  */, " ")
         }
         Map filterData = [courseReferenceNumber: "20199", term: "201410"]
-        def meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
-        assertNotNull meetingQuery
-        def query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        def meetings = MeetingTimeSearch.findAll(query.flattenString())
+        def meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
+        assertNotNull meetingQuery.query
+        assertNotNull meetingQuery.filter
+        def query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        def meetings = MeetingTimeSearch.findAll(query.flattenString(), meetingQuery.filter)
         assertEquals meetings.size(), 2
         assertEquals meetings[0].category, "03"
         assertEquals meetings[1].category, "04"
@@ -105,10 +106,10 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         assertEquals countMeetings, 2
 
         filterData = [monday: true, wednesday: true, beginTime: "0800", endTime: '0900', term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString(), meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.monday
             assertTrue meet.wednesday
@@ -116,10 +117,10 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         }
 
         filterData = [monday: true, wednesday: true, friday: "not true", term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString() , meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.monday
             assertTrue meet.wednesday
@@ -127,44 +128,44 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         }
 
         filterData = [tuesday: true, thursday: true, beginTime: "1000", endTime: "1100", term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString(), meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.tuesday
             assertTrue meet.thursday
             assertTrue meet.beginTime >= "1000" && meet.endTime <= "1100"
         }
         filterData = [friday: true, term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString(), meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.friday
         }
         filterData = [saturday: true, term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        meetings = MeetingTimeSearch.findAll("from MeetingTimeSearch sr where ${meetingQuery}")
+        meetings = MeetingTimeSearch.findAll("from MeetingTimeSearch sr where ${meetingQuery.query}" , meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.saturday
         }
         filterData = [sunday: true, term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString(), meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.sunday
         }
 
         filterData = [termCourseReferenceNumber: ["20141020001", "20141020002"], term: "201410"]
-        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr")
+        meetingQuery = MeetingTimeSearch.parseQueryString(filterData, "sr", filterData)
         assertNotNull meetingQuery
-        query = "from MeetingTimeSearch sr where ${meetingQuery}"
-        meetings = MeetingTimeSearch.findAll(query.flattenString())
+        query = "from MeetingTimeSearch sr where ${meetingQuery.query}"
+        meetings = MeetingTimeSearch.findAll(query.flattenString(), meetingQuery.filter)
         meetings.each { meet ->
             assertTrue meet.term == "201410" && (meet.courseReferenceNumber == "20001" ||
                     meet.courseReferenceNumber == '20002')
