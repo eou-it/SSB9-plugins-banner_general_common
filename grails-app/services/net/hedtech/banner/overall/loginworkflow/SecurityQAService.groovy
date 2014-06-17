@@ -184,7 +184,7 @@ class SecurityQAService {
 
     private void createEditableQuestionAndAnswer(pidm, question, question_num, answer) {
         if (GeneralForStoringResponsesAndPinQuestion.fetchCountOfSameQuestionForPidm([pidm: Integer.valueOf(pidm), questionDescription: question]) > 0) {
-            log.error("Question has to be Unique")
+            log.warn("Question has to be Unique")
             throw new ApplicationException("", "securityQA.unique.question")
         }
         GeneralForStoringResponsesAndPinQuestion generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
