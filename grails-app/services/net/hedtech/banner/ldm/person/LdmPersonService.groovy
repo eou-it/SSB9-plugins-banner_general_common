@@ -11,7 +11,7 @@ import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonTelephone
 import net.hedtech.banner.general.system.Race
-import net.hedtech.banner.ldm.overall.Guid
+import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,7 +24,7 @@ class LdmPersonService {
     @Transactional(readOnly = true)
     def get(id) {
         // TODO: Exception handling / checking nulls
-        def entity = Guid.findByGuid(id)
+        def entity = GlobalUniqueIdentifier.findByGuid(id)
         if( !entity ) {
             throw new ApplicationException("Person","@@r1:not.found.message:Person::BusinessLogicValidationException@@")
         }
@@ -102,7 +102,7 @@ class LdmPersonService {
     // TODO: validate guid format.
     private void updateGuidValue(def id, def guid) {
         // Update the GUID to the one we received.
-        Guid newEntity = Guid.findByLdmNameAndDomainId('persons', id)
+        GlobalUniqueIdentifier newEntity = GlobalUniqueIdentifier.findByLdmNameAndDomainId('persons', id)
         if( !newEntity ) {
             throw new ApplicationException("Person","@@r1:guid.record.not.found.message:Person@@")
         }
