@@ -6,7 +6,7 @@ package net.hedtech.banner.general.overall
 
 
 /**
- * Information about the application, versions, plugins, and grails
+ * Information about the application
  */
 class AboutService {
  
@@ -16,7 +16,7 @@ class AboutService {
         def appName = grailsApplication?.metadata?.getApplicationName()
         def appVersion = grailsApplication?.metadata?.getApplicationVersion()
         def aboutMap = [applicationName: appName, applicationVersion: appVersion]
-        return [new net.hedtech.banner.general.overall.decorator.About(aboutMap)]
+        return [new AboutDecorator(aboutMap)]
     }
 
     def count() {
