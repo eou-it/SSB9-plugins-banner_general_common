@@ -1,21 +1,21 @@
 /*******************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.ldm.person
+package net.hedtech.banner.general.person.ldm.v1
 
 /**
  * LDM decorator for person resource credential.
  */
-class CredentialV1 {
+class Credential {
     String credentialType
-    String credentialId
+    String credentialID
     Date effectiveStartDate
     Date effectiveEndDate
 
-    def CredentialV1( String credentialType, String credentialId,
+    def Credential( String credentialType, String credentialId,
                     Date effectiveStartDate, Date effectiveEndDate) {
         this.credentialType = credentialType
-        this.credentialId = credentialId
+        this.credentialID = credentialId
         this.effectiveStartDate = effectiveStartDate
         this.effectiveEndDate = effectiveEndDate
     }
