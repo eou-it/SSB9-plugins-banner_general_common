@@ -2,17 +2,17 @@
  Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
-package net.hedtech.banner.general.overall.decorator
+package net.hedtech.banner.general.overall
 
 /**
  * Decorator for the about service
  */
-class About {
+class AboutDecorator {
 
     def applicationName
     def applicationVersion
 
-    About( Map<String,Object> about) {
+    AboutDecorator( Map<String,Object> about) {
 
         this.applicationName = about.applicationName
         this.applicationVersion = about.applicationVersion
