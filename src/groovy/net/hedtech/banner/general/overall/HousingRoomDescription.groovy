@@ -2,12 +2,11 @@
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
-
-import net.hedtech.banner.service.DatabaseModifiesState
 import net.hedtech.banner.general.system.*
-import org.hibernate.annotations.Type
-import javax.persistence.*
+import net.hedtech.banner.query.DynamicFinder
+import net.hedtech.banner.service.DatabaseModifiesState
 
+import javax.persistence.*
 /**
  * Room Description Table.
  */
@@ -497,6 +496,14 @@ class HousingRoomDescription implements Serializable {
             roomList = HousingRoomDescription.findAll([sort: "roomNumber", order: "asc"])
         }
         return [list: roomList]
+    }
+
+
+    static List<HousingRoomDescription> fetchAllActiveClassrooms(Map filterData, Map paginationAndSortParams){
+        def query = """FROM  HousingRoomDescription a
+                                       WHERE a.roomType = 'C'
+                                       AND NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'"""
+        return new DynamicFinder(HousingRoomDescription.class, query, 'a').find(filterData?:[params:[:]], paginationAndSortParams)
     }
 
 }

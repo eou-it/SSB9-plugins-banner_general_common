@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 /** *****************************************************************************
  Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
@@ -8,6 +8,7 @@ package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
+import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
@@ -135,7 +136,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         super.setUp()
         initializeTestDataForReferences()
     }
-
 
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
@@ -381,7 +381,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
     void testValidation() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
-        assertTrue "HousingRoomDescription could not be validated as expected due to ${housingRoomDescription.errors}", housingRoomDescription.validate()
+        assertTrue "HousingRoomDescription could not be validated as expected due to ${ housingRoomDescription.errors }", housingRoomDescription.validate()
     }
 
 
@@ -389,37 +389,37 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         def housingRoomDescription = new HousingRoomDescription()
         assertFalse "HousingRoomDescription should have failed validation", housingRoomDescription.validate()
         assertErrorsFor housingRoomDescription, 'nullable',
-                        [
+                [
                         'roomNumber',
                         'termEffective',
                         'capacity',
                         'roomType',
                         'building'
-                        ]
+                ]
         assertNoErrorsFor housingRoomDescription,
-                          [
-                          'description',
-                          'maximumCapacity',
-                          'utilityRate',
-                          'utilityRatePeriod',
-                          'phoneArea',
-                          'phoneNumber',
-                          'phoneExtension',
-                          'benefitCategory',
-                          'sex',
-                          'priority',
-                          'keyNumber',
-                          'width',
-                          'length',
-                          'area',
-                          'countryPhone',
-                          'department',
-                          'partition',
-                          'roomStatus',
-                          'roomRate',
-                          'phoneRate',
-                          'college'
-                          ]
+                [
+                        'description',
+                        'maximumCapacity',
+                        'utilityRate',
+                        'utilityRatePeriod',
+                        'phoneArea',
+                        'phoneNumber',
+                        'phoneExtension',
+                        'benefitCategory',
+                        'sex',
+                        'priority',
+                        'keyNumber',
+                        'width',
+                        'length',
+                        'area',
+                        'countryPhone',
+                        'department',
+                        'partition',
+                        'roomStatus',
+                        'roomRate',
+                        'phoneRate',
+                        'college'
+                ]
     }
 
 
@@ -453,14 +453,14 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingRoomDescription.validate()
         assertErrorsFor housingRoomDescription, 'max',
-                        [
+                [
                         'capacity',
                         'maximumCapacity',
                         'utilityRate',
                         'width',
                         'length',
                         'area'
-                        ]
+                ]
     }
 
 
@@ -475,14 +475,14 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
         assertFalse "HousingLocationBuildingDescription should have failed validation", housingRoomDescription.validate()
         assertErrorsFor housingRoomDescription, 'min',
-                        [
+                [
                         'capacity',
                         'maximumCapacity',
                         'utilityRate',
                         'width',
                         'length',
                         'area'
-                        ]
+                ]
     }
 
 
@@ -517,25 +517,25 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test by passing room number or description as filters
-     void testFetchBySomeHousingRoomDescription() {
-         //Test by passing room description as filter
-         def map = [termEffective: '200110']
-         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('lecture hall', map)
-         assertNotNull housings
-         assertTrue housings.list.size() > 0
-         def descList = housings.list*.description
-         descList.each { it ->
-              assertTrue(it.contains('Lecture Hall'))
-         }
-         //Test by passing room number as filter
-         def map2 = [termEffective: '200110']
-         def housings2 = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('100', map2)
-         assertNotNull housings2
-         assertTrue housings2.list.size() > 0
-         def roomNumberList = housings2.list*.roomNumber
-           roomNumberList.each { it ->
-              assertTrue(it.contains('100'))
-         }
+    void testFetchBySomeHousingRoomDescription() {
+        //Test by passing room description as filter
+        def map = [termEffective: '200110']
+        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('lecture hall', map)
+        assertNotNull housings
+        assertTrue housings.list.size() > 0
+        def descList = housings.list*.description
+        descList.each { it ->
+            assertTrue(it.contains('Lecture Hall'))
+        }
+        //Test by passing room number as filter
+        def map2 = [termEffective: '200110']
+        def housings2 = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('100', map2)
+        assertNotNull housings2
+        assertTrue housings2.list.size() > 0
+        def roomNumberList = housings2.list*.roomNumber
+        roomNumberList.each { it ->
+            assertTrue(it.contains('100'))
+        }
     }
 
 
@@ -560,6 +560,25 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)
         assertNotNull housings
         assertEquals '100', housings.roomNumber
+    }
+
+
+    void testFetchAllActiveClassrooms() {
+        def housingRoomDescription = newValidForCreateHousingRoomDescription()
+        housingRoomDescription.save(failOnError: true, flush: true)
+        assertNotNull housingRoomDescription.id
+        def result = HousingRoomDescription.fetchAllActiveClassrooms([:], [max: 10, offset: 0])
+        assertNotNull result
+        assertFalse result.isEmpty()
+        assertFalse result.contains(housingRoomDescription)
+
+        housingRoomDescription.roomType = 'C'
+        housingRoomDescription.save(failOnError: true, flush: true)
+        def filterData = [params: [id: housingRoomDescription.id], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
+        result = HousingRoomDescription.fetchAllActiveClassrooms(filterData, [max: 10, offset: 0])
+        assertNotNull result
+        assertFalse result.isEmpty()
+        assertTrue result.contains(housingRoomDescription)
     }
 
 
