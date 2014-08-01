@@ -21,7 +21,7 @@ class RoomCompositeService {
 
     List<Room> list(Map map) {
         List rooms = []
-        RestfulApiValidationUtility.correctMaxAndOffset(map, 10, 30)
+        RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveClassrooms([:], map)
         housingRoomDescriptions.each { housingRoomDescription ->
             List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
