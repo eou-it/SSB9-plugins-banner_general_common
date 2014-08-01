@@ -63,7 +63,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         HousingRoomDescription housingRoomDescription = i_success_housingRoomDescription
         assertNotNull housingRoomDescription.id
         def id = i_success_housingRoomDescription.id
-        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('rooms', i_success_housingRoomDescription.id)
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('rooms', i_success_housingRoomDescription.id).guid
         assertNotNull guid
 
         housingRoomDescription.delete(flush: true)
