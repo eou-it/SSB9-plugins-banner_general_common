@@ -72,4 +72,12 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         assertEquals display, showNameSuffix
 
     }
+
+
+    void testFetchSSBMaskByBlockNameAndColumnName() {
+        def display = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName([blockName:'BWPKHSTB',columnName:'%_SSN'])
+        assertNotNull display
+        assertEquals display.dataMask,"X****XXXX"
+
+    }
 }
