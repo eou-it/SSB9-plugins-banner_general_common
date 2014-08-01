@@ -22,8 +22,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private void initiializeDataReferences() {
-        Building building = Building.findByCode('B00A')
-        i_success_housingRoomDescription = HousingRoomDescription.findByBuildingAndRoomNumber(building, 'R00A')
+        Building building = Building.findByCode('CIS')
+        i_success_housingRoomDescription = HousingRoomDescription.findByBuildingAndRoomNumber(building, '100')
     }
 
 
@@ -63,7 +63,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         HousingRoomDescription housingRoomDescription = i_success_housingRoomDescription
         assertNotNull housingRoomDescription.id
         def id = i_success_housingRoomDescription.id
-        String guid = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId('rooms', i_success_housingRoomDescription.id)
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('rooms', i_success_housingRoomDescription.id)
         assertNotNull guid
 
         housingRoomDescription.delete(flush: true)

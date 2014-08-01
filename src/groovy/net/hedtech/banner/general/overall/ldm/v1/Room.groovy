@@ -5,6 +5,9 @@ package net.hedtech.banner.general.overall.ldm.v1
 
 import net.hedtech.banner.general.overall.HousingRoomDescription
 
+/**
+ * LDM decorator for Room resource(/base/domain/room/room.json-schema)
+ */
 class Room {
 
     @Delegate
