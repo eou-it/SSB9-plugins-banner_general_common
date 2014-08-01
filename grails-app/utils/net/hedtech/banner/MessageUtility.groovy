@@ -11,7 +11,7 @@ import net.hedtech.banner.ui.zk.i18n.MessageHelper
  */
 class MessageUtility {
 
-    public static String message(key, args = null) {
+    public static String message(key, args = null, locale = null) {
        return MessageHelper.message(key, args)
    }
 
