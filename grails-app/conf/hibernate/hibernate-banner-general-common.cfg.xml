@@ -33,7 +33,6 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescription"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomUsageRestriction"/>
         <mapping class="net.hedtech.banner.general.overall.ImsSourcedIdBase"/>
-        <mapping class="net.hedtech.banner.general.overall.IntegrationConfiguration"/>
         <mapping class="net.hedtech.banner.general.overall.IntegrationPartnerSystemRule"/>
         <mapping class="net.hedtech.banner.general.overall.MeetingTimeSearch"/>
         <mapping class="net.hedtech.banner.general.overall.PidmAndUDCIdMapping"/>
