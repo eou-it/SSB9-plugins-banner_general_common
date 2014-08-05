@@ -80,4 +80,12 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         assertEquals display.dataMask,"X****XXXX"
 
     }
+
+
+    void testFetchSSBMaskByBlockName() {
+        def displayRules = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName([blockName:'BWGKOADR'])
+        assertNotNull displayRules
+        assertEquals displayRules.size,4
+
+    }
 }
