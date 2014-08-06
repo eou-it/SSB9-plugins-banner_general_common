@@ -19,10 +19,11 @@ class RoomCompositeService {
     private static final String ROOM_LAYOUT_TYPE_CLASSROOM = 'Classroom'
 
 
-    List<Room> list(Map map) {
+    List<Room> list(Map params) {
         List rooms = []
-        RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveClassrooms([:], map)
+        RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
+        def filterData = [params: [:]]
+        List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveClassrooms(filterData, params)
         housingRoomDescriptions.each { housingRoomDescription ->
             List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
             rooms << new Room(housingRoomDescription, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(ROOM_LDM_NAME, housingRoomDescription.id).guid)
@@ -32,7 +33,7 @@ class RoomCompositeService {
 
 
     Long count() {
-        return HousingRoomDescription.count()
+        return HousingRoomDescription.countAllActiveClassrooms()
     }
 
 

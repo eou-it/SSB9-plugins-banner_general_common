@@ -567,18 +567,30 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
         assertNotNull housingRoomDescription.id
-        def result = HousingRoomDescription.fetchAllActiveClassrooms([:], [max: 10, offset: 0])
+        def filterData = [params: [:]]
+        def result = HousingRoomDescription.fetchAllActiveClassrooms(filterData, [max: 10, offset: 0])
         assertNotNull result
         assertFalse result.isEmpty()
         assertFalse result.contains(housingRoomDescription)
 
         housingRoomDescription.roomType = 'C'
         housingRoomDescription.save(failOnError: true, flush: true)
-        def filterData = [params: [id: housingRoomDescription.id], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
+        filterData = [params: [id: housingRoomDescription.id], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
         result = HousingRoomDescription.fetchAllActiveClassrooms(filterData, [max: 10, offset: 0])
         assertNotNull result
         assertFalse result.isEmpty()
         assertTrue result.contains(housingRoomDescription)
+    }
+
+
+    void testCountAllActiveClassrooms() {
+        def housingRoomDescription = newValidForCreateHousingRoomDescription()
+        housingRoomDescription.roomType = 'C'
+        housingRoomDescription.save(failOnError: true, flush: true)
+        assertNotNull housingRoomDescription.id
+        Long count = HousingRoomDescription.countAllActiveClassrooms()
+        assertNotNull count
+        assertTrue count > 0
     }
 
 

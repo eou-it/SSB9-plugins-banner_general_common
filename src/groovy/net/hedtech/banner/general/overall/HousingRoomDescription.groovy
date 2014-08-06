@@ -503,7 +503,15 @@ class HousingRoomDescription implements Serializable {
         def query = """FROM  HousingRoomDescription a
                                        WHERE a.roomType = 'C'
                                        AND NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'"""
-        return new DynamicFinder(HousingRoomDescription.class, query, 'a').find(filterData?:[params:[:]], paginationAndSortParams)
+        new DynamicFinder(HousingRoomDescription.class, query, 'a').find(filterData?:[params:[:]], paginationAndSortParams)
+    }
+
+
+    static Long countAllActiveClassrooms(Map filterData = [params:[:]] ){
+        def query = """FROM  HousingRoomDescription a
+                                       WHERE a.roomType = 'C'
+                                       AND NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'"""
+        new DynamicFinder(HousingRoomDescription.class, query, 'a').count(filterData)
     }
 
 }
