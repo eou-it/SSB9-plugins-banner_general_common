@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingRoomDescription
+import net.hedtech.banner.general.overall.ldm.v1.Building
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.query.operators.Operators
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 class RoomCompositeService {
+
+    def buildingCompositeService
 
     private static final String ROOM_LDM_NAME = 'rooms'
     private static final String ROOM_LAYOUT_TYPE_CLASSROOM = 'Classroom'
@@ -26,7 +29,8 @@ class RoomCompositeService {
         List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveClassrooms(filterData, params)
         housingRoomDescriptions.each { housingRoomDescription ->
             List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
-            rooms << new Room(housingRoomDescription, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(ROOM_LDM_NAME, housingRoomDescription.id).guid)
+            Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
+            rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(ROOM_LDM_NAME, housingRoomDescription.id).guid)
         }
         return rooms
     }
@@ -49,8 +53,8 @@ class RoomCompositeService {
         if (!housingRoomDescription) {
             throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Room.class.simpleName))
         }
-
+        Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
         List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
-        return new Room(housingRoomDescription, occupancies, globalUniqueIdentifier.guid)
+        return new Room(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid)
     }
 }

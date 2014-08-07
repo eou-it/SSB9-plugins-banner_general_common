@@ -12,13 +12,26 @@ class Room {
 
     @Delegate
     private final HousingRoomDescription housingRoomDescription
+    Building building
     List occupancies
     String guid
 
-    Room(HousingRoomDescription housingRoomDescription, List occupancies, String guid){
+
+    Room(HousingRoomDescription housingRoomDescription, Building building, List occupancies, String guid) {
         this.housingRoomDescription = housingRoomDescription
+        this.building = building
         this.occupancies = occupancies
         this.guid = guid
+    }
+
+
+    Building getBuilding() {
+        this.building
+    }
+
+
+    void setBuilding(Building building) {
+        this.building = building
     }
 
 
@@ -28,6 +41,7 @@ class Room {
         Room room = (Room) o
         if (guid != room.guid) return false
         if (housingRoomDescription != room.housingRoomDescription) return false
+        if (building != room.building) return false
         if (occupancies != room.occupancies) return false
         return true
     }
@@ -36,6 +50,7 @@ class Room {
     int hashCode() {
         int result
         result = (housingRoomDescription != null ? housingRoomDescription.hashCode() : 0)
+        result = (building != null ? building.hashCode() : 0)
         result = 31 * result + (occupancies != null ? occupancies.hashCode() : 0)
         result = 31 * result + (guid != null ? guid.hashCode() : 0)
         return result
@@ -45,6 +60,7 @@ class Room {
     public String toString() {
         """Room[
                     housingRoomDescription=$housingRoomDescription,
+                    building=$building,
                     occupancies=$occupancies,
                     guid=$guid]"""
     }
