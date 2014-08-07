@@ -69,10 +69,10 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     void testGetInvalidNonExistentHousingLocationBuildingDescription() {
-        HousingLocationBuildingDescription housingLocationBuildingDescription = i_success_housingLocationBuildingDescription
+        HousingLocationBuildingDescription housingLocationBuildingDescription = HousingLocationBuildingDescription.findByBuilding( net.hedtech.banner.general.system.Building.findByCode( 'NORTH' ) )
         assertNotNull housingLocationBuildingDescription.id
-        def id = i_success_housingLocationBuildingDescription.id
-        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( 'buildings', i_success_housingLocationBuildingDescription.id ).guid
+        def id = housingLocationBuildingDescription.id
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( 'buildings', id ).guid
         assertNotNull guid
 
         housingLocationBuildingDescription.delete( flush: true )
