@@ -3,7 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.overall
 
-import org.hibernate.annotations.Type
+
 import javax.persistence.*
 import net.hedtech.banner.service.DatabaseModifiesState
 
