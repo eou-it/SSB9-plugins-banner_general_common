@@ -20,11 +20,22 @@ class BuildingCompositeService {
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
 
+    private HashMap ldmFieldToBannerDomainPropertyMap = [
+            abbreviation: 'building.code',
+            title       : 'building.description'
+    ]
 
-    List<Building> list( Map map ) {
+
+    List<Building> list( Map params ) {
         List buildings = []
-        RestfulApiValidationUtility.correctMaxAndOffset( map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
-        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list( map ) as List
+        List allowedSortFields = ['abbreviation', 'title']
+
+        RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
+        RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
+        RestfulApiValidationUtility.validateSortOrder(params.order)
+        params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
+
+        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list( params ) as List
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
             buildings << new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid )

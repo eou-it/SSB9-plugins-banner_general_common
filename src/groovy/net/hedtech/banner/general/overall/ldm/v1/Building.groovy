@@ -46,7 +46,7 @@ class Building {
     }
 
 
-    String getNumber(){
+    String getAbbreviation(){
         housingLocationBuildingDescription?.building?.code
     }
 
