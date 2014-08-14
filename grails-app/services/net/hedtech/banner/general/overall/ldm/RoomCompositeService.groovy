@@ -18,7 +18,6 @@ class RoomCompositeService {
 
     def buildingCompositeService
 
-    private static final String ROOM_LDM_NAME = 'rooms'
     private static final String ROOM_LAYOUT_TYPE_CLASSROOM = 'Classroom'
 
 
@@ -30,7 +29,7 @@ class RoomCompositeService {
         housingRoomDescriptions.each { housingRoomDescription ->
             List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
             Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
-            rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(ROOM_LDM_NAME, housingRoomDescription.id).guid)
+            rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid)
         }
         return rooms
     }
@@ -43,7 +42,7 @@ class RoomCompositeService {
 
     @Transactional(readOnly = true)
     Room get(String guid) {
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ROOM_LDM_NAME, guid)
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(Room.LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
             throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Room.class.simpleName))
         }

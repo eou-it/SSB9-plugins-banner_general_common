@@ -4,7 +4,7 @@
 package net.hedtech.banner.general.overall.ldm.v1
 
 /**
- * POGO to represent each element of "occupancies" array inside Room LDM (/base/domain/room/v1/room.json-schema)
+ * POGO to represent each element of "occupancies" array inside Room LDM (/base/domain/rooms/v1/rooms.json-schema)
  */
 class Occupancy {
 

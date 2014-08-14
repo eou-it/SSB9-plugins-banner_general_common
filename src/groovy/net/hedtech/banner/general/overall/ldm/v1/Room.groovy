@@ -10,6 +10,8 @@ import net.hedtech.banner.general.overall.HousingRoomDescription
  */
 class Room {
 
+    public static final String LDM_NAME = 'rooms'
+
     @Delegate
     private final HousingRoomDescription housingRoomDescription
     Building building
