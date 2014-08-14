@@ -14,7 +14,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def roomCompositeService
 
 
-    void setUp() {
+    protected  void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initiializeDataReferences()
