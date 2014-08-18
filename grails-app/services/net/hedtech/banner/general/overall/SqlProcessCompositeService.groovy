@@ -26,6 +26,7 @@ class SqlProcessCompositeService {
                             params.get(parameter.parameterForSqlProcess.toLowerCase() ?: parameter.parameterForSqlProcess.toUpperCase()))
                 }
             }
+            log.debug "Parsed SQL: ${parsedSql}"
             log.debug "Bind variables: ${bindValues.toString()}"
             def conn = dataSource.getConnection()
             Sql db = new Sql( conn )

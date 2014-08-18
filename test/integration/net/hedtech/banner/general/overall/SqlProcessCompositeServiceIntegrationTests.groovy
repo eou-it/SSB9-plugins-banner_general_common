@@ -68,5 +68,19 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
             db?.close()
         }
     }
+
+    void testSqlProcessCompositeServiceTestGetSqlProcessResultsTerms() {
+        def params = [sqlCode: 'DERIVE_TERM', sqlProcessCode: 'LDM', input_date: new java.sql.Date(new Date().time)]
+        Sql db
+        try {
+            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
+            def results = sqlProcessCompositeService.getSqlProcessResults(params)
+            assertEquals results[0][0], "201410"
+
+        }
+        finally {
+            db?.close()
+        }
+    }
     // TODO: Test bad cases.
 }
