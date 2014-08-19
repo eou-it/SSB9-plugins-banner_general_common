@@ -24,7 +24,7 @@ class BuildingCompositeService {
     List<Building> list( Map params ) {
         List buildings = []
         List allowedSortFields = ['abbreviation', 'title']
-		private HashMap ldmFieldToBannerDomainPropertyMap = [
+		HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: 'building.code',
             title       : 'building.description'
 		]
