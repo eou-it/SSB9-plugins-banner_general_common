@@ -8,6 +8,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.ldm.v1.Building
+import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
@@ -93,6 +94,24 @@ class BuildingCompositeService {
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         return new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid )
+    }
+
+    List<Building> fetchByCampusCode( String campusCode ) {
+        List buildings = []
+        def siteDetail
+
+        if (null == campusCode) {
+            return null
+        }
+
+        Campus campus = net.hedtech.banner.general.system.Campus.findByCode( campusCode )
+        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = HousingLocationBuildingDescription.findAllByCampus(campus)
+
+        housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
+            buildings << new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid )
+        }
+        return buildings
+
     }
 
 

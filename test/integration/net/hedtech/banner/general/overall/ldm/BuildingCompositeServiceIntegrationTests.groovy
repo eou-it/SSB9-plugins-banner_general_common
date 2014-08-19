@@ -6,12 +6,14 @@ package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.ldm.v1.Building
+import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     HousingLocationBuildingDescription i_success_housingLocationBuildingDescription
     def buildingCompositeService
+    def siteDetailCompositeService
 
 
     void setUp() {
@@ -129,5 +131,16 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNull buildingCompositeService.fetchByBuildingCode( '' )
         assertNull buildingCompositeService.fetchByBuildingCode( null )
     }
+
+    void testFetchAllCampus() {
+        def paginationParams = [max: '20', offset: '0']
+
+        List buildings = buildingCompositeService.fetchByCampusCode(i_success_housingLocationBuildingDescription.campus.code )
+        assertNotNull buildings
+        assertFalse buildings.isEmpty()
+        assertTrue buildings.size() <= 20
+    }
+
+
 
 }
