@@ -28,16 +28,20 @@ class SqlProcessCompositeService {
             }
             log.debug "Parsed SQL: ${parsedSql}"
             log.debug "Bind variables: ${bindValues.toString()}"
-            def conn = dataSource.getConnection()
-            Sql db = new Sql( conn )
             def rows
-            if( bindValues.size() > 0 ) {
-                rows = db.rows(parsedSql, bindValues)
+            def conn
+            try {
+                conn = dataSource.getConnection()
+                Sql db = new Sql(conn)
+                if (bindValues.size() > 0) {
+                    rows = db.rows(parsedSql, bindValues)
+                } else {
+                    rows = db.rows(parsedSql)
+                }
             }
-            else {
-                rows = db.rows(parsedSql)
+            finally {
+                conn?.close()
             }
-            conn?.close()
             return rows
         }
         return null
