@@ -20,15 +20,14 @@ class BuildingCompositeService {
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
 
-    private HashMap ldmFieldToBannerDomainPropertyMap = [
-            abbreviation: 'building.code',
-            title       : 'building.description'
-    ]
-
-
+	
     List<Building> list( Map params ) {
         List buildings = []
         List allowedSortFields = ['abbreviation', 'title']
+		private HashMap ldmFieldToBannerDomainPropertyMap = [
+            abbreviation: 'building.code',
+            title       : 'building.description'
+		]
 
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
         RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
