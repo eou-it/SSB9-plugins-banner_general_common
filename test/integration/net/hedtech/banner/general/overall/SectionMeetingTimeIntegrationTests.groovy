@@ -834,6 +834,39 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertFalse "Schedule does not exist with this time ", count > 0
     }
 
+
+    void testFetchRecentCategoryByTermAndCourseReferenceNumber(){
+        def sectionMeetingTime = newValidForCreateSectionMeetingTime()
+        sectionMeetingTime.save(failOnError: true, flush: true)
+        assertNotNull sectionMeetingTime
+
+        def sectionMeetingTime2 = newValidForCreateSectionMeetingTime()
+        sectionMeetingTime2.category = "00"
+        sectionMeetingTime2.save(failOnError: true, flush: true)
+        assertNotNull sectionMeetingTime2
+
+        List sectionMeetingTimes = SectionMeetingTime.findAllByTermAndCourseReferenceNumber(sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber)
+        assertTrue sectionMeetingTimes.size() >= 2
+
+        String category = SectionMeetingTime.fetchRecentCategoryByTermAndCourseReferenceNumber( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
+        assertNotNull category
+        assertEquals sectionMeetingTime2.category, category
+    }
+
+
+    void testFetchRecentCategoryByTermAndCourseReferenceNumberWithInvalidData(){
+        // Fetch with invalid term and crn combination
+        String category = SectionMeetingTime.fetchRecentCategoryByTermAndCourseReferenceNumber( '444444', '55555' )
+        assertNull category
+    }
+
+
+    void testFetchRecentCategoryByTermAndCourseReferenceNumberWithNullData(){
+            String category = SectionMeetingTime.fetchRecentCategoryByTermAndCourseReferenceNumber( null, null )
+            assertNull category
+    }
+
+
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
     void testFetchByTermCRNAndFunction() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTimeForEvent()
