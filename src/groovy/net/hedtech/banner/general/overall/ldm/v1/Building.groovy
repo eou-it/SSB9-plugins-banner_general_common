@@ -19,12 +19,12 @@ class Building {
     Metadata metadata
     List<Room> rooms = []
 
-    Building ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata meatadata ) {
+    Building ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata metadata ) {
         this.housingLocationBuildingDescription = housingLocationBuildingDescription
         this.siteDetail = siteDetail
         this.guid = guid
         this.rooms = rooms
-        this.metadata = meatadata
+        this.metadata = metadata
     }
 
 
