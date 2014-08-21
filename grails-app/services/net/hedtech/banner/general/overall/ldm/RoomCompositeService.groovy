@@ -9,6 +9,7 @@ import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.ldm.v1.Building
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
+import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
@@ -29,7 +30,7 @@ class RoomCompositeService {
         housingRoomDescriptions.each { housingRoomDescription ->
             List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
             Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
-            rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid)
+            rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid, new Metadata(housingRoomDescription.dataOrigin))
         }
         return rooms
     }
@@ -54,6 +55,6 @@ class RoomCompositeService {
         }
         Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
         List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
-        return new Room(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid)
+        return new Room(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
     }
 }

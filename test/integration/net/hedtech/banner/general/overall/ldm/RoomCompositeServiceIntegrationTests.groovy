@@ -35,7 +35,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testList() {
+    void testListWithPagination() {
         def paginationParams = [max: '20', offset: '0']
         List rooms = roomCompositeService.list(paginationParams)
         assertNotNull rooms
@@ -87,5 +87,9 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         Room room = roomCompositeService.get(rooms[0].guid)
         assertNotNull room
         assertEquals rooms[0], room
+        assertEquals rooms[0].metadata.dataOrigin, room.metadata.dataOrigin
+        assertEquals rooms[0].building, room.building
+        assertEquals rooms[0].occupancies, room.occupancies
+        assertEquals rooms[0].guid, room.guid
     }
 }

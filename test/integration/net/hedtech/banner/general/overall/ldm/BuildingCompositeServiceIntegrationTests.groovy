@@ -13,7 +13,6 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     HousingLocationBuildingDescription i_success_housingLocationBuildingDescription
     def buildingCompositeService
-    def siteDetailCompositeService
 
 
     void setUp() {
@@ -37,7 +36,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testList() {
+    void testListWithPagination() {
         def paginationParams = [max: '20', offset: '0']
         List buildings = buildingCompositeService.list( paginationParams )
         assertNotNull buildings
@@ -48,7 +47,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     void testCount() {
         assertNotNull i_success_housingLocationBuildingDescription
-        assertTrue buildingCompositeService.count() > 0
+        assertEquals HousingLocationBuildingDescription.count(), buildingCompositeService.count()
     }
 
 
@@ -98,7 +97,11 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         Building building = buildingCompositeService.get( buildings[0].guid )
         assertNotNull building
         assertEquals buildings[0], building
-
+        assertEquals buildings[0].guid, building.guid
+        assertEquals buildings[0].rooms, building.rooms
+        assertEquals buildings[0].metadata, building.metadata
+        assertEquals buildings[0].site, building.site
+        assertEquals buildings[0].building.code, building.building.code
         assertNotNull building.guid
         assertNotSame '', building.guid
     }
@@ -109,6 +112,8 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull building
         assertNotNull building.guid
         assertEquals i_success_housingLocationBuildingDescription.id, building.id
+        assertEquals i_success_housingLocationBuildingDescription.building.code, building.building.code
+        assertEquals i_success_housingLocationBuildingDescription.building.dataOrigin, building.metadata.dataOrigin
     }
 
 
@@ -124,6 +129,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull building.guid
         assertEquals i_success_housingLocationBuildingDescription.id, building.id
         assertEquals i_success_housingLocationBuildingDescription.building.code, building.building.code
+        assertEquals i_success_housingLocationBuildingDescription.building.dataOrigin, building.metadata.dataOrigin
     }
 
 

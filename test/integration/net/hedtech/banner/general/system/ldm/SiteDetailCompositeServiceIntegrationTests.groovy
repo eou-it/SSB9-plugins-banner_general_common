@@ -29,7 +29,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Test case for List method
      */
-    void testList() {
+    void testListWithPagination() {
         def paginationParams = [max: '20', offset: '0']
         List siteList = siteDetailCompositeService.list(paginationParams)
         assertNotNull siteList
@@ -41,7 +41,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
      * Testcase for count method
      */
     void testCount() {
-        assertTrue siteDetailCompositeService.count() > 0
+        assertEquals Campus.count(), siteDetailCompositeService.count()
     }
 
     /**
@@ -56,6 +56,10 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         def site = siteDetailCompositeService.get(siteList[0].guid)
         assertNotNull site
         assertEquals siteList[0].code, site.code
+        assertEquals siteList[0].description, site.description
+        assertEquals siteList[0].guid, site.guid
+        assertEquals siteList[0].metadata, site.metadata
+        assertEquals siteList[0].buildings, site.buildings
     }
 
     /**
@@ -77,7 +81,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         Assert.assertEquals campus.id, siteDetail.id
         GroovyTestCase.assertEquals campus.code, siteDetail.code
         GroovyTestCase.assertEquals campus.description, siteDetail.description
-
+        GroovyTestCase.assertEquals campus.dataOrigin, siteDetail.metadata.dataOrigin
     }
 
     /**
@@ -89,6 +93,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         assertEquals campus.id, site.id
         assertEquals campus.code, site.code
         assertEquals campus.description, site.description
+        assertEquals campus.dataOrigin, site.metadata.dataOrigin
     }
 
 }

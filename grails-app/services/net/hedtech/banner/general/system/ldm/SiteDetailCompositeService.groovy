@@ -10,6 +10,7 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.Site
+import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.query.QueryBuilder
@@ -33,12 +34,6 @@ class SiteDetailCompositeService {
 
     def campusService
     def buildingCompositeService
-    def paginationParams = [max: '20', offset: '0']
-    def organizationCompositeService
-    def academicLevelCompositeService
-    def roomCompositeService
-    def gradeSchemeCompositeService
-
 
     /**
      * GET /api/sites/<guid>
@@ -58,7 +53,7 @@ class SiteDetailCompositeService {
             throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Site.class.simpleName))
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(guid, campus, buildings);
+        return new SiteDetail(guid, campus, buildings, new Metadata(campus.dataOrigin));
     }
 
     /**
@@ -89,7 +84,7 @@ class SiteDetailCompositeService {
 
         campuses.each { campus ->
             buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-            sites << new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings)
+            sites << new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
          }
 
         return sites
@@ -114,7 +109,7 @@ class SiteDetailCompositeService {
             return null
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, domainId).guid, campus, buildings)
+        return new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, domainId).guid, campus, buildings, new Metadata(campus.dataOrigin))
     }
 
 
@@ -127,7 +122,7 @@ class SiteDetailCompositeService {
             return null
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id)?.guid, campus, buildings)
+        return new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id)?.guid, campus, buildings, new Metadata(campus.dataOrigin))
     }
 
 }

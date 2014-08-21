@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall.ldm.v1
 
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
+import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 
 /**
@@ -15,11 +16,15 @@ class Building {
     private final HousingLocationBuildingDescription housingLocationBuildingDescription
     String guid
     private SiteDetail siteDetail
+    Metadata metadata
+    List<Room> rooms = []
 
-    Building ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid ) {
+    Building ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata meatadata ) {
         this.housingLocationBuildingDescription = housingLocationBuildingDescription
         this.siteDetail = siteDetail
         this.guid = guid
+        this.rooms = rooms
+        this.metadata = meatadata
     }
 
 
@@ -29,6 +34,8 @@ class Building {
         Building that = (Building) o
         if (housingLocationBuildingDescription != that.housingLocationBuildingDescription) return false
         if (guid != that.guid) return false
+        if (metadata != that.metadata) return false
+        if (rooms != that.rooms) return false
         return true
     }
 
@@ -37,6 +44,8 @@ class Building {
         int result
         result = (housingLocationBuildingDescription != null ? housingLocationBuildingDescription.hashCode() : 0)
         result = 31 * result + (guid != null ? guid.hashCode() : 0)
+        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
+        result = 31 * result + (rooms != null ? rooms.hashCode() : 0)
         return result
     }
 
@@ -59,6 +68,8 @@ class Building {
     public String toString() {
         """Building[
                        housingLocationBuildingDescription=$housingLocationBuildingDescription,
+                       metadata=$metadata,
+                       rooms=$rooms,
                        guid=$guid]"""
     }
 

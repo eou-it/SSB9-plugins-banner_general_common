@@ -3,7 +3,6 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm.v1
 
-import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
 
 /**
@@ -14,14 +13,17 @@ class SiteDetail {
 
     @Delegate
     private final Campus campus
+    Metadata metadata
+
 
     String guid
     def buildings = []
 
-    def SiteDetail(String guid, def campus, def buildings) {
+    def SiteDetail(String guid, def campus, def buildings, Metadata metadata) {
         this.guid = guid
         this.campus = campus
         this.buildings = buildings
+        this.metadata = metadata
     }
 
     /**
@@ -35,10 +37,10 @@ class SiteDetail {
         if (getClass() != o.class) return false
 
         SiteDetail that = (SiteDetail) o
-
+        if (metadata != that.metadata) return false
         if (guid != that.guid) return false
         if (campus != that.campus) return false
-
+        if (buildings != that.buildings) return false
         return true
     }
 
@@ -50,9 +52,17 @@ class SiteDetail {
         int result
         result = (campus != null ? campus.hashCode() : 0)
         result = 31 * result + (guid != null ? guid.hashCode() : 0)
+        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
+        result = 31 * result + (buildings != null ? buildings.hashCode() : 0)
         return result
     }
 
 
-
+    public String toString() {
+        """SiteDetail[
+                    campus=$campus,
+                    guid=$guid,
+                    buildings=$buildings,
+                    metadata=$metadata]"""
+    }
 }
