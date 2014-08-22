@@ -3,7 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner
 
-import net.hedtech.banner.ui.zk.i18n.MessageHelper
+import net.hedtech.banner.i18n.MessageHelper
 
 /**
  * This is a helper class that is used for retrieving Message from i18n messsage.properties
