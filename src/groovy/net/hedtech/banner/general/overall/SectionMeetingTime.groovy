@@ -47,7 +47,7 @@ query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
                         FROM SectionMeetingTime a
                         WHERE a.term = :term
                         AND a.courseReferenceNumber = :courseReferenceNumber
-                        ORDER BY a.id DESC""")
+                        ORDER BY a.id ASC""")
 ] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
@@ -577,16 +577,16 @@ class SectionMeetingTime implements Serializable {
     }
 
 
-    public static String fetchRecentCategoryByTermAndCourseReferenceNumber(String term, String courseReferenceNumber){
-        String category
+    public static List fetchCategoryByTermAndCourseReferenceNumber(String term, String courseReferenceNumber){
+        List categories = []
         if(term && courseReferenceNumber){
             SectionMeetingTime.withSession { session ->
-                category = session.getNamedQuery(
-                        'SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber').setString('term',term)
-                        .setString('courseReferenceNumber',courseReferenceNumber).list().getAt(0)
+                categories = session.getNamedQuery(
+                        'SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber')
+                        .setString('term',term).setString('courseReferenceNumber',courseReferenceNumber).list()
             }
         }
-        return category
+        return categories
     }
 
 }

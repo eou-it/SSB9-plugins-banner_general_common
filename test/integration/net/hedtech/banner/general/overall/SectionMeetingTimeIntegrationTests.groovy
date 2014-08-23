@@ -7,7 +7,6 @@ package net.hedtech.banner.general.overall
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.junit.Ignore
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
@@ -835,7 +834,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testFetchRecentCategoryByTermAndCourseReferenceNumber(){
+    void testFetchCategoryByTermAndCourseReferenceNumber(){
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
         assertNotNull sectionMeetingTime
@@ -848,22 +847,26 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         List sectionMeetingTimes = SectionMeetingTime.findAllByTermAndCourseReferenceNumber(sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber)
         assertTrue sectionMeetingTimes.size() >= 2
 
-        String category = SectionMeetingTime.fetchRecentCategoryByTermAndCourseReferenceNumber( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
-        assertNotNull category
-        assertEquals sectionMeetingTime2.category, category
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
+        assertNotNull categories
+        assertTrue categories?.size() >= 2
+        categories?.each(){
+            assertEquals sectionMeetingTime.term, it.term
+            assertEquals sectionMeetingTime.courseReferenceNumber, it.courseReferenceNumber
+        }
     }
 
 
-    void testFetchRecentCategoryByTermAndCourseReferenceNumberWithInvalidData(){
+    void testFetchCategoryByTermAndCourseReferenceNumberWithInvalidData(){
         // Fetch with invalid term and crn combination
-        String category = SectionMeetingTime.fetchRecentCategoryByTermAndCourseReferenceNumber( '444444', '55555' )
-        assertNull category
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( '444444', '55555' )
+        assertTrue categories.isEmpty(  )
     }
 
 
-    void testFetchRecentCategoryByTermAndCourseReferenceNumberWithNullData(){
-            String category = SectionMeetingTime.fetchRecentCategoryByTermAndCourseReferenceNumber( null, null )
-            assertNull category
+    void testFetchCategoryByTermAndCourseReferenceNumberWithNullData(){
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( null, null )
+        assertTrue categories.isEmpty(  )
     }
 
 
