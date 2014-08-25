@@ -53,6 +53,8 @@ class PersonIdentificationCompositeService {
             }
 
         }
+        if( buildSelectionList(identificationEntities,
+                'personidentificationname').size() > 0)
         identificationEntities = processResults(identificationEntities, 
                                                 PersonIdentificationName.fetchBannerPersonList(buildSelectionList(identificationEntities,
                                                                                                                    'personidentificationname')))
