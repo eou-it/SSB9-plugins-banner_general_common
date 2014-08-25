@@ -9,19 +9,21 @@ import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.system.Term
 import net.hedtech.banner.exceptions.ApplicationException
 
-// NOTE:
-// This service is injected with create, update, and delete methods that may throw runtime exceptions (listed below).
-// These exceptions must be caught and handled by the controller using this service.
-//
-// update and delete may throw net.hedtech.banner.exceptions.NotFoundException if the entity cannot be found in the database
-// update and delete may throw org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException a runtime exception if an optimistic lock failure occurs
-// create, update, and delete may throw grails.validation.ValidationException a runtime exception when there is a validation failure
-
 class SectionMeetingTimeService extends ServiceBase {
+
+    private static final String[] numericCategorySequence
+    static {
+        numericCategorySequence = new String[100]
+        int counter = 0
+        int asciiZero = 48
+        int asciiNine = 57
+        for (int i = asciiZero; i <= asciiNine; i++)
+            for (int j = asciiZero; j <= asciiNine; ++j)
+                numericCategorySequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
+    }
 
     boolean transactional = true
     def sessionFactory
-
 
     def preCreate(Map map) {
         //Unable to validate against ScheduleUtility because this is in the General package.  API will enforce relationship.
@@ -121,6 +123,73 @@ class SectionMeetingTimeService extends ServiceBase {
             throw new ApplicationException( SectionMeetingTime, "@@r1:sessionHoursExceedsSectionHigh:${courseGeneralInformation?.creditHourHigh}@@" )
         }
     }
+
+
+    public String generateCategoryValue( String term, String courseReferenceNumber ) {
+           String category = numericCategorySequence[0]
+           List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( term, courseReferenceNumber )
+           if (categories) {
+               // Categories are unique and are in sequence. Starts with 00..99, then AA..ZZ and finally aa..zz
+               // Since its likely that section meeting time in between could be deleted, we are trying to utilize the limited available sequence.
+               // Hence iterating through the list and assigning the next available category.
+               if (categories.size() <= numericCategorySequence.length) {
+                   int counter = 0
+                   for (String innerCategory : categories) {
+                       if (innerCategory != numericCategorySequence[counter++]) {
+                           category = numericCategorySequence[counter - 1]
+                           break
+                       }
+                   }
+                   category = numericCategorySequence[counter]
+               }
+
+               // Number of possible values between AA..ZZ is 26*26 =676 + No of values in numericCategorySequence
+               if (categories.size() > numericCategorySequence.length && categories.size() <= 776) {
+                   String[] capitalsAlphabeticalSequence = new String[676]
+                   int counter = 0
+                   int asciiA = 65
+                   int asciiZ = 90
+                   for (int i = asciiA; i <= asciiZ; i++)
+                       for (int j = asciiA; j <= asciiZ; j++)
+                           capitalsAlphabeticalSequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
+
+                   for (String innerCategory : categories) {
+                       if (innerCategory != capitalsAlphabeticalSequence[counter++]) {
+                           category = capitalsAlphabeticalSequence[counter - 1]
+                           break
+                       }
+                   }
+                   category = capitalsAlphabeticalSequence[counter]
+                   capitalsAlphabeticalSequence = null
+               }
+
+               // Number of possible values between aa..zz is 26*26 =676 + 676+ No of values in numericCategorySequence
+               if (categories.size() > 776 && categories.size() <= 1452) {
+                   String[] smallAlphabeticalSequence = new String[676]
+                   int counter = 0
+                   int asciiA = 97
+                   int asciiZ = 122
+                   for (int i = asciiA; i <= asciiZ; i++)
+                       for (int j = asciiA; j <= asciiZ; j++)
+                           smallAlphabeticalSequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
+
+                   for (String innerCategory : categories) {
+                       if (innerCategory != smallAlphabeticalSequence[counter++]) {
+                           category = smallAlphabeticalSequence[counter - 1]
+                           break
+                       }
+                   }
+                   category = smallAlphabeticalSequence[counter]
+                   smallAlphabeticalSequence = null
+               }
+
+               // If the number of possible combinations have exceeded, throw an error
+               if (categories.size() > 1452) {
+                   throw new ApplicationException( SectionMeetingTime, "@@r1:session_indicator_cannot_be_calculated@@" )
+               }
+           }
+           return category
+       }
 
 
 }
