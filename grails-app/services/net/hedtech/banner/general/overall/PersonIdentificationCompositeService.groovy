@@ -44,10 +44,17 @@ class PersonIdentificationCompositeService {
             }
 
         }
-        if( params.ldapUserMapping || params.externalUser ) {
+        if( params.ldapUserMapping ) {
             ldapUserMappings = params.list('ldapUserMapping')
+            ThirdPartyAccess.findAllByLdapUserMappingInList(ldapUserMappings).each {
+                def identificationEntity = identificationEntities[it.pidm]
+                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, null))
+            }
+
+        }
+        if( params.externalUser ) {
             externalUsers = params.list('externalUser')
-            ThirdPartyAccess.findAllByExternalUserInListAndLdapUserMappingInList(externalUsers, ldapUserMappings).each {
+            ThirdPartyAccess.findAllByExternalUserInList(externalUsers).each {
                 def identificationEntity = identificationEntities[it.pidm]
                 identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, null))
             }
