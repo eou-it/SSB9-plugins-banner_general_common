@@ -1,7 +1,6 @@
 /*******************************************************************************
  Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
-
 package net.hedtech.banner.general.overall
 
 
@@ -25,26 +24,27 @@ class SectionMeetingTimeService extends ServiceBase {
     boolean transactional = true
     def sessionFactory
 
-    def preCreate(Map map) {
+
+    def preCreate( Map map ) {
         //Unable to validate against ScheduleUtility because this is in the General package.  API will enforce relationship.
-        validateCodes(map.domainModel)
+        validateCodes( map.domainModel )
     }
 
 
-    def preUpdate(Map map) {
-        validateCodes(map.domainModel)
+    def preUpdate( Map map ) {
+        validateCodes( map.domainModel )
     }
 
     /**
      * Validate the SectionMeetingTime values which are not enforced with a foreign key constraint
      */
 
-    private void validateCodes(SectionMeetingTime sectionMeetingTime) {
-        validateTerm(sectionMeetingTime.term)
+    private void validateCodes( SectionMeetingTime sectionMeetingTime ) {
+        validateTerm( sectionMeetingTime.term )
         //If section meeting time, the hoursWeek is required
-        validateTimes(sectionMeetingTime)
-        if (!sectionMeetingTime.hoursWeek && sectionMeetingTime.term != "EVENT") {
-            throw new ApplicationException(SectionMeetingTime, "@@r1:missing_hours_week@@")
+        validateTimes( sectionMeetingTime )
+        if (sectionMeetingTime.hoursWeek == null && sectionMeetingTime.term != "EVENT") {
+            throw new ApplicationException( SectionMeetingTime, "@@r1:missing_hours_week@@" )
         }
     }
 
@@ -52,40 +52,39 @@ class SectionMeetingTimeService extends ServiceBase {
      * Method to validate that the term is in STVTERM or "EVENT"
      */
 
-    private void validateTerm(String term) {
-        if (term != "EVENT" && !Term.findByCode(term)) {
-            throw new ApplicationException(SectionMeetingTime, "@@r1:invalid_term@@")
+    private void validateTerm( String term ) {
+        if (term != "EVENT" && !Term.findByCode( term )) {
+            throw new ApplicationException( SectionMeetingTime, "@@r1:invalid_term@@" )
         }
     }
 
 
-    private void validateTimes(sectionMeetingTime) {
-
-        if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && ((sectionMeetingTime.beginTime < "0000") || (sectionMeetingTime.beginTime > "2359") ||
-                (sectionMeetingTime.beginTime.toString().substring(2, 3) > "59")))
-            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_time@@")
+    private void validateTimes( sectionMeetingTime ) {
+        if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && ((sectionMeetingTime.beginTime.length() != 4) || (sectionMeetingTime.beginTime < "0000") || (sectionMeetingTime.beginTime > "2359") ||
+                (sectionMeetingTime.beginTime.toString().substring( 2, 3 ) > "59")))
+            throw new ApplicationException( SectionMeetingTime, "@@r1:begin_time@@" )
+        if ((sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") && ((sectionMeetingTime.endTime.length() != 4) || (sectionMeetingTime.endTime < "0000") || (sectionMeetingTime.endTime > "2359") ||
+                        (sectionMeetingTime.endTime.toString().substring( 2, 3 ) > "59")))
+                    throw new ApplicationException( SectionMeetingTime, "@@r1:end_time@@" )
         if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && (sectionMeetingTime.endTime == null))
-            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_end_time@@")
+            throw new ApplicationException( SectionMeetingTime, "@@r1:begin_end_time@@" )
+        if ((sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") && (sectionMeetingTime.beginTime == null))
+                    throw new ApplicationException( SectionMeetingTime, "@@r1:begin_end_time@@" )
         if ((sectionMeetingTime.beginTime != null && sectionMeetingTime.beginTime != "") && (sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") &&
                 (sectionMeetingTime.beginTime >= sectionMeetingTime.endTime))
-            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_time_greater_than_end_time@@")
-        if ((sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") && ((sectionMeetingTime.endTime < "0000") || (sectionMeetingTime.endTime > "2359") ||
-                (sectionMeetingTime.endTime.toString().substring(2, 3) > "59")))
-            throw new ApplicationException(SectionMeetingTime, "@@r1:end_time@@")
-        if ((sectionMeetingTime.endTime != null && sectionMeetingTime.endTime != "") && (sectionMeetingTime.beginTime == null))
-            throw new ApplicationException(SectionMeetingTime, "@@r1:begin_end_time@@")
+            throw new ApplicationException( SectionMeetingTime, "@@r1:begin_time_greater_than_end_time@@" )
     }
 
 
-    public static boolean isMeetingTimesForSession(String term, String crn, String category) {
-        def meetingTimes = SectionMeetingTime.findAllWhere(term: term,
-                courseReferenceNumber: crn,
-                category: category)
+    public static boolean isMeetingTimesForSession( String term, String crn, String category ) {
+        def meetingTimes = SectionMeetingTime.findAllWhere( term: term,
+                                                            courseReferenceNumber: crn,
+                                                            category: category )
         return (meetingTimes.size() > 0)
     }
 
 
-    public boolean isBuildingRoomAndNoTimeDays(SectionMeetingTime sectionMeetingTime) {
+    public boolean isBuildingRoomAndNoTimeDays( SectionMeetingTime sectionMeetingTime ) {
         if ((sectionMeetingTime.building && sectionMeetingTime.room)
                 && ((!sectionMeetingTime.beginTime && !sectionMeetingTime.endTime)
                 || (!sectionMeetingTime.monday && !sectionMeetingTime.tuesday && !sectionMeetingTime.wednesday &&
@@ -97,11 +96,11 @@ class SectionMeetingTimeService extends ServiceBase {
     }
 
 
-    public void validateCreditHourSession(section, courseGeneralInformation, sectionMeetingTimes) {
+    public void validateCreditHourSession( section, courseGeneralInformation, sectionMeetingTimes ) {
 
         def creditHourSessionTotal = 0
 
-        sectionMeetingTimes.each { domain ->
+        sectionMeetingTimes.each {domain ->
             if (domain.creditHourSession) {
                 creditHourSessionTotal += domain.creditHourSession
             }
@@ -126,70 +125,96 @@ class SectionMeetingTimeService extends ServiceBase {
 
 
     public String generateCategoryValue( String term, String courseReferenceNumber ) {
-           String category = numericCategorySequence[0]
-           List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( term, courseReferenceNumber )
-           if (categories) {
-               // Categories are unique and are in sequence. Starts with 00..99, then AA..ZZ and finally aa..zz
-               // Since its likely that section meeting time in between could be deleted, we are trying to utilize the limited available sequence.
-               // Hence iterating through the list and assigning the next available category.
-               if (categories.size() <= numericCategorySequence.length) {
-                   int counter = 0
-                   for (String innerCategory : categories) {
-                       if (innerCategory != numericCategorySequence[counter++]) {
-                           category = numericCategorySequence[counter - 1]
-                           break
-                       }
-                   }
-                   category = numericCategorySequence[counter]
-               }
+        String category = numericCategorySequence[0]
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( term, courseReferenceNumber )
+        if (categories) {
+            // Categories are unique and are in sequence. Starts with 00..99, then AA..ZZ and finally aa..zz
+            // Since its likely that section meeting time in between could be deleted, we are trying to utilize the limited available sequence.
+            // Hence iterating through the list and assigning the next available category.
+            if (categories.size() <= numericCategorySequence.length) {
+                int counter = 0
+                for (String innerCategory : categories) {
+                    if (innerCategory != numericCategorySequence[counter++]) {
+                        category = numericCategorySequence[counter - 1]
+                        break
+                    }
+                }
+                category = numericCategorySequence[counter]
+            }
 
-               // Number of possible values between AA..ZZ is 26*26 =676 + No of values in numericCategorySequence
-               if (categories.size() > numericCategorySequence.length && categories.size() <= 776) {
-                   String[] capitalsAlphabeticalSequence = new String[676]
-                   int counter = 0
-                   int asciiA = 65
-                   int asciiZ = 90
-                   for (int i = asciiA; i <= asciiZ; i++)
-                       for (int j = asciiA; j <= asciiZ; j++)
-                           capitalsAlphabeticalSequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
+            // Number of possible values between AA..ZZ is 26*26 =676 + No of values in numericCategorySequence
+            if (categories.size() > numericCategorySequence.length && categories.size() <= 776) {
+                String[] capitalsAlphabeticalSequence = new String[676]
+                int counter = 0
+                int asciiA = 65
+                int asciiZ = 90
+                for (int i = asciiA; i <= asciiZ; i++)
+                    for (int j = asciiA; j <= asciiZ; j++)
+                        capitalsAlphabeticalSequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
 
-                   for (String innerCategory : categories) {
-                       if (innerCategory != capitalsAlphabeticalSequence[counter++]) {
-                           category = capitalsAlphabeticalSequence[counter - 1]
-                           break
-                       }
-                   }
-                   category = capitalsAlphabeticalSequence[counter]
-                   capitalsAlphabeticalSequence = null
-               }
+                for (String innerCategory : categories) {
+                    if (innerCategory != capitalsAlphabeticalSequence[counter++]) {
+                        category = capitalsAlphabeticalSequence[counter - 1]
+                        break
+                    }
+                }
+                category = capitalsAlphabeticalSequence[counter]
+                capitalsAlphabeticalSequence = null
+            }
 
-               // Number of possible values between aa..zz is 26*26 =676 + 676+ No of values in numericCategorySequence
-               if (categories.size() > 776 && categories.size() <= 1452) {
-                   String[] smallAlphabeticalSequence = new String[676]
-                   int counter = 0
-                   int asciiA = 97
-                   int asciiZ = 122
-                   for (int i = asciiA; i <= asciiZ; i++)
-                       for (int j = asciiA; j <= asciiZ; j++)
-                           smallAlphabeticalSequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
+            // Number of possible values between aa..zz is 26*26 =676 + 676+ No of values in numericCategorySequence
+            if (categories.size() > 776 && categories.size() <= 1452) {
+                String[] smallAlphabeticalSequence = new String[676]
+                int counter = 0
+                int asciiA = 97
+                int asciiZ = 122
+                for (int i = asciiA; i <= asciiZ; i++)
+                    for (int j = asciiA; j <= asciiZ; j++)
+                        smallAlphabeticalSequence[counter++] = Character.toChars( i ).toString() + Character.toChars( j )
 
-                   for (String innerCategory : categories) {
-                       if (innerCategory != smallAlphabeticalSequence[counter++]) {
-                           category = smallAlphabeticalSequence[counter - 1]
-                           break
-                       }
-                   }
-                   category = smallAlphabeticalSequence[counter]
-                   smallAlphabeticalSequence = null
-               }
+                for (String innerCategory : categories) {
+                    if (innerCategory != smallAlphabeticalSequence[counter++]) {
+                        category = smallAlphabeticalSequence[counter - 1]
+                        break
+                    }
+                }
+                category = smallAlphabeticalSequence[counter]
+                smallAlphabeticalSequence = null
+            }
 
-               // If the number of possible combinations have exceeded, throw an error
-               if (categories.size() > 1452) {
-                   throw new ApplicationException( SectionMeetingTime, "@@r1:session_indicator_cannot_be_calculated@@" )
-               }
-           }
-           return category
-       }
+            // If the number of possible combinations have exceeded, throw an error
+            if (categories.size() > 1452) {
+                throw new ApplicationException( SectionMeetingTime, "@@r1:session_indicator_cannot_be_calculated@@" )
+            }
+        }
+        return category
+    }
+
+
+    public Double calculateHoursPerWeek( SectionMeetingTime sectionMeetingTime, Integer calculatedDeviationFactor ) {
+        def beginTime = sectionMeetingTime .beginTime
+        def endTime = sectionMeetingTime .endTime
+        def sValue = 0.0
+        if (beginTime && endTime && beginTime.length() == 4 && endTime.length() == 4) {
+            int numberOfDays = 0
+            if (sectionMeetingTime .monday) ++numberOfDays
+            if (sectionMeetingTime .tuesday) ++numberOfDays
+            if (sectionMeetingTime .wednesday) ++numberOfDays
+            if (sectionMeetingTime .thursday) ++numberOfDays
+            if (sectionMeetingTime .friday) ++numberOfDays
+            if (sectionMeetingTime .saturday) ++numberOfDays
+            if (sectionMeetingTime .sunday) ++numberOfDays
+
+            def num = numberOfDays * ((endTime[0, 1].toInteger() * 60 + endTime[2, 3].toInteger()) - (beginTime[0, 1].toInteger() * 60 + beginTime[2, 3].toInteger()))
+            if (!calculatedDeviationFactor)
+                calculatedDeviationFactor = 60
+            sValue = String.valueOf( num / calculatedDeviationFactor )
+            if (sValue.indexOf( '.' ) != -1 && sValue.substring( sValue.indexOf( '.' ), sValue.length() ).length() > 3) {
+                sValue = sValue.substring( 0, sValue.indexOf( '.' ) + 3 )
+            }
+        }
+        return new Double( sValue )
+    }
 
 
 }
