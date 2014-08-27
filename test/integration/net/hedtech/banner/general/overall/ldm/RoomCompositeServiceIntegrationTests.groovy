@@ -44,6 +44,16 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testListWithFilter() {
+        def params = ['filter[filter[0][value]':'Classroom', 'filter[0][field]':'roomLayoutType', 'filter[0][operator]':'equals']
+        List rooms = roomCompositeService.list(params)
+        assertNotNull rooms
+        assertFalse rooms.isEmpty()
+        assertTrue rooms.size() <= 20
+       assertNull rooms.find{it.occupancies[0].roomLayoutType != 'Classroom'}
+    }
+
+
     void testCount() {
         assertNotNull i_success_housingRoomDescription
         assertTrue roomCompositeService.count() > 0

@@ -563,32 +563,32 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testFetchAllActiveClassrooms() {
+    void testFetchAllActiveRooms() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
         assertNotNull housingRoomDescription.id
-        def filterData = [params: [:]]
-        def result = HousingRoomDescription.fetchAllActiveClassrooms(filterData, [max: 10, offset: 0])
+        def filterData = [params: [roomType: '%']]
+        def result = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterData, [max: 10, offset: 0])
         assertNotNull result
         assertFalse result.isEmpty()
         assertFalse result.contains(housingRoomDescription)
 
         housingRoomDescription.roomType = 'C'
         housingRoomDescription.save(failOnError: true, flush: true)
-        filterData = [params: [id: housingRoomDescription.id], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
-        result = HousingRoomDescription.fetchAllActiveClassrooms(filterData, [max: 10, offset: 0])
+        filterData = [params: [roomType: '%',  id: housingRoomDescription.id], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
+        result = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterData, [max: 10, offset: 0])
         assertNotNull result
         assertFalse result.isEmpty()
         assertTrue result.contains(housingRoomDescription)
     }
 
 
-    void testCountAllActiveClassrooms() {
+    void testCountAllActiveRooms() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.roomType = 'C'
         housingRoomDescription.save(failOnError: true, flush: true)
         assertNotNull housingRoomDescription.id
-        Long count = HousingRoomDescription.countAllActiveClassrooms()
+        Long count = HousingRoomDescription.countAllActiveRoomsByRoomType([params: [roomType: 'C']])
         assertNotNull count
         assertTrue count > 0
     }
