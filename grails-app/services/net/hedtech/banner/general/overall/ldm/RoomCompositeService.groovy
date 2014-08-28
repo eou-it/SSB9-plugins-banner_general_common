@@ -47,7 +47,7 @@ class RoomCompositeService extends LdmService {
         def filterMap = QueryBuilder.getFilterData(params)
         def filterData = [params: [roomType: '%']]
         if (filterMap.params.containsKey('roomLayoutType')) {
-            filterData.params = [roomType: fetchBannerRoomTypeForLdmRoomLayoutType(filterMap.params?.roomLayoutType)]
+            filterData.params = [roomType: fetchBannerRoomTypeForLdmRoomLayoutType(filterMap.params?.roomLayoutType?.trim())]
         }
         return [filterData: filterData, pagingAndSortParams: filterMap.pagingAndSortParams]
     }
