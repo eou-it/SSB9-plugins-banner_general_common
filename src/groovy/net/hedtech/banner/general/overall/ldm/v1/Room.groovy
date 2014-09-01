@@ -15,12 +15,12 @@ class Room {
 
     @Delegate
     private final HousingRoomDescription housingRoomDescription
-    Building building
+    BuildingDetail building
     List occupancies
     String guid
     Metadata metadata
 
-    Room(HousingRoomDescription housingRoomDescription, Building building, List occupancies, String guid, Metadata metadata) {
+    Room(HousingRoomDescription housingRoomDescription, BuildingDetail building, List occupancies, String guid, Metadata metadata) {
         this.housingRoomDescription = housingRoomDescription
         this.building = building
         this.occupancies = occupancies
@@ -29,12 +29,12 @@ class Room {
     }
 
 
-    Building getBuilding() {
+    BuildingDetail getBuilding() {
         this.building
     }
 
 
-    void setBuilding(Building building) {
+    void setBuilding(BuildingDetail building) {
         this.building = building
     }
 

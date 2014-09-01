@@ -10,7 +10,7 @@ import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 /**
  * LDM decorator for building resource (/base/domain/buildings/v1/buildings.json-schema)
  */
-class Building {
+class BuildingDetail {
 
     @Delegate
     private final HousingLocationBuildingDescription housingLocationBuildingDescription
@@ -19,7 +19,7 @@ class Building {
     Metadata metadata
     List<Room> rooms = []
 
-    Building ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata metadata ) {
+    BuildingDetail ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata metadata ) {
         this.housingLocationBuildingDescription = housingLocationBuildingDescription
         this.siteDetail = siteDetail
         this.guid = guid
@@ -31,7 +31,7 @@ class Building {
     boolean equals( o ) {
         if (this.is( o )) return true
         if (getClass() != o.class) return false
-        Building that = (Building) o
+        BuildingDetail that = (BuildingDetail) o
         if (housingLocationBuildingDescription != that.housingLocationBuildingDescription) return false
         if (guid != that.guid) return false
         if (metadata != that.metadata) return false
@@ -66,7 +66,7 @@ class Building {
 
 
     public String toString() {
-        """Building[
+        """BuildingDetail[
                        housingLocationBuildingDescription=$housingLocationBuildingDescription,
                        metadata=$metadata,
                        rooms=$rooms,

@@ -5,7 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
-import net.hedtech.banner.general.overall.ldm.v1.Building
+import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
@@ -89,12 +89,12 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     void testGet() {
         def paginationParams = [max: '1', offset: '0']
-        List<Building> buildings = buildingCompositeService.list( paginationParams )
+        List<BuildingDetail> buildings = buildingCompositeService.list( paginationParams )
         assertNotNull buildings
         assertFalse buildings.isEmpty()
 
         assertNotNull buildings[0].guid
-        Building building = buildingCompositeService.get( buildings[0].guid )
+        BuildingDetail building = buildingCompositeService.get( buildings[0].guid )
         assertNotNull building
         assertEquals buildings[0], building
         assertEquals buildings[0].guid, building.guid
@@ -108,7 +108,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     void testFetchByBuildingId() {
-        Building building = buildingCompositeService.fetchByBuildingId( i_success_housingLocationBuildingDescription.id )
+        BuildingDetail building = buildingCompositeService.fetchByBuildingId( i_success_housingLocationBuildingDescription.id )
         assertNotNull building
         assertNotNull building.guid
         assertEquals i_success_housingLocationBuildingDescription.id, building.id
@@ -124,7 +124,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     void testFetchByBuildingCode() {
-        Building building = buildingCompositeService.fetchByBuildingCode( i_success_housingLocationBuildingDescription.building.code )
+        BuildingDetail building = buildingCompositeService.fetchByBuildingCode( i_success_housingLocationBuildingDescription.building.code )
         assertNotNull building
         assertNotNull building.guid
         assertEquals i_success_housingLocationBuildingDescription.id, building.id

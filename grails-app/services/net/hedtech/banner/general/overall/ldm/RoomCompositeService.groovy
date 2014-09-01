@@ -7,7 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.ldm.v1.Building
+import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.general.system.ldm.v1.Metadata
@@ -29,7 +29,7 @@ class RoomCompositeService extends LdmService {
         List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterParams.filterData, filterParams.pagingAndSortParams)
         housingRoomDescriptions.each { housingRoomDescription ->
             List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-            Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
+            BuildingDetail building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
             rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid, new Metadata(housingRoomDescription.dataOrigin))
         }
         return rooms
@@ -73,7 +73,7 @@ class RoomCompositeService extends LdmService {
         if (!housingRoomDescription) {
             throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Room.class.simpleName))
         }
-        Building building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
+        BuildingDetail building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
         return new Room(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
     }

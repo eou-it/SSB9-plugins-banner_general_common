@@ -8,7 +8,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.HousingRoomDescription
-import net.hedtech.banner.general.overall.ldm.v1.Building
+import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.general.system.Campus
@@ -34,7 +34,7 @@ class BuildingCompositeService {
     ]
 
 
-    List<Building> list( Map params ) {
+    List<BuildingDetail> list( Map params ) {
         List buildings = []
         List allowedSortFields = ['abbreviation', 'title']
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
@@ -46,7 +46,7 @@ class BuildingCompositeService {
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
             List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-            buildings << new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
         return buildings
     }
@@ -57,24 +57,24 @@ class BuildingCompositeService {
     }
 
 
-    Building get( String guid ) {
+    BuildingDetail get( String guid ) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( LDM_NAME, guid )
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( Building.class.simpleName ) ) )
+            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( BuildingDetail.class.simpleName ) ) )
         }
 
         HousingLocationBuildingDescription housingLocationBuildingDescription = housingLocationBuildingDescriptionService.get( globalUniqueIdentifier.domainId )
         if (!housingLocationBuildingDescription) {
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( Building.class.simpleName ) ) )
+            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( BuildingDetail.class.simpleName ) ) )
         }
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-        return new Building( housingLocationBuildingDescription, siteDetail, globalUniqueIdentifier.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, globalUniqueIdentifier.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
 
-    Building fetchByBuildingId( Long domainId ) {
+    BuildingDetail fetchByBuildingId( Long domainId ) {
         if (null == domainId) {
             return null
         }
@@ -86,11 +86,11 @@ class BuildingCompositeService {
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-        return new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
 
-    Building fetchByBuildingCode( String buildingCode ) {
+    BuildingDetail fetchByBuildingCode( String buildingCode ) {
         if (null == buildingCode) {
             return null
         }
@@ -102,11 +102,11 @@ class BuildingCompositeService {
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-        return new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
 
-    List<Building> fetchByCampusCode( String campusCode ) {
+    List<BuildingDetail> fetchByCampusCode( String campusCode ) {
         List buildings = []
         def siteDetail
         def rooms
@@ -119,7 +119,7 @@ class BuildingCompositeService {
         List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = HousingLocationBuildingDescription.findAllByCampus(campus)
 
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
-            buildings << new Building( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
         return buildings
     }
@@ -127,7 +127,7 @@ class BuildingCompositeService {
 
     private List<Room> getRooms(def building){
         List rooms = []
-        net.hedtech.banner.general.overall.ldm.v1.Building buildingDetail
+        net.hedtech.banner.general.overall.ldm.v1.BuildingDetail buildingDetail
         if (null == building) {
             return null
         }
