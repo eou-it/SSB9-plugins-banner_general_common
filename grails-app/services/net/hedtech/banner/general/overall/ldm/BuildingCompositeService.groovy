@@ -11,6 +11,7 @@ import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
+import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
@@ -60,12 +61,12 @@ class BuildingCompositeService {
     BuildingDetail get( String guid ) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( LDM_NAME, guid )
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( BuildingDetail.class.simpleName ) ) )
+            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( Building.class.simpleName ) ) )
         }
 
         HousingLocationBuildingDescription housingLocationBuildingDescription = housingLocationBuildingDescriptionService.get( globalUniqueIdentifier.domainId )
         if (!housingLocationBuildingDescription) {
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( BuildingDetail.class.simpleName ) ) )
+            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( Building.class.simpleName ) ) )
         }
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
