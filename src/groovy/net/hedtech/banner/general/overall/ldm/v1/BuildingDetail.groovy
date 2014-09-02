@@ -60,7 +60,7 @@ class BuildingDetail {
     }
 
 
-    SiteDetail getSite(){
+    SiteDetail getSiteDetail(){
         siteDetail
     }
 
