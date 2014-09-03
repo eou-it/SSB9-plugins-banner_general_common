@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.overall.AvailableRoomDescription
 import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.utility.RoomsAvailabilityHelper
@@ -41,8 +42,8 @@ class RoomCompositeService extends LdmService {
             List rooms = []
             RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
             Map filterParams = prepareSearchParams(params)
-            List<HousingRoomDescription> housingRoomDescriptions = RoomsAvailabilityHelper.fetchAvailableRoomSearch(filterParams.filterData, filterParams.pagingAndSortParams)
-            housingRoomDescriptions.each { availableRoomDescription ->
+            List<AvailableRoomDescription> availableRoomDescriptions = RoomsAvailabilityHelper.fetchAvailableRoomSearch(filterParams.filterData, filterParams.pagingAndSortParams)
+            availableRoomDescriptions.each { availableRoomDescription ->
                 List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(availableRoomDescription.roomType), availableRoomDescription.capacity)]
                 BuildingDetail building = buildingCompositeService.fetchByBuildingCode(availableRoomDescription.buildingCode)
                 rooms << new AvailableRoom(availableRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, availableRoomDescription.id).guid,new Metadata(availableRoomDescription.dataOrigin))
