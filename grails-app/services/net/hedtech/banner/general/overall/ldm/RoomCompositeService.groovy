@@ -2,7 +2,6 @@
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
-
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.AvailableRoomDescription
@@ -13,62 +12,110 @@ import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
+import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.query.QueryBuilder
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 
 @Transactional
 class RoomCompositeService extends LdmService {
 
+    private static final String DATE_FORMAT = 'yyyy-MM-dd'
+
     def buildingCompositeService
 
-	 /**
-     * Responsible for returning the list of Rooms in case of API request or Returns List
-     * of AvailableRoom for QAPI request, In case of QAPI Request will be sent as part of
-     * POST method, which is exposed as POST Restfull Webservice having the endpoints
-     * API End Point  /api/rooms
-     * QAPI End point /qapi/rooms
-     * param params Request parameter
-     * @return List<Room>
-     */
+
     List<Room> list(Map params) {
-	
-	 //Handles QAPI Request
-        if(RestfulApiValidationUtility.isQApiRequest(params)){
+        if (RestfulApiValidationUtility.isQApiRequest(params)) {
+            checkIfRoomAvailable(params)
             List rooms = []
             RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
+            validateParams(params)
             Map filterParams = prepareSearchParams(params)
-            List<AvailableRoomDescription> availableRoomDescriptions = RoomsAvailabilityHelper.fetchAvailableRoomSearch(filterParams.filterData, filterParams.pagingAndSortParams)
+            List<AvailableRoomDescription> availableRoomDescriptions = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
             availableRoomDescriptions.each { availableRoomDescription ->
                 List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(availableRoomDescription.roomType), availableRoomDescription.capacity)]
                 BuildingDetail building = buildingCompositeService.fetchByBuildingCode(availableRoomDescription.buildingCode)
-                rooms << new AvailableRoom(availableRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, availableRoomDescription.id).guid,new Metadata(availableRoomDescription.dataOrigin))
+                rooms << new AvailableRoom(availableRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, availableRoomDescription.id).guid, new Metadata(availableRoomDescription.dataOrigin))
+            }
+            return rooms
+        } else {
+            List rooms = []
+            RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
+            Map filterParams = prepareParams(params)
+            List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterParams.filterData, filterParams.pagingAndSortParams)
+            housingRoomDescriptions.each { housingRoomDescription ->
+                List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
+                BuildingDetail building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
+                rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid, new Metadata(housingRoomDescription.dataOrigin))
             }
             return rooms
         }
-        // Handles API request
-        else{
-			List rooms = []
-			RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-			Map filterParams = prepareParams(params)
-			List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterParams.filterData, filterParams.pagingAndSortParams)
-			housingRoomDescriptions.each { housingRoomDescription ->
-				List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-				BuildingDetail building = buildingCompositeService.fetchByBuildingCode(housingRoomDescription.building.code)
-				rooms << new Room(housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid, new Metadata(housingRoomDescription.dataOrigin))
-			}
-			return rooms
-		}
     }
 
 
     Long count(Map params) {
-        Map filterParams = prepareParams(params)
-        return HousingRoomDescription.countAllActiveRoomsByRoomType(filterParams.filterData)
+        if (RestfulApiValidationUtility.isQApiRequest(params)) {
+            Map filterParams = prepareSearchParams(params)
+            RoomsAvailabilityHelper.countAllAvailableRoom(filterParams.filterData)
+        } else {
+            Map filterParams = prepareParams(params)
+            return HousingRoomDescription.countAllActiveRoomsByRoomType(filterParams.filterData)
+        }
+    }
+
+
+    private void validateParams(Map params) {
+        if (!params.startDate) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.startDate:BusinessLogicValidationException@@")
+        }
+        if (!params.endDate) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.endDate:BusinessLogicValidationException@@")
+        }
+        def pattern = /[0-2][0-3][0-5][0-9]/
+        if (!params.startTime) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.startTime:BusinessLogicValidationException@@")
+        }
+        if( !(params.startTime ==~ pattern)) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.startTime:BusinessLogicValidationException@@")
+        }
+        if (!params.endTime) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.endTime:BusinessLogicValidationException@@")
+        }
+        if (!(params.endTime ==~ pattern)) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.endTime:BusinessLogicValidationException@@")
+        }
+        if (params.recurrence) {
+            if (!params.recurrence?.byDay) {
+                throw new ApplicationException(RoomCompositeService, "@@r1:invalid.recurrence.byDay:BusinessLogicValidationException@@")
+            }
+        } else {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.recurrence:BusinessLogicValidationException@@")
+        }
+        if (params.occupancies) {
+            if (!params.occupancies[0]?.roomLayoutType) {
+                throw new ApplicationException(RoomCompositeService, "@@r1:invalid.roomLayoutType:BusinessLogicValidationException@@")
+            }
+            if (!params.occupancies && params.occupancies[0]?.maxOccupancy) {
+                throw new ApplicationException(RoomCompositeService, "@@r1:invalid.maxOccupancy:BusinessLogicValidationException@@")
+            }
+        } else {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.occupancies:BusinessLogicValidationException@@")
+        }
+        Date startDate = Date.parse(DATE_FORMAT, params.startDate?.trim())
+        Date endDate = Date.parse(DATE_FORMAT, params.endDate?.trim())
+
+        if (startDate > endDate) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:startDate.laterThanEndDate:BusinessLogicValidationException@@")
+        }
+
+        Integer startTimeAsInteger = Integer.valueOf(params.startTime)
+        Integer endTimeAsInteger = Integer.valueOf(params.endTime)
+        if (startTimeAsInteger >= endTimeAsInteger) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:startTime.laterThanEndTime:BusinessLogicValidationException@@")
+        }
     }
 
 
@@ -81,45 +128,39 @@ class RoomCompositeService extends LdmService {
         }
         return [filterData: filterData, pagingAndSortParams: filterMap.pagingAndSortParams]
     }
-	
-	private Map prepareSearchParams(Map params) {
+
+
+    private Map prepareSearchParams(Map params) {
         validateSearchCriteria(params)
         def filterMap = QueryBuilder.getFilterData(params)
-        def type = params.occupancies.roomLayoutType[0] == "Classroom" ? 'C':'%'
+        Map inputData = [:]
 
-        List<String> days =['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-        def daysList = params.recurrences.byDay[0]
-        Map inputData =[:]
+        inputData.put('startDate', Date.parse(DATE_FORMAT, params.startDate?.trim()))
+        inputData.put('endDate', Date.parse(DATE_FORMAT, params.endDate?.trim()))
+
+        inputData.put('beginTime', params.startTime)
+        inputData.put('endTime', params.endTime)
+
+        List<DayOfWeek> days = DayOfWeek.list([sort: 'number', order: 'asc'])
+        def daysList = params.recurrence.byDay
         days.each { day ->
-            if(daysList.contains(day)){
-                inputData.put(day.toLowerCase(), 'S')
-
-
-            }else{
-                inputData.put(day.toLowerCase(), '')
+            if (daysList.contains(day.description)) {
+                inputData.put(day.description.toLowerCase(), 'S')
+            } else {
+                inputData.put(day.description.toLowerCase(), '')
             }
-
         }
-        inputData.put('roomType',type )
-
-        //Extract beginDate
-        DateFormat df = new SimpleDateFormat("yyyy-mm-dd");
-        java.util.Date beginDate = df.parse(params.startDate);
-        inputData.put('beginDate',new java.sql.Date(beginDate.getTime()))
-
-        //Extract endDate
-        java.util.Date endDate = df.parse(params.endDate);
-        inputData.put('endDate',new java.sql.Date(endDate.getTime()))
-
-        inputData.put('beginTime',params.startTime)
-        inputData.put('endTime',params.endTime)
-        def filterData = [params: inputData,criteria:[]]
-        if (filterMap.params.containsKey('roomLayoutType')) {
-            filterData.params = [roomType: fetchBannerRoomTypeForLdmRoomLayoutType(filterMap.params?.roomLayoutType)]
+        if (params.occupancies) {
+            inputData.put('roomType', fetchBannerRoomTypeForLdmRoomLayoutType(params.occupancies[0]?.roomLayoutType))
+            inputData.put('capacity', params.occupancies[0]?.maxOccupancy)
+        } else {
+            inputData.put('roomType', '%')
+            inputData.put('capacity', null)
         }
+
+        def filterData = [params: inputData, criteria: []]
         return [filterData: filterData, pagingAndSortParams: filterMap.pagingAndSortParams]
     }
-
 
 
     private void validateSearchCriteria(Map params) {
@@ -148,20 +189,34 @@ class RoomCompositeService extends LdmService {
     }
 
 
+    boolean checkIfRoomAvailable(Map params){
+        boolean roomAvailable = false
+        validateParams(params)
+        if(params.roomNumber && params.building?.code) {
+            Map filterParams = prepareSearchParams(params)
+            filterParams.filterData.params << [roomNumber: params.roomNumber.toString(), buildingCode: params.building?.code]
+            roomAvailable = RoomsAvailabilityHelper.checkExistsAvailableRoomByRoomAndBuilding(filterParams.filterData)
+        }
+        return roomAvailable
+    }
+
     private String fetchBannerRoomTypeForLdmRoomLayoutType(String ldmRoomLayoutType) {
-        String roomType
+        String roomType = null
         if (ldmRoomLayoutType) {
             List<IntegrationConfiguration> roomLayoutTypes = rules.grep {
                 it.settingName?.equals('room.occupancy.roomLayoutType')
             }
             roomType = roomLayoutTypes.find { it.value == ldmRoomLayoutType }?.translationValue
         }
+        if (!roomType) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.roomLayoutType:BusinessLogicValidationException@@")
+        }
         return roomType
     }
 
 
     private String fetchLdmRoomLayoutTypeForBannerRoomType(String bannerRoomType) {
-        String roomLayoutType
+        String roomLayoutType = null
         if (bannerRoomType) {
             List<IntegrationConfiguration> roomLayoutTypes = rules.grep {
                 it.settingName?.equals('room.occupancy.roomLayoutType')
