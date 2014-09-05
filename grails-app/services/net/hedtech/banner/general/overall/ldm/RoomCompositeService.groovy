@@ -203,10 +203,8 @@ class RoomCompositeService extends LdmService {
     private String fetchBannerRoomTypeForLdmRoomLayoutType(String ldmRoomLayoutType) {
         String roomType = null
         if (ldmRoomLayoutType) {
-            List<IntegrationConfiguration> roomLayoutTypes = rules.grep {
-                it.settingName?.equals('room.occupancy.roomLayoutType')
-            }
-            roomType = roomLayoutTypes.find { it.value == ldmRoomLayoutType }?.translationValue
+            def rule = findAllByProcessCodeAndSettingNameAndValue('LDM','room.occupancy.roomLayoutType', ldmRoomLayoutType)
+            roomType = rule?.translationValue
         }
         if (!roomType) {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.roomLayoutType:BusinessLogicValidationException@@")
@@ -218,10 +216,8 @@ class RoomCompositeService extends LdmService {
     private String fetchLdmRoomLayoutTypeForBannerRoomType(String bannerRoomType) {
         String roomLayoutType = null
         if (bannerRoomType) {
-            List<IntegrationConfiguration> roomLayoutTypes = rules.grep {
-                it.settingName?.equals('room.occupancy.roomLayoutType')
-            }
-            roomLayoutType = roomLayoutTypes.find { it.translationValue == bannerRoomType }?.value
+            def rule = fetchAllByProcessCodeAndSettingNameAndTranslationValue('LDM','room.occupancy.roomLayoutType', bannerRoomType)
+            roomLayoutType = rule?.value
         }
         return roomLayoutType
     }
