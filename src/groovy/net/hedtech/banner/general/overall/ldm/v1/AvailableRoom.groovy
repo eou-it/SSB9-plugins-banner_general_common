@@ -15,30 +15,18 @@ class AvailableRoom {
 
     @Delegate
     private final AvailableRoomDescription availableRoomDescription
-
-    @Delegate
-    BuildingDetail building
+    BuildingDetail buildingDetail
     List occupancies
     String guid
     Metadata metadata
 
 
-    AvailableRoom(AvailableRoomDescription housingRoomDescription, BuildingDetail building, List occupancies, String guid, Metadata metadata) {
+    AvailableRoom(AvailableRoomDescription housingRoomDescription, BuildingDetail buildingDetail, List occupancies, String guid, Metadata metadata) {
         this.availableRoomDescription = housingRoomDescription
-        this.building = building
+        this.buildingDetail = buildingDetail
         this.occupancies = occupancies
         this.guid = guid
         this.metadata = metadata
-    }
-
-
-    BuildingDetail getBuilding() {
-        this.building
-    }
-
-
-    void setBuilding(BuildingDetail building) {
-        this.building = building
     }
 
 
@@ -48,7 +36,7 @@ class AvailableRoom {
         AvailableRoom room = (AvailableRoom) o
         if (guid != room.guid) return false
         if (availableRoomDescription != room.availableRoomDescription) return false
-        if (building != room.building) return false
+        if (buildingDetail != room.buildingDetail) return false
         if (occupancies != room.occupancies) return false
         if (metadata != room.metadata) return false
         return true
@@ -58,7 +46,7 @@ class AvailableRoom {
     int hashCode() {
         int result
         result = (availableRoomDescription != null ? availableRoomDescription.hashCode() : 0)
-        result = 31 * result + (building != null ? building.hashCode() : 0)
+        result = 31 * result + (buildingDetail != null ? buildingDetail.hashCode() : 0)
         result = 31 * result + (occupancies != null ? occupancies.hashCode() : 0)
         result = 31 * result + (guid != null ? guid.hashCode() : 0)
         result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
@@ -69,7 +57,7 @@ class AvailableRoom {
     public String toString() {
         """Room[
                     availableRoomDescription=$availableRoomDescription,
-                    building=$building,
+                    building=$buildingDetail,
                     occupancies=$occupancies,
                     metadata=$metadata,
                     guid=$guid]"""
