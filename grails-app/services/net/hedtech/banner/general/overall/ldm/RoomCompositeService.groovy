@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 class RoomCompositeService extends LdmService {
 
     private static final String DATE_FORMAT = 'yyyy-MM-dd'
-    private static final String TIME_FORMAT = /[0-2][0-3]:[0-5][0-9]/
+    private static final String TIME_FORMAT = /[0-2][0-3][0-5][0-9]/    //HHmm format
     private String timeFormat
 
     def buildingCompositeService
@@ -80,12 +80,12 @@ class RoomCompositeService extends LdmService {
 
     private void validateParams(Map params) {
         validateRequiredFields(params)
+        validateBeginAndEndDates(params)
         validateTimeFormat(params.startTime?.trim(), 'startTime')
         validateTimeFormat(params.endTime?.trim(), 'endTime')
+        validateBeginAndEndTimes(params)
         validateRecurrence(params)
         validateOccupancies(params)
-        validateBeginAndEndDates(params)
-        validateBeginAndEndTimes(params)
     }
 
 
@@ -105,11 +105,21 @@ class RoomCompositeService extends LdmService {
     }
 
 
+    private void validateBeginAndEndDates(Map params) {
+        Date startDate = Date.parse(DATE_FORMAT, params.startDate?.trim())
+        Date endDate = Date.parse(DATE_FORMAT, params.endDate?.trim())
+
+        if (startDate > endDate) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:startDate.laterThanEndDate:BusinessLogicValidationException@@")
+        }
+    }
+
+
     private void validateTimeFormat(String timeString, String fieldName) {
         if (timeString && timeString.length() != getTimeFormat().length()) {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.$fieldName:BusinessLogicValidationException@@")
         }
-        if (getTimeInHHmmFormat(timeString) ==~ TIME_FORMAT) {
+        if (!(getTimeInHHmmFormat(timeString) ==~ TIME_FORMAT)) {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.$fieldName:BusinessLogicValidationException@@")
         }
     }
@@ -127,9 +137,18 @@ class RoomCompositeService extends LdmService {
     }
 
 
+    private void validateBeginAndEndTimes(Map params) {
+        Integer startTimeAsInteger = Integer.valueOf(getTimeInHHmmFormat(params.startTime?.trim()))
+        Integer endTimeAsInteger = Integer.valueOf(getTimeInHHmmFormat(params.endTime?.trim()))
+        if (startTimeAsInteger >= endTimeAsInteger) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:startTime.laterThanEndTime:BusinessLogicValidationException@@")
+        }
+    }
+
+
     private void validateRecurrence(Map params) {
         if (!params.recurrence) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.recurrence:BusinessLogicValidationException@@")
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.recurrence:BusinessLogicValidationException@@")
         }
         validateByDays(params)
     }
@@ -170,32 +189,18 @@ class RoomCompositeService extends LdmService {
 
     private void validateOccupancies(Map params) {
         if (!params.occupancies) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.occupancies:BusinessLogicValidationException@@")
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.occupancies:BusinessLogicValidationException@@")
         }
         if (!params.occupancies[0]?.roomLayoutType) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.roomLayoutType:BusinessLogicValidationException@@")
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.roomLayoutType:BusinessLogicValidationException@@")
         }
         if (!params.occupancies[0]?.maxOccupancy) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.maxOccupancy:BusinessLogicValidationException@@")
+        }
+        try{
+            Integer.valueOf(params.occupancies[0]?.maxOccupancy)
+        }catch (NumberFormatException nfe){
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.maxOccupancy:BusinessLogicValidationException@@")
-        }
-    }
-
-
-    private void validateBeginAndEndDates(Map params) {
-        Date startDate = Date.parse(DATE_FORMAT, params.startDate?.trim())
-        Date endDate = Date.parse(DATE_FORMAT, params.endDate?.trim())
-
-        if (startDate > endDate) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:startDate.laterThanEndDate:BusinessLogicValidationException@@")
-        }
-    }
-
-
-    private void validateBeginAndEndTimes(Map params) {
-        Integer startTimeAsInteger = Integer.valueOf(getTimeInHHmmFormat(params.startTime?.trim()))
-        Integer endTimeAsInteger = Integer.valueOf(getTimeInHHmmFormat(params.endTime?.trim()))
-        if (startTimeAsInteger >= endTimeAsInteger) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:startTime.laterThanEndTime:BusinessLogicValidationException@@")
         }
     }
 
