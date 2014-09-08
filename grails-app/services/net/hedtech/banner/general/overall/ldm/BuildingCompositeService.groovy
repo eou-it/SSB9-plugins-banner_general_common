@@ -47,7 +47,7 @@ class BuildingCompositeService {
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
             List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
         return buildings
     }
@@ -71,7 +71,7 @@ class BuildingCompositeService {
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, globalUniqueIdentifier.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, globalUniqueIdentifier.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
 
@@ -87,7 +87,7 @@ class BuildingCompositeService {
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
 
@@ -103,7 +103,7 @@ class BuildingCompositeService {
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
         List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
-        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
 
@@ -120,7 +120,7 @@ class BuildingCompositeService {
         List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = HousingLocationBuildingDescription.findAllByCampus(campus)
 
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
-            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid, rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
         return buildings
     }
@@ -136,7 +136,7 @@ class BuildingCompositeService {
         List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.findAllByBuilding(building)
         housingRoomDescriptions.each {housingRoomDescription ->
             List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
-            rooms << new Room(housingRoomDescription, buildingDetail, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid, new Metadata(housingRoomDescription.dataOrigin))
+            rooms << new Room(housingRoomDescription, buildingDetail, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid.toLowerCase(), new Metadata(housingRoomDescription.dataOrigin))
         }
         return rooms
     }
