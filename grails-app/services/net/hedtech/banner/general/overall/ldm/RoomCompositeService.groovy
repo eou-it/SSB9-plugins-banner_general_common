@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 class RoomCompositeService extends LdmService {
 
     private static final String DATE_FORMAT = 'yyyy-MM-dd'
-    private static final String TIME_FORMAT = /[0-2][0-3][0-5][0-9]/    //HHmm format
+    private static final String TIME_FORMAT = /([0-1][0-9]|2[0-3])[0-5][0-9]/    //HHmm format
     private String timeFormat
 
     def buildingCompositeService

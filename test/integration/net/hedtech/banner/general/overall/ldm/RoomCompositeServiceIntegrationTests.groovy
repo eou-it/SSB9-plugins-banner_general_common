@@ -169,16 +169,9 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testListForInvalidStartTime() {
+    void testListForInvalidStartTimeLength() {
         Map params = getParamsForRoomQuery()
         params.startTime = '00:11'
-        try {
-            roomCompositeService.list(params)
-            fail('This should have failed as the startTime is invalid')
-        } catch (ApplicationException ae) {
-            assertApplicationException ae, 'invalid.startTime'
-        }
-        params.startTime = '15:60:60'
         try {
             roomCompositeService.list(params)
             fail('This should have failed as the startTime is invalid')
@@ -188,7 +181,19 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void testListForInvalidEndTime() {
+    void testListForInvalidStartTime() {
+        Map params = getParamsForRoomQuery()
+        params.startTime = '24:60:60'
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the startTime is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'invalid.startTime'
+        }
+    }
+
+
+    void testListForInvalidEndTimeLength() {
         Map params = getParamsForRoomQuery()
         params.endTime = '23:59'
         try {
@@ -197,6 +202,9 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'invalid.endTime'
         }
+    }
+    void testListForInvalidEndTime(){
+        Map params = getParamsForRoomQuery()
         params.endTime = '24:60:60'
         try {
             roomCompositeService.list(params)
