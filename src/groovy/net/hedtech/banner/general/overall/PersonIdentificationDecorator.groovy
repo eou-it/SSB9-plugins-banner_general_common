@@ -18,26 +18,26 @@ class PersonIdentificationDecorator {
                                       ThirdPartyAccess thirdPartyAccess,
                                       ImsSourcedIdBase imsSourcedIdBase,
                                       PidmAndUDCIdMapping pidmAndUDCIdMapping) {
-        this.personIdentificationName = personIdentificationName
-        this.thirdPartyAccess = thirdPartyAccess
-        this.imsSourcedIdBase = imsSourcedIdBase
-        this.pidmAndUDCIdMapping = pidmAndUDCIdMapping
+        this.personIdentificationName = personIdentificationName ?: new PersonIdentificationName()
+        this.thirdPartyAccess = thirdPartyAccess ?: new ThirdPartyAccess()
+        this.imsSourcedIdBase = imsSourcedIdBase ?: new ImsSourcedIdBase()
+        this.pidmAndUDCIdMapping = pidmAndUDCIdMapping ?: new PidmAndUDCIdMapping()
     }
 
 
     PersonIdentificationDecorator(Map personIdentification) {
-        this.personIdentificationName = personIdentification['personidentificationname']
-        this.thirdPartyAccess = personIdentification['thirdpartyaccess']
-        this.imsSourcedIdBase = personIdentification['imssourcedidbase']
-        this.pidmAndUDCIdMapping = personIdentification['pidmandudcidmapping']
+        this.personIdentificationName = personIdentification.personidentificationname ?: new PersonIdentificationName()
+        this.thirdPartyAccess = personIdentification.thirdpartyaccess ?: new ThirdPartyAccess()
+        this.imsSourcedIdBase = personIdentification.imssourcedidbase ?: new ImsSourcedIdBase()
+        this.pidmAndUDCIdMapping = personIdentification.pidmandudcidmapping ?: new PidmAndUDCIdMapping()
     }
 
 
     PersonIdentificationDecorator() {
-        this.personIdentificationName = null
-        this.thirdPartyAccess = null
-        this.imsSourcedIdBase = null
-        this.pidmAndUDCIdMapping = null
+        this.personIdentificationName = new PersonIdentificationName()
+        this.thirdPartyAccess = new ThirdPartyAccess()
+        this.imsSourcedIdBase = new ImsSourcedIdBase()
+        this.pidmAndUDCIdMapping = new PidmAndUDCIdMapping()
     }
 
 

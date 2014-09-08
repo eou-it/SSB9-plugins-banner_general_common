@@ -40,7 +40,7 @@ class PersonIdentificationCompositeService {
             sourcedIds = params.list('sourcedId')
             ImsSourcedIdBase.findAllBySourcedIdInList(sourcedIds).each {
                 def identificationEntity = identificationEntities[it.pidm]
-                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, null))
+                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, it))
             }
 
         }
@@ -48,7 +48,7 @@ class PersonIdentificationCompositeService {
             ldapUserMappings = params.list('ldapUserMapping')
             ThirdPartyAccess.findAllByLdapUserMappingInList(ldapUserMappings).each {
                 def identificationEntity = identificationEntities[it.pidm]
-                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, null))
+                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, it))
             }
 
         }
@@ -56,7 +56,7 @@ class PersonIdentificationCompositeService {
             externalUsers = params.list('externalUser')
             ThirdPartyAccess.findAllByExternalUserInList(externalUsers).each {
                 def identificationEntity = identificationEntities[it.pidm]
-                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, null))
+                identificationEntities.put(it.pidm, addEntityToMap(identificationEntity, it))
             }
 
         }
