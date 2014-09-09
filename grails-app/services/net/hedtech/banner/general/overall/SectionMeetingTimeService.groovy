@@ -188,7 +188,7 @@ class SectionMeetingTimeService extends ServiceBase {
             }
         }
 
-        if (category)
+        if (!category)
             category = numericCategorySequence[0]
 
         return category
