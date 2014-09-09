@@ -3,7 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
-import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
@@ -15,8 +14,6 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     HousingRoomDescription i_success_housingRoomDescription
     def roomCompositeService
-
-    private static String dateFormat
 
 
     protected void setUp() {
@@ -161,8 +158,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     void testListForStartDateLaterThanEndDate() {
         Map params = getParamsForRoomQuery()
-        params.startDate = new Date().format(getDateFormat())
-        params.endDate = (new Date()-1).format(getDateFormat())
+        params.startDate = '2014-09-10'
+        params.endDate = '2014-09-09'
         try {
             roomCompositeService.list(params)
             fail('This should have failed as the startDate is later than endDate')
@@ -269,8 +266,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     void testListForInvalidByDaysForMismatchWithDate() {
         Map params = getParamsForRoomQuery()
-        params.startDate =  Date.parse('yyyy-MM-dd',"2014-09-08").format(getDateFormat())
-        params.endDate = Date.parse('yyyy-MM-dd',"2014-09-08").format(getDateFormat())
+        params.startDate = '2014-09-08'
+        params.endDate = '2014-09-08'
         params.recurrence.byDay = ['Tuesday']
         try {
             roomCompositeService.list(params)
@@ -283,8 +280,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     void testListForInvalidByDaysForMismatchWithDates() {
         Map params = getParamsForRoomQuery()
-        params.startDate = new Date().format(getDateFormat())
-        params.endDate = (new Date()+2).format(getDateFormat())
+        params.startDate = '2014-09-08'
+        params.endDate = '2014-09-10'
         params.recurrence.byDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
         try {
             roomCompositeService.list(params)
@@ -297,8 +294,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     void testListForInvalidByDaysForInvalidDay() {
         Map params = getParamsForRoomQuery()
-        params.startDate = new Date().format(getDateFormat())
-        params.endDate = (new Date()+10).format(getDateFormat())
+        params.startDate = '2014-09-08'
+        params.endDate = '2014-09-18'
         params.recurrence.byDay = ['Monday', 'XXXXXXXXX', 'Wednesday', 'Friday']
         try {
             roomCompositeService.list(params)
@@ -373,22 +370,14 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                                       maxOccupancy  : 200,
                                       roomLayoutType: "Classroom"
                               ]],
-                startDate  : new Date().format(getDateFormat()),
-                endDate    : (new Date()+10).format(getDateFormat()),
+                startDate  : "2014-01-01",
+                endDate    : "2014-12-31",
                 startTime  : "00:00:00",
                 endTime    : "23:59:59",
                 recurrence : [
                         byDay: ["Monday", "Wednesday", "Friday"]
                 ]
         ]
-    }
-
-
-    private String  getDateFormat() {
-        if (!dateFormat) {
-            dateFormat = MessageUtility.message('default.date.format')
-        }
-        return dateFormat
     }
 
 }

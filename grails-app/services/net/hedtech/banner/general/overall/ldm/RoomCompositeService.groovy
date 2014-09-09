@@ -3,7 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
-import net.hedtech.banner.DateUtility
 import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
@@ -108,11 +107,8 @@ class RoomCompositeService extends LdmService {
 
 
     private void validateBeginAndEndDates(Map params) {
-        if (!DateUtility.validateDateFormat(params.startDate?.trim()) || !DateUtility.validateDateFormat(params.endDate?.trim())) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.dateFormat:BusinessLogicValidationException@@")
-        }
-        Date startDate = DateUtility.parseDateString(params.startDate?.trim())
-        Date endDate = DateUtility.parseDateString(params.endDate?.trim())
+        Date startDate = convertString2Date(params.startDate?.trim())
+        Date endDate = convertString2Date(params.endDate?.trim())
 
         if (startDate > endDate) {
             throw new ApplicationException(RoomCompositeService, "@@r1:startDate.laterThanEndDate:BusinessLogicValidationException@@")
@@ -166,8 +162,8 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.recurrence.byDay:BusinessLogicValidationException@@")
         }
         List validDays = []
-        Date startDate = DateUtility.parseDateString(params.startDate?.trim())
-        Date endDate = DateUtility.parseDateString(params.endDate?.trim())
+        Date startDate = convertString2Date(params.startDate?.trim())
+        Date endDate = convertString2Date(params.endDate?.trim())
         int noOfDays = (int) use(groovy.time.TimeCategory) {
             def duration = endDate - startDate
             duration.days
@@ -224,8 +220,8 @@ class RoomCompositeService extends LdmService {
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
 
-        inputData.put('startDate', DateUtility.parseDateString(params.startDate?.trim()))
-        inputData.put('endDate', DateUtility.parseDateString(params.endDate?.trim()))
+        inputData.put('startDate', convertString2Date(params.startDate?.trim()))
+        inputData.put('endDate', convertString2Date(params.endDate?.trim()))
 
         inputData.put('beginTime', getTimeInHHmmFormat(params.startTime?.trim()))
         inputData.put('endTime', getTimeInHHmmFormat(params.endTime?.trim()))
