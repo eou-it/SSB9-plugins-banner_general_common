@@ -3,6 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
@@ -24,8 +25,9 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class RoomCompositeService extends LdmService {
 
-    private static final String DATE_FORMAT = 'yyyy-MM-dd'
-    private static final String TIME_FORMAT = /([0-1][0-9]|2[0-3])[0-5][0-9]/    //HHmm format
+    private static final String HOUR_FORMAT = '([0-1][0-9]|2[0-3])'
+    private static final String MINUTE_FORMAT = '[0-5][0-9]'
+    private static final String SECOND_FORMAT = '[0-5][0-9]'
     private String timeFormat
 
     def buildingCompositeService
@@ -106,8 +108,11 @@ class RoomCompositeService extends LdmService {
 
 
     private void validateBeginAndEndDates(Map params) {
-        Date startDate = Date.parse(DATE_FORMAT, params.startDate?.trim())
-        Date endDate = Date.parse(DATE_FORMAT, params.endDate?.trim())
+        if (!DateUtility.validateDateFormat(params.startDate?.trim()) || !DateUtility.validateDateFormat(params.endDate?.trim())) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.dateFormat:BusinessLogicValidationException@@")
+        }
+        Date startDate = DateUtility.parseDateString(params.startDate?.trim())
+        Date endDate = DateUtility.parseDateString(params.endDate?.trim())
 
         if (startDate > endDate) {
             throw new ApplicationException(RoomCompositeService, "@@r1:startDate.laterThanEndDate:BusinessLogicValidationException@@")
@@ -116,11 +121,9 @@ class RoomCompositeService extends LdmService {
 
 
     private void validateTimeFormat(String timeString, String fieldName) {
-        if (timeString && timeString.length() != getTimeFormat().length()) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.$fieldName:BusinessLogicValidationException@@")
-        }
-        if (!(getTimeInHHmmFormat(timeString) ==~ TIME_FORMAT)) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.$fieldName:BusinessLogicValidationException@@")
+        String timeFormat = getTimeFormat().toLowerCase().replace('hh',HOUR_FORMAT).replace('mm',MINUTE_FORMAT).replace('ss',SECOND_FORMAT)
+        if (timeString && (timeString.length() != getTimeFormat().length() || !(timeString ==~ /$timeFormat/))) {
+            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.timeFormat:BusinessLogicValidationException@@")
         }
     }
 
@@ -163,8 +166,8 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.recurrence.byDay:BusinessLogicValidationException@@")
         }
         List validDays = []
-        Date startDate = Date.parse(DATE_FORMAT, params.startDate?.trim())
-        Date endDate = Date.parse(DATE_FORMAT, params.endDate?.trim())
+        Date startDate = DateUtility.parseDateString(params.startDate?.trim())
+        Date endDate = DateUtility.parseDateString(params.endDate?.trim())
         int noOfDays = (int) use(groovy.time.TimeCategory) {
             def duration = endDate - startDate
             duration.days
@@ -181,7 +184,7 @@ class RoomCompositeService extends LdmService {
             validDays = days.description
         }
         List invalidDays = params.recurrence?.byDay - validDays
-        if(invalidDays){
+        if (invalidDays) {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.recurrence.byDay:BusinessLogicValidationException@@")
         }
     }
@@ -197,9 +200,9 @@ class RoomCompositeService extends LdmService {
         if (!params.occupancies[0]?.maxOccupancy) {
             throw new ApplicationException(RoomCompositeService, "@@r1:missing.maxOccupancy:BusinessLogicValidationException@@")
         }
-        try{
+        try {
             Integer.valueOf(params.occupancies[0]?.maxOccupancy)
-        }catch (NumberFormatException nfe){
+        } catch (NumberFormatException nfe) {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.maxOccupancy:BusinessLogicValidationException@@")
         }
     }
@@ -221,8 +224,8 @@ class RoomCompositeService extends LdmService {
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
 
-        inputData.put('startDate', Date.parse(DATE_FORMAT, params.startDate?.trim()))
-        inputData.put('endDate', Date.parse(DATE_FORMAT, params.endDate?.trim()))
+        inputData.put('startDate', DateUtility.parseDateString(params.startDate?.trim()))
+        inputData.put('endDate', DateUtility.parseDateString(params.endDate?.trim()))
 
         inputData.put('beginTime', getTimeInHHmmFormat(params.startTime?.trim()))
         inputData.put('endTime', getTimeInHHmmFormat(params.endTime?.trim()))
