@@ -56,6 +56,17 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testListWithFilterForInvalidRoomLayoutType() {
+        def params = ['filter[filter[0][value]': 'XXXX', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
+        try{
+            roomCompositeService.list(params)
+            fail("This should have failed as the filter is invalid")
+        }catch (ApplicationException ae){
+            assertApplicationException ae, "missing.roomLayoutType"
+        }
+    }
+
+
     void testCount() {
         assertNotNull i_success_housingRoomDescription
         assertTrue roomCompositeService.count() > 0

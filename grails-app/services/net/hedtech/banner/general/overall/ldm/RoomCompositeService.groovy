@@ -288,7 +288,7 @@ class RoomCompositeService extends LdmService {
             roomType = integrationConfiguration?.translationValue
         }
         if (!roomType) {
-            throw new ApplicationException(RoomCompositeService, "@@r1:invalid.roomLayoutType:BusinessLogicValidationException@@")
+            throw new ApplicationException(RoomCompositeService, "@@r1:missing.roomLayoutType:BusinessLogicValidationException@@")
         }
         return roomType
     }
