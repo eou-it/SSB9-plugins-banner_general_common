@@ -1,14 +1,13 @@
-/*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
- **********************************************************************************/
-/** *****************************************************************************
+
+/*******************************************************************************
  Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
+*******************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.Ignore
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
@@ -835,4 +834,60 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertFalse "Schedule does not exist with this time ", count > 0
     }
 
+    // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
+    void testFetchByTermCRNAndFunction() {
+        def sectionMeetingTime = newValidForCreateSectionMeetingTimeForEvent()
+        sectionMeetingTime.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull sectionMeetingTime.id
+        def results = SectionMeetingTime.fetchByTermCRNAndFunction(
+                "EVENT", sectionMeetingTime.courseReferenceNumber, sectionMeetingTime.function.code)
+
+        assertTrue results?.size() >= 1
+        results?.each { result ->
+            assertEquals "EVENT", result.term
+            assertEquals sectionMeetingTime.courseReferenceNumber, result.courseReferenceNumber
+            assertEquals sectionMeetingTime.function.code, result.function.code
+        }
+
+        /* Test for null values */
+        def result = SectionMeetingTime.fetchByTermCRNAndFunction(
+                null, null, null)
+
+        assertFalse "SectionMeetingTime does not exist for the Event and Function ", result?.size() > 0
+    }
+
+    //Create a valid section meeting time record for an Event and Function
+    private def newValidForCreateSectionMeetingTimeForEvent() {
+        def sectionMeetingTime = new SectionMeetingTime(
+                courseReferenceNumber: "E0001",
+                dayNumber: i_success_dayNumber,
+                beginTime: i_success_beginTime,
+                endTime: i_success_endTime,
+                room: i_success_room,
+                startDate: i_success_startDate,
+                endDate: i_success_endDate,
+                category: i_success_category,
+                sunday: i_success_sunday,
+                monday: i_success_monday,
+                tuesday: i_success_tuesday,
+                wednesday: i_success_wednesday,
+                thursday: i_success_thursday,
+                friday: i_success_friday,
+                saturday: i_success_saturday,
+                override: i_success_override,
+                creditHourSession: i_success_creditHourSession,
+                meetNumber: i_success_meetNumber,
+                hoursWeek: i_success_hoursWeek,
+                term: "EVENT",
+                dayOfWeek: i_success_dayOfWeek,
+                building: i_success_building,
+                scheduleType: i_success_scheduleType,
+                function: Function.findByCode("BREAK"),
+                committee: i_success_committeeAndServiceType,
+                scheduleToolStatus: i_success_scheduleToolStatus,
+                meetingType: i_success_meetingType
+        )
+        return sectionMeetingTime
+    }
 }

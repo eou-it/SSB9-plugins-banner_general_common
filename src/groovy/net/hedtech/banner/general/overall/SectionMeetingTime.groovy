@@ -30,8 +30,19 @@ import javax.persistence.*
 		                WHERE a.term = :term
 		                AND a.courseReferenceNumber = :courseReferenceNumber
 		                AND a.category = :category
-		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""")
-])
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery(name = "SectionMeetingTime.fetchByTermAndCourseReferenceNumberStartAndEndDate",
+query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
+		                WHERE a.term = :term
+		                AND a.courseReferenceNumber = :courseReferenceNumber
+		                order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery( name = "SectionMeetingTime.fetchByTermCRNAndFunction",
+              query = """FROM SectionMeetingTime a
+		                 WHERE a.term = :term
+		                 AND a.courseReferenceNumber = :eventCourseReferenceNumber
+		                 AND a.function.code = :functionCode
+		                 order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
+] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
 
@@ -492,6 +503,22 @@ class SectionMeetingTime implements Serializable {
     }
 
 
+    /**
+     * This fetchBy is used to retrieve Start Date and End Date for a given term and crn.
+     *
+     */
+    public static SectionMeetingTime fetchByTermAndCourseReferenceNumberStartAndEndDate(String term,
+                                                                                        String courseReferenceNumber) {
+        def sectionMeetingDates
+        SectionMeetingTime.withSession { session ->
+            sectionMeetingDates = session.getNamedQuery(
+                    'SectionMeetingTime.fetchByTermAndCourseReferenceNumberStartAndEndDate').setString('term', term).setString('courseReferenceNumber', courseReferenceNumber).list()[0]
+        }
+
+        return new SectionMeetingTime(startDate: sectionMeetingDates[0], endDate: sectionMeetingDates[1])
+    }
+
+
     public static int fetchCountOfSchedulesByDateTimeAndLocation(String beginTime, String endTime, Date beginDate, Date endDate,
                                                                  String buildingCode, String roomNumber, String monday, String tuesday,
                                                                  String wednesday, String thursday, String friday, String saturday, String sunday) {
@@ -528,5 +555,18 @@ class SectionMeetingTime implements Serializable {
                     setString('friday', friday).setString('saturday', saturday).setString('sunday', sunday).list()[0]
         }
         return count
+    }
+
+
+    public static List fetchByTermCRNAndFunction(String term, String eventCourseReferenceNumber,
+                                                 String function) {
+        List sectionMeetingTimes = []
+        if (term && eventCourseReferenceNumber && function) {
+            SectionMeetingTime.withSession { session ->
+                sectionMeetingTimes = session.getNamedQuery(
+                        'SectionMeetingTime.fetchByTermCRNAndFunction').setString('term', term).setString('eventCourseReferenceNumber', eventCourseReferenceNumber).setString('functionCode', function).list()
+            }
+        }
+        return sectionMeetingTimes
     }
 }
