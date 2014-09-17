@@ -11,8 +11,8 @@ class PersonIdentificationDecorator {
 
     @Delegate private final PersonIdentificationName personIdentificationName
     ThirdPartyAccess thirdPartyAccess
-    ImsSourcedIdBase imsSourcedIdBase  
-    PidmAndUDCIdMapping pidmAndUDCIdMapping
+    ImsSourcedIdBase imsSourcedIdBase
+    String enterpriseId
 
     PersonIdentificationDecorator(PersonIdentificationName personIdentificationName,
                                       ThirdPartyAccess thirdPartyAccess,
@@ -21,7 +21,7 @@ class PersonIdentificationDecorator {
         this.personIdentificationName = personIdentificationName ?: new PersonIdentificationName()
         this.thirdPartyAccess = thirdPartyAccess ?: new ThirdPartyAccess()
         this.imsSourcedIdBase = imsSourcedIdBase ?: new ImsSourcedIdBase()
-        this.pidmAndUDCIdMapping = pidmAndUDCIdMapping ?: new PidmAndUDCIdMapping()
+        this.enterpriseId = pidmAndUDCIdMapping?.udcId
     }
 
 
@@ -29,7 +29,7 @@ class PersonIdentificationDecorator {
         this.personIdentificationName = personIdentification.personidentificationname ?: new PersonIdentificationName()
         this.thirdPartyAccess = personIdentification.thirdpartyaccess ?: new ThirdPartyAccess()
         this.imsSourcedIdBase = personIdentification.imssourcedidbase ?: new ImsSourcedIdBase()
-        this.pidmAndUDCIdMapping = personIdentification.pidmandudcidmapping ?: new PidmAndUDCIdMapping()
+        this.enterpriseId = personIdentification.pidmandudcidmapping?.udcId
     }
 
 
@@ -37,7 +37,7 @@ class PersonIdentificationDecorator {
         this.personIdentificationName = new PersonIdentificationName()
         this.thirdPartyAccess = new ThirdPartyAccess()
         this.imsSourcedIdBase = new ImsSourcedIdBase()
-        this.pidmAndUDCIdMapping = new PidmAndUDCIdMapping()
+        this.enterpriseId = null
     }
 
 
