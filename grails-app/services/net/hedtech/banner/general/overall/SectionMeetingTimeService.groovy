@@ -3,10 +3,13 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
-
+import groovy.sql.Sql
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.system.Term
 import net.hedtech.banner.exceptions.ApplicationException
+
+import java.sql.SQLException
 
 class SectionMeetingTimeService extends ServiceBase {
 
@@ -31,22 +34,29 @@ class SectionMeetingTimeService extends ServiceBase {
 
     def preCreate( Map map ) {
         //Unable to validate against ScheduleUtility because this is in the General package.  API will enforce relationship.
-        validateCodes( map.domainModel )
+        validateData( map.domainModel )
     }
 
 
     def preUpdate( Map map ) {
-        validateCodes( map.domainModel )
+        validateData( map.domainModel )
     }
 
     /**
      * Validate the SectionMeetingTime values which are not enforced with a foreign key constraint
      */
 
-    private void validateCodes( SectionMeetingTime sectionMeetingTime ) {
+    private void validateData( SectionMeetingTime sectionMeetingTime ) {
         validateTerm( sectionMeetingTime.term )
-        //If section meeting time, the hoursWeek is required
+        def section = getSection( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
+        validateDates( section, sectionMeetingTime )
         validateTimes( sectionMeetingTime )
+        validateHoursPerWeek( sectionMeetingTime )
+    }
+
+
+    private void validateHoursPerWeek( SectionMeetingTime sectionMeetingTime ) {
+        //If section meeting time, the hoursWeek is required
         if (sectionMeetingTime.hoursWeek == null && sectionMeetingTime.term != "EVENT") {
             throw new ApplicationException( SectionMeetingTime, "@@r1:missing_hours_week@@" )
         }
@@ -218,6 +228,65 @@ class SectionMeetingTimeService extends ServiceBase {
             }
         }
         return new Double( sValue )
+    }
+
+
+    private void validateDates( section, sectionMeetingTime ) {
+
+        if (section?.partOfTermEndDate) {
+            if (sectionMeetingTime.endDate > section.partOfTermEndDate || sectionMeetingTime.endDate == null) {
+                throw new ApplicationException( SectionMeetingTime, "@@r1:endDateAfterSectionEndDate:${DateUtility.formatDate(section.partOfTermEndDate)}@@" )
+            }
+        }
+
+        if (section?.partOfTermStartDate) {
+            if (sectionMeetingTime.startDate < section.partOfTermStartDate || sectionMeetingTime.startDate == null) {
+                throw new ApplicationException( SectionMeetingTime, "@@r1:startDateBeforeSectionStartDate:${DateUtility.formatDate(section.partOfTermStartDate)}@@" )
+            }
+        }
+
+        //For OLR courses, start date and end date are to be validated against Learner First and last start dates
+        if (section?.learnerRegStartFromDate || section?.learnerRegStartToDate) {
+            def startDate = sectionMeetingTime.startDate
+            def endDate = sectionMeetingTime.endDate
+
+            if (startDate == null || startDate < section.learnerRegStartFromDate) {
+                throw new ApplicationException( SectionMeetingTime, "@@r1:startDate.invalid.start_date_greater_than_learner_first:${DateUtility.formatDate(section.learnerRegStartFromDate)}@@" )
+            } else if (startDate > section.learnerRegStartToDate) {
+                throw new ApplicationException( SectionMeetingTime, "@@r1:startDate.invalid.start_date_less_than_learner_last:${DateUtility.formatDate(section.learnerRegStartToDate)}@@" )
+            } else if (endDate == null) {
+                throw new ApplicationException( SectionMeetingTime, "@@r1:endDate.invalid.end_less_than_start_date@@" )
+            }
+        }
+
+    }
+
+
+    private Map getSection( String term, String courseReferenceNumber ) {
+        Map section = new HashMap()
+        def sql
+
+        if(term && courseReferenceNumber) {
+            try {
+                sql = new Sql( sessionFactory.getCurrentSession().connection() )
+                def result = sql.firstRow( "select ssbsect_ptrm_start_date, ssbsect_ptrm_end_date, ssbsect_learner_regstart_fdate, ssbsect_learner_regstart_tdate from ssbsect where ssbsect_term_code = ? and ssbsect_crn = ?", [term, courseReferenceNumber] )
+                section.partOfTermStartDate = result[0] ? new Date( result[0]?.getTime() ) : null
+                section.partOfTermEndDate = result[1] ? new Date( result[1]?.getTime() ) : null
+                section.learnerRegStartFromDate = result[2] ? new Date( result[2]?.getTime() ) : null
+                section.learnerRegStartToDate = result[3] ? new Date( result[3]?.getTime() ) : null
+            } catch (e) {
+                log.error "Error while obtaining section details : " + e.stackTrace
+                throw e
+            }
+            finally {
+                try {
+                    sql?.close()
+                } catch (SQLException se) { /* squash it*/
+                    log.trace getClass().simpleName + " : Sql Statement is already closed, no need to close it."
+                }
+            }
+        }
+        return section
     }
 
 

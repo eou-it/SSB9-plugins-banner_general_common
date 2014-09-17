@@ -43,4 +43,11 @@ class DateUtility {
     }
 
 
+    public static String formatDate(Date date, String dateFormat = null) {
+        if (!dateFormat) {
+               dateFormat = MessageUtility.message("default.date.format")
+        }
+        return new SimpleDateFormat(dateFormat).format(date)
+    }
+
 }
