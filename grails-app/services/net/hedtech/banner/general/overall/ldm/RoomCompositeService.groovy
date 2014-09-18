@@ -27,7 +27,6 @@ class RoomCompositeService extends LdmService {
     private static final String HOUR_FORMAT = '([0-1][0-9]|2[0-3])'
     private static final String MINUTE_FORMAT = '[0-5][0-9]'
     private static final String SECOND_FORMAT = '[0-5][0-9]'
-    private String timeFormat
 
     def buildingCompositeService
 
@@ -121,18 +120,6 @@ class RoomCompositeService extends LdmService {
         if (timeString && (timeString.length() != getTimeFormat().length() || !(timeString ==~ /$timeFormat/))) {
             throw new ApplicationException(RoomCompositeService, "@@r1:invalid.timeFormat:BusinessLogicValidationException@@")
         }
-    }
-
-
-    private String getTimeFormat() {
-        return timeFormat ?: (timeFormat = MessageUtility.message("default.time.format"))
-    }
-
-
-    private String getTimeInHHmmFormat(String time) {
-        String[] timesArray = time.split(':')
-        List patternList = getTimeFormat().toLowerCase().split(':') as List
-        return timesArray[patternList.indexOf('hh')] + timesArray[patternList.indexOf('mm')]
     }
 
 
@@ -294,7 +281,7 @@ class RoomCompositeService extends LdmService {
     }
 
 
-    private String fetchLdmRoomLayoutTypeForBannerRoomType(String bannerRoomType) {
+    public String fetchLdmRoomLayoutTypeForBannerRoomType(String bannerRoomType) {
         String roomLayoutType = null
         if (bannerRoomType) {
             IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue('LDM', 'room.occupancy.roomLayoutType', bannerRoomType)
