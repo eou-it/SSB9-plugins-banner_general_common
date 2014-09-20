@@ -19,6 +19,9 @@ import java.sql.CallableStatement
  */
 class GeneralCommonUtility {
 
+     public static int INVALID_PIN =  1
+     public static int DISABLED_PIN = 2
+     public static int EXPIRED_PIN  = 3
 
     /**
      * Store the gtvsdax values used by an App in a list that gets passed and stored in the app session
@@ -85,5 +88,55 @@ class GeneralCommonUtility {
             connection.close()
         }
         return isValidPin
+    }
+
+
+    /**
+     * Store the gtvsdax values used by an App in a list that gets passed and stored in the app session
+     * @param pin
+     * @param pidm
+     * @return statusFlag :
+     *  0 - Pin is valid
+     *  1 - Invalid Pin
+     *  2 - Disabled Pin
+     *  3 - Expired Pin
+     */
+    public static int validateUserPin(String pin, String pidm) {
+        def ctx = SCH.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+        def sessionFactory = ctx.sessionFactory
+        def connection
+        int statusFlag = 0
+        int isPinValid = 0
+        String isPinExpired = ""
+        String isPinDisabled = ""
+        try {
+            connection = sessionFactory.currentSession.connection()
+            String queryString = "BEGIN " +
+                    "  ? := CASE gb_third_party_access.f_validate_pin(?,?,?,?) " +
+                    "         WHEN TRUE THEN 1 " +
+                    "         ELSE 0 " +
+                    "         END; " +
+                    "END; "
+            CallableStatement cs = connection.prepareCall(queryString)
+            cs.registerOutParameter(1, java.sql.Types.INTEGER)
+            cs.setString(2, pidm)
+            cs.setString(3, pin)
+            cs.registerOutParameter(4, java.sql.Types.VARCHAR)
+            cs.registerOutParameter(5, java.sql.Types.VARCHAR)
+            cs.executeQuery()
+            isPinValid = cs.getInt(1)
+            isPinExpired=cs.getString(4)
+            isPinDisabled = cs.getString(5)
+            if (isPinValid == 0) {
+                statusFlag = INVALID_PIN
+            }  else if (isPinDisabled.equals("Y")) {
+                statusFlag = DISABLED_PIN
+            }else if (isPinExpired.equals("Y")) {
+                statusFlag = EXPIRED_PIN
+            }
+        } finally {
+            connection.close()
+        }
+        return statusFlag
     }
 }

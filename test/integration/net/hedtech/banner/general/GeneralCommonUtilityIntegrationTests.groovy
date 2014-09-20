@@ -85,4 +85,14 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
         assertTrue !GeneralCommonUtility.validatePin("111112", "" + pidm)
     }
 
+    def testValidateUserPin() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("HOS00001").pidm
+        //valid password
+        int statusFlag = GeneralCommonUtility.validateUserPin("111111", "" + pidm)
+        assertTrue  statusFlag != GeneralCommonUtility.INVALID_PIN
+
+        statusFlag = GeneralCommonUtility.validateUserPin("111112", "" + pidm)
+        assertTrue  statusFlag == GeneralCommonUtility.INVALID_PIN
+       //TODO --Need to write test cases for Expired and Disable scenarios
+    }
 }
