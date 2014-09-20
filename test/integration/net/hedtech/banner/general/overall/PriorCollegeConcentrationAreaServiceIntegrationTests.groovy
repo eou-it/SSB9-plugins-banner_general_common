@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -13,17 +16,20 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     def priorCollegeConcentrationAreaService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testPriorCollegeConcentrationAreaValidCreate() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -41,6 +47,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
+	@Test
     void testPriorCollegeConcentrationAreaInvalidCreate() {
         def priorCollegeConcentrationArea = newInvalidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -50,6 +57,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
+	@Test
     void testPriorCollegeConcentrationAreaValidUpdate() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -78,6 +86,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
+	@Test
     void testPriorCollegeConcentrationAreaDelete() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -90,6 +99,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
+	@Test
     void testReadOnly() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]

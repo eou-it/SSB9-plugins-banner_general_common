@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -16,17 +19,20 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     def priorCollegeDegreeService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testPriorCollegeDegreeValidCreate() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -51,6 +57,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeInvalidCreate() {
         def priorCollegeDegree = newInvalidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -60,6 +67,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeValidUpdate() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -122,6 +130,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeInvalidUpdate() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -153,6 +162,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeDelete() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]

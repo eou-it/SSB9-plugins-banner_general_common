@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -16,23 +19,27 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
     def mapPK
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     def testCompositeServiceCreate() {
         // create and test new records
         createAll()
     }
 
 
+	@Test
     def testCompositeServiceDelete() {
         // create and test new records
         def deleteMap = createAll()
@@ -51,6 +58,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     def testCompositeServiceUpdate() {
         // create and test new records
         def map = createAll()
@@ -79,6 +87,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     def testCompositeServiceDuplicateDocument() {
         // create and test new records
         createAll()

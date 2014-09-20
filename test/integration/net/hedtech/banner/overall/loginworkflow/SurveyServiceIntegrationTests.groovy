@@ -3,6 +3,9 @@ Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
 **********************************************************************************/
 
 package net.hedtech.banner.overall.loginworkflow
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonIdentificationName
@@ -28,13 +31,15 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
     Integer u_failure_pidm = 01L
     String u_failure_race = "MOAN"
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
     }
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
@@ -43,6 +48,7 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+	@Test
     void testSaveSurveyResponseValid() {
 
         PersonRace quiredPersonRace = PersonRace.fetchByPidmAndRace(i_success_pidm, i_success_race)
@@ -60,6 +66,7 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+	@Test
     void testSaveSurveyResponseInvalid() {
 
         PersonRace quiredPersonRace = PersonRace.fetchByPidmAndRace(i_success_pidm, i_success_race)

@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -15,17 +18,20 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     def visaInformationService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testVisaInformationValidCreate() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -41,6 +47,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testVisaInformationInvalidCreate() {
         def visaInformation = newInvalidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -50,6 +57,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testVisaInformationValidUpdate() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -83,6 +91,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testVisaInformationInvalidUpdate() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -107,6 +116,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testVisaInformationDelete() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -119,6 +129,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testReadOnly() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]

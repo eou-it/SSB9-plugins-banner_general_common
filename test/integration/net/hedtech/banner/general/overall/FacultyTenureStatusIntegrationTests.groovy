@@ -2,6 +2,9 @@
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -41,17 +44,20 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_reviewDateIndicator = null
     def u_failure_eeoTenureIndicator = "X"
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidFacultyTenureStatus() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.save(flush: true, failOnError: true)
@@ -60,6 +66,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidFacultyTenureStatus() {
         def facultyTenureStatus = newInvalidForCreateFacultyTenureStatus()
         shouldFail(ValidationException) {
@@ -68,6 +75,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidFacultyTenureStatus() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.save(flush: true, failOnError: true)
@@ -95,6 +103,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidFacultyTenureStatus() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.save(flush: true, failOnError: true)
@@ -117,6 +126,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.save(flush: true, failOnError: true)
@@ -140,6 +150,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteFacultyTenureStatus() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.save(flush: true, failOnError: true)
@@ -150,12 +161,14 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         assertTrue "FacultyTenureStatus could not be validated as expected due to ${facultyTenureStatus.errors}", facultyTenureStatus.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def facultyTenureStatus = new FacultyTenureStatus()
         assertFalse "FacultyTenureStatus should have failed validation", facultyTenureStatus.validate()
@@ -170,6 +183,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testInListValidationFailure() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.eeoTenureIndicator = i_failure_eeoTenureIndicator
@@ -178,6 +192,7 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def facultyTenureStatus = newValidForCreateFacultyTenureStatus()
         facultyTenureStatus.code = i_failure_code

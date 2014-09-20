@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -15,17 +18,20 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegrationTestCase {
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -34,6 +40,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newInvalidForCreateSourceBackgroundInstitutionDemographic()
         shouldFail(ValidationException) {
@@ -42,6 +49,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testUpdateValidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -70,6 +78,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testUpdateInvalidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -93,6 +102,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -109,6 +119,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -129,6 +140,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -139,12 +151,14 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionDemographic = newInvalidForCreateSourceBackgroundInstitutionDemographic()
         assertFalse "SourceBackgroundInstitutionDemographic could not be validated as expected due to ${sourceBackgroundInstitutionDemographic.errors}", sourceBackgroundInstitutionDemographic.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionDemographic = new SourceBackgroundInstitutionDemographic()
         assertFalse "SourceBackgroundInstitutionDemographic should have failed validation", sourceBackgroundInstitutionDemographic.validate()
@@ -163,6 +177,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testFetchSearch() {
         // Create 2 demographics
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()

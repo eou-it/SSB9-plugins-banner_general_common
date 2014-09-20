@@ -2,6 +2,9 @@
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
@@ -76,7 +79,8 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     def u_failure_saturday = "#"
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -101,11 +105,13 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidHousingRoomUsageRestriction() {
         def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
         housingRoomUsageRestriction.save(failOnError: true, flush: true)
@@ -117,6 +123,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
+	@Test
     void testUpdateValidHousingRoomUsageRestriction() {
         def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
         housingRoomUsageRestriction.save(failOnError: true, flush: true)
@@ -172,6 +179,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
+	@Test
     void testOptimisticLock() {
         def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
         housingRoomUsageRestriction.save(failOnError: true, flush: true)
@@ -203,6 +211,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
+	@Test
     void testDeleteHousingRoomUsageRestriction() {
         def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
         housingRoomUsageRestriction.save(failOnError: true, flush: true)
@@ -213,6 +222,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def housingRoomUsageRestriction = new HousingRoomUsageRestriction()
         assertFalse "HousingRoomUsageRestriction should have failed validation", housingRoomUsageRestriction.validate()
@@ -238,6 +248,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def housingRoomUsageRestriction = new HousingRoomUsageRestriction(
                 roomNumber: '01234567891',
@@ -255,6 +266,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
+	@Test
     void testFetchCountOfUsageRestrictionsByDateAndLocation() {
         def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
         Calendar startDatecal = Calendar.instance

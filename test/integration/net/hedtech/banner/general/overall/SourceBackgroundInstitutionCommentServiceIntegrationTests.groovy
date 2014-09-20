@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
@@ -15,17 +18,20 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     def sourceBackgroundInstitutionCommentService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCommentValidCreate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -42,6 +48,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCommentInvalidCreate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newInvalidForCreateSourceBackgroundInstitutionComment()
         shouldFail(ApplicationException) {
@@ -50,6 +57,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCommentValidUpdate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -61,6 +69,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCommentInvalidUpdate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -72,6 +81,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCommentDelete() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -83,6 +93,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         def map = [domainModel: sourceBackgroundInstitutionComment]

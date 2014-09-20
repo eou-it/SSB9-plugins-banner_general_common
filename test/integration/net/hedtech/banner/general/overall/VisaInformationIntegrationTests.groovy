@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -16,17 +19,20 @@ import java.text.SimpleDateFormat
 
 class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -35,6 +41,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidVisaInformation() {
         def visaInformation = newInvalidForCreateVisaInformation()
         shouldFail(ValidationException) {
@@ -43,6 +50,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -79,6 +87,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -103,6 +112,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -131,6 +141,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -151,6 +162,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -161,12 +173,14 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def visaInformation = newInvalidForCreateVisaInformation()
         assertFalse "VisaInformation could not be validated as expected due to ${visaInformation.errors}", visaInformation.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def visaInformation = new VisaInformation()
         assertFalse "VisaInformation should have failed validation", visaInformation.validate()
@@ -192,6 +206,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def visaInformation = new VisaInformation(
                 visaNumber: 'XXXXXXXXXXXXXXXXXXXX',
@@ -202,6 +217,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateOverlappingExpireDateExists() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)

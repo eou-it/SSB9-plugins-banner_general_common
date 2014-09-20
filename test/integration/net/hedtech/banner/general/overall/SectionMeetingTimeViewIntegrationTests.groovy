@@ -3,23 +3,29 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import java.text.SimpleDateFormat
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 
 class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.BaseIntegrationTestCase {
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SSAMATX']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testFetchByTermAndCourseReferenceNumberExistingRecord() {
         def findResults = SectionMeetingTimeView.findAllByTermAndCourseReferenceNumber(
                 "201410", "20001")
@@ -40,6 +46,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
+	@Test
     void testFetchSearch() {
         // find base list
         def pagingAndSortParams = [:]
@@ -73,6 +80,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
+	@Test
     void testFetchSearchAndDates() {
         def newDate = "2010-09-01"
         def df1 = new SimpleDateFormat("yyyy-MM-dd")
@@ -123,6 +131,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
  * Prove that you cannot save
  */
 
+	@Test
     void testCreateExceptionResults() {
         def existingSection = SectionMeetingTimeView.findAllByTermAndCourseReferenceNumber(
                 "201410", "20001")[0]
@@ -137,6 +146,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
+	@Test
     void testUpdateExceptionResults() {
         def existingSection = SectionMeetingTimeView.findByTermAndCourseReferenceNumber(
                 "201410", "20001")
@@ -148,6 +158,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
+	@Test
     void testDeleteExceptionResults() {
         def existingSection = SectionMeetingTimeView.findByTermAndCourseReferenceNumber(
                 "201410", "20001")

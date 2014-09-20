@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import net.hedtech.banner.exceptions.ApplicationException
@@ -16,17 +19,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidPriorCollegeMajor() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         priorCollegeMajor.save(failOnError: true, flush: true)
@@ -35,6 +41,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidPriorCollegeMajor() {
         def priorCollegeMajor = newInvalidForCreatePriorCollegeMajor()
         shouldFail(ValidationException) {
@@ -43,6 +50,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidPriorCollegeMajor() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         priorCollegeMajor.save(failOnError: true, flush: true)
@@ -65,6 +73,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -82,6 +91,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeletePriorCollegeMajor() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         priorCollegeMajor.save(failOnError: true, flush: true)
@@ -92,12 +102,14 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def priorCollegeMajor = newInvalidForCreatePriorCollegeMajor()
         assertFalse "PriorCollegeMajor could not be validated as expected due to ${priorCollegeMajor.errors}", priorCollegeMajor.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def priorCollegeMajor = new PriorCollegeMajor()
         assertFalse "PriorCollegeMajor should have failed validation", priorCollegeMajor.validate()

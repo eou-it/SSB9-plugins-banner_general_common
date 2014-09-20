@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
@@ -19,17 +22,20 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     def housingRoomDescriptionService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ["SSASECT"]
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testHousingRoomDescriptionCreate() {
         def housingRoomDescription = newHousingRoomDescription()
 
@@ -46,6 +52,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testUpdate() {
         def housingRoomDescription = newHousingRoomDescription()
         def keyBlockMap = [termEffective: 201410, building: "LAW", room: "102"]
@@ -137,6 +144,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testHousingRoomDescriptionDelete() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -149,6 +157,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testReadOnlyRoomNumber() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -165,6 +174,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testReadOnlyTermEffective() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -181,6 +191,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testReadOnlyBuilding() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])

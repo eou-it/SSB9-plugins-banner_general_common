@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -14,17 +17,20 @@ import java.text.SimpleDateFormat
 
 class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCase {
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -33,6 +39,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testCreateInvalidVisaInternationalInformation() {
         def visaInternationalInformation = newInvalidForCreateVisaInternationalInformation()
         shouldFail(ValidationException) {
@@ -41,6 +48,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testUpdateValidVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -108,6 +116,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testUpdateInvalidVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -140,6 +149,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -168,6 +178,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testOptimisticLock() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -188,6 +199,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testDeleteVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -198,12 +210,14 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testValidation() {
         def visaInternationalInformation = newInvalidForCreateVisaInternationalInformation()
         assertFalse "VisaInternationalInformation could not be validated as expected due to ${visaInternationalInformation.errors}", visaInternationalInformation.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def visaInternationalInformation = new VisaInternationalInformation()
         assertFalse "VisaInternationalInformation should have failed validation", visaInternationalInformation.validate()
@@ -238,6 +252,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 passportId: 'XXXXXXXXXXXXXXXXXXXXXXXXXXX',

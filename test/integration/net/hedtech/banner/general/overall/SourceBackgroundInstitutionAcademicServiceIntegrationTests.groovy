@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
@@ -15,17 +18,20 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     def sourceBackgroundInstitutionAcademicService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionAcademicValidCreate() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         def map = [domainModel: sourceBackgroundInstitutionAcademic]
@@ -39,6 +45,7 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionAcademicInvalidCreate() {
         def sourceBackgroundInstitutionAcademic = newInvalidForCreateSourceBackgroundInstitutionAcademic()
         def map = [domainModel: sourceBackgroundInstitutionAcademic]
@@ -48,6 +55,7 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionAcademicValidUpdate() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         def map = [domainModel: sourceBackgroundInstitutionAcademic]
@@ -75,6 +83,7 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionAcademicInvalidUpdate() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         def map = [domainModel: sourceBackgroundInstitutionAcademic]
@@ -95,6 +104,7 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionAcademicDelete() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         def map = [domainModel: sourceBackgroundInstitutionAcademic]
@@ -106,6 +116,7 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         def map = [domainModel: sourceBackgroundInstitutionAcademic]

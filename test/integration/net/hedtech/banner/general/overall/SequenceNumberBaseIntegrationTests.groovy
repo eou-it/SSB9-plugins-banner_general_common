@@ -2,6 +2,9 @@
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
@@ -36,17 +39,20 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_maximumSequenceNumber = 1
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -58,6 +64,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidSequenceNumberBase() {
         def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
         shouldFail(ValidationException) {
@@ -66,6 +73,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -87,6 +95,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -105,6 +114,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -126,6 +136,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -136,12 +147,14 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
         assertFalse "SequenceNumberBase could not be validated as expected due to ${sequenceNumberBase.errors}", sequenceNumberBase.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sequenceNumberBase = new SequenceNumberBase()
         assertFalse "SequenceNumberBase should have failed validation", sequenceNumberBase.validate()
@@ -157,6 +170,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def sequenceNumberBase = new SequenceNumberBase(
                 sequenceNumberPrefix: 'XXX',
@@ -166,6 +180,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxValidationFailures() {
         def sequenceNumberBase = new SequenceNumberBase(
                 maximumSequenceNumber: 999999991)
@@ -174,6 +189,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMinValidationFailures() {
         def sequenceNumberBase = new SequenceNumberBase(
                 maximumSequenceNumber: -999999991)

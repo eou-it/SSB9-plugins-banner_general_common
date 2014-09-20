@@ -5,6 +5,9 @@
  Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
@@ -49,7 +52,8 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     def u_failure_mustMatch = null
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -76,11 +80,13 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidHousingRoomAttributesDefinition() {
         def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
         housingRoomAttributesDefinition.save(flush: true, failOnError: true)
@@ -92,6 +98,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
     @Ignore
+	@Test
     void testUpdateValidHousingRoomAttributesDefinition() {
         def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
         housingRoomAttributesDefinition.save(flush: true, failOnError: true)
@@ -114,6 +121,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testOptimisticLock() {
         def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
         housingRoomAttributesDefinition.save(flush: true, failOnError: true)
@@ -134,6 +142,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testDeleteHousingRoomAttributesDefinition() {
         def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
         housingRoomAttributesDefinition.save(flush: true, failOnError: true)
@@ -144,6 +153,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition()
         assertFalse "HousingRoomAttributesDefinition should have failed validation", housingRoomAttributesDefinition.validate()
@@ -161,6 +171,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def housingRoomAttributesDefinition = new HousingRoomAttributesDefinition(
                 mustMatch: 'XXX',
@@ -171,6 +182,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testFetchByBuildingRoomNumberAndTermEffective() {
         def housingRoomAttributesDefinition = newValidForCreateHousingRoomAttributesDefinition()
         housingRoomAttributesDefinition.save(flush: true, failOnError: true)

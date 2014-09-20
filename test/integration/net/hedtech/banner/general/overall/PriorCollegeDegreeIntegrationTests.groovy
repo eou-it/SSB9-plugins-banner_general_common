@@ -1,10 +1,11 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -17,17 +18,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidPriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -36,6 +40,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidPriorCollegeDegree() {
         def priorCollegeDegree = newInvalidForCreatePriorCollegeDegree()
         shouldFail(ValidationException) {
@@ -44,6 +49,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidPriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -51,8 +57,8 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 0L, priorCollegeDegree.version
         assertEquals PersonUtility.getPerson("HOR000001").pidm, priorCollegeDegree.pidm
         assertEquals 1, priorCollegeDegree.degreeSequenceNumber
-        assertEquals 200.00, priorCollegeDegree.hoursTransferred
-        assertEquals 1000.00, priorCollegeDegree.gpaTransferred
+        assertEquals 200.00, priorCollegeDegree.hoursTransferred, 0
+        assertEquals 1000.00, priorCollegeDegree.gpaTransferred, 0
         assertEquals "2014", priorCollegeDegree.degreeYear
         assertEquals "Y", priorCollegeDegree.termDegree
         assertEquals "Y", priorCollegeDegree.primaryIndicator
@@ -88,8 +94,8 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
         priorCollegeDegree = PriorCollegeDegree.get(priorCollegeDegree.id)
         assertEquals 1L, priorCollegeDegree?.version
         assertEquals 2, priorCollegeDegree.degreeSequenceNumber
-        assertEquals 201.00, priorCollegeDegree.hoursTransferred
-        assertEquals 1001.00, priorCollegeDegree.gpaTransferred
+        assertEquals 201.00, priorCollegeDegree.hoursTransferred, 0
+        assertEquals 1001.00, priorCollegeDegree.gpaTransferred, 0
         assertEquals "2013", priorCollegeDegree.degreeYear
         assertEquals "N", priorCollegeDegree.termDegree
         assertEquals "N", priorCollegeDegree.primaryIndicator
@@ -100,6 +106,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidPriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -107,8 +114,8 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 0L, priorCollegeDegree.version
         assertEquals PersonUtility.getPerson("HOR000001").pidm, priorCollegeDegree.pidm
         assertEquals 1, priorCollegeDegree.degreeSequenceNumber
-        assertEquals 200.00, priorCollegeDegree.hoursTransferred
-        assertEquals 1000.00, priorCollegeDegree.gpaTransferred
+        assertEquals 200.00, priorCollegeDegree.hoursTransferred, 0
+        assertEquals 1000.00, priorCollegeDegree.gpaTransferred, 0
         assertEquals "2014", priorCollegeDegree.degreeYear
         assertEquals "Y", priorCollegeDegree.termDegree
         assertEquals "Y", priorCollegeDegree.primaryIndicator
@@ -126,6 +133,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -152,6 +160,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -172,6 +181,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeletePriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -182,12 +192,14 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def priorCollegeDegree = newInvalidForCreatePriorCollegeDegree()
         assertFalse "PriorCollegeDegree could not be validated as expected due to ${priorCollegeDegree.errors}", priorCollegeDegree.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def priorCollegeDegree = new PriorCollegeDegree()
         assertFalse "PriorCollegeDegree should have failed validation", priorCollegeDegree.validate()
@@ -215,6 +227,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def priorCollegeDegree = new PriorCollegeDegree(
                 degreeYear: 'XXXXXX',
@@ -225,6 +238,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchByPidm() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
