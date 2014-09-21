@@ -13,6 +13,8 @@ grails.plugin.location.'banner-general-person' = "../banner_general_person.git"
 grails.plugin.location.'banner-seeddata-catalog' = "../banner_seeddata_catalog.git"
 grails.plugin.location.'i18n-core' = "../i18n_core.git"
 
+grails.project.dependency.resolver = "ivy" // or maven
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {

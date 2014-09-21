@@ -1,7 +1,6 @@
 /*********************************************************************************
- Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2014 Ellucian Company L.P. and its affiliates.
   **********************************************************************************/
-
 
 import net.hedtech.banner.configuration.ApplicationConfigurationUtils as ConfigFinder
 import grails.plugins.springsecurity.SecurityConfigType
@@ -27,7 +26,7 @@ def locationAdder = ConfigFinder.&addLocation.curry(grails.config.locations)
         customRepresentationConfig: "grails-app/conf/CustomRepresentationConfig.groovy",
 ].each { envName, defaultFileName -> locationAdder(envName, defaultFileName) }
 
-
+grails.databinding.useSpringBinder=true
 
 grails.project.groupId = "net.hedtech" // used when deploying to a maven repo
 
