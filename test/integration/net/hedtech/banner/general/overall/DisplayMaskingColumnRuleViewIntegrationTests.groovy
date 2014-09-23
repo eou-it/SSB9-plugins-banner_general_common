@@ -69,7 +69,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testFetchSsbNameDisplay() {
         def showNameSuffix
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -79,6 +79,24 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         def display = DisplayMaskingColumnRuleView.fetchSSBNameMask()
         assertNotNull display
         assertEquals display, showNameSuffix
+
+    }
+
+
+    @Test
+    void testFetchSSBMaskByBlockNameAndColumnName() {
+        def display = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName([blockName:'BWPKHSTB',columnName:'%_SSN'])
+        assertNotNull display
+        assertEquals display.dataMask,"X****XXXX"
+
+    }
+
+
+    @Test
+    void testFetchSSBMaskByBlockName() {
+        def displayRules = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName([blockName:'BWGKOADR'])
+        assertNotNull displayRules
+        assertEquals displayRules.size,4
 
     }
 }
