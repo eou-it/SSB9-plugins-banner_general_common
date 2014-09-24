@@ -24,11 +24,11 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
     String u_success_race = "MOA"
 
     String i_failure_ethnicity = "02"
-    Integer i_failure_pidm = 01L
+    Integer i_failure_pidm = 990000
     String i_failure_race = "MOAN"
 
     String u_failure_ethnicity = "23"
-    Integer u_failure_pidm = 01L
+    Integer u_failure_pidm = 990000
     String u_failure_race = "MOAN"
 
 	@Before
