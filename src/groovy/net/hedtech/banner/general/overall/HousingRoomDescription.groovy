@@ -502,7 +502,8 @@ class HousingRoomDescription implements Serializable {
     static List<HousingRoomDescription> fetchAllActiveRoomsByRoomType(Map filterData, Map paginationAndSortParams){
         def query = """FROM  HousingRoomDescription a
                                        WHERE a.roomType like NVL(:roomType, '%')
-                                       AND NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'"""
+                                       AND (NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'
+                                            OR a.roomStatus is NULL)"""
         new DynamicFinder(HousingRoomDescription.class, query, 'a').find(filterData, paginationAndSortParams)
     }
 
@@ -510,7 +511,8 @@ class HousingRoomDescription implements Serializable {
     static Long countAllActiveRoomsByRoomType(Map filterData){
         def query = """FROM  HousingRoomDescription a
                                        WHERE a.roomType like NVL(:roomType,'%')
-                                       AND NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'"""
+                                       AND (NVL(a.roomStatus.inactiveIndicator,'N') != 'Y'
+                                            OR a.roomStatus is NULL)"""
         new DynamicFinder(HousingRoomDescription.class, query, 'a').count(filterData)
     }
 
