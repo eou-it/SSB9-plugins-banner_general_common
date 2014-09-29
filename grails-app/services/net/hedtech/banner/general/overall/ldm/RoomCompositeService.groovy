@@ -57,7 +57,10 @@ class RoomCompositeService extends LdmService {
             RestfulApiValidationUtility.validateSortOrder( params.order?.trim() )
             params.sort = fetchBannerDomainPropertyForLdmField( params.sort?.trim() )
             Map filterParams = prepareParams( params )
-            List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams )
+            List<HousingRoomDescription> housingRoomDescriptions = []
+            HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams ).each { roomDescription ->
+                housingRoomDescriptions << roomDescription[0]
+            }
             housingRoomDescriptions.each {housingRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
                 BuildingDetail building = buildingCompositeService.fetchByBuildingCode( housingRoomDescription.building.code )
@@ -247,7 +250,7 @@ class RoomCompositeService extends LdmService {
         }
 
         def filterData = [params: [roomType: '%', id: globalUniqueIdentifier.domainId], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
-        HousingRoomDescription housingRoomDescription = HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterData, [:] )[0]
+        def housingRoomDescription = HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterData, [:] )[0][0]
         if (!housingRoomDescription) {
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
         }

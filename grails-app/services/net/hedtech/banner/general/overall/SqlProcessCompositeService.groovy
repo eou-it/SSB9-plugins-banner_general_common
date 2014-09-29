@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 class SqlProcessCompositeService {
 
-    def dataSource
+    def sessionFactory
 
     List getSqlProcessResults( Map params ) {
         if ( params.sqlCode && params.sqlProcessCode ) {
@@ -31,7 +31,7 @@ class SqlProcessCompositeService {
             def rows
             def conn
             try {
-                conn = dataSource.getConnection()
+                conn = sessionFactory.currentSession.connection()
                 Sql db = new Sql(conn)
                 if (bindValues.size() > 0) {
                     rows = db.rows(parsedSql, bindValues)
