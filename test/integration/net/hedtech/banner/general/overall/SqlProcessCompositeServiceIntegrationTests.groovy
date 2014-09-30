@@ -35,8 +35,8 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         def params = [sqlCode: 'FACULTY', sqlProcessCode: 'INTCOMP']
         Sql db
         try {
-            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
             def results = sqlProcessCompositeService.getSqlProcessResults(params)
+            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
             //assertEquals results, "testing"
             assertEquals results.size(),
                     db.rows("SELECT DISTINCT a.sibinst_pidm" +
@@ -65,8 +65,8 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         def params = [sqlCode: 'IAM_GOBEACC_RULE', sqlProcessCode: 'IAM', pidm: 32473, garbage: "randomGarbage"]
         Sql db
         try {
-            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
             def results = sqlProcessCompositeService.getSqlProcessResults(params)
+            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
             //assertEquals results, "testing"
             assertEquals results.size(),
                     db.rows("SELECT GOBTPAC_EXTERNAL_USER PRINCIPAL, GOBTPAC_PIN CREDENTIAL, GOBTPAC_PIDM PIDM FROM GOBTPAC WHERE GOBTPAC.GOBTPAC_PIDM = :pidm", [pidm: 32473]).size()
@@ -82,8 +82,8 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         def params = [sqlCode: 'DERIVE_TERM', sqlProcessCode: 'LDM', input_date: new java.sql.Date(new Date().time)]
         Sql db
         try {
-            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
             def results = sqlProcessCompositeService.getSqlProcessResults(params)
+            db = new Sql(new Sql(sessionFactory.getCurrentSession().connection()))
             assertEquals results[0][0], "201410"
 
         }
