@@ -31,7 +31,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     def u_success_createDate = new Date()
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -58,7 +58,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

@@ -41,13 +41,13 @@ class FacultyTenureStatusIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_reviewDateIndicator = null
     def u_failure_eeoTenureIndicator = "X"
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

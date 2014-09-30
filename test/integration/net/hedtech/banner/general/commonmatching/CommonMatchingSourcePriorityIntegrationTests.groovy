@@ -48,13 +48,13 @@ class CommonMatchingSourcePriorityIntegrationTests extends BaseIntegrationTestCa
     def u_failure_longDescription = "TTTTT"
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

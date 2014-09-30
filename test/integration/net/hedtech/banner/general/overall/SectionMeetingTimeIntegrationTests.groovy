@@ -138,7 +138,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     def u_success_existing_courseReferenceNumber = "20001"
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GEIFUNC', 'GEAFUNC', 'SLAEVNT', 'SSAMATX', 'SFQSECT', 'SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -210,7 +210,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

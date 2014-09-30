@@ -144,7 +144,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     def u_failure_surnamePrefix = "TTTTT"
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -165,7 +165,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

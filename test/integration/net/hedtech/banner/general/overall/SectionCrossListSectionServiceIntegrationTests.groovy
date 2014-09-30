@@ -16,13 +16,13 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     def sectionCrossListSectionService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SSAXLST', 'SSAXLSQ']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

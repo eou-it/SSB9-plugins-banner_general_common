@@ -9,13 +9,13 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException
 
 class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.BaseIntegrationTestCase {
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SSAMATX']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

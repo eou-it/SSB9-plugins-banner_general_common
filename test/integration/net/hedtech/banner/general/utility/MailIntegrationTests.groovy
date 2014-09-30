@@ -107,7 +107,7 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_miscellaneousNumber = 1
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -142,7 +142,7 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

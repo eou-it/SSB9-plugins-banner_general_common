@@ -15,13 +15,13 @@ class SourceBackgroundInstitutionAcademicServiceIntegrationTests extends BaseInt
     def sourceBackgroundInstitutionAcademicService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

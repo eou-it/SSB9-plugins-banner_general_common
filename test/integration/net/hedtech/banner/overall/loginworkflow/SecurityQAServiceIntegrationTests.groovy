@@ -21,7 +21,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     def i_failure_question_desc1 ="My test Question<>"
     def pidm
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()

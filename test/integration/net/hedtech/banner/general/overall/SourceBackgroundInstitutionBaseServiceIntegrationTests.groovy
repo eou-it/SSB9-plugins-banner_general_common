@@ -15,13 +15,13 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     def sourceBackgroundInstitutionBaseService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

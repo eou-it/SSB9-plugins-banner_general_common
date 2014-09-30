@@ -55,7 +55,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     def u_failure_answerSalt = null
     /*PROTECTED REGION END*/
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -70,7 +70,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         u_failure_pinQuestion = null
     }
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

@@ -120,7 +120,7 @@ class SqlProcessParameter implements Serializable {
         result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
         result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
         result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (entriesForSqlProcess != null ? entriesForSqlProcess.hashCode() : 0)
+        result = 31 * result + (entriesForSqlProcesss != null ? entriesForSqlProcess.hashCode() : 0)
         result = 31 * result + (parameterForSqlProcess != null ? parameterForSqlProcess.hashCode() : 0)
         return result
     }

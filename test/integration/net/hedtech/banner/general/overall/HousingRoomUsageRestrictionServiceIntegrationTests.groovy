@@ -83,7 +83,7 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 	def u_failure_keyBlockMap = [:]
 
 
-	protected void setUp() {
+	void setUp() {
 		formContext = ['SSASECT']
 		super.setUp()
         initializeTestDataForReferences()
@@ -107,7 +107,7 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 		//Test data for references for custom tests
 	}
 
-	protected void tearDown() {
+	void tearDown() {
 		super.tearDown()
 	}
 

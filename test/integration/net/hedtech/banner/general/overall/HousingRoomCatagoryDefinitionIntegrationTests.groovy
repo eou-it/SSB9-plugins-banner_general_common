@@ -37,7 +37,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	def u_failure_code = "TTTT"
 	def u_failure_description = "update failure description field with a string of more than 30 characters"
 
-	protected void setUp() {
+	void setUp() {
 		formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
 		super.setUp()
 		initializeTestDataForReferences()
@@ -64,7 +64,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 
 	}
 
-	protected void tearDown() {
+	void tearDown() {
 		super.tearDown()
 	}
 

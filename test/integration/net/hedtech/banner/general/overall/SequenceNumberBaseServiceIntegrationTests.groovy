@@ -42,13 +42,13 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     def u_failure_keyBlockMap = [:]
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SCACRSE']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

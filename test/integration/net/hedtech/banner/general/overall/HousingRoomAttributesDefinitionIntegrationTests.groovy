@@ -49,7 +49,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     def u_failure_mustMatch = null
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -76,7 +76,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

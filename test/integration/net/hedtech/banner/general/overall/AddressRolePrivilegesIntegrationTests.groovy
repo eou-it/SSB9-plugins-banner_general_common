@@ -25,12 +25,12 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     def i_failure_modified_by = "modifiedbyme1234567812345678901"
     def i_failure_data_origin = "origin7890123456789012345678901"
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this (removing GEAPART because of GUOBOBS_UI_VERSION = B)
         super.setUp()
     }
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

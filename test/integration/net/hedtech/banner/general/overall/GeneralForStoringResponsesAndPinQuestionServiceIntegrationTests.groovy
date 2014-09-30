@@ -51,7 +51,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
     def u_failure_answerDescription = null
     def u_failure_answerSalt = "DUMMY"
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -64,7 +64,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         u_success_pidm = i_success_pidm
     }
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

@@ -28,13 +28,13 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
     Integer u_failure_pidm = 01L
     String u_failure_race = "MOAN"
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
     }
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

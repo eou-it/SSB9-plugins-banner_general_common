@@ -74,7 +74,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_systemRequiredIndicator = true
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -109,7 +109,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

@@ -17,13 +17,13 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     def priorCollegeService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

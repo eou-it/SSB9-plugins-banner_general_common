@@ -76,7 +76,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     def u_failure_saturday = "#"
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -101,7 +101,7 @@ class HousingRoomUsageRestrictionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

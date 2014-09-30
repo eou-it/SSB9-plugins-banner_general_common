@@ -46,7 +46,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     def u_failure_keyBlockMap = [:]
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SSASECT']
         super.setUp()
         initializeTestDataForReferences()
@@ -74,7 +74,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

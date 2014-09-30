@@ -25,13 +25,13 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     def housingLocationBuildingDescriptionService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ["SSASECT"]
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

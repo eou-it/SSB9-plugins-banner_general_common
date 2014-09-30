@@ -13,13 +13,13 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     def priorCollegeConcentrationAreaService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

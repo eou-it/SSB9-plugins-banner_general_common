@@ -43,7 +43,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_displayIndicator = true
     /*PROTECTED REGION END*/
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']// Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
@@ -54,7 +54,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

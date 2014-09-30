@@ -14,13 +14,13 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     def integrationPartnerSystemRuleService
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

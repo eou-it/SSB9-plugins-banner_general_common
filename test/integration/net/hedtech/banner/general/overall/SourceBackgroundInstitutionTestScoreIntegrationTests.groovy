@@ -17,13 +17,13 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrationTestCase {
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

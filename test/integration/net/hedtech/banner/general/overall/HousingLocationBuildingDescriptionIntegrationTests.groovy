@@ -125,7 +125,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     def u_failure_streetLine4 = "TTTTT"
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ["SSASECT"] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -186,7 +186,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

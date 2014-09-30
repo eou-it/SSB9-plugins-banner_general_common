@@ -13,13 +13,13 @@ import net.hedtech.banner.general.system.Term
 class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['SSAXLST', 'SSAXLSQ'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 

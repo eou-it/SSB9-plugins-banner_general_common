@@ -33,7 +33,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     def i_failure_emailType
 
 
-    protected void setUp() {
+    void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -47,7 +47,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+    void tearDown() {
         super.tearDown()
     }
 
