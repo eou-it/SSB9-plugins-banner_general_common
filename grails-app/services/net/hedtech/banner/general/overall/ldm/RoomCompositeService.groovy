@@ -245,15 +245,15 @@ class RoomCompositeService extends LdmService {
     @Transactional(readOnly = true)
     Room get( String guid ) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( Room.LDM_NAME, guid )
-        if (!globalUniqueIdentifier) {
+        if (!globalUniqueIdentifier)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
-        }
-
         def filterData = [params: [roomType: '%', id: globalUniqueIdentifier.domainId], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
-        def housingRoomDescription = HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterData, [:] )[0][0]
-        if (!housingRoomDescription) {
+        List housingQueryResults = HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterData, [:] )
+        HousingRoomDescription housingRoomDescription
+        if( housingQueryResults.size() > 0 )
+            housingRoomDescription = housingQueryResults[0][0]
+        if (!housingRoomDescription)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
-        }
         BuildingDetail building = buildingCompositeService.fetchByBuildingCode( housingRoomDescription.building.code )
         List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
         return new Room( housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata( housingRoomDescription.dataOrigin ) )
