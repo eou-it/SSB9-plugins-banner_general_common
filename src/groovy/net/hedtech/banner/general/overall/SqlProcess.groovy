@@ -279,4 +279,12 @@ class SqlProcess implements Serializable {
         }
         ""
     }
+
+    static def fetchAllActiveValidatedPriorityProcessSql( sql, sqlProcess) {
+        def parsedSql = SqlProcess.withSession {session ->
+            session.getNamedQuery(
+                    'SqlProcess.fetchActiveValidatedPriorityProcessSql').setString('sql', sql).setString('sqlProcess', sqlProcess).list()
+        }
+        return parsedSql
+    }
 }
