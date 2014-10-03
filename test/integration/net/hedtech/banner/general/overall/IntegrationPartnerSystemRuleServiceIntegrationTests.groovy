@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
@@ -13,17 +16,20 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
     def integrationPartnerSystemRuleService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreate() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRule = integrationPartnerSystemRuleService.create(integrationPartnerSystemRule)
@@ -34,6 +40,7 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testUpdate() {
         def integrationPartnerSystemRules = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRules = integrationPartnerSystemRuleService.create(integrationPartnerSystemRules)
@@ -47,6 +54,7 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testIntegrationPartnerSystemRulesDelete() {
         def integrationPartnerSystemRules = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRules = integrationPartnerSystemRuleService.create(integrationPartnerSystemRules)

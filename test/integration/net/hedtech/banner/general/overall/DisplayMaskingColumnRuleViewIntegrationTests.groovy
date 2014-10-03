@@ -3,6 +3,9 @@
  *******************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -12,13 +15,15 @@ import org.springframework.jdbc.UncategorizedSQLException
 class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCase {
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
@@ -26,6 +31,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
      * Tests that view does not allow crud (create,update,delete) operations and is readonly
      */
 
+	@Test
     void testCreateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -41,6 +47,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testUpdateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -52,6 +59,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testDeleteExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -61,6 +69,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+	@Test
     void testFetchSsbNameDisplay() {
         def showNameSuffix
         def sql = new Sql(sessionFactory.getCurrentSession().connection())

@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -13,17 +16,20 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     def visaInternationalInformationService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testVisaInternationalInformationValidCreate() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -41,6 +47,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testVisaInternationalInformationInvalidCreate() {
         def visaInternationalInformation = newInvalidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -50,6 +57,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testVisaInternationalInformationValidUpdate() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -108,6 +116,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testVisaInternationalInformationInvalidUpdate() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -132,6 +141,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testVisaInternationalInformationDelete() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -144,6 +154,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testReadOnly() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -161,6 +172,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testMissingNationOfIssue() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,
@@ -179,6 +191,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testInvalidCertificationDate() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,
@@ -195,6 +208,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testDefaultRequired() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,

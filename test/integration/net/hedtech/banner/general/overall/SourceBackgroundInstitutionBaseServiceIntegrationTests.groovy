@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.*
@@ -15,17 +18,20 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     def sourceBackgroundInstitutionBaseService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseValidCreate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -41,6 +47,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseInvalidCreate() {
         def sourceBackgroundInstitutionBase = newInvalidForCreateSourceBackgroundInstitutionBase()
         shouldFail(ApplicationException) {
@@ -49,6 +56,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseMissingAddressInfoCreate() {
         def zip = newValidForCreateZip()
         def sourceBackgroundInstitutionBase
@@ -95,6 +103,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseMissingAddressInfoUpdate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -128,6 +137,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseValidUpdate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -157,6 +167,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseInvalidUpdate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -169,6 +180,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionBaseDelete() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -179,6 +191,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         def map = [domainModel: sourceBackgroundInstitutionBase]

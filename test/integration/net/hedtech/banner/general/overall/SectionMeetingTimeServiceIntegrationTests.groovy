@@ -1,8 +1,11 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -14,13 +17,15 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     def sectionMeetingTimeService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GEIFUNC', 'GEAFUNC', 'SLAEVNT', 'SSAMATX', 'SFQSECT', 'SSASECT']// Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
@@ -30,6 +35,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
      * types of meeting times. 
      */
 
+	@Test
     void testSectionMeetingTimeCreateTraditionalSection() {
 
         def sectionMeetingTime = newSectionMeetingTime()
@@ -51,6 +57,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeCreateOLRSection() {
 
         def sectionMeetingTime = newSectionMeetingTimeOLR()
@@ -73,6 +80,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
 
+	@Test
     void testEventMeetingTimeCreate() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -95,6 +103,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
      * The API should default the MeetingType of CLAS when a class meeting type is entered.
      */
 
+	@Test
     void testSectionMeetingTimeValidCreateDefaultMeetingType() {
 
         def sectionMeetingTime = newSectionMeetingTime()
@@ -118,6 +127,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeInvalidCreateTerm() {
 
         def sectionMeetingTime = newSectionMeetingTime()
@@ -137,6 +147,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeInvalidCreateTerm() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -157,6 +168,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
 
+	@Test
     void testEventMeetingTimeInvalidBeginTime() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -176,6 +188,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeInvalidEndTime() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -195,6 +208,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeInvalidMissingBeginTime() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -215,6 +229,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeInvalidMissingEndTime() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -235,6 +250,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeInvalidBeginTimeGreaterThanEndTime() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -255,6 +271,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeMissingHoursWeek() {
 
         def sectionMeetingTime = newSectionMeetingTime()
@@ -274,6 +291,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeUpdate() {
 
         def sectionMeetingTime = newSectionMeetingTime()
@@ -292,11 +310,12 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
                 domainModel: sectionMeetingTimeUpdate]
         sectionMeetingTimeUpdate = sectionMeetingTimeService.update(updateMap)
         assertNull sectionMeetingTimeUpdate.monday
-        assertEquals new BigDecimal(1), sectionMeetingTimeUpdate.creditHourSession
+        assertEquals new BigDecimal(1), sectionMeetingTimeUpdate.creditHourSession, 0.001
         assertEquals "O", sectionMeetingTimeUpdate.override
     }
 
 
+	@Test
     void testSectionMeetingTimeInvalidUpdateTraditionalSection() {
 
         def sectionMeetingTime = newSectionMeetingTime()
@@ -322,6 +341,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeUpdate() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -345,6 +365,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testEventMeetingTimeInvalidUpdate() {
 
         def sectionMeetingTime = newEventMeetingTime()
@@ -368,6 +389,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testReadOnlyCrn() {
         def sectionMeetingTime = SectionMeetingTime.findByTermAndCourseReferenceNumber("201410", "20001")
         assertNotNull sectionMeetingTime
@@ -384,6 +406,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testReadOnlyTerm() {
         def sectionMeetingTime = SectionMeetingTime.findByTermAndCourseReferenceNumber("201410", "20001")
         assertNotNull sectionMeetingTime
@@ -400,6 +423,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeDeleteTraditionalSection() {
         def sectionMeetingTime = newSectionMeetingTime()
 
@@ -419,6 +443,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
 
+	@Test
     void testEventMeetingTimeDelete() {
         def sectionMeetingTime = newEventMeetingTime()
 
@@ -437,6 +462,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testIsBuildingRoomAndNoTime() {
         def sectionMeetingTime = newSectionMeetingTime()
         sectionMeetingTime.building = Building.findByCode("ADAMS")
@@ -455,6 +481,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testIsBuildingRoomAndNoDays() {
         def sectionMeetingTime = newSectionMeetingTime()
         sectionMeetingTime.building = Building.findByCode("ADAMS")
@@ -595,6 +622,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeForSessionExists() {
         //test an existing section
         def sectionMeetingTimeForSession = SectionMeetingTimeService.isMeetingTimesForSession("201410", "20001", "01")
@@ -602,6 +630,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSectionMeetingTimeForSessionDoesNotExist() {
         //test a section without meeting times for this category
         def sectionMeetingTimeForSession = SectionMeetingTimeService.isMeetingTimesForSession("201410", "20431", "02")

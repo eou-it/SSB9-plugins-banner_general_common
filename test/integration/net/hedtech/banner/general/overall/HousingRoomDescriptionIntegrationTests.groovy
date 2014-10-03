@@ -1,10 +1,11 @@
 /*********************************************************************************
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/** *****************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
@@ -14,7 +15,6 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 
 class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
-    //Test data for creating new domain instance
     //Valid test data (For success tests)
     def i_success_department
     def i_success_partition
@@ -23,7 +23,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def i_success_roomRate
     def i_success_phoneRate
     def i_success_college
-
     def i_success_roomNumber = "101"
     def i_success_termEffective = "201410"
     def i_success_description = "TTTTT"
@@ -43,6 +42,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def i_success_length = 1
     def i_success_area = 1
     def i_success_countryPhone = null
+
     //Invalid test data (For failure tests)
     def i_failure_department
     def i_failure_partition
@@ -51,7 +51,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def i_failure_roomRate
     def i_failure_phoneRate
     def i_failure_college
-
     def i_failure_roomNumber = "TTTTT"
     def i_failure_termEffective = "TTTTT"
     def i_failure_description = "TTTTT"
@@ -72,7 +71,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def i_failure_area = 1
     def i_failure_countryPhone = "TTTT"
 
-    //Test data for creating updating domain instance
     //Valid test data (For success tests)
     def u_success_department
     def u_success_partition
@@ -81,7 +79,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def u_success_roomRate
     def u_success_phoneRate
     def u_success_college
-
     def u_success_roomNumber = "101"
     def u_success_termEffective = "201410"
     def u_success_description = "TTTTT"
@@ -101,6 +98,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def u_success_length = 1
     def u_success_area = 1
     def u_success_countryPhone = "TTTT"
+
     //Valid test data (For failure tests)
     def u_failure_department
     def u_failure_partition
@@ -109,7 +107,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_roomRate
     def u_failure_phoneRate
     def u_failure_college
-
     def u_failure_roomNumber = "103"
     def u_failure_termEffective = "201420"
     def u_failure_description = "TTTTT"
@@ -131,7 +128,8 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_countryPhone = "TTTT"
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ["SSASECT"] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -180,11 +178,13 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -196,6 +196,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidHousingRoomDescription() {
         def housingRoomDescription = newInvalidForCreateHousingRoomDescription()
         shouldFail {
@@ -204,6 +205,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -214,7 +216,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_description, housingRoomDescription.description
         assertEquals i_success_capacity, housingRoomDescription.capacity
         assertEquals i_success_maximumCapacity, housingRoomDescription.maximumCapacity
-        assertEquals i_success_utilityRate, housingRoomDescription.utilityRate
+        assertEquals i_success_utilityRate, housingRoomDescription.utilityRate, 0
         assertEquals i_success_utilityRatePeriod, housingRoomDescription.utilityRatePeriod
         assertEquals i_success_phoneArea, housingRoomDescription.phoneArea
         assertEquals i_success_phoneNumber, housingRoomDescription.phoneNumber
@@ -224,9 +226,9 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_roomType, housingRoomDescription.roomType
         assertEquals i_success_priority, housingRoomDescription.priority
         assertEquals i_success_keyNumber, housingRoomDescription.keyNumber
-        assertEquals i_success_width, housingRoomDescription.width
-        assertEquals i_success_length, housingRoomDescription.length
-        assertEquals i_success_area, housingRoomDescription.area
+        assertEquals i_success_width, housingRoomDescription.width, 0
+        assertEquals i_success_length, housingRoomDescription.length, 0
+        assertEquals i_success_area, housingRoomDescription.area, 0
         assertEquals i_success_countryPhone, housingRoomDescription.countryPhone
 
         //Update the entity
@@ -261,7 +263,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals u_success_description, housingRoomDescription.description
         assertEquals u_success_capacity, housingRoomDescription.capacity
         assertEquals u_success_maximumCapacity, housingRoomDescription.maximumCapacity
-        assertEquals u_success_utilityRate, housingRoomDescription.utilityRate
+        assertEquals u_success_utilityRate, housingRoomDescription.utilityRate, 0
         assertEquals u_success_utilityRatePeriod, housingRoomDescription.utilityRatePeriod
         assertEquals u_success_phoneArea, housingRoomDescription.phoneArea
         assertEquals u_success_phoneNumber, housingRoomDescription.phoneNumber
@@ -271,13 +273,14 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals u_success_roomType, housingRoomDescription.roomType
         assertEquals u_success_priority, housingRoomDescription.priority
         assertEquals u_success_keyNumber, housingRoomDescription.keyNumber
-        assertEquals u_success_width, housingRoomDescription.width
-        assertEquals u_success_length, housingRoomDescription.length
-        assertEquals u_success_area, housingRoomDescription.area
+        assertEquals u_success_width, housingRoomDescription.width, 0
+        assertEquals u_success_length, housingRoomDescription.length, 0
+        assertEquals u_success_area, housingRoomDescription.area, 0
         assertEquals u_success_countryPhone, housingRoomDescription.countryPhone
     }
 
 
+	@Test
     void testUpdateInvalidHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -288,7 +291,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_description, housingRoomDescription.description
         assertEquals i_success_capacity, housingRoomDescription.capacity
         assertEquals i_success_maximumCapacity, housingRoomDescription.maximumCapacity
-        assertEquals i_success_utilityRate, housingRoomDescription.utilityRate
+        assertEquals i_success_utilityRate, housingRoomDescription.utilityRate, 0
         assertEquals i_success_utilityRatePeriod, housingRoomDescription.utilityRatePeriod
         assertEquals i_success_phoneArea, housingRoomDescription.phoneArea
         assertEquals i_success_phoneNumber, housingRoomDescription.phoneNumber
@@ -298,9 +301,9 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_roomType, housingRoomDescription.roomType
         assertEquals i_success_priority, housingRoomDescription.priority
         assertEquals i_success_keyNumber, housingRoomDescription.keyNumber
-        assertEquals i_success_width, housingRoomDescription.width
-        assertEquals i_success_length, housingRoomDescription.length
-        assertEquals i_success_area, housingRoomDescription.area
+        assertEquals i_success_width, housingRoomDescription.width, 0
+        assertEquals i_success_length, housingRoomDescription.length, 0
+        assertEquals i_success_area, housingRoomDescription.area, 0
         assertEquals i_success_countryPhone, housingRoomDescription.countryPhone
 
         //Update the entity with invalid values
@@ -333,6 +336,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -369,6 +373,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -379,12 +384,14 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         assertTrue "HousingRoomDescription could not be validated as expected due to ${ housingRoomDescription.errors }", housingRoomDescription.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def housingRoomDescription = new HousingRoomDescription()
         assertFalse "HousingRoomDescription should have failed validation", housingRoomDescription.validate()
@@ -423,6 +430,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def housingRoomDescription = new HousingRoomDescription(
                 description: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
@@ -442,6 +450,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxValueValidationFailure() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.capacity = 100000
@@ -464,6 +473,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMinValueValidationFailure() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.capacity = -100000
@@ -486,6 +496,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchTermTo() {
         //Seed data
         // BuildingCode B00A	RoomNumber R00A	    TermCode200010
@@ -496,6 +507,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchBySomeHousingRoomDescriptionRoom() {
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom()
         assertNotNull housings
@@ -503,6 +515,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchBySomeHousingRoomDescriptionRoomBuilding() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom(map)
@@ -510,6 +523,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchBySomeHousingRoomDescriptionRoomFilter() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('1', map)
@@ -517,28 +531,30 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test by passing room number or description as filters
-    void testFetchBySomeHousingRoomDescription() {
-        //Test by passing room description as filter
-        def map = [termEffective: '200110']
-        def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('lecture hall', map)
-        assertNotNull housings
-        assertTrue housings.list.size() > 0
-        def descList = housings.list*.description
-        descList.each { it ->
-            assertTrue(it.contains('Lecture Hall'))
-        }
-        //Test by passing room number as filter
-        def map2 = [termEffective: '200110']
-        def housings2 = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('100', map2)
-        assertNotNull housings2
-        assertTrue housings2.list.size() > 0
-        def roomNumberList = housings2.list*.roomNumber
-        roomNumberList.each { it ->
-            assertTrue(it.contains('100'))
-        }
+	@Test
+     void testFetchBySomeHousingRoomDescription() {
+         //Test by passing room description as filter
+         def map = [termEffective: '200110']
+         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('lecture hall', map)
+         assertNotNull housings
+         assertTrue housings.list.size() > 0
+         def descList = housings.list*.description
+         descList.each { it ->
+              assertTrue(it.contains('Lecture Hall'))
+         }
+         //Test by passing room number as filter
+         def map2 = [termEffective: '200110']
+         def housings2 = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('100', map2)
+         assertNotNull housings2
+         assertTrue housings2.list.size() > 0
+         def roomNumberList = housings2.list*.roomNumber
+           roomNumberList.each { it ->
+              assertTrue(it.contains('100'))
+         }
     }
 
 
+	@Test
     void testFetchValidRoomAndBuilding() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchValidRoomAndBuilding("100", map)
@@ -547,6 +563,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchValidSomeRoomAndBuilding() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)
@@ -555,6 +572,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchValidSomeRoomAndBuildingWithoutBuildingParam() {
         def map = [termEffective: '200110']
         def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)

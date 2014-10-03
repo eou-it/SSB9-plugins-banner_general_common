@@ -3,6 +3,9 @@
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.general.system.Building
 
@@ -83,7 +86,8 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 	def u_failure_keyBlockMap = [:]
 
 
-	protected void setUp() {
+    @Before
+    public void setUp() {
 		formContext = ['SSASECT']
 		super.setUp()
         initializeTestDataForReferences()
@@ -107,10 +111,14 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 		//Test data for references for custom tests
 	}
 
-	protected void tearDown() {
+
+    @After
+    public void tearDown() {
 		super.tearDown()
 	}
 
+
+    @Test
 	void testHousingRoomUsageRestrictionValidCreate() {
 		def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
 		def map = [keyBlock: i_success_keyBlockMap,
@@ -125,6 +133,7 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
     }
 
 
+    @Test
 	void testHousingRoomUsageRestrictionValidUpdate() {
 		def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
 		def map = [keyBlock: i_success_keyBlockMap,
@@ -170,6 +179,8 @@ class HousingRoomUsageRestrictionServiceIntegrationTests extends BaseIntegration
 		assertEquals u_success_building, housingRoomUsageRestriction.building
 	}
 
+
+    @Test
 	void testHousingRoomUsageRestrictionDelete() {
 		def housingRoomUsageRestriction = newValidForCreateHousingRoomUsageRestriction()
 		def map = [keyBlock: i_success_keyBlockMap,

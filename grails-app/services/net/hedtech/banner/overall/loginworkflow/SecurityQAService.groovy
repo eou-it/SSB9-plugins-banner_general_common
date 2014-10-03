@@ -102,29 +102,29 @@ class SecurityQAService {
 
     private void checkAndRaiseExceptionIfMoreThanOneQuestionEntered(String question1, String question2) {
         if (isValueEntered(question1) && isValueEntered(question2)) {
-            log.error("Each question can be selected or defined, not both. Please choose a question from the drop down or define your own question.")
+            log.debug("Each question can be selected or defined, not both. Please choose a question from the drop down or define your own question.")
             throw new ApplicationException("", "securityQA.invalid.number.question")
         }
     }
 
     private void checkAndRaiseExceptionIfQuestionAnswerNotEntered(String question1, String question2, String answer) {
         if (isValueEntered(answer) && !isValueEntered(question1) && !isValueEntered(question2)) {
-            log.error("Please enter Security Question and Answer.")
+            log.debug("Please enter Security Question and Answer.")
             throw new ApplicationException("", "securityQA.error")
         } else if (!isValueEntered(answer) && (isValueEntered(question1) || isValueEntered(question2))) {
-            log.error("Please enter Security Question and Answer.")
+            log.debug("Please enter Security Question and Answer.")
             throw new ApplicationException("", "securityQA.error")
         }
     }
 
     private void checkAndRaiseExceptionForInvalidCharacter(String answer, String question) {
         if (isValueEntered(question) && isInvalidCharacterEntered(question)) {
-            log.error("Question may not contain the < or > characters.")
+            log.debug("Question may not contain the < or > characters.")
             throw new ApplicationException("", "securityQA.invalid.question")
         }
 
         if (isValueEntered(answer) && isInvalidCharacterEntered(answer)) {
-            log.error("Answer may not contain the < or > characters.")
+            log.debug("Answer may not contain the < or > characters.")
             throw new ApplicationException("", "securityQA.invalid.answer")
         }
     }
@@ -143,13 +143,13 @@ class SecurityQAService {
     private void checkAndRaiseExceptionForInvalidLength(String answer, String question) {
         def gubprfAnsrMinLength = getUserDefinedPreference()?.GUBPPRF_ANSR_MIN_LENGTH
         if (isValueEntered(answer) && answer.length() < gubprfAnsrMinLength && gubprfAnsrMinLength > 0) {
-            log.error("Answer has to be " + gubprfAnsrMinLength + " characters or more.")
+            log.debug("Answer has to be " + gubprfAnsrMinLength + " characters or more.")
             throw new ApplicationException("", "securityQA.invalid.length.answer")
         }
 
         def gubprfQstnMinLength = getUserDefinedPreference()?.GUBPPRF_QSTN_MIN_LENGTH
         if (isValueEntered(question) && question.length() < gubprfQstnMinLength && gubprfQstnMinLength > 0) {
-            log.error("Question has to be " + gubprfQstnMinLength + " characters or more.")
+            log.debug("Question has to be " + gubprfQstnMinLength + " characters or more.")
             throw new ApplicationException("", "securityQA.invalid.length.question")
         }
     }
@@ -184,7 +184,7 @@ class SecurityQAService {
 
     private void createEditableQuestionAndAnswer(pidm, question, question_num, answer) {
         if (GeneralForStoringResponsesAndPinQuestion.fetchCountOfSameQuestionForPidm([pidm: Integer.valueOf(pidm), questionDescription: question]) > 0) {
-            log.error("Question has to be Unique")
+            log.warn("Question has to be Unique")
             throw new ApplicationException("", "securityQA.unique.question")
         }
         GeneralForStoringResponsesAndPinQuestion generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(

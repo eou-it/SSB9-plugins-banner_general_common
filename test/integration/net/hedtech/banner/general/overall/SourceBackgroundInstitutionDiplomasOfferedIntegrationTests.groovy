@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import net.hedtech.banner.general.system.DiplomaType
@@ -15,17 +18,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseIntegrationTestCase {
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionDiplomasOffered() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
@@ -34,6 +40,7 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionDiplomasOffered() {
         def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
         shouldFail(ValidationException) {
@@ -43,6 +50,7 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
 
     // NOTE: No Updates are allowed
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -59,6 +67,7 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionDiplomasOffered() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         sourceBackgroundInstitutionDiplomasOffered.save(failOnError: true, flush: true)
@@ -69,12 +78,14 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
         assertFalse "SourceBackgroundInstitutionDiplomasOffered could not be validated as expected due to ${sourceBackgroundInstitutionDiplomasOffered.errors}", sourceBackgroundInstitutionDiplomasOffered.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionDiplomasOffered = new SourceBackgroundInstitutionDiplomasOffered()
         assertFalse "SourceBackgroundInstitutionDiplomasOffered should have failed validation", sourceBackgroundInstitutionDiplomasOffered.validate()
@@ -87,6 +98,7 @@ class SourceBackgroundInstitutionDiplomasOfferedIntegrationTests extends BaseInt
     }
 
 
+	@Test
     void testFetchSearch() {
         // Create 2 diplomas
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()

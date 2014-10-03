@@ -1,10 +1,10 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -16,17 +16,20 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     def priorCollegeDegreeService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testPriorCollegeDegreeValidCreate() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -51,6 +54,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeInvalidCreate() {
         def priorCollegeDegree = newInvalidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -60,6 +64,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeValidUpdate() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -110,8 +115,8 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
         priorCollegeDegree = PriorCollegeDegree.get(priorCollegeDegree.id)
         assertEquals 1L, priorCollegeDegree?.version
         assertEquals 2, priorCollegeDegree.degreeSequenceNumber
-        assertEquals 201.00, priorCollegeDegree.hoursTransferred
-        assertEquals 1001.00, priorCollegeDegree.gpaTransferred
+        assertEquals 201.00, priorCollegeDegree.hoursTransferred, 0.001
+        assertEquals 1001.00, priorCollegeDegree.gpaTransferred, 0.001
         assertEquals "2013", priorCollegeDegree.degreeYear
         assertEquals "N", priorCollegeDegree.termDegree
         assertEquals "N", priorCollegeDegree.primaryIndicator
@@ -122,6 +127,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeInvalidUpdate() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]
@@ -153,6 +159,7 @@ class PriorCollegeDegreeServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testPriorCollegeDegreeDelete() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         def map = [domainModel: priorCollegeDegree]

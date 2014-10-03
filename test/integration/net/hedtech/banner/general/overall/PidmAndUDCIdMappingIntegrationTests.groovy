@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -31,7 +34,8 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     def u_success_createDate = new Date()
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -58,11 +62,13 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidPidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
@@ -71,6 +77,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidPidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
@@ -92,6 +99,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidPidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
@@ -110,6 +118,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -132,6 +141,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
@@ -153,6 +163,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeletePidmAndUDCIdMapping() {
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
@@ -164,12 +175,14 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping()
         assertFalse "PidmAndUDCIdMapping could not be validated as expected due to ${pidmAndUDCIdMapping.errors}", pidmAndUDCIdMapping.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping()
         assertFalse "PidmAndUDCIdMapping should have failed validation", pidmAndUDCIdMapping.validate()
@@ -182,6 +195,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchByUdcId() {
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.save(failOnError: true, flush: true)
@@ -194,6 +208,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testFetchByUdcIdList() {
         def pidmAndUDCIdMappings = newMultipleValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMappings.each { it.save(failOnError: true, flush: true)}

@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.BackgroundInstitutionCharacteristic
@@ -16,18 +19,21 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     def sourceBackgroundInstitutionCharacteristicService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCharacteristicValidCreate() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
@@ -42,6 +48,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionCharacteristicInvalidCreate() {
         def sourceBackgroundInstitutionCharacteristic = newInvalidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
@@ -52,6 +59,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
 
     // NOTE: No Updates are allowed
 
+	@Test
     void testSourceBackgroundInstitutionCharacteristicDelete() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
@@ -63,6 +71,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]

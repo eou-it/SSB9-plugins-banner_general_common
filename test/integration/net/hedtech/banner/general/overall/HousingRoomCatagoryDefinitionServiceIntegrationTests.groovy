@@ -2,6 +2,9 @@
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
@@ -46,7 +49,8 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     def u_failure_keyBlockMap = [:]
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SSASECT']
         super.setUp()
         initializeTestDataForReferences()
@@ -74,11 +78,13 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testHousingRoomCatagoryDefinitionValidCreate() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -93,6 +99,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
+	@Test
     void testHousingRoomCatagoryDefinitionInvalidCreate() {
         def housingRoomCatagoryDefinition = newInvalidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_failure_keyBlockMap,
@@ -104,6 +111,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
 
 
+	@Test
     void testHousingRoomCatagoryDefinitionValidUpdate() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -126,6 +134,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
+	@Test
     void testHousingRoomCatagoryDefinitionInvalidUpdate() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -149,6 +158,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
 
 
+	@Test
     void testHousingRoomCatagoryDefinitionDelete() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -164,6 +174,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
 
 
+	@Test
     void testReadOnly() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,

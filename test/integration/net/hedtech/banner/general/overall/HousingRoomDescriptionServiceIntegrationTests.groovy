@@ -1,8 +1,11 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
@@ -19,17 +22,20 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     def housingRoomDescriptionService
 
 
-    protected void setUp() {
+	@Before
+	public void setUp() {
         formContext = ["SSASECT"]
         super.setUp()
     }
 
 
-    protected void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testHousingRoomDescriptionCreate() {
         def housingRoomDescription = newHousingRoomDescription()
 
@@ -46,6 +52,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testUpdate() {
         def housingRoomDescription = newHousingRoomDescription()
         def keyBlockMap = [termEffective: 201410, building: "LAW", room: "102"]
@@ -112,8 +119,8 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals itermEffective, housingRoomDescription.termEffective
         assertEquals idescription, housingRoomDescription.description
         assertEquals icapacity, housingRoomDescription.capacity
-        assertEquals imaximumCapacity, housingRoomDescription.maximumCapacity
-        assertEquals iutilityRate, housingRoomDescription.utilityRate
+        assertEquals imaximumCapacity, housingRoomDescription.maximumCapacity, 0.001
+        assertEquals iutilityRate, housingRoomDescription.utilityRate, 0.001
         assertEquals iutilityRatePeriod, housingRoomDescription.utilityRatePeriod
         assertEquals iphoneArea, housingRoomDescription.phoneArea
         assertEquals iphoneNumber, housingRoomDescription.phoneNumber
@@ -123,9 +130,9 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals iroomType, housingRoomDescription.roomType
         assertEquals ipriority, housingRoomDescription.priority
         assertEquals ikeyNumber, housingRoomDescription.keyNumber
-        assertEquals iwidth, housingRoomDescription.width
-        assertEquals ilength, housingRoomDescription.length
-        assertEquals iwidth * ilength, housingRoomDescription.area // calculated by GB_ROOMDEFINITION.p_update procedure
+        assertEquals iwidth, housingRoomDescription.width, 0.001
+        assertEquals ilength, housingRoomDescription.length, 0.001
+        assertEquals iwidth * ilength, housingRoomDescription.area, 0.001 // calculated by GB_ROOMDEFINITION.p_update procedure
         assertEquals icountryPhone, housingRoomDescription.countryPhone
         assertEquals idepartment, housingRoomDescription.department
         assertEquals ipartition, housingRoomDescription.partition
@@ -137,6 +144,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testHousingRoomDescriptionDelete() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -149,6 +157,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testReadOnlyRoomNumber() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -165,6 +174,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testReadOnlyTermEffective() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -181,6 +191,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testReadOnlyBuilding() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])

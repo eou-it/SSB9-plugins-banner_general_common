@@ -3,7 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner
 
-import net.hedtech.banner.utility.MessageResolver
+import net.hedtech.banner.i18n.MessageHelper
 
 /**
  * This is a helper class that is used for retrieving Message from i18n messsage.properties
@@ -12,7 +12,7 @@ import net.hedtech.banner.utility.MessageResolver
 class MessageUtility {
 
     public static String message(key, args = null, locale = null) {
-        return MessageResolver.message(key, args, locale)
-    }
+       return MessageHelper.message(key, args)
+   }
 
 }
