@@ -3,6 +3,8 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+
+
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -506,19 +508,21 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
     private def newSectionMeetingTime() {
-        def iterm = Term.findByCode("201410")
+        def myFormat = 'MM/dd/yyyy'
+        def istartDate = Date.parse(myFormat, '01/01/2013')
+        def iendDate = Date.parse(myFormat, '06/30/2023')
         def idayOfWeek = DayOfWeek.findByCode("T")
         def ischeduleType = "L"  //Unable to access ScheduleType
         def imeetingType = MeetingType.findByCode("CLAS")
 
-        return new SectionMeetingTime(term: iterm.code,
+        return new SectionMeetingTime(term: "201410",
                 courseReferenceNumber: "20431",
                 dayOfWeek: idayOfWeek,
                 dayNumber: 1,
                 beginTime: "0100",
                 endTime: "0200",
-                startDate: iterm.startDate,
-                endDate: iterm.endDate,
+                startDate: istartDate,
+                endDate: iendDate,
                 category: "03",
                 sunday: null,
                 monday: "M",

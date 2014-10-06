@@ -8,13 +8,15 @@ import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.Before
+import org.junit.Test
 
 class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     HousingLocationBuildingDescription i_success_housingLocationBuildingDescription
     def buildingCompositeService
 
-
+    @Before
     void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
@@ -27,15 +29,15 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         i_success_housingLocationBuildingDescription = HousingLocationBuildingDescription.findByBuilding( building )
     }
 
-
+    @Test
     void testListWithoutPaginationParams() {
-        List buildings = buildingCompositeService.list( [:] )
+        List buildings = buildingCompositeService.list( [max:'10'] )
         assertNotNull buildings
         assertFalse buildings.isEmpty()
         assertEquals 10, buildings.size()
     }
 
-
+    @Test
     void testListWithPagination() {
         def paginationParams = [max: '20', offset: '0']
         List buildings = buildingCompositeService.list( paginationParams )
@@ -44,13 +46,13 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue buildings.size() <= 20
     }
 
-
+    @Test
     void testCount() {
         assertNotNull i_success_housingLocationBuildingDescription
         assertEquals HousingLocationBuildingDescription.count(), buildingCompositeService.count()
     }
 
-
+    @Test
     void testGetInvalidGuid() {
         try {
             buildingCompositeService.get( 'Invalid-guid' )
@@ -59,7 +61,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testGetNullGuid() {
         try {
             buildingCompositeService.get( null )
@@ -68,7 +70,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testGetInvalidNonExistentHousingLocationBuildingDescription() {
         HousingLocationBuildingDescription housingLocationBuildingDescription = HousingLocationBuildingDescription.findByBuilding( net.hedtech.banner.general.system.Building.findByCode( 'NORTH' ) )
         assertNotNull housingLocationBuildingDescription.id
@@ -86,7 +88,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testGet() {
         def paginationParams = [max: '1', offset: '0']
         List<BuildingDetail> buildings = buildingCompositeService.list( paginationParams )
@@ -106,7 +108,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotSame '', building.guid
     }
 
-
+    @Test
     void testFetchByBuildingId() {
         BuildingDetail building = buildingCompositeService.fetchByBuildingId( i_success_housingLocationBuildingDescription.id )
         assertNotNull building
@@ -116,13 +118,13 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_housingLocationBuildingDescription.building.dataOrigin, building.metadata.dataOrigin
     }
 
-
+    @Test
     void testInvalidFetchByBuildingId() {
         assertNull buildingCompositeService.fetchByBuildingId( -1 )
         assertNull buildingCompositeService.fetchByBuildingId( null )
     }
 
-
+    @Test
     void testFetchByBuildingCode() {
         BuildingDetail building = buildingCompositeService.fetchByBuildingCode( i_success_housingLocationBuildingDescription.building.code )
         assertNotNull building
@@ -132,12 +134,13 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_housingLocationBuildingDescription.building.dataOrigin, building.metadata.dataOrigin
     }
 
-
+    @Test
     void testInvalidFetchByBuildingCode() {
         assertNull buildingCompositeService.fetchByBuildingCode( '' )
         assertNull buildingCompositeService.fetchByBuildingCode( null )
     }
 
+    @Test
     void testFetchAllCampus() {
         def paginationParams = [max: '20', offset: '0']
 

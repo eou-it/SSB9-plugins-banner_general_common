@@ -8,19 +8,26 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     Campus campus
     def siteDetailCompositeService
 
-
+    @Before
     void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeDataReferences()
     }
 
+    @After
+    public void tearDown() {
+        super.tearDown()
+    }
 
     private void initializeDataReferences() {
         campus = Campus.findByCode('A')
@@ -29,6 +36,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Test case for List method
      */
+    @Test
     void testListWithPagination() {
         def paginationParams = [max: '20', offset: '0']
         List siteList = siteDetailCompositeService.list(paginationParams)
@@ -40,6 +48,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Testcase for count method
      */
+    @Test
     void testCount() {
         assertEquals Campus.count(), siteDetailCompositeService.count()
     }
@@ -47,6 +56,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Testcase for show method
      */
+    @Test
     void testGet() {
         def paginationParams = [max: '20', offset: '0']
         List siteList = siteDetailCompositeService.list(paginationParams)
@@ -65,6 +75,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Testcase for show method with ApplicationException
      */
+    @Test
     void testGetWithInvalidGuid() {
         shouldFail( ApplicationException  ) {
             siteDetailCompositeService.get(null)
@@ -75,6 +86,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Testcase for fetchByCampusId method
      */
+    @Test
     void testFetchByCampusId() {
         def siteDetail = siteDetailCompositeService.fetchByCampusId(campus.id)
         assertNotNull siteDetail
@@ -87,6 +99,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     /**
      * Testcase for fetchByCampusCode
      */
+    @Test
     void testFetchFetchByCampusCode() {
         SiteDetail site = siteDetailCompositeService.fetchByCampusCode(campus.code)
         assertNotNull site

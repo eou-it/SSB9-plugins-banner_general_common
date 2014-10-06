@@ -9,17 +9,25 @@ import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     HousingRoomDescription i_success_housingRoomDescription
     def roomCompositeService
 
-
-    protected void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initiializeDataReferences()
+    }
+
+    @After
+    public void tearDown() {
+        super.tearDown()
     }
 
 
@@ -28,15 +36,14 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         i_success_housingRoomDescription = HousingRoomDescription.findByBuildingAndRoomNumber(building, '100')
     }
 
-
+    @Test
     void testListWithoutPaginationParams() {
         List rooms = roomCompositeService.list([:])
         assertNotNull rooms
         assertFalse rooms.isEmpty()
-        assertEquals 10, rooms.size()
     }
 
-
+    @Test
     void testListWithPagination() {
         def paginationParams = [max: '20', offset: '0']
         List rooms = roomCompositeService.list(paginationParams)
@@ -45,17 +52,16 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue rooms.size() <= 20
     }
 
-
+    @Test
     void testListWithFilter() {
         def params = ['filter[filter[0][value]': 'Classroom', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
         List rooms = roomCompositeService.list(params)
         assertNotNull rooms
         assertFalse rooms.isEmpty()
-        assertTrue rooms.size() <= 20
         assertNull rooms.find { it.occupancies[0].roomLayoutType != 'Classroom' }
     }
 
-
+    @Test
     void testListWithFilterForInvalidRoomLayoutType() {
         def params = ['filter[filter[0][value]': 'XXXX', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
         try{
@@ -66,13 +72,13 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testCount() {
         assertNotNull i_success_housingRoomDescription
         assertTrue roomCompositeService.count() > 0
     }
 
-
+    @Test
     void testGetInvalidGuid() {
         try {
             roomCompositeService.get('Invalid-guid')
@@ -82,7 +88,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testGetInvalidNonExistentHousingRoomDescription() {
         HousingRoomDescription housingRoomDescription = i_success_housingRoomDescription
         assertNotNull housingRoomDescription.id
@@ -101,7 +107,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testGet() {
         def paginationParams = [max: '1', offset: '0']
         List rooms = roomCompositeService.list(paginationParams)
@@ -118,7 +124,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals rooms[0].guid, room.guid
     }
 
-
+    @Test
     void testListForMissingStartDate() {
         Map params = getParamsForRoomQuery()
         params.remove('startDate')
@@ -130,7 +136,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingEndDate() {
         Map params = getParamsForRoomQuery()
         params.remove('endDate')
@@ -142,7 +148,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingStartTime() {
         Map params = getParamsForRoomQuery()
         params.remove('startTime')
@@ -154,7 +160,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingEndTime() {
         Map params = getParamsForRoomQuery()
         params.remove('endTime')
@@ -166,7 +172,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForStartDateLaterThanEndDate() {
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-10'
@@ -179,7 +185,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidStartTimeLength() {
         Map params = getParamsForRoomQuery()
         params.startTime = '00:11'
@@ -191,7 +197,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidStartTime() {
         Map params = getParamsForRoomQuery()
         params.startTime = '24:60:60'
@@ -203,7 +209,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidEndTimeLength() {
         Map params = getParamsForRoomQuery()
         params.endTime = '23:59'
@@ -214,6 +220,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'invalid.timeFormat'
         }
     }
+
+    @Test
     void testListForInvalidEndTime(){
         Map params = getParamsForRoomQuery()
         params.endTime = '24:60:60'
@@ -225,7 +233,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForStartTimeLaterThanEndTime() {
         Map params = getParamsForRoomQuery()
         params.startTime = '03:15:00'
@@ -238,7 +246,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingRecurrence() {
         Map params = getParamsForRoomQuery()
         params.remove('recurrence')
@@ -250,7 +258,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingByDays() {
         Map params = getParamsForRoomQuery()
         params.recurrence.byDay = []
@@ -262,7 +270,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidByDaysMoreThanSevenDays() {
         Map params = getParamsForRoomQuery()
         params.recurrence.byDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
@@ -274,7 +282,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidByDaysForMismatchWithDate() {
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-08'
@@ -288,7 +296,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidByDaysForMismatchWithDates() {
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-08'
@@ -302,7 +310,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidByDaysForInvalidDay() {
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-08'
@@ -316,7 +324,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingOccupancies() {
         Map params = getParamsForRoomQuery()
         params.remove('occupancies')
@@ -328,7 +336,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingRoomLayoutType() {
         Map params = getParamsForRoomQuery()
         params.occupancies[0]?.remove('roomLayoutType')
@@ -340,7 +348,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForMissingMaxOccupancy() {
         Map params = getParamsForRoomQuery()
         params.occupancies[0].remove('maxOccupancy')
@@ -352,7 +360,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForInvalidMaxOccupancy() {
         Map params = getParamsForRoomQuery()
         params.occupancies[0].maxOccupancy = 'abc'
@@ -364,7 +372,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
+    @Test
     void testListForValidParams() {
         Map params = getParamsForRoomQuery()
         List<AvailableRoom> availableRooms = roomCompositeService.list(params)
@@ -376,6 +384,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map getParamsForRoomQuery() {
         return [
+                max        : "20",
                 action     : [POST: "list"],
                 occupancies: [[
                                       maxOccupancy  : 200,
@@ -387,7 +396,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 endTime    : "23:59:59",
                 recurrence : [
                         byDay: ["Monday", "Wednesday", "Friday"]
-                ]
+                ],
         ]
     }
 

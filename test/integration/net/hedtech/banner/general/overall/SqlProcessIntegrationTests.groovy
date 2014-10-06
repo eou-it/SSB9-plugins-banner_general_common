@@ -18,7 +18,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance
     //Valid test data (For success tests)
-    def i_success_entriesForSqlProcesss
+    def i_success_entriesForSqlProcess
     def i_success_entriesForSql
 
     def i_success_sequenceNumber = 1
@@ -32,7 +32,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def i_success_parsedSql = "TTTTT"
     def i_success_systemRequiredIndicator = true
     //Invalid test data (For failure tests)
-    def i_failure_entriesForSqlProcesss
+    def i_failure_entriesForSqlProcess
     def i_failure_entriesForSql
 
     def i_failure_sequenceNumber = 1
@@ -48,7 +48,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating updating domain instance
     //Valid test data (For success tests)
-    def u_success_entriesForSqlProcesss
+    def u_success_entriesForSqlProcess
     def u_success_entriesForSql
 
     def u_success_sequenceNumber = 1
@@ -62,7 +62,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def u_success_parsedSql = "TTTTTTTTTT"
     def u_success_systemRequiredIndicator = true
     //Valid test data (For failure tests)
-    def u_failure_entriesForSqlProcesss
+    def u_failure_entriesForSqlProcess
     def u_failure_entriesForSql
 
     def u_failure_sequenceNumber = 1
@@ -88,17 +88,17 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
         //Valid test data (For success tests)
-        def entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
-        entriesForSqlProcesss.save(failOnError: true, flush: true)
+        def entriesForSqlProcess = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
+        entriesForSqlProcess.save(failOnError: true, flush: true)
 
         def entriesForSql = new EntriesForSql(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
         entriesForSql.save(failOnError: true, flush: true)
 
-        i_success_entriesForSqlProcesss = entriesForSqlProcesss
+        i_success_entriesForSqlProcess = entriesForSqlProcess
         i_success_entriesForSql = entriesForSql
 
         //Invalid test data (For failure tests)
-        i_failure_entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'NON_EXISTENT', description: 'NON_EXISTENT', startDate: new Date(), endDate: new Date() + 1)
+        i_failure_entriesForSqlProcess = new EntriesForSqlProcesss(code: 'NON_EXISTENT', description: 'NON_EXISTENT', startDate: new Date(), endDate: new Date() + 1)
         i_failure_entriesForSql = new EntriesForSql(code: 'NON_EXISTENT', description: 'NON_EXISTENT', startDate: new Date(), endDate: new Date() + 1)
 
         //Valid test data (For success tests)
@@ -302,7 +302,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
                         'startDate',
                         'selectFrom',
                         'systemRequiredIndicator',
-                        'entriesForSqlProcesss',
+                        'entriesForSqlProcess',
                         'entriesForSql'
                 ]
         assertNoErrorsFor sqlProcess,
@@ -338,7 +338,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
                 endDate: i_success_endDate,
                 parsedSql: i_success_parsedSql,
                 systemRequiredIndicator: i_success_systemRequiredIndicator,
-                entriesForSqlProcesss: i_success_entriesForSqlProcesss,
+                entriesForSqlProcess: i_success_entriesForSqlProcess,
                 entriesForSql: i_success_entriesForSql,
         )
         return sqlProcess
@@ -357,7 +357,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
                 endDate: i_failure_endDate,
                 parsedSql: i_failure_parsedSql,
                 systemRequiredIndicator: i_failure_systemRequiredIndicator,
-                entriesForSqlProcesss: i_failure_entriesForSqlProcesss,
+                entriesForSqlProcess: i_failure_entriesForSqlProcess,
                 entriesForSql: i_failure_entriesForSql,
         )
         return sqlProcess
