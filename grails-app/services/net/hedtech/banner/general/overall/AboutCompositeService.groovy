@@ -8,7 +8,7 @@ package net.hedtech.banner.general.overall
 /**
  * Information about the application
  */
-class AboutService {
+class AboutCompositeService {
  
     def grailsApplication
 
