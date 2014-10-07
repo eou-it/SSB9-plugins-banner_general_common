@@ -19,21 +19,21 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     def sourceBackgroundInstitutionCharacteristicService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCharacteristicValidCreate() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
@@ -48,7 +48,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCharacteristicInvalidCreate() {
         def sourceBackgroundInstitutionCharacteristic = newInvalidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
@@ -59,7 +59,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
 
     // NOTE: No Updates are allowed
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCharacteristicDelete() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]
@@ -71,7 +71,7 @@ class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends B
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         def map = [domainModel: sourceBackgroundInstitutionCharacteristic]

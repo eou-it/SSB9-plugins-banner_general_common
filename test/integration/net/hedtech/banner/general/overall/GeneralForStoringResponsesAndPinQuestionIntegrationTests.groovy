@@ -58,8 +58,8 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     def u_failure_answerSalt = null
     /*PROTECTED REGION END*/
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -74,12 +74,12 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         u_failure_pinQuestion = null
     }
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
-	@Test
+    @Test
     void testCreateValidUserEnteredPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -88,7 +88,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         assertEquals i_success_user_entered_questionDescription, generalForStoringResponsesAndPinQuestion.questionDescription
     }
 
-	@Test
+    @Test
     void testCreateValidGeneralForStoringResponsesAndPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -97,7 +97,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         assertEquals i_success_questionDescription, generalForStoringResponsesAndPinQuestion.questionDescription
     }
 
-	@Test
+    @Test
     void testCreateInvalidGeneralForStoringResponsesAndPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = newInvalidForCreateGeneralForStoringResponsesAndPinQuestion()
         shouldFail(ValidationException) {
@@ -105,7 +105,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         }
     }
 
-	@Test
+    @Test
     void testUpdateValidGeneralForStoringResponsesAndPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -134,7 +134,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         generalForStoringResponsesAndPinQuestion.pinQuestion = u_success_pinQuestion
     }
 
-	@Test
+    @Test
     void testUpdateInvalidGeneralForStoringResponsesAndPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -158,7 +158,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         }
     }
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -179,7 +179,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
 
     }
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -201,7 +201,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         }
     }
 
-	@Test
+    @Test
     void testDeleteGeneralForStoringResponsesAndPinQuestion() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -211,13 +211,13 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         assertNull GeneralForStoringResponsesAndPinQuestion.get( id )
     }
 
-	@Test
+    @Test
     void testValidation() {
         def generalForStoringResponsesAndPinQuestion = newInvalidForCreateGeneralForStoringResponsesAndPinQuestion()
         assertFalse "GeneralForStoringResponsesAndPinQuestion could not be validated as expected due to ${generalForStoringResponsesAndPinQuestion.errors}", generalForStoringResponsesAndPinQuestion.validate()
     }
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion()
         assertFalse "GeneralForStoringResponsesAndPinQuestion should have failed validation", generalForStoringResponsesAndPinQuestion.validate()
@@ -235,7 +235,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
                 ]
     }
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
                 questionDescription:'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' )
@@ -243,7 +243,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         assertErrorsFor generalForStoringResponsesAndPinQuestion, 'maxSize', [ 'questionDescription' ]
     }
 
-	@Test
+    @Test
     void testAnswerCountForPidm() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -253,7 +253,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
         assertTrue ansrCount>1
     }
 
-	@Test
+    @Test
     void testFetchCountOfSameQuestionForPidm() {
         def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )

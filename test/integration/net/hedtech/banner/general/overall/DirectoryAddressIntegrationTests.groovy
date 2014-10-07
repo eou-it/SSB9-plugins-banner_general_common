@@ -46,8 +46,8 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_priorityNumber = 1
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -82,13 +82,13 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidDirectoryAddress() {
         def directoryAddress = newValidForCreateDirectoryAddress()
         directoryAddress.priorityNumber = 1
@@ -98,7 +98,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidDirectoryAddress() {
         def directoryAddress = newInvalidForCreateDirectoryAddress()
         directoryAddress.priorityNumber = null
@@ -108,7 +108,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidDirectoryAddress() {
         def directoryAddress = newValidForCreateDirectoryAddress()
         directoryAddress.priorityNumber = 1
@@ -129,7 +129,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidDirectoryAddress() {
         def directoryAddress = newValidForCreateDirectoryAddress()
         directoryAddress.priorityNumber = 1
@@ -148,7 +148,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def directoryAddress = newValidForCreateDirectoryAddress()
         directoryAddress.save( failOnError: true, flush: true )
@@ -169,7 +169,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteDirectoryAddress() {
         def directoryAddress = newValidForCreateDirectoryAddress()
         directoryAddress.save( failOnError: true, flush: true )
@@ -180,7 +180,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def directoryAddress = newInvalidForCreateDirectoryAddress()
         directoryAddress.priorityNumber = 1234567890123
@@ -188,7 +188,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def directoryAddress = new DirectoryAddress()
         assertFalse "DirectoryAddress should have failed validation", directoryAddress.validate()
@@ -205,7 +205,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testfetchByDirectoryOptionOrderByPriority(){
         def directoryAddress = newValidForCreateDirectoryAddress()
         directoryAddress.priorityNumber = 1

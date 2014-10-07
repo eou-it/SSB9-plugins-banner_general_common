@@ -15,15 +15,15 @@ import org.springframework.jdbc.UncategorizedSQLException
 class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCase {
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
@@ -31,7 +31,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
      * Tests that view does not allow crud (create,update,delete) operations and is readonly
      */
 
-	@Test
+    @Test
     void testCreateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -47,7 +47,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testUpdateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -59,7 +59,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testDeleteExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -69,7 +69,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testFetchSsbNameDisplay() {
         def showNameSuffix
         def sql = new Sql(sessionFactory.getCurrentSession().connection())

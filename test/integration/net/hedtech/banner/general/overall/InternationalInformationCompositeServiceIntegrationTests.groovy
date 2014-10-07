@@ -19,27 +19,27 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
     def mapPK
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCompositeServiceCreate() {
         // create and test new records
         createAll()
     }
 
 
-	@Test
+    @Test
     void testCompositeServiceDelete() {
         // create and test new records
         def deleteMap = createAll()
@@ -58,7 +58,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
     }
 
 
-	@Test
+    @Test
     void testCompositeServiceUpdate() {
         // create and test new records
         def map = createAll()
@@ -87,7 +87,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
     }
 
 
-	@Test
+    @Test
     void testCompositeServiceDuplicateDocument() {
         // create and test new records
         createAll()

@@ -147,8 +147,8 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     def u_failure_surnamePrefix = "TTTTT"
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -169,13 +169,13 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -184,7 +184,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newInvalidForCreateCommonMatchingMatchEntryGlobalTemporary()
         shouldFail(ValidationException) {
@@ -193,7 +193,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testUpdateValidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -234,7 +234,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -271,7 +271,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -293,7 +293,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testDeleteCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -304,14 +304,14 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def commonMatchingMatchEntryGlobalTemporary = newInvalidForCreateCommonMatchingMatchEntryGlobalTemporary()
         assertFalse "CommonMatchingMatchEntryGlobalTemporary could not be validated as expected due to ${commonMatchingMatchEntryGlobalTemporary.errors}", commonMatchingMatchEntryGlobalTemporary.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def commonMatchingMatchEntryGlobalTemporary = new CommonMatchingMatchEntryGlobalTemporary()
         assertFalse "CommonMatchingMatchEntryGlobalTemporary should have failed validation", commonMatchingMatchEntryGlobalTemporary.validate()
@@ -354,7 +354,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def commonMatchingMatchEntryGlobalTemporary = new CommonMatchingMatchEntryGlobalTemporary(
                 lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',

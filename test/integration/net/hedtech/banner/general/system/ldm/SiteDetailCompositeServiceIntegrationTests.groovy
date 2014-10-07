@@ -18,7 +18,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     def siteDetailCompositeService
 
     @Before
-    void setUp() {
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeDataReferences()

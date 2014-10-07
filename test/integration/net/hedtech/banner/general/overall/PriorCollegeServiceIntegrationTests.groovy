@@ -20,20 +20,20 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     def priorCollegeService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeValidCreate() {
         def priorCollege = newValidForCreatePriorCollege()
         def map = [domainModel: priorCollege]
@@ -50,7 +50,7 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeInvalidCreate() {
         def priorCollege = newInvalidForCreatePriorCollege()
         def map = [domainModel: priorCollege]
@@ -60,7 +60,7 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeValidUpdate() {
         def priorCollege = newValidForCreatePriorCollege()
         def map = [domainModel: priorCollege]
@@ -88,7 +88,7 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeInvalidUpdate() {
         def priorCollege = newValidForCreatePriorCollege()
         def map = [domainModel: priorCollege]
@@ -112,7 +112,7 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeDelete() {
         def priorCollege = newValidForCreatePriorCollege()
         def map = [domainModel: priorCollege]
@@ -125,7 +125,7 @@ class PriorCollegeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def priorCollege = newValidForCreatePriorCollege()
         def map = [domainModel: priorCollege]

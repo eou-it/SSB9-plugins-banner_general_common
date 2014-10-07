@@ -15,20 +15,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidPriorCollegeConcentrationArea() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         priorCollegeConcentrationArea.save(failOnError: true, flush: true)
@@ -37,7 +37,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testUpdateValidPriorCollegeConcentrationArea() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         priorCollegeConcentrationArea.save(failOnError: true, flush: true)
@@ -60,7 +60,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -78,7 +78,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testDeletePriorCollegeConcentrationArea() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         priorCollegeConcentrationArea.save(failOnError: true, flush: true)
@@ -89,14 +89,14 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def priorCollegeConcentrationArea = newInvalidForCreatePriorCollegeConcentrationArea()
         assertFalse "PriorCollegeConcentrationArea could not be validated as expected due to ${priorCollegeConcentrationArea.errors}", priorCollegeConcentrationArea.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def priorCollegeConcentrationArea = new PriorCollegeConcentrationArea()
         assertFalse "PriorCollegeConcentrationArea should have failed validation", priorCollegeConcentrationArea.validate()

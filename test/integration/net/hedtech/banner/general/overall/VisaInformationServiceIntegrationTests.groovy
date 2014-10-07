@@ -18,20 +18,20 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     def visaInformationService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testVisaInformationValidCreate() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -47,7 +47,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testVisaInformationInvalidCreate() {
         def visaInformation = newInvalidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -57,7 +57,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testVisaInformationValidUpdate() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -91,7 +91,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testVisaInformationInvalidUpdate() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -116,7 +116,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testVisaInformationDelete() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]
@@ -129,7 +129,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def visaInformation = newValidForCreateVisaInformation()
         def map = [domainModel: visaInformation]

@@ -21,20 +21,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidPriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -43,7 +43,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidPriorCollege() {
         def priorCollege = newInvalidForCreatePriorCollege()
         shouldFail(ValidationException) {
@@ -52,7 +52,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidPriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -76,7 +76,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidPriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -95,7 +95,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -120,7 +120,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -141,7 +141,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeletePriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -152,14 +152,14 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def priorCollege = newInvalidForCreatePriorCollege()
         assertFalse "PriorCollege could not be validated as expected due to ${priorCollege.errors}", priorCollege.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def priorCollege = new PriorCollege()
         assertFalse "PriorCollege should have failed validation", priorCollege.validate()
@@ -178,7 +178,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def priorCollege = new PriorCollege(
                 officialTransaction: 'XXX')

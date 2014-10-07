@@ -128,8 +128,8 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_countryPhone = "TTTT"
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ["SSASECT"] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -178,13 +178,13 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -196,7 +196,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidHousingRoomDescription() {
         def housingRoomDescription = newInvalidForCreateHousingRoomDescription()
         shouldFail {
@@ -205,7 +205,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -280,7 +280,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -336,7 +336,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -373,7 +373,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteHousingRoomDescription() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -384,14 +384,14 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         assertTrue "HousingRoomDescription could not be validated as expected due to ${ housingRoomDescription.errors }", housingRoomDescription.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def housingRoomDescription = new HousingRoomDescription()
         assertFalse "HousingRoomDescription should have failed validation", housingRoomDescription.validate()
@@ -430,7 +430,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def housingRoomDescription = new HousingRoomDescription(
                 description: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
@@ -450,7 +450,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxValueValidationFailure() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.capacity = 100000
@@ -473,7 +473,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMinValueValidationFailure() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.capacity = -100000
@@ -496,7 +496,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchTermTo() {
         //Seed data
         // BuildingCode B00A	RoomNumber R00A	    TermCode200010
@@ -507,7 +507,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchBySomeHousingRoomDescriptionRoom() {
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom()
         assertNotNull housings
@@ -515,7 +515,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchBySomeHousingRoomDescriptionRoomBuilding() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom(map)
@@ -523,7 +523,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchBySomeHousingRoomDescriptionRoomFilter() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchBySomeHousingRoomDescriptionRoom('1', map)
@@ -531,7 +531,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test by passing room number or description as filters
-	@Test
+    @Test
      void testFetchBySomeHousingRoomDescription() {
          //Test by passing room description as filter
          def map = [termEffective: '200110']
@@ -554,7 +554,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchValidRoomAndBuilding() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchValidRoomAndBuilding("100", map)
@@ -563,7 +563,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchValidSomeRoomAndBuilding() {
         def map = [building: Building.findByCode('ADAMS'), termEffective: '200110']
         def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)
@@ -572,7 +572,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchValidSomeRoomAndBuildingWithoutBuildingParam() {
         def map = [termEffective: '200110']
         def housings = HousingRoomDescription.fetchValidSomeRoomAndBuilding("100", map)
@@ -581,6 +581,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    @Test
     void testFetchAllActiveRooms() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.save(failOnError: true, flush: true)
@@ -601,6 +602,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    @Test
     void testCountAllActiveRooms() {
         def housingRoomDescription = newValidForCreateHousingRoomDescription()
         housingRoomDescription.roomType = 'C'

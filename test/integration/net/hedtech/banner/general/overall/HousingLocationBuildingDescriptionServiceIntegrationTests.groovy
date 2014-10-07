@@ -28,20 +28,20 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     def housingLocationBuildingDescriptionService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ["SSASECT"]
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testHousingLocationBuildingDescriptionCreate() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
 
@@ -64,7 +64,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testUpdate() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         def keyBlockMap = [code: "GRANT"]
@@ -154,7 +154,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testHousingLocationBuildingDescriptionDelete() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         housingLocationBuildingDescription = housingLocationBuildingDescriptionService.create([domainModel: housingLocationBuildingDescription])
@@ -167,7 +167,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         housingLocationBuildingDescription = housingLocationBuildingDescriptionService.create([domainModel: housingLocationBuildingDescription])

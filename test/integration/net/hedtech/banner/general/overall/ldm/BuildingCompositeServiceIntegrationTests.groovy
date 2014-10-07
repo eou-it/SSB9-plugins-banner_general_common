@@ -17,7 +17,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def buildingCompositeService
 
     @Before
-    void setUp() {
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initiializeDataReferences()
