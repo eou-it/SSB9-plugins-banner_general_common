@@ -2,11 +2,12 @@
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
-import net.hedtech.banner.general.system.*
-import net.hedtech.banner.query.DynamicFinder
-import net.hedtech.banner.service.DatabaseModifiesState
 
+import net.hedtech.banner.service.DatabaseModifiesState
+import net.hedtech.banner.general.system.*
+import org.hibernate.annotations.Type
 import javax.persistence.*
+
 /**
  * Room Description Table.
  */
@@ -496,28 +497,6 @@ class HousingRoomDescription implements Serializable {
             roomList = HousingRoomDescription.findAll([sort: "roomNumber", order: "asc"])
         }
         return [list: roomList]
-    }
-
-    // Note, this is returning a list of lists.
-    // [
-    //   [HousingRoomDescription[...],RoomStatus[...]],
-    //   [HousingRoomDescription[...],RoomStatus[...]]
-    // ]
-    static List fetchAllActiveRoomsByRoomType(Map filterData, Map paginationAndSortParams){
-        def query = """FROM  HousingRoomDescription a
-                                       left outer join a.roomStatus b
-                                       WHERE a.roomType like NVL(:roomType, '%')
-                                       AND NVL(b.inactiveIndicator,'N') = 'N'"""
-        new DynamicFinder(HousingRoomDescription.class, query, 'a').find(filterData, paginationAndSortParams)
-    }
-
-
-    static Long countAllActiveRoomsByRoomType(Map filterData){
-        def query = """FROM  HousingRoomDescription a
-                                       left outer join a.roomStatus b
-                                       WHERE a.roomType like NVL(:roomType, '%')
-                                       AND NVL(b.inactiveIndicator,'N') = 'N'"""
-        new DynamicFinder(HousingRoomDescription.class, query, 'a').count(filterData)
     }
 
 }
