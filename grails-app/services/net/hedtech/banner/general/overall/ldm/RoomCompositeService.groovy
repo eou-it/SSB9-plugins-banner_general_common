@@ -96,16 +96,16 @@ class RoomCompositeService extends LdmService {
 
     private void validateRequiredFields( Map params ) {
         if (!params.startDate?.trim()) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.startDate",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.startDate",[]) )
         }
         if (!params.endDate?.trim()) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.endDate",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.endDate",[]) )
         }
         if (!params.startTime?.trim()) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.startTime",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.startTime",[]) )
         }
         if (!params.endTime?.trim()) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.endTime",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.endTime",[]) )
         }
     }
 
@@ -115,7 +115,7 @@ class RoomCompositeService extends LdmService {
         Date endDate = convertString2Date( params.endDate?.trim() )
 
         if (startDate > endDate) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("startDate.laterThanEndDate",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("startDate.laterThanEndDate",[]) )
         }
     }
 
@@ -123,7 +123,7 @@ class RoomCompositeService extends LdmService {
     private void validateTimeFormat( String timeString, String fieldName ) {
         String timeFormat = getTimeFormat().toLowerCase().replace( 'hh', HOUR_FORMAT ).replace( 'mm', MINUTE_FORMAT ).replace( 'ss', SECOND_FORMAT )
         if (timeString && (timeString.length() != getTimeFormat().length() || !(timeString ==~ /$timeFormat/))) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.timeFormat",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.timeFormat",[]) )
         }
     }
 
@@ -132,14 +132,14 @@ class RoomCompositeService extends LdmService {
         Integer startTimeAsInteger = Integer.valueOf( getTimeInHHmmFormat( params.startTime?.trim() ) )
         Integer endTimeAsInteger = Integer.valueOf( getTimeInHHmmFormat( params.endTime?.trim() ) )
         if (startTimeAsInteger >= endTimeAsInteger) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("startTime.laterThanEndTime",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("startTime.laterThanEndTime",[]) )
         }
     }
 
 
     private void validateRecurrence( Map params ) {
         if (!params.recurrence) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.recurrence",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.recurrence",[]) )
         }
         validateByDays( params )
     }
@@ -147,11 +147,11 @@ class RoomCompositeService extends LdmService {
 
     private void validateByDays( Map params ) {
         if (!params.recurrence?.byDay) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.recurrence.byDay",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.recurrence.byDay",[]) )
         }
         List<DayOfWeek> days = DayOfWeek.list()
         if (days.description.intersect( params.recurrence?.byDay ).isEmpty() || params.recurrence?.byDay?.size() > 7) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.recurrence.byDay",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.recurrence.byDay",[]) )
         }
         List validDays = []
         Date startDate = convertString2Date( params.startDate?.trim() )
@@ -173,25 +173,25 @@ class RoomCompositeService extends LdmService {
         }
         List invalidDays = params.recurrence?.byDay - validDays
         if (invalidDays) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.recurrence.byDay",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.recurrence.byDay",[]) )
         }
     }
 
 
     private void validateOccupancies( Map params ) {
         if (!params.occupancies) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.occupancies",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.occupancies",[]) )
         }
         if (!params.occupancies[0]?.roomLayoutType) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType",[]) )
         }
         if (!params.occupancies[0]?.maxOccupancy) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.maxOccupancy",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.maxOccupancy",[]) )
         }
         try {
             Integer.valueOf( params.occupancies[0]?.maxOccupancy )
         } catch (NumberFormatException nfe) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.maxOccupancy",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("invalid.maxOccupancy",[]) )
         }
     }
 
@@ -280,7 +280,7 @@ class RoomCompositeService extends LdmService {
             roomType = integrationConfiguration?.value
         }
         if (!roomType) {
-            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType",["BusinessLogicValidationException"]) )
+            throw new ApplicationException( RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType",[]) )
         }
         return roomType
     }
