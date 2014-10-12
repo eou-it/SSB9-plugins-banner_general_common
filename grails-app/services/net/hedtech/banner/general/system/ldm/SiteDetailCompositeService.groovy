@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 class SiteDetailCompositeService {
 
-    private static final String LDM_NAME = "campuses"
+    public static final String LDM_NAME = "campuses"
     private static final String CODE ="code"
     private static final String DESCRIPTION ="description"
     private static final String QUERY = """from Campus a"""

@@ -19,7 +19,11 @@ class BuildingDetail {
     Metadata metadata
     List<Room> rooms = []
 
-    BuildingDetail ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata metadata ) {
+    BuildingDetail ( guid ) {
+        this.guid = guid
+        this.housingLocationBuildingDescription = new HousingLocationBuildingDescription()
+    }
+            BuildingDetail ( HousingLocationBuildingDescription housingLocationBuildingDescription, SiteDetail siteDetail, String guid, def rooms, Metadata metadata ) {
         this.housingLocationBuildingDescription = housingLocationBuildingDescription
         this.siteDetail = siteDetail
         this.guid = guid

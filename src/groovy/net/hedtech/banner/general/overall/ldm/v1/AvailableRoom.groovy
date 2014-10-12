@@ -20,6 +20,10 @@ class AvailableRoom {
     String guid
     Metadata metadata
 
+    AvailableRoom(String guid) {
+        this.guid = guid
+        this.availableRoomDescription = new AvailableRoomDescription()
+    }
 
     AvailableRoom(AvailableRoomDescription housingRoomDescription, BuildingDetail buildingDetail, List occupancies, String guid, Metadata metadata) {
         this.availableRoomDescription = housingRoomDescription

@@ -46,8 +46,10 @@ class RoomCompositeService extends LdmService {
             List<AvailableRoomDescription> availableRoomDescriptions = RoomsAvailabilityHelper.fetchSearchAvailableRoom( filterParams.filterData, filterParams.pagingAndSortParams )
             availableRoomDescriptions.each {availableRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( availableRoomDescription.roomType ), availableRoomDescription.capacity )]
-                BuildingDetail building = buildingCompositeService.fetchByBuildingCode( availableRoomDescription.buildingCode )
-                rooms << new AvailableRoom( availableRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId( Room.LDM_NAME, availableRoomDescription.id ).guid, new Metadata( availableRoomDescription.dataOrigin ) )
+                String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, availableRoomDescriptions.buildingCode )?.guid
+                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( Room.LDM_NAME, availableRoomDescription.id )?.guid
+                BuildingDetail building = buildingGuid ? new BuildingDetail( buildingGuid ) : null
+                rooms << new AvailableRoom( availableRoomDescription, building, occupancies, roomGuid, new Metadata( availableRoomDescription.dataOrigin ) )
             }
             return rooms
         } else {
@@ -58,14 +60,12 @@ class RoomCompositeService extends LdmService {
             RestfulApiValidationUtility.validateSortOrder( params.order?.trim() )
             params.sort = fetchBannerDomainPropertyForLdmField( params.sort?.trim() )
             Map filterParams = prepareParams( params )
-            List<HousingRoomDescription> housingRoomDescriptions = []
-            HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams ).each { roomDescription ->
-                housingRoomDescriptions << roomDescription[0]
-            }
-            housingRoomDescriptions.each {housingRoomDescription ->
+            AvailableRoomDescription.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams ).each { AvailableRoomDescription housingRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
-                BuildingDetail building = buildingCompositeService.fetchByBuildingCode( housingRoomDescription.building.code )
-                rooms << new Room( housingRoomDescription, building, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId( Room.LDM_NAME, housingRoomDescription.id ).guid, new Metadata( housingRoomDescription.dataOrigin ) )
+                String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode )?.guid
+                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( Room.LDM_NAME, housingRoomDescription.id ).guid
+                BuildingDetail building = buildingGuid ? new BuildingDetail( buildingGuid ) : null
+                rooms << new AvailableRoom( housingRoomDescription, building, occupancies, roomGuid, new Metadata( housingRoomDescription.dataOrigin ) )
             }
             return rooms
         }
@@ -248,11 +248,7 @@ class RoomCompositeService extends LdmService {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( Room.LDM_NAME, guid )
         if (!globalUniqueIdentifier)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
-        def filterData = [params: [roomType: '%', id: globalUniqueIdentifier.domainId], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
-        List housingQueryResults = HousingRoomDescription.fetchAllActiveRoomsByRoomType( filterData, [:] )
-        HousingRoomDescription housingRoomDescription
-        if( housingQueryResults.size() > 0 )
-            housingRoomDescription = housingQueryResults[0][0]
+        HousingRoomDescription housingRoomDescription = HousingRoomDescription.get( globalUniqueIdentifier.domainId )
         if (!housingRoomDescription)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
         BuildingDetail building = buildingCompositeService.fetchByBuildingCode( housingRoomDescription.building.code )

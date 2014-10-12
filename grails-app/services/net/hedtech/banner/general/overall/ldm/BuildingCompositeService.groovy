@@ -6,13 +6,16 @@ package net.hedtech.banner.general.overall.ldm
 import grails.util.GrailsNameUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.overall.AvailableRoomDescription
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.HousingRoomDescription
+import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
+import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -23,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 class BuildingCompositeService {
 
 
-    private static final String LDM_NAME = 'buildings'
+    public static final String LDM_NAME = 'buildings'
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
 
@@ -45,7 +48,7 @@ class BuildingCompositeService {
 
         List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list( params ) as List
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
-            SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
+            SiteDetail siteDetail = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey( SiteDetailCompositeService.LDM_NAME,housingLocationBuildingDescription?.campus?.code)?.guid )
             List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
             buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
@@ -133,10 +136,9 @@ class BuildingCompositeService {
             return null
         }
 
-        List<HousingRoomDescription> housingRoomDescriptions = HousingRoomDescription.findAllByBuilding(building)
+        List<HousingRoomDescription> housingRoomDescriptions = AvailableRoomDescription.findAllByBuildingCode(building)
         housingRoomDescriptions.each {housingRoomDescription ->
-            List occupancies = [new Occupancy(ROOM_LAYOUT_TYPE_CLASSROOM, housingRoomDescription.capacity)]
-            rooms << new Room(housingRoomDescription, buildingDetail, occupancies, GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid.toLowerCase(), new Metadata(housingRoomDescription.dataOrigin))
+            rooms << new AvailableRoom(GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid.toLowerCase())
         }
         return rooms
     }

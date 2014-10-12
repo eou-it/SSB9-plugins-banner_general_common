@@ -3,6 +3,8 @@
  *********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import net.hedtech.banner.query.DynamicFinder
+
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -163,5 +165,11 @@ class AvailableRoomDescription {
         result = 31 * result + (campusCode != null ? campusCode.hashCode() : 0)
         result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0)
         return result
+    }
+
+    static List fetchAllActiveRoomsByRoomType(Map filterData, Map paginationAndSortParams){
+        def query = """FROM  AvailableRoomDescription a
+                       WHERE a.roomType like NVL(:roomType, '%') """
+        new DynamicFinder(AvailableRoomDescription.class, query, 'a').find(filterData, paginationAndSortParams)
     }
 }

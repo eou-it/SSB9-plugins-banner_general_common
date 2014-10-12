@@ -19,6 +19,11 @@ class SiteDetail {
     String guid
     def buildings = []
 
+    def SiteDetail(String guid) {
+        this.campus = new Campus()
+        this.guid = guid
+    }
+
     def SiteDetail(String guid, def campus, def buildings, Metadata metadata) {
         this.guid = guid
         this.campus = campus
