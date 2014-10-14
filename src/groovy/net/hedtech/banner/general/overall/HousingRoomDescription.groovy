@@ -498,12 +498,4 @@ class HousingRoomDescription implements Serializable {
         return [list: roomList]
     }
 
-    static Long countAllActiveRoomsByRoomType(Map filterData){
-        def query = """FROM  HousingRoomDescription a
-                                       left outer join a.roomStatus b
-                                       WHERE a.roomType like NVL(:roomType, '%')
-                                       AND NVL(b.inactiveIndicator,'N') = 'N'"""
-        new DynamicFinder(HousingRoomDescription.class, query, 'a').count(filterData)
-    }
-
 }

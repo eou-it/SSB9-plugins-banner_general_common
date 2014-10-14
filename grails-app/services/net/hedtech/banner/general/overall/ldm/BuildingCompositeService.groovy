@@ -30,7 +30,6 @@ class BuildingCompositeService {
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
 
-    private static final String ROOM_LAYOUT_TYPE_CLASSROOM = 'Classroom'
 
     private HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: 'building.code',
@@ -136,7 +135,7 @@ class BuildingCompositeService {
             return null
         }
 
-        List<HousingRoomDescription> housingRoomDescriptions = AvailableRoomDescription.findAllByBuildingCode(building)
+        List<AvailableRoomDescription> housingRoomDescriptions = AvailableRoomDescription.findAllByBuildingCode(building)
         housingRoomDescriptions.each {housingRoomDescription ->
             rooms << new AvailableRoom(GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid.toLowerCase())
         }

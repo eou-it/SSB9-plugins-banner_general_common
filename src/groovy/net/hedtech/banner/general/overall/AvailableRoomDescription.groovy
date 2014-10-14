@@ -172,4 +172,10 @@ class AvailableRoomDescription {
                        WHERE a.roomType like NVL(:roomType, '%') """
         new DynamicFinder(AvailableRoomDescription.class, query, 'a').find(filterData, paginationAndSortParams)
     }
+
+    static Long countAllActiveRoomsByRoomType(Map filterData){
+        def query = """FROM  AvailableRoomDescription a
+                       WHERE a.roomType like NVL(:roomType, '%')"""
+        new DynamicFinder(AvailableRoomDescription.class, query, 'a').count(filterData)
+    }
 }

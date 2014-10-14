@@ -17,7 +17,7 @@ class BuildingDetail {
     String guid
     private SiteDetail siteDetail
     Metadata metadata
-    List<Room> rooms = []
+    List rooms = []
 
     BuildingDetail ( guid ) {
         this.guid = guid

@@ -878,10 +878,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
         assertNotNull categories
         assertTrue categories?.size() >= 2
-        categories?.each(){
-            assertEquals sectionMeetingTime.term, it.term
-            assertEquals sectionMeetingTime.courseReferenceNumber, it.courseReferenceNumber
-        }
+        assertTrue categories.contains(sectionMeetingTime.category)
+        assertTrue categories.contains(sectionMeetingTime2.category)
     }
 
 

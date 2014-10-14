@@ -47,9 +47,11 @@ class SectionMeetingTimeService extends ServiceBase {
      */
 
     private void validateData( SectionMeetingTime sectionMeetingTime ) {
-        validateTerm( sectionMeetingTime.term )
-        def section = getSection( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
-        validateDates( section, sectionMeetingTime )
+        validateTerm(sectionMeetingTime.term)
+        if (sectionMeetingTime.term != "EVENT") {
+            def section = getSection(sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber)
+            validateDates(section, sectionMeetingTime)
+        }
         validateTimes( sectionMeetingTime )
         validateHoursPerWeek( sectionMeetingTime )
     }

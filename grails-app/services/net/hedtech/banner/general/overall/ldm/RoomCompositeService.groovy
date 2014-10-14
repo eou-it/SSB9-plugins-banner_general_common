@@ -78,7 +78,7 @@ class RoomCompositeService extends LdmService {
             RoomsAvailabilityHelper.countAllAvailableRoom( filterParams.filterData )
         } else {
             Map filterParams = prepareParams( params )
-            return HousingRoomDescription.countAllActiveRoomsByRoomType( filterParams.filterData )
+            return AvailableRoomDescription.countAllActiveRoomsByRoomType( filterParams.filterData )
         }
     }
 
@@ -244,16 +244,16 @@ class RoomCompositeService extends LdmService {
 
 
     @Transactional(readOnly = true)
-    Room get( String guid ) {
+    AvailableRoom get( String guid ) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( Room.LDM_NAME, guid )
         if (!globalUniqueIdentifier)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
-        HousingRoomDescription housingRoomDescription = HousingRoomDescription.get( globalUniqueIdentifier.domainId )
+        AvailableRoomDescription housingRoomDescription = AvailableRoomDescription.get( globalUniqueIdentifier.domainId )
         if (!housingRoomDescription)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
-        BuildingDetail building = buildingCompositeService.fetchByBuildingCode( housingRoomDescription.building.code )
+        BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode )?.guid)
         List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
-        return new Room( housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata( housingRoomDescription.dataOrigin ) )
+        return new AvailableRoom( housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata( housingRoomDescription.dataOrigin ) )
     }
 
 

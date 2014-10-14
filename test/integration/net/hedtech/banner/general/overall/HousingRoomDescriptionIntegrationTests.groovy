@@ -581,38 +581,6 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    @Test
-    void testFetchAllActiveRooms() {
-        def housingRoomDescription = newValidForCreateHousingRoomDescription()
-        housingRoomDescription.save(failOnError: true, flush: true)
-        assertNotNull housingRoomDescription.id
-        def filterData = [params: [roomType: '%']]
-        def result = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterData, [max: 10, offset: 0])
-        assertNotNull result
-        assertFalse result.isEmpty()
-        assertFalse result.contains(housingRoomDescription)
-
-        housingRoomDescription.roomType = 'C'
-        housingRoomDescription.save(failOnError: true, flush: true)
-        filterData = [params: [roomType: '%',  id: housingRoomDescription.id], criteria: [[key: 'id', binding: 'id', operator: Operators.EQUALS]]]
-        result = HousingRoomDescription.fetchAllActiveRoomsByRoomType(filterData, [max: 10, offset: 0])
-        assertNotNull result
-        assertFalse result.isEmpty()
-        assertTrue result.contains(housingRoomDescription)
-    }
-
-
-    @Test
-    void testCountAllActiveRooms() {
-        def housingRoomDescription = newValidForCreateHousingRoomDescription()
-        housingRoomDescription.roomType = 'C'
-        housingRoomDescription.save(failOnError: true, flush: true)
-        assertNotNull housingRoomDescription.id
-        Long count = HousingRoomDescription.countAllActiveRoomsByRoomType([params: [roomType: 'C']])
-        assertNotNull count
-        assertTrue count > 0
-    }
-
 
     private def newValidForCreateHousingRoomDescription() {
         def housingRoomDescription = new HousingRoomDescription(
