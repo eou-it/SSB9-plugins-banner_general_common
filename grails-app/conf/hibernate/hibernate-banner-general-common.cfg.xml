@@ -60,6 +60,31 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
+
+
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQuery"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionListEntry"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryView"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationListView"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView"/>
+        <mapping class="net.hedtech.banner.general.communication.folder.CommunicationFolder"/>
+        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganization"/>
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationEmailTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionConstant"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionStatement"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationRuleStatementType"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationField"/>
+
+        <mapping class="net.hedtech.banner.general.communication.job.CommunicationJob"/>
+        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
+        <mapping class="net.hedtech.banner.general.communication.job.CommunicationJobItem"/>
+        <mapping class="net.hedtech.banner.general.communication.merge.CommunicationRecipientData"/>
+        <mapping class="net.hedtech.banner.general.communication.merge.CommunicationFieldValue"/>
+
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
     </session-factory>
 </hibernate-configuration>
    
