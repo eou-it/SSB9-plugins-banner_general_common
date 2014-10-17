@@ -16,7 +16,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
 /**
@@ -51,7 +50,8 @@ class CommunicationGroupsendServiceIntegrationTests extends BaseIntegrationTestC
         CommunicationOrganization organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
         organization = communicationOrganizationService.create(organization) as CommunicationOrganization
 
-        Authentication auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', 'u_pick_it'))
+        assertNotNull auth
         SecurityContextHolder.getContext().setAuthentication(auth)
         assertTrue(auth instanceof BannerAuthenticationToken)
         BannerAuthenticationToken bannerAuthenticationToken = auth as BannerAuthenticationToken
