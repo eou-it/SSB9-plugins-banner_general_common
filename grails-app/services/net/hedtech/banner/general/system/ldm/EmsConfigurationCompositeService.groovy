@@ -10,9 +10,9 @@ import net.hedtech.banner.general.system.ldm.v1.EmsConfiguration
  */
 class EmsConfigurationCompositeService {
 
-    public static String ROUTING_KEYS = ["CDM.*.*"]
+    public static List<String> ROUTING_KEYS = ["CDM.*.*"]
 
-    EmsConfiguration show(String id) {
+    EmsConfiguration get(String id) {
         List<IntegrationConfiguration> settings = IntegrationConfiguration.findAllByProcessCode("EMS-" + id.toUpperCase())
         if(settings.size()) {
             EmsConfiguration configuration = new EmsConfiguration(id)
@@ -77,7 +77,6 @@ class EmsConfigurationCompositeService {
                         break;
                     default:
                         break;
-
                 }
             }
             configuration
