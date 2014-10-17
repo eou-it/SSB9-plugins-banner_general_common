@@ -4,7 +4,7 @@
 package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 
-import net.hedtech.banner.MessageUtility
+
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.AvailableRoomDescription
@@ -14,7 +14,6 @@ import net.hedtech.banner.general.overall.ldm.utility.RoomsAvailabilityHelper
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
-import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.general.system.ldm.v1.Metadata
@@ -30,10 +29,9 @@ class RoomCompositeService extends LdmService {
     private static final String MINUTE_FORMAT = '[0-5][0-9]'
     private static final String SECOND_FORMAT = '[0-5][0-9]'
     private static final String LDM_NAME = 'rooms'
-    def buildingCompositeService
 
 
-    List<Room> list( Map params ) {
+    List<AvailableRoom> list( Map params ) {
         if (RestfulApiValidationUtility.isQApiRequest( params )) {
             List rooms = []
             RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
@@ -47,7 +45,7 @@ class RoomCompositeService extends LdmService {
             availableRoomDescriptions.each {availableRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( availableRoomDescription.roomType ), availableRoomDescription.capacity )]
                 String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, availableRoomDescriptions.buildingCode )?.guid
-                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( Room.LDM_NAME, availableRoomDescription.id )?.guid
+                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( AvailableRoom.LDM_NAME, availableRoomDescription.id )?.guid
                 BuildingDetail building = buildingGuid ? new BuildingDetail( buildingGuid ) : null
                 rooms << new AvailableRoom( availableRoomDescription, building, occupancies, roomGuid, new Metadata( availableRoomDescription.dataOrigin ) )
             }
@@ -63,7 +61,7 @@ class RoomCompositeService extends LdmService {
             AvailableRoomDescription.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams ).each { AvailableRoomDescription housingRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
                 String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode )?.guid
-                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( Room.LDM_NAME, housingRoomDescription.id ).guid
+                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( AvailableRoom.LDM_NAME, housingRoomDescription.id ).guid
                 BuildingDetail building = buildingGuid ? new BuildingDetail( buildingGuid ) : null
                 rooms << new AvailableRoom( housingRoomDescription, building, occupancies, roomGuid, new Metadata( housingRoomDescription.dataOrigin ) )
             }
@@ -245,12 +243,12 @@ class RoomCompositeService extends LdmService {
 
     @Transactional(readOnly = true)
     AvailableRoom get( String guid ) {
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( Room.LDM_NAME, guid )
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( AvailableRoom.LDM_NAME, guid )
         if (!globalUniqueIdentifier)
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
+            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: "Room" ) )
         AvailableRoomDescription housingRoomDescription = AvailableRoomDescription.get( globalUniqueIdentifier.domainId )
         if (!housingRoomDescription)
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: Room.class.simpleName ) )
+            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: "Room" ) )
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode )?.guid)
         List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
         return new AvailableRoom( housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata( housingRoomDescription.dataOrigin ) )
@@ -260,9 +258,9 @@ class RoomCompositeService extends LdmService {
     boolean checkIfRoomAvailable( Map params ) {
         boolean roomAvailable = false
         validateParams( params )
-        if (params.roomNumber?.trim() && params.building?.code?.trim()) {
+        if (params.roomNumber?.trim() && params.building?.trim()) {
             Map filterParams = prepareSearchParams( params )
-            filterParams.filterData.params << [roomNumber: params.roomNumber.toString()?.trim(), buildingCode: params.building?.code?.trim()]
+            filterParams.filterData.params << [roomNumber: params.roomNumber.toString()?.trim(), buildingCode: params.building?.trim()]
             roomAvailable = RoomsAvailabilityHelper.checkExistsAvailableRoomByRoomAndBuilding( filterParams.filterData )
         }
         return roomAvailable
@@ -292,8 +290,8 @@ class RoomCompositeService extends LdmService {
     }
 
 
-    public Room fetchByRoomBuiildingAndTerm( String roomNumber, Building building, String termEffective ) {
-        Room room
+    public AvailableRoom fetchByRoomBuildingAndTerm( String roomNumber, Building building, String termEffective ) {
+        AvailableRoom room
         if(roomNumber && building && termEffective) {
             Map params = [building: building, termEffective: termEffective]
             HousingRoomDescription housingRoomDescription = HousingRoomDescription.fetchValidRoomAndBuilding( roomNumber, params )

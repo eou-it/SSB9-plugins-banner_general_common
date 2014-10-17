@@ -8,11 +8,8 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.AvailableRoomDescription
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
-import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
-import net.hedtech.banner.general.overall.ldm.v1.Occupancy
-import net.hedtech.banner.general.overall.ldm.v1.Room
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
@@ -48,7 +45,7 @@ class BuildingCompositeService {
         List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list( params ) as List
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey( SiteDetailCompositeService.LDM_NAME,housingLocationBuildingDescription?.campus?.code)?.guid )
-            List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
+            List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription?.building)
             buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
         return buildings
@@ -72,7 +69,7 @@ class BuildingCompositeService {
         }
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
-        List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
+        List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription?.building)
         return new BuildingDetail( housingLocationBuildingDescription, siteDetail, globalUniqueIdentifier.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
@@ -88,7 +85,7 @@ class BuildingCompositeService {
         }
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
-        List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
+        List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription?.building)
         return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
@@ -104,7 +101,7 @@ class BuildingCompositeService {
         }
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )
-        List<Room> rooms = getRooms(housingLocationBuildingDescription?.building)
+        List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription?.building)
         return new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
     }
 
@@ -128,7 +125,7 @@ class BuildingCompositeService {
     }
 
 
-    private List<Room> getRooms(def building){
+    private List<AvailableRoom> getRooms(def building){
         List rooms = []
         net.hedtech.banner.general.overall.ldm.v1.BuildingDetail buildingDetail
         if (null == building) {
@@ -137,7 +134,7 @@ class BuildingCompositeService {
 
         List<AvailableRoomDescription> housingRoomDescriptions = AvailableRoomDescription.findAllByBuildingCode(building)
         housingRoomDescriptions.each {housingRoomDescription ->
-            rooms << new AvailableRoom(GlobalUniqueIdentifier.findByLdmNameAndDomainId(Room.LDM_NAME, housingRoomDescription.id).guid.toLowerCase())
+            rooms << new AvailableRoom(GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid.toLowerCase())
         }
         return rooms
     }
