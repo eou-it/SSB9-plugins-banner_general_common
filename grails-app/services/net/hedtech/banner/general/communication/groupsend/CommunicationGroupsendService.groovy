@@ -9,5 +9,5 @@ import net.hedtech.banner.service.ServiceBase
 /**
  * Manages group send instances.
  */
-class CommunicationGroupsendService extends ServiceBase {
+class CommunicationGroupSendService extends ServiceBase {
 }

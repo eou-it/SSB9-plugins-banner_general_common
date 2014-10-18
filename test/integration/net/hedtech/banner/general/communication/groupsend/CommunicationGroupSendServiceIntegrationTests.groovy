@@ -21,9 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests the group send service.
  */
-class CommunicationGroupsendServiceIntegrationTests extends BaseIntegrationTestCase {
+class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationOrganizationService
+    def communicationGroupSendService
     def selfServiceBannerAuthenticationProvider
     def communicationPopulationQueryService
     def communicationPopulationExecutionService
@@ -50,7 +51,7 @@ class CommunicationGroupsendServiceIntegrationTests extends BaseIntegrationTestC
         CommunicationOrganization organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
         organization = communicationOrganizationService.create(organization) as CommunicationOrganization
 
-        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', 'u_pick_it'))
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         assertNotNull auth
         SecurityContextHolder.getContext().setAuthentication(auth)
         assertTrue(auth instanceof BannerAuthenticationToken)
@@ -99,7 +100,7 @@ class CommunicationGroupsendServiceIntegrationTests extends BaseIntegrationTestC
                 template: emailTemplate,
                 ownerPidm: bannerAuthenticationToken.getPidm()
         )
-        groupSend = communicationOrganizationService.create(groupSend) as CommunicationGroupSend
+        groupSend = communicationGroupSendService.create(groupSend) as CommunicationGroupSend
         assertNotNull groupSend.getId()
     }
 }
