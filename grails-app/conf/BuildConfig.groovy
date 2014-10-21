@@ -43,12 +43,15 @@ grails.project.dependency.resolution = {
         compile ":tomcat:7.0.52.1"
         compile ':resources:1.2.7' // If the functional-test plugin is being used
         compile ":functional-test:2.0.0" // If the functional-test plugin is being used
+
     }
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
         // runtime 'mysql:mysql-connector-java:5.1.5'
+        compile "org.apache.velocity:velocity:1.7"
+
     }
 
 
