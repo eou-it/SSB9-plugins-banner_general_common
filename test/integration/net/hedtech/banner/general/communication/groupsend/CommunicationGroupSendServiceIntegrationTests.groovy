@@ -72,10 +72,13 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         CommunicationPopulationSelectionList population = CommunicationPopulationSelectionList.get(populationId)
         assertNotNull population.getId()
 
-        CommunicationFolder folder = new CommunicationFolder(
-                name: "test folder"
-        )
-        folder = communicationFolderService.create(folder) as CommunicationFolder
+        CommunicationFolder folder = CommunicationFolder.fetchByName( "test folder" )
+        if (!folder) {
+            folder = new CommunicationFolder(
+                    name: "test folder"
+            )
+            folder = communicationFolderService.create(folder) as CommunicationFolder
+        }
         assertNotNull folder.getId()
 
         CommunicationEmailTemplate emailTemplate = new CommunicationEmailTemplate(
