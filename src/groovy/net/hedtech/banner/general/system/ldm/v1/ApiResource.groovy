@@ -1,3 +1,6 @@
+/*********************************************************************************
+ Copyright 2014 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.system.ldm.v1
 
 class ApiResource {

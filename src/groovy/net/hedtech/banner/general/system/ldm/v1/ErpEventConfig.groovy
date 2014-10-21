@@ -1,8 +1,8 @@
+/*********************************************************************************
+ Copyright 2014 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.system.ldm.v1
 
-/**
- * Created by rshishehbor on 10/15/14.
- */
 class ErpEventConfig {
     List<String> routingKeys
     String exchangeName
