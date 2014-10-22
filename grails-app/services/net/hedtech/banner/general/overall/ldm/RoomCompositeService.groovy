@@ -44,7 +44,7 @@ class RoomCompositeService extends LdmService {
             List<AvailableRoomDescription> availableRoomDescriptions = RoomsAvailabilityHelper.fetchSearchAvailableRoom( filterParams.filterData, filterParams.pagingAndSortParams )
             availableRoomDescriptions.each {availableRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( availableRoomDescription.roomType ), availableRoomDescription.capacity )]
-                String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, availableRoomDescriptions.buildingCode )?.guid
+                String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, availableRoomDescription.buildingCode )?.guid
                 String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( AvailableRoom.LDM_NAME, availableRoomDescription.id )?.guid
                 BuildingDetail building = buildingGuid ? new BuildingDetail( buildingGuid ) : null
                 rooms << new AvailableRoom( availableRoomDescription, building, occupancies, roomGuid, new Metadata( availableRoomDescription.dataOrigin ) )
