@@ -4,8 +4,10 @@
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
+import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import net.hedtech.banner.general.system.Term;
 
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 class SqlProcessCompositeService {
@@ -55,16 +57,17 @@ class SqlProcessCompositeService {
      *      Date being within range.
      *
      * It fetches all of the active process objects and goes one by one in sequence order until one returns a non-null
-     * result. It then returns that result. If none return a result, it returns an empty list.
+     * result. The result must match up with a Term record. It then returns that result. If none return a result, it returns an empty list.
      * @param params A map of the following:
      *      sqlCode - The SqlProceess.entriesForSql code
      *      sqlProcessCode - The SqlProceess.entriesForSqlProcess process code
      *      <any additional params> - Any additional params needed for the SQL. These should match what is in the
      *      SqlProcessParameter table for the given process.
-     * @return A list of values returned by the query. an empty list if no values were returned.
+     * @return A Term returned by the query. null if no values were returned.
      */
-    List getSqlProcessResultsFromHierarchy( Map params ) {
+    Term getSqlProcessResultsFromHierarchy( Map params ) {
         def results = []
+        def resultTerm
         if ( params.sqlCode && params.sqlProcessCode ) {
             def parsedSqlList = SqlProcess.fetchAllActiveValidatedPriorityProcessSql(params.sqlCode, params.sqlProcessCode)
             for (def i=0;i<parsedSqlList.size();i++) {
@@ -97,12 +100,18 @@ class SqlProcessCompositeService {
                     conn?.close()
                 }
                 if (rows) {
-                    results = rows
-                    break
+                    def termCode = rows[0].getAt(0)
+                    resultTerm = Term.findByCode(termCode)
+                    if (!resultTerm) {
+                        throw new ApplicationException(SqlProcess, "@@r1:shouldReturnTerm@@")
+                    }
+                    else {
+                        break
+                    }
                 }
             }
         }
-        return results
+        return resultTerm
 
     }
 
@@ -110,7 +119,7 @@ class SqlProcessCompositeService {
     private def getParameterValue(def key, def fromThis) {
         def value = fromThis[key.toUpperCase()]
         if (null == value) {
-            value = fromThis[key.toLowerCae()]
+            value = fromThis[key.toLowerCase()]
         }
         return value
     }
