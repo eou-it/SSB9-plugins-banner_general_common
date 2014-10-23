@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.field
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import org.hibernate.annotations.Type
 import net.hedtech.banner.general.communication.*
@@ -199,5 +200,32 @@ class CommunicationField implements Serializable {
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id', 'immutableId']
+
+
+    public static String getQuery(Map filterData) {
+        def query =
+                """ FROM CommunicationField a  """
+
+        if (filterData?.params?.containsKey('folderName')) {
+            query = query + """WHERE (a.folderName = :folderName) """
+        }
+        if (filterData?.params?.containsKey('folderName') && filterData?.params?.containsKey('name')) {
+            query = query + """  AND (upper(a.name) like upper(:name)+'%')"""
+        } else if (filterData?.params?.containsKey('name')) {
+            query = query + """  WHERE (upper(a.name) like upper(:name)+'%')"""
+        }
+        return query
+    }
+
+
+    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
+        def finder = new DynamicFinder(CommunicationField.class, getQuery(filterData), "a")
+        return finder.find(filterData, pagingAndSortParams)
+    }
+
+
+    public static countByFilterParams(filterData) {
+        return new DynamicFinder(CommunicationField.class, getQuery(filterData), "a").count(filterData)
+    }
 
 }
