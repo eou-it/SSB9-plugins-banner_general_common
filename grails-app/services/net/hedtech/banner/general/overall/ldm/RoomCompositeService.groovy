@@ -70,6 +70,7 @@ class RoomCompositeService extends LdmService {
     }
 
 
+
     Long count( Map params ) {
         if (RestfulApiValidationUtility.isQApiRequest( params )) {
             Map filterParams = prepareSearchParams( params )
