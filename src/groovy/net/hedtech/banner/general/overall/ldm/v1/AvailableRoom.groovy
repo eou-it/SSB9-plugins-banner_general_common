@@ -3,7 +3,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall.ldm.v1
 
-import net.hedtech.banner.general.overall.AvailableRoomDescription
+import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 
 /**
@@ -14,7 +14,7 @@ class AvailableRoom {
     public static final String LDM_NAME = 'rooms'
 
     @Delegate
-    private final AvailableRoomDescription availableRoomDescription
+    private final HousingRoomDescriptionReadOnly availableRoomDescription
     BuildingDetail buildingDetail
     List occupancies
     String guid
@@ -22,10 +22,10 @@ class AvailableRoom {
 
     AvailableRoom(String guid) {
         this.guid = guid
-        this.availableRoomDescription = new AvailableRoomDescription()
+        this.availableRoomDescription = new HousingRoomDescriptionReadOnly()
     }
 
-    AvailableRoom(AvailableRoomDescription housingRoomDescription, BuildingDetail buildingDetail, List occupancies, String guid, Metadata metadata) {
+    AvailableRoom(HousingRoomDescriptionReadOnly housingRoomDescription, BuildingDetail buildingDetail, List occupancies, String guid, Metadata metadata) {
         this.availableRoomDescription = housingRoomDescription
         this.buildingDetail = buildingDetail
         this.occupancies = occupancies

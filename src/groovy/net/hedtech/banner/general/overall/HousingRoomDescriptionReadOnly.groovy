@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2011-2012 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2014 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -13,13 +13,9 @@ import javax.persistence.Temporal
 import javax.persistence.TemporalType
 import javax.persistence.Version
 
-/**
- * AvailableRoomDescription model, represents the view
- * SVQ_SLBRDEF, for fetching the Available rooms
- */
 @Entity
-@Table(name = "SVQ_SLBRDEF")
-class AvailableRoomDescription {
+@Table(name = "SVQ_SLBRDEF_SLBBLDG")
+class HousingRoomDescriptionReadOnly {
 
     /**
      * Surrogate ID for SLBRDEF
@@ -108,7 +104,7 @@ class AvailableRoomDescription {
     String siteCode
 
     public String toString() {
-        """AvailableRoomDescription[
+        """HousingRoomDescriptionReadOnly[
 					id=$id,
 					version=$version,
 					lastModified=$lastModified,
@@ -128,8 +124,8 @@ class AvailableRoomDescription {
 
     boolean equals(o) {
         if (this.is(o)) return true
-        if (!(o instanceof AvailableRoomDescription)) return false
-        AvailableRoomDescription that = (AvailableRoomDescription) o
+        if (!(o instanceof HousingRoomDescriptionReadOnly)) return false
+        HousingRoomDescriptionReadOnly that = (HousingRoomDescriptionReadOnly) o
         if (id != that.id) return false
         if (version != that.version) return false
         if (lastModified != that.lastModified) return false
@@ -168,14 +164,14 @@ class AvailableRoomDescription {
     }
 
     static List fetchAllActiveRoomsByRoomType(Map filterData, Map paginationAndSortParams){
-        def query = """FROM  AvailableRoomDescription a
+        def query = """FROM  HousingRoomDescriptionReadOnly a
                        WHERE a.roomType like NVL(:roomType, '%') """
-        new DynamicFinder(AvailableRoomDescription.class, query, 'a').find(filterData, paginationAndSortParams)
+        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, 'a').find(filterData, paginationAndSortParams)
     }
 
     static Long countAllActiveRoomsByRoomType(Map filterData){
-        def query = """FROM  AvailableRoomDescription a
+        def query = """FROM  HousingRoomDescriptionReadOnly a
                        WHERE a.roomType like NVL(:roomType, '%')"""
-        new DynamicFinder(AvailableRoomDescription.class, query, 'a').count(filterData)
+        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, 'a').count(filterData)
     }
 }

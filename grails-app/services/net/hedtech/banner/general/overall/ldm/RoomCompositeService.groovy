@@ -7,8 +7,8 @@ import net.hedtech.banner.exceptions.BusinessLogicValidationException
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.overall.AvailableRoomDescription
 import net.hedtech.banner.general.overall.HousingRoomDescription
+import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.utility.RoomsAvailabilityHelper
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
@@ -41,7 +41,7 @@ class RoomCompositeService extends LdmService {
             params.sort = fetchBannerDomainPropertyForLdmField( params.sort?.trim() )
             validateParams( params )
             Map filterParams = prepareSearchParams( params )
-            List<AvailableRoomDescription> availableRoomDescriptions = RoomsAvailabilityHelper.fetchSearchAvailableRoom( filterParams.filterData, filterParams.pagingAndSortParams )
+            List<HousingRoomDescriptionReadOnly> availableRoomDescriptions = RoomsAvailabilityHelper.fetchSearchAvailableRoom( filterParams.filterData, filterParams.pagingAndSortParams )
             availableRoomDescriptions.each {availableRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( availableRoomDescription.roomType ), availableRoomDescription.capacity )]
                 String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, availableRoomDescription.buildingCode )?.guid
@@ -58,7 +58,7 @@ class RoomCompositeService extends LdmService {
             RestfulApiValidationUtility.validateSortOrder( params.order?.trim() )
             params.sort = fetchBannerDomainPropertyForLdmField( params.sort?.trim() )
             Map filterParams = prepareParams( params )
-            AvailableRoomDescription.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams ).each { AvailableRoomDescription housingRoomDescription ->
+            HousingRoomDescriptionReadOnly.fetchAllActiveRoomsByRoomType( filterParams.filterData, filterParams.pagingAndSortParams ).each { HousingRoomDescriptionReadOnly housingRoomDescription ->
                 List occupancies = [new Occupancy( fetchLdmRoomLayoutTypeForBannerRoomType( housingRoomDescription.roomType ), housingRoomDescription.capacity )]
                 String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey( BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode )?.guid
                 String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( AvailableRoom.LDM_NAME, housingRoomDescription.id ).guid
@@ -77,7 +77,7 @@ class RoomCompositeService extends LdmService {
             RoomsAvailabilityHelper.countAllAvailableRoom( filterParams.filterData )
         } else {
             Map filterParams = prepareParams( params )
-            return AvailableRoomDescription.countAllActiveRoomsByRoomType( filterParams.filterData )
+            return HousingRoomDescriptionReadOnly.countAllActiveRoomsByRoomType( filterParams.filterData )
         }
     }
 
@@ -247,7 +247,7 @@ class RoomCompositeService extends LdmService {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( AvailableRoom.LDM_NAME, guid )
         if (!globalUniqueIdentifier)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: "Room" ) )
-        AvailableRoomDescription housingRoomDescription = AvailableRoomDescription.get( globalUniqueIdentifier.domainId )
+        HousingRoomDescriptionReadOnly housingRoomDescription = HousingRoomDescriptionReadOnly.get( globalUniqueIdentifier.domainId )
         if (!housingRoomDescription)
             throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: "Room" ) )
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode )?.guid)

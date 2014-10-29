@@ -6,8 +6,8 @@ package net.hedtech.banner.general.overall.ldm
 import grails.util.GrailsNameUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.overall.AvailableRoomDescription
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
+import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.system.Building
@@ -132,7 +132,7 @@ class BuildingCompositeService {
             return null
         }
 
-        List<AvailableRoomDescription> housingRoomDescriptions = AvailableRoomDescription.findAllByBuildingCode(building)
+        List<HousingRoomDescriptionReadOnly> housingRoomDescriptions = HousingRoomDescriptionReadOnly.findAllByBuildingCode(building)
         housingRoomDescriptions.each {housingRoomDescription ->
             rooms << new AvailableRoom(GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid.toLowerCase())
         }

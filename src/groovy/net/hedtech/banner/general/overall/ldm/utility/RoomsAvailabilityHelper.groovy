@@ -1,5 +1,6 @@
 package net.hedtech.banner.general.overall.ldm.utility
-import net.hedtech.banner.general.overall.AvailableRoomDescription
+
+import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.general.system.Term
 import net.hedtech.banner.query.DynamicFinder
@@ -12,26 +13,26 @@ class RoomsAvailabilityHelper {
 
     static List fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams) {
         parseInputParameters(filterData)
-        def query = """FROM AvailableRoomDescription a
+        def query = """FROM HousingRoomDescriptionReadOnly a
                             WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
-        new DynamicFinder(AvailableRoomDescription.class, query, "a").find(filterData, pagingAndSortParams)
+        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a").find(filterData, pagingAndSortParams)
     }
 
     static Long countAllAvailableRoom(Map filterData){
         parseInputParameters(filterData)
-        def query = """FROM AvailableRoomDescription a
+        def query = """FROM HousingRoomDescriptionReadOnly a
                             WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
-        new DynamicFinder(AvailableRoomDescription.class, query, "a").count(filterData)
+        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a").count(filterData)
     }
 
 
     static boolean checkExistsAvailableRoomByRoomAndBuilding(Map filterData) {
         parseInputParameters(filterData)
-        def query = """FROM AvailableRoomDescription a
+        def query = """FROM HousingRoomDescriptionReadOnly a
                             WHERE ROWNUM = 1
                             AND a.buildingCode = :buildingCode
                             AND a.roomNumber = :roomNumber AND """ + fetchConditionalClauseForAvailableRoomSearch("a")
-        new DynamicFinder(AvailableRoomDescription.class, query, "a").find(filterData, [:])
+        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a").find(filterData, [:])
     }
 
 
@@ -52,7 +53,7 @@ class RoomsAvailabilityHelper {
         return """${tableIdentifier}.roomType like :roomType
                             AND ${tableIdentifier}.capacity >= NVL(:capacity, 0)
                             AND ${tableIdentifier}.termEffective = (SELECT MAX(hrd1.termEffective)
-                                                                        FROM AvailableRoomDescription hrd1
+                                                                        FROM HousingRoomDescriptionReadOnly hrd1
                                                                         WHERE ${tableIdentifier}.buildingCode = hrd1.buildingCode
                                                                         AND ${tableIdentifier}.roomNumber = hrd1.roomNumber
                                                                         AND hrd1.termEffective <= :termCode )
