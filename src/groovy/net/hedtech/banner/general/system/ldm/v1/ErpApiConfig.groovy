@@ -33,13 +33,8 @@ class ErpApiConfig {
             'buildings',
             1,
             '/buildings/',
-            ['CDM.Building.SLBBLDG']
-        )
-        resourceMap << new ApiResource (
-            'buildings',
-            1,
-            '/buildings/',
-            ['CDM.Building.SLBRDEF']
+            ['CDM.Building.SLBBLDG',
+             'CDM.Building.SLBRDEF']
         )
         resourceMap << new ApiResource (
             'ethnicities',
@@ -105,13 +100,8 @@ class ErpApiConfig {
             'sites',
             1,
             '/sites/',
-            ['CDM.Campus.STVCAMP']
-        )
-        resourceMap << new ApiResource(
-            'sites',
-            1,
-            '/sites/',
-            ['CDM.Campus.SLBBLDG']
+            ['CDM.Campus.STVCAMP',
+             'CDM.Campus.SLBBLDG']
         )
         resourceMap << new ApiResource( 
             'subjects',
