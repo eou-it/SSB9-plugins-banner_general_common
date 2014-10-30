@@ -93,11 +93,17 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
 
 
     @Test
-    void testMultiValueSqlStatement() {
-        def populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(i_fail_multiValueSqlStatement)
-        assertEquals("N", populationQueryParseResult.status)
-        assertNotNull(populationQueryParseResult.message)
-        assertEquals('Tried multi value sql statement.', "ORA-20100: Statement can only select one value, a pidm.", populationQueryParseResult.message)
+    void testExecuteMultiValueSqlStatement() {
+        def populationQuery = newValidPopulationQuery()
+        populationQuery.sqlString = i_fail_multiValueSqlStatement
+        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def populationSelectionListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+
+        assertNull( populationSelectionListId)
+        / * Now examine results */
+        def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(savedPopulationQuery.id)
+        assertEquals false, calculatedPopulationQuery.valid
+ //       assertEquals('Tried multi value sql statement.', "ORA-20100: Statement can only select one value, a pidm.", populationQueryParseResult.message)
     }
 
 
@@ -111,7 +117,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(savedPopulationQuery.id)
         calculatedPopulationQuery.refresh()
 
-        println(calculatedPopulationQuery.id + ":" + bannerUser?.username)
+
         def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, bannerUser?.username)
         assertNotNull populationQuerySelectionList
         assertEquals( populationSelectionListId, populationQuerySelectionList.id )
@@ -143,8 +149,9 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     void testBadSqlExecute() {
         def populationQuery = newInvalidPopulationQuery()
         def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
-        println "savedPopulationQuery.id =" + savedPopulationQuery.id
-        communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+
+        def populationListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        assertNull populationListId
         populationQuery = communicationPopulationQueryService.get(savedPopulationQuery.id)
         populationQuery.refresh()
 
@@ -154,9 +161,6 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         assertEquals(CommunicationPopulationQueryExecutionStatus.ERROR, populationQuerySelectionList?.status)
 
     }
-
-    /* TODO: Test separately a valid populationQuery that is not published */
-
 
     private def newValidPopulationQuery() {
         def populationQuery = new CommunicationPopulationQuery(
@@ -188,7 +192,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
                 createdBy: "TTTTTTTTTT",
                 locked: false,
                 name: "TTTTTTTTTT",
-                valid: true,
+                valid: false,
                 published: true,
 
                 // Nullable fields

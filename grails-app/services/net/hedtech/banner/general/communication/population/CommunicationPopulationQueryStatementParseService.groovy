@@ -25,7 +25,6 @@ class CommunicationPopulationQueryStatementParseService {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
         def exceptionMessage
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
-        println "parsing populationQuery string =" + statement
 
         try {
             //def stmt = '{call gokextr.p_validate_sql(?,?,?,?,?)}'

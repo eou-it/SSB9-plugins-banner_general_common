@@ -48,8 +48,6 @@ class CommunicationPopulationExecutionService {
      * @returns the population selection list id
      */
     def execute(Long populationQueryId) {
-        //def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        println "Calling gokextr.p_execute_pop_query: populationQuery id " + populationQueryId
 
         if (!populationQueryId) {
             throw new ApplicationException(populationQueryId, "Null populationQuery id")
@@ -92,13 +90,11 @@ class CommunicationPopulationExecutionService {
             populationSelectionListId
         }
         catch (SQLException ae) {
-            println "SqlException in gokextr.p_create_popsel ${ae}"
             log.debug "SqlException in gokextr.p_create_popsel ${ae}"
             log.debug ae.stackTrace
             throw ae
         }
         catch (Exception ae) {
-            println "Exception in gokextr.p_create_popsel ${ae}"
             log.debug "Exception in gokextr.p_create_popsel ${ae}"
             log.debug ae.stackTrace
             throw ae
