@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.Term
-import net.hedtech.banner.query.DynamicFinder
 
 import javax.persistence.*
 
@@ -171,17 +170,4 @@ class HousingRoomDescriptionReadOnly {
         return result
     }
 
-
-    static List fetchAllActiveRoomsByRoomType(Map filterData, Map paginationAndSortParams) {
-        def query = """FROM  HousingRoomDescriptionReadOnly a
-                       WHERE a.roomType like NVL(:roomType, '%') """
-        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, 'a').find(filterData, paginationAndSortParams)
-    }
-
-
-    static Long countAllActiveRoomsByRoomType(Map filterData) {
-        def query = """FROM  HousingRoomDescriptionReadOnly a
-                       WHERE a.roomType like NVL(:roomType, '%')"""
-        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, 'a').count(filterData)
-    }
 }
