@@ -29,51 +29,34 @@ class RoomCompositeService extends LdmService {
     private static final String MINUTE_FORMAT = '[0-5][0-9]'
     private static final String SECOND_FORMAT = '[0-5][0-9]'
     private static final String LDM_NAME = 'rooms'
+    private static final String PROCESS_CODE = "LDM"
+    private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
 
 
     List<AvailableRoom> list(Map params) {
-        List rooms = []
+        def entities
+        RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
+        List allowedSortFields = ['number', 'title']
+        RestfulApiValidationUtility.validateSortField(params.sort?.trim(), allowedSortFields)
+        RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
+        params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
-            RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-            List allowedSortFields = ['number', 'title']
-            RestfulApiValidationUtility.validateSortField(params.sort?.trim(), allowedSortFields)
-            RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
-            params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
+            // POST /qapi/rooms
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
-            List<HousingRoomDescriptionReadOnly> availableRoomDescriptions = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
-            availableRoomDescriptions.each { availableRoomDescription ->
-                List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(availableRoomDescription.roomType), availableRoomDescription.capacity)]
-                String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, availableRoomDescription.buildingCode)?.guid
-                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, availableRoomDescription.id)?.guid
-                BuildingDetail building = buildingGuid ? new BuildingDetail(buildingGuid) : null
-                rooms << new AvailableRoom(availableRoomDescription, building, occupancies, roomGuid, new Metadata(availableRoomDescription.dataOrigin))
-            }
+            entities = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
         } else {
             // GET /api/rooms?filter[0][field]=roomLayoutType&filter[0][operator]=equals&filter[0][value]=Classroom
-            RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-            List allowedSortFields = ['number', 'title']
-            RestfulApiValidationUtility.validateSortField(params.sort?.trim(), allowedSortFields)
-            RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
-            params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
             Map filterData = prepareParams(params)
             def roomTypes
             if (filterData.params.containsKey('roomLayoutType')) {
                 roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterData.params?.roomLayoutType?.trim())]
             } else {
-                // TODO: Get all Higher Education Data Model (HEDM) room types
-                roomTypes = ["C", "O"]
+                roomTypes = getHEDMRoomTypes()
             }
-            def entities = fetchAllActiveRoomsByRoomTypes(roomTypes, filterData.pagingAndSortParams)
-            entities.each { HousingRoomDescriptionReadOnly housingRoomDescription ->
-                List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-                String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid
-                String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid
-                BuildingDetail building = buildingGuid ? new BuildingDetail(buildingGuid) : null
-                rooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
-            }
+            entities = fetchAllActiveRoomsByRoomTypes(roomTypes, filterData.pagingAndSortParams)
         }
-        return rooms
+        return getAvailableRooms(entities)
     }
 
 
@@ -87,8 +70,7 @@ class RoomCompositeService extends LdmService {
             if (filterData.params.containsKey('roomLayoutType')) {
                 roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterData.params?.roomLayoutType?.trim())]
             } else {
-                // TODO: Get all Higher Education Data Model (HEDM) room types
-                roomTypes = ["C", "O"]
+                roomTypes = getHEDMRoomTypes()
             }
             return fetchAllActiveRoomsByRoomTypes(roomTypes, null, true)
         }
@@ -215,7 +197,6 @@ class RoomCompositeService extends LdmService {
 
 
     private Map prepareSearchParams(Map params) {
-        validateSearchCriteria(params)
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
 
@@ -229,11 +210,22 @@ class RoomCompositeService extends LdmService {
         DayOfWeek.list().each { DayOfWeek day ->
             inputData.put(day.description.toLowerCase(), daysList.contains(day.description) ? day.code : null)
         }
+
+        def roomTypes
         if (params.occupancies) {
-            inputData.put('roomType', fetchBannerRoomTypeForLdmRoomLayoutType(params.occupancies[0]?.roomLayoutType))
+            roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(params.occupancies[0]?.roomLayoutType)]
+        } else {
+            roomTypes = getHEDMRoomTypes()
+        }
+        def roomTypeObjects = []
+        roomTypes.each {
+            roomTypeObjects << [data: it]
+        }
+        inputData.put('roomTypes', roomTypeObjects)
+
+        if (params.occupancies) {
             inputData.put('capacity', params.occupancies[0]?.maxOccupancy)
         } else {
-            inputData.put('roomType', '%')
             inputData.put('capacity', null)
         }
 
@@ -279,7 +271,7 @@ class RoomCompositeService extends LdmService {
     private String fetchBannerRoomTypeForLdmRoomLayoutType(String ldmRoomLayoutType) {
         String roomType = null
         if (ldmRoomLayoutType) {
-            IntegrationConfiguration integrationConfiguration = fetchAllByProcessCodeAndSettingNameAndTranslationValue('LDM', 'ROOM.OCCUPANCY.ROOMLAYOUTTYPE', ldmRoomLayoutType)
+            IntegrationConfiguration integrationConfiguration = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE, ldmRoomLayoutType)
             roomType = integrationConfiguration?.value
         }
         if (!roomType) {
@@ -292,7 +284,7 @@ class RoomCompositeService extends LdmService {
     private String fetchLdmRoomLayoutTypeForBannerRoomType(String bannerRoomType) {
         String roomLayoutType = null
         if (bannerRoomType) {
-            IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue('LDM', 'ROOM.OCCUPANCY.ROOMLAYOUTTYPE', bannerRoomType)
+            IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE, bannerRoomType)
             roomLayoutType = integrationConfiguration?.translationValue
         }
         return roomLayoutType
@@ -329,6 +321,41 @@ class RoomCompositeService extends LdmService {
 
         log.trace "fetchAllActiveRoomsByRoomTypes:End"
         return result
+    }
+
+    /**
+     * Get all Higher Education Data Model (HEDM) room types.
+     *
+     * @return
+     */
+    private def getHEDMRoomTypes() {
+        def list = IntegrationConfiguration.findAllByProcessCodeAndSettingName(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE)
+        def intConfs = list?.findAll {
+            ["Banquet", "Booth", "Classroom", "Empty", "Theater"].contains(it.translationValue)
+        }
+        def map = [:]
+        intConfs?.each {
+            if (!map.containsKey(it.translationValue)) {
+                map.put(it.translationValue, it.value)
+            }
+        }
+        if (map.size() == 0) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException('goriccr.not.found.message', [SETTING_ROOM_LAYOUT_TYPE]))
+        }
+        return map.values()
+    }
+
+
+    private def getAvailableRooms(def listHousingRoomDescriptionReadOnly) {
+        def availableRooms = []
+        listHousingRoomDescriptionReadOnly?.each { HousingRoomDescriptionReadOnly housingRoomDescription ->
+            List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
+            String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid
+            String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid
+            BuildingDetail building = buildingGuid ? new BuildingDetail(buildingGuid) : null
+            availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+        }
+        return availableRooms
     }
 
 

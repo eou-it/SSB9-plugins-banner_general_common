@@ -4,6 +4,7 @@ import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.general.system.Term
 import net.hedtech.banner.query.DynamicFinder
+
 /**
  * Helper class for Rooms Availability, which is the utility class responsible
  * for building the SQL Query AND Runtime parameters AND uses DynamicFinder
@@ -18,7 +19,8 @@ class RoomsAvailabilityHelper {
         new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a").find(filterData, pagingAndSortParams)
     }
 
-    static Long countAllAvailableRoom(Map filterData){
+
+    static Long countAllAvailableRoom(Map filterData) {
         parseInputParameters(filterData)
         def query = """FROM HousingRoomDescriptionReadOnly a
                             WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
@@ -37,26 +39,25 @@ class RoomsAvailabilityHelper {
 
 
     private static void parseInputParameters(Map filterData) {
-        filterData.params.termCode = Term.fetchMaxTermWithStartDateLessThanGivenDate( filterData.params.startDate)?.code
-        if (!filterData.params.roomType) {
-            filterData.params.roomType = "%"
-        }
-        DayOfWeek.list().description.each{day->
-            if(!filterData.params?."${day.toLowerCase()}"){
-                filterData.params?."${day.toLowerCase()}"= '#'
+        filterData.params.termCode = Term.fetchMaxTermWithStartDateLessThanGivenDate(filterData.params.startDate)?.code
+        DayOfWeek.list().description.each { day ->
+            if (!filterData.params?."${day.toLowerCase()}") {
+                filterData.params?."${day.toLowerCase()}" = '#'
             }
         }
     }
 
 
     private static String fetchConditionalClauseForAvailableRoomSearch(String tableIdentifier) {
-        return """${tableIdentifier}.roomType like :roomType
+        return """${tableIdentifier}.roomType in :roomTypes
                             AND ${tableIdentifier}.capacity >= NVL(:capacity, 0)
                             AND ${tableIdentifier}.termEffective = (SELECT MAX(hrd1.termEffective)
                                                                         FROM HousingRoomDescriptionReadOnly hrd1
                                                                         WHERE ${tableIdentifier}.buildingCode = hrd1.buildingCode
                                                                         AND ${tableIdentifier}.roomNumber = hrd1.roomNumber
                                                                         AND hrd1.termEffective <= :termCode )
+                            AND (${tableIdentifier}.termTo is null OR ${tableIdentifier}.termTo.startDate > sysdate)
+                            AND nvl(${tableIdentifier}.roomStatusInactiveIndicator,'N') != 'Y'
                             AND NOT EXISTS ( FROM SectionMeetingTime b
                                                                 WHERE b.building.code IS NOT NULL
                                                                 AND b.room IS NOT NULL
@@ -91,4 +92,5 @@ class RoomsAvailabilityHelper {
                                                             AND  d.termEffective = ${tableIdentifier}.termEffective
                                                             AND d.mustMatch = 'Y')"""
     }
+
 }
