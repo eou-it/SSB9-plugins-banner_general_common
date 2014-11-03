@@ -233,6 +233,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    @Test
 	void testFetchByPidmListAndDateCompare() {
 		def currentDate = new Date()
 		def startDate = currentDate - 7
@@ -250,7 +251,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], currentDate).size()
 		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate).size()
 		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate).size()
-		
+
 		// Test dates out of range
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate - 1).size()
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate + 1).size()
