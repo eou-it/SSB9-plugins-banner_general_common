@@ -93,7 +93,6 @@ public abstract class CommunicationTemplate implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date validTo
 
-
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
@@ -163,6 +162,15 @@ public abstract class CommunicationTemplate implements Serializable {
         def query =
                 """ FROM CommunicationTemplate a
                 """
+        def predicateArray = []
+
+        if (filterData?.params?.containsKey('name')) {
+            predicateArray.push("""(upper(a.name) like upper(:name))""")
+        }
+
+        if (predicateArray.size() > 0) {
+            query = query + """ WHERE """ + predicateArray.join(""" AND """)
+        }
 
         return query
     }

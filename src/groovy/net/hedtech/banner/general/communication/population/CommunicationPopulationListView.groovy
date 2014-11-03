@@ -162,10 +162,23 @@ class CommunicationPopulationListView implements Serializable {
                 """ FROM CommunicationPopulationListView a
                         """
 
+        def predicateArray = []
+
         if (filterData?.params?.containsKey('populationQueryId')) {
-            query = query + """ WHERE (a.populationQueryId = :populationQueryId) """
+            predicateArray.push(""" (a.populationQueryId = :populationQueryId) """)
         }
 
+        if (filterData?.params?.containsKey('queryName')) {
+            predicateArray.push(""" (upper(a.queryName) like upper(:queryName))""")
+        }
+
+        if (filterData?.params?.containsKey('queryApplication')) {
+            predicateArray.push(""" (a.queryApplication = :queryApplication)""")
+        }
+
+        if (predicateArray.size() > 0) {
+            query = query + """ WHERE """ + predicateArray.join(""" AND """)
+        }
         return query
     }
 

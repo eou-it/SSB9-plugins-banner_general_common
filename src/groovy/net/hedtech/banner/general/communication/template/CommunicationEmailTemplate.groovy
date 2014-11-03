@@ -86,7 +86,15 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         def query =
                 """ FROM CommunicationEmailTemplate a
                 """
+        def predicateArray = []
 
+        if (filterData?.params?.containsKey('name')) {
+            predicateArray.push("""(upper(a.name) like upper(:name))""")
+        }
+
+        if (predicateArray.size() > 0) {
+            query = query + """ WHERE """ + predicateArray.join(""" AND """)
+        }
         return query
     }
 

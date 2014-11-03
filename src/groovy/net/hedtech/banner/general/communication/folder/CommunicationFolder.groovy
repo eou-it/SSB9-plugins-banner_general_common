@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.folder
 
 import groovy.transform.EqualsAndHashCode
+import net.hedtech.banner.query.DynamicFinder
 
 import javax.persistence.*
 
@@ -135,4 +136,34 @@ class CommunicationFolder implements Serializable {
         }
         return query
     }
+
+    public static String getQuery(Map filterData) {
+        def query =
+                """ FROM CommunicationFolder a
+                """
+
+        def predicateArray = []
+
+        if (filterData?.params?.containsKey('name')) {
+            predicateArray.push("""(upper(a.name) like upper(:name))""")
+        }
+
+        if (predicateArray.size() > 0) {
+            query = query + """ WHERE """ + predicateArray.join(""" AND """)
+        }
+        return query
+    }
+
+
+    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
+        return (new DynamicFinder(CommunicationFolder.class, getQuery(filterData), "a")).find(filterData,
+                pagingAndSortParams)
+    }
+
+
+    public static countByFilterParams(filterData) {
+        return new DynamicFinder(CommunicationFolder.class, getQuery(filterData), "a").count(filterData)
+    }
+
+
 }

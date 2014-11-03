@@ -142,13 +142,17 @@ class CommunicationPopulationQueryView implements Serializable {
         def query =
                 """ FROM CommunicationPopulationQueryView a  """
 
+        def predicateArray = []
+
         if (filterData?.params?.containsKey('folderName')) {
-            query = query + """WHERE (a.folderName = :folderName) """
+            predicateArray.push(""" (a.folderName = :folderName)""")
         }
-        if (filterData?.params?.containsKey('folderName') && filterData?.params?.containsKey('name')) {
-            query = query + """  AND (upper(a.name) like upper(:name)+'%')"""
-        } else if (filterData?.params?.containsKey('name')) {
-            query = query + """  WHERE (upper(a.name) like upper(:name)+'%')"""
+        if (filterData?.params?.containsKey('name')) {
+            predicateArray.push( """(upper(a.name) like upper(:name))""")
+        }
+
+        if (predicateArray.size() > 0) {
+            query = query + """ WHERE """ + predicateArray.join(""" AND """)
         }
         return query
     }
