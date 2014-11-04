@@ -41,7 +41,7 @@ class RoomCompositeService extends LdmService {
         RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
         params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
-            // POST /qapi/rooms
+            // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
             entities = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
@@ -63,7 +63,7 @@ class RoomCompositeService extends LdmService {
     Long count(Map params) {
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
             Map filterParams = prepareSearchParams(params)
-            RoomsAvailabilityHelper.countAllAvailableRoom(filterParams.filterData)
+            RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, null, true)
         } else {
             Map filterData = prepareParams(params)
             def roomTypes
@@ -217,6 +217,7 @@ class RoomCompositeService extends LdmService {
         } else {
             roomTypes = getHEDMRoomTypes()
         }
+        // TODO: Not sure why IN operator of DynamicFinder requires list in this format
         def roomTypeObjects = []
         roomTypes.each {
             roomTypeObjects << [data: it]
@@ -309,7 +310,19 @@ class RoomCompositeService extends LdmService {
         params.put("roomTypes", roomTypeObjects)
         //criteria.add([key: "roomTypes", binding: "roomType", operator: Operators.IN])
 
-        def query = """from HousingRoomDescriptionReadOnly a where lower(nvl(a.roomStatusInactiveIndicator,'N')) != lower(:inactiveIndicator) and a.roomType in :roomTypes"""
+        params.put("endDate", new Date())
+
+        def query = """
+                       from HousingRoomDescriptionReadOnly a
+                       where lower(nvl(a.roomStatusInactiveIndicator,'N')) != lower(:inactiveIndicator)
+                       and a.roomType in :roomTypes
+                       and a.termEffective.code = (select min(b.termEffective.code)
+                                                   from HousingRoomDescriptionReadOnly b
+                                                   where b.buildingCode = a.buildingCode
+                                                   and b.roomNumber = a.roomNumber
+                                                   and lower(nvl(b.roomStatusInactiveIndicator,'N')) != lower(:inactiveIndicator)
+                                                   and (b.termTo is null OR b.termTo.startDate > :endDate))
+                    """
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
         if (count) {
             result = dynamicFinder.count([params: params, criteria: criteria])

@@ -53,8 +53,11 @@ class HousingRoomDescriptionReadOnly {
     /**
      * Term code effective date.
      */
-    @Column(name = "SLBRDEF_TERM_CODE_EFF", nullable = false, unique = true, length = 6)
-    String termEffective
+    @ManyToOne
+    @JoinColumns([
+            @JoinColumn(name = "SLBRDEF_TERM_CODE_EFF", referencedColumnName = "STVTERM_CODE")
+    ])
+    Term termEffective
 
     /**
      * This field identifies the description associated with the room

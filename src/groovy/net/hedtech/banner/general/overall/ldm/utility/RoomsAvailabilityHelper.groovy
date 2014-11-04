@@ -2,7 +2,6 @@ package net.hedtech.banner.general.overall.ldm.utility
 
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.system.DayOfWeek
-import net.hedtech.banner.general.system.Term
 import net.hedtech.banner.query.DynamicFinder
 
 /**
@@ -12,19 +11,18 @@ import net.hedtech.banner.query.DynamicFinder
  */
 class RoomsAvailabilityHelper {
 
-    static List fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams) {
+    static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, boolean count = false) {
         parseInputParameters(filterData)
         def query = """FROM HousingRoomDescriptionReadOnly a
                             WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
-        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a").find(filterData, pagingAndSortParams)
-    }
-
-
-    static Long countAllAvailableRoom(Map filterData) {
-        parseInputParameters(filterData)
-        def query = """FROM HousingRoomDescriptionReadOnly a
-                            WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
-        new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a").count(filterData)
+        DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
+        def result
+        if (count) {
+            result = dynamicFinder.count(filterData)
+        } else {
+            result = dynamicFinder.find(filterData, pagingAndSortParams)
+        }
+        return result
     }
 
 
@@ -39,7 +37,7 @@ class RoomsAvailabilityHelper {
 
 
     private static void parseInputParameters(Map filterData) {
-        filterData.params.termCode = Term.fetchMaxTermWithStartDateLessThanGivenDate(filterData.params.startDate)?.code
+        //filterData.params.termCode = Term.fetchMaxTermWithStartDateLessThanGivenDate(filterData.params.startDate)?.code
         DayOfWeek.list().description.each { day ->
             if (!filterData.params?."${day.toLowerCase()}") {
                 filterData.params?."${day.toLowerCase()}" = '#'
@@ -51,12 +49,8 @@ class RoomsAvailabilityHelper {
     private static String fetchConditionalClauseForAvailableRoomSearch(String tableIdentifier) {
         return """${tableIdentifier}.roomType in :roomTypes
                             AND ${tableIdentifier}.capacity >= NVL(:capacity, 0)
-                            AND ${tableIdentifier}.termEffective = (SELECT MAX(hrd1.termEffective)
-                                                                        FROM HousingRoomDescriptionReadOnly hrd1
-                                                                        WHERE ${tableIdentifier}.buildingCode = hrd1.buildingCode
-                                                                        AND ${tableIdentifier}.roomNumber = hrd1.roomNumber
-                                                                        AND hrd1.termEffective <= :termCode )
-                            AND (${tableIdentifier}.termTo is null OR ${tableIdentifier}.termTo.startDate > sysdate)
+                            AND ${tableIdentifier}.termEffective.startDate <= :startDate
+                            AND (${tableIdentifier}.termTo is null OR ${tableIdentifier}.termTo.startDate > :endDate)
                             AND nvl(${tableIdentifier}.roomStatusInactiveIndicator,'N') != 'Y'
                             AND NOT EXISTS ( FROM SectionMeetingTime b
                                                                 WHERE b.building.code IS NOT NULL

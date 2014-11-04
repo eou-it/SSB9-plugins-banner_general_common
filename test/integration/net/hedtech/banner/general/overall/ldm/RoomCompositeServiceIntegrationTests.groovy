@@ -17,12 +17,14 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     HousingRoomDescription i_success_housingRoomDescription
     def roomCompositeService
 
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initiializeDataReferences()
     }
+
 
     @After
     public void tearDown() {
@@ -35,12 +37,14 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         i_success_housingRoomDescription = HousingRoomDescription.findByBuildingAndRoomNumber(building, '100')
     }
 
+
     @Test
     void testListWithoutPaginationParams() {
         List rooms = roomCompositeService.list([:])
         assertNotNull rooms
         assertFalse rooms.isEmpty()
     }
+
 
     @Test
     void testListWithPagination() {
@@ -49,33 +53,31 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull rooms
         assertFalse rooms.isEmpty()
         assertTrue rooms.size() <= 20
+        assertTrue roomCompositeService.count() > 0
     }
+
 
     @Test
     void testListWithFilter() {
-        def params = ['filter[filter[0][value]': 'Classroom', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
+        def params = ['filter[0][value]': 'Classroom', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
         List rooms = roomCompositeService.list(params)
         assertNotNull rooms
         assertFalse rooms.isEmpty()
         assertNull rooms.find { it.occupancies[0].roomLayoutType != 'Classroom' }
     }
 
+
     @Test
     void testListWithFilterForInvalidRoomLayoutType() {
-        def params = ['filter[filter[0][value]': 'XXXX', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
-        try{
+        def params = ['filter[0][value]': 'XXXX', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
+        try {
             roomCompositeService.list(params)
             fail("This should have failed as the filter is invalid")
-        }catch (ApplicationException ae){
+        } catch (ApplicationException ae) {
             assertApplicationException ae, "missing.roomLayoutType"
         }
     }
 
-    @Test
-    void testCount() {
-        assertNotNull i_success_housingRoomDescription
-        assertTrue roomCompositeService.count() > 0
-    }
 
     @Test
     void testGetInvalidGuid() {
@@ -86,6 +88,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, "NotFoundException"
         }
     }
+
 
     @Test
     void testGetInvalidNonExistentHousingRoomDescription() {
@@ -106,22 +109,22 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testGet() {
-        def paginationParams = [max: '1', offset: '0']
-        List rooms = roomCompositeService.list(paginationParams)
-        assertNotNull rooms
-        assertFalse rooms.isEmpty()
+        assertNotNull i_success_housingRoomDescription
+        AvailableRoom existingAvailRoom = roomCompositeService.fetchByRoomBuildingAndTerm(i_success_housingRoomDescription.roomNumber, i_success_housingRoomDescription.building, i_success_housingRoomDescription.termEffective)
+        assertNotNull existingAvailRoom.guid
 
-        assertNotNull rooms[0].guid
-        AvailableRoom room = roomCompositeService.get(rooms[0].guid)
+        AvailableRoom room = roomCompositeService.get(existingAvailRoom.guid)
         assertNotNull room
-        assertEquals rooms[0], room
-        assertEquals rooms[0].metadata.dataOrigin, room.metadata.dataOrigin
-        assertEquals rooms[0].buildingDetail, room.buildingDetail
-        assertEquals rooms[0].occupancies, room.occupancies
-        assertEquals rooms[0].guid, room.guid
+        assertEquals existingAvailRoom, room
+        assertEquals existingAvailRoom.metadata.dataOrigin, room.metadata.dataOrigin
+        assertEquals existingAvailRoom.buildingDetail, room.buildingDetail
+        assertEquals existingAvailRoom.occupancies, room.occupancies
+        assertEquals existingAvailRoom.guid, room.guid
     }
+
 
     @Test
     void testListForMissingStartDate() {
@@ -135,6 +138,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForMissingEndDate() {
         Map params = getParamsForRoomQuery()
@@ -146,6 +150,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'missing.endDate'
         }
     }
+
 
     @Test
     void testListForMissingStartTime() {
@@ -159,6 +164,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForMissingEndTime() {
         Map params = getParamsForRoomQuery()
@@ -170,6 +176,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'missing.endTime'
         }
     }
+
 
     @Test
     void testListForStartDateLaterThanEndDate() {
@@ -184,6 +191,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForInvalidStartTimeLength() {
         Map params = getParamsForRoomQuery()
@@ -195,6 +203,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'invalid.timeFormat'
         }
     }
+
 
     @Test
     void testListForInvalidStartTime() {
@@ -208,6 +217,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForInvalidEndTimeLength() {
         Map params = getParamsForRoomQuery()
@@ -220,8 +230,9 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
-    void testListForInvalidEndTime(){
+    void testListForInvalidEndTime() {
         Map params = getParamsForRoomQuery()
         params.endTime = '24:60:60'
         try {
@@ -231,6 +242,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'invalid.timeFormat'
         }
     }
+
 
     @Test
     void testListForStartTimeLaterThanEndTime() {
@@ -245,6 +257,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForMissingRecurrence() {
         Map params = getParamsForRoomQuery()
@@ -256,6 +269,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'missing.recurrence'
         }
     }
+
 
     @Test
     void testListForMissingByDays() {
@@ -269,6 +283,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForInvalidByDaysMoreThanSevenDays() {
         Map params = getParamsForRoomQuery()
@@ -280,6 +295,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'invalid.recurrence.byDay'
         }
     }
+
 
     @Test
     void testListForInvalidByDaysForMismatchWithDate() {
@@ -295,6 +311,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForInvalidByDaysForMismatchWithDates() {
         Map params = getParamsForRoomQuery()
@@ -308,6 +325,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'invalid.recurrence.byDay'
         }
     }
+
 
     @Test
     void testListForInvalidByDaysForInvalidDay() {
@@ -323,6 +341,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForMissingOccupancies() {
         Map params = getParamsForRoomQuery()
@@ -334,6 +353,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, "missing.occupancies"
         }
     }
+
 
     @Test
     void testListForMissingRoomLayoutType() {
@@ -347,6 +367,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForMissingMaxOccupancy() {
         Map params = getParamsForRoomQuery()
@@ -359,6 +380,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListForInvalidMaxOccupancy() {
         Map params = getParamsForRoomQuery()
@@ -370,6 +392,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, "invalid.maxOccupancy"
         }
     }
+
 
     @Test
     void testListForValidParams() {
