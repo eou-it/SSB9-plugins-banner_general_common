@@ -317,11 +317,11 @@ class RoomCompositeService extends LdmService {
                        where lower(nvl(a.roomStatusInactiveIndicator,'N')) != lower(:inactiveIndicator)
                        and a.roomType in :roomTypes
                        and a.termEffective.code = (select min(b.termEffective.code)
-                                                   from HousingRoomDescriptionReadOnly b
+                                                   from HousingRoomDescriptionReadOnly b left join b.termTo termB
                                                    where b.buildingCode = a.buildingCode
                                                    and b.roomNumber = a.roomNumber
                                                    and lower(nvl(b.roomStatusInactiveIndicator,'N')) != lower(:inactiveIndicator)
-                                                   and (b.termTo is null OR b.termTo.startDate > :endDate))
+                                                   and (b.termTo is null OR termB.startDate > :endDate))
                     """
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
         if (count) {
