@@ -7,7 +7,6 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
@@ -26,7 +25,7 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
         formContext = ['GUAGMNU']
         super.setUp()
         folder = newValidForCreateFolder()
-        folder.save(failOnError: true, flush: true)
+        folder.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder.id
         validImmutableId = UUID.randomUUID().toString()
@@ -42,7 +41,7 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCreateCommunicationField() {
         def communicationField = newCommunicationField()
-        communicationField.save(failOnError: true, flush: true)
+        communicationField.save( failOnError: true, flush: true )
 
         // Assert domain values
         assertNotNull communicationField?.id
@@ -62,56 +61,50 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testUpdateCommunicationField() {
         def communicationField = newCommunicationField()
-        communicationField = communicationField.save(failOnError: true, flush: true)
+        communicationField = communicationField.save( failOnError: true, flush: true )
 
         // Assert domain values
         assertNotNull communicationField?.id
         def id = communicationField.id
 
         // Find the domain
-        communicationField = CommunicationField.get(id)
+        communicationField = CommunicationField.get( id )
         assertNotNull communicationField
 
         // Update domain values
         communicationField.groovyFormatter = "###"
-        communicationField.save(failOnError: true, flush: true)
+        communicationField.save( failOnError: true, flush: true )
 
         // Find the updated domain
-        communicationField = CommunicationField.get(id)
+        communicationField = CommunicationField.get( id )
 
         // Assert updated domain values
         assertNotNull communicationField?.id
-        assertEquals("###", communicationField.groovyFormatter)
+        assertEquals( "###", communicationField.groovyFormatter )
     }
+
 
 
     @Test
     void testDeleteCommunicationField() {
         def communicationField = newCommunicationField()
-        communicationField = communicationField.save(failOnError: true, flush: true)
+        communicationField = communicationField.save( failOnError: true, flush: true )
 
         // Assert domain values
         assertNotNull communicationField?.id
         def id = communicationField.id
 
         // Find the domain
-        communicationField = communicationField.get(id)
+        communicationField = communicationField.get( id )
         assertNotNull communicationField
 
         // Delete the domain
         communicationField.delete()
 
         // Attempt to find the deleted domain
-        communicationField = CommunicationField.get(id)
+        communicationField = CommunicationField.get( id )
         assertNull communicationField
     }
-
-    /* TODO:
-
-    explicitly test not null items
-    test rule URI
-    test invalid status
-     */
 
 
     @Test
@@ -124,22 +117,22 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
 
         // Test that these fields raise an error if left null
         assertErrorsFor communicationField, 'nullable',
-                [
-                        'folder',
-                        'renderAsHtml',
-                        'name',
-                ]
+                        [
+                                'folder',
+                                'renderAsHtml',
+                                'name',
+                        ]
         // Test that these fields do NOT raise an error if left null
         assertNoErrorsFor communicationField,
-                [
-                        'description',
-                        'formatString',
-                        'groovyFormatter',
-                        'previewValue',
-                        'ruleUri',
-                        'immutableId',
-                        'status'
-                ]
+                          [
+                                  'description',
+                                  'formatString',
+                                  'groovyFormatter',
+                                  'previewValue',
+                                  'ruleUri',
+                                  'immutableId',
+                                  'status'
+                          ]
     }
 
 
@@ -160,34 +153,34 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
 
         // Assert for specific fields
         assertErrorsFor communicationField, 'maxSize',
-                [
-                        'description',
-                        'immutableId',
-                        'name',
-                        'previewValue',
-                        'ruleUri',
-                ]
+                        [
+                                'description',
+                                'immutableId',
+                                'name',
+                                'previewValue',
+                                'ruleUri',
+                        ]
     }
 
 
     @Test
     void testOptimisticLock() {
         def communicationField = newCommunicationField()
-        communicationField.save(failOnError: true, flush: true)
+        communicationField.save( failOnError: true, flush: true )
         assertNotNull communicationField?.id
 
         def sql
         try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
-            sql.executeUpdate("UPDATE gcrcfld SET gcrcfld_version = 999 WHERE gcrcfld_surrogate_id = ?", [communicationField.id])
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
+            sql.executeUpdate( "UPDATE gcrcfld SET gcrcfld_version = 999 WHERE gcrcfld_surrogate_id = ?", [communicationField.id] )
         } finally {
             sql?.close()
         }
 
         // Update the entity
         communicationField.dataOrigin = "OPT_TEST"
-        shouldFail(HibernateOptimisticLockingFailureException) {
-            communicationField.save(failOnError: true, flush: true)
+        shouldFail( HibernateOptimisticLockingFailureException ) {
+            communicationField.save( failOnError: true, flush: true )
         }
     }
 

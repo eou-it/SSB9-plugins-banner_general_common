@@ -126,6 +126,30 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
     @Test
+    void testUpdateSomeNulls() {
+        def communicationField = newCommunicationField()
+        def savedCommunicationField = communicationFieldService.create( [domainModel: communicationField] )
+
+        // Assert domain values
+        assertNotNull savedCommunicationField?.id
+        def id = savedCommunicationField.id
+
+        // Find the domain
+        communicationField = communicationFieldService.get( id )
+        assertNotNull communicationField
+
+        // Update domain values to null
+
+        communicationField.statementType = null
+        communicationFieldService.update( [domainModel: communicationField] )
+
+        // Find the updated domain
+        communicationField = CommunicationField.get( id )
+        /* Check that the service set it to a default value */
+        assertNotNull communicationField.statementType
+    }
+
+    @Test
     void testDeleteCommunicationField() {
         def newCommunicationField = newCommunicationField()
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
@@ -140,7 +164,6 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         deletedCommunicationField = savedCommunicationField.get( id )
         assertNull deletedCommunicationField
     }
-
 
     private def newCommunicationField() {
         def communicationField = new CommunicationField(
