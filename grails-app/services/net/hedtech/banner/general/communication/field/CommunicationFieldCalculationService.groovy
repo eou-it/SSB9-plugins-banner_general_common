@@ -13,9 +13,11 @@ package net.hedtech.banner.general.communication.field
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
-//import org.stringtemplate.v4.ST
+
 
 import java.sql.SQLException
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class CommunicationFieldCalculationService extends ServiceBase {
 
@@ -34,6 +36,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
 
             resultSet = sql.rows( stmt, parameters )
+
         } catch (SQLException e) {
             throw e
         }
@@ -56,16 +59,14 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
     /**
      *  Extracts all parameter strings starting with : into a map that has the parameter name as the key, and the value as null
-     * @param statement
-     * @return
+     * @param template statement
+     * @return set of unique string variables found in the template string
      */
-    Map extractRuntimeParameters( String statement ) {
-        def myRegEx = /:\w*/
-        def matcher = (statement =~ myRegEx)
-        def Map runTimeParms = [:]
-        matcher.each { runTimeParms.put( it, null ) }
-        println "runtime parameters"
-        runTimeParms.each { println it }
+    Set<String> extractRuntimeParameters( String statement ) {
+        Pattern pattern = Pattern.compile(/\\$([^\\$]+)\\$/);
+        Set<String> templateVars = new LinkedHashSet<>();
+        Matcher matcher = pattern.matcher(yourTemplate);
+        while(matcher.find()) templateVars.add(matcher.group(1));
 
     }
 

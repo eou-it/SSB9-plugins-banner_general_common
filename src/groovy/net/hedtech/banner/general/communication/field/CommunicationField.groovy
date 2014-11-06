@@ -114,6 +114,7 @@ class CommunicationField implements Serializable {
     /**
      * TYPE: Type of rule content. Valid values are SQL_PREPARED_STATEMENT, SQL_CALLABLE_STATEMENT, and GROOVY_STATEMENT.
      */
+    @Enumerated(EnumType.STRING)
     @Column(name = "GCRCFLD_STATEMENT_TYPE")
     CommunicationRuleStatementType statementType
 

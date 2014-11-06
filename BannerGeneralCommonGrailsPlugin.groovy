@@ -1,4 +1,3 @@
-import org.springframework.ui.velocity.VelocityEngineFactoryBean
 
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
@@ -51,12 +50,7 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        velocityEngine( VelocityEngineFactoryBean ) {
-            velocityProperties = [
-                "resource.loader":"class",
-                "class.resource.loader.class":"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader"
-            ]
-        }
+
     }
 
 

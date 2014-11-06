@@ -15,7 +15,7 @@ public enum CommunicationRuleStatementType {
 
 
     public Set<CommunicationRuleStatementType> set() {
-        return EnumSet.range(CommunicationRuleStatementType.SQL_PREPARED_STATEMENT, CommunicationRuleStatementType.GROOVY_STATEMENT, CommunicationRuleStatementType.SQL_CALLABLE_STATEMENT);
+        return EnumSet.range(CommunicationRuleStatementType.SQL_PREPARED_STATEMENT, CommunicationRuleStatementType.GROOVY_STATEMENT);
     }
 
 }
