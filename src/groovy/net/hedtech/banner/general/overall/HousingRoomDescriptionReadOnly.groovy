@@ -55,7 +55,7 @@ class HousingRoomDescriptionReadOnly {
      */
     @ManyToOne
     @JoinColumns([
-            @JoinColumn(name = "SLBRDEF_TERM_CODE_EFF", referencedColumnName = "STVTERM_CODE")
+            @JoinColumn(name = "SLBRDEF_TERM_CODE_EFF", referencedColumnName = "STVTERM_CODE", nullable = false)
     ])
     Term termEffective
 
@@ -108,7 +108,7 @@ class HousingRoomDescriptionReadOnly {
 
     @ManyToOne
     @JoinColumns([
-            @JoinColumn(name = "TERM_TO", referencedColumnName = "STVTERM_CODE")
+            @JoinColumn(name = "TERM_TO", referencedColumnName = "STVTERM_CODE", nullable = true)
     ])
     Term termTo
 

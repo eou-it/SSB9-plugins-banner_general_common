@@ -44,7 +44,11 @@ class RoomCompositeService extends LdmService {
             // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
-            entities = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
+            def listOfObjectArrays = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
+            entities = []
+            listOfObjectArrays?.each {
+                entities << it[0]
+            }
         } else {
             // GET /api/rooms?filter[0][field]=roomLayoutType&filter[0][operator]=equals&filter[0][value]=Classroom
             Map filterData = prepareParams(params)

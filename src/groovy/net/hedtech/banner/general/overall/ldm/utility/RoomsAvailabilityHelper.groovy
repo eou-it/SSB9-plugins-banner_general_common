@@ -13,8 +13,8 @@ class RoomsAvailabilityHelper {
 
     static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, boolean count = false) {
         parseInputParameters(filterData)
-        def query = """FROM HousingRoomDescriptionReadOnly a
-                            WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
+        def query = """FROM HousingRoomDescriptionReadOnly a left join a.termTo termToOfA
+                       WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
         def result
         if (count) {
@@ -28,7 +28,7 @@ class RoomsAvailabilityHelper {
 
     static boolean checkExistsAvailableRoomByRoomAndBuilding(Map filterData) {
         parseInputParameters(filterData)
-        def query = """FROM HousingRoomDescriptionReadOnly a
+        def query = """FROM HousingRoomDescriptionReadOnly a left join a.termTo termToOfA
                             WHERE ROWNUM = 1
                             AND a.buildingCode = :buildingCode
                             AND a.roomNumber = :roomNumber AND """ + fetchConditionalClauseForAvailableRoomSearch("a")
@@ -50,7 +50,7 @@ class RoomsAvailabilityHelper {
         return """${tableIdentifier}.roomType in :roomTypes
                             AND ${tableIdentifier}.capacity >= NVL(:capacity, 0)
                             AND ${tableIdentifier}.termEffective.startDate <= :startDate
-                            AND (${tableIdentifier}.termTo is null OR ${tableIdentifier}.termTo.startDate > :endDate)
+                            AND (${tableIdentifier}.termTo is null OR termToOfA.startDate > :endDate)
                             AND nvl(${tableIdentifier}.roomStatusInactiveIndicator,'N') != 'Y'
                             AND NOT EXISTS ( FROM SectionMeetingTime b
                                                                 WHERE b.building.code IS NOT NULL
