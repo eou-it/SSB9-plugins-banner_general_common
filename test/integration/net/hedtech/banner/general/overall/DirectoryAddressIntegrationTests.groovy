@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2014 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -59,7 +59,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
     void initializeTestDataForReferences() {
 
         //Valid test data (For success tests)	
-        i_success_directoryOption = DirectoryOption.findByCode("ADDR_OF")
+        i_success_directoryOption = DirectoryOption.findByCode("ADDR_HO")
         i_success_addressType = AddressType.findByCode("MA")
         i_success_telephoneType = TelephoneType.findByCode("")
 
@@ -69,7 +69,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
         i_failure_telephoneType = TelephoneType.findByCode("")
 
         //Valid test data (For success tests)
-        u_success_directoryOption = DirectoryOption.findByCode("ADRR_OF")
+        u_success_directoryOption = DirectoryOption.findByCode("ADRR_HO")
         u_success_addressType = AddressType.findByCode("BU")
         u_success_telephoneType = TelephoneType.findByCode("")
 

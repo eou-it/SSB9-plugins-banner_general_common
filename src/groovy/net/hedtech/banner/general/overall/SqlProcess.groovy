@@ -1,7 +1,6 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-
 package net.hedtech.banner.general.overall
 
 import javax.persistence.Column
@@ -12,6 +11,8 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.JoinColumns
 import javax.persistence.ManyToOne
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -45,6 +46,20 @@ import net.hedtech.banner.general.system.EntriesForSql
  */
 @Entity
 @Table(name = "GORRSQL")
+@NamedQueries(value = [
+@NamedQuery(name = "SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode",
+        query = """select a.parsedSql
+            FROM SqlProcess a
+           WHERE a.entriesForSqlProcesss.code = :entriesForSqlProcesssCode
+             AND a.entriesForSql.code = :entriesForSqlCode
+	         AND a.activeIndicator = true
+             AND a.validatedIndicator = true
+             AND a.parsedSql is not null
+             AND TRUNC(sysdate) BETWEEN TRUNC(a.startDate)
+                                    AND TRUNC(nvl(a.endDate,sysdate))
+           ORDER BY a.sequenceNumber
+       """)
+])
 class SqlProcess implements Serializable {
 
     /**
@@ -256,4 +271,16 @@ class SqlProcess implements Serializable {
 
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['sequenceNumber', 'entriesForSqlProcesss', 'entriesForSql']
+
+
+	public static List fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode(String entriesForSqlProcesssCode, String entriesForSqlCode) {
+		return SqlProcess.withSession { session ->
+			session.getNamedQuery(
+					'SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode')
+					.setString('entriesForSqlProcesssCode', entriesForSqlProcesssCode)
+					.setString('entriesForSqlCode', entriesForSqlCode)
+					.list()
+		}
+	}
+
 }

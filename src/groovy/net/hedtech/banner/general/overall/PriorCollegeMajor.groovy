@@ -1,9 +1,6 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.exceptions.ApplicationException
@@ -193,8 +190,4 @@ class PriorCollegeMajor implements Serializable {
         return fetchByPidmAndSourceAndBackgroundInstitution(pidm, sourceAndBackgroundInstitution.code)
     }
 
-
-    transient beforeUpdate = {
-        throw new ApplicationException(PriorCollegeMajor, "@@r1:unsupported.operation@@")
-    }
 }

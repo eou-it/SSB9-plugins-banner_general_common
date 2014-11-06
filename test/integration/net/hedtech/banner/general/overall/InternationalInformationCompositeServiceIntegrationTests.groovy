@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2014 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -33,14 +33,14 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
 
 
 	@Test
-    def testCompositeServiceCreate() {
+    void testCompositeServiceCreate() {
         // create and test new records
         createAll()
     }
 
 
 	@Test
-    def testCompositeServiceDelete() {
+    void testCompositeServiceDelete() {
         // create and test new records
         def deleteMap = createAll()
 
@@ -59,7 +59,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
 
 
 	@Test
-    def testCompositeServiceUpdate() {
+    void testCompositeServiceUpdate() {
         // create and test new records
         def map = createAll()
 
@@ -88,7 +88,7 @@ class InternationalInformationCompositeServiceIntegrationTests extends BaseInteg
 
 
 	@Test
-    def testCompositeServiceDuplicateDocument() {
+    void testCompositeServiceDuplicateDocument() {
         // create and test new records
         createAll()
 

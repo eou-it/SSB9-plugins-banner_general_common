@@ -233,6 +233,31 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    @Test
+	void testFetchByPidmListAndDateCompare() {
+		def currentDate = new Date()
+		def startDate = currentDate - 7
+		def expireDate = currentDate + 7
+		def visaInformation = newValidForCreateVisaInformation()
+        visaInformation.visaStartDate = startDate
+        visaInformation.visaExpireDate = expireDate
+        visaInformation.visaRequiredDate = visaInformation.visaStartDate
+        visaInformation.visaIssueDate = visaInformation.visaStartDate
+		visaInformation.save(failOnError: true, flush: true)
+		// Test if the generated entity now has an id assigned
+		assertNotNull visaInformation.id
+
+		// Test that the entity is returned for the current date and start/expire dates
+		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], currentDate).size()
+		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate).size()
+		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate).size()
+
+		// Test dates out of range
+		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate - 1).size()
+		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate + 1).size()
+	}
+
+
     private def newValidForCreateVisaInformation() {
         def visaInformation = new VisaInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,

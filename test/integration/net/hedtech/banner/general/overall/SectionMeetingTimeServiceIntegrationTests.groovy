@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -310,7 +310,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
                 domainModel: sectionMeetingTimeUpdate]
         sectionMeetingTimeUpdate = sectionMeetingTimeService.update(updateMap)
         assertNull sectionMeetingTimeUpdate.monday
-        assertEquals new BigDecimal(1), sectionMeetingTimeUpdate.creditHourSession
+        assertEquals new BigDecimal(1), sectionMeetingTimeUpdate.creditHourSession, 0.001
         assertEquals "O", sectionMeetingTimeUpdate.override
     }
 
