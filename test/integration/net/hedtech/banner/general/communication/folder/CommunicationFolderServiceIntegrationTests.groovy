@@ -62,7 +62,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
         assertEquals(createdFolder, foundFolder)
 
         CommunicationFolder sameNameFolder = new CommunicationFolder()
-        sameNameFolder.name = "test"
+        sameNameFolder.name = "test-integration"
         sameNameFolder.description = "another folder with same name"
         try {
             communicationFolderService.create(sameNameFolder)
