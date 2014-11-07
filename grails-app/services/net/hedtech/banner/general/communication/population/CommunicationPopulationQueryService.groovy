@@ -6,8 +6,8 @@ package net.hedtech.banner.general.communication.population
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
@@ -17,10 +17,11 @@ class CommunicationPopulationQueryService extends ServiceBase {
     def communicationPopulationQueryStatementParseService
     def log = Logger.getLogger(this.getClass())
 
+
     def preCreate(domainModelOrMap) {
         CommunicationPopulationQuery popQuery = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQuery
-
         popQuery.folder = (popQuery.folder ?: domainModelOrMap.folder)
+
         if (popQuery.getName() == null)
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nameCannotBeNull@@")
 
@@ -32,26 +33,29 @@ class CommunicationPopulationQueryService extends ServiceBase {
         if (CommunicationPopulationQuery.fetchByQueryNameAndFolderName(popQuery.name, popQuery.folder.name))
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:not.unique.message@@")
 
-        BannerUser bannerUser = SecurityContextHolder?.context?.authentication?.principal as BannerUser;
-        def creatorId = bannerUser?.getOracleUserName()
+        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
         if (creatorId == null) {
             def config = Holders.config
             creatorId = config?.bannerSsbDataSource?.username
         }
         popQuery.setCreatedBy(creatorId.toUpperCase())
         popQuery.setCreateDate(new Date())
-
-        if (popQuery.getLocked() == null)
-            popQuery.setLocked(false)
-        popQuery.setPublished(false)
         popQuery.setValid(false)
+
+        //check for sql injection and if it returns true then throw invalid exception
+        if (!CommunicationCommonUtility.validateSqlStatementForInjection(popQuery.sqlString)) {
+            def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
+            popQuery.setValid((parseResult?.status == "Y"))
+        } else {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+        }
     }
 
 
     def preUpdate(domainModelOrMap) {
         CommunicationPopulationQuery popQuery = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQuery
-
         popQuery.folder = (popQuery.folder ?: domainModelOrMap.folder)
+
         if (popQuery.id == null)
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
 
@@ -66,21 +70,14 @@ class CommunicationPopulationQueryService extends ServiceBase {
         if (CommunicationPopulationQuery.existsAnotherNameFolder(popQuery.id, popQuery.name, popQuery.folder.name))
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:not.unique.message@@")
 
-        if (popQuery.getLocked() == null)
-            popQuery.setLocked(false)
-        if (popQuery.getPublished() == null || !popQuery.getPublished())
-            popQuery.setPublished(false)
-        else {//published is being set so parse statement to ensure it is valid
-            def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
+        popQuery.setValid(false)
 
-            if (parseResult.status == "N") {
-                popQuery.setValid(false)
-                popQuery.setPublished(false)
-                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCannotSetPublishedTrue@@")
-            } else {
-                popQuery.setPublished(true)
-                popQuery.setValid(true)
-            }
+        //check for sql injection and if it returns true then throw invalid exception
+        if (!CommunicationCommonUtility.validateSqlStatementForInjection(popQuery.sqlString)) {
+            def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
+            popQuery.setValid((parseResult?.status == "Y"))
+        } else {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
         }
     }
 

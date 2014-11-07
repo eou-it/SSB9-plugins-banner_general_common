@@ -60,10 +60,8 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         assertEquals testFolder.name, populationQuery.folder.name
         assertEquals getUser(), populationQuery.createdBy
         assertEquals "TTTTTTTTTT", populationQuery.description
-        assertTrue populationQuery.locked
         assertEquals "TTTTTTTTTT", populationQuery.name
         assertFalse populationQuery.valid
-        assertFalse populationQuery.published
     }
 
 
@@ -112,22 +110,6 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         // Find the domain
         populationQuery = populationQuery.get(id)
         assertNotNull populationQuery?.id
-
-        // Update domain values with invalid stmt and published indicator false. Should update without errors
-        populationQuery.sqlString = "select spriden_pidm from nonexistingtable where spriden_change_ind is null"
-        populationQuery.setPublished(false)
-        populationQuery = communicationPopulationQueryService.update([domainModel: populationQuery])
-        assertNotNull populationQuery
-        assertFalse(populationQuery.getPublished())
-
-        // Update domain values with invalid stmt and published indicator true. Should parse and raise errors8
-        populationQuery.sqlString = "select spriden_pidm from nonexistingtable where spriden_change_ind is null"
-        populationQuery.setPublished(true)
-        def message = shouldFail(ApplicationException) {
-            populationQuery = communicationPopulationQueryService.update([domainModel: populationQuery])
-        }
-        assertEquals "Incorrect failure message returned", "@@r1:queryInvalidCannotSetPublishedTrue@@", message
-
     }
 
 
@@ -141,11 +123,6 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         // Find the domain
         populationQuery = populationQuery.get(id)
         assertNotNull populationQuery?.id
-        populationQuery.sqlString = "select spriden_pidm from spriden where spriden_change_ind is null"
-        populationQuery.setPublished(true)
-        populationQuery = communicationPopulationQueryService.update([domainModel: populationQuery])
-        assertNotNull(populationQuery)
-        assertTrue(populationQuery.getPublished())
     }
 
 
@@ -204,10 +181,8 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: testFolder,
-                locked: locked,
                 name: queryName,
                 valid: false,
-                published: published,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

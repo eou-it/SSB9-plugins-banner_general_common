@@ -81,7 +81,7 @@ class CommunicationPopulationListView implements Serializable {
      * This field defines the application
      */
     @Column(name = "GCBQURY_FOLDER_NAME")
-    String queryApplication
+    String queryFolder
 
     /**
      * This field defines the description of the query
@@ -114,7 +114,7 @@ class CommunicationPopulationListView implements Serializable {
                 ", lastCalculatedCount=" + lastCalculatedCount +
                 ", calculationStatus='" + calculationStatus + '\'' +
                 ", queryName='" + queryName + '\'' +
-                ", queryApplication='" + queryApplication + '\'' +
+                ", queryFolder='" + queryFolder + '\'' +
                 ", queryDescription='" + queryDescription + '\'' +
                 ", queryCreator='" + queryCreator + '\'' +
                 ", queryLastUpdated=" + queryLastUpdated +
@@ -172,8 +172,8 @@ class CommunicationPopulationListView implements Serializable {
             predicateArray.push(""" (upper(a.queryName) like upper(:queryName))""")
         }
 
-        if (filterData?.params?.containsKey('queryApplication')) {
-            predicateArray.push(""" (a.queryApplication = :queryApplication)""")
+        if (filterData?.params?.containsKey('queryFolder')) {
+            predicateArray.push(""" (a.queryFolder = :queryFolder)""")
         }
 
         if (predicateArray.size() > 0) {

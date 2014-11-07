@@ -37,7 +37,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
         long originalListCount = communicationFolderService.list().size()
 
         CommunicationFolder folder = new CommunicationFolder()
-        folder.name = "test"
+        folder.name = "test-integration"
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)
@@ -50,15 +50,15 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testCreate() {
         CommunicationFolder folder = new CommunicationFolder()
-        folder.name = "test"
+        folder.name = "test-integration"
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)
-        assertEquals("test", createdFolder.name)
+        assertEquals("test-integration", createdFolder.name)
         assertEquals("description", createdFolder.description)
         assertEquals(false, createdFolder.internal)
 
-        CommunicationFolder foundFolder = CommunicationFolder.findByName("test")
+        CommunicationFolder foundFolder = CommunicationFolder.findByName("test-integration")
         assertEquals(createdFolder, foundFolder)
 
         CommunicationFolder sameNameFolder = new CommunicationFolder()
@@ -108,7 +108,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testDelete() {
         CommunicationFolder folder = new CommunicationFolder();
-        folder.name = "test"
+        folder.name = "test-integration"
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)

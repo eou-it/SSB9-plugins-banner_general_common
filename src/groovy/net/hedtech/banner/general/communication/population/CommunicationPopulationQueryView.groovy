@@ -71,25 +71,11 @@ class CommunicationPopulationQueryView implements Serializable {
     String createdBy
 
     /**
-     * LOCKED_IND: Indicator showing if the population query may be modified or not.
-     */
-    @Type(type = "yes_no")
-    @Column(name = "LOCKED_IND")
-    Boolean locked
-
-    /**
      * VALID_IND: Indicator showing if the SQL statement is syntactically valid(Y or N).
      */
     @Type(type = "yes_no")
     @Column(name = "VALID_IND")
     Boolean valid
-
-    /**
-     * PUBLISHED_IND: Indicator showing if the SQL statement is available to be executed.
-     */
-    @Type(type = "yes_no")
-    @Column(name = "PUBLISHED_IND")
-    Boolean published
 
     /**
      * VERSION: Optimistic lock token
@@ -104,10 +90,8 @@ class CommunicationPopulationQueryView implements Serializable {
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         description(nullable: true, maxSize: 2000)
-        locked(nullable: false)
         name(nullable: false, maxSize: 30)
         valid(nullable: false)
-        published(nullable: false)
     }
 
     // Read Only fields that should be protected against update
@@ -148,7 +132,7 @@ class CommunicationPopulationQueryView implements Serializable {
             predicateArray.push(""" (a.folderName = :folderName)""")
         }
         if (filterData?.params?.containsKey('name')) {
-            predicateArray.push( """(upper(a.name) like upper(:name))""")
+            predicateArray.push("""(upper(a.name) like upper(:name))""")
         }
 
         if (predicateArray.size() > 0) {
@@ -179,9 +163,7 @@ class CommunicationPopulationQueryView implements Serializable {
                 ", folderName='" + folderName + '\'' +
                 ", createDate=" + createDate +
                 ", createdBy='" + createdBy + '\'' +
-                ", locked=" + locked +
                 ", valid=" + valid +
-                ", published=" + published +
                 ", version=" + version +
                 '}';
     }

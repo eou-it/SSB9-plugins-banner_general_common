@@ -45,7 +45,6 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
         assertNotNull populationQuery.createDate
         assertEquals "TTTTTTTTTT", populationQuery.createdBy
         assertEquals "TTTTTTTTTT", populationQuery.description
-        assertTrue populationQuery.locked
         assertEquals "MyTestPop", populationQuery.name
         assertNull populationQuery.sqlString
         assertTrue populationQuery.valid
@@ -122,10 +121,8 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
                 folder: testFolder,
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
-                locked: true,
                 name: popName,
                 valid: true,
-                published: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

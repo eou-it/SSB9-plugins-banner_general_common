@@ -43,7 +43,6 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         assertEquals testFolder.name, populationQuery.folder.name
         assertEquals getUser(), populationQuery.createdBy
         assertEquals "TTTTTTTTTT", populationQuery.description
-        assertFalse populationQuery.locked
         assertEquals "TTTTTTTTTT", populationQuery.name
         assertNull populationQuery.sqlString
         assertFalse populationQuery.valid
@@ -165,7 +164,6 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
                         'folder',
                         'createDate',
                         'createdBy',
-                        'locked',
                         'name',
                         'valid',
                 ]
@@ -204,12 +202,10 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: testFolder,
-                locked: false,
                 name: queryName,
                 createDate: new Date(),
                 createdBy: getUser(),
                 valid: false,
-                published: false,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

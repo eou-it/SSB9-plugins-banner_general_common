@@ -5,6 +5,8 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.sql.Sql
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 
 import java.sql.SQLException
 
@@ -26,8 +28,15 @@ class CommunicationPopulationQueryStatementParseService {
         def exceptionMessage
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
 
+        if (statement == null || statement == "") {
+            return
+        }
+
         try {
-            //def stmt = '{call gokextr.p_validate_sql(?,?,?,?,?)}'
+            if (CommunicationCommonUtility.validateSqlStatementForInjection(statement)) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+            }
+
             def stmt = '{call gokextr.p_validate_sql(?,?,?,?,?)}'
             def params = [statement, Sql.VARCHAR, Sql.VARCHAR, Sql.INTEGER, Sql.INTEGER]
             sql.call stmt, params, { status, message, cost, cardinality ->
