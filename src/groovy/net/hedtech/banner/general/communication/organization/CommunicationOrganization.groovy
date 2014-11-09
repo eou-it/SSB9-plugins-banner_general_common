@@ -133,7 +133,7 @@ class CommunicationOrganization implements Serializable {
 
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('Organization.fetchById')
+            query = session.getNamedQuery('CommunicationOrganization.fetchById')
                     .setLong('id', id).list()[0]
 
         }
@@ -144,7 +144,7 @@ class CommunicationOrganization implements Serializable {
     public static CommunicationOrganization fetchByName(String name) {
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('Organization.fetchByName').setString('name', name).list()[0]
+            query = session.getNamedQuery('CommunicationOrganization.fetchByName').setString('name', name).list()[0]
         }
         return query
     }
