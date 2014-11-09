@@ -61,11 +61,10 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
         def populationQuery = newPopulationQuery("MyTestPop")
         populationQuery.save(failOnError: true, flush: true)
 
-        def queries = CommunicationPopulationQueryView.findByFilterPagingParams([params: [folderName: testFolder.name]],
-                [sortColumn: "createdBy", sortDirection: "asc", max: 5, offset: 0])
+        def queries = CommunicationPopulationQueryView.findByNameWithPagingAndSortParams([params: [name: "MyTestPop"]],
+                [sortColumn: "name", sortDirection: "asc", max: 5, offset: 0])
         assertEquals 1, queries.size()
-        def queryCount = CommunicationPopulationQueryView.countByFilterParams([params: [folderName: testFolder.name]])
-        assertEquals 1, queryCount
+        assertEquals 1, queries.getTotalCount()
     }
 
 

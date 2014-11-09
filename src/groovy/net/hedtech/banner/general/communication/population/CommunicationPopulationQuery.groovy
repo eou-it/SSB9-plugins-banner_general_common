@@ -31,7 +31,7 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationQuery.existsAnotherNameFolder",
                 query = """ FROM CommunicationPopulationQuery a
                     WHERE a.folder.name = :folderName
-                    AND   a.name = :queryName
+                    AND   upper(a.name) = upper(:queryName)
                     AND   a.id <> :id"""),
         @NamedQuery(name = "CommunicationPopulationQuery.fetchById",
                 query = """ FROM CommunicationPopulationQuery a
