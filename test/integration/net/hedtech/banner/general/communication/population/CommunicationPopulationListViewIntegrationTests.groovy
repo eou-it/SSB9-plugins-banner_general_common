@@ -57,12 +57,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         def allView = CommunicationPopulationListView.findByNameWithPagingAndSortParams([params: [:]], [sortColumn: "queryName", sortDirection: "asc", max: 20, offset: 0])
         assertNotNull allView
         assertTrue allView.size() >= 1
-
-        def count = CommunicationPopulationListView.countByFilterParams([params: [populationQueryId: new Long(globalTestPopulationQuery.id)]])
-        assertTrue count.equals(1L)
-
-        def popcount = CommunicationPopulationListView.countByFilterParams([params: [:]])
-        assertTrue popcount >= 1
+        assertTrue allView.getTotalCount() >= 1
 
         def listView = CommunicationPopulationListView.findAllByQueryIdUserId(globalTestPopulationSelectionList.populationQueryId, globalTestPopulationSelectionList.lastCalculatedBy)
         assertNotNull(listView)
