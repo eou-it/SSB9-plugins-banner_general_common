@@ -4,7 +4,9 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.query.DynamicFinder
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -156,41 +158,15 @@ class CommunicationPopulationListView implements Serializable {
         return populationListView
     }
 
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
 
-    public static String getQuery(Map filterData) {
-        def query =
-                """ FROM CommunicationPopulationListView a
-                        """
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
 
-        def predicateArray = []
-
-        if (filterData?.params?.containsKey('populationQueryId')) {
-            predicateArray.push(""" (a.populationQueryId = :populationQueryId) """)
+        def queryCriteria = CommunicationPopulationListView.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("queryName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.queryName))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
         }
-
-        if (filterData?.params?.containsKey('queryName')) {
-            predicateArray.push(""" (upper(a.queryName) like upper(:queryName))""")
-        }
-
-        if (filterData?.params?.containsKey('queryFolder')) {
-            predicateArray.push(""" (a.queryFolder = :queryFolder)""")
-        }
-
-        if (predicateArray.size() > 0) {
-            query = query + """ WHERE """ + predicateArray.join(""" AND """)
-        }
-        return query
+        return results
     }
-
-
-    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
-        return (new DynamicFinder(CommunicationPopulationListView.class, getQuery(filterData), "a")).find(filterData,
-                pagingAndSortParams)
-    }
-
-
-    public static countByFilterParams(filterData) {
-        return new DynamicFinder(CommunicationPopulationListView.class, getQuery(filterData), "a").count(filterData)
-    }
-
 }
