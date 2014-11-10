@@ -45,39 +45,58 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
     @Test
     void testExecuteCommunicationField() {
+        /* This is setup */
         def newCommunicationField = newCommunicationField()
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
         assertNotNull communicationField.immutableId
-        def params = ['pidm': 37815]
+
+        /* This is the 'model', just building a result set from a query */
+        def params = [:]
+        params << ['pidm': 37815]
+        params << ['bannerId' : "AA0037815"]
         def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
-
         assertNotNull resultSet
+        println resultSet
 
+        /* Ths might be considered the 'controller', manipulating and possibly altering the data */
         def result = [:]
         result.put(communicationField.name, resultSet[0])
-         JSONObject json = new JSONObject()
+        JSONObject json = new JSONObject()
         json.putAll(result)
         println json
 
-
+        /* The template is the view, it cannot modify the data, but it can format and arrange the data into the output stream */
         char delimeter = '$'
-        String formatter = """hi \$PersonInfo.FIRSTNAME\$!,
+        String formatter = """hi \$field.firstname\$!,
         your last name is \$lastname\$!
          and I see your last name a second time is \$lastname\$
-         Today is \$today\$ and you owe me \$amount\$""";
+         Today is \$today\$ and you owe me \$amount\$"""
+
         ST st = new org.stringtemplate.v4.ST( formatter, delimeter, delimeter );
-        //st.addAggr("PersonInfo.{firstname, lastname, today, amount}", result.getKey(), result.getValue())
-/*        def String key
-        result.each { k, v ->
-            println "setting key : $k to $v"
+
+        //st.addAggr("PersonInfo.{FIRSTNAME, lastname, today, amount}", result.getKey(), result.getValue())
+
+        def String key
+        result.PersonInfo.each { k, v ->
             key = k.toLowerCase()
+            println "setting key : $k to $v"
             st.add( key, v )
-        }*/
+        }
         String mergedResults = st.render()
         println mergedResults
 
     }
 
+    @Test
+    void testExtractParameters() {
+        String template = """hi \$person.firstname\$!,
+                your last name is \$person.lastname\$!
+                 and I see your last name a second time is \$person.lastname\$
+                 Today is \$session.today\$ and you owe me \$fundage.amount\$
+                 But I would settle for \$globalamount\$"""
+        def parms = communicationFieldCalculationService.extractTemplateVariables( template )
+        println parms
+    }
 
     private def newCommunicationField() {
         def communicationField = new CommunicationField(

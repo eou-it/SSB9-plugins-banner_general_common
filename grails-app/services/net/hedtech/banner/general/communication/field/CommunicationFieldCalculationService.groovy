@@ -12,11 +12,10 @@ package net.hedtech.banner.general.communication.field
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
 
-
 import java.sql.SQLException
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class CommunicationFieldCalculationService extends ServiceBase {
@@ -27,8 +26,15 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of parameter values
      * @return
      */
-    List<GroovyRowResult> calculateField( String immutableId, parameters ) {
+    List<GroovyRowResult> calculateField( String immutableId, Map parameters ) {
         def resultSet
+        if (parameters.bannerId && !parameters.pidm) {
+            def person = PersonUtility.getPerson( parameters.bannerId )
+            parameters.put( "pidm", person.pidm )
+        } else {
+            def person = PersonUtility.getPerson( parameters.pidm )
+            parameters.put( "bannerId", person.bannerId )
+        }
         def Sql sql
         String stmt = CommunicationField.findByImmutableId( immutableId ).ruleContent
 
@@ -41,6 +47,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
             throw e
         }
     }
+
     /**
      * Formats a map of parameters. The formatter is a string containing $ delimited fields, each of which
      * will be mapped by name to the items with the corresponding key in the map
@@ -58,16 +65,21 @@ class CommunicationFieldCalculationService extends ServiceBase {
     }
 
     /**
-     *  Extracts all parameter strings starting with : into a map that has the parameter name as the key, and the value as null
+     *  Extracts all parameter strings delimited by $. These can be either $foo.bar$ or just $foo$, will extract foo.
      * @param template statement
      * @return set of unique string variables found in the template string
      */
-    Set<String> extractRuntimeParameters( String statement ) {
-        Pattern pattern = Pattern.compile(/\\$([^\\$]+)\\$/);
-        Set<String> templateVars = new LinkedHashSet<>();
-        Matcher matcher = pattern.matcher(yourTemplate);
-        while(matcher.find()) templateVars.add(matcher.group(1));
+    List<String> extractTemplateVariables( String statement ) {
+//        Pattern pattern = Pattern.compile( /\$(\w*)\$/ );
+        Pattern pattern = Pattern.compile( /\$(\w+)[.]|(\w+?)\$/ );
+        def List<String> runTimeParms = []
+        def matcher = pattern.matcher( statement )
 
+        while (matcher.find()) {
+            runTimeParms << matcher.group( 2 )
+
+        }
+        runTimeParms.removeAll( Collections.singleton( null ) );
+        runTimeParms.unique( false )
     }
-
 }
