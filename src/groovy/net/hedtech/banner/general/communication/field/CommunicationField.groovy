@@ -53,8 +53,8 @@ class CommunicationField implements Serializable {
      */
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "GCRCFLD_FOLDER_ID", referencedColumnName = "GCFOLDR_SURROGATE_ID")
-    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBTMPL_INV_GCFOLDR_KEY")
+    @JoinColumn(name = "GCRCFLD_FOLDER_ID", referencedColumnName = "GCRFLDR_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBTMPL_INV_GCRFLDR_KEY")
     CommunicationFolder folder
 
     /**

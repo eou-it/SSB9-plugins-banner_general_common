@@ -70,8 +70,8 @@ class CommunicationPopulationQuery implements Serializable {
      */
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "GCBQURY_FOLDER_ID", referencedColumnName = "GCFOLDR_SURROGATE_ID")
-    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBQURY_INV_GCFOLDR_KEY")
+    @JoinColumn(name = "GCBQURY_FOLDER_ID", referencedColumnName = "GCRFLDR_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBQURY_INV_GCRFLDR_KEY")
     CommunicationFolder folder
 
     /**

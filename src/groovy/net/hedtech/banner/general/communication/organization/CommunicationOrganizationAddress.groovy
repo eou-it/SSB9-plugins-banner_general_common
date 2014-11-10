@@ -35,16 +35,16 @@ import javax.persistence.*
  * @author Ed Delaney
  */
 @Entity
-@Table(name = "GCORADR")
+@Table(name = "GCROADR")
 class CommunicationOrganizationAddress implements Serializable {
 
     /**
      *  Immutable unique key
      */
     @Id
-    @SequenceGenerator(name = "GCORADR_SEQ_GEN", allocationSize = 1, sequenceName = "GCORADR_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCORADR_SEQ_GEN")
-    @Column(name = "GCORADR_SURROGATE_ID")
+    @SequenceGenerator(name = "GCROADR_SEQ_GEN", allocationSize = 1, sequenceName = "GCROADR_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCROADR_SEQ_GEN")
+    @Column(name = "GCROADR_SURROGATE_ID")
     Long Id
 
     /*  @Embedded
@@ -77,91 +77,91 @@ class CommunicationOrganizationAddress implements Serializable {
     /**
      * Foreign key reference to the Organization (REL_ORGANIZATION) for which this address configuration is associated.
      */
-    @Column(name = "GCORADR_ORG_ID")
+    @Column(name = "GCROADR_ORG_ID")
     Long organizationId
 
     /**
      * Street line 1 to be used for letters.
      */
-    @Column(name = "GCORADR_LTR_STREET1")
+    @Column(name = "GCROADR_LTR_STREET1")
     String ltrStreet1
 
     /**
      * Street line 2 to be used for letters.
      */
-    @Column(name = "GCORADR_LTR_STREET2")
+    @Column(name = "GCROADR_LTR_STREET2")
     String ltrStreet2
 
     /**
      * City to be used for letters.
      */
-    @Column(name = "GCORADR_LTR_CITY")
+    @Column(name = "GCROADR_LTR_CITY")
     String ltrCity
 
     /**
      * State to be used for letters.
      */
-    @Column(name = "GCORADR_LTR_STATE")
+    @Column(name = "GCROADR_LTR_STATE")
     String ltrState
 
     /**
      * Country to be used for letters.
      */
-    @Column(name = "GCORADR_LTR_COUNTRY")
+    @Column(name = "GCROADR_LTR_COUNTRY")
     String ltrCountry
 
     /**
      * Postal code to be used for letters.
      */
-    @Column(name = "GCORADR_LTR_POSTALCODE")
+    @Column(name = "GCROADR_LTR_POSTALCODE")
     String ltrPostalcode
 
     /**
      * Default FROM email address.
      */
-    @Column(name = "GCORADR_EMAIL_DEFAULT_FROM")
+    @Column(name = "GCROADR_EMAIL_DEFAULT_FROM")
     String emailDefaultFrom
 
     /**
      * Mailbox account used for sending email.
      */
-    @Column(name = "GCORADR_EMAIL_SENDER_ACCT_ID")
+    @Column(name = "GCROADR_EMAIL_SENDER_ACCT_ID")
     Long emailSenderAcctId
 
     /**
      * Mailbox account used for monitoring replies.
      */
-    @Column(name = "GCORADR_EMAIL_REPLYTO_ACCT_ID")
+    @Column(name = "GCROADR_EMAIL_REPLYTO_ACCT_ID")
     Long emailReplyToAcctId
 
     /**
      * The user friendly name of the return email address.
      */
-    @Column(name = "GCORADR_EMAIL_DISPLAY_NAME")
+    @Column(name = "GCROADR_EMAIL_DISPLAY_NAME")
     String emailDisplayName
 
     /**
      *  Optimistic lock token.
      */
-    @Column(name = "GCORADR_VERSION")
+    @Column(name = "GCROADR_VERSION")
     Long version
 
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
-    @Column(name = "GCORADR_USER_ID")
+    @Column(name = "GCROADR_USER_ID")
     String lastModifiedBy
 
     /**
      *  Date that record was created or last updated.
      */
-    @Column(name = "GCORADR_ACTIVITY_DATE")
+    @Column(name = "GCROADR_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**
      *  Source system that created or updated the data.
      */
-    @Column(name = "GCORADR_DATA_ORIGIN")
+    @Column(name = "GCROADR_DATA_ORIGIN")
     String dataOrigin
 }

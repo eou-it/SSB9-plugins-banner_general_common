@@ -14,7 +14,7 @@ import javax.persistence.*
  *
  */
 @Entity
-@Table(name = "GCFOLDR")
+@Table(name = "GCRFLDR")
 @EqualsAndHashCode
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationFolder.fetchById",
@@ -33,54 +33,54 @@ class CommunicationFolder implements Serializable {
      * KEY: Generated unique key.
      */
     @Id
-    @Column(name = "GCFOLDR_SURROGATE_ID")
-    @SequenceGenerator(name = "GCFOLDR_SEQ_GEN", allocationSize = 1, sequenceName = "GCFOLDR_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCFOLDR_SEQ_GEN")
+    @Column(name = "GCRFLDR_SURROGATE_ID")
+    @SequenceGenerator(name = "GCRFLDR_SEQ_GEN", allocationSize = 1, sequenceName = "GCRFLDR_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRFLDR_SEQ_GEN")
     Long Id
 
     /**
      * Description of the folder.
      */
-    @Column(name = "GCFOLDR_DESCRIPTION")
+    @Column(name = "GCRFLDR_DESCRIPTION")
     String description
 
     /**
      * Indicates if the folder was created for internal use (1=Yes or 0=No). Internal use folders are
      * created through the seeded data set and should not be deleted or modified in any way.
      */
-    @Column(name = "GCFOLDR_INTERNAL")
+    @Column(name = "GCRFLDR_INTERNAL")
     Boolean internal = false
 
     /**
      * Name of the folder.
      */
-    @Column(name = "GCFOLDR_NAME")
+    @Column(name = "GCRFLDR_NAME")
     String name
 
     /**
      *  Optimistic lock token.
      */
     @Version
-    @Column(name = "GCFOLDR_VERSION")
+    @Column(name = "GCRFLDR_VERSION")
     Long version
 
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
-    @Column(name = "GCFOLDR_USER_ID")
+    @Column(name = "GCRFLDR_USER_ID")
     String lastModifiedBy
 
     /**
      *  Date that record was created or last updated.
      */
-    @Column(name = "GCFOLDR_ACTIVITY_DATE")
+    @Column(name = "GCRFLDR_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**
      *  Source system that created or updated the data.
      */
-    @Column(name = "GCFOLDR_DATA_ORIGIN")
+    @Column(name = "GCRFLDR_DATA_ORIGIN")
     String dataOrigin
 
     static constraints = {

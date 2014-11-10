@@ -13,7 +13,7 @@ import javax.persistence.*
  *
  */
 @Entity
-@Table(name = "GCORGAN")
+@Table(name = "GCRORAN")
 @EqualsAndHashCode
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationOrganization.fetchById",
@@ -28,21 +28,21 @@ class CommunicationOrganization implements Serializable {
      * Generated unique key.
      */
     @Id
-    @Column(name = "GCORGAN_SURROGATE_ID")
-    @SequenceGenerator(name = "GCORGAN_SEQ_GEN", allocationSize = 1, sequenceName = "GCORGAN_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCORGAN_SEQ_GEN")
+    @Column(name = "GCRORAN_SURROGATE_ID")
+    @SequenceGenerator(name = "GCRORAN_SEQ_GEN", allocationSize = 1, sequenceName = "GCRORAN_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRORAN_SEQ_GEN")
     Long id
 
     /**
      * Name of the organization.
      */
-    @Column(name = "GCORGAN_NAME")
+    @Column(name = "GCRORAN_NAME")
     String name
 
     /**
      * Indicates if the organization is the root organization (1=Yes or 0=No). Only one organization can be identified as the root organization.
      */
-    @Column(name = "GCORGAN_IS_ROOT")
+    @Column(name = "GCRORAN_IS_ROOT")
     Boolean isRoot
 
     /**
@@ -51,34 +51,34 @@ class CommunicationOrganization implements Serializable {
      * its parent. Hierarchies are created by associating a parent to a child, not the other way around, therefore child
      * organizations are read-only.
      */
-    @Column(name = "GCORGAN_PARENT_ID")
+    @Column(name = "GCRORAN_PARENT_ID")
     Long parent
 
     /**
      * Description of the organization.
      */
-    @Column(name = "GCORGAN_DESCRIPTION")
+    @Column(name = "GCRORAN_DESCRIPTION")
     String description
 
-    @Column(name = "GCORGAN_DATE_FORMAT")
+    @Column(name = "GCRORAN_DATE_FORMAT")
     String dateFormat
 
-    @Column(name = "GCORGAN_DAYOFWEEK_FORMAT")
+    @Column(name = "GCRORAN_DAYOFWEEK_FORMAT")
     String dayOfWeekFormat
 
-    @Column(name = "GCORGAN_TIMEOFDAY_FORMAT")
+    @Column(name = "GCRORAN_TIMEOFDAY_FORMAT")
     String timeOfDayFormat
 
     /**
      * USER ID: The user ID of the person who inserted or last updated this record.
      */
-    @Column(name = "GCORGAN_USER_ID")
+    @Column(name = "GCRORAN_USER_ID")
     String lastModifiedBy
 
     /**
      * Date that record was created or last updated.
      */
-    @Column(name = "GCORGAN_ACTIVITY_DATE")
+    @Column(name = "GCRORAN_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
@@ -86,13 +86,13 @@ class CommunicationOrganization implements Serializable {
      * Optimistic lock token.
      */
     @Version
-    @Column(name = "GCORGAN_VERSION")
+    @Column(name = "GCRORAN_VERSION")
     Long version
 
     /**
      * Source system that created or updated the data.
      */
-    @Column(name = "GCORGAN_DATA_ORIGIN")
+    @Column(name = "GCRORAN_DATA_ORIGIN")
     String dataOrigin
 
 
