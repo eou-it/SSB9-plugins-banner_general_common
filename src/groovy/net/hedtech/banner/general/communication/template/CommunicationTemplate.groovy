@@ -5,19 +5,18 @@ package net.hedtech.banner.general.communication.template
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.query.DynamicFinder
 import org.hibernate.annotations.Type
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
-
 
 @Entity
 @Table(name = "GCBTMPL")
 @Inheritance(strategy = InheritanceType.JOINED)
 @EqualsAndHashCode
 @ToString
-
 public abstract class CommunicationTemplate implements Serializable {
     /**
      * KEY: Generated unique key.
@@ -147,44 +146,16 @@ public abstract class CommunicationTemplate implements Serializable {
     }
 
 
-    public static List findAllByFolderName(String folderName) {
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
-        def queries = []
-        CommunicationTemplate.withSession { session ->
-            queries = session.getNamedQuery('CommunicationTemplate.findAllByFolderName')
-                    .setString('folderName', folderName).list()
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationTemplate.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
-        return queries
+        return results
     }
-
-
-    public static String getQuery(Map filterData) {
-        def query =
-                """ FROM CommunicationTemplate a
-                """
-        def predicateArray = []
-
-        if (filterData?.params?.containsKey('name')) {
-            predicateArray.push("""(upper(a.name) like upper(:name))""")
-        }
-
-        if (predicateArray.size() > 0) {
-            query = query + """ WHERE """ + predicateArray.join(""" AND """)
-        }
-
-        return query
-    }
-
-
-    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
-        return (new DynamicFinder(CommunicationTemplate.class, getQuery(filterData), "a")).find(filterData,
-                pagingAndSortParams)
-    }
-
-
-    public static countByFilterParams(filterData) {
-        return new DynamicFinder(CommunicationTemplate.class, getQuery(filterData), "a").count(filterData)
-    }
-
 
 }
