@@ -68,8 +68,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
             communicationFolderService.create(sameNameFolder)
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue(e.getMessage().toString().contains("Validation Error(s) occurred during save()") ||
-                    e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCFOLDR) violated"))
+            assertTrue(e.getMessage().toString().contains("not.unique.message"))
         }
 
     }
@@ -98,9 +97,6 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
             communicationFolderService.update(folder1)
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue(e.getMessage().toString().contains("Validation Error(s) occurred during save()") ||
-                    e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCFOLDR) violated")
-            )
         }
     }
 

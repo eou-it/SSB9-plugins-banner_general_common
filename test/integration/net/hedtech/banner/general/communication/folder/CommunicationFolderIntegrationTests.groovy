@@ -5,7 +5,6 @@ package net.hedtech.banner.general.communication.folder
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -32,6 +31,7 @@ class CommunicationFolderIntegrationTests extends BaseIntegrationTestCase {
         formContext = ['GUAGMNU']
         super.setUp()
     }
+
 
     @After
     public void tearDown() {
