@@ -66,7 +66,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             communicationOrganizationService.create(sameNameOrganization)
             Assert.fail "Expected sameNameOrganization to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCORGAN) violated")
+            assertTrue e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCRORAN) violated")
         }
 
     }
@@ -95,7 +95,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             communicationOrganizationService.update(organization1)
             Assert.fail "Expected sameNameOrganization to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCORGAN) violated")
+            assertTrue e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCRORAN) violated")
         }
     }
 
