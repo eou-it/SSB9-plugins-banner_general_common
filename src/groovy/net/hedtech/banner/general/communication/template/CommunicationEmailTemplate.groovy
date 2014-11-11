@@ -16,13 +16,16 @@ import javax.persistence.*
 @ToString
 
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationEmailTemplate.findAllByFolderName",
+        @NamedQuery(name = "CommunicationEmailTemplate.fetchByTemplateNameAndFolderName",
                 query = """ FROM CommunicationEmailTemplate a
-                    WHERE  a.folder.name = :folderName
-                     """)
+                    WHERE a.folder.name = :folderName
+                      AND upper(a.name) = upper(:templateName)"""),
+        @NamedQuery(name = "CommunicationEmailTemplate.existsAnotherNameFolder",
+                query = """ FROM CommunicationEmailTemplate a
+                    WHERE a.folder.name = :folderName
+                    AND   upper(a.name) = upper(:templateName)
+                    AND   a.id <> :id""")
 ])
-
-
 class CommunicationEmailTemplate extends CommunicationTemplate implements Serializable {
 
 
@@ -71,41 +74,28 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         toList(nullable: true, maxSize: 1020)
 
     }
-    public static List findAllByFolderName(String folderName) {
+    public static CommunicationEmailTemplate fetchByTemplateNameAndFolderName(String templateName, String folderName) {
 
-        def queries = []
+        def query
         CommunicationEmailTemplate.withSession { session ->
-            queries = session.getNamedQuery('CommunicationEmailTemplate.findAllByFolderName')
-                    .setString('folderName', folderName).list()
-        }
-        return queries
-    }
-
-
-    public static String getQuery(Map filterData) {
-        def query =
-                """ FROM CommunicationEmailTemplate a
-                """
-        def predicateArray = []
-
-        if (filterData?.params?.containsKey('name')) {
-            predicateArray.push("""(upper(a.name) like upper(:name))""")
-        }
-
-        if (predicateArray.size() > 0) {
-            query = query + """ WHERE """ + predicateArray.join(""" AND """)
+            query = session.getNamedQuery('CommunicationEmailTemplate.fetchByTemplateNameAndFolderName')
+                    .setString('folderName', folderName)
+                    .setString('templateName', templateName)
+                    .list()[0]
         }
         return query
     }
 
+    public static Boolean existsAnotherNameFolder(Long templateId, String templateName, String folderName) {
 
-    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
-        return (new DynamicFinder(CommunicationEmailTemplate.class, getQuery(filterData), "a")).find(filterData,
-                pagingAndSortParams)
-    }
+        def query
+        CommunicationEmailTemplate.withSession { session ->
+            query = session.getNamedQuery('CommunicationEmailTemplate.existsAnotherNameFolder')
+                    .setString('folderName', folderName)
+                    .setString('templateName', templateName)
+                    .setLong('id', templateId).list()[0]
 
-
-    public static countByFilterParams(filterData) {
-        return new DynamicFinder(CommunicationEmailTemplate.class, getQuery(filterData), "a").count(filterData)
+        }
+        return (query != null)
     }
 }

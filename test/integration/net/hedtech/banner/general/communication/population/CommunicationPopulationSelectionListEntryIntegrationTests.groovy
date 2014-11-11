@@ -149,10 +149,8 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
                 folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
-                locked: true,
                 name: "TTTTTTTTTT",
                 valid: true,
-                published: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

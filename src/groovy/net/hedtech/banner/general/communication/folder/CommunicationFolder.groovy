@@ -4,7 +4,8 @@
 package net.hedtech.banner.general.communication.folder
 
 import groovy.transform.EqualsAndHashCode
-import net.hedtech.banner.query.DynamicFinder
+import net.hedtech.banner.general.CommunicationCommonUtility
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -21,10 +22,11 @@ import javax.persistence.*
                     WHERE a.id = :id"""),
         @NamedQuery(name = "CommunicationFolder.fetchByName",
                 query = """ FROM CommunicationFolder a
-                    WHERE a.name = :name"""),
-        @NamedQuery(name = "CommunicationFolder.findByNameWildcard",
+                    WHERE upper(a.name) = upper(:name)"""),
+        @NamedQuery(name = "CommunicationFolder.existsAnotherSameNameFolder",
                 query = """ FROM CommunicationFolder a
-                    WHERE a.name like :folderName""")
+                    WHERE upper(a.name) = upper(:folderName)
+                    AND   a.id <> :id""")
 ])
 class CommunicationFolder implements Serializable {
     /**
@@ -126,44 +128,29 @@ class CommunicationFolder implements Serializable {
         return query
     }
 
+    public static Boolean existsAnotherSameNameFolder(Long folderId, String name ) {
 
-    public static List findByNameWildcard(String folderName) {
         def query
         CommunicationFolder.withSession { session ->
-            query = session.getNamedQuery('CommunicationFolder.findByNameWildcard')
-                    .setString('folderName', folderName + '%').list()
-
-        }
-        return query
-    }
-
-    public static String getQuery(Map filterData) {
-        def query =
-                """ FROM CommunicationFolder a
-                """
-
-        def predicateArray = []
-
-        if (filterData?.params?.containsKey('name')) {
-            predicateArray.push("""(upper(a.name) like upper(:name))""")
+            query = session.getNamedQuery('CommunicationFolder.existsAnotherSameNameFolder')
+                    .setString('folderName', name)
+                    .setLong('id', folderId)
+                    .list()[0]
         }
 
-        if (predicateArray.size() > 0) {
-            query = query + """ WHERE """ + predicateArray.join(""" AND """)
+        return (query != null)
+    }
+
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationFolder.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
-        return query
+        return results
     }
-
-
-    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
-        return (new DynamicFinder(CommunicationFolder.class, getQuery(filterData), "a")).find(filterData,
-                pagingAndSortParams)
-    }
-
-
-    public static countByFilterParams(filterData) {
-        return new DynamicFinder(CommunicationFolder.class, getQuery(filterData), "a").count(filterData)
-    }
-
-
 }

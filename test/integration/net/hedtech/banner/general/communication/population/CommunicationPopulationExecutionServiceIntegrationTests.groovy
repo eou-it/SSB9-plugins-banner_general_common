@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.population
 
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -13,8 +14,6 @@ import org.junit.Test
 import org.springframework.security.core.context.SecurityContextHolder
 
 
-
-
 class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegrationTestCase {
     def communicationPopulationExecutionService
     def communicationPopulationQueryStatementParseService
@@ -22,7 +21,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     def communicationPopulationQueryService
     def i_success_sqlStatement = "select 2086 spriden_pidm from dual"
     def i_fail_sqlStatement = "select 2086 spriden_pidm kjlkj from dual"
-    def i_fail_multiValueSqlStatement = "select 2086 spriden_pidm, sysdate from dual"
+    def i_fail_multiValueSqlStatement = "select 2086 spriden_pidm, sysdate from dual where select y, m from dual"
     def BannerUser
 
 
@@ -97,13 +96,12 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         def populationQuery = newValidPopulationQuery()
         populationQuery.sqlString = i_fail_multiValueSqlStatement
         def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
-        def populationSelectionListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        def populationSelectionListId
+        shouldFail {
+            populationSelectionListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        }
 
-        assertNull( populationSelectionListId)
-        / * Now examine results */
-        def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(savedPopulationQuery.id)
-        assertEquals false, calculatedPopulationQuery.valid
- //       assertEquals('Tried multi value sql statement.', "ORA-20100: Statement can only select one value, a pidm.", populationQueryParseResult.message)
+        assertNull(populationSelectionListId)
     }
 
 
@@ -120,7 +118,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
 
         def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, bannerUser?.username)
         assertNotNull populationQuerySelectionList
-        assertEquals( populationSelectionListId, populationQuerySelectionList.id )
+        assertEquals(populationSelectionListId, populationQuerySelectionList.id)
 
         /* Test that the new count values are populated in the selectionList */
         assertTrue(populationQuerySelectionList.lastCalculatedCount > 0)
@@ -150,17 +148,15 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         def populationQuery = newInvalidPopulationQuery()
         def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
 
-        def populationListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        def populationListId
+        shouldFail(ApplicationException) {
+            populationListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        }
         assertNull populationListId
         populationQuery = communicationPopulationQueryService.get(savedPopulationQuery.id)
         populationQuery.refresh()
-
-        /* Now make sure it got flagged as error */
-        def BannerUser bannerUser = SecurityContextHolder?.context?.authentication?.principal as BannerUser;
-        def populationQuerySelectionList = CommunicationPopulationSelectionList.fetchByNameAndId(populationQuery.id, bannerUser.username)
-        assertEquals(CommunicationPopulationQueryExecutionStatus.ERROR, populationQuerySelectionList?.status)
-
     }
+
 
     private def newValidPopulationQuery() {
         def populationQuery = new CommunicationPopulationQuery(
@@ -168,10 +164,8 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
                 folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
-                locked: false,
                 name: "TTTTTTTTTT",
                 valid: true,
-                published: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
@@ -190,10 +184,8 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
                 folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
-                locked: false,
                 name: "TTTTTTTTTT",
                 valid: false,
-                published: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

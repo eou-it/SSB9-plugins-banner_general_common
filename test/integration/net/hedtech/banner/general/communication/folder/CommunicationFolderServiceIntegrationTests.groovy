@@ -37,7 +37,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
         long originalListCount = communicationFolderService.list().size()
 
         CommunicationFolder folder = new CommunicationFolder()
-        folder.name = "test"
+        folder.name = "test-integration"
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)
@@ -50,26 +50,25 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testCreate() {
         CommunicationFolder folder = new CommunicationFolder()
-        folder.name = "test"
+        folder.name = "test-integration"
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)
-        assertEquals("test", createdFolder.name)
+        assertEquals("test-integration", createdFolder.name)
         assertEquals("description", createdFolder.description)
         assertEquals(false, createdFolder.internal)
 
-        CommunicationFolder foundFolder = CommunicationFolder.findByName("test")
+        CommunicationFolder foundFolder = CommunicationFolder.findByName("test-integration")
         assertEquals(createdFolder, foundFolder)
 
         CommunicationFolder sameNameFolder = new CommunicationFolder()
-        sameNameFolder.name = "test"
+        sameNameFolder.name = "test-integration"
         sameNameFolder.description = "another folder with same name"
         try {
             communicationFolderService.create(sameNameFolder)
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue(e.getMessage().toString().contains("Validation Error(s) occurred during save()") ||
-                    e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCFOLDR) violated"))
+            assertTrue(e.getMessage().toString().contains("not.unique.message"))
         }
 
     }
@@ -98,9 +97,6 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
             communicationFolderService.update(folder1)
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue(e.getMessage().toString().contains("Validation Error(s) occurred during save()") ||
-                    e.getSqlException().toString().contains("ORA-00001: unique constraint (GENERAL.UK2_GCFOLDR) violated")
-            )
         }
     }
 
@@ -108,7 +104,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testDelete() {
         CommunicationFolder folder = new CommunicationFolder();
-        folder.name = "test"
+        folder.name = "test-integration"
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)
