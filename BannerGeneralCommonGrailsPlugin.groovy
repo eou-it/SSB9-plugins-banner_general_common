@@ -51,12 +51,6 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        velocityEngine( VelocityEngineFactoryBean ) {
-            velocityProperties = [
-                "resource.loader":"class",
-                "class.resource.loader.class":"org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader"
-            ]
-        }
     }
 
 
