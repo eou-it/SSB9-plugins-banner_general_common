@@ -1,4 +1,3 @@
-import org.springframework.ui.velocity.VelocityEngineFactoryBean
 
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.

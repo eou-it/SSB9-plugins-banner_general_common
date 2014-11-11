@@ -27,11 +27,11 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationQuery.fetchByQueryNameAndFolderName",
                 query = """ FROM CommunicationPopulationQuery a
                     WHERE a.folder.name = :folderName
-                      AND a.name = :queryName"""),
+                      AND upper(a.name) = upper(:queryName)"""),
         @NamedQuery(name = "CommunicationPopulationQuery.existsAnotherNameFolder",
                 query = """ FROM CommunicationPopulationQuery a
                     WHERE a.folder.name = :folderName
-                    AND   a.name = :queryName
+                    AND   upper(a.name) = upper(:queryName)
                     AND   a.id <> :id"""),
         @NamedQuery(name = "CommunicationPopulationQuery.fetchById",
                 query = """ FROM CommunicationPopulationQuery a
@@ -70,8 +70,8 @@ class CommunicationPopulationQuery implements Serializable {
      */
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "GCBQURY_FOLDER_ID", referencedColumnName = "GCFOLDR_SURROGATE_ID")
-    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBQURY_INV_GCFOLDR_KEY")
+    @JoinColumn(name = "GCBQURY_FOLDER_ID", referencedColumnName = "GCRFLDR_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBQURY_INV_GCRFLDR_KEY")
     CommunicationFolder folder
 
     /**
@@ -114,13 +114,6 @@ class CommunicationPopulationQuery implements Serializable {
     String dataOrigin
 
     /**
-     * LOCKED_IND: Indicator showing if the population query may be modified or not.
-     */
-    @Type(type = "yes_no")
-    @Column(name = "GCBQURY_LOCKED_IND")
-    Boolean locked
-
-    /**
      * QUERY_STRING: The text of the statement that will be executed.
      */
     @Lob
@@ -134,12 +127,6 @@ class CommunicationPopulationQuery implements Serializable {
     @Column(name = "GCBQURY_VALID_IND")
     Boolean valid
 
-    /**
-     * PUBLISHED_IND: Indicator showing if the SQL statement is available to be executed.
-     */
-    @Type(type = "yes_no")
-    @Column(name = "GCBQURY_PUBLISHED_IND")
-    Boolean published
 
     /* ----------------------------------------------------------------------*/
 
@@ -149,11 +136,9 @@ class CommunicationPopulationQuery implements Serializable {
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         description(nullable: true, maxSize: 2000)
-        locked(nullable: false)
         name(nullable: false, maxSize: 30)
         sqlString(nullable: true)
         valid(nullable: false)
-        published(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
@@ -238,10 +223,8 @@ class CommunicationPopulationQuery implements Serializable {
                 ", lastModified=" + lastModified +
                 ", lastModifiedBy='" + lastModifiedBy + '\'' +
                 ", dataOrigin='" + dataOrigin + '\'' +
-                ", locked=" + locked +
                 ", sqlString='" + sqlString + '\'' +
                 ", valid=" + valid +
-                ", published=" + published +
                 '}';
     }
 

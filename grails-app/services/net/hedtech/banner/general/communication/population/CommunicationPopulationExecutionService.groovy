@@ -10,15 +10,17 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 import java.sql.SQLException
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 
 class CommunicationPopulationExecutionService {
 
     def communicationPopulationQueryService
     def communicationPopulationQueryStatementParseService
-//    def populationSelectionService
     def sessionFactory
     def sql
+    def Pattern multipattern = Pattern.compile("SELECT(.*?)FROM");
 
 
     def CommunicationPopulationQueryParseResult parse(Long populationQueryId) {
@@ -29,16 +31,6 @@ class CommunicationPopulationExecutionService {
 
 
         populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.sqlString)
-        /**
-         * If status is N, update populationQuery set valid=N and syntax error=p_error
-         */
-        if (populationQueryParseResult.status == 'N') {
-            populationQuery.valid = false
-            populationQuery.save()
-        } else {
-            populationQuery.valid = true
-            populationQuery.save()
-        }
         return populationQueryParseResult
     }
 
@@ -50,24 +42,31 @@ class CommunicationPopulationExecutionService {
     def execute(Long populationQueryId) {
 
         if (!populationQueryId) {
-            throw new ApplicationException(populationQueryId, "Null populationQuery id")
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nullPopulationQueryId@@")
         }
         def populationQuery = communicationPopulationQueryService.get(populationQueryId)
         if (!populationQuery) {
-            throw new ApplicationException(populationQuery, "No such populationQuery")
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
         }
-        /* Make sure it's not locked */
-        if (populationQuery?.locked == 'Y') {
-            throw new ApplicationException(populationQuery, "@@r1:lockedPopulationQuery@@")
-        }
-        /* Make sure it's published */
-        if (populationQuery?.published == 'N') {
-            throw new ApplicationException(populationQuery, "@@r1:notPublishedPopulationQuery@@")
-        }
-        /* Make sure it's valid */
 
-        if (populationQuery?.valid == 'N') {
-            throw new ApplicationException(populationQuery, "@@r1:invalidPopulationQuery@@")
+        def parseresult = parse(populationQuery.id)
+        populationQuery.valid = (parseresult?.status == 'Y')
+        populationQuery.save()
+
+        populationQuery = communicationPopulationQueryService.get(populationQueryId)
+
+        /* Make sure it's valid */
+        if (!populationQuery?.valid) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalid@@")
+        }
+
+        //make sure the sql statement only selects one value
+
+        Matcher matcher = multipattern.matcher(populationQuery.sqlString.toUpperCase());
+        while (matcher.find()) {
+            if (matcher.group(1).contains(",")) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryHasMultiple@@")
+            }
         }
 
         CommunicationPopulationSelectionList populationSelectionList = new CommunicationPopulationSelectionList()

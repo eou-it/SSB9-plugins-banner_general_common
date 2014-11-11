@@ -69,7 +69,7 @@ public abstract class CommunicationItem implements Serializable {
     /**
      * The organization id
      */
-    @Column(name = "GCRCITM_GCORGAN_ID")
+    @Column(name = "GCRCITM_GCRORAN_ID")
     Long organizationId
 
     /**

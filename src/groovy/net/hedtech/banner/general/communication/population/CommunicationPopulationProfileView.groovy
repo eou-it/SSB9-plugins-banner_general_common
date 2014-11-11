@@ -127,16 +127,12 @@ class CommunicationPopulationProfileView implements Serializable {
 
 
     public static findByFilterPagingParams(filterData, pagingAndSortParams) {
-        println "the filter data "+getQuery(filterData)
-        println "the paging and "+pagingAndSortParams
         return (new DynamicFinder(CommunicationPopulationProfileView.class, getQuery(filterData), "a")).find(filterData,
                 pagingAndSortParams)
     }
 
 
     public static countByFilterParams(filterData) {
-        println ("the filter data is "+filterData)
-        println "the filter query is  data "+getQuery(filterData)
         return (new DynamicFinder(CommunicationPopulationProfileView.class, getQuery(filterData), "a")).count(filterData)
     }
 

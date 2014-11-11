@@ -61,10 +61,8 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
                 createDate: new Date(),
-                locked: false,
                 name: "Test Query",
-                sqlString: "select 2086 spriden_pidm from dual",
-                published: true
+                sqlString: "select 2086 spriden_pidm from dual"
         )
         populationQuery = communicationPopulationQueryService.create(populationQuery) as CommunicationPopulationQuery
 
