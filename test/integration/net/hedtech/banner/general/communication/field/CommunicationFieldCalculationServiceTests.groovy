@@ -57,34 +57,6 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
         assertNotNull resultSet
         println resultSet
-
-        /* Ths might be considered the 'controller', manipulating and possibly altering the data */
-        def result = [:]
-        result.put(communicationField.name, resultSet[0])
-        JSONObject json = new JSONObject()
-        json.putAll(result)
-        println json
-
-        /* The template is the view, it cannot modify the data, but it can format and arrange the data into the output stream */
-        char delimeter = '$'
-        String formatter = """hi \$field.firstname\$!,
-        your last name is \$lastname\$!
-         and I see your last name a second time is \$lastname\$
-         Today is \$today\$ and you owe me \$amount\$"""
-
-        ST st = new org.stringtemplate.v4.ST( formatter, delimeter, delimeter );
-
-        //st.addAggr("PersonInfo.{FIRSTNAME, lastname, today, amount}", result.getKey(), result.getValue())
-
-        def String key
-        result.PersonInfo.each { k, v ->
-            key = k.toLowerCase()
-            println "setting key : $k to $v"
-            st.add( key, v )
-        }
-        String mergedResults = st.render()
-        println mergedResults
-
     }
 
     @Test
@@ -108,7 +80,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                formatString: "TTTTTTTT",
+                formatString: "Hello \$firstname\$ \$lastname\$",
                 groovyFormatter: "TTTTTTTT",
                 previewValue: "TTTTTTTTTT",
                 renderAsHtml: true,
@@ -127,7 +99,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                    FROM spriden, spbpers
                   WHERE     spriden_pidm = spbpers_pidm(+)
                         AND spriden_change_ind IS NULL
-                        AND spriden_pidm = :pidm"""
+                        AND (spriden_pidm = :pidm or spriden_id = :bannerId)"""
         )
 
         return communicationField

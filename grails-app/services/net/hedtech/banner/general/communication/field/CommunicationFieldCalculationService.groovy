@@ -12,8 +12,8 @@ package net.hedtech.banner.general.communication.field
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
+import org.stringtemplate.v4.ST
 
 import java.sql.SQLException
 import java.util.regex.Pattern
@@ -26,22 +26,27 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of parameter values
      * @return
      */
-    List<GroovyRowResult> calculateField( String immutableId, Map parameters ) {
-        def resultSet
-        if (parameters.bannerId && !parameters.pidm) {
-            def person = PersonUtility.getPerson( parameters.bannerId )
-            parameters.put( "pidm", person.pidm )
-        } else {
-            def person = PersonUtility.getPerson( parameters.pidm )
-            parameters.put( "bannerId", person.bannerId )
-        }
+    String calculateField( String immutableId, Map parameters ) {
+
         def Sql sql
-        String stmt = CommunicationField.findByImmutableId( immutableId ).ruleContent
+
+        CommunicationField communicationField = CommunicationField.findByImmutableId( immutableId )
+        String statement = communicationField.ruleContent
 
         try {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
 
-            resultSet = sql.rows( stmt, parameters )
+            List<GroovyRowResult> resultSet = sql.rows( statement, parameters ) /* TODO: change this to explicitly return one row */
+            def results = []
+            resultSet.each { resultRecord ->
+                def row = [:]
+                resultRecord.each { record ->
+                    row.put( record.getKey().toString().toLowerCase(), record.value )
+                }
+                results.add( formatString( communicationField.formatString, row ) )
+            }
+            return results[0]
+
 
         } catch (SQLException e) {
             throw e
@@ -55,13 +60,13 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters
      * @return
      */
-    String formatString( String formatter, parameters ) {
-
-        //String formatter = "hi \$result.firstname\$! \$result.lastname\$! ";
+    String formatString( String formatter, Map parameters ) {
         char delimiter = '$'
-        //ST st = new ST( formatter, delimiter, delimeter );
-        Map<String, Object> data = new HashMap<String, Object>()
-        data.put( "person", aPerson )
+        ST st = new ST( formatter, delimiter, delimiter );
+        parameters.keySet().each { key ->
+            st.add( key, parameters[key] )
+        }
+        st.render()
     }
 
     /**
