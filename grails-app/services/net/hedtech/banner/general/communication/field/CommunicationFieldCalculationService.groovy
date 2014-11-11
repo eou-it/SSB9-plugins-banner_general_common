@@ -32,24 +32,30 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
         CommunicationField communicationField = CommunicationField.findByImmutableId( immutableId )
         String statement = communicationField.ruleContent
+        if (statement == null) {
+            /* there is no statement to execute, so just return the formatter contents */
+            return communicationField.formatString
+        } else {
+            try {
+                sql = new Sql( sessionFactory.getCurrentSession().connection() )
 
-        try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-
-            List<GroovyRowResult> resultSet = sql.rows( statement, parameters ) /* TODO: change this to explicitly return one row */
-            def results = []
-            resultSet.each { resultRecord ->
-                def row = [:]
-                resultRecord.each { record ->
-                    row.put( record.getKey().toString().toLowerCase(), record.value )
+                List<GroovyRowResult> resultSet = sql.rows( statement, parameters ) /* TODO: change this to explicitly return one row */
+                def results = []
+                resultSet.each { resultRecord ->
+                    def row = [:]
+                    resultRecord.each { record ->
+                        row.put( record.getKey().toString().toLowerCase(), record.value )
+                    }
+                    results.add( formatString( communicationField.formatString, row ) )
                 }
-                results.add( formatString( communicationField.formatString, row ) )
+                return results[0]
+
+
+            } catch (SQLException e) {
+                throw e
+            } finally {
+                sql?.close()
             }
-            return results[0]
-
-
-        } catch (SQLException e) {
-            throw e
         }
     }
 

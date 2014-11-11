@@ -10,14 +10,11 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.communication.field
 
-import grails.converters.*
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.codehaus.groovy.grails.web.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.stringtemplate.v4.ST
 
 class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase {
     def CommunicationFolder validFolder
@@ -45,30 +42,50 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
     @Test
     void testExecuteCommunicationField() {
-        /* This is setup */
+
         def newCommunicationField = newCommunicationField()
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
         assertNotNull communicationField.immutableId
 
-        /* This is the 'model', just building a result set from a query */
+
         def params = [:]
         params << ['pidm': 37815]
-        params << ['bannerId' : "AA0037815"]
+        params << ['bannerId': "AA0037815"]
         def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
         assertNotNull resultSet
         println resultSet
     }
 
+
+    @Test
+    void testExecuteCommunicationFieldWithNullStatement() {
+
+        def newCommunicationField = newCommunicationField()
+        newCommunicationField.ruleContent = null
+        def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
+        assertNotNull communicationField.immutableId
+        def params = [:]
+        params << ['pidm': 37815]
+        params << ['bannerId': "AA0037815"]
+        def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
+        assertEquals( "Hello \$firstname\$ \$lastname\$" , resultSet)
+
+    }
+
+
     @Test
     void testExtractParameters() {
-        String template = """hi \$person.firstname\$!,
-                your last name is \$person.lastname\$!
-                 and I see your last name a second time is \$person.lastname\$
-                 Today is \$session.today\$ and you owe me \$fundage.amount\$
-                 But I would settle for \$globalamount\$"""
+        String template = """hi \$firstname\$!,
+                your last name is \$lastname\$!
+                 and I see your last name a second time is \$lastname\$
+                 Today is \$today\$ and you owe me \$amount\$
+                 But I would settle for \$someotheramount\$"""
         def parms = communicationFieldCalculationService.extractTemplateVariables( template )
         println parms
+        assertTrue parms.findAll() == ['firstname', 'lastname', 'today', 'amount', 'someotheramount']
+
     }
+
 
     private def newCommunicationField() {
         def communicationField = new CommunicationField(
