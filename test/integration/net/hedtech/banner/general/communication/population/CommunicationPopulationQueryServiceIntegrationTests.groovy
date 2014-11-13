@@ -3,9 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -37,14 +37,12 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testList() {
-        def expList = communicationPopulationQueryService.list(sort: "name", order: "asc")
+        def expList = communicationPopulationQueryService.list( sort: "name", order: "asc" )
         def originalCount = expList.size()
-        println "original count is " + originalCount
+        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+        populationQuery = communicationPopulationQueryService.create( [domainModel: populationQuery] )
 
-        def populationQuery = newPopulationQuery(false, false, "TTTTTTTTTT")
-        populationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
-
-        expList = communicationPopulationQueryService.list(sort: "name", order: "asc")
+        expList = communicationPopulationQueryService.list( sort: "name", order: "asc" )
         assertNotNull expList
         assertTrue originalCount + 1 == expList.size()
     }
@@ -52,8 +50,8 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testCreatePopulationQuery() {
-        def populationQuery = newPopulationQuery(true, true, "TTTTTTTTTT")
-        populationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def populationQuery = newPopulationQuery( true, true, "TTTTTTTTTT" )
+        populationQuery = communicationPopulationQueryService.create( [domainModel: populationQuery] )
 
         // Assert domain values
         assertNotNull populationQuery?.id
@@ -67,10 +65,10 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testCreateWithMissingFolder() {
-        def populationQuery = newPopulationQuery(true, true, "TTTTTTTTTT")
+        def populationQuery = newPopulationQuery( true, true, "TTTTTTTTTT" )
         populationQuery.folder = null
-        def message = shouldFail(ApplicationException) {
-            communicationPopulationQueryService.create([domainModel: populationQuery])
+        def message = shouldFail( ApplicationException ) {
+            communicationPopulationQueryService.create( [domainModel: populationQuery] )
         }
         assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", message
     }
@@ -78,21 +76,21 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testUpdatePopulationQuery() {
-        def populationQuery = newPopulationQuery(false, false, "TTTTTTTTTT")
-        populationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+        populationQuery = communicationPopulationQueryService.create( [domainModel: populationQuery] )
         assertNotNull populationQuery
         def id = populationQuery.id
 
         // Find the domain
-        populationQuery = populationQuery.get(id)
+        populationQuery = populationQuery.get( id )
         assertNotNull populationQuery?.id
 
         // Update domain values
         populationQuery.description = "###"
-        populationQuery = communicationPopulationQueryService.update([domainModel: populationQuery])
+        populationQuery = communicationPopulationQueryService.update( [domainModel: populationQuery] )
 
         // Find the updated domain
-        populationQuery = populationQuery.get(id)
+        populationQuery = populationQuery.get( id )
 
         // Assert updated domain values
         assertNotNull populationQuery
@@ -102,26 +100,26 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testUpdateInvalidStatementPopulationQuery() {
-        def populationQuery = newPopulationQuery(false, false, "TTTTTTTTTT")
-        populationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+        populationQuery = communicationPopulationQueryService.create( [domainModel: populationQuery] )
         assertNotNull populationQuery
         def id = populationQuery.id
 
         // Find the domain
-        populationQuery = populationQuery.get(id)
+        populationQuery = populationQuery.get( id )
         assertNotNull populationQuery?.id
     }
 
 
     @Test
     void testUpdateValidStatementPopulationQuery() {
-        def populationQuery = newPopulationQuery(false, false, "TTTTTTTTTT")
-        populationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+        populationQuery = communicationPopulationQueryService.create( [domainModel: populationQuery] )
         assertNotNull populationQuery
         def id = populationQuery.id
 
         // Find the domain
-        populationQuery = populationQuery.get(id)
+        populationQuery = populationQuery.get( id )
         assertNotNull populationQuery?.id
     }
 
@@ -129,31 +127,31 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
     @Test
     void testDeletePopulationQuery() {
 
-        def populationQuery = newPopulationQuery(false, false, "TTTTTTTTTT")
+        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
 
-        populationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        populationQuery = communicationPopulationQueryService.create( [domainModel: populationQuery] )
         assertNotNull populationQuery
         def id = populationQuery.id
 
         // Find the domain
-        populationQuery = populationQuery.get(id)
+        populationQuery = populationQuery.get( id )
         assertNotNull populationQuery
 
 
-        def populationQuery1 = newPopulationQuery(false, false, "MMMMMMMMMM")
-        populationQuery1 = communicationPopulationQueryService.create([domainModel: populationQuery1])
+        def populationQuery1 = newPopulationQuery( false, false, "MMMMMMMMMM" )
+        populationQuery1 = communicationPopulationQueryService.create( [domainModel: populationQuery1] )
         assertNotNull populationQuery1
         def id1 = populationQuery1.id
 
         // Find the domain
-        populationQuery1 = populationQuery1.get(id)
+        populationQuery1 = populationQuery1.get( id )
         assertNotNull populationQuery1
 
         // Delete the domain
-        communicationPopulationQueryService.delete([domainModel: populationQuery])
+        communicationPopulationQueryService.delete( [domainModel: populationQuery] )
 
         // Attempt to find the deleted domain
-        populationQuery = populationQuery.get(id)
+        populationQuery = populationQuery.get( id )
         assertNull populationQuery
     }
 
@@ -161,14 +159,14 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
     @Test
     void testDynamicFinder() {
 
-        def populationQuery = newPopulationQuery(false, false, "TestName1")
-        communicationPopulationQueryService.create([domainModel: populationQuery])
-        def populationQuery1 = newPopulationQuery(false, false, "TestName2")
-        communicationPopulationQueryService.create([domainModel: populationQuery1])
+        def populationQuery = newPopulationQuery( false, false, "TestName1" )
+        communicationPopulationQueryService.create( [domainModel: populationQuery] )
+        def populationQuery1 = newPopulationQuery( false, false, "TestName2" )
+        communicationPopulationQueryService.create( [domainModel: populationQuery1] )
         // Find the domain
-        def List<CommunicationPopulationQuery> populationQueries = populationQuery.findAllByQueryName("TestName")
+        def List<CommunicationPopulationQuery> populationQueries = populationQuery.findAllByQueryName( "TestName" )
         assertNotNull populationQueries
-        assertEquals(2, populationQueries.size())
+        assertEquals( 2, populationQueries.size() )
     }
 
 
@@ -177,7 +175,7 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
     }
 
 
-    private def newPopulationQuery(boolean locked, boolean published, String queryName) {
+    private def newPopulationQuery( boolean locked, boolean published, String queryName ) {
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: testFolder,

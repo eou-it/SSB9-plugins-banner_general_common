@@ -16,6 +16,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
 import org.stringtemplate.v4.ST
+import st4hidden.org.antlr.runtime.tree.CommonTree
 
 import java.sql.SQLException
 import java.util.regex.Pattern
@@ -72,9 +73,6 @@ class CommunicationFieldCalculationService extends ServiceBase {
                             attributeMap.put( attributeName, attributeValue )
                         } else {
                             // handle array of values per column name
-                            println attributeMap.containsKey( attributeName )
-                            println attributeMap.get( attributeName )
-                            println new ArrayList()
                             ArrayList values = attributeMap.containsKey( attributeName ) ? attributeMap.get( attributeName ) : new ArrayList()
                             values.add( attributeValue )
                             attributeMap.put( attributeName, values )
@@ -106,22 +104,4 @@ class CommunicationFieldCalculationService extends ServiceBase {
         st.render()
     }
 
-    /**
-     *  Extracts all parameter strings delimited by $. These can be either $foo.bar$ or just $foo$, will extract foo.
-     * @param template statement
-     * @return set of unique string variables found in the template string
-     */
-    List<String> extractTemplateVariables( String statement ) {
-//        Pattern pattern = Pattern.compile( /\$(\w*)\$/ );
-        Pattern pattern = Pattern.compile( /\$(\w+)[.]|(\w+?)\$/ );
-        def List<String> runTimeParms = []
-        def matcher = pattern.matcher( statement )
-
-        while (matcher.find()) {
-            runTimeParms << matcher.group( 2 )
-
-        }
-        runTimeParms.removeAll( Collections.singleton( null ) );
-        runTimeParms.unique( false )
-    }
 }
