@@ -56,7 +56,7 @@ class CommunicationTemplateService extends ServiceBase {
         runTimeParms.removeAll( Collections.singleton( null ) );
         runTimeParms.unique( false )
     }
-
+/*
     final int ID = 25
 
 
@@ -65,7 +65,7 @@ class CommunicationTemplateService extends ServiceBase {
 
     def dataFieldNames = []
 
-/*
+
 
     st.impl.ast.getChildren ( ).each {
 
