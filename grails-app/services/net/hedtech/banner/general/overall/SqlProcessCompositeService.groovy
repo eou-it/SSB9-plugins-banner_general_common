@@ -65,9 +65,8 @@ class SqlProcessCompositeService {
      *      SqlProcessParameterByProcess table for the given process.
      * @return A Term returned by the query. null if no values were returned.
      */
-    Term getSqlProcessResultsFromHierarchy( Map params ) {
-        def results = []
-        def resultTerm
+    def getSqlProcessResultsFromHierarchy( Map params ) {
+        def rows
         if ( params.sqlCode && params.sqlProcessCode ) {
             def parsedSqlList = SqlProcess.fetchAllActiveValidatedPriorityProcessSql(params.sqlCode, params.sqlProcessCode)
             for (def i=0;i<parsedSqlList.size();i++) {
@@ -85,7 +84,7 @@ class SqlProcessCompositeService {
                 }
                 log.debug "Parsed SQL: ${parsedSql}"
                 log.debug "Bind variables: ${bindValues.toString()}"
-                def rows
+
                 def conn
                 try {
                     conn = sessionFactory.currentSession.connection()
@@ -95,23 +94,20 @@ class SqlProcessCompositeService {
                     } else {
                         rows = db.rows(parsedSql)
                     }
+                    if (null != rows && rows.size() > 0) {
+                        break;
+                    }
                 }
                 finally {
                     conn?.close()
                 }
-                if (rows) {
-                    def termCode = rows[0].getAt(0)
-                    resultTerm = Term.findByCode(termCode)
-                    if (!resultTerm) {
-                        throw new ApplicationException(SqlProcess, "@@r1:shouldReturnTerm@@")
-                    }
-                    else {
-                        break
-                    }
-                }
+
             }
         }
-        return resultTerm
+        if (rows != null && rows.size() == 0) {
+            return null;
+        }
+        return rows
 
     }
 

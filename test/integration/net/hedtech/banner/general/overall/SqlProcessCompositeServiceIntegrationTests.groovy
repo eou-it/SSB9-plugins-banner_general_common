@@ -131,10 +131,9 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
             def params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", PIDM: pidm]
 
-            shouldFail(ApplicationException) {
-                sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
-            }
 
+            def result = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
+            assertNotNull result
         }
    }
 
@@ -160,7 +159,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         for (def i=0;i<testData.size();i++) {
             def params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[i]]
             def results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
-            assertEquals testData[i], results.code
+            assertEquals testData[i], results[0].getAt(0)
         }
     }
 
@@ -186,7 +185,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
         def params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[0]]
         def results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
-        assertEquals testData[0], results.code
+        assertEquals testData[0], results[0].getAt(0)
 
         params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[1]]
         results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
@@ -194,7 +193,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
         params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[2]]
         results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
-        assertEquals testData[2], results.code
+        assertEquals testData[2], results[0].getAt(0)
     }
 
 
@@ -224,7 +223,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
         def params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[0]]
         def results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
-        assertEquals testData[0], results.code
+        assertEquals testData[0], results[0].getAt(0)
 
 
         params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[1]]
@@ -234,7 +233,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
         params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[2]]
         results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
-        assertEquals testData[2], results.code
+        assertEquals testData[2], results[0].getAt(0)
     }
 
 
