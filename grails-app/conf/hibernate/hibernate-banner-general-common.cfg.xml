@@ -35,6 +35,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.ImsSourcedIdBase"/>
         <mapping class="net.hedtech.banner.general.overall.IntegrationPartnerSystemRule"/>
         <mapping class="net.hedtech.banner.general.overall.MeetingTimeSearch"/>
+        <mapping class="net.hedtech.banner.general.overall.PidmAndSourcedIdMapping"/>
         <mapping class="net.hedtech.banner.general.overall.PidmAndUDCIdMapping"/>
         <mapping class="net.hedtech.banner.general.overall.PinQuestion"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollege"/>
@@ -58,7 +59,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionEthnicMakeUp"/>
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionTestScore"/>
         <mapping class="net.hedtech.banner.general.overall.SqlProcess"/>
-        <mapping class="net.hedtech.banner.general.overall.SqlProcessParameter"/>
+        <mapping class="net.hedtech.banner.general.overall.SqlProcessParameterByProcess"/>
         <mapping class="net.hedtech.banner.general.overall.ThirdPartyAccess"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>

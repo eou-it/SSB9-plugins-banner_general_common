@@ -19,7 +19,20 @@ import javax.persistence.*
            WHERE a.object = '**SSB_MASKING'
            AND a.blockName = 'F_FORMAT_NAME'
            AND a.queryColumn = 'F_FORMAT_NAME'
-           AND a.columnName = 'SPRIDEN_SURNAME_PREFIX' """)
+           AND a.columnName = 'SPRIDEN_SURNAME_PREFIX' """),
+@NamedQuery(
+        name = "DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName",
+        query = """
+           FROM DisplayMaskingColumnRuleView a
+           WHERE a.object = '**SSB_MASKING'
+           AND a.blockName = :blockName
+           AND a.columnName = :columnName """),
+@NamedQuery(
+        name = "DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName",
+        query = """
+           FROM DisplayMaskingColumnRuleView a
+           WHERE a.object = '**SSB_MASKING'
+           AND a.blockName = :blockName """)
 ])
 
 @Entity
@@ -146,6 +159,40 @@ class DisplayMaskingColumnRuleView implements Serializable {
             display = session.getNamedQuery('DisplayMaskingColumnRuleView.fetchSSBNameMask')
                     .uniqueResult()
         }
+        return display
+    }
+
+
+    static def fetchSSBMaskByBlockNameAndColumnName(Map parms) {
+        def display
+        DisplayMaskingColumnRuleView.withSession { session ->
+            display = session.getNamedQuery(
+                    'DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName')
+                    .setString('blockName', parms?.blockName).setString('columnName',parms?.columnName).uniqueResult()
+        }
+        if (!display)
+            DisplayMaskingColumnRuleView.withSession { session ->
+                display = session.getNamedQuery(
+                        'DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName')
+                        .setString('blockName', parms?.blockName + "_ALL").setString('columnName',parms?.columnName).uniqueResult()
+            }
+        return display
+    }
+
+
+    static def fetchSSBMaskByBlockName(Map parms) {
+        def display
+        DisplayMaskingColumnRuleView.withSession { session ->
+            display = session.getNamedQuery(
+                    'DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName')
+                    .setString('blockName', parms?.blockName).list()
+        }
+        if (!display)
+            DisplayMaskingColumnRuleView.withSession { session ->
+                display = session.getNamedQuery(
+                        'DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName')
+                        .setString('blockName', parms?.blockName + "_ALL").list()
+            }
         return display
     }
 
