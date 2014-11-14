@@ -18,7 +18,7 @@ class SqlProcessCompositeService {
         if ( params.sqlCode && params.sqlProcessCode ) {
             def parsedSql = SqlProcess.fetchActiveValidatedPriorityProcessSql(params.sqlCode, params.sqlProcessCode)
             def bindValues = [:]
-            SqlProcessParameter.findAllByEntriesForSqlProcess(params.sqlProcessCode).each { SqlProcessParameter parameter ->
+            SqlProcessParameterByProcess.findAllByEntriesForSqlProcess(params.sqlProcessCode).each { SqlProcessParameterByProcess parameter ->
                 if( parsedSql.contains(":" + parameter.parameterForSqlProcess.toLowerCase())) {
                     bindValues.put(parameter.parameterForSqlProcess.toLowerCase(),
                             params.get(parameter.parameterForSqlProcess.toLowerCase() ?: parameter.parameterForSqlProcess.toUpperCase()))
@@ -62,7 +62,7 @@ class SqlProcessCompositeService {
      *      sqlCode - The SqlProceess.entriesForSql code
      *      sqlProcessCode - The SqlProceess.entriesForSqlProcess process code
      *      <any additional params> - Any additional params needed for the SQL. These should match what is in the
-     *      SqlProcessParameter table for the given process.
+     *      SqlProcessParameterByProcess table for the given process.
      * @return A Term returned by the query. null if no values were returned.
      */
     Term getSqlProcessResultsFromHierarchy( Map params ) {
@@ -73,7 +73,7 @@ class SqlProcessCompositeService {
             for (def i=0;i<parsedSqlList.size();i++) {
                 def parsedSql = parsedSqlList[i]
                 def bindValues = [:]
-                SqlProcessParameter.findAllByEntriesForSqlProcess(params.sqlProcessCode).each { SqlProcessParameter parameter ->
+                SqlProcessParameterByProcess.findAllByEntriesForSqlProcess(params.sqlProcessCode).each { SqlProcessParameterByProcess parameter ->
                     if (parsedSql.contains(":" + parameter.parameterForSqlProcess.toLowerCase())) {
                         bindValues.put(parameter.parameterForSqlProcess.toLowerCase(),
                                 params.get(getParameterValue(parameter.parameterForSqlProcess, params)))

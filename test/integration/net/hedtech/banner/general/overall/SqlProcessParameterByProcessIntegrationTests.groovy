@@ -5,31 +5,33 @@ package net.hedtech.banner.general.overall
 
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 
-class SqlProcessParameterIntegrationTests extends BaseIntegrationTestCase {
+class SqlProcessParameterByProcessIntegrationTests extends BaseIntegrationTestCase {
 
-    @Override
+    @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
-    @Override
+    @After
     public void tearDown() {
         super.tearDown()
     }
 
     @Test
     void testValidation() {
-        def sqlProcessParameter = new SqlProcessParameter()
+        def sqlProcessParameter = new SqlProcessParameterByProcess()
         assertFalse "SqlProcessParameter could not be validated as expected due to ${sqlProcessParameter.errors}", sqlProcessParameter.validate()
     }
 
     @Test
     void testNullValidationFailure() {
-        def sqlProcessParameter = new SqlProcessParameter()
+        def sqlProcessParameter = new SqlProcessParameterByProcess()
         assertFalse "SqlProcessParameter should have failed validation", sqlProcessParameter.validate()
         assertErrorsFor sqlProcessParameter, 'nullable',
         [
@@ -41,19 +43,19 @@ class SqlProcessParameterIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCreateAndDeleteAndCommonDomainMethods() {
-        SqlProcessParameter sqlProcessParameter = createSqlProcessParameter()
+        SqlProcessParameterByProcess sqlProcessParameter = createSqlProcessParameter()
         sqlProcessParameter.save(failOnError: true, flush: true)
-        SqlProcessParameter that = SqlProcessParameter.get(sqlProcessParameter.id)
+        SqlProcessParameterByProcess that = SqlProcessParameterByProcess.get(sqlProcessParameter.id)
         assertTrue sqlProcessParameter.equals(that)
         assertTrue sqlProcessParameter.toString() instanceof String
         assertTrue sqlProcessParameter.hashCode() instanceof Integer
         assertNotNull that
         that.delete(failOnError: true, flush: true)
-        assertNull SqlProcessParameter.get(that?.id)
+        assertNull SqlProcessParameterByProcess.get(that?.id)
     }
 
-    SqlProcessParameter createSqlProcessParameter() {
-        new SqlProcessParameter(systemRequiredIndicator:false,
+    SqlProcessParameterByProcess createSqlProcessParameter() {
+        new SqlProcessParameterByProcess(systemRequiredIndicator:false,
         lastModified:new Date(),
         lastModifiedBy:"GRAILS_USER",
         dataOrigin:"Banner",

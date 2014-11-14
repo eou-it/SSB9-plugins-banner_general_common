@@ -26,7 +26,7 @@ import net.hedtech.banner.general.system.EntriesForSqlProcesss
 
 @Entity
 @Table(name = "GORSQPA")
-class SqlProcessParameter implements Serializable {
+class SqlProcessParameterByProcess implements Serializable {
 
     /**
      * Surrogate ID for GORSQPA
@@ -84,7 +84,7 @@ class SqlProcessParameter implements Serializable {
 
 
     public String toString() {
-        """SqlProcessParameter[
+        """SqlProcessParameterByProcess[
 					id=$id,
 					version=$version,
 					systemRequiredIndicator=$systemRequiredIndicator,
@@ -98,8 +98,8 @@ class SqlProcessParameter implements Serializable {
 
     boolean equals(o) {
         if (this.is(o)) return true
-        if (!(o instanceof SqlProcessParameter)) return false
-        SqlProcessParameter that = (SqlProcessParameter) o
+        if (!(o instanceof SqlProcessParameterByProcess)) return false
+        SqlProcessParameterByProcess that = (SqlProcessParameterByProcess) o
         if (id != that.id) return false
         if (version != that.version) return false
         if (systemRequiredIndicator != that.systemRequiredIndicator) return false
@@ -120,7 +120,7 @@ class SqlProcessParameter implements Serializable {
         result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
         result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
         result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (entriesForSqlProcesss != null ? entriesForSqlProcess.hashCode() : 0)
+        result = 31 * result + (entriesForSqlProcess != null ? entriesForSqlProcess.hashCode() : 0)
         result = 31 * result + (parameterForSqlProcess != null ? parameterForSqlProcess.hashCode() : 0)
         return result
     }

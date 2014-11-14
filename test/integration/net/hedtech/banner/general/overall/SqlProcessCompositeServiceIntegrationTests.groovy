@@ -295,7 +295,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
 
     void createSqlProcessParameter(def process, def param) {
-        def parameter = new SqlProcessParameter(systemRequiredIndicator:false,
+        def parameter = new SqlProcessParameterByProcess(systemRequiredIndicator:false,
                 lastModified:new Date(),
                 lastModifiedBy:"GRAILS_USER",
                 dataOrigin:"Banner",
