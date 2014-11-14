@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -16,17 +19,20 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     def priorCollegeMinorService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testPriorCollegeMinorValidCreate() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -44,6 +50,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testPriorCollegeMinorInvalidCreate() {
         def priorCollegeMinor = newInvalidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -53,6 +60,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testPriorCollegeMinorValidUpdate() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -81,6 +89,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testPriorCollegeMinorDelete() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -93,6 +102,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testReadOnly() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]

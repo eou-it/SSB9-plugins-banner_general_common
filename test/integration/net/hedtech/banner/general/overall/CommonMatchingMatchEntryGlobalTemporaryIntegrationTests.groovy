@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -144,7 +147,8 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     def u_failure_surnamePrefix = "TTTTT"
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -165,11 +169,13 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -178,6 +184,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testCreateInvalidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newInvalidForCreateCommonMatchingMatchEntryGlobalTemporary()
         shouldFail(ValidationException) {
@@ -186,6 +193,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testUpdateValidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -226,6 +234,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testUpdateInvalidCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -262,6 +271,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testOptimisticLock() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -283,6 +293,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testDeleteCommonMatchingMatchEntryGlobalTemporary() {
         def commonMatchingMatchEntryGlobalTemporary = newValidForCreateCommonMatchingMatchEntryGlobalTemporary()
         commonMatchingMatchEntryGlobalTemporary.save(failOnError: true, flush: true)
@@ -293,12 +304,14 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testValidation() {
         def commonMatchingMatchEntryGlobalTemporary = newInvalidForCreateCommonMatchingMatchEntryGlobalTemporary()
         assertFalse "CommonMatchingMatchEntryGlobalTemporary could not be validated as expected due to ${commonMatchingMatchEntryGlobalTemporary.errors}", commonMatchingMatchEntryGlobalTemporary.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def commonMatchingMatchEntryGlobalTemporary = new CommonMatchingMatchEntryGlobalTemporary()
         assertFalse "CommonMatchingMatchEntryGlobalTemporary should have failed validation", commonMatchingMatchEntryGlobalTemporary.validate()
@@ -341,6 +354,7 @@ class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def commonMatchingMatchEntryGlobalTemporary = new CommonMatchingMatchEntryGlobalTemporary(
                 lastName: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',

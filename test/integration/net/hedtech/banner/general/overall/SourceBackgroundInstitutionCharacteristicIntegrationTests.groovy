@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import net.hedtech.banner.general.system.BackgroundInstitutionCharacteristic
@@ -15,17 +18,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionCharacteristic() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         sourceBackgroundInstitutionCharacteristic.save(failOnError: true, flush: true)
@@ -34,6 +40,7 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionCharacteristic() {
         def sourceBackgroundInstitutionCharacteristic = newInvalidForCreateSourceBackgroundInstitutionCharacteristic()
         shouldFail(ValidationException) {
@@ -43,6 +50,7 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
 
     // NOTE: No Updates are allowed
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -60,6 +68,7 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionCharacteristic() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         sourceBackgroundInstitutionCharacteristic.save(failOnError: true, flush: true)
@@ -70,12 +79,14 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionCharacteristic = newInvalidForCreateSourceBackgroundInstitutionCharacteristic()
         assertFalse "SourceBackgroundInstitutionCharacteristic could not be validated as expected due to ${sourceBackgroundInstitutionCharacteristic.errors}", sourceBackgroundInstitutionCharacteristic.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionCharacteristic = new SourceBackgroundInstitutionCharacteristic()
         assertFalse "SourceBackgroundInstitutionCharacteristic should have failed validation", sourceBackgroundInstitutionCharacteristic.validate()

@@ -1,10 +1,11 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -16,17 +17,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -35,6 +39,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newInvalidForCreateSourceBackgroundInstitutionAcademic()
         shouldFail(ValidationException) {
@@ -43,6 +48,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testUpdateValidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -52,7 +58,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
         assertEquals "Y", sourceBackgroundInstitutionAcademic.stateApprovIndicator
         assertEquals "STANDARD", sourceBackgroundInstitutionAcademic.calendarType
         assertEquals "TTTT", sourceBackgroundInstitutionAcademic.accreditationType
-        assertEquals 5.5, sourceBackgroundInstitutionAcademic.creditTransactionValue
+        assertEquals 5.5, sourceBackgroundInstitutionAcademic.creditTransactionValue, 0
 
         //Update the entity
         sourceBackgroundInstitutionAcademic.stateApprovIndicator = null
@@ -67,10 +73,11 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
         assertNull sourceBackgroundInstitutionAcademic.stateApprovIndicator
         assertNull sourceBackgroundInstitutionAcademic.calendarType
         assertEquals "UPDT", sourceBackgroundInstitutionAcademic.accreditationType
-        assertEquals 0.0, sourceBackgroundInstitutionAcademic.creditTransactionValue
+        assertEquals 0.0, sourceBackgroundInstitutionAcademic.creditTransactionValue, 0
     }
 
 
+	@Test
     void testUpdateInvalidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -80,7 +87,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
         assertEquals "Y", sourceBackgroundInstitutionAcademic.stateApprovIndicator
         assertEquals "STANDARD", sourceBackgroundInstitutionAcademic.calendarType
         assertEquals "TTTT", sourceBackgroundInstitutionAcademic.accreditationType
-        assertEquals 5.5, sourceBackgroundInstitutionAcademic.creditTransactionValue
+        assertEquals 5.5, sourceBackgroundInstitutionAcademic.creditTransactionValue, 0
 
         //Update the entity with invalid values
         sourceBackgroundInstitutionAcademic.demographicYear = null
@@ -90,6 +97,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -107,6 +115,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -130,6 +139,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -140,12 +150,14 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionAcademic = newInvalidForCreateSourceBackgroundInstitutionAcademic()
         assertFalse "SourceBackgroundInstitutionAcademic could not be validated as expected due to ${sourceBackgroundInstitutionAcademic.errors}", sourceBackgroundInstitutionAcademic.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionAcademic = new SourceBackgroundInstitutionAcademic()
         assertFalse "SourceBackgroundInstitutionAcademic should have failed validation", sourceBackgroundInstitutionAcademic.validate()
@@ -164,6 +176,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def sourceBackgroundInstitutionAcademic = new SourceBackgroundInstitutionAcademic(
                 stateApprovIndicator: 'XXX',

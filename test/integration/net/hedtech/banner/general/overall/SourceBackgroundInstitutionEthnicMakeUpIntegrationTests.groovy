@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -17,17 +20,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -36,6 +42,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newInvalidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         shouldFail(ValidationException) {
@@ -44,6 +51,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testUpdateValidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -63,6 +71,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testUpdateInvalidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -79,6 +88,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -95,6 +105,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -115,6 +126,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -125,12 +137,14 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionEthnicMakeUp = newInvalidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         assertFalse "SourceBackgroundInstitutionEthnicMakeUp could not be validated as expected due to ${sourceBackgroundInstitutionEthnicMakeUp.errors}", sourceBackgroundInstitutionEthnicMakeUp.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionEthnicMakeUp = new SourceBackgroundInstitutionEthnicMakeUp()
         assertFalse "SourceBackgroundInstitutionEthnicMakeUp should have failed validation", sourceBackgroundInstitutionEthnicMakeUp.validate()
@@ -147,6 +161,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
+	@Test
     void testFetchSearch() {
         // Create 2 ethnics
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()

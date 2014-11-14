@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
@@ -16,17 +19,20 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     def sectionCrossListSectionService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SSAXLST', 'SSAXLSQ']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: "201410", xlstGroup: "B1"]
@@ -40,6 +46,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
+	@Test
     void testSectionCrossListSectionInvalidCreate() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: "999999", xlstGroup: "TT"]
@@ -54,6 +61,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
+	@Test
     void testUpdateWithDuplicateSection() {
         def term = Term.findWhere(code: "201410")
 
@@ -74,6 +82,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
+	@Test
     void testInsertWithBlankSection() {
         def term = Term.findWhere(code: "201410")
 
@@ -93,6 +102,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
+	@Test
     void testSectionCrossListSectionDelete() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: "201410", xlstGroup: "B1"]
@@ -115,6 +125,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
+	@Test
     void testSectionCrossListSectionDeleteOneOfMany() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: "201410", xlstGroup: "B1"]
@@ -141,6 +152,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
      * Test for the ReadOnly field "XLST Group"
      */
 
+	@Test
     void testReadOnlyXlstGroup() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: sectionCrossListSection.term.code,
@@ -165,6 +177,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
      * Test for the ReadOnly field "Term"
      */
 
+	@Test
     void testReadOnlyTerm() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: sectionCrossListSection.term.code,
@@ -189,6 +202,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
      * Test for the ReadOnly field "CourseReferenceNumber"
      */
 
+	@Test
     void testReadOnlyCourseReferenceNumber() {
         def sectionCrossListSection = newSectionCrossListSection()
         def keyBlockMap = [term: sectionCrossListSection.term.code,
@@ -210,6 +224,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
     }
 
 
+	@Test
     void testFetchByTermAndCrossListGroupIndicator() {
         def sectionCrossListSections = SectionCrossListSection.fetchByTermAndXlstGroup('201410', 'B1')
         assertTrue sectionCrossListSections.size() >= 1

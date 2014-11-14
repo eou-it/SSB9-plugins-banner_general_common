@@ -2,6 +2,9 @@
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
@@ -42,17 +45,20 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     def u_failure_keyBlockMap = [:]
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SCACRSE']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSequenceNumberBaseValidCreate() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -66,6 +72,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSequenceNumberBaseInvalidCreate() {
         def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
         def map = [keyBlock: i_failure_keyBlockMap,
@@ -76,6 +83,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSequenceNumberBaseValidUpdate() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -99,6 +107,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSequenceNumberBaseInvalidUpdate() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -121,6 +130,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testSequenceNumberBaseDelete() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -135,6 +145,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
+	@Test
     void testReadOnly() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -198,7 +209,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
         previousNumber = 0
         sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //B
-        assertEquals "B", sequenceNumberPrefix
+        assertEquals "B", sequenceNumberPrefix.toString()
         expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber) //B1
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
         expectedSequence = "${sequenceNumberPrefix}" + (++previousNumber) //B2
@@ -219,7 +230,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
         previousNumber = 0
         sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //C
-        assertEquals "C", sequenceNumberPrefix
+        assertEquals "C", sequenceNumberPrefix.toString()
         expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C01
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
         expectedSequence = "${sequenceNumberPrefix}0" + (++previousNumber)   //C02
@@ -261,7 +272,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
         previousNumber = 0
         sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1)     //D
-        assertEquals "D", sequenceNumberPrefix
+        assertEquals "D", sequenceNumberPrefix.toString()
         expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //D001
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
         expectedSequence = "${sequenceNumberPrefix}00" + (++previousNumber)   //D002
@@ -283,7 +294,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
         previousNumber = 0
         sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //E
-        assertEquals "E", sequenceNumberPrefix
+        assertEquals "E", sequenceNumberPrefix.toString()
         expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //E0001
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
         expectedSequence = "${sequenceNumberPrefix}000" + (++previousNumber)   //E0002
@@ -305,7 +316,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
         previousNumber = 0
         sequenceNumberPrefix = (char) (sequenceNumberPrefix + 1) //F
-        assertEquals "F", sequenceNumberPrefix
+        assertEquals "F", sequenceNumberPrefix.toString()
         expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //F00001
         assertEquals expectedSequence, sequenceNumberBaseService.getNextSequenceNumberBase(function, maximumSequence)
         expectedSequence = "${sequenceNumberPrefix}0000" + (++previousNumber)   //F00002

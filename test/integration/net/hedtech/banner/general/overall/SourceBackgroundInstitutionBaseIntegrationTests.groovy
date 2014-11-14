@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -19,17 +22,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -47,6 +53,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newInvalidForCreateSourceBackgroundInstitutionBase()
         shouldFail(ValidationException) {
@@ -70,6 +77,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testUpdateValidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -96,6 +104,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testUpdateInvalidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -110,6 +119,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -126,6 +136,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -146,6 +157,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -156,12 +168,14 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionBase = newInvalidForCreateSourceBackgroundInstitutionBase()
         assertFalse "SourceBackgroundInstitutionBase could not be validated as expected due to ${sourceBackgroundInstitutionBase.errors}", sourceBackgroundInstitutionBase.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase()
         assertFalse "SourceBackgroundInstitutionBase should have failed validation", sourceBackgroundInstitutionBase.validate()
@@ -182,6 +196,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
                 streetLine1: '123456789012345678901234567890123456789012345678901234567890123456789012345X',
@@ -196,6 +211,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
+	@Test
     void testFetchBySourceAndBackgroundInstitution() {
         // Create 2 bases
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()

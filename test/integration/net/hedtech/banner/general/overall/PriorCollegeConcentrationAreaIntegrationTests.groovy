@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -12,17 +15,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidPriorCollegeConcentrationArea() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         priorCollegeConcentrationArea.save(failOnError: true, flush: true)
@@ -31,6 +37,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testUpdateValidPriorCollegeConcentrationArea() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         priorCollegeConcentrationArea.save(failOnError: true, flush: true)
@@ -53,6 +60,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -70,6 +78,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testDeletePriorCollegeConcentrationArea() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         priorCollegeConcentrationArea.save(failOnError: true, flush: true)
@@ -80,12 +89,14 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testValidation() {
         def priorCollegeConcentrationArea = newInvalidForCreatePriorCollegeConcentrationArea()
         assertFalse "PriorCollegeConcentrationArea could not be validated as expected due to ${priorCollegeConcentrationArea.errors}", priorCollegeConcentrationArea.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def priorCollegeConcentrationArea = new PriorCollegeConcentrationArea()
         assertFalse "PriorCollegeConcentrationArea should have failed validation", priorCollegeConcentrationArea.validate()

@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.Degree
@@ -16,18 +19,21 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     def sourceBackgroundInstitutionDegreesOfferedService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionDegreesOfferedValidCreate() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
@@ -42,6 +48,7 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionDegreesOfferedInvalidCreate() {
         def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
@@ -52,6 +59,7 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
 
     // NOTE: No Updates are allowed
 
+	@Test
     void testSourceBackgroundInstitutionDegreesOfferedDelete() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
@@ -63,6 +71,7 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]

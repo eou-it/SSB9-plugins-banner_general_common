@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -16,17 +19,20 @@ import java.text.SimpleDateFormat
 
 class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -35,6 +41,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidDocumentInformation() {
         def documentInformation = newInvalidForCreateDocumentInformation()
         shouldFail(ValidationException) {
@@ -43,6 +50,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -71,6 +79,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -92,6 +101,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -116,6 +126,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -136,6 +147,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -146,12 +158,14 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def documentInformation = newInvalidForCreateDocumentInformation()
         assertFalse "DocumentInformation could not be validated as expected due to ${documentInformation.errors}", documentInformation.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def documentInformation = new DocumentInformation()
         assertFalse "DocumentInformation should have failed validation", documentInformation.validate()
@@ -173,6 +187,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def documentInformation = new DocumentInformation(
                 visaNumber: 'XXXXXXXXXXXXXXXXXXXX')

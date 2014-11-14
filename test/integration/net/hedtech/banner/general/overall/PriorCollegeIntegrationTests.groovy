@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -18,17 +21,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidPriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -37,6 +43,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidPriorCollege() {
         def priorCollege = newInvalidForCreatePriorCollege()
         shouldFail(ValidationException) {
@@ -45,6 +52,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidPriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -68,6 +76,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidPriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -86,6 +95,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -110,6 +120,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -130,6 +141,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeletePriorCollege() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
@@ -140,12 +152,14 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def priorCollege = newInvalidForCreatePriorCollege()
         assertFalse "PriorCollege could not be validated as expected due to ${priorCollege.errors}", priorCollege.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def priorCollege = new PriorCollege()
         assertFalse "PriorCollege should have failed validation", priorCollege.validate()
@@ -164,6 +178,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def priorCollege = new PriorCollege(
                 officialTransaction: 'XXX')

@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
@@ -13,17 +16,20 @@ import net.hedtech.banner.general.system.Term
 class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['SSAXLST', 'SSAXLSQ'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
         sectionCrossListSection.save(flush: true, failOnError: true)
@@ -35,6 +41,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
      void testFetchByTermAndCourseReferenceNumber() {
         def sectionCrossListSection = newSectionCrossListSection()
         sectionCrossListSection.save(flush: true, failOnError: true)
@@ -43,6 +50,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         assertTrue sections.size() == 1
     }
 
+	@Test
     void testUpdateSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
         sectionCrossListSection.save(flush: true, failOnError: true)
@@ -68,6 +76,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sectionCrossListSection = newSectionCrossListSection()
         sectionCrossListSection.save(flush: true, failOnError: true)
@@ -91,6 +100,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteSectionCrossListSection() {
         def sectionCrossListSection = newSectionCrossListSection()
         sectionCrossListSection.save(flush: true, failOnError: true)
@@ -101,12 +111,14 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def sectionCrossListSection = newSectionCrossListSection()
         assertTrue "SectionCrossListSection could not be validated as expected due to ${sectionCrossListSection.errors}", sectionCrossListSection.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sectionCrossListSection = new SectionCrossListSection()
         assertFalse "SectionCrossListSection should have failed validation", sectionCrossListSection.validate()
@@ -119,6 +131,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def sectionCrossListSection = new SectionCrossListSection(
                 xlstGroup: 'XXX',

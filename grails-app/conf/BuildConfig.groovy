@@ -1,6 +1,7 @@
 /** *******************************************************************************
- Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
+
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
@@ -12,6 +13,8 @@ grails.plugin.location.'banner-general-validation-common' = "../banner_general_v
 grails.plugin.location.'banner-general-person' = "../banner_general_person.git"
 grails.plugin.location.'banner-seeddata-catalog' = "../banner_seeddata_catalog.git"
 grails.plugin.location.'i18n-core' = "../i18n_core.git"
+
+grails.project.dependency.resolver = "ivy" // or maven
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -36,8 +39,9 @@ grails.project.dependency.resolution = {
 
     plugins {
         runtime  ":hibernate:3.6.10.10"
-        build ":tomcat:7.0.52.1"
-        test ':code-coverage:1.2.5'
+        compile ":tomcat:7.0.52.1"
+        compile ':resources:1.2.7' // If the functional-test plugin is being used
+        compile ":functional-test:2.0.0" // If the functional-test plugin is being used
     }
 
     dependencies {
@@ -45,5 +49,6 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.5'
     }
+
 
 }

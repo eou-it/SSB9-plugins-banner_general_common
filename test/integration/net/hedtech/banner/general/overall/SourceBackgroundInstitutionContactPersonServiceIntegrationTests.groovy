@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.PersonType
@@ -16,17 +19,20 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     def sourceBackgroundInstitutionContactPersonService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionContactPersonValidCreate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -40,6 +46,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionContactPersonInvalidCreate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newInvalidForCreateSourceBackgroundInstitutionContactPerson()
         shouldFail(ApplicationException) {
@@ -48,6 +55,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionContactPersonValidUpdate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -80,6 +88,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionContactPersonInvalidUpdate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -99,6 +108,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionContactPersonDelete() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -109,6 +119,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         def map = [domainModel: sourceBackgroundInstitutionContactPerson]

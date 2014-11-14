@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
@@ -16,17 +19,20 @@ class PriorCollegeMajorServiceIntegrationTests extends BaseIntegrationTestCase {
     def priorCollegeMajorService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testPriorCollegeMajorValidCreate() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         def map = [domainModel: priorCollegeMajor]
@@ -44,6 +50,7 @@ class PriorCollegeMajorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testPriorCollegeMajorInvalidCreate() {
         def priorCollegeMajor = newInvalidForCreatePriorCollegeMajor()
         def map = [domainModel: priorCollegeMajor]
@@ -53,6 +60,7 @@ class PriorCollegeMajorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testPriorCollegeMajorValidUpdate() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         def map = [domainModel: priorCollegeMajor]
@@ -81,6 +89,7 @@ class PriorCollegeMajorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testPriorCollegeMajorDelete() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         def map = [domainModel: priorCollegeMajor]
@@ -93,6 +102,7 @@ class PriorCollegeMajorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testReadOnly() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         def map = [domainModel: priorCollegeMajor]

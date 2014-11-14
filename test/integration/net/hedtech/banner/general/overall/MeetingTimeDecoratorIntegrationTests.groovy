@@ -3,23 +3,29 @@
  ****************************************************************************** */
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 class MeetingTimeDecoratorIntegrationTests extends BaseIntegrationTestCase {
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testNullNewSection() {
         def newSection = new MeetingTimeDecorator()
         assertNull newSection.term
@@ -27,6 +33,7 @@ class MeetingTimeDecoratorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testNewSection() {
         // section has two meetings
         //        SSRMEET_TERM_CODE SSRMEET_CRN SSRMEET_DAYS_CODE SSRMEET_DAY_NUMBER     SSRMEET_BEGIN_TIME SSRMEET_END_TIME SSRMEET_BLDG_CODE SSRMEET_ROOM_CODE SSRMEET_ACTIVITY_DATE     SSRMEET_START_DATE        SSRMEET_END_DATE          SSRMEET_CATAGORY SSRMEET_SUN_DAY SSRMEET_MON_DAY SSRMEET_TUE_DAY SSRMEET_WED_DAY SSRMEET_THU_DAY SSRMEET_FRI_DAY SSRMEET_SAT_DAY SSRMEET_SCHD_CODE SSRMEET_OVER_RIDE SSRMEET_CREDIT_HR_SESS SSRMEET_MEET_NO        SSRMEET_HRS_WEEK       SSRMEET_FUNC_CODE SSRMEET_COMT_CODE SSRMEET_SCHS_CODE SSRMEET_MTYP_CODE SSRMEET_DATA_ORIGIN            SSRMEET_USER_ID                SSRMEET_SURROGATE_ID   SSRMEET_VERSION        SSRMEET_VPDI_CODE
@@ -58,12 +65,13 @@ class MeetingTimeDecoratorIntegrationTests extends BaseIntegrationTestCase {
         assertEquals newMeeting.friday, courseLists[0].friday
         assertEquals newMeeting.saturday, courseLists[0].saturday
         assertEquals newMeeting.creditHourSession, courseLists[0].creditHourSession
-        assertEquals newMeeting.hoursWeek, courseLists[0].hoursWeek
+        assertEquals newMeeting.hoursWeek, courseLists[0].hoursWeek, 0
         assertEquals newMeeting.building, courseLists[0].building
         assertEquals newMeeting.meetingScheduleType, courseLists[0].scheduleType
     }
 
 
+	@Test
     void testToString() {
         def term = "201410"
         def crn = "20199"

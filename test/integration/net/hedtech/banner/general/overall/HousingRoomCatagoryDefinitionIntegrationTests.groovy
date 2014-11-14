@@ -3,6 +3,9 @@
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -37,7 +40,9 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	def u_failure_code = "TTTT"
 	def u_failure_description = "update failure description field with a string of more than 30 characters"
 
-	void setUp() {
+
+    @Before
+    public void setUp() {
 		formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
 		super.setUp()
 		initializeTestDataForReferences()
@@ -64,11 +69,13 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 
 	}
 
-	void tearDown() {
+    @After
+    public void tearDown() {
 		super.tearDown()
 	}
 
 
+    @Test
 	void testCreateValidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -76,6 +83,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
         assertNotNull housingRoomCatagoryDefinition.id
 	}
 
+    @Test
 	void testCreateInvalidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newInvalidForCreateHousingRoomCatagoryDefinition()
 		shouldFail(ValidationException) {
@@ -84,6 +92,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
+    @Test
 	void testUpdateValidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -104,6 +113,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
+    @Test
 	void testUpdateInvalidHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -122,6 +132,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -141,6 +152,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
     }
 
 
+	@Test
     void testOptimisticLock() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -161,6 +173,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
     }
 
 
+    @Test
 	void testDeleteHousingRoomCatagoryDefinition() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -170,11 +183,15 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 		assertNull HousingRoomCatagoryDefinition.get( id )
 	}
 
+
+	@Test
     void testValidation() {
        def housingRoomCatagoryDefinition = newInvalidForCreateHousingRoomCatagoryDefinition()
        assertFalse "HousingRoomCatagoryDefinition could not be validated as expected due to ${housingRoomCatagoryDefinition.errors}", housingRoomCatagoryDefinition.validate()
     }
 
+
+	@Test
     void testNullValidationFailure() {
         def housingRoomCatagoryDefinition = new HousingRoomCatagoryDefinition()
         assertFalse "HousingRoomCatagoryDefinition should have failed validation", housingRoomCatagoryDefinition.validate()
@@ -206,6 +223,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
+  @Test
    void testFetchByCodeOrDescription() {
        //test to verify all records are returned when filter is not provided
        def result = HousingRoomCatagoryDefinition.fetchByCodeOrDescription()

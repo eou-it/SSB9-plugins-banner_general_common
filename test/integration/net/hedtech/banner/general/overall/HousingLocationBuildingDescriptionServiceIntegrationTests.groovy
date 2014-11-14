@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
@@ -25,17 +28,20 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     def housingLocationBuildingDescriptionService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ["SSASECT"]
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testHousingLocationBuildingDescriptionCreate() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
 
@@ -58,6 +64,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testUpdate() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         def keyBlockMap = [code: "GRANT"]
@@ -147,6 +154,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testHousingLocationBuildingDescriptionDelete() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         housingLocationBuildingDescription = housingLocationBuildingDescriptionService.create([domainModel: housingLocationBuildingDescription])
@@ -159,6 +167,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
     }
 
 
+	@Test
     void testReadOnly() {
         def housingLocationBuildingDescription = newHousingLocationBuildingDescription()
         housingLocationBuildingDescription = housingLocationBuildingDescriptionService.create([domainModel: housingLocationBuildingDescription])

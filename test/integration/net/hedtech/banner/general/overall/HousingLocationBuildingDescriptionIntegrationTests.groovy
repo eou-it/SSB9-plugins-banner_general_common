@@ -2,6 +2,9 @@
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
@@ -125,7 +128,8 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     def u_failure_streetLine4 = "TTTTT"
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ["SSASECT"] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -186,12 +190,13 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
-    @Test
+	@Test
     void testCreateValidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -203,7 +208,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
-    @Test
+	@Test
     void testCreateInvalidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newInvalidForCreateHousingLocationBuildingDescription()
         shouldFail {

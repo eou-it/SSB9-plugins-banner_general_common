@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.commonmatching
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -33,7 +36,8 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     def i_failure_emailType
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -47,11 +51,13 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidCommonMatchingSourceRule() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule.save(flush: true, failOnError: true)
@@ -60,6 +66,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testCreateInvalidCommonMatchingSourceRule() {
         def commonMatchingSource = new CommonMatchingSourceRule(code: i_success_commonMatchingSource)
         shouldFail(ValidationException) {
@@ -68,6 +75,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateValidCommonMatchingSourceRule() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule.save(flush: true, failOnError: true)
@@ -102,6 +110,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testUpdateInvalidCommonMatchingSourceRule() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule.save(flush: true, failOnError: true)
@@ -127,6 +136,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
 
 
 
+	@Test
     void testOptimisticLock() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule = commonMatchingSourceRule.save(failOnError: true, flush: true)
@@ -147,6 +157,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testDeleteCommonMatchingSourceRule() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule.save(failOnError: true, flush: true)
@@ -157,12 +168,14 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+	@Test
     void testValidation() {
         def commonMatchingSourceRule = new CommonMatchingSourceRule(code: i_success_commonMatchingSource)
         assertFalse "CommonMatchingSourceRule could not be validated as expected due to ${commonMatchingSourceRule.errors}", commonMatchingSourceRule.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def commonMatchingSourceRule = new CommonMatchingSourceRule()
         assertFalse "CommonMatchingSourceRule should have failed validation", commonMatchingSourceRule.validate()

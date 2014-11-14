@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.DiplomaType
@@ -16,17 +19,20 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
     def sourceBackgroundInstitutionDiplomasOfferedService
 
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionDiplomasOfferedValidCreate() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
@@ -41,6 +47,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
     }
 
 
+	@Test
     void testSourceBackgroundInstitutionDiplomasOfferedInvalidCreate() {
         def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
@@ -51,6 +58,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
 
     // NOTE: No Updates are allowed
 
+	@Test
     void testSourceBackgroundInstitutionDiplomasOfferedDelete() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
@@ -62,6 +70,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
     }
 
 
+	@Test
     void testReadOnly() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]

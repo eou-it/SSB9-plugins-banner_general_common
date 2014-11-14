@@ -3,6 +3,9 @@
  ********************************************************************************* */
 
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -25,15 +28,18 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     def i_failure_modified_by = "modifiedbyme1234567812345678901"
     def i_failure_data_origin = "origin7890123456789012345678901"
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this (removing GEAPART because of GUOBOBS_UI_VERSION = B)
         super.setUp()
     }
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
+	@Test
     void testCreateValidObject() {
         AddressRolePrivileges myPriv = newObject()
         save myPriv
@@ -56,7 +62,8 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
-    def testCreateInvalidObject() {
+	@Test
+    void testCreateInvalidObject() {
         AddressRolePrivileges myPriv = newObject()
         myPriv.addressType = null // not nullable
         shouldFail(ValidationException) {
@@ -65,7 +72,8 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
-    def testUpdateValidObject() {
+	@Test
+    void testUpdateValidObject() {
         AddressRolePrivileges myPriv = newObject()
         save myPriv
         assertNotNull( myPriv.id )
@@ -80,6 +88,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
+	@Test
     void testOptimisticLock() {
         AddressRolePrivileges myPriv = newObject()
         myPriv.save(failOnError: true, flush: true)
@@ -99,6 +108,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
+	@Test
     void testDelete() {
         AddressRolePrivileges myPriv = newObject()
         save myPriv
@@ -112,6 +122,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
+	@Test
     void testNullValidationFailure() {
         AddressRolePrivileges myPriv = new AddressRolePrivileges()
         assertFalse "AddressRolePrivileges should have failed validation", myPriv.validate()
@@ -125,6 +136,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
+	@Test
     void testLengthValidation() {
         AddressRolePrivileges myPriv = newObject()
         myPriv.privilegeIndicator = i_failure_privilege_indicator
@@ -148,6 +160,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
+	@Test
     void testEquivalency() {
         AddressRolePrivileges myPriv = newObject()
         AddressRolePrivileges myPriv2 = newObject()
@@ -192,6 +205,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
     }
 
 
+	@Test
     void testFetchPrivilegedByRole() {
         AddressRolePrivileges myPriv = newObject()
         myPriv.role = "testrole1"
@@ -218,6 +232,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
       }
 
 
+	@Test
     void testFetchPrivilegedByRoleMixedPrivileges() {
         AddressRolePrivileges myPriv = newObject()
         myPriv.role = "testrole1"

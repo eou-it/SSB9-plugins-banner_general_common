@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
 
 import grails.validation.ValidationException
 import groovy.sql.Sql
@@ -17,17 +20,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseIntegrationTestCase {
 
-    void setUp() {
+	@Before
+	public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-    void tearDown() {
+	@After
+	public void tearDown() {
         super.tearDown()
     }
 
 
+	@Test
     void testCreateValidSourceBackgroundInstitutionContactPerson() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
@@ -36,6 +42,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testCreateInvalidSourceBackgroundInstitutionContactPerson() {
         def sourceBackgroundInstitutionContactPerson = newInvalidForCreateSourceBackgroundInstitutionContactPerson()
         shouldFail(ValidationException) {
@@ -44,6 +51,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testUpdateValidSourceBackgroundInstitutionContactPerson() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
@@ -78,6 +86,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testUpdateInvalidSourceBackgroundInstitutionContactPerson() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
@@ -98,6 +107,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -114,6 +124,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
@@ -134,6 +145,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testDeleteSourceBackgroundInstitutionContactPerson() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson.save(failOnError: true, flush: true)
@@ -144,12 +156,14 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testValidation() {
         def sourceBackgroundInstitutionContactPerson = newInvalidForCreateSourceBackgroundInstitutionContactPerson()
         assertFalse "SourceBackgroundInstitutionContactPerson could not be validated as expected due to ${sourceBackgroundInstitutionContactPerson.errors}", sourceBackgroundInstitutionContactPerson.validate()
     }
 
 
+	@Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson()
         assertFalse "SourceBackgroundInstitutionContactPerson should have failed validation", sourceBackgroundInstitutionContactPerson.validate()
@@ -169,6 +183,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testMaxSizeValidationFailures() {
         def sourceBackgroundInstitutionContactPerson = new SourceBackgroundInstitutionContactPerson(
                 phoneArea: 'XXXXXXXX',
@@ -180,6 +195,7 @@ class SourceBackgroundInstitutionContactPersonIntegrationTests extends BaseInteg
     }
 
 
+	@Test
     void testFetchSearch() {
         // Create 3 contacts
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()

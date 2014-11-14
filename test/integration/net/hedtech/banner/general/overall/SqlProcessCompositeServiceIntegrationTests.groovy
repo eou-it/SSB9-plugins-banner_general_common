@@ -252,7 +252,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
                 endDate: startDate + 2,
                 parsedSql: sqlString ,
                 systemRequiredIndicator: true,
-                entriesForSqlProcess: entriesForSqlProcess,
+                entriesForSqlProcesss: entriesForSqlProcess,
                 entriesForSql: entriesForSql,
         )
         return sqlProcess
@@ -272,7 +272,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
                 endDate: startDate + 2,
                 parsedSql: sqlString ,
                 systemRequiredIndicator: true,
-                entriesForSqlProcess: entriesForSqlProcess,
+                entriesForSqlProcesss: entriesForSqlProcess,
                 entriesForSql: entriesForSql,
         )
         return sqlProcess
