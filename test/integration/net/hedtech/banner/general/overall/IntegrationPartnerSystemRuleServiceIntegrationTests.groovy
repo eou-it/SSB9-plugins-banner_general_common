@@ -16,20 +16,20 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
     def integrationPartnerSystemRuleService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreate() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRule = integrationPartnerSystemRuleService.create(integrationPartnerSystemRule)
@@ -40,7 +40,7 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testUpdate() {
         def integrationPartnerSystemRules = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRules = integrationPartnerSystemRuleService.create(integrationPartnerSystemRules)
@@ -54,7 +54,7 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testIntegrationPartnerSystemRulesDelete() {
         def integrationPartnerSystemRules = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRules = integrationPartnerSystemRuleService.create(integrationPartnerSystemRules)

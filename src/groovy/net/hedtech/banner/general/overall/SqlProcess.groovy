@@ -50,7 +50,7 @@ import net.hedtech.banner.general.system.EntriesForSql
 @NamedQuery(name = "SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode",
         query = """select a.parsedSql
             FROM SqlProcess a
-           WHERE a.entriesForSqlProcesss.code = :entriesForSqlProcesssCode
+           WHERE a.entriesForSqlProcess.code = :entriesForSqlProcesssCode
              AND a.entriesForSql.code = :entriesForSqlCode
 	         AND a.activeIndicator = true
              AND a.validatedIndicator = true
@@ -63,7 +63,7 @@ import net.hedtech.banner.general.system.EntriesForSql
                 query = """select parsedSql FROM  SqlProcess a
            WHERE a.activeIndicator = true
            AND   a.validatedIndicator = true
-           AND   a.entriesForSqlProcesss.code = :sqlProcess
+           AND   a.entriesForSqlProcess.code = :sqlProcess
            AND   a.entriesForSql.code = :sql
            AND   current_date BETWEEN a.startDate AND coalesce(a.endDate, current_date + 1)
            ORDER BY a.sequenceNumber  """)
@@ -177,7 +177,7 @@ class SqlProcess implements Serializable {
     @JoinColumns([
     @JoinColumn(name = "GORRSQL_SQPR_CODE", referencedColumnName = "GTVSQPR_CODE")
     ])
-    EntriesForSqlProcesss entriesForSqlProcesss
+    EntriesForSqlProcesss entriesForSqlProcess
 
     /**
      * Foreign Key : FKV_GORRSQL_INV_GTVSQRU_CODE
@@ -206,7 +206,7 @@ class SqlProcess implements Serializable {
 					lastModified=$lastModified,
 					lastModifiedBy=$lastModifiedBy,
 					dataOrigin=$dataOrigin,
-					entriesForSqlProcesss=$entriesForSqlProcesss,
+					entriesForSqlProcess=$entriesForSqlProcess,
 					entriesForSql=$entriesForSql]"""
     }
 
@@ -230,7 +230,7 @@ class SqlProcess implements Serializable {
         if (lastModified != that.lastModified) return false
         if (lastModifiedBy != that.lastModifiedBy) return false
         if (dataOrigin != that.dataOrigin) return false
-        if (entriesForSqlProcesss != that.entriesForSqlProcesss) return false
+        if (entriesForSqlProcess != that.entriesForSqlProcess) return false
         if (entriesForSql != that.entriesForSql) return false
         return true
     }
@@ -253,7 +253,7 @@ class SqlProcess implements Serializable {
         result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
         result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
         result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (entriesForSqlProcesss != null ? entriesForSqlProcesss.hashCode() : 0)
+        result = 31 * result + (entriesForSqlProcess != null ? entriesForSqlProcess.hashCode() : 0)
         result = 31 * result + (entriesForSql != null ? entriesForSql.hashCode() : 0)
         return result
     }
@@ -273,23 +273,13 @@ class SqlProcess implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        entriesForSqlProcesss(nullable: false)
+        entriesForSqlProcess(nullable: false)
         entriesForSql(nullable: false)
     }
 
     //Read Only fields that should be protected against update
-    public static readonlyProperties = ['sequenceNumber', 'entriesForSqlProcesss', 'entriesForSql']
+    public static readonlyProperties = ['sequenceNumber', 'entriesForSqlProcess', 'entriesForSql']
 
-
-	public static List fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode(String entriesForSqlProcesssCode, String entriesForSqlCode) {
-		return SqlProcess.withSession { session ->
-			session.getNamedQuery(
-					'SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode')
-					.setString('entriesForSqlProcesssCode', entriesForSqlProcesssCode)
-					.setString('entriesForSqlCode', entriesForSqlCode)
-					.list()
-		}
-	}
 
     static String fetchActiveValidatedPriorityProcessSql( sql, sqlProcess) {
         String [] parsedSql = SqlProcess.withSession {session ->

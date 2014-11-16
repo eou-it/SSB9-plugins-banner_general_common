@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner
 
@@ -16,7 +16,7 @@ class DateUtility {
      * @param String dateFormat
      */
 
-    public static validateDateFormat = {dateString, dateFormat = null ->
+    public static validateDateFormat = { dateString, dateFormat = null ->
 
         boolean result = true
         try {
@@ -37,10 +37,23 @@ class DateUtility {
 
     public static Date parseDateString(String dateString, String dateFormat = null) {
         if (!dateFormat) {
-               dateFormat = MessageUtility.message("default.date.format")
+            dateFormat = MessageUtility.message("default.date.format")
         }
         return new SimpleDateFormat(dateFormat).parse(dateString)
     }
 
+    public static String getDateString(Date date, String dateFormat = null) {
+        if (!dateFormat) {
+            dateFormat = MessageUtility.message("default.date.format")
+        }
+        return new SimpleDateFormat(dateFormat).format(date);
+    }
+
+    public static String formatDate(Date date, String dateFormat = null) {
+        if (!dateFormat) {
+               dateFormat = MessageUtility.message("default.date.format")
+        }
+        return new SimpleDateFormat(dateFormat).format(date)
+    }
 
 }

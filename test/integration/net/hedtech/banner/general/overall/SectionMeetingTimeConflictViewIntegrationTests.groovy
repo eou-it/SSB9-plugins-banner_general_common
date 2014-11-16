@@ -11,20 +11,20 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException
 
 class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.testing.BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testFetchConflict() {
         def meeting20201 = SectionMeetingTime.findByTermAndCourseReferenceNumber("201410", "20201")
         def meeting20228 = SectionMeetingTime.findByTermAndCourseReferenceNumber("201410", "20228")
@@ -42,7 +42,7 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
  * Prove that you cannot save
  */
 
-	@Test
+    @Test
     void testCreateExceptionResults() {
 
         SectionMeetingTimeConflictView newSectionList = new SectionMeetingTimeConflictView()
@@ -57,7 +57,7 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
     }
 
 
-	@Test
+    @Test
     void testUpdateExceptionResults() {
         def existingSection = SectionMeetingTimeConflictView.fetchByTermAndCourseReferenceNumber(
                 "201410", "20201", "20228")[0]
@@ -69,7 +69,7 @@ class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.
     }
 
 
-	@Test
+    @Test
     void testDeleteExceptionResults() {
         def existingSection = SectionMeetingTimeConflictView.fetchByTermAndCourseReferenceNumber(
                 "201410", "20201", "20228") [0]

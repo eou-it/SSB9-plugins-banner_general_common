@@ -19,20 +19,20 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     def sourceBackgroundInstitutionEthnicMakeUpService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionEthnicMakeUpValidCreate() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]
@@ -47,7 +47,7 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionEthnicMakeUpInvalidCreate() {
         def sourceBackgroundInstitutionEthnicMakeUp = newInvalidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]
@@ -57,7 +57,7 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionEthnicMakeUpValidUpdate() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]
@@ -80,7 +80,7 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionEthnicMakeUpInvalidUpdate() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]
@@ -102,7 +102,7 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionEthnicMakeUpDelete() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]
@@ -114,7 +114,7 @@ class SourceBackgroundInstitutionEthnicMakeUpServiceIntegrationTests extends Bas
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         def map = [domainModel: sourceBackgroundInstitutionEthnicMakeUp]

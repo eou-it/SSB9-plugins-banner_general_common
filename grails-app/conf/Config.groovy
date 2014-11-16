@@ -70,62 +70,35 @@ grails.views.gsp.sitemesh.preprocess = true
 
 
 
-// ******************************************************************************
-//
-//                       +++ LOGGER CONFIGURATION +++
-//
-// ******************************************************************************
-// See http://grails.org/doc/1.1.x/guide/3.%20Configuration.html#3.1.2%20Logging
-// for more information about log4j configuration.
+
 log4j = {
+    def String loggingFileDir = "target/logs"
+    def String logAppName = "banner_general_common"
+    def String loggingFileName = "${loggingFileDir}/${logAppName}.log".toString()
     appenders {
-        file name: 'file', file: 'target/logs/development.log'
-    }
-    root {
-        off 'stdout', 'file'
-        additivity = true
+        rollingFile name: 'appLog', file: loggingFileName, maxFileSize: "${10 * 1024 * 1024}", maxBackupIndex: 10, layout: pattern(conversionPattern: '%d{[EEE, dd-MMM-yyyy @ HH:mm:ss.SSS]} [%t] %-5p %c %x - %m%n')
     }
 
-    // Configure logging for other classes (e.g., in src/ or grails-app/utils/) here:
-    // info 'net.hedtech.banner.representations'
-    // info 'net.hedtech.banner.supplemental.SupplementalDataService'
-    off  'net.hedtech.banner.security'
-    off  'net.hedtech.banner.db'
-    off  'net.hedtech.banner.student'
-    off  'net.hedtech.banner.general.system.CollegeController'
-    off  'net.hedtech.banner.general.system.CollegeService'
-
-    // Grails framework classes
-    off  'org.codehaus.groovy.grails.web.servlet'        // controllers
-    off  'org.codehaus.groovy.grails.web.pages'          // GSP
-    off  'org.codehaus.groovy.grails.web.sitemesh'       // layouts
-    off  'org.codehaus.groovy.grails.web.mapping.filter' // URL mapping
-    off  'org.codehaus.groovy.grails.web.mapping'        // URL mapping
-    off  'org.codehaus.groovy.grails.commons'            // core / classloading
-    off  'org.codehaus.groovy.grails.plugins'            // plugins
-    off  'org.codehaus.groovy.grails.orm.hibernate'      // hibernate integration
-    off  'org.springframework'                           // Spring IoC
-    off  'org.hibernate'                                 // hibernate ORM
-
-    off  'grails.plugins.springsecurity'
-    off  'org.springframework.security'
-
-    // Grails provides a convenience for enabling logging within artefacts, using 'grails.app.XXX'.
-    // Unfortunately, this configuration is not effective when 'mixing in' methods that perform logging.
-    // Therefore, for controllers and services it is recommended that you enable logging using the controller
-    // or service class name (see above 'class name' based configurations).  For example:
-    //     all  'net.hedtech.banner.testing.FooController' // turns on all logging for the FooController
-    //
-    off 'grails.app' // apply to all artefacts
-    // off 'grails.app.<artefactType>.ClassName // where artefactType is in:
-    //  bootstrap  - For bootstrap classes
-    //  dataSource - For data sources
-    //  tagLib     - For tag libraries
-    //  service    // Not effective with mixins -- see comment above
-    //  controller // Not effective with mixins -- see comment above
-    //  domain     - For domain entities
-
-    off 'net.hedtech.banner.student.system'
+    switch (grails.util.Environment.current.name.toString()) {
+        case 'development':
+            root {
+                warn 'appLog'
+                additivity = true
+            }
+            break
+        case 'test':
+            root {
+                error 'appLog'
+                additivity = true
+            }
+            break
+        case 'production':
+            root {
+                error 'appLog'
+                additivity = true
+            }
+            break
+    }
 }
 
 seedDataTarget =  ['bgc': ['/src/groovy/net/hedtech/banner/seeddata/Data/banner_general_common.xml']]

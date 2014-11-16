@@ -12,20 +12,20 @@ import org.springframework.jdbc.UncategorizedSQLException
 
 class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCrnList() {
 
         def term = "201410"
@@ -43,7 +43,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchWithParseQuery() {
         Map filterData = [courseReferenceNumber: "20199", term: "201410"]
         def meetings = MeetingTimeSearch.fetchSearch(filterData)
@@ -95,7 +95,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchWithParseQueryString() {
         String.metaClass.flattenString = {
             return delegate.replace("\n", "").replaceAll(/  */, " ")
@@ -184,7 +184,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
      * Tests that view does not allow crud (create,update,delete) operations and is readonly
      */
 
-	@Test
+    @Test
     void testCreateExceptionResults() {
         def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
         assertNotNull existingMeeting
@@ -199,7 +199,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateExceptionResults() {
         def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
         assertNotNull existingMeeting
@@ -210,7 +210,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteExceptionResults() {
         def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
         assertNotNull existingMeeting
@@ -220,7 +220,7 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetch() {
         def term = "201410"
         def courseReferenceNumber = "20001"
@@ -229,14 +229,14 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMultipleInCrn() {
         def list = MeetingTimeSearch.fetchByTermAndCourseReferenceNumber("201110", "8007")
         assertEquals 2, list.size()
     }
 
 
-	@Test
+    @Test
     void testFetchListMeetingTimeDetailByTermAndCourseReferenceNumber()
     {
         //String termCode = "201410"

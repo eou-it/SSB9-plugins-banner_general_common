@@ -16,20 +16,20 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     def priorCollegeConcentrationAreaService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeConcentrationAreaValidCreate() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -47,7 +47,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeConcentrationAreaInvalidCreate() {
         def priorCollegeConcentrationArea = newInvalidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -57,7 +57,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeConcentrationAreaValidUpdate() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -86,7 +86,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeConcentrationAreaDelete() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]
@@ -99,7 +99,7 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def priorCollegeConcentrationArea = newValidForCreatePriorCollegeConcentrationArea()
         def map = [domainModel: priorCollegeConcentrationArea]

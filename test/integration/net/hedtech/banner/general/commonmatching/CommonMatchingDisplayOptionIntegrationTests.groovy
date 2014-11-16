@@ -35,20 +35,20 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     def u_failure_sequenceNumber = 1
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidCommonMatchingDisplayOption() {
         def commonMatchingDisplayOption = newValidForCreateCommonMatchingDisplayOption()
         commonMatchingDisplayOption.save(failOnError: true, flush: true)
@@ -56,7 +56,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidCommonMatchingDisplayOption() {
         def commonMatchingDisplayOption = newInvalidForCreateCommonMatchingDisplayOption()
         shouldFail(ValidationException) {
@@ -65,7 +65,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-	@Test
+    @Test
     void testUpdateValidCommonMatchingDisplayOption() {
         def commonMatchingDisplayOption = newValidForCreateCommonMatchingDisplayOption()
         commonMatchingDisplayOption.save(failOnError: true, flush: true)
@@ -86,7 +86,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidCommonMatchingDisplayOption() {
         def commonMatchingDisplayOption = newValidForCreateCommonMatchingDisplayOption()
         commonMatchingDisplayOption.save(failOnError: true, flush: true)
@@ -104,7 +104,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def commonMatchingDisplayOption = newValidForCreateCommonMatchingDisplayOption()
         commonMatchingDisplayOption.save(failOnError: true, flush: true)
@@ -125,7 +125,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-	@Test
+    @Test
     void testDeleteCommonMatchingDisplayOption() {
         def commonMatchingDisplayOption = newValidForCreateCommonMatchingDisplayOption()
         commonMatchingDisplayOption.save(failOnError: true, flush: true)
@@ -136,14 +136,14 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def commonMatchingDisplayOption = newInvalidForCreateCommonMatchingDisplayOption()
         assertFalse "CommonMatchingDisplayOption could not be validated as expected due to ${commonMatchingDisplayOption.errors}", commonMatchingDisplayOption.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def commonMatchingDisplayOption = new CommonMatchingDisplayOption()
         assertFalse "CommonMatchingDisplayOption should have failed validation", commonMatchingDisplayOption.validate()

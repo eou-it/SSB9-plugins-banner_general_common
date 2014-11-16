@@ -19,20 +19,20 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
     def sourceBackgroundInstitutionTestScoreService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionTestScoreValidCreate() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         def map = [domainModel: sourceBackgroundInstitutionTestScore]
@@ -48,7 +48,7 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionTestScoreInvalidCreate() {
         def sourceBackgroundInstitutionTestScore = newInvalidForCreateSourceBackgroundInstitutionTestScore()
         def map = [domainModel: sourceBackgroundInstitutionTestScore]
@@ -58,7 +58,7 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionTestScoreValidUpdate() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         def map = [domainModel: sourceBackgroundInstitutionTestScore]
@@ -81,7 +81,7 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionTestScoreInvalidUpdate() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         def map = [domainModel: sourceBackgroundInstitutionTestScore]
@@ -103,7 +103,7 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionTestScoreDelete() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         def map = [domainModel: sourceBackgroundInstitutionTestScore]
@@ -115,7 +115,7 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         def map = [domainModel: sourceBackgroundInstitutionTestScore]

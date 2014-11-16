@@ -22,20 +22,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -53,7 +53,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newInvalidForCreateSourceBackgroundInstitutionBase()
         shouldFail(ValidationException) {
@@ -77,7 +77,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -104,7 +104,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -119,7 +119,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -136,7 +136,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -157,7 +157,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionBase() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
@@ -168,14 +168,14 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionBase = newInvalidForCreateSourceBackgroundInstitutionBase()
         assertFalse "SourceBackgroundInstitutionBase could not be validated as expected due to ${sourceBackgroundInstitutionBase.errors}", sourceBackgroundInstitutionBase.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase()
         assertFalse "SourceBackgroundInstitutionBase should have failed validation", sourceBackgroundInstitutionBase.validate()
@@ -196,7 +196,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def sourceBackgroundInstitutionBase = new SourceBackgroundInstitutionBase(
                 streetLine1: '123456789012345678901234567890123456789012345678901234567890123456789012345X',
@@ -211,7 +211,7 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
     }
 
 
-	@Test
+    @Test
     void testFetchBySourceAndBackgroundInstitution() {
         // Create 2 bases
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()

@@ -20,20 +20,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionTestScore() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         sourceBackgroundInstitutionTestScore.save(failOnError: true, flush: true)
@@ -42,7 +42,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionTestScore() {
         def sourceBackgroundInstitutionTestScore = newInvalidForCreateSourceBackgroundInstitutionTestScore()
         shouldFail(ValidationException) {
@@ -51,7 +51,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSourceBackgroundInstitutionTestScore() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         sourceBackgroundInstitutionTestScore.save(failOnError: true, flush: true)
@@ -72,7 +72,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSourceBackgroundInstitutionTestScore() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         sourceBackgroundInstitutionTestScore.save(failOnError: true, flush: true)
@@ -90,7 +90,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -107,7 +107,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         sourceBackgroundInstitutionTestScore.save(failOnError: true, flush: true)
@@ -128,7 +128,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionTestScore() {
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()
         sourceBackgroundInstitutionTestScore.save(failOnError: true, flush: true)
@@ -139,14 +139,14 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionTestScore = newInvalidForCreateSourceBackgroundInstitutionTestScore()
         assertFalse "SourceBackgroundInstitutionTestScore could not be validated as expected due to ${sourceBackgroundInstitutionTestScore.errors}", sourceBackgroundInstitutionTestScore.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionTestScore = new SourceBackgroundInstitutionTestScore()
         assertFalse "SourceBackgroundInstitutionTestScore should have failed validation", sourceBackgroundInstitutionTestScore.validate()
@@ -160,7 +160,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testFetchSearch() {
         // Create 2 tests
         def sourceBackgroundInstitutionTestScore = newValidForCreateSourceBackgroundInstitutionTestScore()

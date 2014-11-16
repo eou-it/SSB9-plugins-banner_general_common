@@ -33,20 +33,20 @@ class SourceBackgroundInstitutionBaseCompositeServiceIntegrationTests extends Ba
     def sourceBackgroundInstitutionTestScoreService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseCompositeDeleteAll() {
         // create and test new base and detail records
         def map = createAll()
