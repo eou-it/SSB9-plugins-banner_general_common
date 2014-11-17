@@ -22,6 +22,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     def communicationFieldCalculationService
     def communicationTemplateService
 
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -68,7 +69,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         params << ['pidm': 37815]
         params << ['bannerId': "AA0037815"]
         def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
-        assertEquals( "Hello \$firstname\$ \$lastname\$" , resultSet)
+        assertEquals( "Hello \$firstname\$ \$lastname\$", resultSet )
 
     }
 

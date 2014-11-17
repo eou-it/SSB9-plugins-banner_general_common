@@ -7,9 +7,8 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
+import org.antlr.runtime.tree.CommonTree
 import org.stringtemplate.v4.ST
-
-import java.util.regex.Pattern
 
 class CommunicationTemplateService extends ServiceBase {
 
@@ -44,53 +43,37 @@ class CommunicationTemplateService extends ServiceBase {
      * @return set of unique string variables found in the template string
      */
     List<String> extractTemplateVariables( String statement ) {
-//        Pattern pattern = Pattern.compile( /\$(\w*)\$/ );
-        Pattern pattern = Pattern.compile( /\$(\w+)[.]|(\w+?)\$/ );
-        def List<String> runTimeParms = []
-        def matcher = pattern.matcher( statement )
+        final int ID = 25
+        char delimiter = '$'
+        ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
 
-        while (matcher.find()) {
-            runTimeParms << matcher.group( 2 )
+        def dataFieldNames = []
+        st.impl.ast.getChildren().each {
 
-        }
-        runTimeParms.removeAll( Collections.singleton( null ) );
-        runTimeParms.unique( false )
-    }
-/*
-    final int ID = 25
+            if (it != null) {
+                CommonTree child = it as CommonTree
+                if (child.toString().equals( "EXPR" )) {
+                    if (child.getChildCount() == 1) {
+                        CommonTree expressionChild = child.getChild( 0 )
+                        if (expressionChild.getToken().getType() == ID) {
+                            dataFieldNames.add( expressionChild.toString() )
+                        } else if (expressionChild.toString().equals( "PROP" )) {
+                            if (expressionChild.getChildCount() == 2) {
+                                dataFieldNames.add(
+                                        expressionChild.getChild( 0 ).toString() +
+                                                "." +
+                                                expressionChild.getChild( 1 ).toString() )
+                            }
+                        }
 
-
-    char delimiter = '$'
-    ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
-
-    def dataFieldNames = []
-
-
-
-    st.impl.ast.getChildren ( ).each {
-
-    if ( it != null ) {
-        CommonTree child = it as CommonTree
-        if (child.toString().equals( "EXPR" )) {
-            if (child.getChildCount() == 1) {
-                CommonTree expressionChild = child.getChild( 0 )
-                if (expressionChild.getToken().getType() == ID) {
-                    dataFieldNames.add( expressionChild.toString() )
-                } else if (expressionChild.toString().equals( "PROP" )) {
-                    if (expressionChild.getChildCount() == 2) {
-                        dataFieldNames.add(
-                                expressionChild.getChild( 0 ).toString() +
-                                        "." +
-                                        expressionChild.getChild( 1 ).toString() )
                     }
                 }
             }
         }
+
+        dataFieldNames.unique( false )
+
     }
-}
 
-System.out.println( dataFieldNames )
-
-*/
 
 }
