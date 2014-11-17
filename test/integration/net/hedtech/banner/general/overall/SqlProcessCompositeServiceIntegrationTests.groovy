@@ -216,6 +216,46 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
+    @Test
+    void testGetProcessResultsHierarchPidmTwoInactive() {
+        def testData = ["213013", "213014", "213015"]
+
+        // Create three identical processes that act on a pidm. It will return the spriden_id of the pereson with the pidm
+        def entriesForSql = getEntriesForSql()
+        def entriesForSqlProcess = getEntriesForSqlProcess()
+
+        def validProcess = newValidTermForCreateSqlProcess(1, testData[0], entriesForSql, entriesForSqlProcess, new Date()-1, true)
+        validProcess.save(failOnError: true, flush: true)
+
+
+
+        validProcess = newValidTermForCreateSqlProcess(2, testData[1], entriesForSql, entriesForSqlProcess, new Date()-1, false)
+        validProcess.save(failOnError: true, flush: true)
+
+
+        validProcess = newValidTermForCreateSqlProcess(3, testData[2], entriesForSql, entriesForSqlProcess, new Date()-1, false)
+        validProcess.save(failOnError: true, flush: true)
+
+
+        createSqlProcessParameter("INTEGRATION_TEST", "TERM")
+
+
+        def params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[0]]
+        def results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
+        assertEquals testData[0], results[0].getAt(0)
+
+
+        params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[1]]
+        results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
+        assertNull results
+
+
+        params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[2]]
+        results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
+        assertNull results
+    }
+
+
 
     private def newValidForCreateSqlProcess(def sequenceNumber, def bannerId, def entriesForSql, def entriesForSqlProcess, def startDate, def active) {
         def sqlString = "select " + sequenceNumber + " from SPRIDEN where SPRIDEN_PIDM=:PIDM and SPRIDEN_ID='" + bannerId + "'"
@@ -238,7 +278,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
 
     private def newValidTermForCreateSqlProcess(def sequenceNumber, def termCode, def entriesForSql, def entriesForSqlProcess, def startDate, def active) {
-        def sqlString = "select STVTERM_CODE from STVTERM where STVTERM_CODE=:TERM and STVTERM_CODE='" + termCode + "'"
+        def sqlString = "select MAX(STVTERM_CODE) from STVTERM where STVTERM_CODE=:TERM and STVTERM_CODE='" + termCode + "'"
         def sqlProcess = new SqlProcess(
                 sequenceNumber: sequenceNumber,
                 activeIndicator: active,

@@ -93,7 +93,7 @@ class SqlProcessCompositeService {
                     } else {
                         rows = db.rows(parsedSql)
                     }
-                    if (null != rows && rows.size() > 0) {
+                    if (null != rows && rows.size() > 0 && rows[0][0] != null) {
                         break;
                     }
                 }
@@ -103,7 +103,12 @@ class SqlProcessCompositeService {
 
             }
         }
+        // Empty rows
         if (rows != null && rows.size() == 0) {
+            return null;
+        }
+        // function called but null returned as data
+        else if (rows != null && rows[0][0] == null) {
             return null;
         }
         return rows
