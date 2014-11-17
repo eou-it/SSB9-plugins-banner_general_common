@@ -5,16 +5,13 @@
 package net.hedtech.banner.general.communication.merge
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import org.hibernate.annotations.Type
 
 import javax.persistence.Column
 import javax.persistence.Embeddable
 
-
 @Embeddable
 @EqualsAndHashCode
-@ToString
 class CommunicationFieldValue implements Serializable {
 
     @Column(name = "GCRFVAL_VALUE")
@@ -27,4 +24,12 @@ class CommunicationFieldValue implements Serializable {
     @Column(name = "GCRFVAL_RENDER_AS_HTML")
     Boolean renderAsHtml
 
+
+    @Override
+    public String toString() {
+        return "CommunicationFieldValue{" +
+                "value='" + value + '\'' +
+                ", renderAsHtml=" + renderAsHtml +
+                '}';
+    }
 }

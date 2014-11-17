@@ -6,10 +6,8 @@ package net.hedtech.banner.general.communication.field
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import org.hibernate.annotations.Type
-import net.hedtech.banner.general.communication.*
 import org.hibernate.criterion.Order
 
 import javax.persistence.*
@@ -21,10 +19,15 @@ import javax.persistence.*
 @EqualsAndHashCode
 @ToString
 @Table(name = "GCRCFLD")
-// @NamedQueries(value = [
-// @NamedQuery(name = "CommunicationField.fetchByxxxxx",
-//             query = """ FROM CommunicationField a WHERE xxxxx """)
-// ])
+@NamedQueries(value = [
+        @NamedQuery(name = "CommunicationField.fetchByName",
+                query = """ FROM CommunicationField a
+                    WHERE upper(a.name) = upper(:fieldName)"""),
+        @NamedQuery(name = "CommunicationField.existsAnotherName",
+                query = """ FROM CommunicationField a
+                    WHERE  upper(a.name) = upper(:fieldName)
+                    AND   a.id <> :id""")
+])
 class CommunicationField implements Serializable {
 
     /**
@@ -173,38 +176,39 @@ class CommunicationField implements Serializable {
 
 
     static constraints = {
-        name( nullable: false, maxSize: 1020 )
-        description( nullable: true, maxSize: 4000 )
-        folder( nullable: false )
-        formatString( nullable: true )
-        groovyFormatter( nullable: true )
+        name(nullable: false, maxSize: 1020)
+        description(nullable: true, maxSize: 4000)
+        folder(nullable: false)
+        formatString(nullable: true)
+        groovyFormatter(nullable: true)
         /*
         immutableId is actually not null, but is set nullable so it passes domain validation and is populated by the service
          */
-        immutableId( nullable: true, maxSize: 144 )
-        previewValue( nullable: true, maxSize: 1020 )
-        renderAsHtml( nullable: false )
-        ruleUri( nullable: true, maxSize: 1020 )
+        immutableId(nullable: true, maxSize: 144)
+        previewValue(nullable: true, maxSize: 1020)
+        renderAsHtml(nullable: false)
+        ruleUri(nullable: true, maxSize: 1020)
         /*
         status is actually not null, but is set nullable so it passes domain validation and
         is populated by the service preCreate and throws an exception if null on preUpdate
          */
-        status( nullable: true, maxSize: 100 )
-        lastModified( nullable: true )
-        lastModifiedBy( nullable: true, maxSize: 30 )
-        dataOrigin( nullable: true, maxSize: 30 )
+        status(nullable: true, maxSize: 100)
+        lastModified(nullable: true)
+        lastModifiedBy(nullable: true, maxSize: 30)
+        dataOrigin(nullable: true, maxSize: 30)
         /*
         If any of these three are not null, the others must be not null. This is validated in the service
         */
-        returnsArrayArguments( nullable: true )
-        statementType( nullable: true )
-        ruleContent( nullable: true )
+        returnsArrayArguments(nullable: true)
+        statementType(nullable: true)
+        ruleContent(nullable: true)
     }
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id', 'immutableId']
 
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
 
@@ -215,4 +219,30 @@ class CommunicationField implements Serializable {
         }
         return results
     }
+
+
+    public static CommunicationField fetchByName(String fieldName) {
+
+        def query
+        CommunicationField.withSession { session ->
+            query = session.getNamedQuery('CommunicationField.fetchByName')
+                    .setString('fieldName', fieldName)
+                    .list()[0]
+        }
+        return query
+    }
+
+
+    public static Boolean existsAnotherName(Long fieldId, String fieldName) {
+
+        def query
+        CommunicationField.withSession { session ->
+            query = session.getNamedQuery('CommunicationField.existsAnotherName')
+                    .setString('fieldName', fieldName)
+                    .setLong('id', fieldId).list()[0]
+
+        }
+        return (query != null)
+    }
+
 }
