@@ -74,7 +74,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     }
 
 
-    @Test
+    @Test 
     void testExtractParameters() {
         String template = """hi \$firstname\$!,
                 your last name is \$lastname\$!
