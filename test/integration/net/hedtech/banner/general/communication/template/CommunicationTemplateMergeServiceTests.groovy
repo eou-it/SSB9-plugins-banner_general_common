@@ -11,6 +11,9 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -18,6 +21,12 @@ import org.junit.Before
 import org.junit.Test
 
 class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
+
+    def communicationEmailTemplateService
+    def communicationTemplateMergeService
+    def communicationFieldService
+
+
     def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
     def i_valid_emailTemplate_ccList = """Valid Emailtemplate Cclist"""
@@ -37,14 +46,8 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def i_valid_folder_name1 = "Valid Folder1 Name"
     def i_valid_folder_name2 = "Valid Folder2 Name"
 
-
-    def communicationEmailTemplateService
-
-
     def CommunicationFolder folder1
     def CommunicationFolder folder2
-
-    def communicationTemplateMergeService
 
 
     @Before
@@ -59,6 +62,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         folder2.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
+
     }
 
 
@@ -85,6 +89,47 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         shouldFail( ApplicationException ) {
             communicationTemplateMergeService.processTemplate( emailTemplate.content )
         }
+    }
+
+
+    @Test
+    void testRenderPreviewTemplate() {
+        CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
+        def CommunicationField testCommunicationField
+        emailTemplate.content = """\$Salutation\$
+            \$invitation\$
+            \$signed\$"""
+        emailTemplate.subject = "REQUEST FOR URGENT BUSINESS RELATIONSHIP "
+        emailTemplate.save()
+
+        // Now set up the fields
+
+        testCommunicationField = newCommunicationField( "Salutation", "Greetings \$fn\$ \$ln\$,", "Greetings George Washington,", null )
+        communicationFieldService.create( [domainModel: testCommunicationField] )
+
+        testCommunicationField = newCommunicationField( "invitation", "\$IntroParagraph\$", """First, I must solicit your strictest confidence in this transaction. this is by
+        virtue of its nature as being utterly confidential and 'top secret'. I am sure
+        and have confidence of your ability and reliability to prosecute a transaction
+        of this great magnitude involving a pending transaction requiring maxiimum
+        confidence.""", null )
+        communicationFieldService.create( [domainModel: testCommunicationField] )
+
+
+        testCommunicationField = newCommunicationField( "signed", "", """Yours Faithfully,
+            DR CLEMENT OKON """, null )
+        communicationFieldService.create( [domainModel: testCommunicationField] )
+
+        //(String name, String formatString, String previewValue, String ruleContent )
+        String result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate.content )
+        println result
+        assertEquals( """Greetings George Washington,
+                    First, I must solicit your strictest confidence in this transaction. this is by
+                            virtue of its nature as being utterly confidential and 'top secret'. I am sure
+                            and have confidence of your ability and reliability to prosecute a transaction
+                            of this great magnitude involving a pending transaction requiring maxiimum
+                            confidence.
+                    Yours Faithfully,
+                                DR CLEMENT OKON """,result )
     }
 
 
@@ -130,5 +175,30 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
         return communicationTemplate
     }
+
+
+    private def newCommunicationField( String name, String formatString, String previewValue, String ruleContent ) {
+        def communicationField = new CommunicationField(
+                // Required fields
+                folder: folder1,
+                //immutableId: UUID.randomUUID().toString(),
+                name: name,
+                returnsArrayArguments: false,
+
+                // Nullable fields
+                description: name + " test",
+                formatString: formatString,
+                groovyFormatter: "TTTTTTTT",
+                previewValue: previewValue,
+                renderAsHtml: true,
+                ruleUri: null,
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statmentType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                ruleContent: ruleContent
+        )
+
+        return communicationField
+    }
+
 
 }

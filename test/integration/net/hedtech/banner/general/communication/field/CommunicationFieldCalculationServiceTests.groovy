@@ -74,11 +74,11 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     }
 
 
-    @Test 
+    @Test
     void testExtractParameters() {
         String template = """hi \$firstname\$!,
                 your last name is \$lastname\$!
-                 and I see your last name a second time is \$lastname\$
+                 and I see your last name fa second time is \$lastname\$
                  Today is \$today\$ and you owe me \$amount\$
                  But I would settle for \$someotheramount\$"""
         def parms = communicationTemplateService.extractTemplateVariables( template )

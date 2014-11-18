@@ -15,43 +15,53 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.person.PersonUtility
+import org.stringtemplate.v4.ST
 
 class CommunicationTemplateMergeService {
     def communicationFieldService
     def communicationFieldCalculationService
     def communicationTemplateService
 
-    String calculateTempalteByBannerId( String immutableId, String bannerId ) {
 
-           def person = PersonUtility.getPerson( bannerId )
+    String calculateTemplateByBannerId( String immutableId, String bannerId ) {
 
-           if (person == null) {
-               throw new ApplicationException( CommunicationFieldCalculationService, "Person is null" ) // TODO: I18N these
-           }
-           if (immutableId == null) {
-               throw new ApplicationException( CommunicationFieldCalculationService, "ImmutableId is null" )
-           }
+        def person = PersonUtility.getPerson( bannerId )
 
-           calculateFieldByPidm( immutableId, person.pidm )
-       }
+        if (person == null) {
+            throw new ApplicationException( CommunicationFieldCalculationService, "Person is null" ) // TODO: I18N these
+        }
+        if (immutableId == null) {
+            throw new ApplicationException( CommunicationFieldCalculationService, "ImmutableId is null" )
+        }
+
+        calculateFieldByPidm( immutableId, person.pidm )
+    }
+
 
     String calculateTemplateByPidm( String immutableId, Long pidm ) {
-         def sqlParams = [:]
-         sqlParams << ['pidm': pidm]
-         calculateField( immutableId, sqlParams )
-     }
+        def sqlParams = [:]
+        sqlParams << ['pidm': pidm]
+        calculateField( immutableId, sqlParams )
+    }
 
 
-    private String processTemplate( String templateString ) {
+    def String renderPreviewTemplate( String templateString ) {
         def templateVariables = communicationTemplateService.extractTemplateVariables( templateString )
+        def renderedCommunicationFields = [:]
+        char delimiter = '$'
         templateVariables.each { dataFieldName ->
-            def communicationField = CommunicationField.findByName( dataFieldName )
+            CommunicationField communicationField = CommunicationField.findByName( dataFieldName )
             if (communicationField == null) {
                 throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:invalidDataField@@", dataFieldName )
             }
-            String fieldValue = communicationFieldCalculationService.calculateFieldByPidm( immutableId, pidm ) {
-            }
+            renderedCommunicationFields.put(communicationField.name, communicationField.previewValue)
+
         }
+        ST st = new ST( templateString, delimiter, delimiter );
+        renderedCommunicationFields.keySet().each { key ->
+            st.add( key, renderedCommunicationFields[key] )
+        }
+        st.render()
     }
 
 
@@ -60,4 +70,6 @@ class CommunicationTemplateMergeService {
         def template = engine.createTemplate( templateString ).make( bindings )
 
     }
+
+
 }
