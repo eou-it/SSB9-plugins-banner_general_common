@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.merge
 
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.field.CommunicationFieldView
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
@@ -93,7 +94,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         formContext = ['GUAGMNU']
         super.setUp()
 
-        validFolder = newValidForCreateFolder()
+        validFolder = newValidForCreateFolder("Test Folder")
         validFolder.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull validFolder.id
@@ -101,7 +102,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
         validQuery = communicationPopulationQueryService.create(newPopulationQuery(validFolder, "TestQuery"))
         assertNotNull(validQuery.id)
-        validField1 = communicationFieldService.create(newCommunicationField())
+        validField1 = communicationFieldService.create(newCommunicationField(validFolder, validImmutableId, "PersonName"))
         assertNotNull validField1.id
         validTemplate = communicationEmailTemplateService.create([domainModel: newValidForCreateEmailTemplate(validFolder, validField1)])
         assertNotNull(validTemplate.id)
@@ -173,6 +174,26 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     }
 
 
+    @Test
+    void testGroupFolder() {
+
+        def folder1 = newValidForCreateFolder("testfolder1")
+        folder1 = folder1.save(failOnError: true, flush: true)
+        def folder2 = newValidForCreateFolder("testfolder2")
+        folder2 = folder2.save(failOnError: true, flush: true)
+        def field1 = newCommunicationField(folder1, (UUID.randomUUID().toString()), "testfieldname1")
+        field1 = field1.save(failOnError: true, flush: true)
+        def field2 = newCommunicationField(folder1, (UUID.randomUUID().toString()), "testfieldname2")
+        field2 = field2.save(failOnError: true, flush: true)
+        def field3 = newCommunicationField(folder2, (UUID.randomUUID().toString()), "testfieldname3")
+        field3 = field3.save(failOnError: true, flush: true)
+        def field4 = newCommunicationField(folder2, (UUID.randomUUID().toString()), "testfieldname4")
+        field4 = field4.save(failOnError: true, flush: true)
+        def fldrlist = CommunicationFieldView.findAll()
+        assertTrue(fldrlist.size() >= 5)  //5 created in the test plus whatever is already in the table
+    }
+
+
     private def newCommunicationRecipientData(pidmvalue, templateid, fieldValue) {
         def communicationRecipientData = new CommunicationRecipientData(
                 // Required fields
@@ -207,22 +228,22 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     }
 
 
-    private def newValidForCreateFolder() {
+    private def newValidForCreateFolder(String foldername) {
         def folder = new CommunicationFolder(
-                description: "Test Folder",
+                description: foldername,
                 internal: false,
-                name: "Folder Name"
+                name: foldername
         )
         return folder
     }
 
 
-    private def newCommunicationField() {
+    private def newCommunicationField(CommunicationFolder folder, String immId, String fieldname) {
         def communicationField = new CommunicationField(
                 // Required fields
-                folder: validFolder,
-                immutableId: validImmutableId,
-                name: "PersonName",
+                folder: folder,
+                immutableId: immId,
+                name: fieldname,
                 returnsArrayArguments: false,
 
                 // Nullable fields
