@@ -21,7 +21,7 @@ class CommunicationTemplateService extends ServiceBase {
             throw new ApplicationException( CommunicationTemplate, "@@r1:nameCannotBeNull@@" )
 
         if (template.fetchByTemplateNameAndFolderName( template.name, template.folder.name )) {
-            throw new ApplicationException( CommunicationTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
+            throw new ApplicationException( CommunicationTemplate, "@@r1:templateExists@@" + template.name + " name@@" )
         }
     }
 

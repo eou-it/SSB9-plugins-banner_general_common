@@ -68,7 +68,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
             communicationFolderService.create(sameNameFolder)
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue(e.getMessage().toString().contains("not.unique.message"))
+            assertTrue(e.getMessage().toString().contains("folderExists"))
 
         }
 

@@ -10,7 +10,6 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.communication.template
 
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
@@ -62,7 +61,6 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         folder2.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
-
     }
 
 
@@ -73,23 +71,35 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testInvalidDataFields() {
-        def String templateString = "some template data with \$variable1\$ and \$variable2\$ should both fail"
-        shouldFail( ApplicationException ) {
-            communicationTemplateMergeService.processTemplate( templateString )
-        }
+    void testCalculateTemplateByBannerId() {
+        CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
+        emailTemplate.content = """Hi \$firstname\$ \$lastname\$"""
+        emailTemplate.save( failOnError: true, flush: true )
+
+        // Now set up the fields
+
+        def testCommunicationField = newCommunicationField( "firstname", "\$firstname\$", "George", "Select spriden_first_name firstname from spriden where spriden_pidm = :pidm and spriden_change_ind is null" )
+        communicationFieldService.create( [domainModel: testCommunicationField] )
+
+        testCommunicationField = newCommunicationField( "lastname", "\$lastname\$", "George", "Select spriden_last_name lastname from spriden where spriden_pidm = :pidm and spriden_change_ind is null" )
+        communicationFieldService.create( [domainModel: testCommunicationField] )
+
+        String templateResult = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, "17" )
+        assertNotNull( templateResult )
     }
 
 
     @Test
-    void testValidMerge() {
+    void testInvalidDataFields() {
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         emailTemplate.content = """Hi \$firstname\$ \$lastname\$"""
-        emailTemplate.save()
-        shouldFail( ApplicationException ) {
-            communicationTemplateMergeService.processTemplate( emailTemplate.content )
-        }
+        emailTemplate.save( failOnError: true, flush: true )
+
+        // do not set up any fields, you should not get any exception
+        String templateResult = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, "17" )
+        assertNotNull( templateResult )
     }
+
 
 
     @Test
@@ -100,7 +110,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 \$invitation\$
 \$signed\$"""
         emailTemplate.subject = "REQUEST FOR URGENT BUSINESS RELATIONSHIP "
-        emailTemplate.save()
+        emailTemplate.save( failOnError: true, flush: true )
 
         // Now set up the fields
 
@@ -150,7 +160,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
                 published: i_valid_emailTemplate_published,
                 validFrom: i_valid_emailTemplate_validFrom,
                 validTo: i_valid_emailTemplate_validTo,
-                folder: folder,
+                folder: folder1,
                 bccList: i_valid_emailTemplate_bccList,
                 ccList: i_valid_emailTemplate_ccList,
                 content: i_valid_emailTemplate_content,
