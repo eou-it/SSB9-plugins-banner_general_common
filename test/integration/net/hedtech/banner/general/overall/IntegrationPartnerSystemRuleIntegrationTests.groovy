@@ -17,20 +17,20 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     def integrationPartnerSystemRuleService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRule.save(flush: true, failOnError: true)
@@ -42,7 +42,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testUpdateIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         assertTrue integrationPartnerSystemRule.validate()
@@ -69,7 +69,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRule.save(flush: true, failOnError: true)
@@ -96,7 +96,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testDeleteIntegrationPartnerSystemRule() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         integrationPartnerSystemRule.save(flush: true, failOnError: true)
@@ -107,14 +107,14 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def integrationPartnerSystemRule = newIntegrationPartnerSystemRule()
         assertTrue "IntegrationPartnerSystemRule could not be validated as expected due to ${integrationPartnerSystemRule.errors}", integrationPartnerSystemRule.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def integrationPartnerSystemRule = new IntegrationPartnerSystemRule()
         assertFalse "IntegrationPartnerSystemRule should have failed validation", integrationPartnerSystemRule.validate()
@@ -122,7 +122,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def integrationPartnerSystemRule = new IntegrationPartnerSystemRule(
                 code: 'XXXXXXX',

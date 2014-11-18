@@ -32,8 +32,10 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.HousingRoomCatagoryDefinition"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescription"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomUsageRestriction"/>
+        <mapping class="net.hedtech.banner.general.overall.ImsSourcedIdBase"/>
         <mapping class="net.hedtech.banner.general.overall.IntegrationPartnerSystemRule"/>
         <mapping class="net.hedtech.banner.general.overall.MeetingTimeSearch"/>
+        <mapping class="net.hedtech.banner.general.overall.PidmAndSourcedIdMapping"/>
         <mapping class="net.hedtech.banner.general.overall.PidmAndUDCIdMapping"/>
         <mapping class="net.hedtech.banner.general.overall.PinQuestion"/>
         <mapping class="net.hedtech.banner.general.overall.PriorCollege"/>
@@ -57,6 +59,8 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionEthnicMakeUp"/>
         <mapping class="net.hedtech.banner.general.overall.SourceBackgroundInstitutionTestScore"/>
         <mapping class="net.hedtech.banner.general.overall.SqlProcess"/>
+        <mapping class="net.hedtech.banner.general.overall.SqlProcessParameterByProcess"/>
+        <mapping class="net.hedtech.banner.general.overall.ThirdPartyAccess"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
@@ -86,6 +90,8 @@ there is no concept of an 'entity manager' within this project.
 
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
+
+        <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
+
     </session-factory>
 </hibernate-configuration>
-   

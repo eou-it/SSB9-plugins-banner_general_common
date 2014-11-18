@@ -22,20 +22,20 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     def housingRoomDescriptionService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ["SSASECT"]
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testHousingRoomDescriptionCreate() {
         def housingRoomDescription = newHousingRoomDescription()
 
@@ -52,7 +52,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testUpdate() {
         def housingRoomDescription = newHousingRoomDescription()
         def keyBlockMap = [termEffective: 201410, building: "LAW", room: "102"]
@@ -144,7 +144,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testHousingRoomDescriptionDelete() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -157,7 +157,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testReadOnlyRoomNumber() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -174,7 +174,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testReadOnlyTermEffective() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])
@@ -191,7 +191,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testReadOnlyBuilding() {
         def housingRoomDescription = newHousingRoomDescription()
         housingRoomDescription = housingRoomDescriptionService.create([domainModel: housingRoomDescription])

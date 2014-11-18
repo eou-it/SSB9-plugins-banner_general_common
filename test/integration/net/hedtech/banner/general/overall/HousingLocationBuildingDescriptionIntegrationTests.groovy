@@ -128,8 +128,8 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     def u_failure_streetLine4 = "TTTTT"
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ["SSASECT"] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -190,13 +190,13 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newValidForCreateHousingLocationBuildingDescription()
         housingLocationBuildingDescription.save(failOnError: true, flush: true)
@@ -208,7 +208,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidHousingLocationBuildingDescription() {
         def housingLocationBuildingDescription = newInvalidForCreateHousingLocationBuildingDescription()
         shouldFail {

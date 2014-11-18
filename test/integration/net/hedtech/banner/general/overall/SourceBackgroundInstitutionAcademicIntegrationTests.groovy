@@ -17,20 +17,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -39,7 +39,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newInvalidForCreateSourceBackgroundInstitutionAcademic()
         shouldFail(ValidationException) {
@@ -48,7 +48,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -77,7 +77,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -97,7 +97,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -115,7 +115,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -139,7 +139,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionAcademic() {
         def sourceBackgroundInstitutionAcademic = newValidForCreateSourceBackgroundInstitutionAcademic()
         sourceBackgroundInstitutionAcademic.save(failOnError: true, flush: true)
@@ -150,14 +150,14 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionAcademic = newInvalidForCreateSourceBackgroundInstitutionAcademic()
         assertFalse "SourceBackgroundInstitutionAcademic could not be validated as expected due to ${sourceBackgroundInstitutionAcademic.errors}", sourceBackgroundInstitutionAcademic.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionAcademic = new SourceBackgroundInstitutionAcademic()
         assertFalse "SourceBackgroundInstitutionAcademic should have failed validation", sourceBackgroundInstitutionAcademic.validate()
@@ -176,7 +176,7 @@ class SourceBackgroundInstitutionAcademicIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def sourceBackgroundInstitutionAcademic = new SourceBackgroundInstitutionAcademic(
                 stateApprovIndicator: 'XXX',

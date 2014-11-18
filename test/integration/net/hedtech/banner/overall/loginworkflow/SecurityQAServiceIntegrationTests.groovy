@@ -24,8 +24,8 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     def i_failure_question_desc1 ="My test Question<>"
     def pidm
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -38,7 +38,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         i_success_pidm = pidm.toString()
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithInvalidPassword(){
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
         String invalidPassword = "abcdef"
@@ -50,7 +50,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithInvalidNoOfQuestions(){
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
         String validPassword = "111111"
@@ -61,7 +61,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithNullQuestions(){
         List quesAnsList = [[pidm: i_success_pidm,question:null,userDefinedQuestion:null,answer:i_success_answer1,questionNo:null] ]
         String validPassword = "111111"
@@ -72,7 +72,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithNullAnswer(){
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:null,answer:null,questionNo:null] ]
         String validPassword = "111111"
@@ -82,7 +82,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
             assertApplicationException ae, "securityQA.error"
         }
     }
-	@Test
+    @Test
     void testSaveQAResponseWithEmptyQuestions(){
         List quesAnsList = [[pidm: i_success_pidm,question:"",userDefinedQuestion:"",answer:i_success_answer1,questionNo:""] ]
         String validPassword = "111111"
@@ -93,7 +93,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithEmptyAnswer(){
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:"",questionNo:""] ]
         String validPassword = "111111"
@@ -104,7 +104,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithInvalidQuestion(){
         List quesAnsList = [[pidm: i_success_pidm,question: "",userDefinedQuestion:i_failure_question_desc1,answer:"asdasd",questionNo:""] ]
         String validPassword = "111111"
@@ -115,7 +115,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testSaveQAResponseWithInvalidAnswer(){
         List quesAnsList = [[pidm: i_success_pidm,question: "",userDefinedQuestion:i_success_question_desc1,answer:i_failure_answer1,questionNo:""] ]
         String validPassword = "111111"
@@ -126,7 +126,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testQuestionMinimumLength(){
         def questionMinimumLength = securityQAService.getUserDefinedPreference()?.GUBPPRF_QSTN_MIN_LENGTH
         if(questionMinimumLength>0){
@@ -141,7 +141,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testAnswerMinimumLength(){
         def length = securityQAService.getUserDefinedPreference()?.GUBPPRF_ANSR_MIN_LENGTH
         if(length>0){
@@ -156,7 +156,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         }
     }
 
-	@Test
+    @Test
     void testUniqueQuestion(){
         def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
@@ -173,7 +173,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     }
 
-	@Test
+    @Test
     void testVaildSaveSingleQAResponse()
     {
         def pinQuestion  = newValidForCreatePinQuestion("TT12")
@@ -189,7 +189,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     }
 
-	@Test
+    @Test
     void testVaildSaveSingleUserDefinedQAResponse()
     {
         String validPassword = "111111"
@@ -202,7 +202,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     }
 
-	@Test
+    @Test
     void testValidSaveSingleQAResponseWithUserDefinedAsNull()
     {
         def pinQuestion  = newValidForCreatePinQuestion("TT12")
@@ -218,7 +218,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     }
 
-	@Test
+    @Test
     void testVaildSaveSecurityQAResponse()
     {
         def pinQuestion  = newValidForCreatePinQuestion("TT12")
@@ -236,21 +236,21 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
 
     }
 
-	@Test
+    @Test
     void testGetNumberOfQuestions()
     {
         def numberOfQues =  securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS
         assertNotNull numberOfQues
     }
 
-	@Test
+    @Test
     void testGetUserDefinedQuestionFlag()
     {
         def userDefinedFlag = securityQAService.getUserDefinedPreference()?.GUBPPRF_EDITQSTN_IND
         assertNotNull userDefinedFlag
     }
 
-	@Test
+    @Test
     void testGetNumberOfQuestionsAnswered()
     {
         def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()

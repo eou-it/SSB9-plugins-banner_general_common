@@ -45,20 +45,20 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     def u_failure_keyBlockMap = [:]
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['SCACRSE']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSequenceNumberBaseValidCreate() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -72,7 +72,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-	@Test
+    @Test
     void testSequenceNumberBaseInvalidCreate() {
         def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
         def map = [keyBlock: i_failure_keyBlockMap,
@@ -83,7 +83,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-	@Test
+    @Test
     void testSequenceNumberBaseValidUpdate() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -107,7 +107,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-	@Test
+    @Test
     void testSequenceNumberBaseInvalidUpdate() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -130,7 +130,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-	@Test
+    @Test
     void testSequenceNumberBaseDelete() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -145,7 +145,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         def map = [keyBlock: i_success_keyBlockMap,

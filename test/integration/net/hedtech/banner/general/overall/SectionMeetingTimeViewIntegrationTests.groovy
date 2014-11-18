@@ -12,20 +12,20 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException
 
 class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['SSAMATX']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testFetchByTermAndCourseReferenceNumberExistingRecord() {
         def findResults = SectionMeetingTimeView.findAllByTermAndCourseReferenceNumber(
                 "201410", "20001")
@@ -46,7 +46,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
-	@Test
+    @Test
     void testFetchSearch() {
         // find base list
         def pagingAndSortParams = [:]
@@ -80,7 +80,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
-	@Test
+    @Test
     void testFetchSearchAndDates() {
         def newDate = "2010-09-01"
         def df1 = new SimpleDateFormat("yyyy-MM-dd")
@@ -131,7 +131,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
  * Prove that you cannot save
  */
 
-	@Test
+    @Test
     void testCreateExceptionResults() {
         def existingSection = SectionMeetingTimeView.findAllByTermAndCourseReferenceNumber(
                 "201410", "20001")[0]
@@ -146,7 +146,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
-	@Test
+    @Test
     void testUpdateExceptionResults() {
         def existingSection = SectionMeetingTimeView.findByTermAndCourseReferenceNumber(
                 "201410", "20001")
@@ -158,7 +158,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
     }
 
 
-	@Test
+    @Test
     void testDeleteExceptionResults() {
         def existingSection = SectionMeetingTimeView.findByTermAndCourseReferenceNumber(
                 "201410", "20001")

@@ -19,20 +19,20 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     def sourceBackgroundInstitutionContactPersonService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionContactPersonValidCreate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -46,7 +46,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionContactPersonInvalidCreate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newInvalidForCreateSourceBackgroundInstitutionContactPerson()
         shouldFail(ApplicationException) {
@@ -55,7 +55,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionContactPersonValidUpdate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -88,7 +88,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionContactPersonInvalidUpdate() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -108,7 +108,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionContactPersonDelete() {
         SourceBackgroundInstitutionContactPerson sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         sourceBackgroundInstitutionContactPerson = sourceBackgroundInstitutionContactPersonService.create([domainModel: sourceBackgroundInstitutionContactPerson])
@@ -119,7 +119,7 @@ class SourceBackgroundInstitutionContactPersonServiceIntegrationTests extends Ba
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionContactPerson = newValidForCreateSourceBackgroundInstitutionContactPerson()
         def map = [domainModel: sourceBackgroundInstitutionContactPerson]

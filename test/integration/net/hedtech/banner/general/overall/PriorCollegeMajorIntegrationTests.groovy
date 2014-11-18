@@ -19,20 +19,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidPriorCollegeMajor() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         priorCollegeMajor.save(failOnError: true, flush: true)
@@ -41,7 +41,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidPriorCollegeMajor() {
         def priorCollegeMajor = newInvalidForCreatePriorCollegeMajor()
         shouldFail(ValidationException) {
@@ -50,7 +50,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidPriorCollegeMajor() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         priorCollegeMajor.save(failOnError: true, flush: true)
@@ -73,7 +73,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -91,7 +91,7 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeletePriorCollegeMajor() {
         def priorCollegeMajor = newValidForCreatePriorCollegeMajor()
         priorCollegeMajor.save(failOnError: true, flush: true)
@@ -102,14 +102,14 @@ class PriorCollegeMajorIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def priorCollegeMajor = newInvalidForCreatePriorCollegeMajor()
         assertFalse "PriorCollegeMajor could not be validated as expected due to ${priorCollegeMajor.errors}", priorCollegeMajor.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def priorCollegeMajor = new PriorCollegeMajor()
         assertFalse "PriorCollegeMajor should have failed validation", priorCollegeMajor.validate()

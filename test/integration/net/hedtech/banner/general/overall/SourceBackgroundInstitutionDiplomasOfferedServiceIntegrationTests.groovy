@@ -19,20 +19,20 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
     def sourceBackgroundInstitutionDiplomasOfferedService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDiplomasOfferedValidCreate() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
@@ -47,7 +47,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDiplomasOfferedInvalidCreate() {
         def sourceBackgroundInstitutionDiplomasOffered = newInvalidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
@@ -58,7 +58,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
 
     // NOTE: No Updates are allowed
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDiplomasOfferedDelete() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]
@@ -70,7 +70,7 @@ class SourceBackgroundInstitutionDiplomasOfferedServiceIntegrationTests extends 
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionDiplomasOffered = newValidForCreateSourceBackgroundInstitutionDiplomasOffered()
         def map = [domainModel: sourceBackgroundInstitutionDiplomasOffered]

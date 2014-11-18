@@ -18,20 +18,20 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     def sourceBackgroundInstitutionBaseService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseValidCreate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -47,7 +47,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseInvalidCreate() {
         def sourceBackgroundInstitutionBase = newInvalidForCreateSourceBackgroundInstitutionBase()
         shouldFail(ApplicationException) {
@@ -56,7 +56,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseMissingAddressInfoCreate() {
         def zip = newValidForCreateZip()
         def sourceBackgroundInstitutionBase
@@ -103,7 +103,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseMissingAddressInfoUpdate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -137,7 +137,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseValidUpdate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -167,7 +167,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseInvalidUpdate() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -180,7 +180,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionBaseDelete() {
         SourceBackgroundInstitutionBase sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         sourceBackgroundInstitutionBase = sourceBackgroundInstitutionBaseService.create([domainModel: sourceBackgroundInstitutionBase])
@@ -191,7 +191,7 @@ class SourceBackgroundInstitutionBaseServiceIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionBase = newValidForCreateSourceBackgroundInstitutionBase()
         def map = [domainModel: sourceBackgroundInstitutionBase]

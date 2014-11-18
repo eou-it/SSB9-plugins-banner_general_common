@@ -31,15 +31,15 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
     Integer u_failure_pidm = 990000
     String u_failure_race = "MOAN"
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
     }
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
@@ -48,7 +48,7 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-	@Test
+    @Test
     void testSaveSurveyResponseValid() {
 
         PersonRace quiredPersonRace = PersonRace.fetchByPidmAndRace(i_success_pidm, i_success_race)
@@ -66,7 +66,7 @@ class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-	@Test
+    @Test
     void testSaveSurveyResponseInvalid() {
 
         PersonRace quiredPersonRace = PersonRace.fetchByPidmAndRace(i_success_pidm, i_success_race)

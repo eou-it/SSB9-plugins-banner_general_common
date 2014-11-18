@@ -18,20 +18,20 @@ import java.text.SimpleDateFormat
 
 class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidPriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -40,7 +40,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidPriorCollegeDegree() {
         def priorCollegeDegree = newInvalidForCreatePriorCollegeDegree()
         shouldFail(ValidationException) {
@@ -49,7 +49,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidPriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -106,7 +106,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidPriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -133,7 +133,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -160,7 +160,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -181,7 +181,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeletePriorCollegeDegree() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)
@@ -192,14 +192,14 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def priorCollegeDegree = newInvalidForCreatePriorCollegeDegree()
         assertFalse "PriorCollegeDegree could not be validated as expected due to ${priorCollegeDegree.errors}", priorCollegeDegree.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def priorCollegeDegree = new PriorCollegeDegree()
         assertFalse "PriorCollegeDegree should have failed validation", priorCollegeDegree.validate()
@@ -227,7 +227,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def priorCollegeDegree = new PriorCollegeDegree(
                 degreeYear: 'XXXXXX',
@@ -238,7 +238,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchByPidm() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
         priorCollegeDegree.save(failOnError: true, flush: true)

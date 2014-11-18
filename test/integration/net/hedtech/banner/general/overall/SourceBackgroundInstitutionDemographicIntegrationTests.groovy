@@ -18,20 +18,20 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegrationTestCase {
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -40,7 +40,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newInvalidForCreateSourceBackgroundInstitutionDemographic()
         shouldFail(ValidationException) {
@@ -49,7 +49,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -78,7 +78,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -102,7 +102,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -119,7 +119,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -140,7 +140,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionDemographic() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         sourceBackgroundInstitutionDemographic.save(failOnError: true, flush: true)
@@ -151,14 +151,14 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionDemographic = newInvalidForCreateSourceBackgroundInstitutionDemographic()
         assertFalse "SourceBackgroundInstitutionDemographic could not be validated as expected due to ${sourceBackgroundInstitutionDemographic.errors}", sourceBackgroundInstitutionDemographic.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionDemographic = new SourceBackgroundInstitutionDemographic()
         assertFalse "SourceBackgroundInstitutionDemographic should have failed validation", sourceBackgroundInstitutionDemographic.validate()
@@ -177,7 +177,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
     }
 
 
-	@Test
+    @Test
     void testFetchSearch() {
         // Create 2 demographics
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()

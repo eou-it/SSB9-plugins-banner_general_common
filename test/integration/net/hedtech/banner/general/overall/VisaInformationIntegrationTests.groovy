@@ -19,20 +19,20 @@ import java.text.SimpleDateFormat
 
 class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -41,7 +41,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidVisaInformation() {
         def visaInformation = newInvalidForCreateVisaInformation()
         shouldFail(ValidationException) {
@@ -50,7 +50,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -87,7 +87,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -112,7 +112,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -141,7 +141,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -162,7 +162,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteVisaInformation() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -173,14 +173,14 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def visaInformation = newInvalidForCreateVisaInformation()
         assertFalse "VisaInformation could not be validated as expected due to ${visaInformation.errors}", visaInformation.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def visaInformation = new VisaInformation()
         assertFalse "VisaInformation should have failed validation", visaInformation.validate()
@@ -206,7 +206,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def visaInformation = new VisaInformation(
                 visaNumber: 'XXXXXXXXXXXXXXXXXXXX',
@@ -217,7 +217,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateOverlappingExpireDateExists() {
         def visaInformation = newValidForCreateVisaInformation()
         visaInformation.save(failOnError: true, flush: true)
@@ -231,6 +231,31 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
         assertTrue VisaInformation.overlappingExpireDateExists(PersonUtility.getPerson("HOR000008").pidm, 2, new Date(), new Date()+1)
         assertTrue VisaInformation.overlappingExpireDateExists(PersonUtility.getPerson("HOR000008").pidm, 2, new Date(), new Date())
     }
+
+
+    @Test
+	void testFetchByPidmListAndDateCompare() {
+		def currentDate = new Date()
+		def startDate = currentDate - 7
+		def expireDate = currentDate + 7
+		def visaInformation = newValidForCreateVisaInformation()
+        visaInformation.visaStartDate = startDate
+        visaInformation.visaExpireDate = expireDate
+        visaInformation.visaRequiredDate = visaInformation.visaStartDate
+        visaInformation.visaIssueDate = visaInformation.visaStartDate
+		visaInformation.save(failOnError: true, flush: true)
+		// Test if the generated entity now has an id assigned
+		assertNotNull visaInformation.id
+
+		// Test that the entity is returned for the current date and start/expire dates
+		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], currentDate).size()
+		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate).size()
+		assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate).size()
+
+		// Test dates out of range
+		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate - 1).size()
+		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate + 1).size()
+	}
 
 
     private def newValidForCreateVisaInformation() {

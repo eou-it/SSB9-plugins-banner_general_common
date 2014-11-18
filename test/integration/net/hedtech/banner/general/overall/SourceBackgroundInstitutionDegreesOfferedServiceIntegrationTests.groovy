@@ -19,21 +19,21 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     def sourceBackgroundInstitutionDegreesOfferedService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDegreesOfferedValidCreate() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
@@ -48,7 +48,7 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDegreesOfferedInvalidCreate() {
         def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
@@ -59,7 +59,7 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
 
     // NOTE: No Updates are allowed
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDegreesOfferedDelete() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]
@@ -71,7 +71,7 @@ class SourceBackgroundInstitutionDegreesOfferedServiceIntegrationTests extends B
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         def map = [domainModel: sourceBackgroundInstitutionDegreesOffered]

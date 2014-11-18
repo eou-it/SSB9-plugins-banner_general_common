@@ -18,20 +18,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionDegreesOffered() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
@@ -40,7 +40,7 @@ class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionDegreesOffered() {
         def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
         shouldFail(ValidationException) {
@@ -50,7 +50,7 @@ class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseInte
 
     // NOTE: No Updates are allowed
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -67,7 +67,7 @@ class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionDegreesOffered() {
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()
         sourceBackgroundInstitutionDegreesOffered.save(failOnError: true, flush: true)
@@ -78,14 +78,14 @@ class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionDegreesOffered = newInvalidForCreateSourceBackgroundInstitutionDegreesOffered()
         assertFalse "SourceBackgroundInstitutionDegreesOffered could not be validated as expected due to ${sourceBackgroundInstitutionDegreesOffered.errors}", sourceBackgroundInstitutionDegreesOffered.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionDegreesOffered = new SourceBackgroundInstitutionDegreesOffered()
         assertFalse "SourceBackgroundInstitutionDegreesOffered should have failed validation", sourceBackgroundInstitutionDegreesOffered.validate()
@@ -98,7 +98,7 @@ class SourceBackgroundInstitutionDegreesOfferedIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testFetchSearch() {
         // Create 2 degrees
         def sourceBackgroundInstitutionDegreesOffered = newValidForCreateSourceBackgroundInstitutionDegreesOffered()

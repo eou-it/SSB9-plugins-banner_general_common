@@ -20,20 +20,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -42,7 +42,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newInvalidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         shouldFail(ValidationException) {
@@ -51,7 +51,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -71,7 +71,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -88,7 +88,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -105,7 +105,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -126,7 +126,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionEthnicMakeUp() {
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         sourceBackgroundInstitutionEthnicMakeUp.save(failOnError: true, flush: true)
@@ -137,14 +137,14 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionEthnicMakeUp = newInvalidForCreateSourceBackgroundInstitutionEthnicMakeUp()
         assertFalse "SourceBackgroundInstitutionEthnicMakeUp could not be validated as expected due to ${sourceBackgroundInstitutionEthnicMakeUp.errors}", sourceBackgroundInstitutionEthnicMakeUp.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionEthnicMakeUp = new SourceBackgroundInstitutionEthnicMakeUp()
         assertFalse "SourceBackgroundInstitutionEthnicMakeUp should have failed validation", sourceBackgroundInstitutionEthnicMakeUp.validate()
@@ -161,7 +161,7 @@ class SourceBackgroundInstitutionEthnicMakeUpIntegrationTests extends BaseIntegr
     }
 
 
-	@Test
+    @Test
     void testFetchSearch() {
         // Create 2 ethnics
         def sourceBackgroundInstitutionEthnicMakeUp = newValidForCreateSourceBackgroundInstitutionEthnicMakeUp()

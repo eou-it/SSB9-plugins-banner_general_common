@@ -17,20 +17,20 @@ import java.text.SimpleDateFormat
 
 class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -39,7 +39,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidVisaInternationalInformation() {
         def visaInternationalInformation = newInvalidForCreateVisaInternationalInformation()
         shouldFail(ValidationException) {
@@ -48,7 +48,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testUpdateValidVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -116,7 +116,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -149,7 +149,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -178,7 +178,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -199,7 +199,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testDeleteVisaInternationalInformation() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         visaInternationalInformation.save(failOnError: true, flush: true)
@@ -210,14 +210,14 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def visaInternationalInformation = newInvalidForCreateVisaInternationalInformation()
         assertFalse "VisaInternationalInformation could not be validated as expected due to ${visaInternationalInformation.errors}", visaInternationalInformation.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def visaInternationalInformation = new VisaInternationalInformation()
         assertFalse "VisaInternationalInformation should have failed validation", visaInternationalInformation.validate()
@@ -252,7 +252,7 @@ class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 passportId: 'XXXXXXXXXXXXXXXXXXXXXXXXXXX',
