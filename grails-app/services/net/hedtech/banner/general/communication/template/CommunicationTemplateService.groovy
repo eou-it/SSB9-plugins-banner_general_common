@@ -54,7 +54,7 @@ class CommunicationTemplateService extends ServiceBase {
         }
         runTimeParms.removeAll( Collections.singleton( null ) );
         runTimeParms.unique( false )
-
+/*
 
         final int ID = 25
         char delimiter = '$'
@@ -86,7 +86,7 @@ class CommunicationTemplateService extends ServiceBase {
         }
 
         dataFieldNames.unique( false )
-
+*/
     }
 
 

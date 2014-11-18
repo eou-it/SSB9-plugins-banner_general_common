@@ -97,8 +97,8 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         def CommunicationField testCommunicationField
         emailTemplate.content = """\$Salutation\$
-            \$invitation\$
-            \$signed\$"""
+\$invitation\$
+\$signed\$"""
         emailTemplate.subject = "REQUEST FOR URGENT BUSINESS RELATIONSHIP "
         emailTemplate.save()
 
@@ -107,29 +107,16 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         testCommunicationField = newCommunicationField( "Salutation", "Greetings \$fn\$ \$ln\$,", "Greetings George Washington,", null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
-        testCommunicationField = newCommunicationField( "invitation", "\$IntroParagraph\$", """First, I must solicit your strictest confidence in this transaction. this is by
-        virtue of its nature as being utterly confidential and 'top secret'. I am sure
-        and have confidence of your ability and reliability to prosecute a transaction
-        of this great magnitude involving a pending transaction requiring maxiimum
-        confidence.""", null )
+        testCommunicationField = newCommunicationField( "invitation", "\$IntroParagraph\$",
+                                                        """First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.""", null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
-
-        testCommunicationField = newCommunicationField( "signed", "", """Yours Faithfully,
-            DR CLEMENT OKON """, null )
+        testCommunicationField = newCommunicationField( "signed", "", """Yours Faithfully, DR CLEMENT OKON """, null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
         //(String name, String formatString, String previewValue, String ruleContent )
         String result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate.content )
-        println result
-        assertEquals( """Greetings George Washington,
-                    First, I must solicit your strictest confidence in this transaction. this is by
-                            virtue of its nature as being utterly confidential and 'top secret'. I am sure
-                            and have confidence of your ability and reliability to prosecute a transaction
-                            of this great magnitude involving a pending transaction requiring maxiimum
-                            confidence.
-                    Yours Faithfully,
-                                DR CLEMENT OKON """,result )
+        assertEquals( """Greetings George Washington,\r\nFirst, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r\nYours Faithfully, DR CLEMENT OKON """, result )
     }
 
 
