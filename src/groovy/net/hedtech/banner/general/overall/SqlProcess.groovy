@@ -47,6 +47,18 @@ import net.hedtech.banner.general.system.EntriesForSql
 @Entity
 @Table(name = "GORRSQL")
 @NamedQueries(value = [
+@NamedQuery(name = "SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode",
+        query = """select a.parsedSql
+            FROM SqlProcess a
+           WHERE a.entriesForSqlProcess.code = :entriesForSqlProcesssCode
+             AND a.entriesForSql.code = :entriesForSqlCode
+	         AND a.activeIndicator = true
+             AND a.validatedIndicator = true
+             AND a.parsedSql is not null
+             AND TRUNC(sysdate) BETWEEN TRUNC(a.startDate)
+                                    AND TRUNC(nvl(a.endDate,sysdate))
+           ORDER BY a.sequenceNumber
+       """),
 @NamedQuery(name = "SqlProcess.fetchActiveValidatedPriorityProcessSql",
                 query = """select parsedSql FROM  SqlProcess a
            WHERE a.activeIndicator = true
@@ -268,6 +280,7 @@ class SqlProcess implements Serializable {
     //Read Only fields that should be protected against update
     public static readonlyProperties = ['sequenceNumber', 'entriesForSqlProcess', 'entriesForSql']
 
+
     static String fetchActiveValidatedPriorityProcessSql( sql, sqlProcess) {
         String [] parsedSql = SqlProcess.withSession {session ->
             session.getNamedQuery(
@@ -277,6 +290,14 @@ class SqlProcess implements Serializable {
             return parsedSql[0]
         }
         ""
+    }
+
+    static def fetchAllActiveValidatedPriorityProcessSql( sql, sqlProcess) {
+        def parsedSql = SqlProcess.withSession {session ->
+            session.getNamedQuery(
+                    'SqlProcess.fetchActiveValidatedPriorityProcessSql').setString('sql', sql).setString('sqlProcess', sqlProcess).list()
+        }
+        return parsedSql
     }
 
 }
