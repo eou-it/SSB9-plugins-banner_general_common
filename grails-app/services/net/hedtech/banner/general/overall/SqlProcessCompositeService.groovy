@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall
 import groovy.sql.Sql
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import net.hedtech.banner.general.system.EntriesForSqlProcesss
 
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 class SqlProcessCompositeService {
@@ -16,14 +17,14 @@ class SqlProcessCompositeService {
         if ( params.sqlCode && params.sqlProcessCode ) {
             def parsedSql = SqlProcess.fetchActiveValidatedPriorityProcessSql(params.sqlCode, params.sqlProcessCode)
             def bindValues = [:]
-            SqlProcessParameter.findAllByEntriesForSqlProcess(params.sqlProcessCode).each { SqlProcessParameter parameter ->
-                if( parsedSql.contains(":" + parameter.parameterForSqlProcess.toLowerCase())) {
-                    bindValues.put(parameter.parameterForSqlProcess.toLowerCase(),
-                            params.get(parameter.parameterForSqlProcess.toLowerCase() ?: parameter.parameterForSqlProcess.toUpperCase()))
+            SqlProcessParameterByProcess.findAllByEntriesForSqlProcesss(EntriesForSqlProcesss.findByCode(params.sqlProcessCode)).each { SqlProcessParameterByProcess parameter ->
+                if( parsedSql.contains(":" + parameter.sqlProcessParameter.code.toLowerCase())) {
+                    bindValues.put(parameter.sqlProcessParameter.code.toLowerCase(),
+                            params.get(parameter.sqlProcessParameter.code.toLowerCase() ?: parameter.sqlProcessParameter.code.toUpperCase()))
                 }
-                if( parsedSql.contains(":" + parameter.parameterForSqlProcess.toUpperCase())) {
-                    bindValues.put(parameter.parameterForSqlProcess.toUpperCase(),
-                            params.get(parameter.parameterForSqlProcess.toLowerCase() ?: parameter.parameterForSqlProcess.toUpperCase()))
+                if( parsedSql.contains(":" + parameter.sqlProcessParameter.code.toUpperCase())) {
+                    bindValues.put(parameter.sqlProcessParameter.code.toUpperCase(),
+                            params.get(parameter.sqlProcessParameter.code.toLowerCase() ?: parameter.sqlProcessParameter.code.toUpperCase()))
                 }
             }
             log.debug "Parsed SQL: ${parsedSql}"
