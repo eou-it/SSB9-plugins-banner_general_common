@@ -7,6 +7,8 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
+import org.antlr.runtime.tree.CommonTree
+import org.stringtemplate.v4.ST
 
 import java.util.regex.Pattern
 
@@ -45,7 +47,7 @@ class CommunicationTemplateService extends ServiceBase {
     List<String> extractTemplateVariables( String statement ) {
         Pattern pattern = Pattern.compile( /\$(\w*)\$/ );
         //Pattern pattern = Pattern.compile( /\$(\w+)[.]|(\w+?)\$/ );
-        def List<String> runTimeParms = []
+/*        def List<String> runTimeParms = []
         def matcher = pattern.matcher( statement )
 
         while (matcher.find()) {
@@ -54,40 +56,46 @@ class CommunicationTemplateService extends ServiceBase {
         }
         runTimeParms.removeAll( Collections.singleton( null ) );
         runTimeParms.unique( false )
-/*
 
+*/
         final int ID = 25
         char delimiter = '$'
         ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
 
         def dataFieldNames = []
-        def t = st.getAttributes(  )
+        println st.impl.ast.text
         st.impl.ast.getChildren().each {
 
             if (it != null) {
                 CommonTree child = it as CommonTree
-                if (child.toString().equals( "EXPR" )) {
-                    if (child.getChildCount() == 1) {
-                        CommonTree expressionChild = child.getChild( 0 )
-                        if (expressionChild.getToken().getType() == ID) {
-                            dataFieldNames.add( expressionChild.toString() )
-                        } else if (expressionChild.toString().equals( "PROP" )) {
-                            if (expressionChild.getChildCount() == 2) {
-                                dataFieldNames.add(
-                                        expressionChild.getChild( 0 ).toString() +
-                                                "." +
-                                                expressionChild.getChild( 1 ).toString() )
-                            }
-                        }
 
+                if (child.toString().equals( "EXPR" )) {
+
+                    //if (child.getChildCount() == 1) {
+                    CommonTree expressionChild = child.getChild( 0 )
+                    if (expressionChild.getToken().getType() == ID) {
+                        dataFieldNames.add( expressionChild.toString() )
+                        //} else if (expressionChild.toString().equals( "PROP" )) {
+                        //    if (expressionChild.getChildCount() == 2) {
+                        //        dataFieldNames.add(
+                        //                expressionChild.getChild( 0 ).toString() +
+                        //                        "." +
+                        //                        expressionChild.getChild( 1 ).toString() )
+                        //    }
+                        //}
+                    }
+                } else if (child.toString().equals( "INDENTED_EXPR" )) {
+                    CommonTree expressionChild = child.getChild( 1 ).getChild( 0 )
+                    if (expressionChild.getToken().getType() == ID) {
+                        dataFieldNames.add( expressionChild.toString() )
                     }
                 }
             }
         }
 
+
         dataFieldNames.unique( false )
-*/
     }
 
-
 }
+

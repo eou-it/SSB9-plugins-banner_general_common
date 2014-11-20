@@ -111,6 +111,12 @@ class CommunicationTemplateMergeService {
         renderedCommunicationFields.keySet().each { key ->
             st.add( key, renderedCommunicationFields[key] )
         }
+
+        //StringWriter sw = new StringWriter();
+        //NoIndentWriter w = new NoIndentWriter(sw);
+        //w.newline=""
+        //st.write(w); // same as render() except with a different writer
+        //sw.toString();
         st.render()
     }
 

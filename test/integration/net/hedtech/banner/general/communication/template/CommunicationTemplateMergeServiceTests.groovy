@@ -101,14 +101,17 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     }
 
 
-
-/* TODO reenable this test after we sort out the line ending problem */
+    @Test
     void testRenderPreviewTemplate() {
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         def CommunicationField testCommunicationField
-        emailTemplate.content = """\$Salutation\$
-\$invitation\$
-\$signed\$"""
+        emailTemplate.content = """
+\$code, reason:{ c,r |
+\t<li>\$c\$, \$r\$</li>
+}\$
+\$Salutation\$
+        \$invitation\$
+        \$signed\$"""
         emailTemplate.subject = "REQUEST FOR URGENT BUSINESS RELATIONSHIP "
         emailTemplate.save( failOnError: true, flush: true )
 
@@ -126,16 +129,27 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
         //(String name, String formatString, String previewValue, String ruleContent )
         String result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate.content )
-        assertEquals( """Greetings George Washington,\r\nFirst, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r\nYours Faithfully, DR CLEMENT OKON """, result )
+        String expected = """Greetings George Washington,\r
+        First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r
+        Yours Faithfully, DR CLEMENT OKON """.toString()
+        assertEquals( expected, result )
     }
 
 
     @Test
     void testProcessGroovyTemplate() {
-        def text = 'Dear "$firstname $lastname",\nSo nice to meet you in <% print city %>.\nSee you in ${month},\n${signed}'
+        def text = """
+        Dear \$firstname \$lastname,
+        So nice to meet you in <% print city %>.
+        See you in \${month},
+        \${signed}"""
         def bindings = ["firstname": "Sam", "lastname": "Pullara", "city": "San Francisco", "month": "December", "signed": "Groovy-Dev"]
         def renderedTemplate = communicationTemplateMergeService.processGroovyTemplate( text, bindings )
-        def result = 'Dear "Sam Pullara",\nSo nice to meet you in San Francisco.\nSee you in December,\nGroovy-Dev'
+        def result = """
+        Dear Sam Pullara,
+        So nice to meet you in San Francisco.
+        See you in December,
+        Groovy-Dev"""
         assert result == renderedTemplate.toString()
     }
 
