@@ -1,7 +1,6 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-
 package net.hedtech.banner.general.overall
 
 import javax.persistence.Column
@@ -45,8 +44,10 @@ import net.hedtech.banner.general.system.EntriesForSql
  *  gorrsql_sqpr_code,gorrsql_sqru_code,gorrsql_seq_no
 
  */
+@Entity
+@Table(name = "GORRSQL")
 @NamedQueries(value = [
-        @NamedQuery(name = "SqlProcess.fetchActiveValidatedPriorityProcessSql",
+@NamedQuery(name = "SqlProcess.fetchActiveValidatedPriorityProcessSql",
                 query = """select parsedSql FROM  SqlProcess a
            WHERE a.activeIndicator = true
            AND   a.validatedIndicator = true
@@ -55,8 +56,6 @@ import net.hedtech.banner.general.system.EntriesForSql
            AND   current_date BETWEEN a.startDate AND coalesce(a.endDate, current_date + 1)
            ORDER BY a.sequenceNumber  """)
 ])
-@Entity
-@Table(name = "GORRSQL")
 class SqlProcess implements Serializable {
 
     /**
@@ -279,4 +278,5 @@ class SqlProcess implements Serializable {
         }
         ""
     }
+
 }
