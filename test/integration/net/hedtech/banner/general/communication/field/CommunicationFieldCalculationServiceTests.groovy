@@ -22,6 +22,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     def communicationFieldCalculationService
     def communicationTemplateService
 
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -68,7 +69,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         params << ['pidm': 37815]
         params << ['bannerId': "AA0037815"]
         def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
-        assertEquals( "Hello \$firstname\$ \$lastname\$" , resultSet)
+        assertEquals( "Hello \$firstname\$ \$lastname\$", resultSet )
 
     }
 
@@ -77,7 +78,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     void testExtractParameters() {
         String template = """hi \$firstname\$!,
                 your last name is \$lastname\$!
-                 and I see your last name a second time is \$lastname\$
+                 and I see your last name fa second time is \$lastname\$
                  Today is \$today\$ and you owe me \$amount\$
                  But I would settle for \$someotheramount\$"""
         def parms = communicationTemplateService.extractTemplateVariables( template )
