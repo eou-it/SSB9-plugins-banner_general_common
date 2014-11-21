@@ -1,7 +1,7 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
-package net.hedtech.banner.general.communication.job
+package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization

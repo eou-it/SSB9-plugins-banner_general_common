@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
-import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 
 import javax.persistence.*

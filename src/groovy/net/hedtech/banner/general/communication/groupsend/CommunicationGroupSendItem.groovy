@@ -2,7 +2,7 @@
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
-package net.hedtech.banner.general.communication.job
+package net.hedtech.banner.general.communication.groupsend
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -26,7 +26,7 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "GCRCJIT")
-class CommunicationJobItem {
+class CommunicationGroupSendItem {
 
     /**
      * KEY: Generated unique key.
@@ -76,7 +76,7 @@ class CommunicationJobItem {
 
     @Column(name="GCRCJIT_CURRENT_STATE")
     @Enumerated(EnumType.STRING)
-    CommunicationJobItemExecutionState currentExecutionState;
+    CommunicationGroupSendItemExecutionState currentExecutionState;
 
     @Column(name="GCRCJIT_ERROR_TEXT", nullable=true)
     @Lob
