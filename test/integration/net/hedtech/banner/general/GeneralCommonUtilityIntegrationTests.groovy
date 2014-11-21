@@ -12,20 +12,20 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateSdaxMapForAppSessionList() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
         assertNotNull gtvsdaxValue
@@ -36,7 +36,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testAppGtvsdaxNewValueNoList() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
         assertNotNull gtvsdaxValue
@@ -49,7 +49,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testAppGtvsdaxNewValueExisingList() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
         assertNotNull gtvsdaxValue
@@ -66,7 +66,7 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testAppGtvsdaxNewValueExisingListMultipleEntries() {
         def gtvsdaxValue = SdaCrosswalkConversion.fetchAllByInternalAndInternalGroup('SCHBYDATE', 'WEBREG')[0]?.external
         assertNotNull gtvsdaxValue
@@ -88,14 +88,14 @@ class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidatePin() {
         def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("HOS00001").pidm
         assertTrue GeneralCommonUtility.validatePin("111111", "" + pidm)
         assertTrue !GeneralCommonUtility.validatePin("111112", "" + pidm)
     }
 
-	@Test
+    @Test
     void testValidateUserPin() {
         def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("HOS00001").pidm
         //valid password

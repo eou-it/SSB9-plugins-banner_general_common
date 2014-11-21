@@ -6,21 +6,7 @@ package net.hedtech.banner.general.communication.merge
 
 import groovy.transform.EqualsAndHashCode
 
-import javax.persistence.CollectionTable
-import javax.persistence.Column
-import javax.persistence.ElementCollection
-import javax.persistence.Entity
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.MapKeyColumn
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
-import javax.persistence.Version
+import javax.persistence.*
 
 /**
  A Recipient Data instance contains the evaluated values of communication fields referenced in the template.
@@ -29,6 +15,14 @@ import javax.persistence.Version
 @Entity
 @Table(name = "GCBRDAT")
 @EqualsAndHashCode
+@NamedQueries(value = [
+        @NamedQuery(name = "CommunicationRecipientData.findByTemplateId",
+                query = """ FROM CommunicationRecipientData a
+                    WHERE  a.templateId = :templateId"""),
+        @NamedQuery(name = "CommunicationRecipientData.findByReferenceId",
+                query = """ FROM CommunicationRecipientData a
+                    WHERE  a.referenceId = :referenceId""")
+])
 class CommunicationRecipientData {
 
     /**
@@ -39,6 +33,32 @@ class CommunicationRecipientData {
     @SequenceGenerator(name = "GCBRDAT_SEQ_GEN", allocationSize = 1, sequenceName = "GCBRDAT_SURROGATE_ID_SEQUENCE")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCBRDAT_SEQ_GEN")
     Long Id
+
+    /**
+     * Pidm that belong to a selection list.
+     */
+    @Column(name = "GCBRDAT_PIDM")
+    Long pidm
+
+
+    @Column(name = "GCBRDAT_TMPL_ID")
+    Long templateId
+
+
+    @Column(name = "GCBRDAT_REFERENCE_ID")
+    Long referenceId
+
+    @Column(name = "GCBRDAT_OWNER_ID")
+    String ownerId
+
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "GCRFVAL_canonicalForm", insertable = false, updatable = false)
+    @CollectionTable(
+            name = "GCRFVAL",
+            joinColumns = @JoinColumn(name = "gcrfval_gcbrdat_id")
+    )
+    Map<String, CommunicationFieldValue> fieldValues = Collections.emptyMap(); // maps canonical form to field value
 
     /**
      *  Optimistic lock token.
@@ -66,18 +86,45 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_DATA_ORIGIN")
     String dataOrigin
 
-    /**
-     * Pidm that belong to a selection list.
-     */
-    @Column(name = "GCBRDAT_PIDM")
-    Long pidm
 
-    @ElementCollection(fetch=FetchType.EAGER)
-    @MapKeyColumn(name = "GCRFVAL_canonicalForm", insertable = false, updatable = false)
-    @CollectionTable(
-        name="GCRFVAL",
-        joinColumns = @JoinColumn(name = "GCBRDAT_SURROGATE_ID")
-    )
-    Map<String,CommunicationFieldValue> fieldValues = Collections.emptyMap(); // maps canonical form to field value
+    @Override
+    public String toString() {
+        return "CommunicationRecipientData{" +
+                "Id=" + Id +
+                ", pidm=" + pidm +
+                ", templateId=" + templateId +
+                ", referenceId=" + referenceId +
+                ", ownerId='" + ownerId + '\'' +
+                ", fieldValues=" + fieldValues +
+                ", version=" + version +
+                ", lastModifiedBy='" + lastModifiedBy + '\'' +
+                ", lastModified=" + lastModified +
+                ", dataOrigin='" + dataOrigin + '\'' +
+                '}';
+    }
+
+
+    public static List findByTemplateId(templateId) {
+
+        def queryList
+        CommunicationRecipientData.withSession { session ->
+            queryList = session.getNamedQuery('CommunicationRecipientData.findByTemplateId')
+                    .setLong('templateId', templateId)
+                    .list()
+        }
+        return queryList
+    }
+
+    public static List findByReferenceId(referenceId) {
+
+        def queryList
+        CommunicationRecipientData.withSession { session ->
+            queryList = session.getNamedQuery('CommunicationRecipientData.findByReferenceId')
+                    .setLong('referenceId', referenceId)
+                    .list()
+        }
+        return queryList
+    }
 
 }
+

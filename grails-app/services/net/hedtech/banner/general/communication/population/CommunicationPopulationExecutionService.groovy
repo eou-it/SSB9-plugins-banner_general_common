@@ -80,7 +80,7 @@ class CommunicationPopulationExecutionService {
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
 
-            def stmt = "{call gokextr.p_execute_pop_query(?,?)}"
+            def stmt = "{call gckextr.p_execute_pop_query(?,?)}"
             def params = [populationQueryId, Sql.INTEGER]
 
             sql.call stmt, params, { pk ->
@@ -89,12 +89,12 @@ class CommunicationPopulationExecutionService {
             populationSelectionListId
         }
         catch (SQLException ae) {
-            log.debug "SqlException in gokextr.p_create_popsel ${ae}"
+            log.debug "SqlException in gckextr.p_create_popsel ${ae}"
             log.debug ae.stackTrace
             throw ae
         }
         catch (Exception ae) {
-            log.debug "Exception in gokextr.p_create_popsel ${ae}"
+            log.debug "Exception in gckextr.p_create_popsel ${ae}"
             log.debug ae.stackTrace
             throw ae
         }

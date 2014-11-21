@@ -46,8 +46,8 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_displayIndicator = true
     /*PROTECTED REGION END*/
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']// Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
@@ -58,12 +58,12 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
-	@Test
+    @Test
     void testCreateValidPinQuestion() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
@@ -71,7 +71,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull pinQuestion.id
     }
 
-	@Test
+    @Test
     void testCreateInvalidPinQuestion() {
         def pinQuestion = newInvalidForCreatePinQuestion()
         shouldFail(ValidationException) {
@@ -79,7 +79,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-	@Test
+    @Test
     void testUpdateValidPinQuestion() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
@@ -100,7 +100,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals u_success_displayIndicator, pinQuestion.displayIndicator
     }
 
-	@Test
+    @Test
     void testUpdateInvalidPinQuestion() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
@@ -118,7 +118,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -139,7 +139,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
@@ -160,7 +160,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-	@Test
+    @Test
     void testDeletePinQuestion() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
@@ -170,13 +170,13 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         assertNull PinQuestion.get( id )
     }
 
-	@Test
+    @Test
     void testValidation() {
         def pinQuestion = newInvalidForCreatePinQuestion()
         assertFalse "PinQuestion could not be validated as expected due to ${pinQuestion.errors}", pinQuestion.validate()
     }
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def pinQuestion = new PinQuestion()
         assertFalse "PinQuestion should have failed validation", pinQuestion.validate()
@@ -206,7 +206,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         return pinQuestion
     }
 
-	@Test
+    @Test
     void testFetchQuestions() {
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
@@ -215,6 +215,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
         assertTrue fetchedPinQuestions.size()>0
     }
 
+    @Test
     void testFetchByQuestionId (){
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )

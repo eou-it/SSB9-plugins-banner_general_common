@@ -11,6 +11,7 @@ import groovy.sql.Sql
 import java.text.SimpleDateFormat
 import net.hedtech.banner.general.system.EntriesForSql
 import net.hedtech.banner.general.system.EntriesForSqlProcesss
+import net.hedtech.banner.general.system.SqlProcessParameter
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
@@ -18,7 +19,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance
     //Valid test data (For success tests)
-    def i_success_entriesForSqlProcesss
+    def i_success_entriesForSqlProcess
     def i_success_entriesForSql
 
     def i_success_sequenceNumber = 1
@@ -32,7 +33,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def i_success_parsedSql = "TTTTT"
     def i_success_systemRequiredIndicator = true
     //Invalid test data (For failure tests)
-    def i_failure_entriesForSqlProcesss
+    def i_failure_entriesForSqlProcess
     def i_failure_entriesForSql
 
     def i_failure_sequenceNumber = 1
@@ -48,7 +49,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating updating domain instance
     //Valid test data (For success tests)
-    def u_success_entriesForSqlProcesss
+    def u_success_entriesForSqlProcess
     def u_success_entriesForSql
 
     def u_success_sequenceNumber = 1
@@ -62,7 +63,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def u_success_parsedSql = "TTTTTTTTTT"
     def u_success_systemRequiredIndicator = true
     //Valid test data (For failure tests)
-    def u_failure_entriesForSqlProcesss
+    def u_failure_entriesForSqlProcess
     def u_failure_entriesForSql
 
     def u_failure_sequenceNumber = 1
@@ -77,8 +78,8 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_systemRequiredIndicator = true
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -88,17 +89,17 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
         //Valid test data (For success tests)
-        def entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
-        entriesForSqlProcesss.save(failOnError: true, flush: true)
+        def entriesForSqlProcess = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
+        entriesForSqlProcess.save(failOnError: true, flush: true)
 
         def entriesForSql = new EntriesForSql(code: 'INTEGRATION_TEST', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
         entriesForSql.save(failOnError: true, flush: true)
 
-        i_success_entriesForSqlProcesss = entriesForSqlProcesss
+        i_success_entriesForSqlProcess = entriesForSqlProcess
         i_success_entriesForSql = entriesForSql
 
         //Invalid test data (For failure tests)
-        i_failure_entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'NON_EXISTENT', description: 'NON_EXISTENT', startDate: new Date(), endDate: new Date() + 1)
+        i_failure_entriesForSqlProcess = new EntriesForSqlProcesss(code: 'NON_EXISTENT', description: 'NON_EXISTENT', startDate: new Date(), endDate: new Date() + 1)
         i_failure_entriesForSql = new EntriesForSql(code: 'NON_EXISTENT', description: 'NON_EXISTENT', startDate: new Date(), endDate: new Date() + 1)
 
         //Valid test data (For success tests)
@@ -113,13 +114,13 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSqlProcess() {
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
@@ -128,7 +129,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSqlProcess() {
         def sqlProcess = newInvalidForCreateSqlProcess()
         shouldFail(ValidationException) {
@@ -137,7 +138,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSqlProcess() {
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
@@ -181,7 +182,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSqlProcess() {
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
@@ -215,7 +216,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -243,7 +244,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
@@ -272,7 +273,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteSqlProcess() {
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
@@ -283,14 +284,14 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sqlProcess = newInvalidForCreateSqlProcess()
         assertFalse "SqlProcess could not be validated as expected due to ${sqlProcess.errors}", sqlProcess.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sqlProcess = new SqlProcess()
         assertFalse "SqlProcess should have failed validation", sqlProcess.validate()
@@ -302,7 +303,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
                         'startDate',
                         'selectFrom',
                         'systemRequiredIndicator',
-                        'entriesForSqlProcesss',
+                        'entriesForSqlProcess',
                         'entriesForSql'
                 ]
         assertNoErrorsFor sqlProcess,
@@ -315,7 +316,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def sqlProcess = new SqlProcess(
                 selectValue: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
@@ -324,6 +325,122 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
         assertFalse "SqlProcess should have failed validation", sqlProcess.validate()
         assertErrorsFor sqlProcess, 'maxSize', ['selectValue', 'whereClause', 'parsedSql']
     }
+
+
+    @Test
+	void testFetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode() {
+		// setup test data
+        def entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST_PROCESS', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
+        entriesForSqlProcesss.save(failOnError: true, flush: true)
+        def entriesForSql = new EntriesForSql(code: 'INTEGRATION_TEST_RULE', description: 'INTEGRATION_TEST', startDate: new Date(), endDate: new Date() + 1, systemRequiredIndicator: false)
+        entriesForSql.save(failOnError: true, flush: true)
+        def sqlProcessParameter = new SqlProcessParameter(code: 'INTEGRATION_TEST_PARAM', description: 'INTEGRATION_TEST_PARAM', dataType: 'N', startDate: new Date(), endDate: new Date() + 1)
+        sqlProcessParameter.save(failOnError: true, flush: true)
+		def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcesss: entriesForSqlProcesss, sqlProcessParameter: sqlProcessParameter)
+        sqlProcessParameterByProcess.save(failOnError: true, flush: true)
+
+		// define a relatively simple sql statement
+		def sqlStatement = "select sgbstdn_pidm, decode(sgbstdn_styp_code,'T','Y','N') from sgbstdn where sgbstdn_pidm in :INTEGRATION_TEST_PARAM"
+
+		// validate the sql statement to ensure lists of parameters are acceptable for use with GORRSQL
+		def sql = new Sql(sessionFactory.currentSession.connection())
+		sql.executeUpdate(
+"""declare
+  lv_result varchar2(1);
+  invalid_sql EXCEPTION;
+  function f_validate_sql_rule(sqpr_code varchar2, sql_stmt IN varchar2)
+    return varchar2 is
+    lv_err_msg varchar2(4000);
+  begin
+    if (gokrsql.f_validate_sql_rule(sqpr_code, sql_stmt, lv_err_msg)) then
+      return 'Y';
+    else
+      return 'N';
+    end if;
+  end;
+begin
+  lv_result := f_validate_sql_rule(?,?);
+  if (lv_result = 'N') then
+    raise invalid_sql;
+  end if;
+end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
+
+		// create the SQL statement
+        def sqlProcess = new SqlProcess(
+                sequenceNumber: 1,
+                activeIndicator: true,
+                validatedIndicator: true,
+                startDate: new Date(),
+                selectFrom: 'FROM',
+                whereClause: sqlStatement,
+                endDate: null,
+                parsedSql: sqlStatement,
+                systemRequiredIndicator: true,
+                entriesForSqlProcess: entriesForSqlProcesss,
+                entriesForSql: entriesForSql)
+        sqlProcess.save(failOnError: true, flush: true)
+
+		// test sql statement retrieval
+		def sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertNotNull sqlStatements
+
+		// update SQL statement to be invalid and re-test retrieval
+		sqlProcess.validatedIndicator = false
+		sqlProcess.save(failOnError: true, flush: true)
+		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertEquals 0, sqlStatements.size()
+		sqlProcess.validatedIndicator = true
+
+		// update SQL statement to be inactive and re-test retrieval
+		sqlProcess.activeIndicator = false
+		sqlProcess.save(failOnError: true, flush: true)
+		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertEquals 0, sqlStatements.size()
+		sqlProcess.activeIndicator = true
+
+		// update SQL statement to have no parsed sql and re-test retrieval
+		sqlProcess.parsedSql = null
+		sqlProcess.save(failOnError: true, flush: true)
+		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertNull sqlStatements
+		sqlProcess.parsedSql = sqlStatement
+
+		// update SQL statement where start date not yet met and re-test retrieval
+		sqlProcess.startDate = new Date() + 1
+		sqlProcess.endDate = new Date() + 7
+		sqlProcess.save(failOnError: true, flush: true)
+		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertEquals 0, sqlStatements.size()
+
+		// update SQL statement where end date is passed and re-test retrieval
+		sqlProcess.startDate = new Date() - 7
+		sqlProcess.endDate = new Date() - 1
+		sqlProcess.save(failOnError: true, flush: true)
+		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertEquals 0, sqlStatements.size()
+
+		// revert the original sql statement
+		sqlProcess.startDate = new Date()
+		sqlProcess.endDate = null
+		sqlProcess.save(failOnError: true, flush: true)
+
+		// add annother statement and re-test
+        sqlProcess = new SqlProcess(
+                sequenceNumber: 2,
+                activeIndicator: true,
+                validatedIndicator: true,
+                startDate: new Date(),
+                selectFrom: 'FROM',
+                whereClause: sqlStatement,
+                endDate: new Date(),
+                parsedSql: sqlStatement,
+                systemRequiredIndicator: true,
+                entriesForSqlProcess: entriesForSqlProcesss,
+                entriesForSql: entriesForSql)
+        sqlProcess.save(failOnError: true, flush: true)
+		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
+		assertNotNull sqlStatements
+	}
 
 
     private def newValidForCreateSqlProcess() {
@@ -338,7 +455,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
                 endDate: i_success_endDate,
                 parsedSql: i_success_parsedSql,
                 systemRequiredIndicator: i_success_systemRequiredIndicator,
-                entriesForSqlProcesss: i_success_entriesForSqlProcesss,
+                entriesForSqlProcess: i_success_entriesForSqlProcess,
                 entriesForSql: i_success_entriesForSql,
         )
         return sqlProcess
@@ -357,7 +474,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
                 endDate: i_failure_endDate,
                 parsedSql: i_failure_parsedSql,
                 systemRequiredIndicator: i_failure_systemRequiredIndicator,
-                entriesForSqlProcesss: i_failure_entriesForSqlProcesss,
+                entriesForSqlProcess: i_failure_entriesForSqlProcess,
                 entriesForSql: i_failure_entriesForSql,
         )
         return sqlProcess

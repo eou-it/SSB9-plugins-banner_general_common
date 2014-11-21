@@ -18,20 +18,20 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     def sourceBackgroundInstitutionCommentService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCommentValidCreate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -48,7 +48,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCommentInvalidCreate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newInvalidForCreateSourceBackgroundInstitutionComment()
         shouldFail(ApplicationException) {
@@ -57,7 +57,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCommentValidUpdate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -69,7 +69,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCommentInvalidUpdate() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -81,7 +81,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionCommentDelete() {
         SourceBackgroundInstitutionComment sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         sourceBackgroundInstitutionComment = sourceBackgroundInstitutionCommentService.create([domainModel: sourceBackgroundInstitutionComment])
@@ -93,7 +93,7 @@ class SourceBackgroundInstitutionCommentServiceIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionComment = newValidForCreateSourceBackgroundInstitutionComment()
         def map = [domainModel: sourceBackgroundInstitutionComment]

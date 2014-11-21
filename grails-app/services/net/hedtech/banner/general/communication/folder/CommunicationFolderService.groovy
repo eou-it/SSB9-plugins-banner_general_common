@@ -13,25 +13,26 @@ import net.hedtech.banner.service.ServiceBase
  */
 class CommunicationFolderService extends ServiceBase {
 
-    def preCreate(domainModelOrMap) {
+    def preCreate( domainModelOrMap ) {
         CommunicationFolder folder = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationFolder
 
         if (folder.getName() == null)
-            throw new ApplicationException(CommunicationFolder, "@@r1:nameCannotBeNull@@")
+            throw new ApplicationException( CommunicationFolder, "@@r1:nameCannotBeNull@@" )
 
-        if (CommunicationFolder.fetchByName(folder.name)) {
-            throw new ApplicationException(CommunicationFolder, "@@r1:not.unique.message:"+folder.name+" name@@" )
+        if (CommunicationFolder.fetchByName( folder.name )) {
+            throw new ApplicationException( CommunicationFolder, "@@r1:folderExists@@", folder.name )
         }
     }
 
 
-    def preUpdate(domainModelOrMap) {
+    def preUpdate( domainModelOrMap ) {
         CommunicationFolder folder = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationFolder
 
         if (folder.getName() == null)
-            throw new ApplicationException(CommunicationFolder, "@@r1:nameCannotBeNull@@")
+            throw new ApplicationException( CommunicationFolder, "@@r1:nameCannotBeNull@@" )
 
-        if (CommunicationFolder.existsAnotherSameNameFolder(folder.id, folder.name))
-            throw new ApplicationException(CommunicationFolder, "@@r1:not.unique.message:"+folder.name+" name@@")    }
+        if (CommunicationFolder.existsAnotherSameNameFolder( folder.id, folder.name ))
+            throw new ApplicationException( CommunicationFolder, "@@r1:folderExists@@", folder.name )
+    }
 
 }

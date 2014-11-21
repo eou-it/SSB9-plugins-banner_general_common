@@ -19,20 +19,20 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     def priorCollegeMinorService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeMinorValidCreate() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -50,7 +50,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeMinorInvalidCreate() {
         def priorCollegeMinor = newInvalidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -60,7 +60,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeMinorValidUpdate() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -89,7 +89,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testPriorCollegeMinorDelete() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]
@@ -102,7 +102,7 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def priorCollegeMinor = newValidForCreatePriorCollegeMinor()
         def map = [domainModel: priorCollegeMinor]

@@ -16,20 +16,20 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     def visaInternationalInformationService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testVisaInternationalInformationValidCreate() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -47,7 +47,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testVisaInternationalInformationInvalidCreate() {
         def visaInternationalInformation = newInvalidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -57,7 +57,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testVisaInternationalInformationValidUpdate() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -116,7 +116,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testVisaInternationalInformationInvalidUpdate() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -141,7 +141,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testVisaInternationalInformationDelete() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -154,7 +154,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def visaInternationalInformation = newValidForCreateVisaInternationalInformation()
         def map = [domainModel: visaInternationalInformation]
@@ -172,7 +172,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testMissingNationOfIssue() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,
@@ -191,7 +191,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testInvalidCertificationDate() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,
@@ -208,7 +208,7 @@ class VisaInternationalInformationServiceIntegrationTests extends BaseIntegratio
     }
 
 
-	@Test
+    @Test
     void testDefaultRequired() {
         def visaInternationalInformation = new VisaInternationalInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,

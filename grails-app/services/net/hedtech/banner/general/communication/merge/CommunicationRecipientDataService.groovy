@@ -4,8 +4,10 @@
 
 package net.hedtech.banner.general.communication.merge
 
+import net.hedtech.banner.service.ServiceBase
+
 /**
  * Manages recipient data.
  */
-class CommunicationRecipientDataService {
+class CommunicationRecipientDataService  extends ServiceBase {
 }

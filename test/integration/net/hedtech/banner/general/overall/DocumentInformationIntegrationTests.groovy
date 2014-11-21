@@ -19,20 +19,20 @@ import java.text.SimpleDateFormat
 
 class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -41,7 +41,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidDocumentInformation() {
         def documentInformation = newInvalidForCreateDocumentInformation()
         shouldFail(ValidationException) {
@@ -50,7 +50,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -79,7 +79,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -101,7 +101,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
@@ -126,7 +126,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -147,7 +147,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteDocumentInformation() {
         def documentInformation = newValidForCreateDocumentInformation()
         documentInformation.save(failOnError: true, flush: true)
@@ -158,14 +158,14 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def documentInformation = newInvalidForCreateDocumentInformation()
         assertFalse "DocumentInformation could not be validated as expected due to ${documentInformation.errors}", documentInformation.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def documentInformation = new DocumentInformation()
         assertFalse "DocumentInformation should have failed validation", documentInformation.validate()
@@ -187,7 +187,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def documentInformation = new DocumentInformation(
                 visaNumber: 'XXXXXXXXXXXXXXXXXXXX')

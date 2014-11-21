@@ -54,8 +54,8 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
     def u_failure_answerDescription = null
     def u_failure_answerSalt = "DUMMY"
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         initializeTestDataForReferences()
@@ -68,12 +68,12 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         u_success_pidm = i_success_pidm
     }
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
-	@Test
+    @Test
     void testGeneralForStoringResponsesAndPinQuestionValidCreate() {
         def generalForStoringResponsesAndPinQuestion1 = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         def map = [domainModel: generalForStoringResponsesAndPinQuestion1]
@@ -87,7 +87,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         assertNotNull generalForStoringResponsesAndPinQuestion.lastModified
     }
 
-	@Test
+    @Test
     void testGeneralForStoringResponsesAndPinQuestionInvalidCreate() {
         def generalForStoringResponsesAndPinQuestion = newInvalidForCreateGeneralForStoringResponsesAndPinQuestion()
         def map = [domainModel: generalForStoringResponsesAndPinQuestion]
@@ -96,7 +96,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         }
     }
 
-	@Test
+    @Test
     void testGeneralForStoringResponsesAndPinQuestionValidUpdate() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         def map = [domainModel: generalForStoringResponsesAndPinQuestion]
@@ -124,7 +124,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         assertEquals u_success_pinQuestion, generalForStoringResponsesAndPinQuestion.pinQuestion
     }
 
-	@Test
+    @Test
     void testGeneralForStoringResponsesAndPinQuestionInvalidUpdate() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         def map = [domainModel: generalForStoringResponsesAndPinQuestion]
@@ -146,7 +146,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         }
     }
 
-	@Test
+    @Test
     void testGeneralForStoringResponsesAndPinQuestionDelete() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         def map = [domainModel: generalForStoringResponsesAndPinQuestion]
@@ -159,7 +159,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         def map = [domainModel: generalForStoringResponsesAndPinQuestion]

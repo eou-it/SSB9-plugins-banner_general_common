@@ -15,15 +15,15 @@ import org.springframework.jdbc.UncategorizedSQLException
 class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCase {
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
@@ -31,7 +31,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
      * Tests that view does not allow crud (create,update,delete) operations and is readonly
      */
 
-	@Test
+    @Test
     void testCreateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -47,7 +47,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testUpdateExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -59,7 +59,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testDeleteExceptionResults() {
         def existingMask = DisplayMaskingColumnRuleView.findAll()[0]
         assertNotNull existingMask
@@ -69,7 +69,7 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
-	@Test
+    @Test
     void testFetchSsbNameDisplay() {
         def showNameSuffix
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -81,4 +81,29 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         assertEquals display, showNameSuffix
 
     }
+
+    @Test
+    void testFetchSSBMaskByBlockNameAndColumnName() {
+        def sql
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.executeUpdate("update GORDMSK set GORDMSK_DATA_MASK = '*****XXXX' where GORDMSK_BLOCK_NAME = 'BWPKHSTB_ALL' AND GORDMSK_COLUMN_NAME = '%_SSN'")
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+        def display = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName([blockName:'BWPKHSTB',columnName:'%_SSN'])
+        assertNotNull display
+        assertEquals display.dataMask,"*****XXXX"
+
+    }
+
+
+    @Test
+    void testFetchSSBMaskByBlockName() {
+        def displayRules = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName([blockName:'BWGKOADR'])
+        assertNotNull displayRules
+        assertEquals displayRules.size,4
+
+    }
+
 }

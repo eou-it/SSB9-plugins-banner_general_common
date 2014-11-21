@@ -28,6 +28,10 @@ import javax.persistence.*
                       AND a.sequenceNumber <> :sequenceNumber
                       AND (   (:visaStartDate  BETWEEN a.visaStartDate AND a.visaExpireDate)
                            OR (:visaExpireDate BETWEEN a.visaStartDate AND a.visaExpireDate))"""),
+@NamedQuery(name = "VisaInformation.fetchByPidmListAndDateCompare",
+query = """FROM VisaInformation a
+          WHERE a.pidm IN :pidm
+            AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(a.visaExpireDate)""")
 ])
 
 @Entity
@@ -275,6 +279,14 @@ class VisaInformation implements Serializable {
         }
         return exists.size() > 0
     }
+
+
+	static List<VisaInformation> fetchByPidmListAndDateCompare(List pidm, Date compareDate) {
+		def visas = VisaInformation.withSession { session ->
+			session.getNamedQuery('VisaInformation.fetchByPidmListAndDateCompare').setParameterList('pidm', pidm).setDate('compareDate', compareDate).list()
+		}
+		return visas
+	}
 
 
     static Integer fetchNextSequenceNumber(Integer pidm) {

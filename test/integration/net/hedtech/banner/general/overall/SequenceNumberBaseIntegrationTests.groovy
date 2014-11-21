@@ -39,20 +39,20 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     def u_failure_maximumSequenceNumber = 1
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -64,7 +64,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSequenceNumberBase() {
         def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
         shouldFail(ValidationException) {
@@ -73,7 +73,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateValidSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -95,7 +95,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testUpdateInvalidSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -114,7 +114,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -136,7 +136,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testDeleteSequenceNumberBase() {
         def sequenceNumberBase = newValidForCreateSequenceNumberBase()
         sequenceNumberBase.save(failOnError: true, flush: true)
@@ -147,14 +147,14 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sequenceNumberBase = newInvalidForCreateSequenceNumberBase()
         assertFalse "SequenceNumberBase could not be validated as expected due to ${sequenceNumberBase.errors}", sequenceNumberBase.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sequenceNumberBase = new SequenceNumberBase()
         assertFalse "SequenceNumberBase should have failed validation", sequenceNumberBase.validate()
@@ -170,7 +170,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def sequenceNumberBase = new SequenceNumberBase(
                 sequenceNumberPrefix: 'XXX',
@@ -180,7 +180,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMaxValidationFailures() {
         def sequenceNumberBase = new SequenceNumberBase(
                 maximumSequenceNumber: 999999991)
@@ -189,7 +189,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testMinValidationFailures() {
         def sequenceNumberBase = new SequenceNumberBase(
                 maximumSequenceNumber: -999999991)

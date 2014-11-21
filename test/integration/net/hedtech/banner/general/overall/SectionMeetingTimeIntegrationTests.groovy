@@ -10,7 +10,6 @@ import org.junit.After
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.junit.Ignore
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
@@ -141,8 +140,8 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     def u_success_existing_courseReferenceNumber = "20001"
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GEIFUNC', 'GEAFUNC', 'SLAEVNT', 'SSAMATX', 'SFQSECT', 'SSASECT'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
@@ -214,15 +213,15 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
     //Test creation of a valid record
 
 
-	@Test
+    @Test
     void testCreateValidSectionMeetingTime() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -236,7 +235,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     //Test creation of an invalid record
 
 
-	@Test
+    @Test
     void testCreateInvalidSectionMeetingTime() {
         def sectionMeetingTime = newInvalidForCreateSectionMeetingTime()
         shouldFail {
@@ -247,7 +246,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     //Test valid update of a new record
 
 
-	@Test
+    @Test
     void testUpdateValidSectionMeetingTime() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -339,7 +338,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     //Test invalid update of a new record
 
 
-	@Test
+    @Test
     void testUpdateInvalidSectionMeetingTime() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -402,7 +401,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     //Test optimistic lock with creation and update of new record
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -441,7 +440,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test delete of a new record
-	@Test
+    @Test
     void testDeleteSectionMeetingTime() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -452,14 +451,14 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test that a valid record is validated
-	@Test
+    @Test
     void testValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         assertTrue "SectionMeetingTime could not be validated as expected due to ${sectionMeetingTime.errors}", sectionMeetingTime.validate()
     }
 
     //Test that not null fields fail validation
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sectionMeetingTime = new SectionMeetingTime()
         assertFalse "SectionMeetingTime should have failed validation", sectionMeetingTime.validate()
@@ -499,7 +498,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //Test that exceeding maximum size of fields causes failure
-	@Test
+    @Test
     void testMaxSizeValidationFailures() {
         def sectionMeetingTime = new SectionMeetingTime(
                 term: "XXXXXXX",
@@ -590,7 +589,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Confirm that only the values in the inList are accepted.
-	@Test
+    @Test
     void testInListValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         //set the inList fields to invalid values
@@ -615,7 +614,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the BigDecimal fields fail when exceed the maximum size.
-	@Test
+    @Test
     void testScaleMaxSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.creditHourSession = 9999.9999
@@ -626,7 +625,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the BigDecimal fields fail when it is smaller than minimum size.
-	@Test
+    @Test
     void testScaleMinSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.creditHourSession = -1
@@ -637,7 +636,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the Integer fields fail validation when maximum size is exceeded.
-	@Test
+    @Test
     void testIntegerMaxSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.dayNumber = 99
@@ -649,7 +648,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the Integer fields fail validation when maximum size is exceeded.
-	@Test
+    @Test
     void testIntegerMinSizeValidation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.dayNumber = -1
@@ -707,7 +706,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Execute a test for the begin and end times to make sure they correspond to valid times in range of '0000'..'2359'
-	@Test
+    @Test
     void testBeginAndEndTimes() {
 
         //test begin times being > "2359"
@@ -737,7 +736,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Execute a test for start date
-	@Test
+    @Test
     void testStartDate() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         //set the start date after the end date
@@ -749,7 +748,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Execute a test for end date
-	@Test
+    @Test
     void testEndDate() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         //set the end date before the start date
@@ -762,7 +761,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the ScheduleToolStatus and requirement for building and room.
-	@Test
+    @Test
     void testScheduleToolStatusRequireBuildingRoom() {
         //test a code which requires the building and room
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
@@ -775,7 +774,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // Test the ScheduleToolStatus when it does not require building and room.
-	@Test
+    @Test
     void testScheduleToolStatusNotRequireBuildingRoom() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.scheduleToolStatus = ScheduleToolStatus.findByCode('NSM')
@@ -786,7 +785,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
-	@Test
+    @Test
     void testFetchByTermAndCourseReferenceNumberNewRecord() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -803,7 +802,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
-	@Test
+    @Test
     void testFetchByTermAndCourseReferenceNumberExistingRecord() {
         def result = SectionMeetingTime.fetchByTermAndCourseReferenceNumber(
                 u_success_existing_term, u_success_existing_courseReferenceNumber)
@@ -818,7 +817,7 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-	@Test
+    @Test
     void testFetchCountOfSchedulesByDateTimeAndLocation() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTime()
         sectionMeetingTime.save(failOnError: true, flush: true)
@@ -861,8 +860,46 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertFalse "Schedule does not exist with this time ", count > 0
     }
 
+
+    @Test
+    void testFetchCategoryByTermAndCourseReferenceNumber(){
+        def sectionMeetingTime = newValidForCreateSectionMeetingTime()
+        sectionMeetingTime.save(failOnError: true, flush: true)
+        assertNotNull sectionMeetingTime
+
+        def sectionMeetingTime2 = newValidForCreateSectionMeetingTime()
+        sectionMeetingTime2.category = "00"
+        sectionMeetingTime2.save(failOnError: true, flush: true)
+        assertNotNull sectionMeetingTime2
+
+        List sectionMeetingTimes = SectionMeetingTime.findAllByTermAndCourseReferenceNumber(sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber)
+        assertTrue sectionMeetingTimes.size() >= 2
+
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber )
+        assertNotNull categories
+        assertTrue categories?.size() >= 2
+        assertTrue categories.contains(sectionMeetingTime.category)
+        assertTrue categories.contains(sectionMeetingTime2.category)
+    }
+
+
+    @Test
+    void testFetchCategoryByTermAndCourseReferenceNumberWithInvalidData(){
+        // Fetch with invalid term and crn combination
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( '444444', '55555' )
+        assertTrue categories.isEmpty(  )
+    }
+
+
+    @Test
+    void testFetchCategoryByTermAndCourseReferenceNumberWithNullData(){
+        List categories = SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber( null, null )
+        assertTrue categories.isEmpty(  )
+    }
+
+
     // This test will execute the fetchBy in the domain to retrieve a list of class meeting times from the NamedQuery after creating a new reocrd
-	@Test
+    @Test
     void testFetchByTermCRNAndFunction() {
         def sectionMeetingTime = newValidForCreateSectionMeetingTimeForEvent()
         sectionMeetingTime.save(failOnError: true, flush: true)

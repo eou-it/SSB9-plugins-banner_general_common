@@ -18,20 +18,20 @@ import java.text.SimpleDateFormat
 
 class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testCreateValidSourceBackgroundInstitutionCharacteristic() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         sourceBackgroundInstitutionCharacteristic.save(failOnError: true, flush: true)
@@ -40,7 +40,7 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testCreateInvalidSourceBackgroundInstitutionCharacteristic() {
         def sourceBackgroundInstitutionCharacteristic = newInvalidForCreateSourceBackgroundInstitutionCharacteristic()
         shouldFail(ValidationException) {
@@ -50,7 +50,7 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
 
     // NOTE: No Updates are allowed
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -68,7 +68,7 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testDeleteSourceBackgroundInstitutionCharacteristic() {
         def sourceBackgroundInstitutionCharacteristic = newValidForCreateSourceBackgroundInstitutionCharacteristic()
         sourceBackgroundInstitutionCharacteristic.save(failOnError: true, flush: true)
@@ -79,14 +79,14 @@ class SourceBackgroundInstitutionCharacteristicIntegrationTests extends BaseInte
     }
 
 
-	@Test
+    @Test
     void testValidation() {
         def sourceBackgroundInstitutionCharacteristic = newInvalidForCreateSourceBackgroundInstitutionCharacteristic()
         assertFalse "SourceBackgroundInstitutionCharacteristic could not be validated as expected due to ${sourceBackgroundInstitutionCharacteristic.errors}", sourceBackgroundInstitutionCharacteristic.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def sourceBackgroundInstitutionCharacteristic = new SourceBackgroundInstitutionCharacteristic()
         assertFalse "SourceBackgroundInstitutionCharacteristic should have failed validation", sourceBackgroundInstitutionCharacteristic.validate()

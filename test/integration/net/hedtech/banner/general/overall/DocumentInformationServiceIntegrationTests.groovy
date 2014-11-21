@@ -18,20 +18,20 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     def documentInformationService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testDocumentInformationValidCreate() {
         def documentInformation = newValidForCreateDocumentInformation()
         def map = [domainModel: documentInformation]
@@ -47,7 +47,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
-	@Test
+    @Test
     void testDocumentInformationInvalidCreate() {
         def documentInformation = newInvalidForCreateDocumentInformation()
         def map = [domainModel: documentInformation]
@@ -56,7 +56,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
         }
     }
 
-	@Test
+    @Test
     void testDocumentInformationValidUpdate() {
         def documentInformation = newValidForCreateDocumentInformation()
         def map = [domainModel: documentInformation]
@@ -85,7 +85,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
-	@Test
+    @Test
     void testDocumentInformationInvalidUpdate() {
         def documentInformation = newValidForCreateDocumentInformation()
         def map = [domainModel: documentInformation]
@@ -109,7 +109,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
-	@Test
+    @Test
     void testDocumentInformationDelete() {
         def documentInformation = newValidForCreateDocumentInformation()
         def map = [domainModel: documentInformation]
@@ -122,7 +122,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def documentInformation = newValidForCreateDocumentInformation()
         def map = [domainModel: documentInformation]
@@ -140,7 +140,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
-	@Test
+    @Test
     void testMissingRequestDate() {
         def documentInformation = new DocumentInformation(
                 pidm: PersonUtility.getPerson("HOR000001").pidm,
@@ -158,7 +158,7 @@ class DocumentInformationServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
 
-	@Test
+    @Test
     void testInvalidDocumentDate() {
         def documentInformation = new DocumentInformation(
                 pidm: PersonUtility.getPerson("HOR000001").pidm,

@@ -18,20 +18,20 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     def sourceBackgroundInstitutionDemographicService
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDemographicValidCreate() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         def map = [domainModel: sourceBackgroundInstitutionDemographic]
@@ -45,7 +45,7 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDemographicInvalidCreate() {
         def sourceBackgroundInstitutionDemographic = newInvalidForCreateSourceBackgroundInstitutionDemographic()
         def map = [domainModel: sourceBackgroundInstitutionDemographic]
@@ -55,7 +55,7 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDemographicValidUpdate() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         def map = [domainModel: sourceBackgroundInstitutionDemographic]
@@ -83,7 +83,7 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDemographicInvalidUpdate() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         def map = [domainModel: sourceBackgroundInstitutionDemographic]
@@ -104,7 +104,7 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     }
 
 
-	@Test
+    @Test
     void testSourceBackgroundInstitutionDemographicDelete() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         def map = [domainModel: sourceBackgroundInstitutionDemographic]
@@ -116,7 +116,7 @@ class SourceBackgroundInstitutionDemographicServiceIntegrationTests extends Base
     }
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def sourceBackgroundInstitutionDemographic = newValidForCreateSourceBackgroundInstitutionDemographic()
         def map = [domainModel: sourceBackgroundInstitutionDemographic]

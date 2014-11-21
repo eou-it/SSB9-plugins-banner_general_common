@@ -49,8 +49,8 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     def u_failure_keyBlockMap = [:]
 
 
-	@Before
-	public void setUp() {
+    @Before
+    public void setUp() {
         formContext = ['SSASECT']
         super.setUp()
         initializeTestDataForReferences()
@@ -78,13 +78,13 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@After
-	public void tearDown() {
+    @After
+    public void tearDown() {
         super.tearDown()
     }
 
 
-	@Test
+    @Test
     void testHousingRoomCatagoryDefinitionValidCreate() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -99,7 +99,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testHousingRoomCatagoryDefinitionInvalidCreate() {
         def housingRoomCatagoryDefinition = newInvalidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_failure_keyBlockMap,
@@ -111,7 +111,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
 
 
-	@Test
+    @Test
     void testHousingRoomCatagoryDefinitionValidUpdate() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -134,7 +134,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
     }
 
 
-	@Test
+    @Test
     void testHousingRoomCatagoryDefinitionInvalidUpdate() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -158,7 +158,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
 
 
-	@Test
+    @Test
     void testHousingRoomCatagoryDefinitionDelete() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,
@@ -174,7 +174,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
 
 
-	@Test
+    @Test
     void testReadOnly() {
         def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
         def map = [keyBlock: i_success_keyBlockMap,

@@ -37,7 +37,7 @@ class CommunicationPopulationQueryStatementParseService {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
             }
 
-            def stmt = '{call gokextr.p_validate_sql(?,?,?,?,?)}'
+            def stmt = '{call gckextr.p_validate_sql(?,?,?,?,?)}'
             def params = [statement, Sql.VARCHAR, Sql.VARCHAR, Sql.INTEGER, Sql.INTEGER]
             sql.call stmt, params, { status, message, cost, cardinality ->
                 populationQueryParseResult.status = status

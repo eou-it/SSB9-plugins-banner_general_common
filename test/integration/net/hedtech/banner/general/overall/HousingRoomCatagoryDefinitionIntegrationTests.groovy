@@ -132,7 +132,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-	@Test
+    @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -152,7 +152,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
     }
 
 
-	@Test
+    @Test
     void testOptimisticLock() {
 		def housingRoomCatagoryDefinition = newValidForCreateHousingRoomCatagoryDefinition()
 		housingRoomCatagoryDefinition.save( failOnError: true, flush: true )
@@ -184,14 +184,14 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-	@Test
+    @Test
     void testValidation() {
        def housingRoomCatagoryDefinition = newInvalidForCreateHousingRoomCatagoryDefinition()
        assertFalse "HousingRoomCatagoryDefinition could not be validated as expected due to ${housingRoomCatagoryDefinition.errors}", housingRoomCatagoryDefinition.validate()
     }
 
 
-	@Test
+    @Test
     void testNullValidationFailure() {
         def housingRoomCatagoryDefinition = new HousingRoomCatagoryDefinition()
         assertFalse "HousingRoomCatagoryDefinition should have failed validation", housingRoomCatagoryDefinition.validate()
@@ -223,7 +223,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 	}
 
 
-  @Test
+    @Test
    void testFetchByCodeOrDescription() {
        //test to verify all records are returned when filter is not provided
        def result = HousingRoomCatagoryDefinition.fetchByCodeOrDescription()

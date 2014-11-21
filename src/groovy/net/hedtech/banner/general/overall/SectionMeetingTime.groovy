@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -41,7 +41,13 @@ query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
 		                 WHERE a.term = :term
 		                 AND a.courseReferenceNumber = :eventCourseReferenceNumber
 		                 AND a.function.code = :functionCode
-		                 order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" )
+		                 order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""" ),
+@NamedQuery( name = "SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber",
+        query = """SELECT a.category
+                        FROM SectionMeetingTime a
+                        WHERE a.term = :term
+                        AND a.courseReferenceNumber = :courseReferenceNumber
+                        ORDER BY a.id ASC""")
 ] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
@@ -569,4 +575,18 @@ class SectionMeetingTime implements Serializable {
         }
         return sectionMeetingTimes
     }
+
+
+    public static List fetchCategoryByTermAndCourseReferenceNumber(String term, String courseReferenceNumber){
+        List categories = []
+        if(term && courseReferenceNumber){
+            SectionMeetingTime.withSession { session ->
+                categories = session.getNamedQuery(
+                        'SectionMeetingTime.fetchCategoryByTermAndCourseReferenceNumber')
+                        .setString('term',term).setString('courseReferenceNumber',courseReferenceNumber).list()
+            }
+        }
+        return categories
+    }
+
 }
