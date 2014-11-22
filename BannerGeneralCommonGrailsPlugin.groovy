@@ -50,7 +50,6 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-
     }
 
 
