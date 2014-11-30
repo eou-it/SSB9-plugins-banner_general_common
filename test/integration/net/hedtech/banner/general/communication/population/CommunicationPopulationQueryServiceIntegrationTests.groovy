@@ -10,12 +10,15 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Integration tests for PopulationQueryService service
  */
 class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegrationTestCase {
 
+    def selfServiceBannerAuthenticationProvider
     def communicationPopulationQueryService
 
     def CommunicationFolder testFolder
@@ -23,8 +26,11 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
@@ -32,6 +38,7 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
@@ -171,7 +178,7 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
 
     private String getUser() {
-        return 'GRAILS_USER'
+        return 'BCMADMIN'
     }
 
 

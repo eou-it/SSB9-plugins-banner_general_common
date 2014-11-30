@@ -10,6 +10,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Integration tests for PopulationSelectionList entity
@@ -17,12 +19,15 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationPopulationQuery globalTestPopulationQuery
-
+    def selfServiceBannerAuthenticationProvider
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         globalTestPopulationQuery = newPopulation().save()
     }
 
@@ -30,6 +35,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 

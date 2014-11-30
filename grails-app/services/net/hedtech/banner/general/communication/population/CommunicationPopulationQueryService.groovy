@@ -19,6 +19,11 @@ class CommunicationPopulationQueryService extends ServiceBase {
 
 
     def preCreate(domainModelOrMap) {
+
+        if (!CommunicationCommonUtility.userCanCreate()) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+        }
+
         CommunicationPopulationQuery popQuery = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQuery
         popQuery.folder = (popQuery.folder ?: domainModelOrMap.folder)
 
@@ -43,11 +48,11 @@ class CommunicationPopulationQueryService extends ServiceBase {
         popQuery.setValid(false)
 
         //check for sql injection and if it returns true then throw invalid exception
-        if (!CommunicationCommonUtility.validateSqlStatementForInjection(popQuery.sqlString)) {
+        if (CommunicationCommonUtility.sqlStatementNotAllowed(popQuery.sqlString, false)) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+        } else {
             def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
             popQuery.setValid((parseResult?.status == "Y"))
-        } else {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
         }
     }
 
@@ -58,6 +63,16 @@ class CommunicationPopulationQueryService extends ServiceBase {
 
         if (popQuery.id == null)
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
+
+        def oldpopquery = CommunicationPopulationQuery.get(popQuery.id)
+
+        if (oldpopquery.id == null)
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
+
+        //check if user is authorized. user should be admin or author
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpopquery.createdBy)) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+        }
 
         if (popQuery.name == null || popQuery.name == "")
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nameCannotBeNull@@")
@@ -73,11 +88,27 @@ class CommunicationPopulationQueryService extends ServiceBase {
         popQuery.setValid(false)
 
         //check for sql injection and if it returns true then throw invalid exception
-        if (!CommunicationCommonUtility.validateSqlStatementForInjection(popQuery.sqlString)) {
+        if (CommunicationCommonUtility.sqlStatementNotAllowed(popQuery.sqlString, false)) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+        } else {
             def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
             popQuery.setValid((parseResult?.status == "Y"))
-        } else {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+        }
+    }
+
+
+    def preDelete(domainModelOrMap) {
+
+        if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null))
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
+
+        def oldpopquery = CommunicationPopulationQuery.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
+
+        if (oldpopquery.id == null)
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
+
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpopquery.createdBy)) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
     }
 

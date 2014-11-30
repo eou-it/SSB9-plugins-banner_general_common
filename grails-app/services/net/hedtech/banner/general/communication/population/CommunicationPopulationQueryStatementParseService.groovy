@@ -23,7 +23,7 @@ class CommunicationPopulationQueryStatementParseService {
     def sql
 
 
-    def CommunicationPopulationQueryParseResult parse(String statement) {
+    def CommunicationPopulationQueryParseResult parse(String statement, Boolean multiSelectColumnAllowed=true) {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
         def exceptionMessage
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
@@ -33,7 +33,8 @@ class CommunicationPopulationQueryStatementParseService {
         }
 
         try {
-            if (CommunicationCommonUtility.validateSqlStatementForInjection(statement)) {
+            //test for sql injec tion and throw exception if found
+            if (CommunicationCommonUtility.sqlStatementNotAllowed(statement,multiSelectColumnAllowed )) {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
             }
 

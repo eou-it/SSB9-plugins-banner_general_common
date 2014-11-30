@@ -6,13 +6,13 @@ package net.hedtech.banner.general.communication.population
 
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 import java.sql.SQLException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-
 
 class CommunicationPopulationExecutionService {
 
@@ -24,13 +24,19 @@ class CommunicationPopulationExecutionService {
 
 
     def CommunicationPopulationQueryParseResult parse(Long populationQueryId) {
+
+        //throw exception if the banner security for query execution is not setup for this user
+        if (!CommunicationCommonUtility.userCanExecuteQuery()) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+        }
+
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
         def exceptionMessage
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
         def populationQuery = communicationPopulationQueryService.get(populationQueryId)
 
 
-        populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.sqlString)
+        populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.sqlString, false)
         return populationQueryParseResult
     }
 
@@ -40,6 +46,11 @@ class CommunicationPopulationExecutionService {
      * @returns the population selection list id
      */
     def execute(Long populationQueryId) {
+
+        //throw exception if the banner security for query execution is not setup for this user
+        if (!CommunicationCommonUtility.userCanExecuteQuery()) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+        }
 
         if (!populationQueryId) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nullPopulationQueryId@@")

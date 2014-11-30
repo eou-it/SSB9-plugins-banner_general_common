@@ -10,6 +10,8 @@ import org.hibernate.FlushMode
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Integration tests for PopulationQueryView entity
@@ -17,12 +19,16 @@ import org.junit.Test
 class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder testFolder
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
@@ -30,6 +36,7 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
