@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
 
 // NOTE:
@@ -23,12 +25,22 @@ class CommunicationPopulationSelectionListService extends ServiceBase {
     }
 
 
-    def preDelete(map) {
-        //throw new ApplicationException(PopulationSelectionList, "@@r1:unsupported.operation@@")
+    def preDelete(domainModelOrMap) {
+        if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null))
+            throw new ApplicationException(CommunicationPopulationSelectionList, "@@r1:queryDoesNotExist@@")
+
+        def oldpop = CommunicationPopulationSelectionList.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
+
+        if (oldpop.id == null)
+            throw new ApplicationException(CommunicationPopulationSelectionList, "@@r1:queryDoesNotExist@@")
+
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpop.lastCalculatedBy)) {
+            throw new ApplicationException(CommunicationPopulationSelectionList, "@@r1:operation.not.authorized@@")
+        }
     }
 
 
-    def preUpdate(map) {
+    def preUpdate(domainModelOrMap) {
 //        throw new ApplicationException(PopulationSelectionList, "@@r1:unsupported.operation@@")
 
     }
