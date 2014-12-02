@@ -133,7 +133,7 @@ public abstract class CommunicationTemplate implements Serializable {
 
     static constraints = {
         name(nullable: false, maxSize: 1020)
-        description(nullable: false, maxSize: 4000)
+        description(nullable: true, maxSize: 4000)
         personal(nullable: false)
         folder(nullable: false)
         validFrom(nullable: true)
