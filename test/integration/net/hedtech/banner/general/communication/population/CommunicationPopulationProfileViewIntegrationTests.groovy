@@ -9,6 +9,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Integration tests for PopulationSelectionListEntry entity
@@ -17,12 +19,15 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
     def CommunicationPopulationQuery globalTestPopulationQuery
     def CommunicationPopulationSelectionList globalTestPopulationSelectionList
     def Long globalPidm
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
 
         newPerson()
         globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
@@ -36,6 +41,7 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 

@@ -9,6 +9,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Integration tests for PopulationSelectionListEntry entity
@@ -18,12 +20,17 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
     def CommunicationPopulationSelectionList globalTestPopulationSelectionList
     def CommunicationFolder folder
     def i_valid_foldername = "TestFolderName"
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         folder = newValidForCreateFolder()
         folder.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -40,6 +47,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
@@ -54,7 +62,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         assertEquals 9199999999999999999, populationSelectionListEntry.pidm
         assertEquals globalTestPopulationSelectionList, populationSelectionListEntry.populationSelectionList
 
-        def allView = CommunicationPopulationListView.findByNameWithPagingAndSortParams([params: [:]], [sortColumn: "queryName", sortDirection: "asc", max: 20, offset: 0])
+        def allView = CommunicationPopulationListView.findByNameWithPagingAndSortParams([params: ["queryName":'%']], [sortColumn: "queryName", sortDirection: "asc", max: 20, offset: 0])
         assertNotNull allView
         assertTrue allView.size() >= 1
         assertTrue allView.getTotalCount() >= 1

@@ -29,7 +29,7 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testGoodSql() {
         def sqlstring = "select spriden_pidm from spriden where spriden_change_ind is null  AND spriden_id LIKE 'A0000091%'"
-        def result = CommunicationCommonUtility.validateSqlStatementForInjection(sqlstring)
+        def result = CommunicationCommonUtility.sqlStatementNotAllowed(sqlstring)
         assertFalse(result)
     }
 
@@ -37,7 +37,7 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testInsertSql() {
         def sqlstring = "insert into dual; select spriden_pidm from spriden where spriden_change_ind is null  AND spriden_id LIKE 'A0000091%'"
-        def result = CommunicationCommonUtility.validateSqlStatementForInjection(sqlstring)
+        def result = CommunicationCommonUtility.sqlStatementNotAllowed(sqlstring)
         assertTrue(result)
     }
 
@@ -45,7 +45,7 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testInsert2Sql() {
         def sqlstring = "select spriden_pidm from spriden where spriden_change_ind is null  AND spriden_id LIKE 'A0000091%';insert into dual;"
-        def result = CommunicationCommonUtility.validateSqlStatementForInjection(sqlstring)
+        def result = CommunicationCommonUtility.sqlStatementNotAllowed(sqlstring)
         assertTrue(result)
     }
 

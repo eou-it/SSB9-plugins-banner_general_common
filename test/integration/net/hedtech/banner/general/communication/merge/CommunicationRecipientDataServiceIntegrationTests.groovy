@@ -15,6 +15,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -26,6 +28,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationPopulationSelectionListService
     def communicationFieldCalculationService
     def communicationFieldService
+    def selfServiceBannerAuthenticationProvider
 
     def CommunicationFolder validFolder
     def CommunicationEmailTemplate emailTemplate
@@ -91,8 +94,10 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
 
         validFolder = newValidForCreateFolder("Test Folder")
         validFolder.save(failOnError: true, flush: true)
@@ -113,6 +118,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 

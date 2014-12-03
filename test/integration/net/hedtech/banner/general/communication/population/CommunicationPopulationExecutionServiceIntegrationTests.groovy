@@ -11,6 +11,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
 
@@ -23,12 +24,16 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     def i_fail_sqlStatement = "select 2086 spriden_pidm kjlkj from dual"
     def i_fail_multiValueSqlStatement = "select 2086 spriden_pidm, sysdate from dual where select y, m from dual"
     def BannerUser
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         bannerUser = SecurityContextHolder?.context?.authentication?.principal as BannerUser;
     }
 
@@ -36,6 +41,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
@@ -95,7 +101,9 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     void testExecuteMultiValueSqlStatement() {
         def populationQuery = newValidPopulationQuery()
         populationQuery.sqlString = i_fail_multiValueSqlStatement
-        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        shouldFail {
+            def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        }
         def populationSelectionListId
         shouldFail {
             populationSelectionListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
@@ -116,7 +124,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         calculatedPopulationQuery.refresh()
 
 
-        def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, bannerUser?.username)
+        def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, 'GRAILS_USER')
         assertNotNull populationQuerySelectionList
         assertEquals(populationSelectionListId, populationQuerySelectionList.id)
 

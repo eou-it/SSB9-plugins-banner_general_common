@@ -112,7 +112,8 @@ class CommunicationPopulationSelectionList implements Serializable {
 
         def populationSelectionLists = CommunicationPopulationSelectionList.withSession { session ->
             org.hibernate.Query query = session.getNamedQuery('CommunicationPopulationSelectionList.fetchByNameAndId')
-                    .setLong('populationQueryId', populationQueryId).setString('userId', userId); query.list()
+                    .setLong('populationQueryId', populationQueryId).setString('userId', userId)
+            ; query.list()
         }
         return populationSelectionLists.getAt(0)
     }
