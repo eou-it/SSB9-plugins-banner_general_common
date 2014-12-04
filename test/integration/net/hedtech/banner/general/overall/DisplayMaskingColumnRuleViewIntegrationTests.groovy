@@ -81,4 +81,29 @@ class DisplayMaskingColumnRuleViewIntegrationTests extends BaseIntegrationTestCa
         assertEquals display, showNameSuffix
 
     }
+
+    @Test
+    void testFetchSSBMaskByBlockNameAndColumnName() {
+        def sql
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.executeUpdate("update GORDMSK set GORDMSK_DATA_MASK = '*****XXXX' where GORDMSK_BLOCK_NAME = 'BWPKHSTB_ALL' AND GORDMSK_COLUMN_NAME = '%_SSN'")
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+        def display = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockNameAndColumnName([blockName:'BWPKHSTB',columnName:'%_SSN'])
+        assertNotNull display
+        assertEquals display.dataMask,"*****XXXX"
+
+    }
+
+
+    @Test
+    void testFetchSSBMaskByBlockName() {
+        def displayRules = DisplayMaskingColumnRuleView.fetchSSBMaskByBlockName([blockName:'BWGKOADR'])
+        assertNotNull displayRules
+        assertEquals displayRules.size,4
+
+    }
+
 }
