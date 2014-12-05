@@ -133,6 +133,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r
         Yours Faithfully, DR CLEMENT OKON """.toString()
         assertEquals( expected, result )
+
     }
 
 

@@ -102,21 +102,17 @@ class CommunicationTemplateMergeService {
         char delimiter = '$'
         templateVariables.each { dataFieldName ->
             CommunicationField communicationField = CommunicationField.findByName( dataFieldName )
-            if (communicationField == null) {
-                throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:invalidDataField@@", dataFieldName )
+            if (communicationField) {
+                renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
+                //throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:invalidDataField@@", dataFieldName )
+            } else {
+                renderedCommunicationFields.put( dataFieldName, null )
             }
-            renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
         }
         ST st = new ST( templateString, delimiter, delimiter );
         renderedCommunicationFields.keySet().each { key ->
             st.add( key, renderedCommunicationFields[key] )
         }
-
-        //StringWriter sw = new StringWriter();
-        //NoIndentWriter w = new NoIndentWriter(sw);
-        //w.newline=""
-        //st.write(w); // same as render() except with a different writer
-        //sw.toString();
         st.render()
     }
 

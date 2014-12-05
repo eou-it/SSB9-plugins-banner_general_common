@@ -9,10 +9,11 @@ import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
 import org.antlr.runtime.tree.CommonTree
 import org.stringtemplate.v4.ST
-
-import java.util.regex.Pattern
+import org.stringtemplate.v4.STGroup
 
 class CommunicationTemplateService extends ServiceBase {
+    def dataFieldNames = []
+
 
     def preCreate( domainModelOrMap ) {
         CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
@@ -45,57 +46,47 @@ class CommunicationTemplateService extends ServiceBase {
      * @return set of unique string variables found in the template string
      */
     List<String> extractTemplateVariables( String statement ) {
-        Pattern pattern = Pattern.compile( /\$(\w*)\$/ );
-        //Pattern pattern = Pattern.compile( /\$(\w+)[.]|(\w+?)\$/ );
-/*        def List<String> runTimeParms = []
-        def matcher = pattern.matcher( statement )
 
-        while (matcher.find()) {
-            runTimeParms << matcher.group( 1 )
-
-        }
-        runTimeParms.removeAll( Collections.singleton( null ) );
-        runTimeParms.unique( false )
-
-*/
-        final int ID = 25
+        final int ID = 25 // This is the ST constant for an ID token
         char delimiter = '$'
+        /* TODO: get a listener working so  you can trap rendering errors */
+        STGroup group = new STGroup( delimiter, delimiter )
+        CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
+        group.setListener( errorListener )
+        group.defineTemplate( "foo", statement )
         ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
 
-        def dataFieldNames = []
-        println st.impl.ast.text
-        st.impl.ast.getChildren().each {
+        /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
+        down the branch looking for ID tokens to place in the global dataFieldNames */
 
+        st.impl.ast.getChildren().each {
             if (it != null) {
                 CommonTree child = it as CommonTree
-
-                if (child.toString().equals( "EXPR" )) {
-
-                    //if (child.getChildCount() == 1) {
-                    CommonTree expressionChild = child.getChild( 0 )
-                    if (expressionChild.getToken().getType() == ID) {
-                        dataFieldNames.add( expressionChild.toString() )
-                        //} else if (expressionChild.toString().equals( "PROP" )) {
-                        //    if (expressionChild.getChildCount() == 2) {
-                        //        dataFieldNames.add(
-                        //                expressionChild.getChild( 0 ).toString() +
-                        //                        "." +
-                        //                        expressionChild.getChild( 1 ).toString() )
-                        //    }
-                        //}
-                    }
-                } else if (child.toString().equals( "INDENTED_EXPR" )) {
-                    CommonTree expressionChild = child.getChild( 1 ).getChild( 0 )
-                    if (expressionChild.getToken().getType() == ID) {
-                        dataFieldNames.add( expressionChild.toString() )
-                    }
-                }
+                examineNodes( child )
             }
         }
 
-
         dataFieldNames.unique( false )
+
     }
 
+
+    def examineNodes( CommonTree treeNode ) {
+        final int ID = 25
+
+        if (treeNode) {
+            //println "token type = " + treeNode.getToken().getType() + " text= " + treeNode.getToken().getText()
+            if (treeNode.getToken().getType() == ID) {
+                //println "ChildIndex= " + treeNode.childIndex + "string= " + treeNode.toStringTree()
+                dataFieldNames.add( treeNode.toString() )
+            }
+            treeNode.getChildren().each {
+                CommonTree nextNode = it as CommonTree
+                examineNodes( nextNode )
+            }
+
+        }
+    }
 }
+
 
