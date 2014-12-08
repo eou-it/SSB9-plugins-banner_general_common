@@ -43,6 +43,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate
         communicationMergedEmailTemplate = calculateTemplateByPidm( emailTemplate, person.pidm )
         communicationMergedEmailTemplate
+
     }
 
     /**
@@ -61,6 +62,7 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate.content = renderTemplate( emailTemplate.content, recipientDataMap )
         communicationMergedEmailTemplate
     }
+
 
     /**
      * Compute each communication field in the list and return the results. This data will become what is known
@@ -242,6 +244,7 @@ class CommunicationTemplateMergeService {
             }
 
         }
+
     }
 
 

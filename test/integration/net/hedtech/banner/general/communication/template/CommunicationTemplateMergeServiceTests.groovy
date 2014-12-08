@@ -23,7 +23,6 @@ import org.junit.Test
 
 class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
-
     def communicationTemplateMergeService
     def communicationFieldService
     def communicationFieldCalculationService
@@ -131,6 +130,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         assertEquals( "Hi Chubby Checker", communicationMergedEmailTemplate.toList )
         assertEquals( "Hi Chubby Checker", communicationMergedEmailTemplate.subject )
         assertEquals( "Hi Chubby Checker", communicationMergedEmailTemplate.content )
+
 
     }
 
