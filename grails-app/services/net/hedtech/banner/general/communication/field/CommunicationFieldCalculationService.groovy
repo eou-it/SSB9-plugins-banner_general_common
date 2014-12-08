@@ -21,18 +21,24 @@ import java.sql.SQLException
 
 class CommunicationFieldCalculationService extends ServiceBase {
 
-    String calculateFieldByBannerId( String immutableId, String bannerId ) {
+    Map calculateFieldByBannerId( String immutableId, String bannerId ) {
 
         def person = PersonUtility.getPerson( bannerId )
 
         if (person == null) {
-            throw new ApplicationException( CommunicationFieldCalculationService, "Person is null" ) // TODO: I18N these
+            throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:idInvalid@@" )
         }
         if (immutableId == null) {
-            throw new ApplicationException( CommunicationFieldCalculationService, "ImmutableId is null" )
+            throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:immutableIdInvalid@@" )
         }
+        def returnmap = [:]
 
-        calculateFieldByPidm( immutableId, person.pidm )
+        def confdecmap = PersonUtility.isPersonConfidentialOrDeceased(person.pidm)
+        returnmap << ["confidential":confdecmap.confidential]
+        returnmap << ["deceased":confdecmap.deceased]
+        returnmap << ["name":PersonUtility.formatName([lastName: person.lastName, firstName: person.firstName, mi: person.middleName])]
+        returnmap << ["fieldResult":calculateFieldByPidm( immutableId, person.pidm )]
+        returnmap
     }
 
     /**
