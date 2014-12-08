@@ -14,6 +14,8 @@ import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -21,10 +23,11 @@ import org.junit.Test
 
 class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
-    def communicationEmailTemplateService
+
     def communicationTemplateMergeService
     def communicationFieldService
-
+    def communicationFieldCalculationService
+    def communicationRecipientDataService
 
     def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
@@ -44,7 +47,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def i_valid_folder_internal = true
     def i_valid_folder_name1 = "Valid Folder1 Name"
     def i_valid_folder_name2 = "Valid Folder2 Name"
-
+    def i_valid_pidm = 1299
     def CommunicationFolder folder1
     def CommunicationFolder folder2
 
@@ -71,21 +74,64 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testCalculateTemplateByBannerId() {
+    /* The sunny day test */
+    void testMergeTemplate() {
+        /* create the template */
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
+        /* it doesn't matter what we set them to, as long as they contain personalization fields, we can test that they get rendered */
         emailTemplate.content = """Hi \$firstname\$ \$lastname\$"""
+        emailTemplate.toList = """Hi \$firstname\$ \$lastname\$"""
+        emailTemplate.subject = """Hi \$firstname\$ \$lastname\$"""
         emailTemplate.save( failOnError: true, flush: true )
 
-        // Now set up the fields
-
+        // Now set up the data fields
+        CommunicationField tempfield
         def testCommunicationField = newCommunicationField( "firstname", "\$firstname\$", "George", "Select spriden_first_name firstname from spriden where spriden_pidm = :pidm and spriden_change_ind is null" )
-        communicationFieldService.create( [domainModel: testCommunicationField] )
+        tempfield = communicationFieldService.create( [domainModel: testCommunicationField] )
+        assertNotNull tempfield.immutableId
 
         testCommunicationField = newCommunicationField( "lastname", "\$lastname\$", "George", "Select spriden_last_name lastname from spriden where spriden_pidm = :pidm and spriden_change_ind is null" )
-        communicationFieldService.create( [domainModel: testCommunicationField] )
+        tempfield = communicationFieldService.create( [domainModel: testCommunicationField] )
+        assertNotNull tempfield.immutableId
 
-        String templateResult = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, "17" )
-        assertNotNull( templateResult )
+        // Now extract the template variables and calculate their values and save as RecipientData
+        def templateVariables = communicationTemplateMergeService.extractTemplateVariables( emailTemplate )
+
+        String fieldCalculationResult
+
+        CommunicationRecipientData communicationRecipientData
+        def fieldListByPidm = [:]
+        params = [:]
+        params << ['pidm': i_valid_pidm]
+
+        println templateVariables
+        templateVariables.each {
+            variableName ->
+                println variableName
+                tempfield = CommunicationField.fetchByName( variableName )
+                assertNotNull(tempfield.immutableId)
+                fieldCalculationResult = communicationFieldCalculationService.calculateField( tempfield.immutableId, params )
+                fieldListByPidm.put( tempfield.name, new CommunicationFieldValue(
+                        value: fieldCalculationResult,
+                        renderAsHtml: false ) )
+        }
+        communicationRecipientData = new CommunicationRecipientData(
+                pidm: i_valid_pidm,
+                templateId: emailTemplate.id,
+                referenceId: 1,
+                ownerId: getUser(),
+                fieldValues: fieldListByPidm
+        )
+
+        communicationRecipientDataService.create( communicationRecipientData )
+
+        /* Now merge the recipient data into the template */
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
+        assertNotNull( communicationMergedEmailTemplate )
+        assertEquals( "Hi Chubby Checker", communicationMergedEmailTemplate.toList )
+        assertEquals( "Hi Chubby Checker", communicationMergedEmailTemplate.subject )
+        assertEquals( "Hi Chubby Checker", communicationMergedEmailTemplate.content )
+
     }
 
 
@@ -96,8 +142,11 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         emailTemplate.save( failOnError: true, flush: true )
 
         // do not set up any fields, you should not get any exception
-        String templateResult = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, "17" )
-        assertNotNull( templateResult )
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, "17" )
+        //CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
+        assertNotNull( communicationMergedEmailTemplate )
+        /* No errors expect, just nulls returned */
+        assertEquals("Hi  ", communicationMergedEmailTemplate.content )
     }
 
 
@@ -127,12 +176,16 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         testCommunicationField = newCommunicationField( "signed", "", """Yours Faithfully, DR CLEMENT OKON """, null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
-        //(String name, String formatString, String previewValue, String ruleContent )
-        String result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate.content )
-        String expected = """Greetings George Washington,\r
+
+        CommunicationMergedEmailTemplate result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate )
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
+        communicationMergedEmailTemplate.content = """Greetings George Washington,\r
         First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r
         Yours Faithfully, DR CLEMENT OKON """.toString()
-        assertEquals( expected, result )
+        /* Since toList and subject contents are not communicationFields, they should render null */
+        assertNull( communicationMergedEmailTemplate.toList )
+        assertNull( communicationMergedEmailTemplate.subject )
+        assertEquals( communicationMergedEmailTemplate.content, result.content )
 
     }
 
@@ -213,4 +266,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     }
 
 
+    private String getUser() {
+        return 'GRAILS_USER'
+    }
 }

@@ -16,10 +16,8 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
 import org.stringtemplate.v4.ST
-import st4hidden.org.antlr.runtime.tree.CommonTree
 
 import java.sql.SQLException
-import java.util.regex.Pattern
 
 class CommunicationFieldCalculationService extends ServiceBase {
 
@@ -37,7 +35,12 @@ class CommunicationFieldCalculationService extends ServiceBase {
         calculateFieldByPidm( immutableId, person.pidm )
     }
 
-
+    /**
+     * Convenience method to calculate a field with only a pidm as input
+     * @param immutableId A CommunicationField immutable identifier
+     * @param pidm
+     * @return
+     */
     String calculateFieldByPidm( String immutableId, Long pidm ) {
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
@@ -89,7 +92,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
     }
 
     /**
-     * Formats a map of parameters. The formatter is a string containing $ delimited fields, each of which
+     * Formats a string using a map of parameters. The formatter is a stringTemplate containing $ delimited fields, each of which
      * will be mapped by name to the items with the corresponding key in the map
      * @param formatter
      * @param parameters
