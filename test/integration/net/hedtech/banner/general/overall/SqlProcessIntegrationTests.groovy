@@ -336,7 +336,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
         entriesForSql.save(failOnError: true, flush: true)
         def sqlProcessParameter = new SqlProcessParameter(code: 'INTEGRATION_TEST_PARAM', description: 'INTEGRATION_TEST_PARAM', dataType: 'N', startDate: new Date(), endDate: new Date() + 1)
         sqlProcessParameter.save(failOnError: true, flush: true)
-		def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcesss: entriesForSqlProcesss, sqlProcessParameter: sqlProcessParameter)
+		def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcess: entriesForSqlProcesss.code, parameterForSqlProcess: sqlProcessParameter.code)
         sqlProcessParameterByProcess.save(failOnError: true, flush: true)
 
 		// define a relatively simple sql statement
