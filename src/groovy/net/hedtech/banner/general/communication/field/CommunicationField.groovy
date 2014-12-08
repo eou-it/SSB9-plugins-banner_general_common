@@ -175,7 +175,7 @@ class CommunicationField implements Serializable {
 
 
     static constraints = {
-        name(nullable: false, maxSize: 1020)
+        name(nullable: false, maxSize: 1020, matches: "[a-zA-Z_0-9]+")
         description(nullable: true, maxSize: 4000)
         folder(nullable: false)
         formatString(nullable: true)
