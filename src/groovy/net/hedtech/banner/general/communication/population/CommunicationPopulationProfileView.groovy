@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.query.DynamicFinder
+import org.hibernate.annotations.Type
 
 import javax.persistence.*
 
@@ -72,6 +73,26 @@ class CommunicationPopulationProfileView implements Serializable {
     @Column(name = "FIRST_NAME")
     String firstName
 
+    /**
+     * This field entifies the middle name of person.
+     */
+    @Column(name = "MIDDLE_NAME")
+    String middleName
+
+    /**
+     * This field identifies if a person record is confidential
+     *
+     */
+    @Type(type = "yes_no")
+    @Column(name = "CONFIDENTIAL_IND")
+    Boolean confidential
+
+    /**
+     * This field indicates if a person is deceased.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "DECEASED_IND")
+    Boolean deceased
 
     public String toString() {
         return "PopulationProfileView{" +
@@ -82,6 +103,7 @@ class CommunicationPopulationProfileView implements Serializable {
                 ", pidm=" + pidm +
                 ", bannerId='" + bannerId + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", middleName='" + middleName + '\'' +
                 ", firstName='" + firstName + '\'' +
                 '}';
     }
