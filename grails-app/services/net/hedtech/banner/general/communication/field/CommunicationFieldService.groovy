@@ -46,6 +46,12 @@ class CommunicationFieldService extends ServiceBase {
         else
             validateFolder( communicationField.getFolder().getId() )
 
+        if (communicationField.name.contains(" "))
+            throw new ApplicationException(CommunicationField, "@@r1:space.not.allowed@@")
+
+        if (CommunicationField.fetchByName(communicationField.name))
+            throw new ApplicationException(CommunicationField, "@@r1:fieldNameAlreadyExists@@")
+
         if (communicationField.immutableId == null)
             communicationField.immutableId = UUID.randomUUID().toString()
 
@@ -76,6 +82,13 @@ class CommunicationFieldService extends ServiceBase {
                 communicationField.returnsArrayArguments = false
             }
         }
+
+        if (communicationField.name.contains(" "))
+            throw new ApplicationException(CommunicationField, "@@r1:space.not.allowed@@")
+
+        if (CommunicationField.existsAnotherName(communicationField.id, communicationField.name))
+            throw new ApplicationException(CommunicationField, "@@r1:fieldNameAlreadyExists@@")
+
 
         validateFormatter( communicationField )
 
