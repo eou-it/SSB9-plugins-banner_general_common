@@ -60,13 +60,12 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
         assertNotNull(listView)
         assertTrue listView.size() >= 1
 
-        def querycount = CommunicationPopulationProfileView.countByFilterParams([params: [populationId: globalTestPopulationSelectionList.id]])
+        def results = CommunicationPopulationProfileView.findByNameWithPagingAndSortParams([params: [populationId: globalTestPopulationSelectionList.id, "name":"%"]],[sortColumn: "lastName", sortDirection: "asc", max: 20, offset: 0])
+        def querycount = results.getTotalCount()
         assertTrue querycount > 0
 
-        def listView1 = CommunicationPopulationProfileView.findByFilterPagingParams([params: [populationId: new Long(globalTestPopulationSelectionList.id)]],
-                [sortColumn: "lastName", sortDirection: "asc", max: 20, offset: 0])
-        assertNotNull listView1
-        assertTrue listView1.size() == 1
+        assertNotNull results
+        assertTrue results.size() == 1
 
     }
 
