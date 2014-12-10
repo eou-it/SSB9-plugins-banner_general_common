@@ -8,6 +8,8 @@ import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationFieldView
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
@@ -29,6 +31,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationFieldCalculationService
     def communicationFieldService
     def selfServiceBannerAuthenticationProvider
+    def communicationOrganizationService
+
 
     def CommunicationFolder validFolder
     def CommunicationEmailTemplate emailTemplate
@@ -91,6 +95,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def CommunicationEmailTemplate validTemplate
     def CommunicationFieldValue validValue
 
+    private CommunicationOrganization organization
+
 
     @Before
     public void setUp() {
@@ -112,6 +118,9 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         validTemplate = communicationEmailTemplateService.create([domainModel: newValidForCreateEmailTemplate(validFolder, validField1)])
         assertNotNull(validTemplate.id)
         validValue = newFieldValue("TEST")
+
+        organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
+        organization = communicationOrganizationService.create(organization) as CommunicationOrganization
     }
 
 
@@ -170,7 +179,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                         templateId: validTemplate.id,
                         referenceId: 1,
                         ownerId: getUser(),
-                        fieldValues: fieldListByPidm
+                        fieldValues: fieldListByPidm,
+                        organization: this.organization
                 )
                 communicationRecipientDataService.create(temprecipient)
         }
@@ -207,7 +217,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 templateId: templateid,
                 referenceId: 1,
                 ownerId: getUser(),
-                fieldValues: ["name": fieldValue]
+                fieldValues: ["name": fieldValue],
+                organization: this.organization
         )
         return communicationRecipientData
     }

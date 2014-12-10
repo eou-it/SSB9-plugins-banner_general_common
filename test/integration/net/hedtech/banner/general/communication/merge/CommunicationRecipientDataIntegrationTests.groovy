@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.merge
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -19,6 +20,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     def CommunicationFolder folder
     def CommunicationEmailTemplate emailTemplate
     def CommunicationFieldValue fieldValue1
+    def CommunicationOrganizationService communicationOrganizationService
 
     // template
     def i_valid_emailTemplate_name = """Valid Name"""
@@ -41,6 +43,8 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     def i_valid_emailTemplate_createdBy = """Valid EmailTemplate createdBy"""
     def i_valid_emailTemplate_createDate = new Date()
 
+    private CommunicationOrganization organization
+
 
     @Before
     public void setUp() {
@@ -57,6 +61,9 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
         assertNotNull emailTemplate.id
 
         fieldValue1 = newFieldValue("FieldValue1")
+
+        organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
+        organization = communicationOrganizationService.create(organization) as CommunicationOrganization
     }
 
 
@@ -68,9 +75,6 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testCreateCommunicationRecipientData() {
-        CommunicationOrganization organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
-        organization = communicationOrganizationService.create(organization) as CommunicationOrganization
-
         def communicationRecipientData = newCommunicationRecipientData()
         communicationRecipientData.setOrganization( organization )
         communicationRecipientData.save(failOnError: true, flush: true)
