@@ -89,7 +89,7 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_DATA_ORIGIN")
     String dataOrigin
 
-    @JoinColumn(name="gcbgsnd_ORG_ID" )
+    @JoinColumn(name="GCBRDAT_ORG_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationOrganization organization
 
