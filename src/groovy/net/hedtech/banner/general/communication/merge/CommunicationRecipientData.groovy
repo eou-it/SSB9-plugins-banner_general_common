@@ -5,6 +5,8 @@
 package net.hedtech.banner.general.communication.merge
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 
 import javax.persistence.*
 
@@ -15,6 +17,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "GCBRDAT")
 @EqualsAndHashCode
+@ToString
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationRecipientData.findByTemplateId",
                 query = """ FROM CommunicationRecipientData a
@@ -46,7 +49,7 @@ class CommunicationRecipientData {
 
 
     @Column(name = "GCBRDAT_REFERENCE_ID")
-    Long referenceId
+    String referenceId
 
     @Column(name = "GCBRDAT_OWNER_ID")
     String ownerId
@@ -86,22 +89,9 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_DATA_ORIGIN")
     String dataOrigin
 
-
-    @Override
-    public String toString() {
-        return "CommunicationRecipientData{" +
-                "Id=" + Id +
-                ", pidm=" + pidm +
-                ", templateId=" + templateId +
-                ", referenceId=" + referenceId +
-                ", ownerId='" + ownerId + '\'' +
-                ", fieldValues=" + fieldValues +
-                ", version=" + version +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", lastModified=" + lastModified +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                '}';
-    }
+    @JoinColumn(name="gcbgsnd_ORG_ID" )
+    @ManyToOne( fetch = FetchType.LAZY )
+    CommunicationOrganization organization
 
 
     public static List findByTemplateId(templateId) {

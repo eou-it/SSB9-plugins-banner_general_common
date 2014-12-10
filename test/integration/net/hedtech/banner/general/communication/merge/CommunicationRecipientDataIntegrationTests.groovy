@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.merge
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -67,7 +68,11 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testCreateCommunicationRecipientData() {
+        CommunicationOrganization organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
+        organization = communicationOrganizationService.create(organization) as CommunicationOrganization
+
         def communicationRecipientData = newCommunicationRecipientData()
+        communicationRecipientData.setOrganization( organization )
         communicationRecipientData.save(failOnError: true, flush: true)
 
         assertNotNull(communicationRecipientData.Id)

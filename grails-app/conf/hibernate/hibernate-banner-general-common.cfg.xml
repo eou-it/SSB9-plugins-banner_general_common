@@ -82,7 +82,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationField"/>
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldView"/>
 
-        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationJob"/>
+        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
         <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
         <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem"/>
         <mapping class="net.hedtech.banner.general.communication.merge.CommunicationRecipientData"/>
