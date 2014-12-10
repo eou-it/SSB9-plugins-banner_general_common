@@ -4,8 +4,10 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.query.DynamicFinder
 import org.hibernate.annotations.Type
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -68,16 +70,22 @@ class CommunicationPopulationProfileView implements Serializable {
     String lastName
 
     /**
-     * This field entifies the first name of person.
+     * This field entities the first name of person.
      */
     @Column(name = "FIRST_NAME")
     String firstName
 
     /**
-     * This field entifies the middle name of person.
+     * This field entities the middle name of person.
      */
     @Column(name = "MIDDLE_NAME")
     String middleName
+
+    /**
+     * This field entifies the middle name of person.
+     */
+    @Column(name = "SURNAME_PREFIX")
+    String surnamePrefix
 
     /**
      * This field identifies if a person record is confidential
@@ -93,20 +101,6 @@ class CommunicationPopulationProfileView implements Serializable {
     @Type(type = "yes_no")
     @Column(name = "DECEASED_IND")
     Boolean deceased
-
-    public String toString() {
-        return "PopulationProfileView{" +
-                "id=" + id +
-                ", version=" + version +
-                ", populationQueryId=" + populationQueryId +
-                ", populationId=" + populationId +
-                ", pidm=" + pidm +
-                ", bannerId='" + bannerId + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                '}';
-    }
 
 
     static constraints = {
@@ -129,33 +123,40 @@ class CommunicationPopulationProfileView implements Serializable {
         return populationProfileViews
     }
 
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
 
-    public static String getQuery(Map filterData) {
-        def query =
-                """  FROM CommunicationPopulationProfileView a
-                     WHERE  a.populationId = :populationId
-                """
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
 
-        if (filterData?.params?.containsKey('bannerId')) {
-            query = query + """AND (a.bannerId = :bannerId) """
+        def queryCriteria = CommunicationPopulationProfileView.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+             eq ("populationId", filterData?.params?.populationId)
+             or {
+                 ilike("lastName", searchName)
+                 ilike("firstName", searchName)
+                 ilike("bannerId", searchName)
+             }
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
         }
-
-        if (filterData?.params?.containsKey('name')) {
-            query = query + """AND ( upper(a.lastName) like upper(:name) OR (upper(a.firstName) like upper(:name))  ) """
-        }
-
-        return query
+        return results
     }
 
 
-    public static findByFilterPagingParams(filterData, pagingAndSortParams) {
-        return (new DynamicFinder(CommunicationPopulationProfileView.class, getQuery(filterData), "a")).find(filterData,
-                pagingAndSortParams)
+    @Override
+    public String toString() {
+        return "CommunicationPopulationProfileView{" +
+                "id=" + id +
+                ", version=" + version +
+                ", populationQueryId=" + populationQueryId +
+                ", populationId=" + populationId +
+                ", pidm=" + pidm +
+                ", bannerId='" + bannerId + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", middleName='" + middleName + '\'' +
+                ", surnamePrefix='" + surnamePrefix + '\'' +
+                ", confidential=" + confidential +
+                ", deceased=" + deceased +
+                '}';
     }
-
-
-    public static countByFilterParams(filterData) {
-        return (new DynamicFinder(CommunicationPopulationProfileView.class, getQuery(filterData), "a")).count(filterData)
-    }
-
 }

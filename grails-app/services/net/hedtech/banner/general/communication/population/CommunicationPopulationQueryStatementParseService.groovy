@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.population
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.field.CommunicationField
 
 import java.sql.SQLException
 
@@ -35,7 +36,10 @@ class CommunicationPopulationQueryStatementParseService {
         try {
             //test for sql injec tion and throw exception if found
             if (CommunicationCommonUtility.sqlStatementNotAllowed(statement,multiSelectColumnAllowed )) {
-                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+                if (multiSelectColumnAllowed)
+                    throw new ApplicationException(CommunicationField, "@@r1:queryInvalidCall@@")
+                else
+                    throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
             }
 
             def stmt = '{call gckextr.p_validate_sql(?,?,?,?,?)}'

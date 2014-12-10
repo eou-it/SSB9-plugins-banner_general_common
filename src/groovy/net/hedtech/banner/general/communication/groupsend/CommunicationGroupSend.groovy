@@ -4,21 +4,117 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import org.hibernate.annotations.Type
 
 import javax.persistence.*
 
 /**
- * A group send is a template based communication job directed towards the pidms in a population.
+ * CommunicationJob
  *
  */
 @Entity
-@DiscriminatorValue("GROUP_SEND")
+@Table(name = "GCBGSND")
 @EqualsAndHashCode
-class CommunicationGroupSend extends CommunicationJob {
+@ToString
+@NamedQueries(value = [
+    @NamedQuery( name = "CommunicationGroupSend.findRunning",
+        query = """ FROM CommunicationGroupSend gs
+                    WHERE gs.currentExecutionState = :new_ or
+                          gs.currentExecutionState = :processing_ """
+    )
+])
+class CommunicationGroupSend implements Serializable {
 
-    @JoinColumn(name="GCBCJOB_TEMPLATE_KEY" )
+    /**
+     * KEY: Generated unique key.
+     */
+    @Id
+    @Column(name = "gcbgsnd_SURROGATE_ID")
+    @SequenceGenerator(name = "gcbgsnd_SEQ_GEN", allocationSize = 1, sequenceName = "gcbgsnd_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gcbgsnd_SEQ_GEN")
+    Long id
+
+    /**
+     *  Optimistic lock token.
+     */
+    @Version
+    @Column(name = "gcbgsnd_VERSION")
+    Long version
+
+    /**
+     *  The user ID of the person who inserted or last updated this record.
+     */
+    @Column(name = "gcbgsnd_USER_ID")
+    String lastModifiedBy
+
+    /**
+     *  Date that record was created or last updated.
+     */
+    @Column(name = "gcbgsnd_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date lastModified
+
+    /**
+     *  Source system that created or updated the data.
+     */
+    @Column(name = "gcbgsnd_DATA_ORIGIN")
+    String dataOrigin
+
+    @Column(name="gcbgsnd_VPDI_CODE" )
+    String mepCode
+
+    @Column(name="gcbgsnd_OWNER_PIDM" )
+    Long ownerPidm;
+
+    @JoinColumn(name="gcbgsnd_ORG_ID" )
+    @ManyToOne( fetch = FetchType.LAZY )
+    CommunicationOrganization organization;
+
+    @JoinColumn(name="gcbgsnd_POPLIST_ID" )
+    @ManyToOne( fetch = FetchType.LAZY )
+    CommunicationPopulationSelectionList population;
+
+    @JoinColumn(name="gcbgsnd_TEMPLATE_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationTemplate template;
+
+    @Column(name="gcbgsnd_STARTED_DATE", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    Date startedDate;
+
+    @Column(name="gcbgsnd_CREATIONDATETIME", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    Date creationDateTime;
+
+    @Column(name="gcbgsnd_CURRENT_STATE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    CommunicationGroupSendExecutionState currentExecutionState = CommunicationGroupSendExecutionState.New;
+
+    @Column(name="gcbgsnd_STOP_DATE", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    Date stopDate;
+
+    @Column(name="gcbgsnd_DELETED", nullable = false)
+    @Type(type="yes_no")
+    boolean deleted = false;
+
+    static constraints = {
+        mepCode(nullable: true)
+        population(nullable: false)
+        organization(nullable: false)
+        ownerPidm(nullable:false)
+        lastModified(nullable: true)
+        lastModifiedBy(nullable: true, maxSize: 30)
+        dataOrigin(nullable: true, maxSize: 30)
+        startedDate(nullable: true)
+        stopDate(nullable: true)
+        creationDateTime(nullable: false)
+        currentExecutionState(nullable: false)
+    }
+
 }
 
