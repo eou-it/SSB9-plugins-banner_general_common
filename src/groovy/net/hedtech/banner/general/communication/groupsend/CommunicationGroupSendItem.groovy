@@ -4,6 +4,8 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import org.hibernate.annotations.Type
+
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -25,70 +27,78 @@ import javax.persistence.Version
  * A communication job item is an order to send a message to an individual recipient.
  */
 @Entity
-@Table(name = "GCRCJIT")
-class CommunicationGroupSendItem {
+@Table(name = "GCRGSIM")
+class CommunicationGroupSendItem implements Serializable {
 
     /**
      * KEY: Generated unique key.
      */
     @Id
-    @Column(name = "GCRCJIT_SURROGATE_ID")
-    @SequenceGenerator(name = "GCRCJIT_SEQ_GEN", allocationSize = 1, sequenceName = "GCRCJIT_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRCJIT_SEQ_GEN")
+    @Column(name = "GCRGSIM_SURROGATE_ID")
+    @SequenceGenerator(name = "GCRGSIM_SEQ_GEN", allocationSize = 1, sequenceName = "GCRGSIM_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRGSIM_SEQ_GEN")
     Long Id
 
     /**
      *  Optimistic lock token.
      */
     @Version
-    @Column(name = "GCRCJIT_VERSION")
+    @Column(name = "GCRGSIM_VERSION")
     Long version
 
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
-    @Column(name = "GCRCJIT_USER_ID")
+    @Column(name = "GCRGSIM_USER_ID")
     String lastModifiedBy
 
     /**
      *  Date that record was created or last updated.
      */
-    @Column(name = "GCRCJIT_ACTIVITY_DATE")
+    @Column(name = "GCRGSIM_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**
      *  Source system that created or updated the data.
      */
-    @Column(name = "GCRCJIT_DATA_ORIGIN")
+    @Column(name = "GCRGSIM_DATA_ORIGIN")
     String dataOrigin
 
     /**
      * Parent communication job
      */
     @ManyToOne( fetch = FetchType.LAZY )
-    @JoinColumn(name="GCRCJIT_GCBCJOB_ID", referencedColumnName="GCBCJOB_SURROGATE_ID", nullable=false )
-    CommunicationJob communicationJob;
+    @JoinColumn(name="GCRGSIM_GCBGSND_ID", referencedColumnName="GCBGSND_SURROGATE_ID", nullable=false )
+    CommunicationGroupSend communicationGroupSend;
 
     /** The target of the send item */
-    @Column(name="GCRCJIT_PIDM")
+    @Column(name="GCRGSIM_PIDM")
     Long recipientPidm;
 
-    @Column(name="GCRCJIT_CURRENT_STATE")
+    @Column(name="GCRGSIM_CURRENT_STATE")
     @Enumerated(EnumType.STRING)
     CommunicationGroupSendItemExecutionState currentExecutionState;
 
-    @Column(name="GCRCJIT_ERROR_TEXT", nullable=true)
+    @Column(name="GCRGSIM_ERROR_TEXT", nullable=true)
     @Lob
     String errorText;
 
-    @Column(name="GCRCJIT_STARTED_DATE")
+    @Column(name="GCRGSIM_STARTED_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date startedDate;
 
-    @Column(name="GCRCJIT_STOP_DATE")
+    @Column(name="GCRGSIM_STOP_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date stopDate;
+
+    /** Correlation ID linking the communication request to the recipient data to the communication job to the final communication item. **/
+    @Column(name = "GCRGSIM_REFERENCE_ID")
+    String referenceId
+
+    @Column(name="GCRGSIM_CREATIONDATETIME")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date creationDateTime;
 
     static constraints = {
         lastModified(nullable: true)
