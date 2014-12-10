@@ -16,6 +16,7 @@ import net.hedtech.banner.general.communication.field.CommunicationRuleStatement
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -27,6 +28,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def communicationFieldService
     def communicationFieldCalculationService
     def communicationRecipientDataService
+    def communicationOrganizationService
 
     def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
@@ -49,7 +51,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def i_valid_pidm = 1299
     def CommunicationFolder folder1
     def CommunicationFolder folder2
-
+    def CommunicationOrganization i_valid_Organization
 
     @Before
     public void setUp() {
@@ -63,6 +65,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         folder2.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
+        i_valid_Organization = createNewCommunicationOrganization()
     }
 
 
@@ -108,7 +111,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
             variableName ->
                 println variableName
                 tempfield = CommunicationField.fetchByName( variableName )
-                assertNotNull(tempfield.immutableId)
+                assertNotNull( tempfield.immutableId )
                 fieldCalculationResult = communicationFieldCalculationService.calculateField( tempfield.immutableId, params )
                 fieldListByPidm.put( tempfield.name, new CommunicationFieldValue(
                         value: fieldCalculationResult,
@@ -117,6 +120,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         communicationRecipientData = new CommunicationRecipientData(
                 pidm: i_valid_pidm,
                 templateId: emailTemplate.id,
+                organization: i_valid_Organization,
                 referenceId: 1,
                 ownerId: getUser(),
                 fieldValues: fieldListByPidm
@@ -146,7 +150,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         //CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
         assertNotNull( communicationMergedEmailTemplate )
         /* No errors expect, just nulls returned */
-        assertEquals("Hi  ", communicationMergedEmailTemplate.content )
+        assertEquals( "Hi  ", communicationMergedEmailTemplate.content )
     }
 
 
@@ -249,7 +253,6 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
                 //immutableId: UUID.randomUUID().toString(),
                 name: name,
                 returnsArrayArguments: false,
-
                 // Nullable fields
                 description: name + " test",
                 formatString: formatString,
@@ -263,6 +266,14 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         )
 
         return communicationField
+    }
+
+
+    CommunicationOrganization createNewCommunicationOrganization() {
+        CommunicationOrganization organization = new CommunicationOrganization()
+        organization.name = "test"
+        organization.description = "description"
+        communicationOrganizationService.create( organization )
     }
 
 

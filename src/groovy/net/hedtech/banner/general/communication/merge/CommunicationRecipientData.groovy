@@ -93,7 +93,6 @@ class CommunicationRecipientData {
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationOrganization organization
 
-
     public static List findByTemplateId(templateId) {
 
         def queryList
