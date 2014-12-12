@@ -201,7 +201,7 @@ class CommunicationTemplateMergeService {
      * @return set of unique string variables found in the template string
      */
     List<String> extractTemplateVariables( String statement ) {
-
+        dataFieldNames = []
         final int ID = 25 // This is the ST constant for an ID token
         char delimiter = '$'
         /* TODO: get a listener working so  you can trap rendering errors */
