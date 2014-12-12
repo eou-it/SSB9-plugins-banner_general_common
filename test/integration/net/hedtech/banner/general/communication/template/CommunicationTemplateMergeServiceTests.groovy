@@ -189,7 +189,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         /* Since toList and subject contents are not communicationFields, they should render null */
         assertNull( communicationMergedEmailTemplate.toList )
         assertNull( communicationMergedEmailTemplate.subject )
-        assertEquals( communicationMergedEmailTemplate.content, result.content )
+        assertEquals( communicationMergedEmailTemplate.content.trim(), result.content.trim() )
 
     }
 
