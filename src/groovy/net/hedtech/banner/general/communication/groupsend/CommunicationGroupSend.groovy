@@ -116,5 +116,16 @@ class CommunicationGroupSend implements Serializable {
         currentExecutionState(nullable: false)
     }
 
+    public static List findRunning() {
+        def query
+        CommunicationGroupSend.withSession { session ->
+            query = session.getNamedQuery( 'CommunicationGroupSend.findRunning' )
+                .setParameter( 'new_', CommunicationGroupSendExecutionState.New )
+                .setParameter( 'processing_', CommunicationGroupSendExecutionState.Processing )
+                .list()
+        }
+        return query
+    }
+
 }
 

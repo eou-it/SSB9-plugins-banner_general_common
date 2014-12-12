@@ -45,7 +45,7 @@ public abstract class CommunicationTemplate implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCBTMPL_PERSONAL")
-    Boolean personal
+    Boolean personal = false
 
     /**
      * Foreign key reference to the Folder under which this template is organized.
@@ -61,21 +61,21 @@ public abstract class CommunicationTemplate implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCBTMPL_ACTIVE")
-    Boolean active
+    Boolean active = false
 
     /**
      * Indicates if this is a one-off version of the template (1=Yes or 0=No).
      */
     @Type(type = "yes_no")
     @Column(name = "GCBTMPL_ONEOFF")
-    Boolean oneOff
+    Boolean oneOff = false
 
     /**
      * Indicates if this template version is published (1=Yes or 0=No). A template is published to make it available for the BCM subsystem.
      */
     @Type(type = "yes_no")
     @Column(name = "GCBTMPL_PUBLISH")
-    Boolean published
+    Boolean published = false
 
     /**
      * Date from which the template version is available for use.
@@ -132,7 +132,7 @@ public abstract class CommunicationTemplate implements Serializable {
     String dataOrigin
 
     static constraints = {
-        name(nullable: false, maxSize: 1020)
+        name(nullable: false, maxSize: 102)
         description(nullable: true, maxSize: 4000)
         personal(nullable: false)
         folder(nullable: false)

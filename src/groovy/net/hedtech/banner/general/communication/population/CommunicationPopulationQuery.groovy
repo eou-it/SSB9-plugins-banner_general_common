@@ -125,18 +125,18 @@ class CommunicationPopulationQuery implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCBQURY_VALID_IND")
-    Boolean valid
+    Boolean valid = false
 
 
     /* ----------------------------------------------------------------------*/
 
 
     static constraints = {
-        folder(nullable: false, maxSize: 30)
+        folder(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         description(nullable: true, maxSize: 2000)
-        name(nullable: false, maxSize: 30)
+        name(nullable: false, maxSize: 255)
         sqlString(nullable: true)
         valid(nullable: false)
         lastModified(nullable: true)

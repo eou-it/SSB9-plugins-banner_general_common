@@ -23,18 +23,9 @@ class CommunicationGroupSendService extends ServiceBase {
         groupSend.setDeleted( false );
     }
 
-
-    public static List findRunning() {
-        def query
-        CommunicationGroupSend.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationGroupSend.findRunning' )
-                .setParameter( 'new_', CommunicationGroupSendExecutionState.New )
-                .setParameter( 'processing_', CommunicationGroupSendExecutionState.Processing )
-                .list()
-        }
-        return query
+    public List findRunning() {
+        return CommunicationGroupSend.findRunning()
     }
-
 
     public CommunicationGroupSend stopGroupSend( Long groupSendId ) {
         if (log.isDebugEnabled()) log.debug( "Stopping group send with id = " + groupSendId + "." )

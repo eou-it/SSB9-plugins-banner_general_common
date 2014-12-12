@@ -38,6 +38,20 @@ class CommunicationTemplateService extends ServiceBase {
     }
 
     /**
+     * Marks the template as published and there by useable for communications.
+     * @param domainModelOrMap
+     * @return
+     */
+    def publish( domainModelOrMap ) {
+        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
+        if (!template.published) {
+            template.setPublished( true )
+            template = this.update( template )
+        }
+        return template
+    }
+
+    /**
      *  Extracts all parameter strings delimited by $. These can be either $foo.bar$ or just $foo$, will extract foo.
      * @param template statement
      * @return set of unique string variables found in the template string
