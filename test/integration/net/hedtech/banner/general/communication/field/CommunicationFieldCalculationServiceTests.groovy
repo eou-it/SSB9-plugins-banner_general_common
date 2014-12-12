@@ -20,7 +20,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     def CommunicationFolder validFolder
     def communicationFieldService
     def communicationFieldCalculationService
-    def communicationTemplateService
+    def communicationTemplateMergeService
 
 
     @Before
@@ -81,7 +81,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                  and I see your last name fa second time is \$lastname\$
                  Today is \$today\$ and you owe me \$amount\$
                  But I would settle for \$someotheramount\$"""
-        def parms = communicationTemplateService.extractTemplateVariables( template )
+        def parms = communicationTemplateMergeService.extractTemplateVariables( template )
         assertTrue parms.findAll() == ['firstname', 'lastname', 'today', 'amount', 'someotheramount']
 
     }

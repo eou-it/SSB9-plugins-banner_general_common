@@ -14,16 +14,23 @@ import groovy.text.SimpleTemplateEngine
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
+import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.person.PersonUtility
+import org.antlr.runtime.tree.CommonTree
 import org.stringtemplate.v4.ST
+import org.stringtemplate.v4.STGroup
 
 class CommunicationTemplateMergeService {
-    def communicationFieldService
     def communicationFieldCalculationService
-    def communicationTemplateService
+    def dataFieldNames = []
 
-
-    String calculateTemplateByBannerId( Long templateId, String bannerId ) {
+    /**
+     * Convenience method to fully render an email template. Looks up template, and pidm using banner id, and delegates to calculateTemplateByPidm
+     * @param templateId A CommunicationEmailTemplate to evaluate
+     * @param bannerId
+     * @return
+     */
+    CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
         CommunicationEmailTemplate emailTemplate = CommunicationEmailTemplate.get( templateId )
         if (emailTemplate == null) {
             throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist@@", templateId )
@@ -33,24 +40,30 @@ class CommunicationTemplateMergeService {
         if (person == null) {
             throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist@@", bannerId )
         }
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate
+        communicationMergedEmailTemplate = calculateTemplateByPidm( emailTemplate, person.pidm )
+        communicationMergedEmailTemplate
 
-        calculateTemplateByPidm( emailTemplate, person.pidm )
     }
 
     /**
      * Convenience method to fully render a template. Assumed Pidm is the only input parameter. In the future, the input
-     * will be a map so that other values can be bound as input to the data functions.
+     * will be a map or a RecipientData object so that other values can be bound as input to the data functions.
      * @param emailTemplate A CommunicationEmailTemplate to evaluate
      * @param pidm
      * @return
      */
-    String calculateTemplateByPidm( CommunicationEmailTemplate emailTemplate, Long pidm ) {
+    CommunicationMergedEmailTemplate calculateTemplateByPidm( CommunicationEmailTemplate emailTemplate, Long pidm ) {
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
-        List<String> templateVariables = communicationTemplateService.extractTemplateVariables( emailTemplate.content )
-        def recipientData = calculateRecipientData( templateVariables, sqlParams )
-        renderTemplate( emailTemplate.content, recipientData )
+        List<String> templateVariables = extractTemplateVariables( emailTemplate.content )
+        def recipientDataMap = calculateRecipientData( templateVariables, sqlParams )
+        def CommunicationMergedEmailTemplate communicationMergedEmailTemplate= new CommunicationMergedEmailTemplate()
+        communicationMergedEmailTemplate.content = renderTemplate( emailTemplate.content, recipientDataMap )
+        communicationMergedEmailTemplate
     }
+
+
     /**
      * Compute each communication field in the list and return the results. This data will become what is known
      * as recipient data.
@@ -91,27 +104,147 @@ class CommunicationTemplateMergeService {
         st.render()
     }
 
-/**
- * Returns a string containing the template content with all data fields replaced with their preview value
- * @param templateString
- * @return
- */
-    def String renderPreviewTemplate( String templateString ) {
-        def templateVariables = communicationTemplateService.extractTemplateVariables( templateString )
+    /**
+     * Merges each of the email specific template fields with the recipient data previously calculated
+     *
+     * @param template The template containing the tokens
+     * @param data the map of values that will be substituted for each matching token
+     * @return CommunicationMergedEmailTemplate
+     */
+    CommunicationMergedEmailTemplate mergeEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate, CommunicationRecipientData recipientData ) {
+
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
+        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, recipientData.fieldValues )
+        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject, recipientData.fieldValues )
+        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, recipientData.fieldValues )
+        communicationMergedEmailTemplate
+    }
+
+    /**
+     * Returns the preview values for all the fields in the template rather than executing the data function.
+     * These serve in the place of recipient data when a preview is requested
+     * @param templateString
+     * @return
+     */
+    Map<String, String> renderPreviewValues( String templateString ) {
+        List<String> templateVariables = extractTemplateVariables( templateString )
         def renderedCommunicationFields = [:]
-        char delimiter = '$'
-        templateVariables.each { dataFieldName ->
-            CommunicationField communicationField = CommunicationField.findByName( dataFieldName )
-            if (communicationField == null) {
-                throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:invalidDataField@@", dataFieldName )
+
+        if (templateVariables.size() > 0) {
+
+            templateVariables.each {
+                CommunicationField communicationField = CommunicationField.findByName( it )
+                if (communicationField) {
+                    renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
+                    //throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:invalidDataField@@", it )
+                } else {
+                    renderedCommunicationFields.put( it, null )
+                }
             }
-            renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
         }
-        ST st = new ST( templateString, delimiter, delimiter );
-        renderedCommunicationFields.keySet().each { key ->
-            st.add( key, renderedCommunicationFields[key] )
+        renderedCommunicationFields
+    }
+
+    /**
+     * Returns a CommunicationMergedEmailTemplate containing the template content with all data fields replaced with their preview value
+     * @param CommunicationEmailTemplate
+     * @return CommunicationMergedEmailTemplate
+     */
+    CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
+        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, renderPreviewValues( communicationEmailTemplate.toList ) )
+        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject, renderPreviewValues( communicationEmailTemplate.subject ) )
+        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, renderPreviewValues( communicationEmailTemplate.content ) )
+        communicationMergedEmailTemplate
+    }
+
+    /**
+     * Merges the data from the parameter map into the string template
+     * @param stringTemplate A string containing delimited token fields
+     * @param parameters Map of name value pairs representing tokens in the template and their values
+     * @return A fully rendered String
+     */
+    String merge( String stringTemplate, Map<String, String> parameters ) {
+        if (!(stringTemplate == null || parameters == null)) {
+            char delimiter = '$'
+            ST st = new ST( stringTemplate, delimiter, delimiter );
+            parameters.keySet().each { key ->
+                st.add( key, parameters[key] )
+            }
+            st.render()
         }
-        st.render()
+    }
+    /**
+     * Pulls all the template variables from the currently supported parts of an email template
+     * @param communicationEmailTemplate
+     * @return
+     */
+
+    List<String> extractTemplateVariables( CommunicationEmailTemplate communicationEmailTemplate ) {
+        def templateVariables = []
+        extractTemplateVariables( communicationEmailTemplate.toList ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationEmailTemplate.subject ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationEmailTemplate.content ).each {
+            templateVariables << it
+        }
+
+        templateVariables
+    }
+
+    /**
+     *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
+     * @param template statement
+     * @return set of unique string variables found in the template string
+     */
+    List<String> extractTemplateVariables( String statement ) {
+        dataFieldNames = []
+        final int ID = 25 // This is the ST constant for an ID token
+        char delimiter = '$'
+        /* TODO: get a listener working so  you can trap rendering errors */
+        STGroup group = new STGroup( delimiter, delimiter )
+        CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
+        group.setListener( errorListener )
+        group.defineTemplate( "foo", statement )
+        ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
+
+        /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
+        down the branch looking for ID tokens to place in the global dataFieldNames */
+
+        st.impl.ast.getChildren().each {
+            if (it != null) {
+                CommonTree child = it as CommonTree
+                examineNodes( child )
+            }
+        }
+
+        dataFieldNames.unique( false )
+
+    }
+    /**
+     * Walks the ast tree and finds any tokens with the ID attribute
+     * @param treeNode
+     * @return
+     */
+    def examineNodes( CommonTree treeNode ) {
+        final int ID = 25
+
+        if (treeNode) {
+            //println "token type = " + treeNode.getToken().getType() + " text= " + treeNode.getToken().getText()
+            if (treeNode.getToken().getType() == ID) {
+                //println "ChildIndex= " + treeNode.childIndex + "string= " + treeNode.toStringTree()
+                dataFieldNames.add( treeNode.toString() )
+            }
+            treeNode.getChildren().each {
+                CommonTree nextNode = it as CommonTree
+                examineNodes( nextNode )
+            }
+
+        }
+
     }
 
 

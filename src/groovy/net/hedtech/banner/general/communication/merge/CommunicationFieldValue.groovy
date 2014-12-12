@@ -24,12 +24,9 @@ class CommunicationFieldValue implements Serializable {
     @Column(name = "GCRFVAL_RENDER_AS_HTML")
     Boolean renderAsHtml
 
-
+   /* Just return value so that StringTemplate can render it into the template correctly */
     @Override
     public String toString() {
-        return "CommunicationFieldValue{" +
-                "value='" + value + '\'' +
-                ", renderAsHtml=" + renderAsHtml +
-                '}';
+        return value;
     }
 }

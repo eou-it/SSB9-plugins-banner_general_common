@@ -24,7 +24,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
     def communicationRecipientDataService
     def communicationEmailTemplateService
-    def communicationTemplateService
+    def communicationTemplateMergeService
     def communicationPopulationQueryService
     def communicationPopulationExecutionService
     def communicationPopulationSelectionListService
@@ -151,7 +151,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         assertTrue personlist.size() >= 1
 
         // get all the fields from the template
-        def fieldList = communicationTemplateService.extractTemplateVariables(validTemplate.content.toString())
+        def fieldList = communicationTemplateMergeService.extractTemplateVariables(validTemplate.content.toString())
 
         def resultSet
         def tempfield
