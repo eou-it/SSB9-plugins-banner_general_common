@@ -98,6 +98,13 @@ class CommunicationCommonUtility {
         return scrubbedInput;
     }
 
+//get the oracle userid associated with the login banner id.  If there is a gobeacc record, that oracle user will be
+//returned. If no gobeacc record then the username associated with the bannerSsbDataSource will be returned
+    def static getUserOracleUserName() {
+        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: Holders.config?.bannerSsbDataSource?.username
+        return creatorId.toUpperCase()
+    }
+
 
     public static getCommunicationUserRoleMap() {
         def map = [:]

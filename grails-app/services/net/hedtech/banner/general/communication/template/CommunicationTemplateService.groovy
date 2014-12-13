@@ -13,30 +13,6 @@ import org.stringtemplate.v4.STGroup
 
 class CommunicationTemplateService extends ServiceBase {
 
-    def preCreate( domainModelOrMap ) {
-        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
-        template.folder = (template.folder ?: domainModelOrMap.folder)
-
-
-        if (template.getName() == null)
-            throw new ApplicationException( CommunicationTemplate, "@@r1:nameCannotBeNull@@" )
-
-        if (template.fetchByTemplateNameAndFolderName( template.name, template.folder.name )) {
-            throw new ApplicationException( CommunicationTemplate, "@@r1:templateExists@@" + template.name + " name@@" )
-        }
-    }
-
-
-    def preUpdate( domainModelOrMap ) {
-        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
-        template.folder = (template.folder ?: domainModelOrMap.folder)
-
-        if (template.getName() == null)
-            throw new ApplicationException( CommunicationTemplate, "@@r1:nameCannotBeNull@@" )
-
-        if (template.existsAnotherNameFolder( template.id, template.name, template.folder.name ))
-            throw new ApplicationException( CommunicationFolder, "@@r1:not.unique.message:" + template.name + " name@@" )
-    }
 
 }
 
