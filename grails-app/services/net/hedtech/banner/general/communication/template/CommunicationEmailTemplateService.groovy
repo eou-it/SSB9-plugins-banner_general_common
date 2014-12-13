@@ -11,6 +11,8 @@ import net.hedtech.banner.service.ServiceBase
 
 class CommunicationEmailTemplateService extends ServiceBase {
 
+    def dateConverterService
+
     def preCreate(domainModelOrMap) {
         CommunicationEmailTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationEmailTemplate
         template.folder = (template.folder ?: domainModelOrMap.folder)
@@ -26,6 +28,7 @@ class CommunicationEmailTemplateService extends ServiceBase {
         template.active = false
         template.createdBy = CommunicationCommonUtility.getUserOracleUserName()
         template?.createDate = new Date()
+        template.validFrom = template.validFrom ?: new Date()
     }
 
 
