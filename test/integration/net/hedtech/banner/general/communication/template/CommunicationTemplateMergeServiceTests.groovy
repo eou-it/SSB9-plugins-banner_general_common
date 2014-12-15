@@ -185,11 +185,13 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.content = """Greetings George Washington,\r
         First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r
-        Yours Faithfully, DR CLEMENT OKON """.toString()
+        Yours Faithfully, DR CLEMENT OKON """
         /* Since toList and subject contents are not communicationFields, they should render null */
+        println "debug: result content is: **"+result.content.replace("\r\n", "\n").replace("\r", "\n")+"**"
+        println "debug: template content is: **"+communicationMergedEmailTemplate.content.replace("\r\n", "\n").replace("\r", "\n")+"**"
         assertNull( communicationMergedEmailTemplate.toList )
         assertNull( communicationMergedEmailTemplate.subject )
-        assertEquals( communicationMergedEmailTemplate.content, result.content )
+        assertEquals( communicationMergedEmailTemplate.content.replace("\r\n", "\n").replace("\r", "\n"), result.content.replace("\r\n", "\n").replace("\r", "\n") )
 
     }
 

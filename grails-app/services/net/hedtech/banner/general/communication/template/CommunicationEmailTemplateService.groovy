@@ -5,14 +5,16 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
 
 class CommunicationEmailTemplateService extends ServiceBase {
 
+    def dateConverterService
+
     def preCreate(domainModelOrMap) {
         CommunicationEmailTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationEmailTemplate
-        template?.createDate = new Date()
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
         if (template.getName() == null)
@@ -21,6 +23,12 @@ class CommunicationEmailTemplateService extends ServiceBase {
         if (template.fetchByTemplateNameAndFolderName(template.name, template.folder.name)) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:not.unique.message:"+template.name+" name@@" )
         }
+
+        template.published  = false
+        template.active = false
+        template.createdBy = CommunicationCommonUtility.getUserOracleUserName()
+        template?.createDate = new Date()
+        template.validFrom = template.validFrom ?: new Date()
     }
 
 
@@ -33,6 +41,8 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
         if (template.existsAnotherNameFolder(template.id, template.name, template.folder.name))
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:not.unique.message:"+template.name+" name@@")
+
+        //TODO have to set published and active
     }
 
 
