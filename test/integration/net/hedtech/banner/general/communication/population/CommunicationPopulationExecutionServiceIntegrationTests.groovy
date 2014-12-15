@@ -124,7 +124,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         calculatedPopulationQuery.refresh()
 
 
-        def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, 'GRAILS_USER')
+        def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, 'BCMADMIN')
         assertNotNull populationQuerySelectionList
         assertEquals(populationSelectionListId, populationQuerySelectionList.id)
 
