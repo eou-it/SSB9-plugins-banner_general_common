@@ -5,7 +5,9 @@ package net.hedtech.banner.general.communication.template
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.query.DynamicFinder
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -108,5 +110,18 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
                 ", subject='" + subject + '\'' +
                 ", toList='" + toList + '\'' +
                 '}';
+    }
+
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationEmailTemplate.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
     }
 }
