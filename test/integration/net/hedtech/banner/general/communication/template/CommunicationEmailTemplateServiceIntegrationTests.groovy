@@ -8,6 +8,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Tests crud methods provided by communication template service.
@@ -65,7 +67,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
 
     def communicationEmailTemplateService
-
+    def selfServiceBannerAuthenticationProvider
 
     def CommunicationFolder folder1
     def CommunicationFolder folder2
@@ -75,6 +77,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+
         folder1 = newValidForCreateFolder(i_valid_folder_name1)
         folder1.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -102,6 +105,35 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertNotNull newTemplate.createDate
         assertNotNull(newTemplate.lastModified)
         assertNotNull(newTemplate.lastModifiedBy)
+
+        // Now test findall
+        def foundEmailTemplates = communicationEmailTemplateService.findAll()
+        assertEquals(1, foundEmailTemplates.size())
+    }
+
+    @Test
+    void testPublishTemplate() {
+        def originalListCount = communicationEmailTemplateService.list().size()
+        def template = newValidForCreateEmailTemplate(folder1)
+        def newTemplate = communicationEmailTemplateService.create([domainModel: template])
+        //Test if the service set the created date, and the infrastructure set the modifiedby and date
+        assertNotNull newTemplate.createDate
+        assertNotNull(newTemplate.lastModified)
+        assertNotNull(newTemplate.lastModifiedBy)
+        assertFalse(newTemplate.published)
+
+        newTemplate.toList = null
+        def template1 = communicationEmailTemplateService.update([domainModel:newTemplate])
+        assertNull(template1.toList)
+        shouldFail {
+            def notPublished = communicationEmailTemplateService.publishTemplate([id:template1.id])
+        }
+
+        template1.toList = "TOLIST"
+        def template2 = communicationEmailTemplateService.update([domainModel:newTemplate])
+
+        def pubtemp = communicationEmailTemplateService.publishTemplate(["id":newTemplate.id])
+        assertTrue(pubtemp.published)
 
         // Now test findall
         def foundEmailTemplates = communicationEmailTemplateService.findAll()
