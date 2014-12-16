@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.asynchronous.task
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory;
 
@@ -34,11 +35,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Configuration Bean that this engine will work with
      */
     private AsynchronousTaskConfiguration config;
-    
-    /**
-     * The configuration service from which to attain configuration information.
-     */
-    private GrailsApplicationFactoryBean grailsApplication;
 
     /**
      * The job manager for which this processing engine is configured to support.
@@ -115,26 +111,26 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Initializes the job processing engine.  This method starts the polling process.
      */
     public void init() {
-        config = getJobConfiguration();
-        if (config != null) {
-            this.maxQueueSize = config.getMaxQueueSize();
-            this.continuousPolling = config.isContinuousPolling();
-            this.deleteSuccessfullyCompleted = config.isDeleteSuccessfullyCompleted();
-            if (!config.isDisabled()) {
-                startRunning();
-            } else {
-                log.warn( " JobProcessor for job type " + config.getJobType() + " is disabled; will not start" );
-            }
-        } else {
-            log.fatal( "JobProcessingEngine " + this + " has not been configured!" );
-            throw new RuntimeException( "JobProcessingEngine " + this + " has not been configured!" );
-        }
-
-        if (log.isInfoEnabled()) {
-            log.info( "JobProcessingEngine " + this + " has been initialized with jobType "
-                      + config.getJobType() + ", maxThreads=" + config.getMaxThreads()
-                      + ", maxQueueSize=" + this.maxQueueSize + ", continuousPolling=" + this.continuousPolling );
-        }
+//        config = getJobConfiguration();
+//        if (config != null) {
+//            this.maxQueueSize = config.getMaxQueueSize();
+//            this.continuousPolling = config.isContinuousPolling();
+//            this.deleteSuccessfullyCompleted = config.isDeleteSuccessfullyCompleted();
+//            if (!config.isDisabled()) {
+//                startRunning();
+//            } else {
+//                log.warn( " JobProcessor for job type " + config.getJobType() + " is disabled; will not start" );
+//            }
+//        } else {
+//            log.fatal( "JobProcessingEngine " + this + " has not been configured!" );
+//            throw new RuntimeException( "JobProcessingEngine " + this + " has not been configured!" );
+//        }
+//
+//        if (log.isInfoEnabled()) {
+//            log.info( "JobProcessingEngine " + this + " has been initialized with jobType "
+//                      + config.getJobType() + ", maxThreads=" + config.getMaxThreads()
+//                      + ", maxQueueSize=" + this.maxQueueSize + ", continuousPolling=" + this.continuousPolling );
+//        }
     }
 
 
@@ -157,13 +153,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     public void setJobManager( AsynchronousTaskManager jobManager ) {
         this.jobManager = jobManager;
     }
-
-
-    @Required
-    public void setGrailsApplication(GrailsApplicationFactoryBean grailsApplication) {
-        this.grailsApplication = grailsApplication;
-    }
-
 
 //  ----------------------- JobProcessingEngine Method(s) ----------------------
 
@@ -269,7 +258,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         AsynchronousTaskConfiguration configuration = null;
 
         try {
-            grailsApplication.config?.jobProcessors?.each() {  jobProcessorName ->
+            Holders.grailsApplication.config?.jobProcessors?.each() {  jobProcessorName ->
                 if (jobProcessorName.equals( jobManager.getJobType().getSimpleName())) {
                     configuration = new AsynchronousTaskConfiguration();
                     configuration.setContinuousPolling( jobProcessorConfig.getContinuousPolling() );
