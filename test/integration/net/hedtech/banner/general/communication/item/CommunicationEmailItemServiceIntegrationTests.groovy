@@ -91,6 +91,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
