@@ -70,6 +70,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
