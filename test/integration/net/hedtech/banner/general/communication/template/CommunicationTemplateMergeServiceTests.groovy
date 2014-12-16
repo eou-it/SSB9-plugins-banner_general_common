@@ -162,22 +162,22 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 \$code, reason:{ c,r |
 \t<li>\$c\$, \$r\$</li>
 }\$
-\$Salutation\$
-        \$invitation\$
-        \$signed\$"""
+\$SalutationTest\$
+        \$invitationTest\$
+        \$signedTest\$"""
         emailTemplate.subject = "REQUEST FOR URGENT BUSINESS RELATIONSHIP "
         emailTemplate.save( failOnError: true, flush: true )
 
         // Now set up the fields
 
-        testCommunicationField = newCommunicationField( "Salutation", "Greetings \$fn\$ \$ln\$,", "Greetings George Washington,", null )
+        testCommunicationField = newCommunicationField( "SalutationTest", "Greetings \$fn\$ \$ln\$,", "Greetings George Washington,", null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
-        testCommunicationField = newCommunicationField( "invitation", "\$IntroParagraph\$",
+        testCommunicationField = newCommunicationField( "invitationTest", "\$IntroParagraph\$",
                                                         """First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.""", null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
-        testCommunicationField = newCommunicationField( "signed", "", """Yours Faithfully, DR CLEMENT OKON """, null )
+        testCommunicationField = newCommunicationField( "signedTest", "", """Yours Faithfully, DR CLEMENT OKON """, null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
 
@@ -193,24 +193,6 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         assertNull( communicationMergedEmailTemplate.subject )
         assertEquals( communicationMergedEmailTemplate.content.replace("\r\n", "\n").replace("\r", "\n"), result.content.replace("\r\n", "\n").replace("\r", "\n") )
 
-    }
-
-
-    @Test
-    void testProcessGroovyTemplate() {
-        def text = """
-        Dear \$firstname \$lastname,
-        So nice to meet you in <% print city %>.
-        See you in \${month},
-        \${signed}"""
-        def bindings = ["firstname": "Sam", "lastname": "Pullara", "city": "San Francisco", "month": "December", "signed": "Groovy-Dev"]
-        def renderedTemplate = communicationTemplateMergeService.processGroovyTemplate( text, bindings )
-        def result = """
-        Dear Sam Pullara,
-        So nice to meet you in San Francisco.
-        See you in December,
-        Groovy-Dev"""
-        assert result == renderedTemplate.toString()
     }
 
 

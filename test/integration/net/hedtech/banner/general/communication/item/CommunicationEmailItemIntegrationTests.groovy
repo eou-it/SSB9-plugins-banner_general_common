@@ -44,7 +44,7 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['GUAGMNU','SELFSERVICE']
         super.setUp()
         folder = newValidForCreateFolder()
         folder.save(failOnError: true, flush: true)
@@ -57,6 +57,7 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
