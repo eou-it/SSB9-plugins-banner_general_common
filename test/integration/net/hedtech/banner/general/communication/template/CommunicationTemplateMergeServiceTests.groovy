@@ -196,24 +196,6 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     }
 
 
-    @Test
-    void testProcessGroovyTemplate() {
-        def text = """
-        Dear \$firstname \$lastname,
-        So nice to meet you in <% print city %>.
-        See you in \${month},
-        \${signed}"""
-        def bindings = ["firstname": "Sam", "lastname": "Pullara", "city": "San Francisco", "month": "December", "signed": "Groovy-Dev"]
-        def renderedTemplate = communicationTemplateMergeService.processGroovyTemplate( text, bindings )
-        def result = """
-        Dear Sam Pullara,
-        So nice to meet you in San Francisco.
-        See you in December,
-        Groovy-Dev"""
-        assert result == renderedTemplate.toString()
-    }
-
-
     private def newValidForCreateFolder( String folderName ) {
         def folder = new CommunicationFolder(
                 description: i_valid_folder_description,
