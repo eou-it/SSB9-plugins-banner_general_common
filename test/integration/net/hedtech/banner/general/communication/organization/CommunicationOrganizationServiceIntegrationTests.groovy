@@ -34,6 +34,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
