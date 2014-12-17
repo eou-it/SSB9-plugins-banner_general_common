@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 import javax.persistence.*
 
@@ -15,6 +16,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "GCRORAN")
 @EqualsAndHashCode
+@ToString
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationOrganization.fetchById",
                 query = """ FROM CommunicationOrganization a
@@ -107,25 +109,6 @@ class CommunicationOrganization implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-    }
-
-
-    @Override
-    public String toString() {
-        return "Organization{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", isRoot=" + isRoot +
-                ", parent=" + parent +
-                ", description='" + description + '\'' +
-                ", dateFormat='" + dateFormat + '\'' +
-                ", dayOfWeekFormat='" + dayOfWeekFormat + '\'' +
-                ", timeOfDayFormat='" + timeOfDayFormat + '\'' +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", lastModified=" + lastModified +
-                ", version=" + version +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                '}';
     }
 
 
