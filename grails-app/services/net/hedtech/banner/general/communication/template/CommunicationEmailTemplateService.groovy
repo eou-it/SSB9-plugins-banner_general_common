@@ -30,6 +30,9 @@ class CommunicationEmailTemplateService extends ServiceBase {
         template.createdBy = CommunicationCommonUtility.getUserOracleUserName()
         template?.createDate = new Date()
         template.validFrom = template.validFrom ?: new Date()
+        if (template.validTo != null  && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
+            throw new ApplicationException(CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@");
+        }
     }
 
 
@@ -45,6 +48,10 @@ class CommunicationEmailTemplateService extends ServiceBase {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@")
 
         template.active = getTemplateStatus(template)
+        template.validFrom = template.validFrom ?: new Date()
+        if (template.validTo != null  && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
+            throw new ApplicationException(CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@");
+        }
     }
 
 
@@ -59,12 +66,14 @@ class CommunicationEmailTemplateService extends ServiceBase {
         if (map.id) {
             def temp = CommunicationEmailTemplate.get(map.id)
             def today = new Date()
+            if (temp.published)
+                return
             if (temp.name != null && temp.folder != null  && temp.toList != null && temp.content != null && temp.subject != null) {
                 temp.published = true
                 temp.active = getTemplateStatus(temp)
+                update(temp)
             } else
                 throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-            update(temp)
         } else
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:idNotValid@@")
     }
