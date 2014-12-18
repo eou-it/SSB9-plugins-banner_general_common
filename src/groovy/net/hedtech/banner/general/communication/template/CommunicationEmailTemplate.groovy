@@ -13,6 +13,7 @@ import javax.persistence.*
 @Table(name = "GCBEMTL")
 @PrimaryKeyJoinColumn(name = "GCBEMTL_SURROGATE_ID")
 @EqualsAndHashCode
+@ToString
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationEmailTemplate.fetchByTemplateNameAndFolderName",
                 query = """ FROM CommunicationEmailTemplate a
@@ -97,16 +98,4 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         return (query != null)
     }
 
-
-    @Override
-    public String toString() {
-        return "CommunicationEmailTemplate{" +
-                "bccList='" + bccList + '\'' +
-                ", ccList='" + ccList + '\'' +
-                ", content='" + content + '\'' +
-                ", fromList='" + fromList + '\'' +
-                ", subject='" + subject + '\'' +
-                ", toList='" + toList + '\'' +
-                '}';
-    }
 }
