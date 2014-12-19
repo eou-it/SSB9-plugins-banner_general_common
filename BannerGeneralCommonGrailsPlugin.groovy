@@ -1,3 +1,8 @@
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngineImpl
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendMonitor
+import net.hedtech.banner.general.communication.groupsend.automation.CommunicationGroupSendItemManagerImpl
+import net.hedtech.banner.general.security.TrustedBannerAuthenticationProvider
+
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** */
@@ -49,6 +54,32 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
+        trustedBannerAuthenticationProvider(TrustedBannerAuthenticationProvider) {
+            dataSource = ref('dataSource')
+        }
+
+        // Manage the execution state of the group send as a whole
+        // This object will scan the group send item records at regular intervals to determine
+        // if the group send has completed.
+        communicationGroupSendMonitor(CommunicationGroupSendMonitor) { bean ->
+            bean.autowire = 'byName'
+            bean.initMethod = 'init'
+            sessionFactory = ref( "sessionFactory" )
+            messageSource = ref( "messageSource" )
+        }
+
+        // BRM also injected a group send item monitor record dao for auditing
+        // the thread processing. Not implemented as to dubious need but we may
+        // inject this in the future if we find it useful for debugging.
+        communicationGroupSendItemManager (CommunicationGroupSendItemManagerImpl) { bean ->
+            bean.autowire = 'byName'
+            bean.initMethod = 'init'
+        }
+
+        communicationGroupSendItemProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
+            bean.initMethod = 'init'
+            jobManager = ref('communicationGroupSendItemManager')
+        }
     }
 
 

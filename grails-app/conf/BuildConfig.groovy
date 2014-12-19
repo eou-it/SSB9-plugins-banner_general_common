@@ -43,6 +43,7 @@ grails.project.dependency.resolution = {
         compile ":tomcat:7.0.52.1"
         compile ':resources:1.2.7' // If the functional-test plugin is being used
         compile ":functional-test:2.0.0" // If the functional-test plugin is being used
+        compile ":executor:0.3"
 
     }
 
