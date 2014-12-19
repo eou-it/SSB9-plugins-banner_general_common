@@ -146,16 +146,4 @@ public abstract class CommunicationTemplate implements Serializable {
     }
 
 
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-
-        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
-
-        def queryCriteria = CommunicationTemplate.createCriteria()
-        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
-            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
-        }
-        return results
-    }
-
 }

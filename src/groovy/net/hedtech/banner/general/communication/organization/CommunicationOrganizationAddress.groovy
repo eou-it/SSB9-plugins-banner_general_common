@@ -3,6 +3,9 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.organization
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+
 import javax.persistence.*
 
 /**
@@ -35,6 +38,8 @@ import javax.persistence.*
  * @author Ed Delaney
  */
 @Entity
+@EqualsAndHashCode
+@ToString
 @Table(name = "GCROADR")
 class CommunicationOrganizationAddress implements Serializable {
 
