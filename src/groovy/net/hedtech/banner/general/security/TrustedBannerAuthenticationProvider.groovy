@@ -21,7 +21,7 @@ public class TrustedBannerAuthenticationProvider implements AuthenticationProvid
 
     public boolean supports( Class clazz ) {
         log.debug "Saying supports for " + clazz
-        return clazz instanceof BannerPidmToken
+        return clazz instanceof TrustedBannerToken
     }
 
 

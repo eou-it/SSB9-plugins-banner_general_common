@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.security.TrustedBannerAuthenticationProvider
 import net.hedtech.banner.general.security.TrustedBannerToken
 import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.Log
@@ -20,21 +22,17 @@ class CommunicationGroupSendMonitor {
     private CommunicationGroupSendMonitorThread monitorThread
     private CommunicationGroupSendService communicationGroupSendService
     private CommunicationGroupSendItemService communicationGroupSendItemService
-
-    def trustedBannerAuthenticationProvider
-    def dataSource                    // injected via spring
-    def sessionFactory                // injected via spring
-    def messageSource                 // injected via spring
-
+    private TrustedBannerAuthenticationProvider trustedBannerAuthenticationProvider
     public int monitorIntervalInSeconds = 10
+
+    @Required
+    void setTrustedBannerAuthenticationProvider(TrustedBannerAuthenticationProvider trustedBannerAuthenticationProvider) {
+        this.trustedBannerAuthenticationProvider = trustedBannerAuthenticationProvider
+    }
 
     @Required
     public void setCommunicationGroupSendService( CommunicationGroupSendService communicationGroupSendService ) {
         this.communicationGroupSendService = communicationGroupSendService
-    }
-
-    public CommunicationGroupSendService getCommunicationGroupSendService() {
-        return communicationGroupSendService;
     }
 
     @Required
@@ -42,15 +40,15 @@ class CommunicationGroupSendMonitor {
         this.communicationGroupSendItemService = communicationGroupSendItemService
     }
 
-    public CommunicationGroupSendItemService getCommunicationGroupSendItemService() {
-        return communicationGroupSendItemService;
+    public void init() {
+        log.info( "Initialized." );
+        this.monitorThread = new CommunicationGroupSendMonitorThread( this );
     }
 
-    public void init() {
-        System.out.println( "Initialized group send monitor" )
-        log.debug( "Initialized." );
-        this.monitorThread = new CommunicationGroupSendMonitorThread( this );
-        //this.monitorThread.start();
+
+    public void startMonitoring() {
+        log.info( "Monitor thread started.")
+        this.monitorThread.start();
     }
 
 
@@ -69,22 +67,16 @@ class CommunicationGroupSendMonitor {
             System.out.println( "after findRunning" )
             if (log.isDebugEnabled()) log.debug( "Group Send Monitor found " + records.size() + " records" );
 
-//             if (communicationFolderService.findAll().size() < 10) {
-//                 CommunicationFolder folder = new CommunicationFolder()
-//                 folder.setName( "Folder " + new Date() )
-//                 communicationFolderService.create( folder )
-//             }
+             if (communicationFolderService.findAll().size() < 10) {
+                 CommunicationFolder folder = new CommunicationFolder()
+                 folder.setName( "Folder " + new Date() )
+                 communicationFolderService.create( folder )
+             }
 
         } catch( Throwable t) {
             t.printStackTrace()
             log.error( t )
         }
-
-        // tearDown
-//        sessionFactory.currentSession.connection().rollback()
-//        sessionFactory.currentSession.close()
-
-
 
 //        System.out.println( "before call" )
 //        Session session = sessionFactory.openSession()

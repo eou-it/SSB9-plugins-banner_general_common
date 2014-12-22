@@ -8,7 +8,7 @@ import org.apache.log4j.Logger
  * assumes a http session has been established that stores the mep code. Usually this is done by one
  * of the servlet filters (AccessFilter). Since a batch thread has no http session, we fake it out.
  */
-class BatchBannerSession {
+class MockBannerSession {
     private final Logger log = Logger.getLogger(getClass())
 
     String mep

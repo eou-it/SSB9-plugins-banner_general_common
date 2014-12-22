@@ -64,8 +64,7 @@ class BannerGeneralCommonGrailsPlugin {
         communicationGroupSendMonitor(CommunicationGroupSendMonitor) { bean ->
             bean.autowire = 'byName'
             bean.initMethod = 'init'
-            sessionFactory = ref( "sessionFactory" )
-            messageSource = ref( "messageSource" )
+            trustedBannerAuthenticationProvider = ref('trustedBannerAuthenticationProvider')
         }
 
         // BRM also injected a group send item monitor record dao for auditing

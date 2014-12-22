@@ -7,7 +7,7 @@ import org.springframework.web.context.request.RequestAttributes
 /**
  * A mock request attribute for handing back a batch banner session.
  */
-class BatchBannerRequest implements RequestAttributes {
+class MockBannerRequest implements RequestAttributes {
     private final Logger log = Logger.getLogger(getClass())
     def session
 

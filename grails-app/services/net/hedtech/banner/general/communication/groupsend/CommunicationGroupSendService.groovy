@@ -15,8 +15,8 @@ class CommunicationGroupSendService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
         CommunicationGroupSend groupSend = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationGroupSend
-        if (groupSend.getOwnerPidm() == null) {
-            groupSend.setOwnerPidm( SecurityContextHolder?.context?.authentication?.principal?.pidm )
+        if (groupSend.getCreatedBy() == null) {
+            groupSend.setCreatedBy( SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() )
         };
         if (groupSend.getCreationDateTime() == null) {
             groupSend.setCreationDateTime( new Date() )
