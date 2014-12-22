@@ -45,6 +45,9 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "gcbgsnd_VERSION")
     Long version
 
+    @Column(name = "gcbgsnd_CREATOR_ID")
+    String createdBy
+
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
@@ -66,9 +69,6 @@ class CommunicationGroupSend implements Serializable {
 
     @Column(name="gcbgsnd_VPDI_CODE" )
     String mepCode
-
-    @Column(name="gcbgsnd_OWNER_PIDM" )
-    Long ownerPidm;
 
     @JoinColumn(name="gcbgsnd_ORG_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
@@ -106,7 +106,7 @@ class CommunicationGroupSend implements Serializable {
         mepCode(nullable: true)
         population(nullable: false)
         organization(nullable: false)
-        ownerPidm(nullable:false)
+        createdBy(nullable:false, maxSize: 30)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
