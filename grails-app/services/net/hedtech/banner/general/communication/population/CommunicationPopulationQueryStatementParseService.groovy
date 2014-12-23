@@ -26,7 +26,6 @@ class CommunicationPopulationQueryStatementParseService {
 
     def CommunicationPopulationQueryParseResult parse(String statement, Boolean multiSelectColumnAllowed=true) {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        def exceptionMessage
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
 
         if (statement == null || statement == "") {
@@ -61,9 +60,7 @@ class CommunicationPopulationQueryStatementParseService {
             log.debug ae.stackTrace
             throw ae
         }
-        finally {
 
-        }
         return populationQueryParseResult
     }
 
