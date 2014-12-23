@@ -65,7 +65,7 @@ class InstructionalPlatformCompositeService {
     }
 
 
-    InstructionalPlatform fetchByIntegrationPartnerId( Long domainId ) {
+    InstructionalPlatform fetchByIntegrationPartnerSystemId( Long domainId ) {
         if (null == domainId) {
             return null
         }
@@ -77,14 +77,14 @@ class InstructionalPlatformCompositeService {
     }
 
 
-    InstructionalPlatform fetchByIntegrationPartnerCode( String integrationPartnerCode ) {
-        if (!integrationPartnerCode) {
+    InstructionalPlatform fetchByIntegrationPartnerSystemCode( String code ) {
+        if (!code) {
             return null
         }
-        IntegrationPartnerSystemRule integrationPartnerSystemRule = IntegrationPartnerSystemRule.findByCode( integrationPartnerCode )
+        IntegrationPartnerSystemRule integrationPartnerSystemRule = IntegrationPartnerSystemRule.findByCode( code )
         if (!integrationPartnerSystemRule) {
             return null
         }
-        return new InstructionalPlatform( integrationPartnerSystemRule, new Metadata( integrationPartnerSystemRule.dataOrigin ), GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, level.id )?.guid )
+        return new InstructionalPlatform( integrationPartnerSystemRule, new Metadata( integrationPartnerSystemRule.dataOrigin ), GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, integrationPartnerSystemRule.id )?.guid )
     }
 }
