@@ -65,7 +65,6 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
         if (map.id) {
             def temp = CommunicationEmailTemplate.get(map.id)
-            def today = new Date()
             if (temp.published)
                 return
             if (temp.name != null && temp.folder != null  && temp.toList != null && temp.content != null && temp.subject != null) {

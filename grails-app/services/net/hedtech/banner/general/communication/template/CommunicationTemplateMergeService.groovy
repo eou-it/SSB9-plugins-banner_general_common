@@ -172,6 +172,9 @@ class CommunicationTemplateMergeService {
                 st.add( key, parameters[key] )
             }
             st.render()
+        } else {
+            // You have nothing to do, so just return the input templateString
+            stringTemplate
         }
     }
     /**
@@ -202,7 +205,6 @@ class CommunicationTemplateMergeService {
      */
     List<String> extractTemplateVariables( String statement ) {
         dataFieldNames = []
-        final int ID = 25 // This is the ST constant for an ID token
         char delimiter = '$'
         /* TODO: get a listener working so  you can trap rendering errors */
         STGroup group = new STGroup( delimiter, delimiter )
@@ -251,7 +253,7 @@ class CommunicationTemplateMergeService {
     def String processGroovyTemplate( String templateString, bindings ) {
         def engine = new SimpleTemplateEngine()
         def template = engine.createTemplate( templateString ).make( bindings )
-
+        template
     }
 
 
