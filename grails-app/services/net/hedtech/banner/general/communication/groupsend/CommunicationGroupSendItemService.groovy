@@ -19,4 +19,8 @@ class CommunicationGroupSendItemService extends ServiceBase {
         };
     }
 
+    public List fetchByGroupSend( CommunicationGroupSend groupSend ) {
+        return CommunicationGroupSendItem.fetchByGroupSend( groupSend )
+    }
+
 }

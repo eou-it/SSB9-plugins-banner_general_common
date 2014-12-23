@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.security.TrustedBannerAuthenticationProvider
 import net.hedtech.banner.general.security.TrustedBannerToken
 import net.hedtech.banner.security.FormContext
@@ -53,68 +52,24 @@ class CommunicationGroupSendMonitor {
 
 
     public void monitorGroupSends() {
+        if (log.isDebugEnabled()) log.debug( "Checking group sends for status updates." )
         // begin setup
         if (!SecurityContextHolder.getContext().getAuthentication()) {
             FormContext.set( ['SELFSERVICE'] )
 
-            Authentication auth = trustedBannerAuthenticationProvider.authenticate( new TrustedBannerToken( 'BCMADMIN' ) )
+            String monitorOracleUserName = 'BCMADMIN'
+            Authentication auth = trustedBannerAuthenticationProvider.authenticate( new TrustedBannerToken( monitorOracleUserName ) )
             SecurityContextHolder.getContext().setAuthentication( auth )
+            if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for monitoring." )
         }
 
         try {
-            System.out.println( "after openSession" )
             List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
-            System.out.println( "after findRunning" )
-            if (log.isDebugEnabled()) log.debug( "Group Send Monitor found " + records.size() + " records" );
-
-             if (communicationFolderService.findAll().size() < 10) {
-                 CommunicationFolder folder = new CommunicationFolder()
-                 folder.setName( "Folder " + new Date() )
-                 communicationFolderService.create( folder )
-             }
-
+            if (log.isDebugEnabled()) log.debug( "Running group send count = " + groupSendList.size() + "." );
         } catch( Throwable t) {
             t.printStackTrace()
             log.error( t )
         }
-
-//        System.out.println( "before call" )
-//        Session session = sessionFactory.openSession()
-//        try {
-//            System.out.println( "after openSession" )
-//            List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
-//            System.out.println( "after findRunning" )
-//            if (log.isDebugEnabled()) log.debug( "Group Send Monitor found " + records.size() + " records" );
-//
-//             if (communicationFolderService.findAll().size() < 10) {
-//                 CommunicationFolder folder = new CommunicationFolder()
-//                 folder.setName( "Folder " + groupSendList.size() )
-//                 communicationFolderService.create( folder )
-//             }
-//
-//        } catch( Throwable t) {
-//            t.printStackTrace()
-//            log.error( t )
-//        } finally {
-//            session.close()
-//        }
-
-
-//        executorService.execute( {
-//            try {
-//             System.out.println( "before call" )
-//             List groupSendList = CommunicationGroupSend.findAll()
-//             System.out.println( "Displaying group sends from monitor" )
-//             groupSendList.each { gs ->
-//                 System.out.print( "group send id = " + gs )
-//             }
-//             if (groupSendList.size() < 10) {
-//                 CommunicationFolder folder = new CommunicationFolder()
-//                 folder.setName( "Folder " + groupSendList.size() )
-//                 CommunicationFolder.withTransaction { status ->
-//                    folder.save()
-//                 }
-//             }
 
 //            List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
 //            if (log.isDebugEnabled()) log.debug( "Group Send Monitor found " + records.size() + " records" );

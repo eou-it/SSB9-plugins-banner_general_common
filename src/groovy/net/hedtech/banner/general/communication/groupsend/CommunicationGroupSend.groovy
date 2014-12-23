@@ -45,6 +45,7 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "gcbgsnd_VERSION")
     Long version
 
+    /** The oracle user name of the person that submitted the group send. **/
     @Column(name = "gcbgsnd_CREATOR_ID")
     String createdBy
 

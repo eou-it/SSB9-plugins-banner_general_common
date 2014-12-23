@@ -66,7 +66,6 @@ class CommunicationGroupSendCommunicationService {
         groupSend.template = template
         groupSend.population = population
         groupSend.organization = organization
-        groupSend.ownerPidm = owner.pidm
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         // TODO: We'll grab the mep code from the logged in user's home context for now. Look into if we should
         // be grabbing from RequestAttributes currentRequestAttributes() in the controller and passing it in as a

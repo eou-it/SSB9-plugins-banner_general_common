@@ -24,7 +24,6 @@ class CommunicationGroupSendService extends ServiceBase {
         groupSend.setDeleted( false );
     }
 
-    @Transactional
     public List findRunning() {
         return CommunicationGroupSend.findRunning()
     }

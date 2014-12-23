@@ -104,7 +104,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     void testCreateGroupSend() {
         CommunicationGroupSend communicationGroupSend = createGroupSend()
         assertNotNull communicationGroupSend.getId()
-        assertEquals( bannerAuthenticationToken.getPidm(), communicationGroupSend.getOwnerPidm() )
+        assertEquals( bannerAuthenticationToken.getOracleUserName(), communicationGroupSend.getCreatedBy() )
     }
 
     @Test
