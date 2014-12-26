@@ -45,6 +45,10 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "gcbgsnd_VERSION")
     Long version
 
+    /** The oracle user name of the person that submitted the group send. **/
+    @Column(name = "gcbgsnd_CREATOR_ID")
+    String createdBy
+
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
@@ -66,9 +70,6 @@ class CommunicationGroupSend implements Serializable {
 
     @Column(name="gcbgsnd_VPDI_CODE" )
     String mepCode
-
-    @Column(name="gcbgsnd_OWNER_PIDM" )
-    Long ownerPidm;
 
     @JoinColumn(name="gcbgsnd_ORG_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
@@ -106,7 +107,7 @@ class CommunicationGroupSend implements Serializable {
         mepCode(nullable: true)
         population(nullable: false)
         organization(nullable: false)
-        ownerPidm(nullable:false)
+        createdBy(nullable:false, maxSize: 30)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
@@ -114,6 +115,17 @@ class CommunicationGroupSend implements Serializable {
         stopDate(nullable: true)
         creationDateTime(nullable: false)
         currentExecutionState(nullable: false)
+    }
+
+    public static List findRunning() {
+        def query
+        CommunicationGroupSend.withSession { session ->
+            query = session.getNamedQuery( 'CommunicationGroupSend.findRunning' )
+                .setParameter( 'new_', CommunicationGroupSendExecutionState.New )
+                .setParameter( 'processing_', CommunicationGroupSendExecutionState.Processing )
+                .list()
+        }
+        return query
     }
 
 }

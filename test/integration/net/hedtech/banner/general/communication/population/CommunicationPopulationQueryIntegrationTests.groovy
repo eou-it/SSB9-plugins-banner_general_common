@@ -171,7 +171,6 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
                         'createDate',
                         'createdBy',
                         'name',
-                        'valid',
                 ]
 
     }
