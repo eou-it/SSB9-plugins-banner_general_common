@@ -116,7 +116,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, recipientData.fieldValues )
         communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject, recipientData.fieldValues )
-        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, recipientData.fieldValues )
+        //communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, recipientData.fieldValues )
         communicationMergedEmailTemplate
     }
 
@@ -152,15 +152,15 @@ class CommunicationTemplateMergeService {
      */
     CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
-        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, renderPreviewValues( communicationEmailTemplate.toList ) )
-        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject, renderPreviewValues( communicationEmailTemplate.subject ) )
-        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, renderPreviewValues( communicationEmailTemplate.content ) )
+        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList?:" ", renderPreviewValues( communicationEmailTemplate.toList?:" " ) )
+        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject?:" ", renderPreviewValues( communicationEmailTemplate.subject?:" " ) )
+        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content?:" ", renderPreviewValues( communicationEmailTemplate.content?:" " ) )
         communicationMergedEmailTemplate
     }
 
     /**
      * Merges the data from the parameter map into the string template
-     * @param stringTemplate A string containing delimited token fields
+     * @param stringTemplate A stcring containing delimited token fields
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */
@@ -172,6 +172,9 @@ class CommunicationTemplateMergeService {
                 st.add( key, parameters[key] )
             }
             st.render()
+        } else {
+            // You have nothing to do, so just return the input templateString
+            stringTemplate
         }
     }
     /**
@@ -202,7 +205,6 @@ class CommunicationTemplateMergeService {
      */
     List<String> extractTemplateVariables( String statement ) {
         dataFieldNames = []
-        final int ID = 25 // This is the ST constant for an ID token
         char delimiter = '$'
         /* TODO: get a listener working so  you can trap rendering errors */
         STGroup group = new STGroup( delimiter, delimiter )
@@ -251,7 +253,7 @@ class CommunicationTemplateMergeService {
     def String processGroovyTemplate( String templateString, bindings ) {
         def engine = new SimpleTemplateEngine()
         def template = engine.createTemplate( templateString ).make( bindings )
-
+        template
     }
 
 
