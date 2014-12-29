@@ -8,7 +8,7 @@ import net.hedtech.banner.service.ServiceBase
 
 class CommunicationEmailItemService extends ServiceBase {
 
-    def preCreate(map) {
+    def preCreate( map ) {
         map?.domainModel?.createDate = new Date()
     }
 }

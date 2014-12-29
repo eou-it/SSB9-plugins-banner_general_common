@@ -35,7 +35,6 @@ class CommunicationPopulationExecutionService {
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
         def populationQuery = communicationPopulationQueryService.get(populationQueryId)
 
-
         populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.sqlString, false)
         return populationQueryParseResult
     }
@@ -46,6 +45,7 @@ class CommunicationPopulationExecutionService {
      * @returns the population selection list id
      */
     def execute(Long populationQueryId) {
+
 
         //throw exception if the banner security for query execution is not setup for this user
         if (!CommunicationCommonUtility.userCanExecuteQuery()) {

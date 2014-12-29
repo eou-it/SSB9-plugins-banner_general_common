@@ -76,13 +76,16 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganization"/>
         <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplate"/>
         <mapping class="net.hedtech.banner.general.communication.template.CommunicationEmailTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationMergedEmailTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.log.CommunicationLog"/>
+
+
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionConstant"/>
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionStatement"/>
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationRuleStatementType"/>
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationField"/>
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldView"/>
 
-        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
         <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
         <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem"/>
         <mapping class="net.hedtech.banner.general.communication.merge.CommunicationRecipientData"/>

@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Manages group send instances.
@@ -14,8 +15,8 @@ class CommunicationGroupSendService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
         CommunicationGroupSend groupSend = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationGroupSend
-        if (groupSend.getOwnerPidm() == null) {
-            groupSend.setOwnerPidm( SecurityContextHolder?.context?.authentication?.principal?.pidm )
+        if (groupSend.getCreatedBy() == null) {
+            groupSend.setCreatedBy( SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() )
         };
         if (groupSend.getCreationDateTime() == null) {
             groupSend.setCreationDateTime( new Date() )
@@ -23,18 +24,9 @@ class CommunicationGroupSendService extends ServiceBase {
         groupSend.setDeleted( false );
     }
 
-
-    public static List findRunning() {
-        def query
-        CommunicationGroupSend.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationGroupSend.findRunning' )
-                .setParameter( 'new_', CommunicationGroupSendExecutionState.New )
-                .setParameter( 'processing_', CommunicationGroupSendExecutionState.Processing )
-                .list()
-        }
-        return query
+    public List findRunning() {
+        return CommunicationGroupSend.findRunning()
     }
-
 
     public CommunicationGroupSend stopGroupSend( Long groupSendId ) {
         if (log.isDebugEnabled()) log.debug( "Stopping group send with id = " + groupSendId + "." )

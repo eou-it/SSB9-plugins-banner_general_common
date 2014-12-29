@@ -17,6 +17,8 @@ import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -28,6 +30,12 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "GCRGSIM")
+@NamedQueries(value = [
+    @NamedQuery( name = "CommunicationGroupSendItem.fetchByGroupSend",
+        query = """ FROM CommunicationGroupSendItem gsi
+                    WHERE gsi.communicationGroupSend = :groupSend """
+    )
+])
 class CommunicationGroupSendItem implements Serializable {
 
     /**
@@ -104,6 +112,16 @@ class CommunicationGroupSendItem implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+    }
+
+    public static List fetchByGroupSend( CommunicationGroupSend groupSend ) {
+        def results
+        CommunicationGroupSend.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByGroupSend' )
+                .setParameter( 'groupSend', groupSend )
+                .list()
+        }
+        return results
     }
 
 }
