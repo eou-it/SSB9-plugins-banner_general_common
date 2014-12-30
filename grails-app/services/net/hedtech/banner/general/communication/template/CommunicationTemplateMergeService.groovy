@@ -116,7 +116,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, recipientData.fieldValues )
         communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject, recipientData.fieldValues )
-        //communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, recipientData.fieldValues )
+        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, recipientData.fieldValues )
         communicationMergedEmailTemplate
     }
 
