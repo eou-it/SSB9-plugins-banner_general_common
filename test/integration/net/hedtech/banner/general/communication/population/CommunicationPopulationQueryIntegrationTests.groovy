@@ -80,13 +80,7 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         assertNotNull(fetchedList)
     }
 
-    /*
-    PopulationQuery.findAll
-    PopulationQuery.findAllByFolderName
-    PopulationQuery.fetchByQueryNameAndFolderName
-    PopulationQuery.existsAnotherNameFolder
-    PopulationQuery.fetchById
-    */
+
 
 
     @Test

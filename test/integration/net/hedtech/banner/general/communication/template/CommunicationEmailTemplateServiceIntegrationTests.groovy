@@ -48,7 +48,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     def i_invalid_emailTemplate_name = """Valid Name""".padLeft(2049)
 
     def i_valid_emailTemplate_oneOff = true
-    def i_valid_emailTemplate_personal = true
+    def i_valid_emailTemplate_personal = false
     def i_valid_emailTemplate_published = true
 
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
@@ -58,7 +58,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     def i_invalid_emailTemplate_toList = "foo@bar.com".padLeft(1021)
 
     def i_valid_emailTemplate_validFrom = new Date()
-    def i_valid_emailTemplate_validTo = new Date()
+    def i_valid_emailTemplate_validTo = new Date() + 200
 
     def i_valid_folder_description = "Valid older description"
     def i_valid_folder_internal = true
@@ -225,6 +225,15 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     }
 
+    @Test
+    void testFetchPublishedActivePublicByFolderName() {
+
+        def emailTemplate = newValidForCreateEmailTemplate( folder1 )
+        emailTemplate.save( failOnError: true, flush: true )
+        assertNotNull( emailTemplate.folder.name )
+        def emailTemplates = CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName( folder1.name )
+        assertEquals( 1, emailTemplates.size() )
+    }
 
     private def newValidForCreateFolder(String folderName) {
         def folder = new CommunicationFolder(

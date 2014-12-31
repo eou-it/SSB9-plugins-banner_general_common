@@ -25,7 +25,14 @@ import javax.persistence.*
                 query = """ FROM CommunicationEmailTemplate a
                     WHERE a.folder.name = :folderName
                     AND   upper(a.name) = upper(:templateName)
-                    AND   a.id <> :id""")
+                    AND   a.id <> :id"""),
+        @NamedQuery(name = "CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName",
+                query = """ FROM CommunicationEmailTemplate a
+                    WHERE a.folder.name = :folderName
+                    AND a.active = 'Y'
+                    AND a.published = 'Y'
+                    AND SYSDATE between validFrom and validTo
+                    AND personal = 'N'""")
 ])
 class CommunicationEmailTemplate extends CommunicationTemplate implements Serializable {
 
@@ -87,6 +94,17 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         return query
     }
 
+    public static List<CommunicationEmailTemplate> fetchPublishedActivePublicByFolderName(String folderName) {
+
+        def templateList
+        CommunicationEmailTemplate.withSession { session ->
+            templateList = session.getNamedQuery('CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName')
+                    .setString('folderName', folderName)
+                    .list()
+        }
+        return templateList
+    }
+
     public static Boolean existsAnotherNameFolder(Long templateId, String templateName, String folderName) {
 
         def query
@@ -111,5 +129,6 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         }
         return results
     }
+
 
 }

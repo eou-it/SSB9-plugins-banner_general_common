@@ -93,7 +93,7 @@ public abstract class CommunicationTemplate implements Serializable {
     Date validTo
 
     /**
-     *  The user ID of the person who inserted or last updated this record.
+     *  The user ID of the person who inserted this record.
      */
     @Column(name = "GCBTMPL_CREATOR_ID")
     String createdBy

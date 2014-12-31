@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -19,7 +18,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     // template
     def i_valid_emailTemplate_name = """Valid Name"""
     def i_valid_emailTemplate_description = """Valid Template Description"""
-    def i_valid_emailTemplate_personal = true
+    def i_valid_emailTemplate_personal = false
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
     def i_valid_emailTemplate_ccList = """Valid Emailtemplate Cclist"""
     def i_valid_emailTemplate_content = """Valid Emailtemplate Content"""
@@ -33,7 +32,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_published = true
     def i_valid_emailTemplate_validFrom = new Date()
-    def i_valid_emailTemplate_validTo = new Date()
+    def i_valid_emailTemplate_validTo = new Date() + 200
     def i_valid_emailTemplate_createdBy = """Valid EmailTemplate createdBy"""
     def i_valid_emailTemplate_createDate = new Date()
 
@@ -48,7 +47,6 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
 
     def CommunicationFolder folder
-    def CommunicationEmailTemplate emailTemplate
 
 
     @Before
@@ -66,6 +64,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
@@ -183,6 +182,17 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     }
 
 
+    @Test
+    void testFetchPublishedActivePublicByFolderName() {
+
+        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate.save( failOnError: true, flush: true )
+        assertNotNull( emailTemplate.folder.name )
+        def emailTemplates = CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName( folder.name )
+        assertEquals( 1, emailTemplates.size() )
+    }
+
+
     private def newValidForCreateFolder() {
         def folder = new CommunicationFolder(
                 description: i_valid_folder_description,
@@ -214,4 +224,6 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
                 toList: i_valid_emailTemplate_toList, )
         return communicationTemplate
     }
+
+
 }
