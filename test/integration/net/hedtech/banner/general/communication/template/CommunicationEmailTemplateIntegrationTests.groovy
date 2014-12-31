@@ -32,7 +32,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_published = true
     def i_valid_emailTemplate_validFrom = new Date()
-    def i_valid_emailTemplate_validTo = new Date() + 200
+    def i_valid_emailTemplate_validTo = new Date()
     def i_valid_emailTemplate_createdBy = """Valid EmailTemplate createdBy"""
     def i_valid_emailTemplate_createDate = new Date()
 
@@ -57,7 +57,14 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         folder.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder.id
-
+        // Force the validTo into the future
+        Calendar c = Calendar.getInstance()
+        c.setTime( new Date() )
+        c.add( Calendar.DATE, 150 )
+        i_valid_emailTemplate_validTo = c.getTime()
+        c.setTime( new Date() )
+        c.add( Calendar.DATE, -300 )
+        i_valid_emailTemplate_validFrom = c.getTime()
     }
 
 
@@ -187,6 +194,8 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
         def emailTemplate = newValidForCreateEmailTemplate( folder )
         emailTemplate.save( failOnError: true, flush: true )
+        println "From: " + emailTemplate.validFrom
+        println "To:" + emailTemplate.validTo
         assertNotNull( emailTemplate.folder.name )
         def emailTemplates = CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName( folder.name )
         assertEquals( 1, emailTemplates.size() )
@@ -204,6 +213,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
 
     private def newValidForCreateEmailTemplate( CommunicationFolder folder ) {
+
         def communicationTemplate = new CommunicationEmailTemplate(
                 description: i_valid_emailTemplate_description,
                 personal: i_valid_emailTemplate_personal,

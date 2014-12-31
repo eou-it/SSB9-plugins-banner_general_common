@@ -87,6 +87,14 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
 
+        // Force the validTo into the future
+        Calendar c = Calendar.getInstance()
+        c.setTime( new Date() )
+        c.add( Calendar.DATE, 150 )
+        i_valid_emailTemplate_validTo = c.getTime()
+        c.setTime( new Date() )
+        c.add( Calendar.DATE, -300 )
+        i_valid_emailTemplate_validFrom = c.getTime()
     }
 
 
