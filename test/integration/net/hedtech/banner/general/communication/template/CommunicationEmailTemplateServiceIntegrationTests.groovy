@@ -234,12 +234,12 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     }
 
     @Test
-    void testFetchPublishedActivePublicByFolderName() {
+    void testFetchPublishedActivePublicByFolderId() {
 
         def emailTemplate = newValidForCreateEmailTemplate( folder1 )
         emailTemplate.save( failOnError: true, flush: true )
         assertNotNull( emailTemplate.folder.name )
-        def emailTemplates = CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName( folder1.name )
+        def emailTemplates = CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId( folder1.id )
         assertEquals( 1, emailTemplates.size() )
     }
 

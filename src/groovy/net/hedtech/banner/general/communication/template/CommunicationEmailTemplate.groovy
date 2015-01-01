@@ -26,9 +26,9 @@ import javax.persistence.*
                     WHERE a.folder.name = :folderName
                     AND   upper(a.name) = upper(:templateName)
                     AND   a.id <> :id"""),
-        @NamedQuery(name = "CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName",
+        @NamedQuery(name = "CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId",
                 query = """ FROM CommunicationEmailTemplate a
-                    WHERE a.folder.name = :folderName
+                    WHERE a.folder.id = :folderId
                     AND a.active = 'Y'
                     AND a.published = 'Y'
                     AND SYSDATE between validFrom and validTo
@@ -94,12 +94,12 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         return query
     }
 
-    public static List<CommunicationEmailTemplate> fetchPublishedActivePublicByFolderName(String folderName) {
+    public static List<CommunicationEmailTemplate> fetchPublishedActivePublicByFolderId(Long id) {
 
         def templateList
         CommunicationEmailTemplate.withSession { session ->
-            templateList = session.getNamedQuery('CommunicationEmailTemplate.fetchPublishedActivePublicByFolderName')
-                    .setString('folderName', folderName)
+            templateList = session.getNamedQuery('CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId')
+                    .setLong('folderId', id)
                     .list()
         }
         return templateList
