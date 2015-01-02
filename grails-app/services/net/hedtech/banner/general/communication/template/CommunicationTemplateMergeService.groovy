@@ -206,11 +206,11 @@ class CommunicationTemplateMergeService {
     List<String> extractTemplateVariables( String statement ) {
         dataFieldNames = []
         char delimiter = '$'
-        /* TODO: get a listener working so  you can trap rendering errors */
+        /* TODO: get a listener working so  you can trap rendering errors
         STGroup group = new STGroup( delimiter, delimiter )
         CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
         group.setListener( errorListener )
-        group.defineTemplate( "foo", statement )
+        group.defineTemplate( "foo", statement ) */
         ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
 
         /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks

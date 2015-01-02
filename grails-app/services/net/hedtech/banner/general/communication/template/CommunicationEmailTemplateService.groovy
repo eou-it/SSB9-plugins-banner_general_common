@@ -77,12 +77,12 @@ class CommunicationEmailTemplateService extends ServiceBase {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:idNotValid@@")
     }
 
-    public static CommunicationEmailTemplate fetchPublishedActivePublicByFolderName(Long folderId) {
+    public List<CommunicationEmailTemplate> fetchPublishedActivePublicByFolderId(Long folderId) {
 
         def communicationEmailTemplateList = CommunicationEmailTemplate.withSession { session ->
             org.hibernate.Query query = session.getNamedQuery('CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId')
                     .setLong('folderId', folderId); query.list()
         }
-        return communicationEmailTemplateList.getAt(0)
+        return communicationEmailTemplateList
     }
 }

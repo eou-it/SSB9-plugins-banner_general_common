@@ -31,7 +31,7 @@ import javax.persistence.*
                     WHERE a.folder.id = :folderId
                     AND a.active = 'Y'
                     AND a.published = 'Y'
-                    AND SYSDATE between validFrom and validTo
+                    AND SYSDATE between NVL(validFrom,SYSDATE) and NVL(validTo, SYSDATE)
                     AND personal = 'N'""")
 ])
 class CommunicationEmailTemplate extends CommunicationTemplate implements Serializable {
