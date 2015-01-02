@@ -71,7 +71,7 @@ class CommunicationGroupSend implements Serializable {
     @Column(name="gcbgsnd_VPDI_CODE" )
     String mepCode
 
-    @JoinColumn(name="gcbgsnd_ORG_ID" )
+    @JoinColumn(name="gcbgsnd_organization_id" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationOrganization organization;
 

@@ -44,7 +44,7 @@ class CommunicationRecipientData {
     Long pidm
 
 
-    @Column(name = "GCBRDAT_TMPL_ID")
+    @Column(name = "GCBRDAT_TEMPLATE_ID")
     Long templateId
 
 
@@ -59,7 +59,7 @@ class CommunicationRecipientData {
     @MapKeyColumn(name = "GCRFVAL_canonicalForm", insertable = false, updatable = false)
     @CollectionTable(
             name = "GCRFVAL",
-            joinColumns = @JoinColumn(name = "gcrfval_gcbrdat_id")
+            joinColumns = @JoinColumn(name = "GCRFVAL_RECIPIENT_DATA_ID")
     )
     Map<String, CommunicationFieldValue> fieldValues = Collections.emptyMap(); // maps canonical form to field value
 
@@ -89,7 +89,7 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_DATA_ORIGIN")
     String dataOrigin
 
-    @JoinColumn(name="GCBRDAT_ORG_ID" )
+    @JoinColumn(name="GCBRDAT_ORGANIZATION_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationOrganization organization
 

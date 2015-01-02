@@ -77,7 +77,7 @@ class CommunicationGroupSendItem implements Serializable {
      * Parent communication job
      */
     @ManyToOne( fetch = FetchType.LAZY )
-    @JoinColumn(name="GCRGSIM_GCBGSND_ID", referencedColumnName="GCBGSND_SURROGATE_ID", nullable=false )
+    @JoinColumn(name="GCRGSIM_GROUP_SEND_ID", referencedColumnName="GCBGSND_SURROGATE_ID", nullable=false )
     CommunicationGroupSend communicationGroupSend;
 
     /** The target of the send item */

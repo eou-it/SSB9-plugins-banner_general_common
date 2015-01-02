@@ -63,13 +63,13 @@ public abstract class CommunicationItem implements Serializable {
     /**
      * The template associated with the template item
      */
-    @Column(name = "GCRCITM_GCBTMPL_ID")
+    @Column(name = "GCRCITM_TEMPLATE_ID")
     Long templateId
 
     /**
      * The organization id
      */
-    @Column(name = "GCRCITM_GCRORAN_ID")
+    @Column(name = "GCRCITM_ORGANIZATION_ID")
     Long organizationId
 
     /**
