@@ -179,7 +179,7 @@ class CommunicationLogIntegrationTests extends BaseIntegrationTestCase {
                 status: "TTTTTTTTTT",
 
                 // Nullable fields
-                communicationItemId: 9999999999999999999,
+                communicationItemId: null,
                 errorText: "TTTTTTTT",
                 organizationName: "TTTTTTTTTT",
                 sendItemReferenceId: "TTTTTTTTTT",
