@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.query.DynamicFinder
 import oracle.net.ns.Communication
@@ -17,12 +18,10 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GVQ_GCBQURY")
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationPopulationQueryView.findAll",
-                query = """ FROM CommunicationPopulationQueryView a
-                            ORDER by a.name"""),
-        @NamedQuery(name = "CommunicationPopulationQueryView.fetchById",
+       @NamedQuery(name = "CommunicationPopulationQueryView.fetchById",
                 query = """ FROM CommunicationPopulationQueryView a
                             WHERE  a.id = :id
                         """)
@@ -113,17 +112,6 @@ class CommunicationPopulationQueryView implements Serializable {
         return query
     }
 
-
-    public static List findAll() {
-
-        def queries = []
-        CommunicationPopulationQueryView.withSession { session ->
-            queries = session.getNamedQuery('CommunicationPopulationQueryView.findAll')
-                    .list()
-        }
-        return queries
-    }
-
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
 
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
@@ -134,21 +122,6 @@ class CommunicationPopulationQueryView implements Serializable {
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
-    }
-
-    @Override
-    public String toString() {
-        return "PopulationQueryView{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", folderId='" + folderId + '\'' +
-                ", folderName='" + folderName + '\'' +
-                ", createDate=" + createDate +
-                ", createdBy='" + createdBy + '\'' +
-                ", valid=" + valid +
-                ", version=" + version +
-                '}';
     }
 
 }

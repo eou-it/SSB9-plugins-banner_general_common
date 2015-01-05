@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
@@ -13,6 +14,7 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GCRLENT")
 @DatabaseModifiesState
 @NamedQueries(value = [
@@ -72,19 +74,6 @@ class CommunicationPopulationSelectionListEntry implements Serializable {
             @JoinColumn(name = "GCRLENT_SLIS_ID", referencedColumnName = "GCRSLIS_SURROGATE_ID")
     ])
     CommunicationPopulationSelectionList populationSelectionList
-
-
-    public String toString() {
-        """PopulationSelectionListEntry[
-                id= $id,
-                version= $version,
-                lastModified= $lastModified,
-                lastModifiedBy= $lastModifiedBy,
-                dataOrigin= $dataOrigin,
-                pidm= $pidm
-                populationSelectionList = $populationSelectionList]"""
-    }
-
 
     static constraints = {
         lastModified(nullable: true)

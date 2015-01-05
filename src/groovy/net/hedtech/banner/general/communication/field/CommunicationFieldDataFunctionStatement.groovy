@@ -3,15 +3,14 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.field
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+
 import javax.persistence.*
 
-/**
- * An entity representing a RuleStatement.
- *
- * @author Charlie Hardt
- * @author Brian Bell
- */
 @SuppressWarnings("serial")
+@EqualsAndHashCode
+@ToString
 @Embeddable
 public class CommunicationFieldDataFunctionStatement implements Serializable {
 
@@ -35,16 +34,5 @@ public class CommunicationFieldDataFunctionStatement implements Serializable {
     @Lob
     @Column(name = "CONTENT")
     String value;
-
-
-    @Override
-    public String toString() {
-        return "RuleStatement{" +
-                "type=" + type +
-                ", arrayOutputFlag='" + arrayOutputFlag + '\'' +
-                ", value='" + value + '\'' +
-                '}';
-    }
-
 
 }

@@ -209,23 +209,4 @@ class CommunicationPopulationQuery implements Serializable {
         return query
     }
 
-
-    @Override
-    public String toString() {
-        return "PopulationQuery{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", folder=" + folder +
-                ", createDate=" + createDate +
-                ", createdBy='" + createdBy + '\'' +
-                ", version=" + version +
-                ", lastModified=" + lastModified +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                ", sqlString='" + sqlString + '\'' +
-                ", valid=" + valid +
-                '}';
-    }
-
 }

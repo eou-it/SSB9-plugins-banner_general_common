@@ -16,10 +16,7 @@ import javax.persistence.*
 @ToString
 @EqualsAndHashCode
 @Table(name = "GCBCLOG")
-// @NamedQueries(value = [
-// @NamedQuery(name = "CommunicationLogRecordOfIndivdualCommunicationItemFinalStatu.fetchByxxxxx",
-//             query = """ FROM CommunicationLogRecordOfIndivdualCommunicationItemFinalStatu a WHERE xxxxx """)
-// ])
+
 class CommunicationLog implements Serializable {
 
     /**

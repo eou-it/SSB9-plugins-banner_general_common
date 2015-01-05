@@ -208,7 +208,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                         communicationRecipientDataService.create( recipient )
                 }
 
-                def recipientDataList = CommunicationRecipientData.findByTemplateId( validTemplate.id )
+                def recipientDataList = CommunicationRecipientData.fetchByTemplateId( validTemplate.id )
                 assertNotNull( recipientDataList )
         }
 

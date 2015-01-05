@@ -67,10 +67,10 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         assertTrue allView.size() >= 1
         assertTrue allView.getTotalCount() >= 1
 
-        def listView = CommunicationPopulationListView.findAllByQueryIdUserId(globalTestPopulationSelectionList.populationQueryId, globalTestPopulationSelectionList.lastCalculatedBy)
+        def listView = CommunicationPopulationListView.fetchAllByQueryIdUserId(globalTestPopulationSelectionList.populationQueryId, globalTestPopulationSelectionList.lastCalculatedBy)
         assertNotNull(listView)
 
-        def listView1 = CommunicationPopulationListView.findAllByQueryId(globalTestPopulationSelectionList.populationQueryId)
+        def listView1 = CommunicationPopulationListView.fetchAllByQueryId(globalTestPopulationSelectionList.populationQueryId)
         assertNotNull(listView1)
         assertTrue listView1.size() >= 1
 
