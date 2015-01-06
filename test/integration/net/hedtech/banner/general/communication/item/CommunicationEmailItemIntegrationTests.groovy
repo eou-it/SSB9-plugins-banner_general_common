@@ -101,6 +101,7 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
                 createdBy: i_valid_emailTemplate_createdBy,
                 createDate: i_valid_emailTemplate_createDate,
                 recipientPidm: 999999999,
+                referenceId: UUID.randomUUID().toString(),
                 bccList: i_valid_emailTemplate_bccList,
                 ccList: i_valid_emailTemplate_ccList,
                 content: i_valid_emailTemplate_content,

@@ -73,6 +73,12 @@ public abstract class CommunicationItem implements Serializable {
     Long organizationId
 
     /**
+     * The reference id
+     */
+    @Column(name = "GCRCITM_REFERENCE_ID")
+    String referenceId
+
+   /**
      *  Optimistic lock token.
      */
     @Version
