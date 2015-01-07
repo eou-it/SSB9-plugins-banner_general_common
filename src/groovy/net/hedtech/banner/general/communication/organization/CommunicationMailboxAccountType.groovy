@@ -11,7 +11,7 @@ package net.hedtech.banner.general.communication.organization
  * Note that the string representations of this enum are persisted in the database.  Do not change the types unless
  * you also handle migration of existing data.
  */
-public enum CommunicationOrganizationMailboxAccountType {
+public enum CommunicationMailboxAccountType {
     Sender,
     ReplyTo;
 }

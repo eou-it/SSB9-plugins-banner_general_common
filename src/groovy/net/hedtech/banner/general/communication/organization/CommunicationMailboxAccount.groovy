@@ -6,5 +6,5 @@ package net.hedtech.banner.general.communication.organization
 /**
  * MailboxAccount.
  */
-class CommunicationOrganizationMailboxAccount {
+class CommunicationMailboxAccount {
 }

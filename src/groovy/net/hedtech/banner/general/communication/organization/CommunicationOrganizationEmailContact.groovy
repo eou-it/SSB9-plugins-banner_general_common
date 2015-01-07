@@ -19,11 +19,11 @@ public class CommunicationOrganizationEmailContact implements Serializable {
     @CommunicationExcludeFromValidation
     //we don't want to validate the fields of the MailboxAccount, as this is just a reference
     @ManyToOne
-    private CommunicationOrganizationMailboxAccount sender;
+    private CommunicationMailboxAccount sender;
     @CommunicationExcludeFromValidation
     //we don't want to validate the fields of the MailboxAccount, as this is just a reference
     @ManyToOne
-    private CommunicationOrganizationMailboxAccount replyTo;
+    private CommunicationMailboxAccount replyTo;
 
     /**
      * Returns the default from email address.
@@ -61,7 +61,7 @@ public class CommunicationOrganizationEmailContact implements Serializable {
      * Returns the MailboxAccount used for sending email
      * @return
      */
-    public CommunicationOrganizationMailboxAccount getSender() {
+    public CommunicationMailboxAccount getSender() {
         return sender;
     }
 
@@ -69,7 +69,7 @@ public class CommunicationOrganizationEmailContact implements Serializable {
      * Sets the MailboxAccount used for sending email
      * @param sender
      */
-    public void setSender(CommunicationOrganizationMailboxAccount sender) {
+    public void setSender(CommunicationMailboxAccount sender) {
         this.sender = sender;
     }
 
@@ -77,7 +77,7 @@ public class CommunicationOrganizationEmailContact implements Serializable {
      * Returns the MailboxAccount used for monitoring replies.
      * @return
      */
-    public CommunicationOrganizationMailboxAccount getReplyTo() {
+    public CommunicationMailboxAccount getReplyTo() {
         return replyTo;
     }
 
@@ -85,7 +85,7 @@ public class CommunicationOrganizationEmailContact implements Serializable {
      * Sets the MailboxAccount used for monitoring replies.
      * @param replyTo
      */
-    public void setReplyTo(CommunicationOrganizationMailboxAccount replyTo) {
+    public void setReplyTo(CommunicationMailboxAccount replyTo) {
         this.replyTo = replyTo;
     }
 
