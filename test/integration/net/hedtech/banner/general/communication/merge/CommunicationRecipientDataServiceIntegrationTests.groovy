@@ -200,7 +200,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                         CommunicationRecipientData recipient = new CommunicationRecipientData(
                                 pidm: person.pidm,
                                 templateId: validTemplate.id,
-                                referenceId: 1,
+                                referenceId:  UUID.randomUUID().toString(),
                                 ownerId: getUser(),
                                 fieldValues: fieldListByPidm,
                                 organization: this.organization
@@ -208,7 +208,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                         communicationRecipientDataService.create( recipient )
                 }
 
-                def recipientDataList = CommunicationRecipientData.findByTemplateId( validTemplate.id )
+                def recipientDataList = CommunicationRecipientData.fetchByTemplateId( validTemplate.id )
                 assertNotNull( recipientDataList )
         }
 
@@ -244,7 +244,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 // Required fields
                 pidm: pidmvalue,
                 templateId: templateid,
-                referenceId: 1,
+                referenceId: UUID.randomUUID().toString(),
                 ownerId: getUser(),
                 fieldValues: ["name": fieldValue],
                 organization: this.organization

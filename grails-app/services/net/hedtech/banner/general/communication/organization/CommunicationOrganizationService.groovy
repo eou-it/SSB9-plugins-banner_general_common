@@ -27,7 +27,6 @@ class CommunicationOrganizationService extends ServiceBase {
             try {
                 def datestring = new SimpleDateFormat(commorgn.dateFormat).format(new Date())
             } catch (Exception e) {
-                println "i a here" + e.message
                 throw new ApplicationException(CommunicationOrganization, "@@r1:invalid.date.format@@")
             }
         }

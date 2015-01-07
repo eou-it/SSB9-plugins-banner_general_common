@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.query.DynamicFinder
 import org.hibernate.annotations.Type
@@ -16,6 +17,7 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GVQ_GCRLENT")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationProfileView.findAllByPopulationId",
@@ -141,22 +143,4 @@ class CommunicationPopulationProfileView implements Serializable {
         return results
     }
 
-
-    @Override
-    public String toString() {
-        return "CommunicationPopulationProfileView{" +
-                "id=" + id +
-                ", version=" + version +
-                ", populationQueryId=" + populationQueryId +
-                ", populationId=" + populationId +
-                ", pidm=" + pidm +
-                ", bannerId='" + bannerId + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", surnamePrefix='" + surnamePrefix + '\'' +
-                ", confidential=" + confidential +
-                ", deceased=" + deceased +
-                '}';
-    }
 }

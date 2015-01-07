@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
@@ -13,6 +14,7 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GCRSLIS")
 @DatabaseModifiesState
 @NamedQueries(value = [
@@ -118,20 +120,4 @@ class CommunicationPopulationSelectionList implements Serializable {
         return populationSelectionLists.getAt(0)
     }
 
-
-    @Override
-    public String toString() {
-        return "PopulationSelectionList{" +
-                "id=" + id +
-                ", populationQueryId=" + populationQueryId +
-                ", status=" + status +
-                ", version=" + version +
-                ", lastModified=" + lastModified +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                ", lastCalculatedCount=" + lastCalculatedCount +
-                ", lastCalculatedBy='" + lastCalculatedBy + '\'' +
-                ", lastCalculatedTime=" + lastCalculatedTime +
-                '}';
-    }
 }

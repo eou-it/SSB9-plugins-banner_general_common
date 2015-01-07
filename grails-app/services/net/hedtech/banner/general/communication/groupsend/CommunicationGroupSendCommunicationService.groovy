@@ -95,12 +95,19 @@ class CommunicationGroupSendCommunicationService {
                 state:CommunicationGroupSendItemExecutionState.Ready.toString(),
                 group_send_key:groupSend.id
             ],
-            """ INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime, gcrgsim_current_state, gcrgsim_user_id, gcrgsim_activity_date)
-                                 SELECT gcbgsnd_surrogate_id, gcrlent_pidm, SYSDATE, :state, gcbgsnd_user_id, SYSDATE
-                                   FROM gcrslis, gcrlent, gcbgsnd
-                                  WHERE     gcbgsnd_poplist_id = gcrslis_surrogate_id
-                                        AND gcrlent_slis_id = gcrslis_surrogate_id
-                                        and gcbgsnd_surrogate_id = :group_send_key
+            """ INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
+                                ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date)
+               SELECT gcbgsnd_surrogate_id
+                     ,gcrlent_pidm
+                     ,SYSDATE
+                     , :state
+                     , SYS_GUID()
+                     ,gcbgsnd_user_id
+                     ,SYSDATE
+                 FROM gcrslis, gcrlent, gcbgsnd
+                WHERE     gcbgsnd_poplist_id = gcrslis_surrogate_id
+                      AND gcrlent_slis_id = gcrslis_surrogate_id
+                      AND gcbgsnd_surrogate_id = :group_send_key
             """ )
 
             if (log.isDebugEnabled()) log.debug( "Created " + sql.updateCount + " group send item records for group send with id = " + groupSend.id )

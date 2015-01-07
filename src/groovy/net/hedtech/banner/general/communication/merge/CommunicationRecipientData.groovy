@@ -19,10 +19,10 @@ import javax.persistence.*
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationRecipientData.findByTemplateId",
+        @NamedQuery(name = "CommunicationRecipientData.fetchByTemplateId",
                 query = """ FROM CommunicationRecipientData a
                     WHERE  a.templateId = :templateId"""),
-        @NamedQuery(name = "CommunicationRecipientData.findByReferenceId",
+        @NamedQuery(name = "CommunicationRecipientData.fetchByReferenceId",
                 query = """ FROM CommunicationRecipientData a
                     WHERE  a.referenceId = :referenceId""")
 ])
@@ -93,22 +93,22 @@ class CommunicationRecipientData {
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationOrganization organization
 
-    public static List findByTemplateId(templateId) {
+    public static List fetchByTemplateId(templateId) {
 
         def queryList
         CommunicationRecipientData.withSession { session ->
-            queryList = session.getNamedQuery('CommunicationRecipientData.findByTemplateId')
+            queryList = session.getNamedQuery('CommunicationRecipientData.fetchByTemplateId')
                     .setLong('templateId', templateId)
                     .list()
         }
         return queryList
     }
 
-    public static List findByReferenceId(referenceId) {
+    public static List fetchByReferenceId(referenceId) {
 
         def queryList
         CommunicationRecipientData.withSession { session ->
-            queryList = session.getNamedQuery('CommunicationRecipientData.findByReferenceId')
+            queryList = session.getNamedQuery('CommunicationRecipientData.fetchByReferenceId')
                     .setLong('referenceId', referenceId)
                     .list()
         }

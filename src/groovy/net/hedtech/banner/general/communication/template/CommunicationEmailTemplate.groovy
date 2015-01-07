@@ -29,7 +29,6 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId",
                 query = """ FROM CommunicationEmailTemplate a
                     WHERE a.folder.id = :folderId
-                    AND a.active = 'Y'
                     AND a.published = 'Y'
                     AND SYSDATE between NVL(validFrom,SYSDATE) and NVL(validTo, SYSDATE)
                     AND personal = 'N'""")
@@ -117,7 +116,13 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         }
         return (query != null)
     }
-
+/**
+ * Return list of templates along with count for display on list page
+ * will return all shared templates and personal templates belonging to the current user
+ * @param filterData
+ * @param pagingAndSortParams
+ * @return
+ */
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
@@ -125,10 +130,50 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         def queryCriteria = CommunicationEmailTemplate.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            and {
+                or {
+                    eq("personal",false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                }
+            }
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }
 
+    /**
+     * Returns a list of templates to be used when sending messages to a population
+     * will return all templates that are active, shared and personal templates belonging to the user will be returned
+     * @param filterData
+     * @return
+     */
+
+    public static findByFolderForSend(filterData) {
+
+        def currentDate = new Date()
+        def queryCriteria = CommunicationEmailTemplate.createCriteria()
+
+        def results = queryCriteria.list {
+            folder {
+                eq("name", filterData?.params?.folderName?.toLowerCase(), [ignoreCase: true])
+            }
+            eq("published",true)
+            and {
+                or {
+                    eq("personal",false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                }
+            }
+            le("validFrom",currentDate)
+            and {
+                    or {
+                        isNull("validTo")
+                        ge("validTo",currentDate)
+                    }
+                }
+            order( Order.asc("name").ignoreCase())
+        }
+        return results
+    }
 
 }

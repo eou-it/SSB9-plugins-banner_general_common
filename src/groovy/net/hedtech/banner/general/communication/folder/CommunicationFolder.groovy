@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.folder
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import org.hibernate.criterion.Order
 
@@ -16,6 +17,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "GCRFLDR")
 @EqualsAndHashCode
+@ToString
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationFolder.fetchById",
                 query = """ FROM CommunicationFolder a
@@ -91,22 +93,6 @@ class CommunicationFolder implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
         internal(nullable: false)
     }
-
-
-    @Override
-    public String toString() {
-        return "Folder{" +
-                "Id=" + Id +
-                ", description='" + description + '\'' +
-                ", internal=" + internal +
-                ", name='" + name + '\'' +
-                ", version=" + version +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", lastModified=" + lastModified +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                '}';
-    }
-
 
     public static CommunicationFolder fetchById(Long id) {
 

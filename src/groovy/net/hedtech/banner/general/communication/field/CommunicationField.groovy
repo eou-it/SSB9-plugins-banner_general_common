@@ -17,6 +17,7 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GCRCFLD")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationField.fetchByName",
@@ -244,31 +245,4 @@ class CommunicationField implements Serializable {
         return (query != null)
     }
 
-
-    @Override
-    public String toString() {
-        return "CommunicationField{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", folder=" + folder +
-                ", formatString='" + formatString + '\'' +
-                ", groovyFormatter='" + groovyFormatter + '\'' +
-                ", immutableId='" + immutableId + '\'' +
-                ", previewValue='" + previewValue + '\'' +
-                ", renderAsHtml=" + renderAsHtml +
-                ", ruleUri='" + ruleUri + '\'' +
-                ", status=" + status +
-                ", returnsArrayArguments=" + returnsArrayArguments +
-                ", statementType=" + statementType +
-                ", ruleContent='" + ruleContent + '\'' +
-                ", version=" + version +
-                ", lastModified=" + lastModified +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                ", nextParameterKey=" + nextParameterKey +
-                ", originalStatus=" + originalStatus +
-                ", originalParameterKeys=" + originalParameterKeys +
-                '}';
-    }
 }

@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.query.DynamicFinder
 import org.hibernate.criterion.Order
@@ -15,13 +16,14 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GVQ_GCRSLIS")
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationPopulationListView.findAllByQueryId",
+        @NamedQuery(name = "CommunicationPopulationListView.fetchAllByQueryId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.populationQueryId = :populationQueryId
                      """),
-        @NamedQuery(name = "CommunicationPopulationListView.findAllByQueryIdUserId",
+        @NamedQuery(name = "CommunicationPopulationListView.fetchAllByQueryIdUserId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.populationQueryId = :populationQueryId
                     AND    upper(a.lastCalculatedBy) = upper(:userid) """)
@@ -105,25 +107,6 @@ class CommunicationPopulationListView implements Serializable {
     Date queryLastUpdated
 
 
-    @Override
-    public String toString() {
-        return "PopulationListView{" +
-                "id=" + id +
-                ", version=" + version +
-                ", populationQueryId=" + populationQueryId +
-                ", lastCalculatedBy='" + lastCalculatedBy + '\'' +
-                ", lastCalculatedTime=" + lastCalculatedTime +
-                ", lastCalculatedCount=" + lastCalculatedCount +
-                ", calculationStatus='" + calculationStatus + '\'' +
-                ", queryName='" + queryName + '\'' +
-                ", queryFolder='" + queryFolder + '\'' +
-                ", queryDescription='" + queryDescription + '\'' +
-                ", queryCreator='" + queryCreator + '\'' +
-                ", queryLastUpdated=" + queryLastUpdated +
-                '}';
-    }
-
-
     static constraints = {
         populationQueryId(nullable: false)
         lastCalculatedBy(nullable: true, maxSize: 30)
@@ -134,11 +117,11 @@ class CommunicationPopulationListView implements Serializable {
     public static readonlyProperties = ['id']
 
 
-    public static List<CommunicationPopulationListView> findAllByQueryId(Long populationQueryId) {
+    public static List<CommunicationPopulationListView> fetchAllByQueryId(Long populationQueryId) {
 
         def CommunicationPopulationListView[] populationListViews
         populationListViews = CommunicationPopulationListView.withSession { session ->
-            session.getNamedQuery('CommunicationPopulationListView.findAllByQueryId')
+            session.getNamedQuery('CommunicationPopulationListView.fetchAllByQueryId')
                     .setLong('populationQueryId', populationQueryId)
                     .list()
         }
@@ -146,11 +129,11 @@ class CommunicationPopulationListView implements Serializable {
     }
 
 
-    public static CommunicationPopulationListView findAllByQueryIdUserId(Long populationQueryId, String userid) {
+    public static CommunicationPopulationListView fetchAllByQueryIdUserId(Long populationQueryId, String userid) {
 
         def CommunicationPopulationListView populationListView
         populationListView = CommunicationPopulationListView.withSession { session ->
-            session.getNamedQuery('CommunicationPopulationListView.findAllByQueryIdUserId')
+            session.getNamedQuery('CommunicationPopulationListView.fetchAllByQueryIdUserId')
                     .setLong('populationQueryId', populationQueryId)
                     .setString('userid', userid)
                     .list()[0]

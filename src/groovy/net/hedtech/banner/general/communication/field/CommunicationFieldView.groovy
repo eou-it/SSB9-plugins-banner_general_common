@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.field
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -16,6 +17,7 @@ import javax.persistence.Version
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GVQ_GCRCFLD")
 class CommunicationFieldView implements Serializable {
 
@@ -57,14 +59,4 @@ class CommunicationFieldView implements Serializable {
     @Column(name = "VERSION")
     Long version
 
-    @Override
-    public String toString() {
-        return "CommunicationFieldView{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", immutableId='" + immutableId + '\'' +
-                ", folderId='" + folderId + '\'' +
-                ", folderName='" + folderName + '\'' +
-                '}';
-    }
 }

@@ -162,7 +162,8 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
                 content: i_valid_emailTemplate_content,
                 fromList: i_valid_emailTemplate_fromList,
                 subject: i_valid_emailTemplate_subject,
-                toList: i_valid_emailTemplate_toList);
+                toList: i_valid_emailTemplate_toList,
+                referenceId: UUID.randomUUID().toString());
 
         return emailItem;
     }
