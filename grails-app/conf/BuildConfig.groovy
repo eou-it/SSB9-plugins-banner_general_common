@@ -43,12 +43,18 @@ grails.project.dependency.resolution = {
         compile ":tomcat:7.0.52.1"
         compile ':resources:1.2.7' // If the functional-test plugin is being used
         compile ":functional-test:2.0.0" // If the functional-test plugin is being used
+
+        test (":greenmail:1.3.4") {
+            export = false
+        }
     }
 
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
         // runtime 'mysql:mysql-connector-java:5.1.5'
         compile 'org.antlr:ST4:4.0.8'
+        compile "javax.mail:javax.mail-api:1.5.1"
+        runtime "com.sun.mail:javax.mail:1.5.1"
     }
 
 
