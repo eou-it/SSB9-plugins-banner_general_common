@@ -5,7 +5,6 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.service.ServiceBase
-import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Manages group send items.

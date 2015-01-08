@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * Manages group send instances.
