@@ -16,8 +16,8 @@ import net.hedtech.banner.general.communication.template.CommunicationEmailTempl
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
-import net.hedtech.banner.general.security.TrustedBannerAuthenticationProvider
-import net.hedtech.banner.general.security.TrustedBannerToken
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerToken
 import net.hedtech.banner.security.FormContext
 import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
@@ -38,7 +38,7 @@ class CommunicationService {
     CommunicationTemplateMergeService communicationTemplateMergeService
     CommunicationFieldCalculationService communicationFieldCalculationService
     CommunicationTemplateService communicationTemplateService
-    TrustedBannerAuthenticationProvider trustedBannerAuthenticationProvider
+    AsynchronousBannerAuthenticationSpoofer trustedBannerAuthenticationProvider
 
 
     public CommunicationReceipt sendCommunication( CommunicationRequest request ) {
@@ -88,7 +88,7 @@ class CommunicationService {
         Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
         try {
             FormContext.set( ['SELFSERVICE'] )
-            Authentication initiatorAuthentication = trustedBannerAuthenticationProvider.authenticate( new TrustedBannerToken( request.initiatorUserId ) )
+            Authentication initiatorAuthentication = trustedBannerAuthenticationProvider.authenticate( new AsynchronousBannerToken( request.initiatorUserId ) )
             SecurityContextHolder.getContext().setAuthentication( initiatorAuthentication )
 
             if (log.isDebugEnabled()) log.debug( "Authenticated as ${initiatorAuthentication} for calculating field values." )

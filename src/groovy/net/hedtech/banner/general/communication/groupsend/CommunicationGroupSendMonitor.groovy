@@ -3,8 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
-import net.hedtech.banner.general.security.TrustedBannerAuthenticationProvider
-import net.hedtech.banner.general.security.TrustedBannerToken
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -21,12 +20,12 @@ class CommunicationGroupSendMonitor {
     private CommunicationGroupSendMonitorThread monitorThread
     private CommunicationGroupSendService communicationGroupSendService
     private CommunicationGroupSendItemService communicationGroupSendItemService
-    private TrustedBannerAuthenticationProvider trustedBannerAuthenticationProvider
+    private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
     public int monitorIntervalInSeconds = 10
 
     @Required
-    void setTrustedBannerAuthenticationProvider(TrustedBannerAuthenticationProvider trustedBannerAuthenticationProvider) {
-        this.trustedBannerAuthenticationProvider = trustedBannerAuthenticationProvider
+    void setAsynchronousBannerAuthenticationSpoofer(AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer) {
+        this.asynchronousBannerAuthenticationSpoofer = asynchronousBannerAuthenticationSpoofer
     }
 
     @Required
@@ -55,10 +54,11 @@ class CommunicationGroupSendMonitor {
         if (log.isDebugEnabled()) log.debug( "Checking group sends for status updates." )
         // begin setup
         if (!SecurityContextHolder.getContext().getAuthentication()) {
-            FormContext.set( ['SELFSERVICE'] )
+//            FormContext.set( ['SELFSERVICE'] )
+            FormContext.set( ['CMQUERYEXECUTE'] )
 
             String monitorOracleUserName = 'BCMADMIN'
-            Authentication auth = trustedBannerAuthenticationProvider.authenticate( new TrustedBannerToken( monitorOracleUserName ) )
+            Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
             SecurityContextHolder.getContext().setAuthentication( auth )
             if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for monitoring." )
         }

@@ -4,6 +4,8 @@
 package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import javax.mail.Authenticator
+import javax.mail.PasswordAuthentication
 
 /**
  * A class that is used to authenticate an email account.
@@ -25,12 +27,11 @@ class CommunicationEmailAuthenticator extends Authenticator {
      * Default Constructor for an email authenticator.
      */
     public EmailAuthenticator() {
-        super();
     }
 
     public EmailAuthenticator( CommunicationMailboxAccount account ) {
-        this.username = account.getUsername();
-        this.password = configurationService.decryptString( account.getPassword() );
+        this.username = account.getUsername()
+        this.password = account.getPassword()
     }
 
 

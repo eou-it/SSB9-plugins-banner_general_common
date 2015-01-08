@@ -1,7 +1,7 @@
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngineImpl
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendMonitor
 import net.hedtech.banner.general.communication.groupsend.automation.CommunicationGroupSendItemManagerImpl
-import net.hedtech.banner.general.security.TrustedBannerAuthenticationProvider
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
@@ -54,7 +54,7 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        trustedBannerAuthenticationProvider(TrustedBannerAuthenticationProvider) {
+        asynchronousBannerAuthenticationSpoofer(AsynchronousBannerAuthenticationSpoofer) {
             dataSource = ref('dataSource')
         }
 
@@ -64,7 +64,7 @@ class BannerGeneralCommonGrailsPlugin {
         communicationGroupSendMonitor(CommunicationGroupSendMonitor) { bean ->
             bean.autowire = 'byName'
             bean.initMethod = 'init'
-            trustedBannerAuthenticationProvider = ref('trustedBannerAuthenticationProvider')
+            asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
         }
 
         // BRM also injected a group send item monitor record dao for auditing

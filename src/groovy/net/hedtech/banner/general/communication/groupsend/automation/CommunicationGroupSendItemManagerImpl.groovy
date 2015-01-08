@@ -17,6 +17,7 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTask;
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemProcessorService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemService
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
@@ -39,10 +40,16 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      */
     private Exception simulatedFailureException;
     private CommunicationGroupSendItemService communicationGroupSendItemService;
+    private CommunicationGroupSendItemProcessorService communicationGroupSendItemProcessorService
 
     @Required
     public void setCommunicationGroupSendItemService(CommunicationGroupSendItemService communicationGroupSendItemService) {
         this.communicationGroupSendItemService = communicationGroupSendItemService
+    }
+
+    @Required
+    void setCommunicationGroupSendItemProcessorService(CommunicationGroupSendItemProcessorService communicationGroupSendItemProcessorService) {
+        this.communicationGroupSendItemProcessorService = communicationGroupSendItemProcessorService
     }
 
     public Class<CommunicationGroupSendItem> getJobType() {
@@ -89,7 +96,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      */
     @Transactional
     public List<CommunicationGroupSendItem> getPendingJobs( int max ) throws ApplicationException {
-        List<CommunicationGroupSendItem> result = communicationGroupSendItemService.getPending( max );
+        List<CommunicationGroupSendItem> result = communicationGroupSendItemProcessorService.getPending( max );
         communicationGroupSendItemService.getNewGroupSendItemKeys( max );
         if (log.isTraceEnabled()) {
             log.trace( "GroupSendItemManagerImpl.getPending(max=" + max + ") is returning " + result.size() + " group send items." );

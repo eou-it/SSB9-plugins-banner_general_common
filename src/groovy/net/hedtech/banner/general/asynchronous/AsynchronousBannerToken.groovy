@@ -1,14 +1,14 @@
-package net.hedtech.banner.general.security
+package net.hedtech.banner.general.asynchronous
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 
 /**
  * Created by mbrzycki on 8/12/14.
  */
-class TrustedBannerToken implements Authentication {
+class AsynchronousBannerToken implements Authentication {
     private String oracleUserName
 
-    public TrustedBannerToken( String oracleUserName ) {
+    public AsynchronousBannerToken( String oracleUserName ) {
         this.oracleUserName = oracleUserName
     }
 

@@ -37,8 +37,9 @@ class CommunicationJob implements Serializable {
     /**
      * STATUS: The final disposition of the communication send operation. SENT, ERROR.
      */
-    @Column(name = "GCBCJOB_STATUS")
-    String status
+    @Column(name = "GCBCJOB_STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    CommunicationJobStatus status = CommunicationJobStatus.PENDING
 
     /**
      * VERSION: Optimistic lock token.

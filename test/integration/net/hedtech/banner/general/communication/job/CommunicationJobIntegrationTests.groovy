@@ -36,7 +36,7 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
         // Assert domain values
         assertNotNull CommunicationJob?.id
         assertEquals "TTTTTTTTTT", CommunicationJob.referenceId
-        assertEquals "TTTTTTTTTT", CommunicationJob.status
+        assertEquals CommunicationJobStatus.PENDING, CommunicationJob.status
     }
 
 
@@ -54,7 +54,7 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull CommunicationJob
 
         // Update domain values
-        CommunicationJob.status = "ERROR"
+        CommunicationJob.status = CommunicationJobStatus.FAILED
         CommunicationJob.save( failOnError: true, flush: true )
 
         // Find the updated domain
@@ -62,7 +62,7 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
 
         // Assert updated domain values
         assertNotNull CommunicationJob?.id
-        assertEquals( "ERROR", CommunicationJob.status )
+        assertEquals( CommunicationJobStatus.FAILED, CommunicationJob.status )
     }
 
 
@@ -99,8 +99,7 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
         // Assert for specific field validation
         assertErrorsFor CommunicationJob, 'nullable',
                 [
-                        'referenceId',
-                        'status',
+                        'referenceId'
                 ]
 
     }
@@ -112,7 +111,6 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
 
         // Set domain values to exceed maximum allowed length
         CommunicationJob.referenceId = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
-        CommunicationJob.status = "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT".padLeft( 31 )
 
         // Assert for domain
         assertFalse "CommunicationJob should have failed max size validation", CommunicationJob.validate()
@@ -120,9 +118,7 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
         // Assert for specific fields
         assertErrorsFor CommunicationJob, 'maxSize',
                 [
-                        'referenceId',
-                        'status',
-
+                        'referenceId'
                 ]
     }
 
@@ -150,8 +146,7 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
     private CommunicationJob newCommunicationJob() {
         CommunicationJob CommunicationJob = new CommunicationJob(
                 // Required fields
-                referenceId: "TTTTTTTTTT",
-                status: "TTTTTTTTTT",
+                referenceId: "TTTTTTTTTT"
         )
 
         return CommunicationJob

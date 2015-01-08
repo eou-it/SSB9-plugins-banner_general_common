@@ -60,29 +60,24 @@ class CommunicationGroupSendCommunicationService {
             throw new NotFoundException( id: request.getOrganizationId(), entityClassName: CommunicationOrganization.class.simpleName )
         }
 
-        BannerUser owner = SecurityContextHolder?.context?.authentication?.principal as BannerUser;
-
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
         groupSend.template = template
         groupSend.population = population
         groupSend.organization = organization
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
-        // TODO: We'll grab the mep code from the logged in user's home context for now. Look into if we should
-        // be grabbing from RequestAttributes currentRequestAttributes() in the controller and passing it in as a
-        // parameter on the request
-        groupSend.mepCode = owner.mepHomeContext
-
         groupSend = communicationGroupSendService.create( groupSend )
 
         // We'll created the group send items synchronously for now until we have support for scheduling.
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems( groupSend )
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
         groupSend = communicationGroupSendService.update( groupSend )
         return groupSend
     }
 
 
     private void createGroupSendItems( CommunicationGroupSend groupSend ) {
+        if (log.isDebugEnabled()) log.debug( "Generating group send item records for group send with id = " + groupSend?.id );
         def sql
         try {
             def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)

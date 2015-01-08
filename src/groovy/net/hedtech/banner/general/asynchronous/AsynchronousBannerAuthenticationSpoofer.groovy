@@ -1,37 +1,33 @@
-package net.hedtech.banner.general.security
+package net.hedtech.banner.general.asynchronous
 
 import groovy.sql.Sql
 import net.hedtech.banner.security.BannerAuthenticationProvider
+import net.hedtech.banner.security.FormContext
 import net.hedtech.banner.security.SelfServiceBannerAuthenticationProvider
 import org.apache.log4j.Logger
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.web.context.request.RequestContextHolder
 
 import java.sql.SQLException
 
 /**
  * An authentication provider for batch threads that authorize a user using behind a batch job thread.
  */
-public class TrustedBannerAuthenticationProvider implements AuthenticationProvider {
+public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationProvider {
     private static final Logger log = Logger.getLogger( "net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider" )
 
     def dataSource  // injected by Spring
 
 
-    public boolean supports( Class clazz ) {
-        log.debug "Saying supports for " + clazz
-        return clazz instanceof TrustedBannerToken
-    }
-
-
-    public static def isSsbEnabled() {
-        SelfServiceBannerAuthenticationProvider.isSsbEnabled()
+    public Authentication authenticate( String oracleUserName ) {
+        this.authenticate( new AsynchronousBannerToken( oracleUserName ) )
     }
 
 
     public Authentication authenticate( Authentication authentication ) {
-        def oracleUserName = ((TrustedBannerToken) authentication).getOracleUserName()
+        String oracleUserName =  ((AsynchronousBannerToken) authentication).oracleUserName
         log.debug "TrustedAuthenticationProvider.authenticate invoked for ${oracleUserName}"
 
         def conn
@@ -42,25 +38,19 @@ public class TrustedBannerAuthenticationProvider implements AuthenticationProvid
             def authenticationResults = trustedAuthentication( oracleUserName, db )
 
             // Next, we'll verify the authenticationResults (and throw appropriate exceptions for expired pin, disabled account, etc.)
-            BannerAuthenticationProvider.verifyAuthenticationResults this, authentication, authenticationResults
-
-            if (isSsbEnabled()) {
-                authenticationResults['authorities'] = SelfServiceBannerAuthenticationProvider.determineAuthorities( authenticationResults, db )
-            }
-            else {
-                authenticationResults['authorities'] = BannerAuthenticationProvider.determineAuthorities( authenticationResults, db )
-            }
-
+            BannerAuthenticationProvider.verifyAuthenticationResults( this, authentication, authenticationResults )
+            authenticationResults['authorities'] = BannerAuthenticationProvider.determineAuthorities( authenticationResults, db )
             authenticationResults['fullName'] = getFullName( authenticationResults.name.toUpperCase(), dataSource ) as String
-            return newAuthenticationToken( authenticationResults )
+            return BannerAuthenticationProvider.newAuthenticationToken( this, authenticationResults )
         } finally {
             conn?.close()
         }
     }
 
 
-    def newAuthenticationToken( authentictionResults ) {
-        BannerAuthenticationProvider.newAuthenticationToken( this, authentictionResults )
+    public boolean supports( Class clazz ) {
+        log.debug "Saying supports for " + clazz
+        return clazz instanceof AsynchronousBannerToken
     }
 
 
