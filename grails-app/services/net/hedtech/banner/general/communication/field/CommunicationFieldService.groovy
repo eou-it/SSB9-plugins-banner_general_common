@@ -116,4 +116,20 @@ class CommunicationFieldService extends ServiceBase {
         }
     }
 
+    def publishDatafield(map) {
+
+        if (map.id) {
+            def temp = CommunicationField.get(map.id)
+            if (temp.status == CommunicationFieldStatus.PRODUCTION)
+                return
+            if (temp.name != null && temp.folder != null  && temp.formatString != null ) {
+                temp.status = CommunicationFieldStatus.PRODUCTION
+                update(temp)
+            } else
+                throw new ApplicationException(CommunicationField, "@@r1:datafield.cannotBePublished@@")
+        } else
+            throw new ApplicationException(CommunicationField, "@@r1:idNotValid@@")
+    }
+
+
 }

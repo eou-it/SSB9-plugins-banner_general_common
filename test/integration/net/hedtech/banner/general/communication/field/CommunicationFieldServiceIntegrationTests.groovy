@@ -54,6 +54,50 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
     }
 
+    @Test
+    void testCommunicationFieldPublish() {
+        def newCommunicationField = newCommunicationField()
+        def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
+        // Assert domain values
+        assertNotNull communicationField?.id
+        assertEquals "TTTTTTTTTT", communicationField.description
+        assertEquals validFolder, communicationField.folder
+        assertEquals "TT" +
+                "TTTTTT", communicationField.formatString
+        assertEquals "TTTTTTTT", communicationField.groovyFormatter
+        assertEquals validImmutableId, communicationField.immutableId
+        assertEquals "TTTTTTTTTT", communicationField.name
+        assertEquals "TTTTTTTTTT", communicationField.previewValue
+        assertEquals true, communicationField.renderAsHtml
+        assertEquals "TTTTTTTTTT", communicationField.ruleUri
+        assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
+        def newPublishedField = communicationFieldService.publishDatafield([id:communicationField.id])
+        assertEquals(CommunicationFieldStatus.PRODUCTION, newPublishedField.status)
+    }
+
+    @Test
+    void testCommunicationFieldPublishError() {
+        def newCommunicationField = newCommunicationField()
+        newCommunicationField.formatString = null
+        def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
+        // Assert domain values
+        assertNotNull communicationField?.id
+        assertEquals "TTTTTTTTTT", communicationField.description
+        assertEquals validFolder, communicationField.folder
+        assertNull communicationField.formatString
+        assertEquals "TTTTTTTT", communicationField.groovyFormatter
+        assertEquals validImmutableId, communicationField.immutableId
+        assertEquals "TTTTTTTTTT", communicationField.name
+        assertEquals "TTTTTTTTTT", communicationField.previewValue
+        assertEquals true, communicationField.renderAsHtml
+        assertEquals "TTTTTTTTTT", communicationField.ruleUri
+        assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
+        def newPublishedField
+        shouldFail {
+            newPublishedField = communicationFieldService.publishDatafield([id: communicationField.id])
+        }
+    }
+
     /*
     Test that the service automatically assigns the immutableId
      */
