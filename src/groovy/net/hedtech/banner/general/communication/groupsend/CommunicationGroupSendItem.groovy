@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import org.hibernate.annotations.Type
 
 import javax.persistence.Column
@@ -47,7 +48,7 @@ import javax.persistence.Version
                      ORDER by gsi.creationDateTime asc"""
     )
 ])
-class CommunicationGroupSendItem implements Serializable {
+class CommunicationGroupSendItem implements AsynchronousTask {
 
     /**
      * KEY: Generated unique key.
@@ -56,7 +57,7 @@ class CommunicationGroupSendItem implements Serializable {
     @Column(name = "GCRGSIM_SURROGATE_ID")
     @SequenceGenerator(name = "GCRGSIM_SEQ_GEN", allocationSize = 1, sequenceName = "GCRGSIM_SURROGATE_ID_SEQUENCE")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRGSIM_SEQ_GEN")
-    Long Id
+    Long id
 
     /**
      *  Optimistic lock token.

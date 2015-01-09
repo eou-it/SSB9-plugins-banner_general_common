@@ -8,7 +8,6 @@ import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFacto
 import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.groovy.grails.commons.GrailsApplicationFactoryBean;
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -283,11 +282,20 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
             found = (jobs.size() > 0);
 
             for (AsynchronousTask job : jobs) {
-                pendingJobs.add( job.getPrimaryKey() );
+                pendingJobs.add( job.getId() );
                 try {
-                    executor.execute( new Handler( job ) );
+//                    AsynchronousTaskHandler handler = new AsynchronousTaskHandler()
+                    executor.execute( new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println( "wait a minute" )
+                        }
+                    })
+//                    executor.execute( handler )
+//                    Handler handler = new Handler( job )
+//                    executor.execute( handler );
                 } catch (RejectedExecutionException e) {
-                    pendingJobs.remove( job.getPrimaryKey() );
+                    pendingJobs.remove( job.getId() );
                     log.warn( "JobProcessingEngine " + this + " handler queue is currently saturated", e );
                     break;
                 }
@@ -447,7 +455,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
       }
 
 
-      private class Handler implements Runnable {
+      class Handler implements Runnable {
           private final AsynchronousTask job;
 
           Handler( AsynchronousTask job ) {
@@ -455,71 +463,70 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           }
 
           public void run() {
-              try {
-                  if (log.isDebugEnabled()) {
-                      log.debug( "JobProcessingEngine " + this + " Handler will process job " + job.getPrimaryKey() );
-                  }
-                  if (!SecurityContextHolder.getContext().getAuthentication()) {
-                      FormContext.set( ['CMQUERYEXECUTE'] )
-
-                      String monitorOracleUserName = 'BCMADMIN'
-                      Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
-                      SecurityContextHolder.getContext().setAuthentication( auth )
-                      if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async process handler." )
-                  }
-
-                  // This is a short-lived transactional method, and if successful the job has been marked as acquired.
-                  boolean acquired = jobManager.acquire( job );
-                  if (!acquired) return;
-
-                  if (log.isDebugEnabled()) {
-                      log.debug( "JobProcessingEngine " + this + " - A handler has successfully processed job " + job.getPrimaryKey() );
-                  }
-
-                  monitorThread.register( new AsynchronousTaskMonitorRecord( Thread.currentThread().getName(), job.getPrimaryKey().getKeyValue() ) );
-
-                  // TODO: Add a map of the job to this thread in a monitor table, so that a monitor
-                  // thread can check to make sure this thread is alive, and update that monitor record's
-                  // 'runningAsOf' timestamp.  If the monitor thread cannot find this thread, it would know that
-                  // this thread did not successfully complete it's task (or at least never removed it's map from
-                  // the monitor table)
-
-                  // This is the potentially long-running and non-transactional processing...
-                  jobManager.process( job );
-
-                  // Now we'll mark the job as complete using another short transactional method
-                  if (deleteSuccessfullyCompleted) {
-                      jobManager.delete( job );
-                  } else {
-                      jobManager.markComplete( job );
-                  }
-                  monitorThread.deregister( new AsynchronousTaskMonitorRecord( Thread.currentThread().getName(), job.getPrimaryKey().getKeyValue() ) );
-                  //Job has been successfully completed.  As the very last step, we remove it from the pendingJobs set
-                  //to signal the polling thread that when all pending work has been completed, it should fetch more work.
-                  pendingJobs.remove( job.getPrimaryKey() );
-
-
-              } catch (ApplicationException e) {
-                  log.error( "JobProcessingEngine " + this + " - A handler failed processing for job " + job.getPrimaryKey() + ", the job will be marked as failed", e );
-
-                  errorExecutor.execute( new ErrorHandler( job, e ) );
-
-              } catch (Throwable t) {
-                  //log.error( "JobProcessingEngine " + this + " - A handler encountered a Throwable for job " + job.getPrimaryKey() + ", and will mark it as failed", t );
-
-                  // Any other exceptions will be handled by another runnable, regardless
-                  // of the above handling for the application exception.  This may
-                  // facilitate alternative processing for system exceptions - for e.g., putting
-                  // them back onto the queue for later processing... but for now, we'll just
-                  // mark them as failed (just like the process method does for application exceptions above).
-                  errorExecutor.execute( new ErrorHandler( job, t ) );
-              } finally {
-                  ThreadCallerContext.set( cc );
-                  //We are finished, one way or another, with working on this job.  Remove it from the
-                  //pending jobs set to signal the polling queue that when all pending work is completed,
-                  //it should grab another block.
-                  pendingJobs.remove( job.getPrimaryKey() );
-              }
+              System.out.println( "hi world" )
+//              log.debug( "JobProcessingEngine " + this + " Handler will process job " + job.getId() );
+//              try {
+//                  if (!SecurityContextHolder.getContext().getAuthentication()) {
+//                      FormContext.set( ['CMQUERYEXECUTE'] )
+//
+//                      String monitorOracleUserName = 'BCMADMIN'
+//                      Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
+//                      SecurityContextHolder.getContext().setAuthentication( auth )
+//                      if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async process handler." )
+//                  }
+//
+//                  // This is a short-lived transactional method, and if successful the job has been marked as acquired.
+//                  boolean acquired = jobManager.acquire( job );
+//                  if (!acquired) return;
+//
+//                  if (log.isDebugEnabled()) {
+//                      log.debug( "JobProcessingEngine " + this + " - A handler has successfully processed job " + job.getId() );
+//                  }
+//
+//                  monitorThread.register( new AsynchronousTaskMonitorRecord( Thread.currentThread().getName(), job.getId() ) );
+//
+//                  // TODO: Add a map of the job to this thread in a monitor table, so that a monitor
+//                  // thread can check to make sure this thread is alive, and update that monitor record's
+//                  // 'runningAsOf' timestamp.  If the monitor thread cannot find this thread, it would know that
+//                  // this thread did not successfully complete it's task (or at least never removed it's map from
+//                  // the monitor table)
+//
+//                  // This is the potentially long-running and non-transactional processing...
+//                  jobManager.process( job );
+//
+//                  // Now we'll mark the job as complete using another short transactional method
+//                  if (deleteSuccessfullyCompleted) {
+//                      jobManager.delete( job );
+//                  } else {
+//                      jobManager.markComplete( job );
+//                  }
+//                  monitorThread.deregister( new AsynchronousTaskMonitorRecord( Thread.currentThread().getName(), job.getId() ) );
+//                  //Job has been successfully completed.  As the very last step, we remove it from the pendingJobs set
+//                  //to signal the polling thread that when all pending work has been completed, it should fetch more work.
+//                  pendingJobs.remove( job.getId() );
+//
+//
+//              } catch (ApplicationException e) {
+//                  log.error( "JobProcessingEngine " + this + " - A handler failed processing for job " + job.getId() + ", the job will be marked as failed", e );
+//
+//                  errorExecutor.execute( new ErrorHandler( job, e ) );
+//
+//              } catch (Throwable t) {
+//                  //log.error( "JobProcessingEngine " + this + " - A handler encountered a Throwable for job " + job.getId() + ", and will mark it as failed", t );
+//
+//                  // Any other exceptions will be handled by another runnable, regardless
+//                  // of the above handling for the application exception.  This may
+//                  // facilitate alternative processing for system exceptions - for e.g., putting
+//                  // them back onto the queue for later processing... but for now, we'll just
+//                  // mark them as failed (just like the process method does for application exceptions above).
+//                  errorExecutor.execute( new ErrorHandler( job, t ) );
+//              } finally {
+//                  ThreadCallerContext.set( cc );
+//                  //We are finished, one way or another, with working on this job.  Remove it from the
+//                  //pending jobs set to signal the polling queue that when all pending work is completed,
+//                  //it should grab another block.
+//                  pendingJobs.remove( job.getId() );
+//              }
           }
       }
 
@@ -539,7 +546,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                   jobManager.markFailed( job, cause );
               } catch (Throwable t) {
-                  log.error( "JobProcessingEngine " + this + " - An error handler could not mark job " + job.getPrimaryKey() + " as in error", t );
+                  log.error( "JobProcessingEngine " + this + " - An error handler could not mark job " + job.getId() + " as in error", t );
               } finally {
                   ThreadCallerContext.set( cc );
               }

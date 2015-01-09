@@ -44,7 +44,7 @@ class CommunicationGroupSendService extends ServiceBase {
 //            try {
 //                jobSubmissionService.unSchedule( groupSend.getScheduledStartJobID() );
 //            } catch (ApplicationException e) {
-//                if (log.isErrorEnabled()) log.error( "Error trying to clean up scheduled group send start job while stopping group send with pk = " + groupSend.getPrimaryKey().getKeyValue() + ".", e );
+//                if (log.isErrorEnabled()) log.error( "Error trying to clean up scheduled group send start job while stopping group send with pk = " + groupSend.getId() + ".", e );
 //            }
 //        }
 

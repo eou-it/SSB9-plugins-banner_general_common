@@ -41,29 +41,15 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
 
     @Before
     public void setUp() {
+        super.useTransactions = false
         formContext = ['SELFSERVICE']
         super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
 
-        organization = new CommunicationOrganization( name: "Test Org", isRoot: true )
-        organization = communicationOrganizationService.create( organization ) as CommunicationOrganization
-
-        folder = new CommunicationFolder( name: "CommunicationGroupSendCommunicationServiceTests", description: "integration test" )
-        folder = communicationFolderService.create( folder )
-
-        emailTemplate = new CommunicationEmailTemplate(
-                name: "CommunicationGroupSendCommunicationServiceTests_template",
-                personal: false,
-                active: true,
-                oneOff: false,
-                folder: folder,
-                toList: "test@test.edu",
-                subject: "test subject",
-                content: "test content",
-        )
-        emailTemplate = communicationEmailTemplateService.create( emailTemplate )
-        emailTemplate = communicationTemplateService.publish( emailTemplate )
+        setUpOrganization()
+        setUpFolder()
+        setUpEmailTemplate()
 
         if (!communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.startRunning()
     }
@@ -177,6 +163,42 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
         )
 
         return populationQuery
+    }
+
+    private void setUpOrganization() {
+        List organizations = communicationOrganizationService.list()
+        if (organizations.size() == 0) {
+            organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
+            organization = communicationOrganizationService.create(organization) as CommunicationOrganization
+        } else {
+            organization = organizations.get(0) as CommunicationOrganization
+        }
+    }
+
+    private void setUpFolder() {
+        folder = CommunicationFolder.findByName( "CommunicationGroupSendCommunicationServiceTests" )
+        if (!folder) {
+            folder = new CommunicationFolder( name: "CommunicationGroupSendCommunicationServiceTests", description: "integration test" )
+            folder = communicationFolderService.create( folder )
+        }
+    }
+
+    private void setUpEmailTemplate() {
+        emailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCommunicationServiceTests_template" )
+        if (!emailTemplate) {
+            emailTemplate = new CommunicationEmailTemplate (
+                    name: "CommunicationGroupSendCommunicationServiceTests_template",
+                    personal: false,
+                    active: true,
+                    oneOff: false,
+                    folder: folder,
+                    toList: "test@test.edu",
+                    subject: "test subject",
+                    content: "test content",
+            )
+            emailTemplate = communicationEmailTemplateService.create( emailTemplate )
+            emailTemplate = communicationTemplateService.publish( emailTemplate )
+        }
     }
 
 }

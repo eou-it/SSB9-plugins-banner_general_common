@@ -77,14 +77,15 @@ class BannerGeneralCommonGrailsPlugin {
         }
 
         communicationGroupSendItemProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
+            bean.autowire = 'byName'
             bean.initMethod = 'init'
             jobManager = ref('communicationGroupSendItemManager')
+            asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
             maxThreads = '5'
             maxQueueSize = '5000'
             continuousPolling = 'true'
             pollingInterval = '2000'
             deleteSuccessfullyCompleted = 'false'
-            asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
         }
 
 //        communicationGroupSendItemProcessingEngineStartupPerformer (CommunicationGroupSendItemProcessingEngineStartupPerformer) {

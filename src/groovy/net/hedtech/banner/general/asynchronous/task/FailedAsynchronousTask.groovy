@@ -70,7 +70,7 @@ public class FailedAsynchronousTask implements Serializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append( "FailedJob[job pk=" ).append( job.getPrimaryKey().getKeyValue() );
+        sb.append( "FailedJob[job pk=" ).append( job.getId() );
         sb.append( ", error=" ).append( errorString ).append( "] " );
         return sb.toString();
     }

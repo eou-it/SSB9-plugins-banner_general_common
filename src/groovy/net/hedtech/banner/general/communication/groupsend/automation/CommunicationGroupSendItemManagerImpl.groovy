@@ -75,7 +75,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
         CommunicationGroupSendItem groupSendItem = jobItem as CommunicationGroupSendItem
         communicationGroupSendItemService.delete( groupSendItem );
         if (log.isDebugEnabled()) {
-            log.debug( "GroupSendItemManagerImpl deleted group send item " + groupSendItem.getPrimaryKey().getKeyValue() );
+            log.debug( "GroupSendItemManagerImpl deleted group send item " + groupSendItem.getId() );
         }
     }
 
@@ -143,7 +143,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
                 throw simulatedFailureException;
             }
 
-            communicationGroupSendItemProcessorService.performGroupSendItem( task.getPrimaryKey() );
+            communicationGroupSendItemProcessorService.performGroupSendItem( task.getId() );
 
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -169,9 +169,9 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
-        communicationGroupSendItemService.failGroupSendItem( groupSendItem.getPrimaryKey(), StringHelper.stackTraceToString( cause ) );
+        communicationGroupSendItemService.failGroupSendItem( groupSendItem.getId(), StringHelper.stackTraceToString( cause ) );
         if (log.isDebugEnabled()) {
-            log.debug( "GroupSendItemManager.markFailed(task=" + groupSendItem.getPrimaryKey() + ") has marked the task as failed " );
+            log.debug( "GroupSendItemManager.markFailed(task=" + groupSendItem.getId() + ") has marked the task as failed " );
         }
     }
 

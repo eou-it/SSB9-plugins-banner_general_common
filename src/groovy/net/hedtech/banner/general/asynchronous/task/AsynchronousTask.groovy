@@ -14,13 +14,13 @@ public interface AsynchronousTask extends Serializable {
      * Returns the primary key for this job.
      * @return PrimaryKey the primary key for this job
      */
-    public Long getPrimaryKey();
+    public Long getId();
 
 
     /**
      * Returns the creation time of this job.
      * @return Date the creation time
      */
-    public Date getCreationTime();
+    public Date getCreationDateTime();
 
 }
