@@ -49,10 +49,15 @@ class CommunicationGroupSendItemProcessorService {
         CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
 
         if (!groupSend.getCurrentExecutionState().isTerminal()) {
-            CommunicationRecipientData recipientData = createRecipientData( groupSend.createdBy, groupSend.template, groupSendItem.referenceId, groupSendItem.recipientPidm, groupSend.organization )
+            CommunicationRecipientData recipientData = buildRecipientData( groupSend.createdBy, groupSend.template, groupSendItem.referenceId, groupSendItem.recipientPidm, groupSend.organization )
+            recipientData = communicationRecipientDataService.create( recipientData )
+            log.debug( "Created recipient data with referenceId = " + groupSendItem.referenceId + "." )
+
+            log.debug( "Creating communication job with reference id = " + recipientData.referenceId )
             CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
             communicationJob = communicationRecipientDataService.create( communicationJob )
 
+            log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )
             groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Complete );
             groupSendItem.setStopDate( new Date() );
             communicationGroupSendItemService.update( groupSendItem );
@@ -65,7 +70,7 @@ class CommunicationGroupSendItemProcessorService {
     }
 
 
-    private void createRecipientData( String senderOracleUserName, CommunicationTemplate template, String referenceId, Long recipientPidm, CommunicationOrganization organization ) {
+    private CommunicationRecipientData buildRecipientData( String senderOracleUserName, CommunicationTemplate template, String referenceId, Long recipientPidm, CommunicationOrganization organization ) {
         log.debug( "Creating recipient data with referenceId = " + referenceId + "." )
         CommunicationEmailTemplate emailTemplate = template as CommunicationEmailTemplate
 
@@ -96,7 +101,7 @@ class CommunicationGroupSendItemProcessorService {
                 }
             }
 
-            CommunicationRecipientData recipient = new CommunicationRecipientData(
+            return new CommunicationRecipientData(
                 pidm: recipientPidm,
                 templateId: template.id,
                 referenceId: referenceId,
@@ -104,8 +109,6 @@ class CommunicationGroupSendItemProcessorService {
                 fieldValues: nameToValueMap,
                 organization: this.organization
             )
-            recipient = communicationRecipientDataService.create( recipient )
-            log.debug( "Created recipient data with referenceId = " + referenceId + "." )
         } finally {
             SecurityContextHolder.getContext().setAuthentication( originalAuthentication )
         }

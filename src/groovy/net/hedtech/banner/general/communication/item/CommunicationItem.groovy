@@ -17,7 +17,6 @@ import javax.persistence.*
 @Inheritance(strategy = InheritanceType.JOINED)
 @EqualsAndHashCode
 @ToString
-
 public abstract class CommunicationItem implements Serializable {
     /**
      * KEY: Generated unique key.

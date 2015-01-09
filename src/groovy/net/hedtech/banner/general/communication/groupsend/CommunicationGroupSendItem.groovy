@@ -34,6 +34,17 @@ import javax.persistence.Version
     @NamedQuery( name = "CommunicationGroupSendItem.fetchByGroupSend",
         query = """ FROM CommunicationGroupSendItem gsi
                     WHERE gsi.communicationGroupSend = :groupSend """
+    ),
+    @NamedQuery(name = "CommunicationGroupSendItem.fetchByExecutionState",
+            query = """ FROM CommunicationGroupSendItem gsi
+                     WHERE gsi.currentExecutionState = :executionState
+                     ORDER by gsi.creationDateTime asc"""
+    ),
+    @NamedQuery(name = "CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend",
+            query = """ FROM CommunicationGroupSendItem gsi
+                     WHERE gsi.communicationGroupSend = :groupSend
+                     and gsi.currentExecutionState = :executionState
+                     ORDER by gsi.creationDateTime asc"""
     )
 ])
 class CommunicationGroupSendItem implements Serializable {
@@ -116,12 +127,47 @@ class CommunicationGroupSendItem implements Serializable {
 
     public static List fetchByGroupSend( CommunicationGroupSend groupSend ) {
         def results
-        CommunicationGroupSend.withSession { session ->
+        CommunicationGroupSendItem.withSession { session ->
             results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByGroupSend' )
                 .setParameter( 'groupSend', groupSend )
                 .list()
         }
         return results
     }
+
+
+    public static List fetchByCompleteExecutionStateAndGroupSend( CommunicationGroupSend groupSend, Integer max = Integer.MAX_VALUE ) {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend' )
+                .setParameter( 'groupSend', groupSend )
+                .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Complete )
+                .list() // TODO: apply max
+        }
+        return results
+    }
+
+    public static List fetchByReadyExecutionState( Integer max = Integer.MAX_VALUE ) {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByExecutionState' )
+                .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Ready )
+                .list() // TODO: apply max
+
+        }
+        return results
+    }
+
+    public static List fetchByCompleteExecutionState( Integer max = Integer.MAX_VALUE ) {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByExecutionState' )
+                .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Complete )
+                .list() // TODO: apply max
+
+        }
+        return results
+    }
+
 
 }

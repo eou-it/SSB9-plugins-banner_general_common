@@ -3,14 +3,15 @@
  *******************************************************************************/
 package net.hedtech.banner.general.asynchronous.task
 
-import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory;
-
+import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
+import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.grails.commons.GrailsApplicationFactoryBean;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Required
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.TransactionException;
 
 import java.util.*;
@@ -44,7 +45,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     /**
      * Time in milliseconds between polling for events.
      */
-    private final long pollingInterval = 5 * 1000;
+    private long pollingInterval = 5 * 1000;
 
     /**
      * If true, and the last poll found jobs to perform, immediately poll again for more jobs.
@@ -103,7 +104,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     /**
      * Tracks if the polling thread and thread pools are running
      */
-    private boolean threadsRunning = false;
+    public boolean threadsRunning = false;
+
+    private int maxThreads
+
+    private boolean isDisabled = false
+
+    private asynchronousBannerAuthenticationSpoofer
 
 //  ------------------------- Initialization Method(s) -------------------------
     
@@ -111,26 +118,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Initializes the job processing engine.  This method starts the polling process.
      */
     public void init() {
-//        config = getJobConfiguration();
-//        if (config != null) {
-//            this.maxQueueSize = config.getMaxQueueSize();
-//            this.continuousPolling = config.isContinuousPolling();
-//            this.deleteSuccessfullyCompleted = config.isDeleteSuccessfullyCompleted();
-//            if (!config.isDisabled()) {
-//                startRunning();
-//            } else {
-//                log.warn( " JobProcessor for job type " + config.getJobType() + " is disabled; will not start" );
-//            }
-//        } else {
-//            log.fatal( "JobProcessingEngine " + this + " has not been configured!" );
-//            throw new RuntimeException( "JobProcessingEngine " + this + " has not been configured!" );
-//        }
-//
-//        if (log.isInfoEnabled()) {
-//            log.info( "JobProcessingEngine " + this + " has been initialized with jobType "
-//                      + config.getJobType() + ", maxThreads=" + config.getMaxThreads()
-//                      + ", maxQueueSize=" + this.maxQueueSize + ", continuousPolling=" + this.continuousPolling );
-//        }
+        log.info( "Initialized with isDisabled = ${isDisabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
     }
 
 
@@ -154,6 +142,10 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         this.jobManager = jobManager;
     }
 
+    @Required
+    void setAsynchronousBannerAuthenticationSpoofer(asynchronousBannerAuthenticationSpoofer) {
+        this.asynchronousBannerAuthenticationSpoofer = asynchronousBannerAuthenticationSpoofer
+    }
 //  ----------------------- JobProcessingEngine Method(s) ----------------------
 
 
@@ -161,10 +153,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * @see net.hedtech.banner.general.services.commsupport.jobs.JobProcessingEngine#startRunning()
      */
     public void startRunning() {
-        if (config.isDisabled()) {
-            log.warn( "Job Processing engine disabled in configuration; will not start" );
+        if (isDisabled) {
+            log.warn( "Asynchronous Task Processing engine disabled in configuration; will not start" );
             return;
         }
+
+        log.info( "Asynchronous Task Processing engine starting." );
+
         if (!threadsRunning) {
             try {
                 monitorThread = new MonitorThread();
@@ -241,43 +236,34 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         return sb.toString();
     }
 
+    public void setMaxThreads(int maxThreads) {
+        this.maxThreads = maxThreads
+    }
+
+    public void setMaxQueueSize(int maxQueueSize) {
+        this.maxQueueSize = maxQueueSize
+    }
+
+    public void setContinuousPolling(boolean continuousPolling) {
+        this.continuousPolling = continuousPolling
+    }
+
+    public void setPollingInterval(int pollingInterval) {
+        this.pollingInterval = pollingInterval
+    }
+
+
+    public void setDeleteSuccessfullyCompleted(boolean deleteSuccessfullyCompleted) {
+        this.deleteSuccessfullyCompleted = deleteSuccessfullyCompleted
+    }
 //---------------------------- protected methods -------------------------------
     /*
      * Provide ability for subclasses to override the configuration settings in
      * RecrutitingConfiguration.xml for MAX processing threads.     
      */
     protected int getMaxProcessingThreads() {
-        return config.getMaxThreads();
-    }   
-
-
-    /*
-     * Return the JobConfiguration Bean that this engine works with
-     */
-    protected AsynchronousTaskConfiguration getJobConfiguration() {
-        AsynchronousTaskConfiguration configuration = null;
-
-        try {
-            Holders.grailsApplication.config?.jobProcessors?.each() {  jobProcessorName ->
-                if (jobProcessorName.equals( jobManager.getJobType().getSimpleName())) {
-                    configuration = new AsynchronousTaskConfiguration();
-                    configuration.setContinuousPolling( jobProcessorConfig.getContinuousPolling() );
-                    configuration.setDeleteSuccessfullyCompleted( jobProcessorConfig.getDeleteSuccessfullyCompleted() );
-                    configuration.setDisabled( jobProcessorConfig.getDisabled() );
-                    configuration.setJobType( jobProcessorConfig.getJobType() );
-                    configuration.setMaxQueueSize( jobProcessorConfig.getMaxQueueSize().intValue() );
-                    configuration.setMaxThreads( jobProcessorConfig.getMaxThreads().intValue() );
-                    configuration.setPollingInterval( jobProcessorConfig.getPollingInterval().intValue() );
-                }
-            }
-
-        } catch (Exception e) {
-            log.fatal( "Can't access the configuration!", e );
-            throw new RuntimeException( e );
-        }
-        return configuration;
+        return maxThreads
     }
-//---------------------------- private methods ---------------------------------
 
 
     /**
@@ -291,8 +277,8 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         if (pendingJobs.size() > 0) return false;
         try {
             List jobs = jobManager.getPendingJobs( maxQueueSize );
-            if (log.isTraceEnabled()) {
-                log.trace( "Found " + jobs.size() + " jobs for processing using maxQueueSize " + maxQueueSize );
+            if (log.isDebugEnabled()) {
+                log.debug( "Found " + jobs.size() + " jobs for processing using maxQueueSize " + maxQueueSize );
             }
             found = (jobs.size() > 0);
 
@@ -327,7 +313,15 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
            */
           @Override
           public void run() {
-//              ThreadCallerContext.set( new TrustedCallerContext() );
+              if (!SecurityContextHolder.getContext().getAuthentication()) {
+                  FormContext.set( ['CMQUERYEXECUTE'] )
+
+                  String monitorOracleUserName = 'BCMADMIN'
+                  Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
+                  SecurityContextHolder.getContext().setAuthentication( auth )
+                  if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process polling thread." )
+              }
+
               boolean foundItems = false;
               while (keepRunning) {
                   isRunning = true;
@@ -379,6 +373,15 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           @Override
           public void run() {
               while (_keepRunning) {
+                  if (!SecurityContextHolder.getContext().getAuthentication()) {
+                      FormContext.set( ['CMQUERYEXECUTE'] )
+
+                      String monitorOracleUserName = 'BCMADMIN'
+                      Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
+                      SecurityContextHolder.getContext().setAuthentication( auth )
+                      if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process monitor thread." )
+                  }
+
                   ArrayList monitored = null;
                   synchronized (monitoredThreads) {
                       monitored = (ArrayList) monitoredThreads.clone();
@@ -452,12 +455,18 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           }
 
           public void run() {
-//              CallerContext cc = ThreadCallerContext.get();
               try {
                   if (log.isDebugEnabled()) {
                       log.debug( "JobProcessingEngine " + this + " Handler will process job " + job.getPrimaryKey() );
                   }
-//                  ThreadCallerContext.set( new TrustedCallerContext() );
+                  if (!SecurityContextHolder.getContext().getAuthentication()) {
+                      FormContext.set( ['CMQUERYEXECUTE'] )
+
+                      String monitorOracleUserName = 'BCMADMIN'
+                      Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
+                      SecurityContextHolder.getContext().setAuthentication( auth )
+                      if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async process handler." )
+                  }
 
                   // This is a short-lived transactional method, and if successful the job has been marked as acquired.
                   boolean acquired = jobManager.acquire( job );

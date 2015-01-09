@@ -17,12 +17,14 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTask;
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemProcessorService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemService
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.annotation.Required
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -53,7 +55,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
     }
 
     public Class<CommunicationGroupSendItem> getJobType() {
-        return GroupSendItem.class;
+        return CommunicationGroupSendItem.class;
     }
 
     public AsynchronousTask create(AsynchronousTask job) throws ApplicationException {
@@ -61,17 +63,17 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
     }
 
     public void init() {
-        log.debug( "Initialized." );
+        log.debug( "CommunicationGroupSendItemManagerImpl Initialized." );
     }
 
     /**
      * Deletes an existing communication job from the persistent store.
      * @param job the communication job to remove
      */
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class )
     public void delete( AsynchronousTask jobItem )  throws ApplicationException {
         CommunicationGroupSendItem groupSendItem = jobItem as CommunicationGroupSendItem
-        communicationGroupSendItemService.delete( groupSendItem.getPrimaryKey() );
+        communicationGroupSendItemService.delete( groupSendItem );
         if (log.isDebugEnabled()) {
             log.debug( "GroupSendItemManagerImpl deleted group send item " + groupSendItem.getPrimaryKey().getKeyValue() );
         }
@@ -82,7 +84,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      * Returns jobs that have failed.
      * @return List<CommunicationJob> the failed jobs
      */
-    @Transactional
+    @Transactional(readOnly=true, rollbackFor = Throwable.class )
     public List getFailedJobs() {
         throw new NotImplementedException();
     }
@@ -94,10 +96,9 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      * @param max maximum number of jobs to return.
      * @return
      */
-    @Transactional
+    @Transactional(readOnly=true, rollbackFor = Throwable.class )
     public List<CommunicationGroupSendItem> getPendingJobs( int max ) throws ApplicationException {
-        List<CommunicationGroupSendItem> result = communicationGroupSendItemProcessorService.getPending( max );
-        communicationGroupSendItemService.getNewGroupSendItemKeys( max );
+        List<CommunicationGroupSendItem> result = CommunicationGroupSendItem.fetchByReadyExecutionState( max )
         if (log.isTraceEnabled()) {
             log.trace( "GroupSendItemManagerImpl.getPending(max=" + max + ") is returning " + result.size() + " group send items." );
         }
@@ -130,7 +131,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      *         able to obtain an exclusive lock on the job and process it.  If false, the job was either
      *         already processed, or locked by another thread, and the call returned without doing any work
      */
-    @Transactional
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void process( AsynchronousTask task) throws ApplicationException {
         if (log.isInfoEnabled()) {
             CommunicationGroupSendItem groupSendItem = task as CommunicationGroupSendItem
@@ -142,7 +143,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
                 throw simulatedFailureException;
             }
 
-            communicationGroupSendItemService.performGroupSendItem( task.getPrimaryKey() );
+            communicationGroupSendItemProcessorService.performGroupSendItem( task.getPrimaryKey() );
 
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
@@ -166,7 +167,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      * @param job the job that failed
      * @param cause the cause of the failure
      */
-    @Transactional //(propagation= Propagation.REQUIRES_NEW, rollbackFor = { Throwable.class })
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
         communicationGroupSendItemService.failGroupSendItem( groupSendItem.getPrimaryKey(), StringHelper.stackTraceToString( cause ) );
         if (log.isDebugEnabled()) {
@@ -175,10 +176,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
     }
 
 
-    /* (non-Javadoc)
-     * @see com.sungardhe.common.services.commsupport.jobs.JobManager#updateMonitorRecord(com.sungardhe.common.services.commsupport.jobs.JobMonitorRecord)
-     */
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class )
     public AsynchronousTaskMonitorRecord updateMonitorRecord( AsynchronousTaskMonitorRecord monitorRecord ) {
         if (log.isDebugEnabled()) {
             CommunicationGroupSendItem groupSendItem = task as CommunicationGroupSendItem

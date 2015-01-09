@@ -2,6 +2,7 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEn
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendMonitor
 import net.hedtech.banner.general.communication.groupsend.automation.CommunicationGroupSendItemManagerImpl
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
+import net.hedtech.banner.general.communication.groupsend.automation.CommunicationGroupSendItemProcessingEngineStartupPerformer
 
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
@@ -78,7 +79,17 @@ class BannerGeneralCommonGrailsPlugin {
         communicationGroupSendItemProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
             bean.initMethod = 'init'
             jobManager = ref('communicationGroupSendItemManager')
+            maxThreads = '5'
+            maxQueueSize = '5000'
+            continuousPolling = 'true'
+            pollingInterval = '2000'
+            deleteSuccessfullyCompleted = 'false'
+            asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
         }
+
+//        communicationGroupSendItemProcessingEngineStartupPerformer (CommunicationGroupSendItemProcessingEngineStartupPerformer) {
+//            jobProcessingEngine = ref('communicationGroupSendItemProcessingEngine')
+//        }
     }
 
 
