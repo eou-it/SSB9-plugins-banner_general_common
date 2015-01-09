@@ -30,8 +30,6 @@ class CommunicationPopulationExecutionService {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
 
-        def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        def exceptionMessage
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
         def populationQuery = communicationPopulationQueryService.get(populationQueryId)
 

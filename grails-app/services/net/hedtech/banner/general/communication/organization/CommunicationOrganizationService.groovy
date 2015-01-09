@@ -5,7 +5,6 @@
 package net.hedtech.banner.general.communication.organization
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 

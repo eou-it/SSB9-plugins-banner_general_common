@@ -77,7 +77,6 @@ class CommunicationGroupSendItemProcessorService {
         Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
         try {
             FormContext.set( ['CMQUERYEXECUTE'] )
-            Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( senderOracleUserName )
             if (log.isDebugEnabled()) log.debug( "Spoofed as ${senderOracleUserName} for creating recipient data." )
 
             // Can this list be cached somewhere for similar processing

@@ -5,21 +5,15 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
-import net.hedtech.banner.security.BannerUser
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.SQLException
-
 
 /**
  * GroupSendCommunicationService is responsible for initiating and processing group send communications.
