@@ -6,11 +6,15 @@ package net.hedtech.banner.general.communication.field
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.service.ServiceBase
+import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryStatementParseService
 
 class CommunicationFieldService extends ServiceBase {
     boolean transactional = true
+    def communicationPopulationQueryStatementParseService
 
 
     def preCreate( domainModelOrMap ) {
@@ -34,6 +38,8 @@ class CommunicationFieldService extends ServiceBase {
             if (communicationField.returnsArrayArguments == null) {
                 communicationField.returnsArrayArguments = false
             }
+            //check for sql injection and if it returns true then throw invalid exception
+            def parseResult = communicationPopulationQueryStatementParseService.parse(communicationField.ruleContent)
         }
 
         validateFormatter( communicationField )
@@ -81,6 +87,8 @@ class CommunicationFieldService extends ServiceBase {
             if (communicationField.returnsArrayArguments == null) {
                 communicationField.returnsArrayArguments = false
             }
+            //check for sql injection and if it returns true then throw invalid exception
+            def parseResult = communicationPopulationQueryStatementParseService.parse(communicationField.ruleContent)
         }
 
         if (communicationField.name.contains(" "))
@@ -123,6 +131,13 @@ class CommunicationFieldService extends ServiceBase {
             if (temp.status == CommunicationFieldStatus.PRODUCTION)
                 return
             if (temp.name != null && temp.folder != null  && temp.formatString != null ) {
+                if (temp.ruleContent != null) {
+                    //check for sql injection and if it returns true then throw invalid exception
+                    def parseResult = communicationPopulationQueryStatementParseService.parse(temp.ruleContent)
+                    if (parseResult?.status != "Y") {
+                        throw new ApplicationException(CommunicationField, "@@r1:cannotPublishSqlStatementInvalid@@")
+                    }
+                }
                 temp.status = CommunicationFieldStatus.PRODUCTION
                 update(temp)
             } else

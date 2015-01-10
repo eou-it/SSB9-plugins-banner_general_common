@@ -36,7 +36,7 @@ class CommunicationPopulationQueryStatementParseService {
             //test for sql injec tion and throw exception if found
             if (CommunicationCommonUtility.sqlStatementNotAllowed(statement,multiSelectColumnAllowed )) {
                 if (multiSelectColumnAllowed)
-                    throw new ApplicationException(CommunicationField, "@@r1:queryInvalidCall@@")
+                    throw new ApplicationException(CommunicationField, "@@r1:sqlStatementInvalidCall@@")
                 else
                     throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
             }
