@@ -169,7 +169,8 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
-        communicationGroupSendItemService.failGroupSendItem( groupSendItem.getId(), StringHelper.stackTraceToString( cause ) );
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) task
+        communicationGroupSendItemProcessorService.failGroupSendItem( groupSendItem.getId(), StringHelper.stackTraceToString( cause ) );
         if (log.isDebugEnabled()) {
             log.debug( "GroupSendItemManager.markFailed(task=" + groupSendItem.getId() + ") has marked the task as failed " );
         }
@@ -179,7 +180,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
     @Transactional(rollbackFor = Throwable.class )
     public AsynchronousTaskMonitorRecord updateMonitorRecord( AsynchronousTaskMonitorRecord monitorRecord ) {
         if (log.isDebugEnabled()) {
-            CommunicationGroupSendItem groupSendItem = task as CommunicationGroupSendItem
+            CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) task
             log.debug( "Continuing to process group send item id = " + groupSendItem.getId() + ", pidm = " + groupSendItem.recipientPidm + "." )
         }
 

@@ -69,10 +69,23 @@ class CommunicationGroupSendItemProcessorService {
 
     }
 
+    public void failGroupSendItem( Long groupSendItemId, String errorText ) {
+        CommunicationGroupSendItem groupSendItem = communicationGroupSendItemService.get( groupSendItemId )
+        groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Failed )
+        //TODO: store errorText on item record
+        log.warn( "Group send item failed id = ${groupSendItemId}, errorText = ${errorText}.")
+        groupSendItem.setStopDate( new Date() )
+        communicationGroupSendItemService.update( groupSendItem )
+    }
+
 
     private CommunicationRecipientData buildRecipientData( String senderOracleUserName, CommunicationTemplate template, String referenceId, Long recipientPidm, CommunicationOrganization organization ) {
         log.debug( "Creating recipient data with referenceId = " + referenceId + "." )
-        CommunicationEmailTemplate emailTemplate = template as CommunicationEmailTemplate
+
+        CommunicationEmailTemplate emailTemplate
+        if (template instanceof CommunicationEmailTemplate) {
+            emailTemplate = (CommunicationEmailTemplate) template
+        }
 
         Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
         try {
