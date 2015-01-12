@@ -204,6 +204,8 @@ class CommunicationTemplateMergeService {
      * @return set of unique string variables found in the template string
      */
     List<String> extractTemplateVariables( String statement ) {
+        if (statement == null) return new ArrayList<String>()
+
         dataFieldNames = []
         char delimiter = '$'
         /* TODO: get a listener working so  you can trap rendering errors

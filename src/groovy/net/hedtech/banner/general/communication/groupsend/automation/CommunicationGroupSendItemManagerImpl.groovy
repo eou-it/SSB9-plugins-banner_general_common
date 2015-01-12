@@ -98,10 +98,9 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
      */
     @Transactional(readOnly=true, rollbackFor = Throwable.class )
     public List<CommunicationGroupSendItem> getPendingJobs( int max ) throws ApplicationException {
+        log.debug( "Getting pending jobs" )
         List<CommunicationGroupSendItem> result = CommunicationGroupSendItem.fetchByReadyExecutionState( max )
-        if (log.isTraceEnabled()) {
-            log.trace( "GroupSendItemManagerImpl.getPending(max=" + max + ") is returning " + result.size() + " group send items." );
-        }
+        log.debug( "Found " + result.size() + " jobs." )
         return result;
     }
 

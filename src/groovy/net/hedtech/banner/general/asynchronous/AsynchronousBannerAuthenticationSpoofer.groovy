@@ -22,6 +22,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
 
 
     public Authentication authenticate( String oracleUserName ) {
+        log.debug( "Attempting to authenticate as ${oracleUserName}" )
         this.authenticate( new AsynchronousBannerToken( oracleUserName ) )
     }
 
