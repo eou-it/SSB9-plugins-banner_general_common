@@ -81,7 +81,7 @@ class BannerGeneralCommonGrailsPlugin {
             bean.initMethod = 'init'
             jobManager = ref('communicationGroupSendItemManager')
             asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
-            maxThreads = '5'
+            maxThreads = '1'
             maxQueueSize = '5000'
             continuousPolling = 'true'
             pollingInterval = '2000'

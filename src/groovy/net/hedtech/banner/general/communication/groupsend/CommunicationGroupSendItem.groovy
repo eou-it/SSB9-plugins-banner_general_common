@@ -89,7 +89,7 @@ class CommunicationGroupSendItem implements AsynchronousTask {
      * Parent communication job
      */
     @ManyToOne( fetch = FetchType.LAZY )
-    @JoinColumn(name="GCRGSIM_GROUP_SEND_ID", referencedColumnName="GCBGSND_SURROGATE_ID", nullable=false )
+    @JoinColumn(name="GCRGSIM_GROUP_SEND_ID", referencedColumnName="GCBGSND_SURROGATE_ID")
     CommunicationGroupSend communicationGroupSend;
 
     /** The target of the send item */
@@ -100,7 +100,7 @@ class CommunicationGroupSendItem implements AsynchronousTask {
     @Enumerated(EnumType.STRING)
     CommunicationGroupSendItemExecutionState currentExecutionState;
 
-    @Column(name="GCRGSIM_ERROR_TEXT", nullable=true)
+    @Column(name="GCRGSIM_ERROR_TEXT")
     @Lob
     String errorText;
 
@@ -124,6 +124,8 @@ class CommunicationGroupSendItem implements AsynchronousTask {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+        stopDate(nullable:true)
+        errorText(nullable:true)
     }
 
     public static List fetchByGroupSend( CommunicationGroupSend groupSend ) {

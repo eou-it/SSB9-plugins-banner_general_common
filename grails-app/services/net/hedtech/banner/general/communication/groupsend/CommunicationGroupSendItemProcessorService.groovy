@@ -11,6 +11,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
+import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -55,16 +56,25 @@ class CommunicationGroupSendItemProcessorService {
 
             log.debug( "Creating communication job with reference id = " + recipientData.referenceId )
             CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
-            communicationJob = communicationRecipientDataService.create( communicationJob )
+            communicationJob = communicationJobService.create( communicationJob )
 
             log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )
-            groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Complete );
-            groupSendItem.setStopDate( new Date() );
-            communicationGroupSendItemService.update( groupSendItem );
+
+            def groupSendItemParamMap = [
+                id : groupSendItem.id,
+                version : groupSendItem.version,
+                currentExecutionState : CommunicationGroupSendItemExecutionState.Complete,
+                stopDate: new Date()
+            ]
+            communicationGroupSendItemService.update( groupSendItemParamMap )
         } else {
-            groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Stopped );
-            groupSendItem.setStopDate( new Date() );
-            communicationGroupSendItemService.update( groupSendItem );
+            def groupSendItemParamMap = [
+                id : groupSendItem.id,
+                version : groupSendItem.version,
+                currentExecutionState : CommunicationGroupSendItemExecutionState.Stopped,
+                stopDate: new Date()
+            ]
+            communicationGroupSendItemService.update( groupSendItemParamMap )
         }
 
     }
@@ -93,9 +103,16 @@ class CommunicationGroupSendItemProcessorService {
             if (log.isDebugEnabled()) log.debug( "Spoofed as ${senderOracleUserName} for creating recipient data." )
 
             // Can this list be cached somewhere for similar processing
-            List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate.toList.toString() )
-            fieldNames << communicationTemplateMergeService.extractTemplateVariables( emailTemplate.subject.toString() )
-            fieldNames << communicationTemplateMergeService.extractTemplateVariables( emailTemplate.content.toString() )
+            List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.toList()?.toString() )
+            communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
+                fieldNames << it
+            }
+            communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
+                fieldNames << it
+            }
+            communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.content?.toString() ).each {
+                fieldNames << it
+            }
             fieldNames = fieldNames.unique()
 
             def nameToValueMap = [:]
@@ -119,7 +136,7 @@ class CommunicationGroupSendItemProcessorService {
                 referenceId: referenceId,
                 ownerId: senderOracleUserName,
                 fieldValues: nameToValueMap,
-                organization: this.organization
+                organization: organization
             )
         } finally {
             SecurityContextHolder.getContext().setAuthentication( originalAuthentication )

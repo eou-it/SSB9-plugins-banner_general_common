@@ -32,6 +32,9 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
     def communicationTemplateService
     def communicationOrganizationService
     def communicationGroupSendItemProcessingEngine
+    def communicationRecipientDataService
+    def communicationJobService
+    def communicationEmailItemService
 
 
     CommunicationOrganization organization
@@ -47,6 +50,10 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
 
+        communicationGroupSendService.deleteAll()
+        communicationRecipientDataService.deleteAll()
+        communicationJobService.deleteAll()
+        communicationEmailItemService.deleteAll()
         setUpOrganization()
         setUpFolder()
         setUpEmailTemplate()
@@ -57,6 +64,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
 
     @After
     public void tearDown() {
+        if (communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.stopRunning()
         super.tearDown()
         logout()
     }
@@ -92,6 +100,9 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
         assertEquals( 5, CommunicationGroupSendItem.fetchByReadyExecutionState().size() )
 
         sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
+
+        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+        assertEquals( 5, countCompleted )
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {

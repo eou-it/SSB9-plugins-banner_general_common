@@ -271,10 +271,17 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
        * available jobs.
        */
     private boolean poll() {
+        log.debug( "polling" );
+
         boolean found = false;
         //to avoid putting duplicate jobs into the executor queue, we will only poll if all
         //the jobs enqueued from the previous poll have run to completion
-        if (pendingJobs.size() > 0) return false;
+        if (pendingJobs.size() > 0) {
+            log.debug( "Pending jobs still queued (size=${pendingJobs.size()}).")
+            return false
+        } else {
+            log.debug( "Get more pending jobs" )
+        }
         try {
             List jobs = jobManager.getPendingJobs( maxQueueSize );
             if (log.isDebugEnabled()) {
@@ -308,9 +315,10 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     }
 
     void handleTask( AsynchronousTask job ) {
-        log.debug( "JobProcessingEngine " + this + " Handler will process job " + job.getId() );
+        log.debug( "Asynchronous Task Processing Engine handler will process job " + job.getId() );
         try {
           if (!SecurityContextHolder.getContext().getAuthentication()) {
+              log.debug( "Setting form context." )
               FormContext.set( ['CMQUERYEXECUTE'] )
 
               String monitorOracleUserName = 'BCMADMIN'
@@ -322,10 +330,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
                   t.printStackTrace()
               }
               SecurityContextHolder.getContext().setAuthentication( auth )
-              if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async process handler." )
+              log.debug( "Authenticated as ${monitorOracleUserName} for async process handler." )
+          } else {
+              log.debug( "Already authenticated as ${SecurityContextHolder.getContext().getAuthentication().principal.toString()}." )
           }
 
           // This is a short-lived transactional method, and if successful the job has been marked as acquired.
+          log.debug( "Acquiring job " + job.getId() )
           boolean acquired = jobManager.acquire( job );
           if (!acquired) return;
 
@@ -342,12 +353,15 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           // the monitor table)
 
           // This is the potentially long-running and non-transactional processing...
+          log.debug( "Processing job " + job.getId() )
           jobManager.process( job );
 
           // Now we'll mark the job as complete using another short transactional method
           if (deleteSuccessfullyCompleted) {
+              log.debug( "Deleting job " + job.getId() )
               jobManager.delete( job );
           } else {
+              log.debug( "Marking complete job " + job.getId() )
               jobManager.markComplete( job );
           }
           monitorThread.deregister( new AsynchronousTaskMonitorRecord( Thread.currentThread().getName(), job.getId() ) );
@@ -362,6 +376,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           errorExecutor.execute( new ErrorHandler( job, e ) );
 
         } catch (Throwable t) {
+            log.error( "Async job handler caught an unexpected error and will mark the job as having an error state" )
           //log.error( "JobProcessingEngine " + this + " - A handler encountered a Throwable for job " + job.getId() + ", and will mark it as failed", t );
 
           // Any other exceptions will be handled by another runnable, regardless

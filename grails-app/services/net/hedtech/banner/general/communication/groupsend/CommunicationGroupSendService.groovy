@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.DetachedCriteria
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -49,6 +50,21 @@ class CommunicationGroupSendService extends ServiceBase {
 //        }
 
         return update( groupSend )
+    }
+
+    /**
+     * This delete all service method is intended for use by unit tests.
+     */
+    public void deleteAll() {
+        def criteria = new DetachedCriteria(CommunicationGroupSendItem).build {
+            ne 'id', 0L
+        }
+        int total = criteria.deleteAll()
+
+        criteria = new DetachedCriteria(CommunicationGroupSend).build {
+            ne 'id', 0L
+        }
+        total = criteria.deleteAll()
     }
 
 }

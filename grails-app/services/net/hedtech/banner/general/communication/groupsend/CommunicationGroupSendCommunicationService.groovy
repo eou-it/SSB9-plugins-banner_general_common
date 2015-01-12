@@ -85,13 +85,14 @@ class CommunicationGroupSendCommunicationService {
                 group_send_key:groupSend.id
             ],
             """ INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
-                                ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date)
+                                ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date, gcrgsim_started_date)
                SELECT gcbgsnd_surrogate_id
                      ,gcrlent_pidm
                      ,SYSDATE
                      , :state
                      , SYS_GUID()
                      ,gcbgsnd_user_id
+                     ,SYSDATE
                      ,SYSDATE
                  FROM gcrslis, gcrlent, gcbgsnd
                 WHERE     gcbgsnd_poplist_id = gcrslis_surrogate_id
