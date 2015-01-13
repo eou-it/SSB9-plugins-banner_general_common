@@ -83,8 +83,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
-//TODO commenting out temporarily. The send item is not being set to complete
-//        assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {

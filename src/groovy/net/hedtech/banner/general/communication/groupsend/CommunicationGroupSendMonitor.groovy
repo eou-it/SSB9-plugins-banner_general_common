@@ -66,6 +66,16 @@ class CommunicationGroupSendMonitor {
         try {
             List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
             if (log.isDebugEnabled()) log.debug( "Running group send count = " + groupSendList.size() + "." );
+
+            for(CommunicationGroupSend groupSend:groupSendList) {
+                if (groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Processing)) {
+                    int runningCount = communicationGroupSendItemService.fetchRunningGroupSendItemCount( groupSend.id )
+                    if (runningCount == 0) {
+                        groupSend.setCurrentExecutionState( CommunicationGroupSendExecutionState.Complete )
+                        groupSend.setStopDate( new Date() )
+                    }
+                }
+            }
         } catch( Throwable t) {
             t.printStackTrace()
             log.error( t )
