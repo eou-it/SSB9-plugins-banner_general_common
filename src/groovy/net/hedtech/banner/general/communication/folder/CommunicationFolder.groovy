@@ -51,7 +51,7 @@ class CommunicationFolder implements Serializable {
     @Column(name = "GCRFLDR_SURROGATE_ID")
     @SequenceGenerator(name = "GCRFLDR_SEQ_GEN", allocationSize = 1, sequenceName = "GCRFLDR_SURROGATE_ID_SEQUENCE")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRFLDR_SEQ_GEN")
-    Long Id
+    Long id
 
     /**
      * Description of the folder.

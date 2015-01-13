@@ -79,7 +79,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
         communicationRecipientData.setOrganization( organization )
         communicationRecipientData.save(failOnError: true, flush: true)
 
-        assertNotNull(communicationRecipientData.Id)
+        assertNotNull(communicationRecipientData.id)
         assertTrue(communicationRecipientData.pidm.equals(new Long(99990001)))
         assertNotNull(communicationRecipientData.version)
 

@@ -14,10 +14,4 @@ import net.hedtech.banner.service.ServiceBase
  */
 class CommunicationJobService extends ServiceBase {
 
-    public void deleteAll() {
-        def criteria = new DetachedCriteria(CommunicationJob).build {
-            ne 'id', 0L
-        }
-        int total = criteria.deleteAll()
-    }
 }
