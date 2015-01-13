@@ -23,14 +23,21 @@ class DateUtility {
             if (!dateFormat) {
                 dateFormat = MessageUtility.message("default.date.format")
             }
-            result = dateString.equals(Date.parse(dateFormat, dateString).format(dateFormat)) ?: false
+            Calendar calendar = Calendar.instance
+            Date date = Date.parse(dateFormat, dateString)
+            calendar.setTime(date)
+            if(calendar.get(Calendar.YEAR).toString().length() == 4 || calendar.get(Calendar.YEAR).toString().length() == 2) {
+                result = dateString.equals(date.format(dateFormat)) ?: false
+            } else {
+                result = false
+            }
         } catch (Exception e) {
             result = false
         }
 
-        if (dateFormat.length() != dateString.length()) {
+        /* if (dateFormat.length() != dateString.length()) {
             result = false
-        }
+         }*/
         return result
     }
 
