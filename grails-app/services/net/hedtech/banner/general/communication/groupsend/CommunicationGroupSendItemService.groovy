@@ -1,16 +1,13 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
- ********************************************************************************* */
-
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
-import javax.persistence.EntityManager
-import javax.persistence.Query
 
 /**
- * Manages group send items.
+ * DAO service interface for communication group send item objects.
  */
 class CommunicationGroupSendItemService extends ServiceBase {
 

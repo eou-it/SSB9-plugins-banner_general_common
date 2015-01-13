@@ -145,7 +145,9 @@ class CommunicationGroupSendItem implements AsynchronousTask {
             results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend' )
                 .setParameter( 'groupSend', groupSend )
                 .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Complete )
-                .list() // TODO: apply max
+                .setFirstResult( 0 )
+                .setMaxResults( max )
+                .list()
         }
         return results
     }
@@ -155,8 +157,9 @@ class CommunicationGroupSendItem implements AsynchronousTask {
         CommunicationGroupSendItem.withSession { session ->
             results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByExecutionState' )
                 .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Ready )
-                .list() // TODO: apply max
-
+                .setFirstResult( 0 )
+                .setMaxResults( max )
+                .list()
         }
         return results
     }
@@ -166,8 +169,9 @@ class CommunicationGroupSendItem implements AsynchronousTask {
         CommunicationGroupSendItem.withSession { session ->
             results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByExecutionState' )
                 .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Complete )
-                .list() // TODO: apply max
-
+                .setFirstResult( 0 )
+                .setMaxResults( max )
+                .list()
         }
         return results
     }
