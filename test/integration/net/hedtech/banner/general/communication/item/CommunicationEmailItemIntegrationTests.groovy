@@ -113,6 +113,34 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull emailItem.id
     }
 
+    @Test
+    void testDeleteEmailItem() {
+
+        def originalList = CommunicationEmailTemplate.findAll()
+
+        def emailTemplate = newValidForCreateEmailTemplate(folder)
+        emailTemplate.save(failOnError: true, flush: true)
+
+        def emailItem = new CommunicationEmailItem(
+                communicationChannel: "EMAIL",
+                createdBy: i_valid_emailTemplate_createdBy,
+                createDate: i_valid_emailTemplate_createDate,
+                recipientPidm: 999999999,
+                referenceId: UUID.randomUUID().toString(),
+                bccList: i_valid_emailTemplate_bccList,
+                ccList: i_valid_emailTemplate_ccList,
+                content: i_valid_emailTemplate_content,
+                fromList: i_valid_emailTemplate_fromList,
+                subject: i_valid_emailTemplate_subject,
+                toList: i_valid_emailTemplate_toList);
+
+        def savedEmailItem = emailItem.save(failOnError: true, flush: true)
+        assertNotNull emailItem.id
+        savedEmailItem.delete( failOnError: true, flush: true )
+        def deletedEmailItem =  savedEmailItem.get(savedEmailItem.id)
+        assertNull( deletedEmailItem )
+    }
+
 
     private def newValidForCreateFolder() {
         def folder = new CommunicationFolder(

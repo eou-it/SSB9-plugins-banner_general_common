@@ -17,7 +17,7 @@ import javax.mail.internet.MimeMessage
 /**
  * Created by mbrzycki on 1/6/15.
  */
-class CommunicationSendEmailMethod {
+class great {
 
     private CommunicationEmailMessage emailMessage;
     private CommunicationMailboxAccount sender;

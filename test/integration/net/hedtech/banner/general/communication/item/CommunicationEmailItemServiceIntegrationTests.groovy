@@ -3,6 +3,8 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.item
 
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -17,44 +19,44 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     def i_valid_emailTemplate_active = true
 
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
-    def i_invalid_emailTemplate_bccList = "foo@bar.com".padLeft(1021)
+    def i_invalid_emailTemplate_bccList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_ccList = """Valid Emailtemplate Cclist"""
-    def i_invalid_emailTemplate_ccList = "foo@bar.com".padLeft(1021)
+    def i_invalid_emailTemplate_ccList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_content = """Valid Emailtemplate Content"""
 
     def i_valid_emailTemplate_createDate = new Date()
 
     def i_valid_emailTemplate_createdBy = """Valid EmailTemplate createdBy"""
-    def i_invalid_emailTemplate_createdBy = """Valid EmailTemplate createdBy""".padLeft(31)
+    def i_invalid_emailTemplate_createdBy = """Valid EmailTemplate createdBy""".padLeft( 31 )
 
     def i_valid_emailTemplate_dataOrigin = """Valid Emailtemplate Dataorigin"""
-    def i_invalid_emailTemplate_dataOrigin = "XE Communication Manager".padLeft(31)
+    def i_invalid_emailTemplate_dataOrigin = "XE Communication Manager".padLeft( 31 )
 
     def i_valid_emailTemplate_description = """Valid Template Description"""
-    def i_invalid_emailTemplate_description = """Valid Template Description""".padLeft(4001)
+    def i_invalid_emailTemplate_description = """Valid Template Description""".padLeft( 4001 )
 
     def i_valid_emailTemplate_fromList = """Valid Emailtemplate Fromlist"""
-    def i_invalid_emailTemplate_fromList = "foo@bar.com".padLeft(1021)
+    def i_invalid_emailTemplate_fromList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_lastModified = new Date()
 
     def i_valid_emailTemplate_lastModifiedBy = """Valid Emailtemplate Lastmodifiedby"""
-    def i_invalid_emailTemplate_lastModifiedBy = "BCMUSER".padLeft(31)
+    def i_invalid_emailTemplate_lastModifiedBy = "BCMUSER".padLeft( 31 )
 
     def i_valid_emailTemplate_name = """Valid Name"""
-    def i_invalid_emailTemplate_name = """Valid Name""".padLeft(2049)
+    def i_invalid_emailTemplate_name = """Valid Name""".padLeft( 2049 )
 
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_personal = true
     def i_valid_emailTemplate_published = true
 
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
-    def i_invalid_emailTemplate_subject = """You're a winner!""".padLeft(1021)
+    def i_invalid_emailTemplate_subject = """You're a winner!""".padLeft( 1021 )
 
     def i_valid_emailTemplate_toList = """Valid Emailtemplate Tolist"""
-    def i_invalid_emailTemplate_toList = "foo@bar.com".padLeft(1021)
+    def i_invalid_emailTemplate_toList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_validFrom = new Date()
     def i_valid_emailTemplate_validTo = new Date()
@@ -74,14 +76,14 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU','SELFSERVICE']
+        formContext = ['GUAGMNU', 'SELFSERVICE']
         super.setUp()
-        folder1 = newValidForCreateFolder(i_valid_folder_name1)
-        folder1.save(failOnError: true, flush: true)
+        folder1 = newValidForCreateFolder( i_valid_folder_name1 )
+        folder1.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder1.id
-        folder2 = newValidForCreateFolder(i_valid_folder_name2)
-        folder2.save(failOnError: true, flush: true)
+        folder2 = newValidForCreateFolder( i_valid_folder_name2 )
+        folder2.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
 
@@ -96,26 +98,52 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
 
     @Test
-    void testCreateTemplate() {
+    void testCreateEmailItem() {
         def originalListCount = communicationEmailTemplateService.list().size()
-        def template = newValidForCreateEmailTemplate(folder1)
-        def newTemplate = communicationEmailTemplateService.create([domainModel: template])
+        def template = newValidForCreateEmailTemplate( folder1 )
+        def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
         assertNotNull newTemplate.createDate
-        assertNotNull(newTemplate.lastModified)
-        assertNotNull(newTemplate.lastModifiedBy)
+        assertNotNull( newTemplate.lastModified )
+        assertNotNull( newTemplate.lastModifiedBy )
 
         // Now test findall
         def foundEmailTemplates = communicationEmailTemplateService.findAll()
-        assertEquals(1, foundEmailTemplates.size())
+        assertEquals( 1, foundEmailTemplates.size() )
 
-        def newEmailItem = communicationEmailItemService.create([domainModel: newValidForCreateEmailItem()])
-        assertNotNull(newEmailItem.id)
+        def newEmailItem = communicationEmailItemService.create( [domainModel: newValidForCreateEmailItem()] )
+        assertNotNull( newEmailItem.id )
 
     }
 
 
-    private def newValidForCreateFolder(String folderName) {
+@Test
+   void testDeleteEmailItem() {
+       def originalListCount = communicationEmailTemplateService.list().size()
+       def template = newValidForCreateEmailTemplate( folder1 )
+       def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
+       //Test if the service set the created date, and the infrastructure set the modifiedby and date
+       assertNotNull newTemplate.createDate
+       assertNotNull( newTemplate.lastModified )
+       assertNotNull( newTemplate.lastModifiedBy )
+
+       // Now test findall
+       def foundEmailTemplates = communicationEmailTemplateService.findAll()
+       assertEquals( 1, foundEmailTemplates.size() )
+
+       def newEmailItem = communicationEmailItemService.create( [domainModel: newValidForCreateEmailItem()] )
+       assertNotNull( newEmailItem.id )
+       CommunicationEmailItem.findAll().each { item ->
+           communicationEmailItemService.delete( item )
+       }
+
+       def results = CommunicationEmailItem.findAll()
+       assertEquals(0, results.size())
+   }
+
+
+
+    private def newValidForCreateFolder( String folderName ) {
         def folder = new CommunicationFolder(
                 description: i_valid_folder_description,
                 internal: i_valid_folder_internal,
@@ -125,7 +153,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-    private def newValidForCreateEmailTemplate(CommunicationFolder folder) {
+    private def newValidForCreateEmailTemplate( CommunicationFolder folder ) {
         def communicationTemplate = new CommunicationEmailTemplate(
                 description: i_valid_emailTemplate_description,
                 personal: i_valid_emailTemplate_personal,
@@ -163,7 +191,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
                 fromList: i_valid_emailTemplate_fromList,
                 subject: i_valid_emailTemplate_subject,
                 toList: i_valid_emailTemplate_toList,
-                referenceId: UUID.randomUUID().toString());
+                referenceId: UUID.randomUUID().toString() );
 
         return emailItem;
     }
