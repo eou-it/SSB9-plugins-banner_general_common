@@ -17,7 +17,7 @@ import javax.mail.internet.MimeMessage
 /**
  * Created by mbrzycki on 1/6/15.
  */
-class great {
+class CommunicationSendEmailMethod {
 
     private CommunicationEmailMessage emailMessage;
     private CommunicationMailboxAccount sender;
@@ -25,7 +25,7 @@ class great {
     private String optOutMessageId;
     private CommunicationEmailReceipt lastSend;
 
-    private SendEmailMethod(CommunicationEmailMessage emailMessage, CommunicationMailboxAccount sender ) {
+    private CommunicationSendEmailMethod(CommunicationEmailMessage emailMessage, CommunicationMailboxAccount sender ) {
         this.emailMessage = emailMessage;
         this.sender = sender;
     }

@@ -34,6 +34,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     def communicationEmailTemplateService
     def communicationOrganizationService
     def communicationGroupSendItemProcessingEngine
+    def communicationJobProcessingEngine
     def communicationRecipientDataService
     def communicationJobService
     def communicationItemService
@@ -71,6 +72,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             sql.executeUpdate( "Delete from GCBGSND" )
             sql.executeUpdate( "Delete from GCBEMTL" )
             sql.executeUpdate( "Delete from GCBTMPL" )
+            sql.executeUpdate( "Delete from GCRCFLD" )
             sql.executeUpdate( "Delete from GCRSLIS" )
             sql.executeUpdate( "Delete from GCBQURY" )
             sql.executeUpdate( "Delete from GCRFLDR" )

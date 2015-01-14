@@ -557,7 +557,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
               } catch (Throwable t) {
                   log.error( "JobProcessingEngine " + this + " - An error handler could not mark job " + job.getId() + " as in error", t );
               } finally {
-                  ThreadCallerContext.set( cc );
+//                  ThreadCallerContext.set( cc );
               }
           }
       }

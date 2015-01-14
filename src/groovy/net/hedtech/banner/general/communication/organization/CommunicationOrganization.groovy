@@ -97,6 +97,12 @@ class CommunicationOrganization implements Serializable {
     @Column(name = "GCRORAN_DATA_ORIGIN")
     String dataOrigin
 
+    CommunicationEmailServerPropreties emailSendProperties
+    CommunicationEmailServerPropreties emailReceiveProperties
+    CommunicationMailboxAccount senderAccount
+    CommunicationMailboxAccount replyToAccount
+
+
 
     static constraints = {
         name(nullable: false, maxSize: 1020)

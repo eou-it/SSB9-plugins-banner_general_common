@@ -37,14 +37,16 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         SecurityContextHolder.getContext().setAuthentication( auth )
 
         if (!communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.startRunning()
+        if (!communicationJobProcessingEngine.threadsRunning) communicationJobProcessingEngine.startRunning()
     }
 
 
     @After
     public void tearDown() {
         if (communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.stopRunning()
+        if (communicationJobProcessingEngine.threadsRunning) communicationJobProcessingEngine.stopRunning()
 
-        super.tearDown()
+//        super.tearDown()
         logout()
     }
 
@@ -84,6 +86,10 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
+
+        sleepUntilCommunicationJobsComplete( 5, 30 )
+        countCompleted = CommunicationJob.fetchCompleted().size()
+        assertEquals( 5, countCompleted )
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
@@ -94,6 +100,21 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
             TimeUnit.SECONDS.sleep( interval );
 
             int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+
+            if ( countCompleted >= totalNumJobs) {
+                break;
+            }
+        }
+    }
+
+    private void sleepUntilCommunicationJobsComplete( long totalNumJobs, int maxSleepTime ) {
+        final int interval = 1;                 // test every second
+        int count = maxSleepTime / interval;    // calculate max loop count
+        while (count > 0) {
+            count--;
+            TimeUnit.SECONDS.sleep( interval );
+
+            int countCompleted = CommunicationJob.fetchCompleted().size()
 
             if ( countCompleted >= totalNumJobs) {
                 break;
