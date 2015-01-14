@@ -5,6 +5,8 @@ package net.hedtech.banner.general.communication.job
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
 
 import javax.persistence.*
 
@@ -15,7 +17,13 @@ import javax.persistence.*
 @ToString
 @EqualsAndHashCode
 @Table(name = "GCBCJOB")
-
+@NamedQueries(value = [
+    @NamedQuery( name = "CommunicationJob.fetchPending",
+        query = """ FROM CommunicationJob job
+                    WHERE job.status = :pending_
+                    ORDER BY job.id ASC """
+    )
+])
 class CommunicationJob implements Serializable {
 
     /**
@@ -62,7 +70,7 @@ class CommunicationJob implements Serializable {
     String lastModifiedBy
 
     /**
-     * DATA ORIGIN: Source system that created or updated the data.
+     * DATA ORIGIN: Source s dystem that created or updated the data.
      */
     @Column(name = "GCBCJOB_DATA_ORIGIN")
     String dataOrigin
@@ -75,8 +83,19 @@ class CommunicationJob implements Serializable {
         status(nullable: false, maxSize: 30)
     }
 
-
     // Read Only fields that should be protected against update
     public static readonlyProperties = [ 'id' ]
+
+    public static List fetchPending( Integer max ) {
+        def results
+        CommunicationJob.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationJob.fetchPending' )
+                .setParameter( 'pending_', CommunicationJobStatus.PENDING )
+                .setFirstResult( 0 )
+                .setMaxResults( max )
+                .list()
+        }
+        return results
+    }
 
 }

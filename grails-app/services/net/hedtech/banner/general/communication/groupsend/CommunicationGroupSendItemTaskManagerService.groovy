@@ -1,58 +1,36 @@
-/*******************************************************************************
-
- � 2012 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD SCT AND IS NOT TO BE COPIED,
- REPRODUCED, LENT, OR DISPOSED OF, NOR USED FOR ANY PURPOSE OTHER THAN THAT
- WHICH IT IS SPECIFICALLY PROVIDED WITHOUT THE WRITTEN PERMISSION OF THE
- SAID COMPANY
- *******************************************************************************/
-package net.hedtech.banner.general.communication.groupsend.automation;
-
+/*********************************************************************************
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
+package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.asynchronous.task.AsynchronousTask;
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemProcessorService
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemService
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.logging.Log;
+import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
+import org.apache.commons.lang.NotImplementedException
+import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional
 
 /**
- * A job manager for asynchronous processing of group send items.
- *
- * @author Michael Brzycki
+ * CommunicationGroupSendItemTaskManagerService implements asynchronous job engine life cycle
+ * methods for manipulating group send item tasks.
  */
-public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskManager {
-
+class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskManager {
     private final Log log = LogFactory.getLog(this.getClass());
+
+    def communicationGroupSendItemService;
+    def communicationGroupSendItemProcessorService
 
     /**
      * Used for testing purposes only.  If this is not null when a job is being
      * processed, that processing will throw this exception.
      */
     private Exception simulatedFailureException;
-    private CommunicationGroupSendItemService communicationGroupSendItemService;
-    private CommunicationGroupSendItemProcessorService communicationGroupSendItemProcessorService
 
-    @Required
-    public void setCommunicationGroupSendItemService(CommunicationGroupSendItemService communicationGroupSendItemService) {
-        this.communicationGroupSendItemService = communicationGroupSendItemService
-    }
-
-    @Required
-    void setCommunicationGroupSendItemProcessorService(CommunicationGroupSendItemProcessorService communicationGroupSendItemProcessorService) {
-        this.communicationGroupSendItemProcessorService = communicationGroupSendItemProcessorService
-    }
 
     public Class<CommunicationGroupSendItem> getJobType() {
         return CommunicationGroupSendItem.class;
@@ -63,7 +41,7 @@ public class CommunicationGroupSendItemManagerImpl implements AsynchronousTaskMa
     }
 
     public void init() {
-        log.debug( "CommunicationGroupSendItemManagerImpl Initialized." );
+        log.debug( "${this.getClass().getSimpleName()} initialized." );
     }
 
     /**

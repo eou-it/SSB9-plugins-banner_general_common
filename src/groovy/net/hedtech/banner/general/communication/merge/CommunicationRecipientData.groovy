@@ -35,7 +35,7 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_SURROGATE_ID")
     @SequenceGenerator(name = "GCBRDAT_SEQ_GEN", allocationSize = 1, sequenceName = "GCBRDAT_SURROGATE_ID_SEQUENCE")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCBRDAT_SEQ_GEN")
-    Long Id
+    Long id
 
     /**
      * Pidm that belong to a selection list.

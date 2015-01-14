@@ -1,10 +1,16 @@
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.DetachedCriteria
+import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.item.CommunicationEmailItem
+import net.hedtech.banner.general.communication.job.CommunicationJob
+import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.security.FormContext
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -18,29 +24,9 @@ import java.util.concurrent.TimeUnit
 /**
  * Created by mbrzycki on 12/3/14.
  */
-class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseIntegrationTestCase {
+class CommunicationGroupSendCommunicationServiceIntegrationTests extends CommunicationBaseIntegrationTestCase {
     def log = LogFactory.getLog( this.class )
     def selfServiceBannerAuthenticationProvider
-    def communicationGroupSendCommunicationService
-    def communicationGroupSendService
-    def communicationGroupSendItemService
-    def communicationPopulationQueryService
-    def communicationPopulationExecutionService
-    def communicationPopulationSelectionListService
-    def communicationFolderService
-    def communicationEmailTemplateService
-    def communicationTemplateService
-    def communicationOrganizationService
-    def communicationGroupSendItemProcessingEngine
-    def communicationRecipientDataService
-    def communicationJobService
-    def communicationEmailItemService
-
-
-    CommunicationOrganization organization
-    CommunicationFolder folder
-    CommunicationEmailTemplate emailTemplate
-
 
     @Before
     public void setUp() {
@@ -50,14 +36,6 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
 
-        communicationGroupSendService.deleteAll()
-        communicationRecipientDataService.deleteAll()
-        communicationJobService.deleteAll()
-        communicationEmailItemService.deleteAll()
-        setUpOrganization()
-        setUpFolder()
-        setUpEmailTemplate()
-
         if (!communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.startRunning()
     }
 
@@ -65,6 +43,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
     @After
     public void tearDown() {
         if (communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.stopRunning()
+
         super.tearDown()
         logout()
     }
@@ -81,8 +60,8 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 populationId: populationSelectionListId,
-                templateId: emailTemplate.id,
-                organizationId: organization.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString()
         )
 
@@ -104,8 +83,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
         sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
-//TODO commenting out temporarily. The send item is not being set to complete
-//        assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
@@ -170,49 +148,13 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends BaseInt
     private def newPopulationQuery( String queryName ) {
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
-                folder: CommunicationGroupSendTestingSupport.newValidForCreateFolderWithSave(),
+                folder: defaultFolder,
                 name: queryName,
                 description: "test description",
                 sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
         )
 
         return populationQuery
-    }
-
-    private void setUpOrganization() {
-        List organizations = communicationOrganizationService.list()
-        if (organizations.size() == 0) {
-            organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
-            organization = communicationOrganizationService.create(organization) as CommunicationOrganization
-        } else {
-            organization = organizations.get(0) as CommunicationOrganization
-        }
-    }
-
-    private void setUpFolder() {
-        folder = CommunicationFolder.findByName( "CommunicationGroupSendCommunicationServiceTests" )
-        if (!folder) {
-            folder = new CommunicationFolder( name: "CommunicationGroupSendCommunicationServiceTests", description: "integration test" )
-            folder = communicationFolderService.create( folder )
-        }
-    }
-
-    private void setUpEmailTemplate() {
-        emailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCommunicationServiceTests_template" )
-        if (!emailTemplate) {
-            emailTemplate = new CommunicationEmailTemplate (
-                    name: "CommunicationGroupSendCommunicationServiceTests_template",
-                    personal: false,
-                    active: true,
-                    oneOff: false,
-                    folder: folder,
-                    toList: "test@test.edu",
-                    subject: "test subject",
-                    content: "test content",
-            )
-            emailTemplate = communicationEmailTemplateService.create( emailTemplate )
-            emailTemplate = communicationTemplateService.publish( emailTemplate )
-        }
     }
 
 }
