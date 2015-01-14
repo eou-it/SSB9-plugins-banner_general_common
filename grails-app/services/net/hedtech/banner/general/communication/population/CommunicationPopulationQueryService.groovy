@@ -27,7 +27,7 @@ class CommunicationPopulationQueryService extends ServiceBase {
         CommunicationPopulationQuery popQuery = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQuery
         popQuery.folder = (popQuery.folder ?: domainModelOrMap.folder)
 
-        if (popQuery.getName() == null)
+        if (popQuery.getName() == null || popQuery.getName() == "")
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nameCannotBeNull@@")
 
         if (popQuery.getFolder() == null)

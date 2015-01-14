@@ -44,7 +44,7 @@ class CommunicationFieldService extends ServiceBase {
 
         validateFormatter( communicationField )
 
-        if (communicationField.name == null)
+        if (communicationField.name == null || communicationField.name == "")
             throw new ApplicationException( CommunicationField, "@@r1:nameCannotBeNull@@" )
 
         if (communicationField.folder == null)
@@ -90,6 +90,9 @@ class CommunicationFieldService extends ServiceBase {
             //check for sql injection and if it returns true then throw invalid exception
             def parseResult = communicationPopulationQueryStatementParseService.parse(communicationField.ruleContent)
         }
+
+        if (communicationField.name == null || communicationField.name == "")
+            throw new ApplicationException( CommunicationField, "@@r1:nameCannotBeNull@@" )
 
         if (communicationField.name.contains(" "))
             throw new ApplicationException(CommunicationField, "@@r1:space.not.allowed@@")
