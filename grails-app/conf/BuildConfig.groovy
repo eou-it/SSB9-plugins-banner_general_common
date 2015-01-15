@@ -44,9 +44,9 @@ grails.project.dependency.resolution = {
         compile ':resources:1.2.7' // If the functional-test plugin is being used
         compile ":functional-test:2.0.0" // If the functional-test plugin is being used
 
-//        test (":greenmail:1.3.4") {
-//            export = false
-//        }
+        test (":greenmail:1.3.4") {
+            export = false
+        }
     }
 
     dependencies {

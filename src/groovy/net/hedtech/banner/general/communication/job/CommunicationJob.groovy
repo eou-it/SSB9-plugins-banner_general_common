@@ -5,8 +5,10 @@ package net.hedtech.banner.general.communication.job
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
+import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
 
@@ -17,14 +19,20 @@ import javax.persistence.*
 @ToString
 @EqualsAndHashCode
 @Table(name = "GCBCJOB")
+@DatabaseModifiesState
 @NamedQueries(value = [
     @NamedQuery( name = "CommunicationJob.fetchPending",
         query = """ FROM CommunicationJob job
-                    WHERE job.status = :pending_
+                    WHERE job.status = :status_
+                    ORDER BY job.id ASC """
+    ),
+    @NamedQuery( name = "CommunicationJob.fetchCompleted",
+        query = """ FROM CommunicationJob job
+                    WHERE job.status = :status_
                     ORDER BY job.id ASC """
     )
 ])
-class CommunicationJob implements Serializable {
+class CommunicationJob implements AsynchronousTask {
 
     /**
      * SURROGATE ID: Generated unique numeric identifier for this entity.
@@ -75,6 +83,10 @@ class CommunicationJob implements Serializable {
     @Column(name = "GCBCJOB_DATA_ORIGIN")
     String dataOrigin
 
+    @Column(name="GCBCJOB_CREATIONDATETIME", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    Date creationDateTime;
+
     static constraints = {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
@@ -90,7 +102,19 @@ class CommunicationJob implements Serializable {
         def results
         CommunicationJob.withSession { session ->
             results = session.getNamedQuery( 'CommunicationJob.fetchPending' )
-                .setParameter( 'pending_', CommunicationJobStatus.PENDING )
+                .setParameter( 'status_', CommunicationJobStatus.PENDING )
+                .setFirstResult( 0 )
+                .setMaxResults( max )
+                .list()
+        }
+        return results
+    }
+
+    public static List fetchCompleted( Integer max = Integer.MAX_VALUE ) {
+        def results
+        CommunicationJob.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationJob.fetchCompleted' )
+                .setParameter( 'status_', CommunicationJobStatus.COMPLETED )
                 .setFirstResult( 0 )
                 .setMaxResults( max )
                 .list()

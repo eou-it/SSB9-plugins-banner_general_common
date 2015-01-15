@@ -8,7 +8,6 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
-import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import org.apache.commons.lang.NotImplementedException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 /**
  * CommunicationJobTaskManagerService implements asynchronous job engine life cycle
  * methods for manipulating group send item tasks.
+ *
  */
 class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
     private final Log log = LogFactory.getLog(this.getClass());
@@ -81,11 +81,9 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
     }
 
     public boolean acquire( AsynchronousTask task ) throws ApplicationException {
-        if (log.isInfoEnabled()) {
-            CommunicationJob job = task as CommunicationJob
-            log.info( "Acquired communication job with id = ${job.id}." )
-        }
-        return true;
+        CommunicationJob job = task as CommunicationJob
+        log.info( "Acquiring communication job with id = ${job.id}." )
+        return communicationJobService.acquire( job.id )
     }
 
 
@@ -93,10 +91,9 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
      * @see com.sungardhe.common.services.commsupport.jobs.JobManager#markComplete(com.sungardhe.common.services.commsupport.jobs.Job)
      */
     public void markComplete( AsynchronousTask task ) throws ApplicationException {
-        if (log.isInfoEnabled()) {
-            CommunicationJob job = task as CommunicationJob
-            log.info( "Marking completed group send item id = ${job.id}." )
-        }
+        CommunicationJob job = task as CommunicationJob
+        log.info( "Marking completed group send item id = ${job.id}." )
+        communicationJobService.markCompleted( job.id )
     }
 
 
@@ -108,10 +105,8 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void process( AsynchronousTask task) throws ApplicationException {
-        if (log.isInfoEnabled()) {
-            CommunicationJob job = task as CommunicationJob
-            log.info( "Processing communication job id = ${job.id}." )
-        }
+        CommunicationJob job = task as CommunicationJob
+        log.info( "Processing communication job id = ${job.id}." )
 
         try {
             if (simulatedFailureException != null) {
@@ -145,8 +140,13 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
         CommunicationJob job = (CommunicationJob) task
-        communicationJobProcessorService.failCommunicationJob( job.getId(), StringHelper.stackTraceToString( cause ) );
-        log.debug( "${this.getClass().getSimpleName()}.markFailed(task=${job.id}) has marked the task as failed " );
+        job.setStatus( CommunicationJobStatus.FAILED )
+        communicationJobService.update( job )
+        if (cause) {
+            log.info( "Marked job with id = ${job.id} as failed; cause = ${cause.toString()}." )
+        } else {
+            log.info( "Marked job with id = ${job.id} as failed." )
+        }
     }
 
 
