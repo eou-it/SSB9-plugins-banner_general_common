@@ -83,7 +83,7 @@ class CommunicationJob implements AsynchronousTask {
     @Column(name = "GCBCJOB_DATA_ORIGIN")
     String dataOrigin
 
-    @Column(name="GCBCJOB_CREATIONDATETIME", nullable = false)
+    @Column(name="GCBCJOB_CREATION_DATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 

@@ -146,7 +146,8 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
     private CommunicationJob newCommunicationJob() {
         CommunicationJob CommunicationJob = new CommunicationJob(
                 // Required fields
-                referenceId: "TTTTTTTTTT"
+                referenceId: "TTTTTTTTTT",
+                creationDateTime: new Date()
         )
 
         return CommunicationJob

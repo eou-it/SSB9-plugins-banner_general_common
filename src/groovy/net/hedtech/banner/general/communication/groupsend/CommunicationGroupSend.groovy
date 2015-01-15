@@ -33,7 +33,7 @@ class CommunicationGroupSend implements Serializable {
      * KEY: Generated unique key.
      */
     @Id
-    @Column(name = "gcbgsnd_SURROGATE_ID")
+    @Column(name = "GCBGSND_SURROGATE_ID")
     @SequenceGenerator(name = "gcbgsnd_SEQ_GEN", allocationSize = 1, sequenceName = "gcbgsnd_SURROGATE_ID_SEQUENCE")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gcbgsnd_SEQ_GEN")
     Long id
@@ -42,52 +42,52 @@ class CommunicationGroupSend implements Serializable {
      *  Optimistic lock token.
      */
     @Version
-    @Column(name = "gcbgsnd_VERSION")
+    @Column(name = "GCBGSND_VERSION")
     Long version
 
     /** The oracle user name of the person that submitted the group send. **/
-    @Column(name = "gcbgsnd_CREATOR_ID")
+    @Column(name = "GCBGSND_CREATOR_ID")
     String createdBy
 
     /**
      *  The user ID of the person who inserted or last updated this record.
      */
-    @Column(name = "gcbgsnd_USER_ID")
+    @Column(name = "GCBGSND_USER_ID")
     String lastModifiedBy
 
     /**
      *  Date that record was created or last updated.
      */
-    @Column(name = "gcbgsnd_ACTIVITY_DATE")
+    @Column(name = "GCBGSND_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
 
     /**
      *  Source system that created or updated the data.
      */
-    @Column(name = "gcbgsnd_DATA_ORIGIN")
+    @Column(name = "GCBGSND_DATA_ORIGIN")
     String dataOrigin
 
-    @Column(name="gcbgsnd_VPDI_CODE" )
+    @Column(name="GCBGSND_VPDI_CODE" )
     String mepCode
 
-    @JoinColumn(name="gcbgsnd_organization_id" )
+    @JoinColumn(name="GCBGSND_ORGANIZATION_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationOrganization organization;
 
-    @JoinColumn(name="gcbgsnd_POPLIST_ID" )
+    @JoinColumn(name="GCBGSND_POPLIST_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationPopulationSelectionList population;
 
-    @JoinColumn(name="gcbgsnd_TEMPLATE_ID" )
+    @JoinColumn(name="GCBGSND_TEMPLATE_ID" )
     @ManyToOne( fetch = FetchType.LAZY )
     CommunicationTemplate template;
 
-    @Column(name="gcbgsnd_STARTED_DATE", nullable = true)
+    @Column(name="GCBGSND_STARTED_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     Date startedDate;
 
-    @Column(name="gcbgsnd_CREATIONDATETIME", nullable = false)
+    @Column(name="GCBGSND_CREATIONDATETIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
