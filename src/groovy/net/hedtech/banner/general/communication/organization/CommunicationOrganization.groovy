@@ -100,28 +100,28 @@ class CommunicationOrganization implements Serializable {
     /**
      * The send email server configuration properties
      */
-    @OneToOne
     @JoinColumn(name = "GCRORAN_SEND_PROPERTIES_ID")
+    @OneToOne( fetch = FetchType.LAZY )
     CommunicationEmailServerProperties emailSendProperties
 
     /**
      * The receive email server configuration properties
      */
-    @OneToOne
     @JoinColumn(name = "GCRORAN_RECEIVE_PROPERTIES_ID")
+    @OneToOne( fetch = FetchType.LAZY )
     CommunicationEmailServerProperties emailReceiveProperties
 
     /**
-     * The receive email server configuration properties
+     * The send email mailbox properties
      */
-    @OneToOne
     @JoinColumn(name = "GCRORAN_SENDER_MAILBOX_ID")
+    @OneToOne( fetch = FetchType.LAZY )
     CommunicationMailboxAccount senderAccount
 
     /**
-     * The receive email server configuration properties
+     * The reply to email mailbox properties
      */
-    @OneToOne
+    @OneToOne( fetch = FetchType.LAZY )
     @JoinColumn(name = "GCRORAN_REPLY_TO_MAILBOX_ID")
     CommunicationMailboxAccount replyToAccount
 

@@ -31,17 +31,6 @@ class CommunicationMailboxAccount implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRMBAC_SEQ_GEN")
     Long id
 
-    /**
-     * DESCRIPTION: Description of the mailbox account.
-     */
-    @Column(name = "GCRMBAC_DESCRIPTION")
-    String description
-
-    /**
-     * DISPLAYNAME: Name to be displayed for the mailbox account.
-     */
-    @Column(name = "GCRMBAC_DISPLAY_NAME")
-    String displayName
 
     /**
      * EMAILADDRESS: Email address of the mailbox account.
@@ -66,6 +55,12 @@ class CommunicationMailboxAccount implements Serializable {
      */
     @Column(name = "GCRMBAC_TYPE")
     CommunicationMailboxAccountType type
+
+    /**
+     * The user friendly name of the return email address.
+     */
+    @Column(name = "GCRMBAC_EMAIL_DISPLAY_NAME")
+    String emailDisplayName
 
     /**
      * USERNAME: Username used to logon to the mail server.
@@ -100,18 +95,16 @@ class CommunicationMailboxAccount implements Serializable {
     String dataOrigin
 
 
-
     static constraints = {
         lastModified( nullable: true )
         lastModifiedBy( nullable: true, maxSize: 30 )
         dataOrigin( nullable: true, maxSize: 30 )
-        description( nullable: true, maxSize: 4000 )
-        displayName( nullable: true, maxSize: 1020 )
         emailAddress( nullable: false, maxSize: 1020 )
         name( nullable: false, maxSize: 1020 )
         password( nullable: true )
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )
+        emailDisplayName( nullable: true )
     }
 
     // Read Only fields that should be protected against update
