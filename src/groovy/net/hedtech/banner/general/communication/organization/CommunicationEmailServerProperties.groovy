@@ -41,7 +41,7 @@ class CommunicationEmailServerProperties implements Serializable {
      * SMTP PORT: The port number on the host send email to
      */
     @Column(name = "GCBSPRP_SMTP_PORT")
-    String smtpPort
+    int smtpPort
 
     /**
      * SMTP HOST: The SMTP protocal to use. none, ssl, etc.
@@ -79,9 +79,9 @@ class CommunicationEmailServerProperties implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        securityProtocol(nullable: true, maxSize: 2000)
-        smtpHost(nullable: true, maxSize: 2000)
-        smtpPort(nullable: true, maxSize: 2000)
+        securityProtocol(nullable: false, maxSize: 2000)
+        smtpHost(nullable: false, maxSize: 2000)
+        smtpPort(nullable: false)
     }
 
 

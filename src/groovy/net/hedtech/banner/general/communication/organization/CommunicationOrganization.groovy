@@ -97,43 +97,69 @@ class CommunicationOrganization implements Serializable {
     @Column(name = "GCRORAN_DATA_ORIGIN")
     String dataOrigin
 
-    CommunicationEmailServerPropreties emailSendProperties
-    CommunicationEmailServerPropreties emailReceiveProperties
+    /**
+     * The send email server configuration properties
+     */
+    @OneToOne
+    @JoinColumn(name = "GCRORAN_SEND_PROPERTIES_ID")
+    CommunicationEmailServerProperties emailSendProperties
+
+    /**
+     * The receive email server configuration properties
+     */
+    @OneToOne
+    @JoinColumn(name = "GCRORAN_RECEIVE_PROPERTIES_ID")
+    CommunicationEmailServerProperties emailReceiveProperties
+
+    /**
+     * The receive email server configuration properties
+     */
+    @OneToOne
+    @JoinColumn(name = "GCRORAN_SENDER_MAILBOX_ID")
     CommunicationMailboxAccount senderAccount
+
+    /**
+     * The receive email server configuration properties
+     */
+    @OneToOne
+    @JoinColumn(name = "GCRORAN_REPLY_TO_MAILBOX_ID")
     CommunicationMailboxAccount replyToAccount
 
 
-
     static constraints = {
-        name(nullable: false, maxSize: 1020)
-        description(nullable: true, maxSize: 2000)
-        parent(nullable: true)
-        isRoot(nullable: true)
-        dateFormat(nullable: true)
-        dayOfWeekFormat(nullable: true)
-        timeOfDayFormat(nullable: true)
-        lastModified(nullable: true)
-        lastModifiedBy(nullable: true, maxSize: 30)
-        dataOrigin(nullable: true, maxSize: 30)
+        name( nullable: false, maxSize: 1020 )
+        description( nullable: true, maxSize: 2000 )
+        parent( nullable: true )
+        isRoot( nullable: true )
+        dateFormat( nullable: true )
+        dayOfWeekFormat( nullable: true )
+        timeOfDayFormat( nullable: true )
+        lastModified( nullable: true )
+        lastModifiedBy( nullable: true, maxSize: 30 )
+        dataOrigin( nullable: true, maxSize: 30 )
+        emailSendProperties( nullable: true )
+        emailReceiveProperties( nullable: true )
+        senderAccount( nullable: true )
+        replyToAccount( nullable: true )
     }
 
 
-    public static CommunicationOrganization fetchById(Long id) {
+    public static CommunicationOrganization fetchById( Long id ) {
 
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('CommunicationOrganization.fetchById')
-                    .setLong('id', id).list()[0]
+            query = session.getNamedQuery( 'CommunicationOrganization.fetchById' )
+                    .setLong( 'id', id ).list()[0]
 
         }
         return query
     }
 
 
-    public static CommunicationOrganization fetchByName(String name) {
+    public static CommunicationOrganization fetchByName( String name ) {
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('CommunicationOrganization.fetchByName').setString('name', name).list()[0]
+            query = session.getNamedQuery( 'CommunicationOrganization.fetchByName' ).setString( 'name', name ).list()[0]
         }
         return query
     }
