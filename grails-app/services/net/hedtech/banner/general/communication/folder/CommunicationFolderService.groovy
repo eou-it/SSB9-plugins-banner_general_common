@@ -28,7 +28,7 @@ class CommunicationFolderService extends ServiceBase {
     def preUpdate( domainModelOrMap ) {
         CommunicationFolder folder = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationFolder
 
-        if (folder.getName() == null)
+        if (folder.getName() == null || folder.getName() == "")
             throw new ApplicationException( CommunicationFolder, "@@r1:nameCannotBeNull@@" )
 
         if (CommunicationFolder.existsAnotherSameNameFolder( folder.id, folder.name ))
