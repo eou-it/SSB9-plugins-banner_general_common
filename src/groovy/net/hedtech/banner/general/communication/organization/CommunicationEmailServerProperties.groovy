@@ -1,19 +1,17 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-
-/*******************************************************************************
-Copyright 2014 Ellucian Company L.P. and its affiliates.
-*******************************************************************************/
 
 import javax.persistence.*
 
+/*******************************************************************************
+ Copyright 2014 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 /**
  * Email server protocol properties. Defines the connection information for the email server. entity.
  */
 @Entity
-@ToString
+
 @EqualsAndHashCode
 @Table(name = "GCBSPRP")
 // @NamedQueries(value = [
@@ -32,10 +30,20 @@ class CommunicationEmailServerProperties implements Serializable {
     Long id
 
     /**
+     * Type: The type of email server properties, Send,Receive
+     */
+    @Column(name = "GCBSPRP_TYPE")
+    CommunicationEmailServerPropertiesType type
+    /**
      * SMTP HOST: The host name for the SMTP mail server to send email to
      */
     @Column(name = "GCBSPRP_SMTP_HOST")
     String smtpHost
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    //@JoinColumn(name = "GCBSPRP_ORGANIZATION_ID", referencedColumnName = "GCRORAN_SURROGATE_ID")
+    @JoinColumn(name = "GCBSPRP_ORGANIZATION_ID")
+    CommunicationOrganization organization
 
     /**
      * SMTP PORT: The port number on the host send email to
@@ -76,16 +84,37 @@ class CommunicationEmailServerProperties implements Serializable {
     String dataOrigin
 
     static constraints = {
-        lastModified(nullable: true)
-        lastModifiedBy(nullable: true, maxSize: 30)
-        dataOrigin(nullable: true, maxSize: 30)
-        securityProtocol(nullable: false, maxSize: 2000)
-        smtpHost(nullable: false, maxSize: 2000)
-        smtpPort(nullable: false)
+        lastModified( nullable: true )
+        lastModifiedBy( nullable: true, maxSize: 30 )
+        dataOrigin( nullable: true, maxSize: 30 )
+        securityProtocol( nullable: false, maxSize: 2000 )
+        smtpHost( nullable: false, maxSize: 2000 )
+        smtpPort( nullable: false )
+        type( nullable: false )
+        organization( nullable: false )
     }
 
-
     // Read Only fields that should be protected against update
-    public static readonlyProperties = [ 'id' ]
+    public static readonlyProperties = ['id']
 
+    /*
+     Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
+     */
+
+
+    @Override
+    public String toString() {
+        return "CommunicationEmailServerProperties{" +
+                "id=" + id +
+                ", type=" + type +
+                ", smtpHost='" + smtpHost + '\'' +
+                ", organization=" + organization.name +
+                ", smtpPort=" + smtpPort +
+                ", securityProtocol='" + securityProtocol + '\'' +
+                ", version=" + version +
+                ", lastModified=" + lastModified +
+                ", lastModifiedBy='" + lastModifiedBy + '\'' +
+                ", dataOrigin='" + dataOrigin + '\'' +
+                '}';
+    }
 }

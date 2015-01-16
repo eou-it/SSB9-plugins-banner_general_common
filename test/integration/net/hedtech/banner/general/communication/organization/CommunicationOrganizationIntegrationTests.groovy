@@ -42,13 +42,21 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testCreateValidOrganization() {
         def organization = newValidForCreateOrganization()
-        organization.save( failOnError: true, flush: true )
+        //organization.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
-        assertNotNull organization.id
-       /* assertNotNull organization.emailReceiveProperties.id
-        assertNotNull organization.emailSendProperties.id
-        assertNotNull organization.replyToAccount.id
-        assertNotNull organization.senderAccount.id*/
+        // assertNotNull organization.id
+        // Add some properties and make sure they stick
+        def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
+        //receiveProperties.organization = organization
+        organization.emailServerProperties = [receiveProperties]
+        organization.save( failOnError: true, flush: true )
+        assertNotNull organization.emailServerProperties
+
+        def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
+        organization.emailServerProperties = [receiveProperties, sendProperties]
+        organization.save( failOnError: true, flush: true )
+        assertEquals( 2, organization.emailServerProperties.size() )
+
 
     }
 
@@ -81,6 +89,12 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertEquals( "Updated description", u_valid_description, organization.description )
 
         assertEquals( "Updated name", u_valid_name, organization.name )
+        // Test update of dependent objects
+        def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
+        organization.emailServerProperties = [receiveProperties]
+        organization.save()
+        assertEquals 1234, organization.emailServerProperties[0].smtpPort
+
     }
 
 
@@ -104,24 +118,20 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
                 description: i_valid_description,
                 name: i_valid_name
         )
-       /* CommunicationEmailServerProperties emailReceiveProperties = new CommunicationEmailServerProperties()
-        emailReceiveProperties.smtpHost = 'smtpHost1'
-        emailReceiveProperties.smtpPort = 1111
-        emailReceiveProperties.securityProtocol = 'protocol1'
-        emailReceiveProperties.save()
-        organization.emailReceiveProperties = emailReceiveProperties*/
-        /*organization.emailSendProperties.smtpHost = 'smtpHost2'
-        organization.emailSendProperties.smtpPort = 2222
-        organization.emailSendProperties.securityProtocol = 'protocol2'
-        organization.replyToAccount.emailAddress = "foo@bar.com"
-        organization.replyToAccount.type = CommunicationMailboxAccountType.ReplyTo
-        organization.replyToAccount.userName = "replyToUser"
-        organization.senderAccount.emailAddress = "foo@bar.com"
-        organization.senderAccount.type = CommunicationMailboxAccountType.Sender
-        organization.senderAccount.userName = "sendUser"*/
-
         return organization
     }
 
+
+    private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
+        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
+                // Required fields
+                securityProtocol: "TTTTTTTTTT",
+                smtpHost: "TTTTTTTTTT",
+                smtpPort: 1234,
+                organization: organization,
+                type: serverType
+        )
+        return communicationEmailServerProperties
+    }
 
 }

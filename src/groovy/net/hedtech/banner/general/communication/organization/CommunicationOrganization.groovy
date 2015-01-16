@@ -100,30 +100,24 @@ class CommunicationOrganization implements Serializable {
     /**
      * The send email server configuration properties
      */
-    @JoinColumn(name = "GCRORAN_SEND_PROPERTIES_ID")
-    @OneToOne( fetch = FetchType.LAZY )
-    CommunicationEmailServerProperties emailSendProperties
+    //@Column(name = "GCBSPRP_ORGANIZATION_ID")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    List<CommunicationEmailServerProperties> emailServerProperties
 
-    /**
-     * The receive email server configuration properties
-     */
-    @JoinColumn(name = "GCRORAN_RECEIVE_PROPERTIES_ID")
-    @OneToOne( fetch = FetchType.LAZY )
-    CommunicationEmailServerProperties emailReceiveProperties
 
     /**
      * The send email mailbox properties
      */
     @JoinColumn(name = "GCRORAN_SENDER_MAILBOX_ID")
-    @OneToOne( fetch = FetchType.LAZY )
-    CommunicationMailboxAccount senderAccount
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<CommunicationMailboxAccount> senderAccount
 
     /**
      * The reply to email mailbox properties
      */
-    @OneToOne( fetch = FetchType.LAZY )
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "GCRORAN_REPLY_TO_MAILBOX_ID")
-    CommunicationMailboxAccount replyToAccount
+    List<CommunicationMailboxAccount> replyToAccount
 
 
     static constraints = {
@@ -137,8 +131,7 @@ class CommunicationOrganization implements Serializable {
         lastModified( nullable: true )
         lastModifiedBy( nullable: true, maxSize: 30 )
         dataOrigin( nullable: true, maxSize: 30 )
-        emailSendProperties( nullable: true )
-        emailReceiveProperties( nullable: true )
+        emailServerProperties( nullable: true )
         senderAccount( nullable: true )
         replyToAccount( nullable: true )
     }
