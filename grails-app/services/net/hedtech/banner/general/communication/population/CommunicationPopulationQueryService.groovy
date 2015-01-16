@@ -33,7 +33,7 @@ class CommunicationPopulationQueryService extends ServiceBase {
         if (popQuery.getFolder() == null)
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:folderCannotBeNull@@")
         else
-            validateFolder(popQuery.getFolder().getId())
+            validateFolder( popQuery.getFolder().id )
 
         if (CommunicationPopulationQuery.fetchByQueryNameAndFolderName(popQuery.name, popQuery.folder.name))
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:not.unique.message@@")

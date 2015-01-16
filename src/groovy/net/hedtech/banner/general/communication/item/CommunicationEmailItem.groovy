@@ -20,7 +20,6 @@ import javax.persistence.Table
 @PrimaryKeyJoinColumn(name = "GCREITM_SURROGATE_ID")
 @EqualsAndHashCode
 @ToString
-
 class CommunicationEmailItem extends CommunicationItem implements Serializable {
 
     /**

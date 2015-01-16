@@ -13,10 +13,4 @@ import net.hedtech.banner.service.ServiceBase
  */
 class CommunicationRecipientDataService extends ServiceBase {
 
-    public void deleteAll() {
-        def criteria = new DetachedCriteria(CommunicationGroupSendItem).build {
-            ne 'id', 0L
-        }
-        int total = criteria.deleteAll()
-    }
 }

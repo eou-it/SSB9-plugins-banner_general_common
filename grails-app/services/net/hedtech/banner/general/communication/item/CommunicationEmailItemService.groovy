@@ -13,7 +13,4 @@ class CommunicationEmailItemService extends ServiceBase {
         map?.domainModel?.createDate = new Date()
     }
 
-    public void deleteAll() {
-        //TODO: remove
-    }
 }
