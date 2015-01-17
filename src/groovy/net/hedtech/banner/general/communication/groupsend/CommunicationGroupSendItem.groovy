@@ -5,6 +5,7 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
+import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 
 import javax.persistence.Column
@@ -31,6 +32,7 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "GCRGSIM")
+@DatabaseModifiesState
 @NamedQueries(value = [
     @NamedQuery( name = "CommunicationGroupSendItem.fetchByGroupSend",
         query = """ FROM CommunicationGroupSendItem gsi

@@ -8,6 +8,7 @@ import groovy.transform.ToString
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 
 import javax.persistence.*
@@ -20,6 +21,7 @@ import javax.persistence.*
 @Table(name = "GCBGSND")
 @EqualsAndHashCode
 @ToString
+@DatabaseModifiesState
 @NamedQueries(value = [
     @NamedQuery( name = "CommunicationGroupSend.findRunning",
         query = """ FROM CommunicationGroupSend gs
