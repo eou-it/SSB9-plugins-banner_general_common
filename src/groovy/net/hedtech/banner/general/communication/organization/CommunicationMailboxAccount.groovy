@@ -31,18 +31,15 @@ class CommunicationMailboxAccount implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRMBAC_SEQ_GEN")
     Long id
 
-
     /**
      * EMAILADDRESS: Email address of the mailbox account.
      */
     @Column(name = "GCRMBAC_EMAIL_ADDRESS")
     String emailAddress
 
-    /**
-     * NAME: Name of the mailbox account.
-     */
-    @Column(name = "GCRMBAC_NAME")
-    String name
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "GCRMBAC_ORGANIZATION_ID")
+    CommunicationOrganization organization
 
     /**
      * PASSWORD: Encrypted password of this mailbox account.
@@ -100,7 +97,7 @@ class CommunicationMailboxAccount implements Serializable {
         lastModifiedBy( nullable: true, maxSize: 30 )
         dataOrigin( nullable: true, maxSize: 30 )
         emailAddress( nullable: false, maxSize: 1020 )
-        name( nullable: false, maxSize: 1020 )
+        organization( nullable: false, maxSize: 1020 )
         password( nullable: true )
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )

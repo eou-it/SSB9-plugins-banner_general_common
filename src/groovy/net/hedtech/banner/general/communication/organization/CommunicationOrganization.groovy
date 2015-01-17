@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.hibernate.annotations.Where
 
 import javax.persistence.*
 
@@ -100,24 +101,36 @@ class CommunicationOrganization implements Serializable {
     /**
      * The send email server configuration properties
      */
-    //@Column(name = "GCBSPRP_ORGANIZATION_ID")
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
-    List<CommunicationEmailServerProperties> emailServerProperties
-
+    //@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    //List<CommunicationEmailServerProperties> emailServerProperties
 
     /**
-     * The send email mailbox properties
+     * The send email server configuration properties
      */
-    @JoinColumn(name = "GCRORAN_SENDER_MAILBOX_ID")
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    List<CommunicationMailboxAccount> senderAccount
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @Where(clause = "GCBSPRP_TYPE = 'Send'")
+    CommunicationEmailServerProperties sendEmailServerProperties
 
     /**
-     * The reply to email mailbox properties
+     * The send email server configuration properties
      */
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "GCRORAN_REPLY_TO_MAILBOX_ID")
-    List<CommunicationMailboxAccount> replyToAccount
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @Where(clause = "GCBSPRP_TYPE = 'Receive'")
+    CommunicationEmailServerProperties receiveEmailServerProperties
+
+    /**
+     * The sender email mailbox properties
+     */
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @Where(clause = "GCRMBAC_TYPE = 'Sender'")
+    CommunicationMailboxAccount senderMailboxAccountSettings
+
+    /**
+     * The replyTo email mailbox properties
+     */
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @Where(clause = "GCRMBAC_TYPE = 'replyTo'")
+    CommunicationMailboxAccount replyToMailboxAccountSettings
 
 
     static constraints = {
@@ -131,9 +144,11 @@ class CommunicationOrganization implements Serializable {
         lastModified( nullable: true )
         lastModifiedBy( nullable: true, maxSize: 30 )
         dataOrigin( nullable: true, maxSize: 30 )
-        emailServerProperties( nullable: true )
-        senderAccount( nullable: true )
-        replyToAccount( nullable: true )
+        receiveEmailServerProperties( nullable: true )
+        sendEmailServerProperties( nullable: true )
+        replyToMailboxAccountSettings( nullable: true )
+        senderMailboxAccountSettings( nullable: true )
+
     }
 
 

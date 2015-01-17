@@ -41,7 +41,6 @@ class CommunicationEmailServerProperties implements Serializable {
     String smtpHost
 
     @ManyToOne(cascade = CascadeType.ALL)
-    //@JoinColumn(name = "GCBSPRP_ORGANIZATION_ID", referencedColumnName = "GCRORAN_SURROGATE_ID")
     @JoinColumn(name = "GCBSPRP_ORGANIZATION_ID")
     CommunicationOrganization organization
 
