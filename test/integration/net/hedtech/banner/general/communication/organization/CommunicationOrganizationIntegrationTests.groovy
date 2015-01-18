@@ -42,20 +42,14 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testCreateValidOrganization() {
         def organization = newValidForCreateOrganization()
-        //organization.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        // assertNotNull organization.id
-        // Add some properties and make sure they stick
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
-        //receiveProperties.organization = organization
-        organization.emailServerProperties = [receiveProperties]
-        organization.save( failOnError: true, flush: true )
-        assertNotNull organization.emailServerProperties
-
         def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
-        organization.emailServerProperties = [receiveProperties, sendProperties]
+        organization.receiveEmailServerProperties = receiveProperties
+        organization.sendEmailServerProperties = sendProperties
         organization.save( failOnError: true, flush: true )
-        assertEquals( 2, organization.emailServerProperties.size() )
+        assertNotNull organization.receiveEmailServerProperties
+        assertNotNull organization.sendEmailServerProperties
+
 
 
     }
@@ -91,9 +85,9 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertEquals( "Updated name", u_valid_name, organization.name )
         // Test update of dependent objects
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
-        organization.emailServerProperties = [receiveProperties]
+        organization.receiveEmailServerProperties = receiveProperties
         organization.save()
-        assertEquals 1234, organization.emailServerProperties[0].smtpPort
+        assertEquals 1234, organization.receiveEmailServerProperties.smtpPort
 
     }
 
