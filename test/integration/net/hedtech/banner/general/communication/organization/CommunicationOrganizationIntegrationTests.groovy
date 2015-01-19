@@ -4,9 +4,12 @@
 package net.hedtech.banner.general.communication.organization
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.hibernate.Hibernate
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+
+import java.sql.Blob
 
 /**
  * OrganizationTest.
@@ -51,7 +54,6 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertNotNull organization.sendEmailServerProperties
 
 
-
     }
 
 
@@ -93,6 +95,30 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
 
     @Test
+    void testPassword() {
+        def organization = newValidForCreateOrganization()
+        def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
+        def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
+        def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
+        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
+        organization.receiveEmailServerProperties = receiveProperties
+        organization.sendEmailServerProperties = sendProperties
+        organization.senderMailboxAccountSettings = senderMailboxAccountSettings
+        organization.replyToMailboxAccountSettings = replyToMailboxAccountSettings
+        organization.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull organization.id
+        assertNotNull organization.receiveEmailServerProperties.id
+        assertNotNull organization.sendEmailServerProperties.id
+        assertNotNull organization.senderMailboxAccountSettings.id
+        assertNotNull organization.replyToMailboxAccountSettings.id
+
+        assertEquals( "Saved sender password does not match retrieved password", "superSecretPassword", organization.senderMailboxAccountSettings.password )
+        assertEquals( "Saved replyto password does not match retrieved password", "superSecretPassword", organization.replyToMailboxAccountSettings.password )
+    }
+
+
+    @Test
     void testCreateInValidOrganization() {
         def organization = newValidForCreateOrganization()
 
@@ -126,6 +152,22 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
                 type: serverType
         )
         return communicationEmailServerProperties
+    }
+
+
+    private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
+        Blob blob = Hibernate.getLobCreator( sessionFactory.getCurrentSession().connection() )
+                .createBlob( "superSecretPassword", 500 )
+
+        def CommunicationMailboxAccount = new CommunicationMailboxAccount(
+                password: blob,
+                organization: organization,
+                type: communicationMailboxAccountType,
+                emailAddress: "Registrar@BannerUniversity.edu",
+                userName: "bannerRegUser" + communicationMailboxAccountType,
+                emailDisplayName: "The Office of The Registrar"
+        )
+        return CommunicationMailboxAccount
     }
 
 }
