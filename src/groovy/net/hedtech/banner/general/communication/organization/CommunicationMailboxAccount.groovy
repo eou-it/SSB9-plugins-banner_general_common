@@ -5,6 +5,8 @@ package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.hibernate.type.LobType
+import org.hibernate.type.MaterializedBlobType
 
 import javax.persistence.*
 import java.sql.Blob
@@ -14,7 +16,6 @@ import java.sql.Blob
  */
 @Entity
 @EqualsAndHashCode
-@ToString
 @Table(name = "GCRMBAC")
 // @NamedQueries(value = [
 // @NamedQuery(name = "CommunicationMailboxAccount.fetchByxxxxx",
@@ -45,6 +46,7 @@ class CommunicationMailboxAccount implements Serializable {
      * PASSWORD: Encrypted password of this mailbox account.
      */
     @Column(name = "GCRMBAC_PASSWORD")
+    @Lob()
     Blob password
 
     /**
@@ -98,7 +100,7 @@ class CommunicationMailboxAccount implements Serializable {
         dataOrigin( nullable: true, maxSize: 30 )
         emailAddress( nullable: false, maxSize: 1020 )
         organization( nullable: false, maxSize: 1020 )
-        password( nullable: true )
+        password( nullable: false )
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )
         emailDisplayName( nullable: true )
@@ -107,4 +109,24 @@ class CommunicationMailboxAccount implements Serializable {
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
+     /*
+     Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
+     */
+
+    @Override
+    public String toString() {
+        return "CommunicationMailboxAccount{" +
+                "id=" + id +
+                ", emailAddress='" + emailAddress + '\'' +
+                ", organization=" + organization.name +
+                ", password=" + password +
+                ", type=" + type +
+                ", emailDisplayName='" + emailDisplayName + '\'' +
+                ", userName='" + userName + '\'' +
+                ", version=" + version +
+                ", lastModified=" + lastModified +
+                ", lastModifiedBy='" + lastModifiedBy + '\'' +
+                ", dataOrigin='" + dataOrigin + '\'' +
+                '}';
+    }
 }
