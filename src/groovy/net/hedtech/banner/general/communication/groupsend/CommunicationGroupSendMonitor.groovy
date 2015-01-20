@@ -7,6 +7,7 @@ import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationS
 import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -15,7 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Created by mbrzycki on 12/5/14.
  */
-class CommunicationGroupSendMonitor {
+class CommunicationGroupSendMonitor implements DisposableBean {
     private Log log = LogFactory.getLog( this.getClass() )
     private CommunicationGroupSendMonitorThread monitorThread
     private CommunicationGroupSendService communicationGroupSendService
@@ -43,6 +44,11 @@ class CommunicationGroupSendMonitor {
         this.monitorThread = new CommunicationGroupSendMonitorThread( this );
     }
 
+    @Override
+    void destroy() throws Exception {
+        log.info( "Calling disposable bean method." );
+        this.monitorThread.stopRunning()
+    }
 
     public void startMonitoring() {
         log.info( "Monitor thread started.")

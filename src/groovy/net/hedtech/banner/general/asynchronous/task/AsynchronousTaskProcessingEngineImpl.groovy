@@ -8,7 +8,8 @@ import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFacto
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.LogFactory
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author charlie hardt (Very significantly based upon work by Shane Riddell)
  */
-public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskProcessingEngine {
+public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskProcessingEngine, DisposableBean {
 
     private final Log log = LogFactory.getLog( this.getClass() );
 
@@ -146,6 +147,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     void setAsynchronousBannerAuthenticationSpoofer(asynchronousBannerAuthenticationSpoofer) {
         this.asynchronousBannerAuthenticationSpoofer = asynchronousBannerAuthenticationSpoofer
     }
+
+    @Override
+    void destroy() throws Exception {
+        log.info( "Calling disposable bean method." );
+        this.stopRunning()
+    }
+
 //  ----------------------- JobProcessingEngine Method(s) ----------------------
 
 
