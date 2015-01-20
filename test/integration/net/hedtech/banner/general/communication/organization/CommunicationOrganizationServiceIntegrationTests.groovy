@@ -6,15 +6,12 @@ package net.hedtech.banner.general.communication.organization
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.hibernate.Hibernate
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-
-import java.sql.Blob
 
 /**
  * Tests crud methods provided by organization service.
@@ -154,9 +151,19 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull( createdOrganization )
         assertEquals( "test", createdOrganization.name )
         assertEquals( "description", createdOrganization.description )
-        assertNotNull( createdOrganization.senderMailboxAccountSettings.password )
-        assertNotNull( createdOrganization.replyToMailboxAccountSettings.password )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings.encryptedPassword )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings.encryptedPassword )
 
+    }
+
+
+    @Test
+    void testPasswordEncryptAndDecrypt() {
+
+        def thePassword = "someSecretThisIs"
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( thePassword )
+        def decryptedPassword = communicationOrganizationService.decryptMailBoxAccountPassword( encryptedPassword )
+        assertEquals( thePassword, decryptedPassword )
     }
 
 
@@ -174,11 +181,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
 
     private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
-        Blob blob = Hibernate.getLobCreator( sessionFactory.getCurrentSession().connection() )
-                       .createBlob( "superSecretPassword", 500 )
-
         def communicationMailboxAccount = new CommunicationMailboxAccount(
-                password: blob,
+                encryptedPassword: "D359A3537A74FC42F284450BCCDDA734",
                 organization: organization,
                 type: communicationMailboxAccountType,
                 emailAddress: "Registrar@BannerUniversity.edu",
@@ -187,5 +191,6 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         )
         return communicationMailboxAccount
     }
+
 
 }

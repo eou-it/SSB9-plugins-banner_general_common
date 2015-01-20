@@ -4,10 +4,10 @@
 
 package net.hedtech.banner.general.communication.organization
 
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
-import org.hibernate.Hibernate
 
 import java.sql.Blob
 import java.text.SimpleDateFormat
@@ -22,18 +22,6 @@ class CommunicationOrganizationService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-
-        if (communicationOrganization.senderMailboxAccountSettings?.password != null) {
-            Blob blob = Hibernate.getLobCreator( sessionFactory.getCurrentSession().connection() )
-                    .createBlob( communicationOrganization.senderMailboxAccountSettings?.password, 5000 );
-            communicationOrganization.senderMailboxAccountSettings.password = blob
-        }
-
-        if (communicationOrganization.replyToMailboxAccountSettings?.password != null) {
-            Blob blob = Hibernate.getLobCreator( sessionFactory.getCurrentSession().connection() )
-                    .createBlob( communicationOrganization.replyToMailboxAccountSettings?.password, 5000 );
-            communicationOrganization.replyToMailboxAccountSettings.password = blob
-        }
 
 
         if (communicationOrganization.dateFormat != null) {
@@ -64,6 +52,7 @@ class CommunicationOrganizationService extends ServiceBase {
     def preUpdate( domainModelOrMap ) {
 
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
+
 
         if (communicationOrganization.dateFormat != null) {
             try {
@@ -103,5 +92,22 @@ class CommunicationOrganizationService extends ServiceBase {
         convertedDate
     }
 
-
+    def  decryptMailBoxAccountPassword (String encryptedPassword)
+    {
+        def decryptedPassword
+        def sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        sql.call( "{? = call baninst1.gckencr.decrypt_string ('${encryptedPassword}')}", [Sql.VARCHAR] ) {
+            result -> decryptedPassword = result
+        }
+        decryptedPassword
+    }
+    def  encryptMailBoxAccountPassword( String clearTextPassword)
+     {
+         def encryptedPassword
+         def sql = new Sql( sessionFactory.getCurrentSession().connection() )
+         sql.call( "{? = call baninst1.gckencr.encrypt_string ('${clearTextPassword}')}", [Sql.VARCHAR] ) {
+             result -> encryptedPassword = result
+         }
+         encryptedPassword
+     }
 }

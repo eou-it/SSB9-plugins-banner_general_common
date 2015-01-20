@@ -43,11 +43,16 @@ class CommunicationMailboxAccount implements Serializable {
     CommunicationOrganization organization
 
     /**
+     * Clear text password
+     */
+    @Transient
+    String clearTextPassword
+
+    /**
      * PASSWORD: Encrypted password of this mailbox account.
      */
-    @Column(name = "GCRMBAC_PASSWORD")
-    @Lob()
-    Blob password
+    @Column(name = "GCRMBAC_ENCRYPTED_PASSWORD")
+    String encryptedPassword
 
     /**
      * TYPE: Type of mailbox account. Valid values are Sender and ReplyTo. MailboxAccount instances must be of a specific type; the type tells the monitoring system how to treat email received by the account. (For example, parse as bounce-backs, or parse as normal replies.)
@@ -100,10 +105,11 @@ class CommunicationMailboxAccount implements Serializable {
         dataOrigin( nullable: true, maxSize: 30 )
         emailAddress( nullable: false, maxSize: 1020 )
         organization( nullable: false, maxSize: 1020 )
-        password( nullable: false )
+        encryptedPassword( nullable: false )
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )
         emailDisplayName( nullable: true )
+        clearTextPassword( nullable: true)
     }
 
     // Read Only fields that should be protected against update
@@ -119,7 +125,8 @@ class CommunicationMailboxAccount implements Serializable {
                 "id=" + id +
                 ", emailAddress='" + emailAddress + '\'' +
                 ", organization=" + organization.name +
-                ", password=" + password +
+                ", encryptedPassword=" + encryptedPassword +
+                ", clearTextPassword=" + clearTextPassword +
                 ", type=" + type +
                 ", emailDisplayName='" + emailDisplayName + '\'' +
                 ", userName='" + userName + '\'' +

@@ -4,7 +4,8 @@
 package net.hedtech.banner.general.communication.organization
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.hibernate.Hibernate
+import java.io.ByteArrayInputStream
+
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -110,12 +111,9 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertNotNull organization.id
         assertNotNull organization.receiveEmailServerProperties.id
         assertNotNull organization.sendEmailServerProperties.id
-        assertNotNull organization.senderMailboxAccountSettings.id
-        assertNotNull organization.replyToMailboxAccountSettings.id
-
-        assertEquals( "Saved sender password does not match retrieved password", "superSecretPassword", organization.senderMailboxAccountSettings.password )
-        assertEquals( "Saved replyto password does not match retrieved password", "superSecretPassword", organization.replyToMailboxAccountSettings.password )
-    }
+        assertNotNull organization.senderMailboxAccountSettings.encryptedPassword
+        assertNotNull organization.replyToMailboxAccountSettings.encryptedPassword
+   }
 
 
     @Test
@@ -156,11 +154,10 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
 
     private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
-        Blob blob = Hibernate.getLobCreator( sessionFactory.getCurrentSession().connection() )
-                .createBlob( "superSecretPassword", 500 )
+
 
         def CommunicationMailboxAccount = new CommunicationMailboxAccount(
-                password: blob,
+                encryptedPassword: "supersecretpassword",
                 organization: organization,
                 type: communicationMailboxAccountType,
                 emailAddress: "Registrar@BannerUniversity.edu",
