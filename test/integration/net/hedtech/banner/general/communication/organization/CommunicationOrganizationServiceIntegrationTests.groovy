@@ -117,7 +117,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
         assertEquals( "organization1 changed", organization1.getName() )
         assertEquals( "description changed", organization1.getDescription() )
-        
+
     }
 
 

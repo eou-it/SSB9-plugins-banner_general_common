@@ -133,7 +133,13 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
         /* Create an organization */
         organization = new CommunicationOrganization( name: "Test Org", isRoot: true )
-        organization = communicationOrganizationService.create( organization ) as CommunicationOrganization
+        def orgList = communicationOrganizationService.list()
+        if (orgList.size() > 0) {
+            organization = orgList[0]
+        } else {
+            organization = communicationOrganizationService.create(organization) as CommunicationOrganization
+        }
+
     }
 
 
