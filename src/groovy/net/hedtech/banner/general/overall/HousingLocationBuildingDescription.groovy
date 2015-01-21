@@ -27,11 +27,14 @@ import javax.persistence.*
                                a.building.description
                           FROM  HousingLocationBuildingDescription a
                          WHERE a.building like :building
-                         ORDER BY a.building """ )
+                         ORDER BY a.building """ ),
+@NamedQuery(name = "HousingLocationBuildingDescription.fetchAllByCampuses",
+            query = """FROM HousingLocationBuildingDescription a
+                        WHERE a.campus.code in (:campusCodes)""")
 ])
-@DatabaseModifiesState 
+@DatabaseModifiesState
 class HousingLocationBuildingDescription implements Serializable {
-	
+
 	/**
 	 * Surrogate ID for SLBBLDG
 	 */
@@ -157,7 +160,7 @@ class HousingLocationBuildingDescription implements Serializable {
 	@Column(name = "SLBBLDG_DATA_ORIGIN", length = 30)
 	String dataOrigin
 
-	
+
 	/**
 	 * Foreign Key : FK1_SLBBLDG_INV_STVBLDG_CODE
 	 */
@@ -248,42 +251,42 @@ class HousingLocationBuildingDescription implements Serializable {
 		])
 	Partition partition
 
-	
+
 	public String toString() {
 		"""HousingLocationBuildingDescription[
-					id=$id, 
-					version=$version, 
-					capacity=$capacity, 
-					maximumCapacity=$maximumCapacity, 
-					streetLine1=$streetLine1, 
-					streetLine2=$streetLine2, 
-					streetLine3=$streetLine3, 
-					city=$city, 
-					zip=$zip, 
-					phoneArea=$phoneArea, 
-					phoneNumber=$phoneNumber, 
-					phoneExtension=$phoneExtension, 
-					sex=$sex, 
-					keyNumber=$keyNumber, 
-					countryPhone=$countryPhone, 
-					houseNumber=$houseNumber, 
-					streetLine4=$streetLine4, 
-					lastModified=$lastModified, 
-					lastModifiedBy=$lastModifiedBy, 
-					dataOrigin=$dataOrigin, 
-					building=$building, 
-					campus=$campus, 
-					roomRate=$roomRate, 
-					phoneRate=$phoneRate, 
-					site=$site, 
-					state=$state, 
-					county=$county, 
-					college=$college, 
-					department=$department, 
+					id=$id,
+					version=$version,
+					capacity=$capacity,
+					maximumCapacity=$maximumCapacity,
+					streetLine1=$streetLine1,
+					streetLine2=$streetLine2,
+					streetLine3=$streetLine3,
+					city=$city,
+					zip=$zip,
+					phoneArea=$phoneArea,
+					phoneNumber=$phoneNumber,
+					phoneExtension=$phoneExtension,
+					sex=$sex,
+					keyNumber=$keyNumber,
+					countryPhone=$countryPhone,
+					houseNumber=$houseNumber,
+					streetLine4=$streetLine4,
+					lastModified=$lastModified,
+					lastModifiedBy=$lastModifiedBy,
+					dataOrigin=$dataOrigin,
+					building=$building,
+					campus=$campus,
+					roomRate=$roomRate,
+					phoneRate=$phoneRate,
+					site=$site,
+					state=$state,
+					county=$county,
+					college=$college,
+					department=$department,
 					partition=$partition]"""
 	}
 
-	
+
 	boolean equals(o) {
 	    if (this.is(o)) return true
 	    if (!(o instanceof HousingLocationBuildingDescription)) return false
@@ -308,20 +311,20 @@ class HousingLocationBuildingDescription implements Serializable {
         if(lastModified != that.lastModified) return false
         if(lastModifiedBy != that.lastModifiedBy) return false
         if(dataOrigin != that.dataOrigin) return false
-        if(building != that.building) return false      
-        if(campus != that.campus) return false      
-        if(roomRate != that.roomRate) return false      
-        if(phoneRate != that.phoneRate) return false      
-        if(site != that.site) return false      
-        if(state != that.state) return false      
-        if(county != that.county) return false      
-        if(college != that.college) return false      
-        if(department != that.department) return false      
-        if(partition != that.partition) return false      
+        if(building != that.building) return false
+        if(campus != that.campus) return false
+        if(roomRate != that.roomRate) return false
+        if(phoneRate != that.phoneRate) return false
+        if(site != that.site) return false
+        if(state != that.state) return false
+        if(county != that.county) return false
+        if(college != that.college) return false
+        if(department != that.department) return false
+        if(partition != that.partition) return false
         return true
     }
 
-	
+
 	int hashCode() {
 		int result
 	    result = (id != null ? id.hashCode() : 0)
@@ -387,7 +390,7 @@ class HousingLocationBuildingDescription implements Serializable {
 		department(nullable:true)
 		partition(nullable:true)
 	}
-    
+
     //Read Only fields that should be protected against update
     public static readonlyProperties = [ 'building' ]
 
@@ -439,4 +442,11 @@ class HousingLocationBuildingDescription implements Serializable {
          return buildings
      }
 
+    public static List<HousingLocationBuildingDescription> fetchAllByCampuses(List<String> campusCodes){
+        def result = HousingLocationBuildingDescription.withSession {
+            session ->
+                session.getNamedQuery('HousingLocationBuildingDescription.fetchAllByCampuses').setParameterList('campusCodes', campusCodes).list()
+        }
+        return result
+    }
 }
