@@ -33,6 +33,7 @@ class CommunicationEmailServerProperties implements Serializable {
      * Type: The type of email server properties, Send,Receive
      */
     @Column(name = "GCBSPRP_TYPE")
+    @Enumerated(value = EnumType.STRING)
     CommunicationEmailServerPropertiesType type
     /**
      * SMTP HOST: The host name for the SMTP mail server to send email to
@@ -107,7 +108,7 @@ class CommunicationEmailServerProperties implements Serializable {
                 "id=" + id +
                 ", type=" + type +
                 ", smtpHost='" + smtpHost + '\'' +
-                ", organization=" + organization.name +
+                ", organization=" + organization.id + "**"+organization.name +
                 ", smtpPort=" + smtpPort +
                 ", securityProtocol='" + securityProtocol + '\'' +
                 ", version=" + version +

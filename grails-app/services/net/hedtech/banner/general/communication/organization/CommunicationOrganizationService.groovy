@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.organization
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
+import oracle.net.ns.Communication
 import org.apache.log4j.Logger
 
 import java.sql.Blob
@@ -23,6 +24,9 @@ class CommunicationOrganizationService extends ServiceBase {
     def preCreate( domainModelOrMap ) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
 
+        def existingOrg = CommunicationOrganization.findAll()
+        if (existingOrg.size() > 0)
+            throw new ApplicationException(CommunicationOrganization, "@@r1:onlyOneOrgCanExist@@")
 
         if (communicationOrganization.dateFormat != null) {
             try {

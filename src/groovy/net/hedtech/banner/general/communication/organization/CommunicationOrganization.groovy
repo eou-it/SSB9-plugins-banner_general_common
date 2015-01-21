@@ -16,8 +16,6 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "GCRORAN")
-@EqualsAndHashCode
-@ToString
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationOrganization.fetchById",
                 query = """ FROM CommunicationOrganization a
@@ -101,36 +99,30 @@ class CommunicationOrganization implements Serializable {
     /**
      * The send email server configuration properties
      */
-    //@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
-    //List<CommunicationEmailServerProperties> emailServerProperties
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @Where(clause = " GCBSPRP_TYPE = 'Send'")
+    List<CommunicationEmailServerProperties> sendEmailServerProperties
 
     /**
      * The send email server configuration properties
      */
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
-    @Where(clause = "GCBSPRP_TYPE = 'Send'")
-    CommunicationEmailServerProperties sendEmailServerProperties
-
-    /**
-     * The send email server configuration properties
-     */
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
     @Where(clause = "GCBSPRP_TYPE = 'Receive'")
-    CommunicationEmailServerProperties receiveEmailServerProperties
+    List<CommunicationEmailServerProperties> receiveEmailServerProperties
 
     /**
      * The sender email mailbox properties
      */
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
     @Where(clause = "GCRMBAC_TYPE = 'Sender'")
-    CommunicationMailboxAccount senderMailboxAccountSettings
+    List<CommunicationMailboxAccount> senderMailboxAccountSettings
 
     /**
      * The replyTo email mailbox properties
      */
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
-    @Where(clause = "GCRMBAC_TYPE = 'replyTo'")
-    CommunicationMailboxAccount replyToMailboxAccountSettings
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @Where(clause = "GCRMBAC_TYPE = 'ReplyTo'")
+    List<CommunicationMailboxAccount> replyToMailboxAccountSettings
 
 
     static constraints = {
@@ -152,6 +144,51 @@ class CommunicationOrganization implements Serializable {
     }
 
 
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof CommunicationOrganization)) return false
+
+        CommunicationOrganization that = (CommunicationOrganization) o
+
+        if (dataOrigin != that.dataOrigin) return false
+        if (dateFormat != that.dateFormat) return false
+        if (dayOfWeekFormat != that.dayOfWeekFormat) return false
+        if (description != that.description) return false
+        if (id != that.id) return false
+        if (isRoot != that.isRoot) return false
+        if (lastModified != that.lastModified) return false
+        if (lastModifiedBy != that.lastModifiedBy) return false
+        if (name != that.name) return false
+        if (parent != that.parent) return false
+        if (!receiveEmailServerProperties.equals(that.receiveEmailServerProperties)) return false
+        if (!replyToMailboxAccountSettings.equals(replyToMailboxAccountSettings)) return false
+        if (!sendEmailServerProperties.equals(sendEmailServerProperties)) return false
+        if (!senderMailboxAccountSettings.equals(senderMailboxAccountSettings)) return false
+        if (timeOfDayFormat != that.timeOfDayFormat) return false
+        if (version != that.version) return false
+
+        return true
+    }
+
+
+    int hashCode() {
+        int result
+        result = (id != null ? id.hashCode() : 0)
+        result = 31 * result + (name != null ? name.hashCode() : 0)
+        result = 31 * result + (isRoot != null ? isRoot.hashCode() : 0)
+        result = 31 * result + (parent != null ? parent.hashCode() : 0)
+        result = 31 * result + (description != null ? description.hashCode() : 0)
+        result = 31 * result + (dateFormat != null ? dateFormat.hashCode() : 0)
+        result = 31 * result + (dayOfWeekFormat != null ? dayOfWeekFormat.hashCode() : 0)
+        result = 31 * result + (timeOfDayFormat != null ? timeOfDayFormat.hashCode() : 0)
+        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
+        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
+        result = 31 * result + (version != null ? version.hashCode() : 0)
+        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
+        return result
+    }
+
+
     public static CommunicationOrganization fetchById( Long id ) {
 
         def query
@@ -170,5 +207,28 @@ class CommunicationOrganization implements Serializable {
             query = session.getNamedQuery( 'CommunicationOrganization.fetchByName' ).setString( 'name', name ).list()[0]
         }
         return query
+    }
+
+
+    @Override
+    public String toString() {
+        return "CommunicationOrganization{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", isRoot=" + isRoot +
+                ", parent=" + parent +
+                ", description='" + description + '\'' +
+                ", dateFormat='" + dateFormat + '\'' +
+                ", dayOfWeekFormat='" + dayOfWeekFormat + '\'' +
+                ", timeOfDayFormat='" + timeOfDayFormat + '\'' +
+                ", lastModifiedBy='" + lastModifiedBy + '\'' +
+                ", lastModified=" + lastModified +
+                ", version=" + version +
+                ", dataOrigin='" + dataOrigin + '\'' +
+                ", sendEmailServerProperties=" + sendEmailServerProperties +
+                ", receiveEmailServerProperties=" + receiveEmailServerProperties +
+                ", senderMailboxAccountSettings=" + senderMailboxAccountSettings +
+                ", replyToMailboxAccountSettings=" + replyToMailboxAccountSettings +
+                '}';
     }
 }

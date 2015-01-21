@@ -48,8 +48,8 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         def organization = newValidForCreateOrganization()
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
         def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
-        organization.receiveEmailServerProperties = receiveProperties
-        organization.sendEmailServerProperties = sendProperties
+        organization.receiveEmailServerProperties = [receiveProperties]
+        organization.sendEmailServerProperties = [sendProperties]
         organization.save( failOnError: true, flush: true )
         assertNotNull organization.receiveEmailServerProperties
         assertNotNull organization.sendEmailServerProperties
@@ -73,7 +73,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testUpdate() {
         def organization = newValidForCreateOrganization()
-        organization.save( failOnError: true, flush: true )
+        organization.save()
         //Test if the generated entity now has an id assigned
         assertNotNull organization.id
         organization.description = u_valid_description
@@ -88,9 +88,9 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertEquals( "Updated name", u_valid_name, organization.name )
         // Test update of dependent objects
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
-        organization.receiveEmailServerProperties = receiveProperties
+        organization.receiveEmailServerProperties = [receiveProperties]
         organization.save()
-        assertEquals 1234, organization.receiveEmailServerProperties.smtpPort
+        assertEquals 1234, organization.receiveEmailServerProperties[0].smtpPort
 
     }
 
@@ -102,10 +102,10 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
         def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
         def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
-        organization.receiveEmailServerProperties = receiveProperties
-        organization.sendEmailServerProperties = sendProperties
-        organization.senderMailboxAccountSettings = senderMailboxAccountSettings
-        organization.replyToMailboxAccountSettings = replyToMailboxAccountSettings
+        organization.receiveEmailServerProperties = [receiveProperties]
+        organization.sendEmailServerProperties = [sendProperties]
+        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
+        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
         organization.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull organization.id

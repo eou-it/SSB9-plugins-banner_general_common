@@ -73,11 +73,36 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             communicationOrganizationService.create( sameNameOrganization )
             Assert.fail "Expected sameNameOrganization to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertTrue e.getSqlException().toString().contains( "ORA-00001: unique constraint (GENERAL.GCRORAN_KEY_INDEX) violated" )
+            assertTrue e.getMessage().contains( "onlyOneOrgCanExist" )
+            //assertTrue e.getSqlException().toString().contains( "ORA-00001: unique constraint (GENERAL.GCRORAN_KEY_INDEX) violated" )
         }
 
     }
 
+    @Test
+    void testCreateMultiple() {
+        CommunicationOrganization organization = new CommunicationOrganization()
+        organization.name = "test"
+        organization.description = "description"
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
+        assertNotNull( createdOrganization )
+        assertEquals( "test", createdOrganization.name )
+        assertEquals( "description", createdOrganization.description )
+
+        CommunicationOrganization foundOrganization = CommunicationOrganization.findByName( "test" )
+        assertEquals( createdOrganization, foundOrganization )
+
+        CommunicationOrganization sameNameOrganization = new CommunicationOrganization()
+        sameNameOrganization.name = "testAnother"
+        sameNameOrganization.description = "another organization that shouldnt be created"
+        try {
+            communicationOrganizationService.create( sameNameOrganization )
+            Assert.fail "Expected sameNameOrganization to fail because only one org can exist."
+        } catch (ApplicationException e) {
+            assertTrue e.getMessage().contains( "onlyOneOrgCanExist" )
+        }
+
+    }
 
     @Test
     void testUpdate() {
@@ -92,18 +117,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
         assertEquals( "organization1 changed", organization1.getName() )
         assertEquals( "description changed", organization1.getDescription() )
-
-        CommunicationOrganization organization2 = new CommunicationOrganization()
-        organization2.name = "organization2"
-        organization2 = communicationOrganizationService.create( organization2 )
-
-        organization1.name = organization2.name
-        try {
-            communicationOrganizationService.update( organization1 )
-            Assert.fail "Expected sameNameOrganization to fail because of name unique constraint."
-        } catch (ApplicationException e) {
-            assertTrue e.getSqlException().toString().contains( "ORA-00001: unique constraint (GENERAL.GCRORAN_KEY_INDEX) violated" )
-        }
+        
     }
 
 
@@ -143,16 +157,16 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
         def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
         def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
-        organization.receiveEmailServerProperties = receiveProperties
-        organization.sendEmailServerProperties = sendProperties
-        organization.senderMailboxAccountSettings = senderMailboxAccountSettings
-        organization.replyToMailboxAccountSettings = replyToMailboxAccountSettings
+        organization.receiveEmailServerProperties = [receiveProperties]
+        organization.sendEmailServerProperties = [sendProperties]
+        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
+        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
         CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
         assertNotNull( createdOrganization )
         assertEquals( "test", createdOrganization.name )
         assertEquals( "description", createdOrganization.description )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings.encryptedPassword )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings.encryptedPassword )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
 
     }
 

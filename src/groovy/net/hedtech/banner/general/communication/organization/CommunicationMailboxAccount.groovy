@@ -58,6 +58,7 @@ class CommunicationMailboxAccount implements Serializable {
      * TYPE: Type of mailbox account. Valid values are Sender and ReplyTo. MailboxAccount instances must be of a specific type; the type tells the monitoring system how to treat email received by the account. (For example, parse as bounce-backs, or parse as normal replies.)
      */
     @Column(name = "GCRMBAC_TYPE")
+    @Enumerated(value = EnumType.STRING)
     CommunicationMailboxAccountType type
 
     /**
