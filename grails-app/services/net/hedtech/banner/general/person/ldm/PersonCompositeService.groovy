@@ -9,7 +9,10 @@ import com.google.i18n.phonenumbers.Phonenumber
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
+import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.person.AdditionalID
 import net.hedtech.banner.general.person.PersonAddress
@@ -166,6 +169,9 @@ class PersonCompositeService extends LdmService {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
                     def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
+                    if("v2".equals(getRequestedVersion())) {
+                        allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
+                    }
                     validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
                     person = createSSN(it.credentialType, it.credentialId, person)
                 }
@@ -306,6 +312,9 @@ class PersonCompositeService extends LdmService {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
                     def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
+                    if("v2".equals(getRequestedVersion())) {
+                        allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
+                    }
                     validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
                 }
             }
@@ -903,6 +912,16 @@ class PersonCompositeService extends LdmService {
             domainIds << identification.id
             currentRecord.metadata = new Metadata(identification.dataOrigin)
             currentRecord.names << name
+            if("v2".equals(getRequestedVersion())) {
+                def sourcedIdBase = ImsSourcedIdBase.findbyPidm(identification.pidm)
+                currentRecord.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
+
+                def thirdPartyAccess = ThirdPartyAccess.findByPidm(identification.pidm)
+                currentRecord.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
+
+                def udcIdMapping = PidmAndUDCIdMapping.findByPidm(identification.pidm)
+                currentRecord.credentials << new Credential("Banner UDC ID", udcIdMapping.udcId, null, null)
+            }
             currentRecord.credentials << new Credential("Banner ID", identification.bannerId, null, null)
             persons.put(identification.pidm, currentRecord)
         }
