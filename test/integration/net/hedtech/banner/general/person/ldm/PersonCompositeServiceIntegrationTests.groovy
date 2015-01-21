@@ -71,12 +71,16 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_confirmedRe = "Y"
     def i_success_confirmedReDate = new Date()
     def i_success_armedServiceMedalVetIndicator = true
+    def i_success_guid_personal = "abcd1234ttyy222223s"
     def i_success_emailAddress_personal = "xyz@ellucian.com"
     def i_success_emailType_personal = "Personal"
+    def i_success_guid_institution = "xyzqweqw32312321zczx"
     def i_success_emailAddress_institution = "abc@ellucian.com"
     def i_success_emailType_institution = "Institution"
+    def i_success_guid_work = "323123sdsdds3123asdasd123"
     def i_success_emailAddress_work = "123@ellucian.com"
     def i_success_emailType_work = "Work"
+    def i_success_emailType_preferred = "Preferred"
     def i_success_first_name = "Mark"
     def i_success_middle_name = "TR"
     def i_success_last_name = "Mccallon"
@@ -195,6 +199,26 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_state_goriccr_data, o_success_person_create.addresses[1].address.state.code
     }
 
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithActiveAndPreferredEmail() {
+        Map content = newPersonWithPreferredEmailRequest()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 3, o_success_person_create.emails?.size()
+        assertEquals i_success_guid_personal, o_success_person_create.emails[0].guid
+        assertEquals i_success_emailType_personal, o_success_person_create.emails[0].emailType
+        assertEquals i_success_emailAddress_personal, o_success_person_create.emails[0].emailAddress
+        assertEquals i_success_guid_personal, o_success_person_create.emails[1].guid
+        assertEquals i_success_emailType_preferred, o_success_person_create.emails[1].emailType
+        assertEquals i_success_emailAddress_personal, o_success_person_create.emails[1].emailAddress
+        assertEquals i_success_guid_institution, o_success_person_create.emails[2].guid
+        assertEquals i_success_emailType_institution, o_success_person_create.emails[2].emailType
+        assertEquals i_success_emailAddress_institution, o_success_person_create.emails[2].emailAddress
+    }
 
     @Test
     void testUpdatePersonFirstNameAndLastNameChange() {
@@ -490,23 +514,28 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String i_success_guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey("persons", personIdentificationNameCurrent.pidm)?.guid
 
         assertNotNull i_success_guid
-        Map params = updatePersonWithEmailAddress(i_success_guid)
+        Map params = updatePersonWithPreferredEmailAddress(i_success_guid)
 
         //update PersonBasicPersonBase info
         def o_person_update = personCompositeService.update(params)
 
         assertNotNull o_person_update
         assertEquals i_success_guid, o_person_update.guid
-        assertEquals 2, o_person_update.emails?.size()
+        assertEquals 3, o_person_update.emails?.size()
+        assertEquals i_success_guid_personal, o_person_update.emails[0].guid
         assertEquals i_success_emailType_personal, o_person_update.emails[0].emailType
         assertEquals i_success_emailAddress_personal, o_person_update.emails[0].emailAddress
-        assertEquals i_success_emailType_institution, o_person_update.emails[1].emailType
-        assertEquals i_success_emailAddress_institution, o_person_update.emails[1].emailAddress
+        assertEquals i_success_guid_personal, o_person_update.emails[1].guid
+        assertEquals i_success_emailType_preferred, o_person_update.emails[1].emailType
+        assertEquals i_success_emailAddress_personal, o_person_update.emails[1].emailAddress
+        assertEquals i_success_guid_institution, o_person_update.emails[2].guid
+        assertEquals i_success_emailType_institution, o_person_update.emails[2].emailType
+        assertEquals i_success_emailAddress_institution, o_person_update.emails[2].emailAddress
     }
 
     //PUT- person update API
     @Test
-    void testUpdatePersonEmailHavingExistingActiveEmailRecord() {
+    void testUpdatePreferredPersonEmailHavingExistingActiveEmailRecord() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
 
         assertNotNull personBasicPersonBase
@@ -520,31 +549,40 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String i_success_guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey("persons", personIdentificationNameCurrent.pidm)?.guid
 
         assertNotNull i_success_guid
-        Map params1 = updatePersonWithEmailAddress(i_success_guid)
+        Map params1 = updatePersonWithPreferredEmailAddress(i_success_guid)
 
         //create the email records
         def o_person_update1 = personCompositeService.update(params1)
 
         assertNotNull o_person_update1
         assertEquals i_success_guid, o_person_update1.guid
-        assertEquals 2, o_person_update1.emails?.size()
+        assertEquals 3, o_person_update1.emails?.size()
+        assertEquals i_success_guid_personal, o_person_update1.emails[0].guid
         assertEquals i_success_emailType_personal, o_person_update1.emails[0].emailType
         assertEquals i_success_emailAddress_personal, o_person_update1.emails[0].emailAddress
-        assertEquals i_success_emailType_institution, o_person_update1.emails[1].emailType
-        assertEquals i_success_emailAddress_institution, o_person_update1.emails[1].emailAddress
+        assertEquals i_success_guid_personal, o_person_update1.emails[1].guid
+        assertEquals i_success_emailType_preferred, o_person_update1.emails[1].emailType
+        assertEquals i_success_emailAddress_personal, o_person_update1.emails[1].emailAddress
+        assertEquals i_success_guid_institution, o_person_update1.emails[2].guid
+        assertEquals i_success_emailType_institution, o_person_update1.emails[2].emailType
+        assertEquals i_success_emailAddress_institution, o_person_update1.emails[2].emailAddress
 
         //update the email records
         Map params2 = [id    : i_success_guid,
-                       emails: [[emailAddress: i_success_emailAddress_work, emailType: i_success_emailType_work]]
+                       emails: [[guid: i_success_guid_work, emailAddress: i_success_emailAddress_work, emailType: i_success_emailType_work], [emailAddress: i_success_emailAddress_work, emailType: i_success_emailType_preferred]]
         ]
 
         def o_person_update2 = personCompositeService.update(params2)
 
         assertNotNull o_person_update2
         assertEquals i_success_guid, o_person_update2.guid
-        assertEquals 1, o_person_update2.emails?.size()
+        assertEquals 2, o_person_update2.emails?.size()
+        assertEquals i_success_guid_work, o_person_update2.emails[0].guid
         assertEquals i_success_emailType_work, o_person_update2.emails[0].emailType
         assertEquals i_success_emailAddress_work, o_person_update2.emails[0].emailAddress
+        assertEquals i_success_guid_work, o_person_update2.emails[1].guid
+        assertEquals i_success_emailType_preferred, o_person_update2.emails[1].emailType
+        assertEquals i_success_emailAddress_work, o_person_update2.emails[1].emailAddress
     }
 
     private def createPersonBasicPersonBase() {
@@ -751,18 +789,27 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    private Map updatePersonWithEmailAddress(String guid) {
-        Map params = [id    : guid,
-                      emails: [[emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution]]
+    private Map newPersonWithAddressRequest() {
+        Map params = [names      : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      addresses  : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]]
         ]
 
         return params
     }
 
 
-    private Map newPersonWithAddressRequest() {
+    private Map newPersonWithPreferredEmailRequest() {
         Map params = [names      : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
-                      addresses  : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]]
+                      emails: [[guid: i_success_guid_personal, emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [guid: i_success_guid_institution, emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution],[emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_preferred]]
+        ]
+
+        return params
+    }
+
+
+    private Map updatePersonWithPreferredEmailAddress(String guid) {
+        Map params = [id    : guid,
+                      emails: [[guid: i_success_guid_personal, emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [guid: i_success_guid_institution, emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution], [emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_preferred]]
         ]
 
         return params

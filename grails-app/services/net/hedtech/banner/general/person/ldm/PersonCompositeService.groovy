@@ -913,16 +913,24 @@ class PersonCompositeService extends LdmService {
             currentRecord.metadata = new Metadata(identification.dataOrigin)
             currentRecord.names << name
             if("v2".equals(getRequestedVersion())) {
-                def sourcedIdBase = ImsSourcedIdBase.findbyPidm(identification.pidm)
-                currentRecord.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
+                def sourcedIdBase = ImsSourcedIdBase.findByPidm(identification.pidm)
+                if(sourcedIdBase?.sourcedId) {
+                    currentRecord.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
+                }
 
                 def thirdPartyAccess = ThirdPartyAccess.findByPidm(identification.pidm)
-                currentRecord.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
+                if(thirdPartyAccess?.externalUser) {
+                    currentRecord.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
+                }
 
                 def udcIdMapping = PidmAndUDCIdMapping.findByPidm(identification.pidm)
-                currentRecord.credentials << new Credential("Banner UDC ID", udcIdMapping.udcId, null, null)
+                if(udcIdMapping?.udcId) {
+                    currentRecord.credentials << new Credential("Banner UDC ID", udcIdMapping.udcId, null, null)
+                }
             }
-            currentRecord.credentials << new Credential("Banner ID", identification.bannerId, null, null)
+            if(identification.bannerId) {
+                currentRecord.credentials << new Credential("Banner ID", identification.bannerId, null, null)
+            }
             persons.put(identification.pidm, currentRecord)
         }
         persons = buildPersonGuids(domainIds, persons)
