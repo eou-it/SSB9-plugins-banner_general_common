@@ -101,6 +101,29 @@ log4j = {
     }
 }
 
+//Default communications config
+ssbEnabled = true
+
+communication {
+    engine {
+        isEnabled = true
+        groupSendEngine {
+            maxThreads = 1
+            maxQueueSize = 5000
+            continuousPolling = true
+            pollingInterval = 2000
+            deleteSuccessfullyCompleted = false
+        }
+        communicationJobEngine {
+            maxThreads = 1
+            maxQueueSize = 5000
+            continuousPolling = true
+            pollingInterval = 2000
+            deleteSuccessfullyCompleted = false
+        }
+    }
+}
+
 seedDataTarget =  ['bgc': ['/src/groovy/net/hedtech/banner/seeddata/Data/banner_general_common.xml']]
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements

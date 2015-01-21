@@ -558,7 +558,14 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           }
 
           public void run() {
-//              CallerContext cc = ThreadCallerContext.get();
+              if (!SecurityContextHolder.getContext().getAuthentication()) {
+                  FormContext.set( ['CMQUERYEXECUTE'] )
+
+                  String monitorOracleUserName = 'BCMADMIN'
+                  Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
+                  SecurityContextHolder.getContext().setAuthentication( auth )
+                  if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process polling thread." )
+              }
               try {
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                   jobManager.markFailed( job, cause );

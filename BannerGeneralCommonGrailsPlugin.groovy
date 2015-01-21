@@ -53,50 +53,7 @@ class BannerGeneralCommonGrailsPlugin {
 
 
     def doWithSpring = {
-        def enableCommunicationManagement = true
 
-        if (enableCommunicationManagement) {
-            asynchronousBannerAuthenticationSpoofer(AsynchronousBannerAuthenticationSpoofer) {
-                dataSource = ref('dataSource')
-            }
-
-            // Manage the execution state of the group send as a whole
-            // This object will scan the group send item records at regular intervals to determine
-            // if the group send has completed.
-            communicationGroupSendMonitor(CommunicationGroupSendMonitor) { bean ->
-                bean.autowire = 'byName'
-                bean.initMethod = 'init'
-                asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
-            }
-
-            // BRM also injected a group send item monitor record dao for auditing
-            // the thread processing. Not implemented as to dubious need but we may
-            // inject this in the future if we find it useful for debugging.
-
-            communicationGroupSendItemProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
-                bean.autowire = 'byName'
-                bean.initMethod = 'init'
-                jobManager = ref('communicationGroupSendItemTaskManagerService')
-                asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
-                maxThreads = '1'
-                maxQueueSize = '5000'
-                continuousPolling = 'true'
-                pollingInterval = '2000'
-                deleteSuccessfullyCompleted = 'false'
-            }
-
-            communicationJobProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
-                bean.autowire = 'byName'
-                bean.initMethod = 'init'
-                jobManager = ref('communicationJobTaskManagerService')
-                asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
-                maxThreads = '1'
-                maxQueueSize = '5000'
-                continuousPolling = 'true'
-                pollingInterval = '2000'
-                deleteSuccessfullyCompleted = 'false'
-            }
-        }
     }
 
 

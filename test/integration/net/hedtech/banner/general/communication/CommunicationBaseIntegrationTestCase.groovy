@@ -63,20 +63,24 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected void deleteAll() {
         def sql
         try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
-            sql.executeUpdate( "Delete from GCREITM" )
-            sql.executeUpdate( "Delete from GCRCITM" )
-            sql.executeUpdate( "Delete from GCBCJOB" )
-            sql.executeUpdate( "Delete from GCBRDAT" )
-            sql.executeUpdate( "Delete from GCRGSIM" )
-            sql.executeUpdate( "Delete from GCBGSND" )
-            sql.executeUpdate( "Delete from GCBEMTL" )
-            sql.executeUpdate( "Delete from GCBTMPL" )
-            sql.executeUpdate( "Delete from GCRCFLD" )
-            sql.executeUpdate( "Delete from GCRSLIS" )
-            sql.executeUpdate( "Delete from GCBQURY" )
-            sql.executeUpdate( "Delete from GCRFLDR" )
-            sql.executeUpdate( "Delete from GCRORAN" )
+            sessionFactory.currentSession.with { session ->
+                sql = new Sql(session.connection())
+                def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCREITM")
+                sql.executeUpdate("Delete from GCRCITM")
+                sql.executeUpdate("Delete from GCBCJOB")
+                sql.executeUpdate("Delete from GCBRDAT")
+                sql.executeUpdate("Delete from GCRGSIM")
+                sql.executeUpdate("Delete from GCBGSND")
+                sql.executeUpdate("Delete from GCBEMTL")
+                sql.executeUpdate("Delete from GCBTMPL")
+                sql.executeUpdate("Delete from GCRCFLD")
+                sql.executeUpdate("Delete from GCRSLIS")
+                sql.executeUpdate("Delete from GCBQURY")
+                sql.executeUpdate("Delete from GCRFLDR")
+                sql.executeUpdate("Delete from GCRORAN")
+                tx.commit()
+            }
         } finally {
             sql?.close()
         }
