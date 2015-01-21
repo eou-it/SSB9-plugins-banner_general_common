@@ -39,6 +39,7 @@ class CommunicationGroupSendService extends ServiceBase {
         }
 
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
+        groupSend.stopDate = new Date()
 
         // Note: Scheduled is not enabled for CR1, but this is how we would do the check:
 //        if (groupSend.getScheduledStartJobID() != null && !groupSend.isStarted()) {
@@ -49,6 +50,21 @@ class CommunicationGroupSendService extends ServiceBase {
 //            }
 //        }
 
+        return update( groupSend )
+    }
+
+    public CommunicationGroupSend completeGroupSend( Long groupSendId ) {
+        if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
+
+        CommunicationGroupSend groupSend = get( groupSendId )
+
+        if (groupSend.currentExecutionState.isTerminal()) {
+            if (log.isWarnEnabled()) log.warn( "Group send with id = " + groupSendId + " has already concluded." )
+            return groupSend
+        }
+
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
+        groupSend.stopDate = new Date()
         return update( groupSend )
     }
 

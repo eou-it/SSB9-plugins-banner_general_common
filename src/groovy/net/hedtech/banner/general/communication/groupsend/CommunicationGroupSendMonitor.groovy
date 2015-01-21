@@ -77,8 +77,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                 if (groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Processing)) {
                     int runningCount = communicationGroupSendItemService.fetchRunningGroupSendItemCount( groupSend.id )
                     if (runningCount == 0) {
-                        groupSend.setCurrentExecutionState( CommunicationGroupSendExecutionState.Complete )
-                        groupSend.setStopDate( new Date() )
+                        communicationGroupSendService.completeGroupSend( groupSend.id )
                     }
                 }
             }
@@ -117,6 +116,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 //            }
 //        } as Callable )
     }
+
 
     public void shutdown() {
         log.debug( "Shutting down." );
