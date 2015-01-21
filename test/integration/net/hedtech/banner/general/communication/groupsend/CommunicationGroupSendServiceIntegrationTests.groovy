@@ -155,6 +155,12 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
 
         runningList = communicationGroupSendService.findRunning()
         assertEquals( 2, runningList.size() )
+
+        groupSendC = communicationGroupSendService.completeGroupSend( groupSendC.id )
+        assertTrue( groupSendC.currentExecutionState.isTerminal() )
+
+        runningList = communicationGroupSendService.findRunning()
+        assertEquals( 1, runningList.size() )
     }
 
 

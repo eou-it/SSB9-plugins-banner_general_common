@@ -46,7 +46,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         if (communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.stopRunning()
         if (communicationJobProcessingEngine.threadsRunning) communicationJobProcessingEngine.stopRunning()
 
-//        super.tearDown()
+        super.tearDown()
         logout()
     }
 
