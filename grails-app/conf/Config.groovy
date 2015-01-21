@@ -103,7 +103,7 @@ log4j = {
 
 //Default communications config
 ssbEnabled = true
-
+ssbOracleUsersProxied = true
 communication {
     engine {
         isEnabled = true
