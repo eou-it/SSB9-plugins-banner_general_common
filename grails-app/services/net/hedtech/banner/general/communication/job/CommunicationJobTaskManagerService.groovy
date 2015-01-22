@@ -140,6 +140,7 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
         CommunicationJob job = (CommunicationJob) task
+        job.refresh()
         job.setStatus( CommunicationJobStatus.FAILED )
         communicationJobService.update( job )
         if (cause) {

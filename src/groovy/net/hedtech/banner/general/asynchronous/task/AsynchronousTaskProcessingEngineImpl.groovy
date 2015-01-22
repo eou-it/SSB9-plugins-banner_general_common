@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.asynchronous.task
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
@@ -119,6 +120,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Initializes the job processing engine.  This method starts the polling process.
      */
     public void init() {
+        isDisabled = Holders.config.communication.engine.isEnabled ? false : true
         log.info( "Initialized with isDisabled = ${isDisabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
     }
 

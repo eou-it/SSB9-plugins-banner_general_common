@@ -32,19 +32,21 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
     public void setUp() {
         super.useTransactions = false
         formContext = ['SELFSERVICE']
-        super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
+        super.setUp()
 
-        if (!communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.startRunning()
-        if (!communicationJobProcessingEngine.threadsRunning) communicationJobProcessingEngine.startRunning()
+        communicationGroupSendMonitor.startMonitoring()
+        communicationGroupSendItemProcessingEngine.startRunning()
+        communicationJobProcessingEngine.startRunning()
     }
 
 
     @After
     public void tearDown() {
-        if (communicationGroupSendItemProcessingEngine.threadsRunning) communicationGroupSendItemProcessingEngine.stopRunning()
-        if (communicationJobProcessingEngine.threadsRunning) communicationJobProcessingEngine.stopRunning()
+        communicationGroupSendMonitor.shutdown()
+        communicationGroupSendItemProcessingEngine.stopRunning()
+        communicationJobProcessingEngine.stopRunning()
 
         super.tearDown()
         logout()

@@ -23,6 +23,7 @@ import org.junit.Test
  */
 class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
+    def communicationGroupSendMonitor
     def communicationGroupSendCommunicationService
     def communicationGroupSendService
     def communicationGroupSendItemService
