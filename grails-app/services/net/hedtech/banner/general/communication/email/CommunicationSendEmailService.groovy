@@ -28,7 +28,11 @@ class CommunicationSendEmailService {
      */
     public void sendEmail( CommunicationOrganization organization, CommunicationEmailMessage emailMessage, CommunicationRecipientData recipientData, Long pidm  ) {
         log.debug( "sending email message" )
-        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, orgAddr.getEmailConfig().getSender() );
+        def sender
+        if( organization.senderMailboxAccountSettings.size() > 0 ) {
+            sender = organization.senderMailboxAccountSettings.get(0)
+        }
+        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, sender );
         sendEmailMethod.execute();
 
         try {

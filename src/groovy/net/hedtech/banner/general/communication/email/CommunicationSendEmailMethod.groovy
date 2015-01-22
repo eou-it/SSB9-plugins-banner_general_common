@@ -31,8 +31,8 @@ class CommunicationSendEmailMethod {
     }
 
     public void execute() {
-        CommunicationEmailMessage emailReceipt = new CommunicationEmailReceipt();
-
+        CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
+        emailMessage.senders = [sender] as Set
         minimumFieldsPresent( emailMessage, false );
         Properties props = new Properties();
         //adding smtp 'from' for handling bounce back emails.

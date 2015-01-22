@@ -8,6 +8,8 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
@@ -25,6 +27,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     def communicationGroupSendMonitor
     def communicationGroupSendCommunicationService
+    def communicationMailboxAccountService
     def communicationGroupSendService
     def communicationGroupSendItemService
     def communicationPopulationQueryService
@@ -80,6 +83,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRFLDR")
                 sql.executeUpdate("Delete from GCRORAN")
+                sql.executeUpdate("Delete from GCRMBAC")
                 tx.commit()
             }
         } finally {
@@ -92,6 +96,14 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org", isRoot: true)
             defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
+            def defaultMailboxAccount = new CommunicationMailboxAccount([
+                    emailAddress: 'rasul.shishehbor@ellucian.com',
+                    organization: defaultOrganization,
+                    encryptedPassword: "ADOFIUSDSF",
+                    type:CommunicationMailboxAccountType.Sender,
+                    userName: 'rshishehbor'
+            ])
+            communicationMailboxAccountService.create(defaultMailboxAccount)
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }

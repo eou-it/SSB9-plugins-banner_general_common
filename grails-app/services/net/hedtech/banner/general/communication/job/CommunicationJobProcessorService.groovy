@@ -27,10 +27,10 @@ class CommunicationJobProcessorService {
         log.debug( "performed communication job with job id = ${jobId}." )
 
         CommunicationJob job = communicationJobService.get( jobId )
-        List<CommunicationRecipientData> recipientData = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
+        List<CommunicationRecipientData> recipientDatas = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
+        CommunicationRecipientData recipientData = recipientDatas.size() ? recipientDatas[0] : null
         CommunicationEmailTemplate emailTemplate = communicationTemplateService.get( recipientData.templateId ) as CommunicationEmailTemplate
-        //TODO: I'm sure this is wrong, someone needs to look at this who understands the expected number of results from the above fetch.
-        CommunicationMergedEmailTemplate mergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, recipientData.size() ? recipientData[0] : null )
+        CommunicationMergedEmailTemplate mergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, recipientData )
 
         CommunicationEmailMessage emailMessage = createEmailMessage( mergedEmailTemplate )
         communicationSendEmailService.sendEmail( recipientData.organization, emailMessage, recipientData, recipientData.pidm )
@@ -82,7 +82,7 @@ class CommunicationJobProcessorService {
 
         for (String string : tempEA) {
 
-            emailAddress = new EmailAddress();
+            emailAddress = new CommunicationEmailAddress();
 
             try {
                 // Try to parse the personal display name out of the address first.
