@@ -623,7 +623,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     @Test
     void testfetchAllByCampuses(){
-        List<String> campusCodes = HousingLocationBuildingDescription.findAll().unique {it.campus?.code}
+        List<String> campusCodes = HousingLocationBuildingDescription.findAll().unique {it.campus?.code}.campus.code
         List<HousingLocationBuildingDescription> buildingDescriptionList = HousingLocationBuildingDescription.fetchAllByCampuses(campusCodes)
         assertNotNUll buildingDescriptionList
         buildingDescriptionList.collect {
