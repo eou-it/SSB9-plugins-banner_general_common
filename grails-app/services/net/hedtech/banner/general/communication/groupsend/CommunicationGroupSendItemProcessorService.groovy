@@ -103,7 +103,7 @@ class CommunicationGroupSendItemProcessorService {
             if (log.isDebugEnabled()) log.debug( "Spoofed as ${senderOracleUserName} for creating recipient data." )
 
             // Can this list be cached somewhere for similar processing
-            List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.toList()?.toString() )
+            List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.toList?.toString() )
             communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
                 fieldNames << it
             }

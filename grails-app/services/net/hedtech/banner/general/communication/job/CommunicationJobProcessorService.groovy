@@ -20,16 +20,17 @@ class CommunicationJobProcessorService {
     def communicationJobService
     def communicationTemplateMergeService
     def communicationSendEmailService
-    def communicationRecipientDataService
+    def communicationTemplateService
     def communicationOrganizationService
 
     public void performCommunicationJob( Long jobId ) {
         log.debug( "performed communication job with job id = ${jobId}." )
 
         CommunicationJob job = communicationJobService.get( jobId )
-        CommunicationRecipientData recipientData = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
+        List<CommunicationRecipientData> recipientData = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
         CommunicationEmailTemplate emailTemplate = communicationTemplateService.get( recipientData.templateId ) as CommunicationEmailTemplate
-        CommunicationMergedEmailTemplate mergedEmailTemplate = mergeEmailTemplate( emailTemplate, recipientData )
+        //TODO: I'm sure this is wrong, someone needs to look at this who understands the expected number of results from the above fetch.
+        CommunicationMergedEmailTemplate mergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, recipientData.size() ? recipientData[0] : null )
 
         CommunicationEmailMessage emailMessage = createEmailMessage( mergedEmailTemplate )
         communicationSendEmailService.sendEmail( recipientData.organization, emailMessage, recipientData, recipientData.pidm )
