@@ -109,7 +109,7 @@ class CommunicationRecipientData {
         def queryList
         CommunicationRecipientData.withSession { session ->
             queryList = session.getNamedQuery('CommunicationRecipientData.fetchByReferenceId')
-                    .setLong('referenceId', referenceId)
+                    .setString('referenceId', referenceId)
                     .list()
         }
         return queryList

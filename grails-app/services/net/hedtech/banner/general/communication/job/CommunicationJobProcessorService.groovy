@@ -20,16 +20,17 @@ class CommunicationJobProcessorService {
     def communicationJobService
     def communicationTemplateMergeService
     def communicationSendEmailService
-    def communicationRecipientDataService
+    def communicationTemplateService
     def communicationOrganizationService
 
     public void performCommunicationJob( Long jobId ) {
         log.debug( "performed communication job with job id = ${jobId}." )
 
         CommunicationJob job = communicationJobService.get( jobId )
-        CommunicationRecipientData recipientData = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
+        List<CommunicationRecipientData> recipientDatas = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
+        CommunicationRecipientData recipientData = recipientDatas.size() ? recipientDatas[0] : null
         CommunicationEmailTemplate emailTemplate = communicationTemplateService.get( recipientData.templateId ) as CommunicationEmailTemplate
-        CommunicationMergedEmailTemplate mergedEmailTemplate = mergeEmailTemplate( emailTemplate, recipientData )
+        CommunicationMergedEmailTemplate mergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, recipientData )
 
         CommunicationEmailMessage emailMessage = createEmailMessage( mergedEmailTemplate )
         communicationSendEmailService.sendEmail( recipientData.organization, emailMessage, recipientData, recipientData.pidm )
@@ -81,7 +82,7 @@ class CommunicationJobProcessorService {
 
         for (String string : tempEA) {
 
-            emailAddress = new EmailAddress();
+            emailAddress = new CommunicationEmailAddress();
 
             try {
                 // Try to parse the personal display name out of the address first.
