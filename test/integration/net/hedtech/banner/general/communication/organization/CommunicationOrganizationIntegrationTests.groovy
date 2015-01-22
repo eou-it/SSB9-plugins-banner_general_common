@@ -4,13 +4,9 @@
 package net.hedtech.banner.general.communication.organization
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import java.io.ByteArrayInputStream
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-
-import java.sql.Blob
 
 /**
  * OrganizationTest.
@@ -90,7 +86,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
         organization.receiveEmailServerProperties = [receiveProperties]
         organization.save()
-        assertEquals 1234, organization.receiveEmailServerProperties[0].smtpPort
+        assertEquals 1234L, organization.receiveEmailServerProperties[0].smtpPort
 
     }
 
@@ -113,7 +109,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertNotNull organization.sendEmailServerProperties.id
         assertNotNull organization.senderMailboxAccountSettings.encryptedPassword
         assertNotNull organization.replyToMailboxAccountSettings.encryptedPassword
-   }
+    }
 
 
     @Test
@@ -131,7 +127,42 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-    private def newValidForCreateOrganization() {
+    @Test
+    void testFetchMailBoxAccountByOrganizationId() {
+        def organization = newValidForCreateOrganization()
+        def senderMailBoxProperties = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
+        organization.senderMailboxAccountSettings = [senderMailBoxProperties]
+        def replyToMailBoxProperties = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
+        organization.replyToMailboxAccountSettings = [replyToMailBoxProperties]
+        organization.save( failOnError: true, flush: true )
+
+        def mailboxAccountList = CommunicationMailboxAccount.fetchByOrganizationId( organization.id )
+        assertEquals( 2, mailboxAccountList.size() )
+    }
+
+
+    @Test
+    void testList() {
+        def organization = newValidForCreateOrganization()
+        def senderMailBoxProperties = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
+        organization.senderMailboxAccountSettings = [senderMailBoxProperties]
+        organization.save( failOnError: true, flush: true )
+        def organizationList = CommunicationOrganization.list()
+        assertNotNull( organizationList[0]?.senderMailboxAccountSettings[0])
+        assertNull( organizationList[0]?.replyToMailboxAccountSettings )
+
+        /* Now add another */
+        def replyToMailBoxProperties = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
+        organization.replyToMailboxAccountSettings = [replyToMailBoxProperties]
+        organization.save( failOnError: true, flush: true )
+
+        organizationList = CommunicationOrganization.list()
+        assertNotNull (organization)
+        assertNotNull( organizationList[0]?.replyToMailboxAccountSettings[0] )
+        assertNotNull( organizationList[0]?.senderMailboxAccountSettings[0] )
+    }
+
+     private def newValidForCreateOrganization() {
         def organization = new CommunicationOrganization(
                 description: i_valid_description,
                 name: i_valid_name

@@ -4,12 +4,8 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-import org.hibernate.type.LobType
-import org.hibernate.type.MaterializedBlobType
 
 import javax.persistence.*
-import java.sql.Blob
 
 /**
  * Communication Mailbox Account Table. A mailbox account is a named object that contains the email address and the credentials of an account on the email system that BCM is linked to for sending and receving email messages. entity.
@@ -17,10 +13,10 @@ import java.sql.Blob
 @Entity
 @EqualsAndHashCode
 @Table(name = "GCRMBAC")
-// @NamedQueries(value = [
-// @NamedQuery(name = "CommunicationMailboxAccount.fetchByxxxxx",
-//             query = """ FROM CommunicationMailboxAccount a WHERE xxxxx """)
-// ])
+@NamedQueries(value = [
+        @NamedQuery(name = "CommunicationMailboxAccount.fetchByOrganizationId",
+                query = """ FROM CommunicationMailboxAccount a WHERE organization.id = :organizationId """)
+])
 class CommunicationMailboxAccount implements Serializable {
 
     /**
@@ -110,15 +106,16 @@ class CommunicationMailboxAccount implements Serializable {
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )
         emailDisplayName( nullable: true )
-        clearTextPassword( nullable: true)
+        clearTextPassword( nullable: true )
     }
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
-     /*
-     Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
-     */
+    /*
+    Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
+    */
+
 
     @Override
     public String toString() {
@@ -137,4 +134,14 @@ class CommunicationMailboxAccount implements Serializable {
                 ", dataOrigin='" + dataOrigin + '\'' +
                 '}';
     }
+
+
+    public static List<CommunicationMailboxAccount> fetchByOrganizationId( Long organizationId ) {
+        def mailboxAccountList
+        CommunicationMailboxAccount.withSession { session ->
+            mailboxAccountList = session.getNamedQuery( 'CommunicationMailboxAccount.fetchByOrganizationId' ).setLong( 'organizationId', organizationId ).list()
+        }
+        return mailboxAccountList
+    }
+
 }
