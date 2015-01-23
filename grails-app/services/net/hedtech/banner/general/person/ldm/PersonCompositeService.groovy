@@ -131,7 +131,12 @@ class PersonCompositeService extends LdmService {
         } else {
             //Add DynamicFinder on PersonIdentificationName in future.
             if (params.role) {
-                pidms = userRoleCompositeService.fetchAllByRole([role:params.role, sortAndPaging:sortParams])
+                String role = params.role?.trim()?.toLowerCase()
+                if(role == "faculty" || role == "student") {
+                    pidms = userRoleCompositeService.fetchAllByRole([role: params.role, sortAndPaging: sortParams])
+                } else {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported",[]))
+                }
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required",[]))
             }
@@ -181,8 +186,10 @@ class PersonCompositeService extends LdmService {
         if (person.names instanceof List) {
             person?.names?.each { it ->
                 if (it instanceof Map) {
-                    if (it.nameType == 'Primary') {
+                    if (it.nameType?.trim() == 'Primary') {
                         newPersonIdentification = it
+                    } else {
+                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("nameType.invalid",[]))
                     }
                 }
             }
@@ -322,8 +329,10 @@ class PersonCompositeService extends LdmService {
 
         def primaryName
         person?.names?.each { it ->
-            if (it.nameType == 'Primary') {
+            if (it.nameType?.trim() == 'Primary') {
                 primaryName = it
+            } else {
+                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("nameType.invalid",[]))
             }
         }
         def pidmToUpdate = globalUniqueIdentifier.domainKey?.toInteger()
