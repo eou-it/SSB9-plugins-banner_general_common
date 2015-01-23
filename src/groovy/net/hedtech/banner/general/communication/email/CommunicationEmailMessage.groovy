@@ -28,7 +28,7 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
     /**
      * place holder for RFC 822 "From" header field of an email message.
      */
-    private Set<CommunicationEmailAddress> senders;
+    private CommunicationEmailAddress senders;
 
     /**
      * place holder for RFC 822 "Reply-To" header field attribute of an email message addresses to which replies should
@@ -237,7 +237,7 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
      * Returns the values for "from" attribute.
      * @return Set<CommunicationEmailMessage> values for "from" attribute
      */
-    public Set<CommunicationEmailAddress> getSenders() {
+    public CommunicationEmailAddress getSenders() {
         return senders;
     }
 
@@ -246,7 +246,7 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
      * Sets the "from" attribute of the email message.
      * @param senders the values to set
      */
-    public void setSenders( Set<CommunicationEmailAddress> senders ) {
+    public void setSenders( CommunicationEmailAddress senders ) {
         this.senders = senders;
     }
 
@@ -325,7 +325,7 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
     protected Object clone() throws CloneNotSupportedException {
         CommunicationEmailMessage newMessage = new CommunicationEmailMessage();
         if (null != senders) {
-            newMessage.setSenders( new HashSet<CommunicationEmailAddress>( senders ) );
+            newMessage.setSenders( new CommunicationEmailAddress(senders) );
         }
 
         if (null != replyTo) {

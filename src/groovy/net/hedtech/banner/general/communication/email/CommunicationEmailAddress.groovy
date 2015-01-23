@@ -29,7 +29,13 @@ public class CommunicationEmailAddress implements Serializable {
      */
     private String displayName;
 
+    public CommunicationEmailAddress( ) {
 
+    }
+    public CommunicationEmailAddress(CommunicationEmailAddress that) {
+        this.mailAddress = that.mailAddress
+        this.displayName = that.displayName
+    }
     /**
      * Returns the display name for the email address
      * @return the displayName for the email address
