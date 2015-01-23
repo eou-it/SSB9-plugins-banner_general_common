@@ -133,4 +133,10 @@ class CommunicationOrganizationService extends ServiceBase {
         }
         encryptedPassword
     }
+
+    @Override
+    public boolean isDirty( model ) {
+        return true
+    }
+
 }

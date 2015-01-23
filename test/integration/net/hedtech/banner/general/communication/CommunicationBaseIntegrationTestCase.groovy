@@ -1,27 +1,15 @@
 package net.hedtech.banner.general.communication
 
-import grails.gorm.DetachedCriteria
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
-import net.hedtech.banner.general.communication.item.CommunicationEmailItem
-import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
-import org.junit.Test
-import com.icegreen.greenmail.user.*
 import com.icegreen.greenmail.util.*
 
 
@@ -53,7 +41,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
     protected GreenMail mailServer
-    protected static final int portOffset = 2000
+    protected static final int smtp_port = 4025
 
     @Before
     public void setUp() {
@@ -64,8 +52,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
 
-        ServerSetupTest.setPortOffset( portOffset )
-        mailServer = new GreenMail( ServerSetupTest.SMTP )
+        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
+        this.mailServer = new GreenMail( smtpServerSetup)
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
@@ -123,8 +111,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
             defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
-                smtpHost: "127.0.0.1",
-                smtpPort: (portOffset + 25)
+                host: "127.0.0.1",
+                port: smtp_port
             )
 
             defaultOrganization = communicationOrganizationService.update( defaultOrganization )

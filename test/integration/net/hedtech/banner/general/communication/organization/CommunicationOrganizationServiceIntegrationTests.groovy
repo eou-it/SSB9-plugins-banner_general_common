@@ -185,8 +185,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
-                smtpHost: "TTTTTTTTTT",
-                smtpPort: 1234,
+                host: "TTTTTTTTTT",
+                port: 1234,
                 organization: organization,
                 type: serverType
         )

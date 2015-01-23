@@ -3,9 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 
 import javax.mail.Message
 import javax.mail.MessagingException
@@ -20,31 +20,34 @@ import javax.mail.internet.MimeMessage
 class CommunicationSendEmailMethod {
 
     private CommunicationEmailMessage emailMessage;
-    private CommunicationMailboxAccount sender;
+    private CommunicationOrganization senderOrganization;
     private MimeMessage mimeMessage;
     private String optOutMessageId;
     private CommunicationEmailReceipt lastSend;
 
-    private CommunicationSendEmailMethod(CommunicationEmailMessage emailMessage, CommunicationMailboxAccount sender ) {
+    private CommunicationSendEmailMethod(CommunicationEmailMessage emailMessage, CommunicationOrganization senderOrganization ) {
         this.emailMessage = emailMessage;
-        this.sender = sender;
+        this.senderOrganization = senderOrganization;
     }
 
     public void execute() {
         CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
-        def senderAddress = new CommunicationEmailAddress(mailAddress:sender.emailAddress,displayName:sender.emailDisplayName)
+        def senderAddress = new CommunicationEmailAddress(
+            mailAddress: senderOrganization.theSenderMailboxAccount.emailAddress,
+            displayName: senderOrganization.theSenderMailboxAccount.emailDisplayName
+        )
         emailMessage.senders = [senderAddress] as Set
         minimumFieldsPresent( emailMessage, false );
         Properties props = new Properties();
         //adding smtp 'from' for handling bounce back emails.
 
-        emailReceipt.setFrom( sender.getEmailAddress());
-        props.put( "mail.smtp.from", sender.getEmailAddress() );
+        emailReceipt.setFrom( senderOrganization.theSenderMailboxAccount.emailAddress );
+        props.put( "mail.smtp.from", senderOrganization.theSenderMailboxAccount.emailAddress );
 
         if (log.isDebugEnabled()) {
             log.debug( "Connecting to email server with account username = " + sender.getUsername() );
         }
-        Session session = newSendSession(sender, props );
+        Session session = newSendSession();
 //        optOutMessageId = uuidService.fetchOneGuid();
 
         try {
@@ -154,7 +157,10 @@ class CommunicationSendEmailMethod {
             throws MessagingException {
         MimeMessage retMessage = new MimeMessage( session );
 
-        retMessage.setFrom( new InternetAddress(message.senders?.mailAddress,message.senders?.displayName) );
+        retMessage.setFrom( new InternetAddress(
+            message.senders?.mailAddress,
+            message.senders?.displayName
+        ) );
 
         // Set Reply-To
         InternetAddress [] addresses = getAddressArray(message.getReplyTo());
@@ -206,16 +212,21 @@ class CommunicationSendEmailMethod {
      * @param overrides properties to add to override in the session
      * @return
      */
-    private Session newSendSession( CommunicationMailboxAccount sender, Properties overrides ) {
-        Properties emailServerProperties = Holders.config?.communication?.email?.sendProperties.toProperties()
-
-        if (!emailServerProperties) emailServerProperties = new Properties()
-
-        for (Object o : overrides.keySet()) {
-            emailServerProperties.setProperty( (String) o, overrides.getProperty( (String) o ) );
+    private Session newSendSession() {
+        Properties emailServerProperties = new Properties()
+        emailServerProperties.put( "mail.smtp.host", senderOrganization.theSendEmailServerProperties.host )
+        emailServerProperties.put( "mail.smtp.port", senderOrganization.theSendEmailServerProperties.port )
+        if (senderOrganization.theSendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.None) {
+            emailServerProperties.put( "mail.smtp.protocol", "smtp" )
+        } else if (senderOrganization.theSendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.Ssl) {
+            emailServerProperties.put( "mail.smtp.protocol", "smtps" )
+            emailServerProperties.put( "mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory" )
+            emailServerProperties.put( "mail.smtp.socketFactory.fallback", "false" )
+        } else {
+            throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
         }
 
-        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( sender );
+        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.theSenderMailboxAccount );
         return Session.getInstance( emailServerProperties, auth );
     }
 

@@ -139,11 +139,11 @@ class CommunicationOrganization implements Serializable {
 
     public void setTheSendEmailServerProperties( CommunicationEmailServerProperties settings ) {
         if (settings) {
-            receiveEmailServerProperties = [ settings ] as List
+            sendEmailServerProperties = [ settings ] as List
             settings.organization = this
             settings.type = CommunicationEmailServerPropertiesType.Send
         } else {
-            receiveEmailServerProperties = null
+            sendEmailServerProperties = null
         }
     }
 
