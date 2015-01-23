@@ -26,12 +26,13 @@ class CommunicationEmailAuthenticator extends Authenticator {
     /**
      * Default Constructor for an email authenticator.
      */
-    public EmailAuthenticator() {
+    public CommunicationEmailAuthenticator() {
     }
 
-    public EmailAuthenticator( CommunicationMailboxAccount account ) {
-        this.username = account.getUsername()
-        this.password = account.getPassword()
+    public CommunicationEmailAuthenticator( CommunicationMailboxAccount account ) {
+        this.username = account.userName
+        //TODO: Switch this to using the unencrypt function.
+        this.password = account.getClearTextPassword()
     }
 
 
