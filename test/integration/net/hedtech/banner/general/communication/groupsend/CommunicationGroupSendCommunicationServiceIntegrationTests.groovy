@@ -48,7 +48,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         communicationGroupSendItemProcessingEngine.stopRunning()
         communicationJobProcessingEngine.stopRunning()
 
-        super.tearDown()
+//        super.tearDown()
         logout()
     }
 
@@ -88,12 +88,12 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         // TODO: Fix this assertEquals( 5, countCompleted )
-        //assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
 
         sleepUntilCommunicationJobsComplete( 5, 30 )
         countCompleted = CommunicationJob.fetchCompleted().size()
        // TODO: Fix this  assertEquals( 5, countCompleted )
-        //assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
@@ -181,5 +181,6 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
         return populationQuery
     }
+
 
 }

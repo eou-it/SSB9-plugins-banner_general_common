@@ -124,6 +124,83 @@ class CommunicationOrganization implements Serializable {
     @Where(clause = "GCRMBAC_TYPE = 'ReplyTo'")
     List<CommunicationMailboxAccount> replyToMailboxAccountSettings
 
+    // Individual accessors. For now qualified with a 'the' in order to avoid conflicts with
+    // the hibernate collection counterparts above. We can only ever have one of each of these.
+    // Will try to remap the above or at least rename them so we can have the desired method access.
+    // These methods will also populate the organization as it makes sense.
+
+    public CommunicationEmailServerProperties getTheSendEmailServerProperties() {
+        CommunicationEmailServerProperties settings = null
+        if (sendEmailServerProperties && sendEmailServerProperties.size() > 0) {
+            settings = sendEmailServerProperties.get( 0 )
+        }
+        return settings
+    }
+
+    public void setTheSendEmailServerProperties( CommunicationEmailServerProperties settings ) {
+        if (settings) {
+            receiveEmailServerProperties = [ settings ] as List
+            settings.organization = this
+            settings.type = CommunicationEmailServerPropertiesType.Send
+        } else {
+            receiveEmailServerProperties = null
+        }
+    }
+
+    public CommunicationEmailServerProperties getTheReceiveEmailServerProperties() {
+        CommunicationEmailServerProperties settings = null
+        if (receiveEmailServerProperties && receiveEmailServerProperties.size() > 0) {
+            settings = receiveEmailServerProperties.get( 0 )
+        }
+        return settings
+    }
+
+    public void setTheReceiveEmailServerProperties( CommunicationEmailServerProperties settings ) {
+        if (settings) {
+            receiveEmailServerProperties = [ settings ] as List
+            settings.organization = this
+            settings.type = CommunicationEmailServerPropertiesType.Receive
+        } else {
+            receiveEmailServerProperties = null
+        }
+    }
+
+    public CommunicationMailboxAccount getTheSenderMailboxAccount() {
+        CommunicationMailboxAccount settings = null
+        if (senderMailboxAccountSettings && senderMailboxAccountSettings.size() > 0) {
+            settings = senderMailboxAccountSettings.get( 0 )
+        }
+        return settings
+    }
+
+    public void setTheSenderMailboxAccount( CommunicationMailboxAccount settings ) {
+        if (settings) {
+            senderMailboxAccountSettings = [ settings ] as List
+            settings.organization = this
+            settings.type = CommunicationMailboxAccountType.Sender
+        } else {
+            senderMailboxAccountSettings = null
+        }
+    }
+
+    public CommunicationMailboxAccount getTheReplyToMailboxAccount() {
+        CommunicationMailboxAccount settings = null
+        if (replyToMailboxAccountSettings && replyToMailboxAccountSettings.size() > 0) {
+            settings = replyToMailboxAccountSettings.get( 0 )
+        }
+        return settings
+    }
+
+    public void setTheReplyToMailboxAccount( CommunicationMailboxAccount settings ) {
+        if (settings) {
+            replyToMailboxAccountSettings = [ settings ] as List
+            settings.organization = this
+            settings.type = CommunicationMailboxAccountType.ReplyTo
+        } else {
+            replyToMailboxAccountSettings = null
+        }
+    }
+
 
     static constraints = {
         name( nullable: false, maxSize: 1020 )

@@ -52,12 +52,12 @@ class CommunicationSendEmailMethod {
             if (emailMessage.getMessageBody() != null) {
                 sb.append( emailMessage.getMessageBody() );
             }
-            sb.append(
-                    EmailAddressUtilities.getOptOutText(
-                    getCommunicationConfiguration().getEmailService().getOptOutUrl(),
-                    getCommunicationConfiguration().getEmailService().getOptOutText(),
-                    this.optOutMessageId )
-            );
+//            sb.append(
+//                    EmailAddressUtilities.getOptOutText(
+//                    getCommunicationConfiguration().getEmailService().getOptOutUrl(),
+//                    getCommunicationConfiguration().getEmailService().getOptOutText(),
+//                    this.optOutMessageId )
+//            );
             emailMessage.setMessageBody( sb.toString() );
 
             mimeMessage = createMimeMessage( emailMessage, true, session, emailReceipt );

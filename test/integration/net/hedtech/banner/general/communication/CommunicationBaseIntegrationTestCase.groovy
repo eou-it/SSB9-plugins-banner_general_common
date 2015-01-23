@@ -8,6 +8,8 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -18,6 +20,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import com.icegreen.greenmail.user.*
+import com.icegreen.greenmail.util.*
 
 
 /**
@@ -47,6 +51,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
+    protected GreenMail mailServer
 
     @Before
     public void setUp() {
@@ -56,10 +61,17 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultOrganization()
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
+
+        mailServer = new GreenMail( ServerSetupTest.SMTP )
+        mailServer.start()
+
+//        mailServer.setUser(EMAIL_USER_ADDRESS, USER_NAME, USER_PASSWORD);
     }
 
     @After
     public void tearDown() {
+        mailServer.stop()
+
         deleteAll()
         super.tearDown()
     }
@@ -98,16 +110,56 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
             def defaultMailboxAccount = new CommunicationMailboxAccount([
                     emailAddress: 'rasul.shishehbor@ellucian.com',
-                    organization: defaultOrganization,
                     encryptedPassword: "ADOFIUSDSF",
-                    type:CommunicationMailboxAccountType.Sender,
                     userName: 'rshishehbor'
             ])
-            communicationMailboxAccountService.create(defaultMailboxAccount)
+
+            defaultOrganization.theSenderMailboxAccount = defaultMailboxAccount
+
+            def sendEmailServerProperties = new CommunicationEmailServerProperties(
+                    // Required fields
+                    securityProtocol: "TTTTTTTTTT",
+                    smtpHost: "TTTTTTTTTT",
+                    smtpPort: 1234,
+            )
+
+            defaultOrganization.theSendEmailServerProperties = sendEmailServerProperties
+            defaultOrganization = communicationOrganizationService.update( defaultOrganization )
+
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }
     }
+
+
+//    private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
+//        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
+//                // Required fields
+//                securityProtocol: "TTTTTTTTTT",
+//                smtpHost: "TTTTTTTTTT",
+//                smtpPort: 1234,
+//                organization: organization,
+//                type: serverType
+//        )
+//        return communicationEmailServerProperties
+//    }
+//
+//
+//    private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
+//
+//
+//        def CommunicationMailboxAccount = new CommunicationMailboxAccount(
+//                encryptedPassword: "supersecretpassword",
+//                organization: organization,
+//                type: communicationMailboxAccountType,
+//                emailAddress: "Registrar@BannerUniversity.edu",
+//                userName: "bannerRegUser" + communicationMailboxAccountType,
+//                emailDisplayName: "The Office of The Registrar"
+//        )
+//        return CommunicationMailboxAccount
+//    }
+//
+
 
     protected void setUpDefaultFolder() {
         defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCommunicationServiceTests" )
