@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.communication
 
 import grails.gorm.DetachedCriteria
+import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
@@ -21,8 +22,6 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import com.icegreen.greenmail.user.*
-import com.icegreen.greenmail.util.*
 
 
 /**
@@ -52,8 +51,6 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
-    protected GreenMail mailServer
-    protected static final int portOffset = 2000
 
     @Before
     public void setUp() {
@@ -64,13 +61,10 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
 
-        ServerSetupTest.setPortOffset( portOffset )
-        mailServer = new GreenMail( ServerSetupTest.SMTP )
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
         String userPassword = communicationOrganizationService.decryptMailBoxAccountPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
-        mailServer.setUser( defaultOrganization.theSenderMailboxAccount.emailAddress, defaultOrganization.theSenderMailboxAccount.userName, userPassword )
     }
 
     @After
@@ -124,7 +118,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                 smtpHost: "127.0.0.1",
-                smtpPort: (portOffset + 25)
+                smtpPort: Holders.config.greenmail?.ports?.smtp
             )
 
             defaultOrganization = communicationOrganizationService.update( defaultOrganization )
