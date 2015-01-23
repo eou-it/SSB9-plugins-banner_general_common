@@ -625,7 +625,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
     void testfetchAllByCampuses(){
         List<String> campusCodes = HousingLocationBuildingDescription.findAll().unique {it.campus?.code}.campus.code
         List<HousingLocationBuildingDescription> buildingDescriptionList = HousingLocationBuildingDescription.fetchAllByCampuses(campusCodes)
-        assertNotNUll buildingDescriptionList
+        assertNotNull buildingDescriptionList
         buildingDescriptionList.collect {
             assertTrue campusCodes.contains(it.campus.code)
         }
