@@ -20,7 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTestCase {
     def communicationOrganizationService
     def selfServiceBannerAuthenticationProvider
-    def encryptionKey =  Holders.config.communication?.security?.password?.encKey
+    def encryptionKey = Holders.config.communication?.security?.password?.encKey
+
 
     @Before
     public void setUp() {
@@ -42,15 +43,18 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testList() {
         long originalListCount = communicationOrganizationService.list().size()
+        if (originalListCount == 0) {
+            CommunicationOrganization organization = new CommunicationOrganization();
+            organization.name = "test"
+            organization.description = "description"
+            CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
+            assertNotNull( createdOrganization )
 
-        CommunicationOrganization organization = new CommunicationOrganization();
-        organization.name = "test"
-        organization.description = "description"
-        CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
-        assertNotNull( createdOrganization )
-
-        long addedListCount = communicationOrganizationService.list().size()
-        assertEquals( originalListCount + 1, addedListCount )
+            long addedListCount = communicationOrganizationService.list().size()
+            assertEquals( originalListCount + 1, addedListCount )
+        } else {
+            fail( "Cannot test, an organization already exists" )
+        }
     }
 
 
@@ -80,6 +84,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     }
 
+
     @Test
     void testCreateMultiple() {
         CommunicationOrganization organization = new CommunicationOrganization()
@@ -100,10 +105,11 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             communicationOrganizationService.create( sameNameOrganization )
             Assert.fail "Expected sameNameOrganization to fail because only one org can exist."
         } catch (ApplicationException e) {
-            assertTrue e.getMessage().contains( "onlyOneOrgCanExist" )
+            assertTrue ("Failed to get expected exception onlyOneOrgCanExist",e.getMessage().contains( "onlyOneOrgCanExist" ))
         }
 
     }
+
 
     @Test
     void testUpdate() {
@@ -168,6 +174,47 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertEquals( "description", createdOrganization.description )
         assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
         assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+
+    }
+
+
+    @Test
+    void testSetAndResetPassword() {
+        def organization = new CommunicationOrganization()
+        organization.name = "test"
+        organization.description = "description"
+        def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
+        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
+        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
+        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
+        def createdOrganization = communicationOrganizationService.create( organization )
+        assertNotNull( createdOrganization )
+        assertEquals( "test", createdOrganization.name )
+        assertEquals( "description", createdOrganization.description )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        assertNull( "senderMailboxAccount cleartext password is not null", createdOrganization.senderMailboxAccountSettings[0].clearTextPassword )
+        assertNull( "replyToMailboxAccount cleartext password is not null", createdOrganization.replyToMailboxAccountSettings[0].clearTextPassword )
+
+        /* Do an update, with clearTextPassword null, the encrypted password should remain the same */
+        createdOrganization.senderMailboxAccountSettings[0].userName = 'AstorPiazolla'
+        communicationOrganizationService.update( createdOrganization )
+        def updatedOrganization = CommunicationMailboxAccount.fetchByOrganizationIdAndType( createdOrganization.id, CommunicationMailboxAccountType.Sender )
+        assertNotNull( updatedOrganization.id )
+        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
+        createdOrganization.senderMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
+        communicationOrganizationService.update( createdOrganization )
+        updatedOrganization = CommunicationMailboxAccount.fetchByOrganizationIdAndType( createdOrganization.id, CommunicationMailboxAccountType.Sender )
+        assertNotNull( updatedOrganization.id )
+        assertTrue( "New encrypted password was not generated", "D359A3537A74FC42F284450BCCDDA734" != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+
+    }
+
+
+    @Test
+    void testFetchByOrganizationIdAndType() {
+
 
     }
 
