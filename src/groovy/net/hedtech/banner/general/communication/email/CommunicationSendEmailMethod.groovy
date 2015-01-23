@@ -7,7 +7,7 @@ import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 
-import javax.mail.Address
+import javax.mail.Message
 import javax.mail.MessagingException
 import javax.mail.Session
 import javax.mail.Transport
@@ -32,7 +32,8 @@ class CommunicationSendEmailMethod {
 
     public void execute() {
         CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
-        emailMessage.senders = [sender] as Set
+        def senderAddress = new CommunicationEmailAddress(mailAddress:sender.emailAddress,displayName:sender.emailDisplayName)
+        emailMessage.senders = [senderAddress] as Set
         minimumFieldsPresent( emailMessage, false );
         Properties props = new Properties();
         //adding smtp 'from' for handling bounce back emails.
@@ -58,6 +59,8 @@ class CommunicationSendEmailMethod {
 //                    getCommunicationConfiguration().getEmailService().getOptOutText(),
 //                    this.optOutMessageId )
 //            );
+
+
             emailMessage.setMessageBody( sb.toString() );
 
             mimeMessage = createMimeMessage( emailMessage, true, session, emailReceipt );
@@ -70,15 +73,15 @@ class CommunicationSendEmailMethod {
                     logMessage.append( String.valueOf( key ) ).append( ": " ).append( String.valueOf( sessionProperties.get( key ) ) ).append( "\n" );
                 }
                 logMessage.append( "From: \n" );
-                for( Address address:mimeMessage.getFrom() ) {
+                for( InternetAddress address:mimeMessage.getFrom() ) {
                     logMessage.append( "    " ).append( address.toString() ).append( "\n" );
                 }
                 logMessage.append( "Recipients: \n" );
-                for( Address address:mimeMessage.getAllRecipients() ) {
+                for( InternetAddress address:mimeMessage.getAllRecipients() ) {
                     logMessage.append( "    " ).append( address.toString() ).append( "\n" );
                 }
                 logMessage.append( "Reply-To: \n" );
-                for( Address address:mimeMessage.getReplyTo() ) {
+                for( InternetAddress address:mimeMessage.getReplyTo() ) {
                     logMessage.append( "    " ).append( address.toString() ).append( "\n" );
                 }
                 logMessage.append( "Subject: " ).append( mimeMessage.getSubject() ).append( "\n" );
@@ -151,10 +154,10 @@ class CommunicationSendEmailMethod {
             throws MessagingException {
         MimeMessage retMessage = new MimeMessage( session );
 
-        retMessage.addFrom( getAddressArray( message.getSenders() ) );
+        retMessage.setFrom( new InternetAddress(message.senders?.mailAddress,message.senders?.displayName) );
 
         // Set Reply-To
-        Address[] addresses = getAddressArray(message.getReplyTo());
+        InternetAddress [] addresses = getAddressArray(message.getReplyTo());
         emailReceipt.setReplyTo( InternetAddress.toString( addresses ) );
         retMessage.setReplyTo( addresses );
 
@@ -166,13 +169,17 @@ class CommunicationSendEmailMethod {
 
             // Set cc:
             addresses = getAddressArray( message.getCcList() );
-            emailReceipt.setCc(InternetAddress.toString(addresses));
-            retMessage.setRecipients( Message.RecipientType.CC, addresses );
+            if( addresses && addresses.length() > 0 ) {
+                emailReceipt.setCc(InternetAddress.toString(addresses));
+                retMessage.setRecipients(Message.RecipientType.CC, addresses);
+            }
 
             // Set bcc:
             addresses = getAddressArray( message.getBccList() );
-            emailReceipt.setBcc( InternetAddress.toString( addresses ) );
-            retMessage.setRecipients( Message.RecipientType.BCC, addresses );
+            if( addresses && addresses.length() > 0 ) {
+                emailReceipt.setBcc(InternetAddress.toString(addresses));
+                retMessage.setRecipients(Message.RecipientType.BCC, addresses);
+            }
         }
 
         retMessage.setSubject( message.getSubjectLine() );
@@ -200,14 +207,15 @@ class CommunicationSendEmailMethod {
      * @return
      */
     private Session newSendSession( CommunicationMailboxAccount sender, Properties overrides ) {
-        Properties sendProperties = Holders.config?.communication?.email?.sendProperties.toProperties()
+        Properties emailServerProperties = Holders.config?.communication?.email?.sendProperties.toProperties()
+
         if (!emailServerProperties) emailServerProperties = new Properties()
 
         for (Object o : overrides.keySet()) {
             emailServerProperties.setProperty( (String) o, overrides.getProperty( (String) o ) );
         }
 
-        Authenticator auth = new CommunicationEmailAuthenticator( sender );
+        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( sender );
         return Session.getInstance( emailServerProperties, auth );
     }
 
@@ -218,7 +226,7 @@ class CommunicationSendEmailMethod {
      * @param emailAddresses the set of EmailAddresses to be converted
      * @return Address[] converted EmailAddresses
      */
-    private Address[] getAddressArray( Set<CommunicationEmailAddress> emailAddresses ) {
+    private InternetAddress[] getAddressArray( Set<CommunicationEmailAddress> emailAddresses ) {
         if (null == emailAddresses || 0 == emailAddresses.size()) {
             return null;
         }
@@ -232,7 +240,7 @@ class CommunicationSendEmailMethod {
             }
         }
 
-        Address[] retAddresses = null;
+        InternetAddress[] retAddresses;
         retAddresses = list.toArray( new InternetAddress[0] );
 
         return retAddresses;
@@ -251,7 +259,7 @@ class CommunicationSendEmailMethod {
 
         if (null == message) {
             exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.nullMessage" );
-        } else if (null == message.getSenders() || 0 == message.getSenders().size()) {
+        } else if (null == message.getSenders()) {
             exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.sendersEmpty" );
         } else if (false == ignoreToList && (null == message.getToList() || 0 == message.getToList().size())) {
             exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.recipientsEmpty" );
