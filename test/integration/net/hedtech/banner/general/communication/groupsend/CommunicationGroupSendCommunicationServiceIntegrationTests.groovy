@@ -91,12 +91,12 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         // TODO: Fix this assertEquals( 5, countCompleted )
-//        assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
 
         sleepUntilCommunicationJobsComplete( 5, 30 )
         countCompleted = CommunicationJob.fetchCompleted().size()
        // TODO: Fix this  assertEquals( 5, countCompleted )
-//        assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
 
 //        MimeMessage[] messages = mailServer.getReceivedMessages();
 //        assertNotNull(messages);
