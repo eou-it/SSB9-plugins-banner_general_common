@@ -62,10 +62,10 @@ class CommunicationGroupSendService extends ServiceBase {
             if (log.isWarnEnabled()) log.warn( "Group send with id = " + groupSendId + " has already concluded." )
             return groupSend
         }
-
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
         groupSend.stopDate = new Date()
-        return update( groupSend )
+        //TODO: Figure out why ServiceBase.update is not working with this domain.
+        return groupSend.save() //update( groupSend )
     }
 
 }
