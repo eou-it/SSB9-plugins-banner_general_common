@@ -104,6 +104,7 @@ log4j = {
 //Default communications config
 ssbEnabled = true
 ssbOracleUsersProxied = true
+
 communication {
     engine {
         isEnabled = true
@@ -123,12 +124,14 @@ communication {
         }
     }
 }
+// encKey must be exactly 32 chars
+communication.security.password.encKey = '772F9958BA824FCC861EBF7031EABB70'
 
 seedDataTarget =  ['bgc': ['/src/groovy/net/hedtech/banner/seeddata/Data/banner_general_common.xml']]
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 
-/* remove this line 
+/* remove this line
 // GSP settings
 grails {
     views {

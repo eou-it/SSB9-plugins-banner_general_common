@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.organization
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -19,7 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTestCase {
     def communicationOrganizationService
     def selfServiceBannerAuthenticationProvider
-
+    def encryptionKey =  Holders.config.communication?.security?.password?.encKey
 
     @Before
     public void setUp() {
