@@ -8,6 +8,7 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
@@ -52,6 +53,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
     protected GreenMail mailServer
+    protected static final int portOffset = 2000
 
     @Before
     public void setUp() {
@@ -62,10 +64,13 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
 
+        ServerSetupTest.setPortOffset( portOffset )
         mailServer = new GreenMail( ServerSetupTest.SMTP )
-        mailServer.start()
 
-//        mailServer.setUser(EMAIL_USER_ADDRESS, USER_NAME, USER_PASSWORD);
+        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
+        defaultOrganization.theReceiveEmailServerProperties
+        String userPassword = communicationOrganizationService.decryptMailBoxAccountPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
+        mailServer.setUser( defaultOrganization.theSenderMailboxAccount.emailAddress, defaultOrganization.theSenderMailboxAccount.userName, userPassword )
     }
 
     @After
@@ -108,24 +113,21 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org", isRoot: true)
             defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
-            def defaultMailboxAccount = new CommunicationMailboxAccount([
-                    emailAddress: 'rasul.shishehbor@ellucian.com',
-                    encryptedPassword: "ADOFIUSDSF",
-                    userName: 'rshishehbor'
+            communicationOrganizationService.encryptMailBoxAccountPassword()
+
+            defaultOrganization.theSenderMailboxAccount = new CommunicationMailboxAccount([
+                emailAddress: 'rasul.shishehbor@ellucian.com',
+                clearPassword: "changeit",
+                userName: 'rshishehbor'
             ])
 
-            defaultOrganization.theSenderMailboxAccount = defaultMailboxAccount
-
-            def sendEmailServerProperties = new CommunicationEmailServerProperties(
-                    // Required fields
-                    securityProtocol: "TTTTTTTTTT",
-                    smtpHost: "TTTTTTTTTT",
-                    smtpPort: 1234,
+            defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
+                securityProtocol: CommunicationEmailServerConnectionSecurity.None,
+                smtpHost: "127.0.0.1",
+                smtpPort: (portOffset + 25)
             )
 
-            defaultOrganization.theSendEmailServerProperties = sendEmailServerProperties
             defaultOrganization = communicationOrganizationService.update( defaultOrganization )
-
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }

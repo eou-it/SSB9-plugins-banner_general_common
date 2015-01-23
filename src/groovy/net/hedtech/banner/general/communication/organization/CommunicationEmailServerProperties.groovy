@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
+import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 
 import javax.persistence.*
 
@@ -55,7 +56,8 @@ class CommunicationEmailServerProperties implements Serializable {
      * SMTP HOST: The SMTP protocal to use. none, ssl, etc.
      */
     @Column(name = "GCBSPRP_SECURITY_PROTOCOL")
-    String securityProtocol
+    @Enumerated(value = EnumType.STRING)
+    CommunicationEmailServerConnectionSecurity securityProtocol = CommunicationEmailServerConnectionSecurity.None
 
     /**
      * VERSION: Optimistic lock token.

@@ -44,14 +44,14 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
         // Assert domain values
         assertNotNull receiveProperties?.id
-        assertEquals "TTTTTTTTTT", receiveProperties.securityProtocol
+        assertEquals CommunicationEmailServerConnectionSecurity.None, receiveProperties.securityProtocol
         assertEquals "TTTTTTTTTT", receiveProperties.smtpHost
         assertEquals 1234, receiveProperties.smtpPort
         assertEquals CommunicationEmailServerPropertiesType.Receive, receiveProperties.type
 
         // Assert domain values
         assertNotNull receiveProperties?.id
-        assertEquals "TTTTTTTTTT", sendProperties.securityProtocol
+        assertEquals CommunicationEmailServerConnectionSecurity.None, sendProperties.securityProtocol
         assertEquals "TTTTTTTTTT", sendProperties.smtpHost
         assertEquals 1234, sendProperties.smtpPort
         assertEquals CommunicationEmailServerPropertiesType.Send, sendProperties.type
@@ -73,7 +73,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         assertNotNull communicationEmailServerProperties
 
         // Update domain values
-        communicationEmailServerProperties.securityProtocol = "###"
+        communicationEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.Ssl
 
         communicationEmailServerProperties.save( failOnError: true, flush: true )
 
@@ -82,7 +82,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
         // Assert updated domain values
         assertNotNull communicationEmailServerProperties?.id
-        assertEquals( "###", communicationEmailServerProperties.securityProtocol )
+        assertEquals( CommunicationEmailServerConnectionSecurity.Ssl, communicationEmailServerProperties.securityProtocol )
 
     }
 
@@ -136,7 +136,6 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         def communicationEmailServerProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive )
 
         // Set domain values to exceed maximum allowed length
-        communicationEmailServerProperties.securityProtocol = """To Long""".padLeft( 2001 )
         communicationEmailServerProperties.smtpHost = """To Long""".padLeft( 2001 )
 
         // Assert for domain
@@ -145,7 +144,6 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         // Assert for specific fields
         assertErrorsFor communicationEmailServerProperties, 'maxSize',
                 [
-                        'securityProtocol',
                         'smtpHost',
                 ]
     }
@@ -174,7 +172,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     private def newCommunicationEmailServerProperties( serverType ) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
-                securityProtocol: "TTTTTTTTTT",
+                securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                 smtpHost: "TTTTTTTTTT",
                 smtpPort: 1234,
                 organization: organization,
