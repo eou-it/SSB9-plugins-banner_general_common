@@ -198,14 +198,12 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
         /* Do an update, with clearTextPassword null, the encrypted password should remain the same */
         createdOrganization.senderMailboxAccountSettings[0].userName = 'AstorPiazolla'
-        communicationOrganizationService.update( createdOrganization )
-        def updatedOrganization = CommunicationMailboxAccount.fetchByOrganizationIdAndType( createdOrganization.id, CommunicationMailboxAccountType.Sender )
+        def updatedOrganization = communicationOrganizationService.update( createdOrganization )
         assertNotNull( updatedOrganization.id )
         assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
         /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
         createdOrganization.senderMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
-        communicationOrganizationService.update( createdOrganization )
-        updatedOrganization = CommunicationMailboxAccount.fetchByOrganizationIdAndType( createdOrganization.id, CommunicationMailboxAccountType.Sender )
+        updatedOrganization = communicationOrganizationService.update( createdOrganization )
         assertNotNull( updatedOrganization.id )
         assertTrue( "New encrypted password was not generated", "D359A3537A74FC42F284450BCCDDA734" != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
 
