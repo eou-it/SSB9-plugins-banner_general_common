@@ -86,7 +86,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
         organization.receiveEmailServerProperties = [receiveProperties]
         organization.save()
-        assertEquals 1234L, organization.receiveEmailServerProperties[0].smtpPort
+        assertEquals 1234L, organization.receiveEmailServerProperties[0].port
 
     }
 
@@ -174,8 +174,8 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
-                smtpHost: "TTTTTTTTTT",
-                smtpPort: 1234,
+                host: "TTTTTTTTTT",
+                port: 1234,
                 organization: organization,
                 type: serverType
         )

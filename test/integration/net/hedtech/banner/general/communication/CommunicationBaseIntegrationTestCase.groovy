@@ -1,28 +1,16 @@
 package net.hedtech.banner.general.communication
 
-import grails.gorm.DetachedCriteria
 import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
-import net.hedtech.banner.general.communication.item.CommunicationEmailItem
-import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
-import org.junit.Test
-
 
 /**
  * A BaseIntegrationTestCase with added test support for communication artifacts.
@@ -117,8 +105,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
             defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
-                smtpHost: "127.0.0.1",
-                smtpPort: Holders.config.greenmail?.ports?.smtp
+                host: "127.0.0.1",
+                port: Holders.config.greenmail?.ports?.smtp
             )
 
             defaultOrganization = communicationOrganizationService.update( defaultOrganization )
@@ -132,8 +120,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 //        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
 //                // Required fields
 //                securityProtocol: "TTTTTTTTTT",
-//                smtpHost: "TTTTTTTTTT",
-//                smtpPort: 1234,
+//                host: "TTTTTTTTTT",
+//                port: 1234,
 //                organization: organization,
 //                type: serverType
 //        )
