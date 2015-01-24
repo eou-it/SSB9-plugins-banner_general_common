@@ -6,6 +6,8 @@ package net.hedtech.banner.general.communication.email
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 import javax.mail.Message
 import javax.mail.MessagingException
@@ -18,6 +20,7 @@ import javax.mail.internet.MimeMessage
  * Created by mbrzycki on 1/6/15.
  */
 class CommunicationSendEmailMethod {
+    private Log log = LogFactory.getLog( this.getClass() )
 
     private CommunicationEmailMessage emailMessage;
     private CommunicationMailboxAccount sender;
@@ -42,7 +45,7 @@ class CommunicationSendEmailMethod {
         props.put( "mail.smtp.from", sender.getEmailAddress() );
 
         if (log.isDebugEnabled()) {
-            log.debug( "Connecting to email server with account username = " + sender.getUsername() );
+            log.debug( "Connecting to email server with account username = " + sender.getUserName() );
         }
         Session session = newSendSession(sender, props );
 //        optOutMessageId = uuidService.fetchOneGuid();
@@ -207,8 +210,8 @@ class CommunicationSendEmailMethod {
      * @return
      */
     private Session newSendSession( CommunicationMailboxAccount sender, Properties overrides ) {
-        Properties emailServerProperties = Holders.config?.communication?.email?.sendProperties.toProperties()
-
+        Properties emailServerProperties = Holders.config?.communication?.email?.sendProperties.toProperties('mail.smtp')
+        log.debug "Mail server properties:" + emailServerProperties.toString()
         if (!emailServerProperties) emailServerProperties = new Properties()
 
         for (Object o : overrides.keySet()) {
