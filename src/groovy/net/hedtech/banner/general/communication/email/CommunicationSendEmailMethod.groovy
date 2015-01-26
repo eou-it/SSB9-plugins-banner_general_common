@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import org.apache.commons.logging.Log
@@ -220,16 +221,22 @@ class CommunicationSendEmailMethod {
     private Session newSendSession() {
         Properties emailServerProperties = new Properties()
 
-        emailServerProperties.put( "mail.smtp.host", senderOrganization.theSendEmailServerProperties.host )
-        emailServerProperties.put( "mail.smtp.port", senderOrganization.theSendEmailServerProperties.port )
-        emailServerProperties.put( "mail.smtp.auth", senderOrganization.theSenderMailboxAccount.encryptedPassword != null )
-        if (senderOrganization.theSendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.None) {
-        } else if (senderOrganization.theSendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.SSL) {
-            emailServerProperties.put( "mail.smtp.ssl.enable", true )
-        } else if (senderOrganization.theSendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.TLS) {
-            emailServerProperties.put( "mail.smtp.starttls.enable", true )
-        } else {
-            throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
+        CommunicationEmailServerProperties sendEmailServerProperties = senderOrganization?.sendEmailServerProperties?.get(0)
+        CommunicationMailboxAccount senderMailboxAccount = senderOrganization?.senderMailboxAccountSettings?.get(0)
+
+        if (sendEmailServerProperties) {
+            emailServerProperties.setProperty( "mail.smtp.host", sendEmailServerProperties.host )
+            emailServerProperties.setProperty( "mail.smtp.port", String.valueOf( sendEmailServerProperties.port ) )
+            emailServerProperties.setProperty( "mail.smtp.auth", String.valueOf( senderMailboxAccount?.encryptedPassword != null ) )
+
+            if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.None) {
+            } else if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.SSL) {
+                emailServerProperties.setProperty( "mail.smtp.ssl.enable", String.valueOf( true ) )
+            } else if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.TLS) {
+                emailServerProperties.setProperty( "mail.smtp.starttls.enable", String.valueOf( true ) )
+            } else {
+                throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
+            }
         }
 
         log.debug "Mail server properties:" + emailServerProperties.toString()
