@@ -134,8 +134,4 @@ class CommunicationOrganizationService extends ServiceBase {
     public boolean isDirty( model ) {
         return true
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> 12b90839c387d598795187fea98f107b57adaccb
 }
