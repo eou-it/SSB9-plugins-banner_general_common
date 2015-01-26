@@ -20,19 +20,31 @@ class CommunicationStringTemplateErrorListener implements STErrorListener {
         throw new Exception( stMessage.toString() );
     }
 
+
     @Override
     void runTimeError( STMessage stMessage ) {
         throw new Exception( stMessage.toString() );
     }
+
 
     @Override
     void IOError( STMessage stMessage ) {
         throw new Exception( stMessage.toString() );
     }
 
+
     @Override
     void internalError( STMessage stMessage ) {
         throw new Exception( stMessage.toString() );
+    }
+
+    public void error( String s ) { error( s, null ); }
+
+    public void error( String s, Throwable e ) {
+        System.err.println( s );
+        if (e != null) {
+            throw new Exception( msg.toString() );
+        }
     }
 }
 

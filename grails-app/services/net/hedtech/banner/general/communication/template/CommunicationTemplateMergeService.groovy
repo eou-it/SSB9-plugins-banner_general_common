@@ -17,10 +17,20 @@ import net.hedtech.banner.general.communication.field.CommunicationFieldCalculat
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.person.PersonUtility
 import org.antlr.runtime.tree.CommonTree
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
 
+/**
+ * To clarify some naming confusion, the term CommunicationTemplate refers to the Communication Manager object
+ * that contains several string fields. Each of these string fields can contain delimited template variables.
+ * The open source tool we use to merge the variables with the template parts is called StringTemplate (ST).
+ * The individual String objects that can contain these delimited variables will therefore be called templateString(s).
+ *
+ */
 class CommunicationTemplateMergeService {
+    private Log log = LogFactory.getLog( this.getClass() )
     def communicationFieldCalculationService
     def dataFieldNames = []
 
@@ -31,8 +41,8 @@ class CommunicationTemplateMergeService {
      * @return
      */
     CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
-        CommunicationEmailTemplate emailTemplate = CommunicationEmailTemplate.get( templateId )
-        if (emailTemplate == null) {
+        CommunicationEmailTemplate communicationTemplate = CommunicationEmailTemplate.get( templateId )
+        if (communicationTemplate == null) {
             throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist@@", templateId )
         }
         def person = PersonUtility.getPerson( bannerId )
@@ -41,7 +51,7 @@ class CommunicationTemplateMergeService {
             throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist@@", bannerId )
         }
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate
-        communicationMergedEmailTemplate = calculateTemplateByPidm( emailTemplate, person.pidm )
+        communicationMergedEmailTemplate = calculateTemplateByPidm( communicationTemplate, person.pidm )
         communicationMergedEmailTemplate
 
     }
@@ -49,17 +59,17 @@ class CommunicationTemplateMergeService {
     /**
      * Convenience method to fully render a template. Assumed Pidm is the only input parameter. In the future, the input
      * will be a map or a RecipientData object so that other values can be bound as input to the data functions.
-     * @param emailTemplate A CommunicationEmailTemplate to evaluate
+     * @param communicationTemplate A CommunicationEmailTemplate to evaluate
      * @param pidm
      * @return
      */
-    CommunicationMergedEmailTemplate calculateTemplateByPidm( CommunicationEmailTemplate emailTemplate, Long pidm ) {
+    CommunicationMergedEmailTemplate calculateTemplateByPidm( CommunicationEmailTemplate communicationTemplate, Long pidm ) {
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
-        List<String> templateVariables = extractTemplateVariables( emailTemplate.content )
+        List<String> templateVariables = extractTemplateVariables( communicationTemplate.content )
         def recipientDataMap = calculateRecipientData( templateVariables, sqlParams )
         def CommunicationMergedEmailTemplate communicationMergedEmailTemplate= new CommunicationMergedEmailTemplate()
-        communicationMergedEmailTemplate.content = renderTemplate( emailTemplate.content, recipientDataMap )
+        communicationMergedEmailTemplate.content = renderTemplate( communicationTemplate.content, recipientDataMap )
         communicationMergedEmailTemplate
     }
 
@@ -76,6 +86,7 @@ class CommunicationTemplateMergeService {
         def recipientData = [:]
         def CommunicationField communicationField
         if (parameters.containsKey( 'pidm' )) {
+            log.debug( "Calculating recipient data for pidm " + parameters.pidm)
             communicationFieldNames.each {
                 communicationField = CommunicationField.findByName( it )
                 if (!(communicationField == null)) {
@@ -96,6 +107,7 @@ class CommunicationTemplateMergeService {
      * @return Fully rendered template as String
      */
     def String renderTemplate( String templateString, Map recipientData ) {
+        log.debug( "Merging recipient data into a template string")
         char delimiter = '$'
         ST st = new ST( templateString, delimiter, delimiter );
         recipientData.keySet().each { key ->
@@ -112,6 +124,7 @@ class CommunicationTemplateMergeService {
      * @return CommunicationMergedEmailTemplate
      */
     CommunicationMergedEmailTemplate mergeEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate, CommunicationRecipientData recipientData ) {
+        log.debug( "Merging recipient data into a CommunicationEmailTemplate ")
 
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, recipientData.fieldValues )
@@ -127,6 +140,7 @@ class CommunicationTemplateMergeService {
      * @return
      */
     Map<String, String> renderPreviewValues( String templateString ) {
+        log.debug( "Extracting preview values from template string.")
         List<String> templateVariables = extractTemplateVariables( templateString )
         def renderedCommunicationFields = [:]
 
@@ -151,6 +165,7 @@ class CommunicationTemplateMergeService {
      * @return CommunicationMergedEmailTemplate
      */
     CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
+        log.debug( "Rendering CommunicationTemplate with preview values only.")
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList?:" ", renderPreviewValues( communicationEmailTemplate.toList?:" " ) )
         communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject?:" ", renderPreviewValues( communicationEmailTemplate.subject?:" " ) )
@@ -178,12 +193,13 @@ class CommunicationTemplateMergeService {
         }
     }
     /**
-     * Pulls all the template variables from the currently supported parts of an email template
+     * Extracts all the template variables from the currently supported parts of an email template
      * @param communicationEmailTemplate
      * @return
      */
 
     List<String> extractTemplateVariables( CommunicationEmailTemplate communicationEmailTemplate ) {
+        log.debug( "Extracting template variables from CommunicationEmailTemplate ${communicationEmailTemplate.name}.")
         def templateVariables = []
         extractTemplateVariables( communicationEmailTemplate.toList ).each {
             templateVariables << it
@@ -200,11 +216,12 @@ class CommunicationTemplateMergeService {
 
     /**
      *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
-     * @param template statement
+     * @param template String
      * @return set of unique string variables found in the template string
      */
-    List<String> extractTemplateVariables( String statement ) {
-        if (statement == null) return new ArrayList<String>()
+    List<String> extractTemplateVariables( String templateString ) {
+        log.debug( "Extracting template variables from template string.")
+        if (templateString == null) return new ArrayList<String>()
 
         dataFieldNames = []
         char delimiter = '$'
@@ -212,8 +229,8 @@ class CommunicationTemplateMergeService {
         STGroup group = new STGroup( delimiter, delimiter )
         CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
         group.setListener( errorListener )
-        group.defineTemplate( "foo", statement ) */
-        ST st = new org.stringtemplate.v4.ST( statement, delimiter, delimiter );
+        group.defineTemplate( "foo", templateString ) */
+        ST st = new org.stringtemplate.v4.ST( templateString, delimiter, delimiter );
 
         /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
         down the branch looking for ID tokens to place in the global dataFieldNames */
@@ -235,7 +252,6 @@ class CommunicationTemplateMergeService {
      */
     def examineNodes( CommonTree treeNode ) {
         final int ID = 25
-
         if (treeNode) {
             //println "token type = " + treeNode.getToken().getType() + " text= " + treeNode.getToken().getText()
             if (treeNode.getToken().getType() == ID) {
@@ -246,9 +262,7 @@ class CommunicationTemplateMergeService {
                 CommonTree nextNode = it as CommonTree
                 examineNodes( nextNode )
             }
-
         }
-
     }
 
 
