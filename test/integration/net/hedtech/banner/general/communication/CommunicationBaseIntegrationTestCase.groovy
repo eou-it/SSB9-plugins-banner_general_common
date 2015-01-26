@@ -1,5 +1,7 @@
 package net.hedtech.banner.general.communication
 
+import com.icegreen.greenmail.util.GreenMail
+import com.icegreen.greenmail.util.ServerSetup
 import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
@@ -11,9 +13,6 @@ import net.hedtech.banner.general.communication.template.CommunicationEmailTempl
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
-import org.junit.Test
-import com.icegreen.greenmail.util.*
-
 
 /**
  * A BaseIntegrationTestCase with added test support for communication artifacts.
@@ -123,8 +122,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 //        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
 //                // Required fields
 //                securityProtocol: "TTTTTTTTTT",
-//                smtpHost: "TTTTTTTTTT",
-//                smtpPort: 1234,
+//                host: "TTTTTTTTTT",
+//                port: 1234,
 //                organization: organization,
 //                type: serverType
 //        )

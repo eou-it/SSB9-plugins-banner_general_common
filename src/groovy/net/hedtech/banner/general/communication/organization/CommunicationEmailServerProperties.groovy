@@ -36,9 +36,9 @@ class CommunicationEmailServerProperties implements Serializable {
     @Enumerated(value = EnumType.STRING)
     CommunicationEmailServerPropertiesType type
     /**
-     * HOST: The host name for the mail server to send email to
+     * HOST: The host name for the mail server
      */
-    @Column(name = "GCBSPRP_SMTP_HOST")
+    @Column(name = "GCBSPRP_HOST")
     String host
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -46,9 +46,9 @@ class CommunicationEmailServerProperties implements Serializable {
     CommunicationOrganization organization
 
     /**
-     * PORT: The port number on the host send email to
+     * PORT: The port number on the host
      */
-    @Column(name = "GCBSPRP_SMTP_PORT")
+    @Column(name = "GCBSPRP_PORT")
     int port
 
     /**
@@ -108,9 +108,9 @@ class CommunicationEmailServerProperties implements Serializable {
         return "CommunicationEmailServerProperties{" +
                 "id=" + id +
                 ", type=" + type +
-                ", smtpHost='" + host + '\'' +
+                ", host='" + host + '\'' +
                 ", organization=" + organization.id + "**"+organization.name +
-                ", smtpPort=" + port +
+                ", port=" + port +
                 ", securityProtocol='" + securityProtocol + '\'' +
                 ", version=" + version +
                 ", lastModified=" + lastModified +
