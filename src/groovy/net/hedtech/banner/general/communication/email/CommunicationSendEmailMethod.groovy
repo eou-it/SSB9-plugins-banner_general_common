@@ -3,13 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 
 import javax.mail.Message
 import javax.mail.MessagingException

@@ -1,8 +1,5 @@
 package net.hedtech.banner.general.communication
 
-import com.icegreen.greenmail.util.GreenMail
-import com.icegreen.greenmail.util.ServerSetup
-import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
@@ -13,6 +10,7 @@ import net.hedtech.banner.general.communication.template.CommunicationEmailTempl
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
+import com.icegreen.greenmail.util.*
 
 /**
  * A BaseIntegrationTestCase with added test support for communication artifacts.
@@ -42,7 +40,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
     protected GreenMail mailServer
-    protected int smtp_port = 4025
+    protected static final int smtp_port = 4025
 
     @Before
     public void setUp() {
@@ -54,7 +52,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultEmailTemplate()
 
         ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
-        this.mailServer = new GreenMail( smtpServerSetup )
+        this.mailServer = new GreenMail( smtpServerSetup)
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
