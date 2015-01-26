@@ -1,5 +1,9 @@
 package net.hedtech.banner.general.communication
 
+<<<<<<< HEAD
+=======
+import grails.util.Holders
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
@@ -10,8 +14,11 @@ import net.hedtech.banner.general.communication.template.CommunicationEmailTempl
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
+<<<<<<< HEAD
 import com.icegreen.greenmail.util.*
 
+=======
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
 
 /**
  * A BaseIntegrationTestCase with added test support for communication artifacts.
@@ -40,8 +47,11 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
+<<<<<<< HEAD
     protected GreenMail mailServer
     protected static final int smtp_port = 4025
+=======
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
 
     @Before
     public void setUp() {
@@ -52,13 +62,15 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
 
+<<<<<<< HEAD
         ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
         this.mailServer = new GreenMail( smtpServerSetup)
+=======
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
         String userPassword = communicationOrganizationService.decryptMailBoxAccountPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
-        mailServer.setUser( defaultOrganization.theSenderMailboxAccount.emailAddress, defaultOrganization.theSenderMailboxAccount.userName, userPassword )
     }
 
     @After
@@ -112,7 +124,11 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                 host: "127.0.0.1",
+<<<<<<< HEAD
                 port: smtp_port
+=======
+                port: Holders.config.greenmail?.ports?.smtp
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
             )
 
             defaultOrganization = communicationOrganizationService.update( defaultOrganization )
@@ -126,8 +142,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 //        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
 //                // Required fields
 //                securityProtocol: "TTTTTTTTTT",
-//                smtpHost: "TTTTTTTTTT",
-//                smtpPort: 1234,
+//                host: "TTTTTTTTTT",
+//                port: 1234,
 //                organization: organization,
 //                type: serverType
 //        )

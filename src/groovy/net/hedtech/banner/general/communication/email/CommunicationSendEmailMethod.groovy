@@ -4,8 +4,14 @@
 package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.exceptions.ApplicationException
+<<<<<<< HEAD
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+=======
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
 
 import javax.mail.Message
 import javax.mail.MessagingException
@@ -18,6 +24,7 @@ import javax.mail.internet.MimeMessage
  * Created by mbrzycki on 1/6/15.
  */
 class CommunicationSendEmailMethod {
+    private Log log = LogFactory.getLog( this.getClass() )
 
     private CommunicationEmailMessage emailMessage;
     private CommunicationOrganization senderOrganization;
@@ -45,7 +52,7 @@ class CommunicationSendEmailMethod {
         props.put( "mail.smtp.from", senderOrganization.theSenderMailboxAccount.emailAddress );
 
         if (log.isDebugEnabled()) {
-            log.debug( "Connecting to email server with account username = " + sender.getUsername() );
+            log.debug( "Connecting to email server with account username = " + sender.getUserName() );
         }
         Session session = newSendSession();
 //        optOutMessageId = uuidService.fetchOneGuid();
@@ -212,6 +219,7 @@ class CommunicationSendEmailMethod {
      * @param overrides properties to add to override in the session
      * @return
      */
+<<<<<<< HEAD
     private Session newSendSession() {
         Properties emailServerProperties = new Properties()
         emailServerProperties.put( "mail.smtp.host", senderOrganization.theSendEmailServerProperties.host )
@@ -224,6 +232,15 @@ class CommunicationSendEmailMethod {
             emailServerProperties.put( "mail.smtp.socketFactory.fallback", "false" )
         } else {
             throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
+=======
+    private Session newSendSession( CommunicationMailboxAccount sender, Properties overrides ) {
+        Properties emailServerProperties = Holders.config?.communication?.email?.sendProperties.toProperties('mail.smtp')
+        log.debug "Mail server properties:" + emailServerProperties.toString()
+        if (!emailServerProperties) emailServerProperties = new Properties()
+
+        for (Object o : overrides.keySet()) {
+            emailServerProperties.setProperty( (String) o, overrides.getProperty( (String) o ) );
+>>>>>>> 12b90839c387d598795187fea98f107b57adaccb
         }
 
         CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.theSenderMailboxAccount );

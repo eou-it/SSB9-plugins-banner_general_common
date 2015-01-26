@@ -123,9 +123,19 @@ communication {
             deleteSuccessfullyCompleted = false
         }
     }
+    email {
+        sendProperties {
+            host = 'localhost'
+            port = 2025
+            connectiontimeout = 30
+            auth = false
+            ssl.enable = false
+        }
+    }
 }
 // encKey must be exactly 32 chars
 communication.security.password.encKey = '772F9958BA824FCC861EBF7031EABB70'
+greenmail.ports.smtp = 2025
 
 seedDataTarget =  ['bgc': ['/src/groovy/net/hedtech/banner/seeddata/Data/banner_general_common.xml']]
 
