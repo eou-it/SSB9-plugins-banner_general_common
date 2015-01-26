@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory
 class CommunicationSendEmailService {
     private Log log = LogFactory.getLog( this.getClass() )
     def communicationEmailItemService
+    def communicationOrganizationService
 
     /**
      * Sends an email message (single) based on the contents of EmailMessage passed.
@@ -28,11 +29,11 @@ class CommunicationSendEmailService {
      */
     public void sendEmail( CommunicationOrganization organization, CommunicationEmailMessage emailMessage, CommunicationRecipientData recipientData, Long pidm  ) {
         log.debug( "sending email message" )
-        def sender
-        if( organization.senderMailboxAccountSettings.size() > 0 ) {
-            sender = organization.senderMailboxAccountSettings.get(0)
+
+        if (organization?.theSenderMailboxAccount.encryptedPassword != null) {
+            organization.theSenderMailboxAccount.clearTextPassword = communicationOrganizationService.decryptMailBoxAccountPassword( organization.theSenderMailboxAccount.encryptedPassword )
         }
-        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, sender );
+        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, organization );
         sendEmailMethod.execute();
 
         try {
@@ -52,8 +53,9 @@ class CommunicationSendEmailService {
         emailItem.setReferenceId( recipientData.getReferenceId() )
         emailItem.setSubject( emailMessage.getSubjectLine() )
         emailItem.setRecipientPidm( pidm )
+        emailItem.setCreatedBy( recipientData.ownerId )
         emailItem = communicationEmailItemService.create( emailItem )
-        log.debug( "recorded email item sent with item id = ${emailitem.id}." )
+        log.debug( "recorded email item sent with item id = ${emailItem.id}." )
     }
 
 }

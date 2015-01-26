@@ -1,7 +1,6 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
-import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 
 import javax.persistence.*
 
@@ -37,20 +36,20 @@ class CommunicationEmailServerProperties implements Serializable {
     @Enumerated(value = EnumType.STRING)
     CommunicationEmailServerPropertiesType type
     /**
-     * SMTP HOST: The host name for the SMTP mail server to send email to
+     * HOST: The host name for the mail server to send email to
      */
     @Column(name = "GCBSPRP_SMTP_HOST")
-    String smtpHost
+    String host
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "GCBSPRP_ORGANIZATION_ID")
     CommunicationOrganization organization
 
     /**
-     * SMTP PORT: The port number on the host send email to
+     * PORT: The port number on the host send email to
      */
     @Column(name = "GCBSPRP_SMTP_PORT")
-    int smtpPort
+    int port
 
     /**
      * SMTP HOST: The SMTP protocal to use. none, ssl, etc.
@@ -90,8 +89,8 @@ class CommunicationEmailServerProperties implements Serializable {
         lastModifiedBy( nullable: true, maxSize: 30 )
         dataOrigin( nullable: true, maxSize: 30 )
         securityProtocol( nullable: false, maxSize: 2000 )
-        smtpHost( nullable: false, maxSize: 2000 )
-        smtpPort( nullable: false )
+        host( nullable: false, maxSize: 2000 )
+        port( nullable: false )
         type( nullable: false )
         organization( nullable: false )
     }
@@ -109,9 +108,9 @@ class CommunicationEmailServerProperties implements Serializable {
         return "CommunicationEmailServerProperties{" +
                 "id=" + id +
                 ", type=" + type +
-                ", smtpHost='" + smtpHost + '\'' +
+                ", smtpHost='" + host + '\'' +
                 ", organization=" + organization.id + "**"+organization.name +
-                ", smtpPort=" + smtpPort +
+                ", smtpPort=" + port +
                 ", securityProtocol='" + securityProtocol + '\'' +
                 ", version=" + version +
                 ", lastModified=" + lastModified +

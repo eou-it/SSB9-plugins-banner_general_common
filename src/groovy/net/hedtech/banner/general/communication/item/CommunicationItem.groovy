@@ -31,6 +31,7 @@ public abstract class CommunicationItem implements Serializable {
      *  The communication type of this item : EMAIL, LETTER, etc
      */
     @Column(name = "GCRCITM_COMM_CHANNEL")
+    @Enumerated(value = EnumType.STRING)
     String communicationChannel
 
     /**
