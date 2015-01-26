@@ -101,17 +101,15 @@ class CommunicationEmailServerProperties implements Serializable {
     /*
      Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
      */
-
-
     @Override
     public String toString() {
         return "CommunicationEmailServerProperties{" +
                 "id=" + id +
                 ", type=" + type +
                 ", host='" + host + '\'' +
-                ", organization=" + organization.id + "**"+organization.name +
+                ", organization=" + organization.id +
                 ", port=" + port +
-                ", securityProtocol='" + securityProtocol + '\'' +
+                ", securityProtocol=" + securityProtocol +
                 ", version=" + version +
                 ", lastModified=" + lastModified +
                 ", lastModifiedBy='" + lastModifiedBy + '\'' +

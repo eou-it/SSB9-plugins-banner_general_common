@@ -4,7 +4,9 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -52,7 +54,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultEmailTemplate()
 
         ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
-        this.mailServer = new GreenMail( smtpServerSetup)
+        mailServer = new GreenMail( smtpServerSetup)
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
@@ -61,7 +63,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     @After
     public void tearDown() {
-        mailServer.stop()
+        if (mailServer) mailServer.stop()
 
         deleteAll()
         super.tearDown()
@@ -94,22 +96,35 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         }
     }
 
+/*
+
+
+     */
+
+
     protected void setUpDefaultOrganization() {
         List organizations = communicationOrganizationService.list()
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org", isRoot: true)
-            defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
-            defaultOrganization.theSenderMailboxAccount = new CommunicationMailboxAccount([
+
+            def cma = new CommunicationMailboxAccount(
                 emailAddress: 'rasul.shishehbor@ellucian.com',
-                clearTextPassword: "changeit",
-                userName: 'rshishehbor'
-            ])
-            defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
+                encryptedPassword: communicationOrganizationService.encryptMailBoxAccountPassword( "changeit" ),
+                userName: 'rshishehbor',
+                organization: defaultOrganization,
+                type: CommunicationMailboxAccountType.Sender
+            )
+            defaultOrganization.senderMailboxAccountSettings = [cma]
+
+            def cesp = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                 host: "127.0.0.1",
-                port: smtp_port
+                port: smtp_port,
+                organization: defaultOrganization,
+                type: CommunicationEmailServerPropertiesType.Send
             )
-            defaultOrganization = communicationOrganizationService.update(defaultOrganization) as CommunicationOrganization
+            defaultOrganization.sendEmailServerProperties = [cesp]
+            defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }

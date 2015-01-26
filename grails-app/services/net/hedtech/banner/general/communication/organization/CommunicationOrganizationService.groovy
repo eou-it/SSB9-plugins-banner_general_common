@@ -22,11 +22,11 @@ class CommunicationOrganizationService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-        if (communicationOrganization?.theReplyToMailboxAccount.clearTextPassword) {
-            communicationOrganization.theReplyToMailboxAccount.encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theReplyToMailboxAccount.clearTextPassword )
+        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theReplyToMailboxAccount.clearTextPassword )
         }
-        if (communicationOrganization?.theSenderMailboxAccount?.clearTextPassword) {
-            communicationOrganization.theSenderMailboxAccount.encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theSenderMailboxAccount.clearTextPassword )
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theSenderMailboxAccount.clearTextPassword )
         }
 
         def existingOrg = CommunicationOrganization.findAll()
@@ -58,14 +58,12 @@ class CommunicationOrganizationService extends ServiceBase {
     }
 
     def preUpdate( domainModelOrMap ) {
-
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-
-        if (communicationOrganization?.theReplyToMailboxAccount.clearTextPassword) {
-            communicationOrganization.theReplyToMailboxAccount.encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theReplyToMailboxAccount.clearTextPassword )
+        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theReplyToMailboxAccount.clearTextPassword )
         }
-        if (communicationOrganization?.theSenderMailboxAccount?.clearTextPassword) {
-            communicationOrganization.theSenderMailboxAccount.encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theSenderMailboxAccount.clearTextPassword )
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theSenderMailboxAccount.clearTextPassword )
         }
 
         if (communicationOrganization.dateFormat != null) {

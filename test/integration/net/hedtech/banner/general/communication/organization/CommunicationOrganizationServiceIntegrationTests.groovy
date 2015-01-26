@@ -211,13 +211,6 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
 
     @Test
-    void testFetchByOrganizationIdAndType() {
-
-
-    }
-
-
-    @Test
     void testPasswordEncryptAndDecrypt() {
 
         def thePassword = "someSecretThisIs"

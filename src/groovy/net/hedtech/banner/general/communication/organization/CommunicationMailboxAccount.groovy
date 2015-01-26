@@ -112,19 +112,25 @@ class CommunicationMailboxAccount implements Serializable {
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
+    public static List<CommunicationMailboxAccount> fetchByOrganizationId( Long organizationId ) {
+        def mailboxAccountList
+        CommunicationMailboxAccount.withSession { session ->
+            mailboxAccountList = session.getNamedQuery( 'CommunicationMailboxAccount.fetchByOrganizationId' ).setLong( 'organizationId', organizationId ).list()
+        }
+        return mailboxAccountList
+    }
+
     /*
     Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
     */
-
-
     @Override
     public String toString() {
         return "CommunicationMailboxAccount{" +
                 "id=" + id +
                 ", emailAddress='" + emailAddress + '\'' +
-                ", organization=" + organization.name +
-                ", encryptedPassword=" + encryptedPassword +
-                ", clearTextPassword=" + clearTextPassword +
+                ", organization=" + organization.id +
+                ", clearTextPassword='" + clearTextPassword + '\'' +
+                ", encryptedPassword='" + encryptedPassword + '\'' +
                 ", type=" + type +
                 ", emailDisplayName='" + emailDisplayName + '\'' +
                 ", userName='" + userName + '\'' +
@@ -134,14 +140,4 @@ class CommunicationMailboxAccount implements Serializable {
                 ", dataOrigin='" + dataOrigin + '\'' +
                 '}';
     }
-
-
-    public static List<CommunicationMailboxAccount> fetchByOrganizationId( Long organizationId ) {
-        def mailboxAccountList
-        CommunicationMailboxAccount.withSession { session ->
-            mailboxAccountList = session.getNamedQuery( 'CommunicationMailboxAccount.fetchByOrganizationId' ).setLong( 'organizationId', organizationId ).list()
-        }
-        return mailboxAccountList
-    }
-
 }
