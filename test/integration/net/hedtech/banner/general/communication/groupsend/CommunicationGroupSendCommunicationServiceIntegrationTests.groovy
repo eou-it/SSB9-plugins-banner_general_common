@@ -31,8 +31,8 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
     @Before
     public void setUp() {
-        super.useTransactions = false
-        formContext = ['SELFSERVICE']
+        //super.setUseTransactions( false )
+        FormContext.set(['SELFSERVICE'])
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
         super.setUp()
@@ -50,6 +50,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         communicationJobProcessingEngine.stopRunning()
 
         super.tearDown()
+        sessionFactory.currentSession?.close()
         logout()
     }
 
@@ -57,23 +58,27 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
         mailServer.start()
+        CommunicationGroupSend groupSend
+        sessionFactory.currentSession.with { session ->  //Ensure a transaction is started and committed for async threads.
+            def tx = session.beginTransaction()
+            CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testPop"))
+            assertTrue(populationQuery.valid)
 
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create( newPopulationQuery( "testPop" ) )
-        assertTrue( populationQuery.valid )
+            Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
+            CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
+            assertEquals(5, selectionList.getLastCalculatedCount())
 
-        Long populationSelectionListId = communicationPopulationExecutionService.execute( populationQuery.id )
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( populationSelectionListId )
-        assertEquals( 5, selectionList.getLastCalculatedCount() )
+            CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                    populationId: populationSelectionListId,
+                    templateId: defaultEmailTemplate.id,
+                    organizationId: defaultOrganization.id,
+                    referenceId: UUID.randomUUID().toString()
+            )
 
-        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
-                populationId: populationSelectionListId,
-                templateId: defaultEmailTemplate.id,
-                organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString()
-        )
-
-        CommunicationGroupSend groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication( request )
-        assertNotNull( groupSend )
+            groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+            assertNotNull(groupSend)
+            tx.commit()
+        }
 
         assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
 
@@ -91,20 +96,20 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         // TODO: Fix this assertEquals( 5, countCompleted )
-//        assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
 
         sleepUntilCommunicationJobsComplete( 5, 30 )
         countCompleted = CommunicationJob.fetchCompleted().size()
        // TODO: Fix this  assertEquals( 5, countCompleted )
-//        assertEquals( 5, countCompleted )
+        assertEquals( 5, countCompleted )
 
-//        MimeMessage[] messages = mailServer.getReceivedMessages();
-//        assertNotNull(messages);
-//        assertEquals(5, messages.length);
-//        for(MimeMessage each:messages) {
-//            System.out.println( "Display message content to out: ")
-//            System.out.println( messages )
-//        }
+        MimeMessage[] messages = mailServer.getReceivedMessages();
+        assertNotNull(messages);
+        assertEquals(5, messages.length);
+        for(MimeMessage each:messages) {
+            System.out.println( "Display message content to out: ")
+            System.out.println( messages )
+        }
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {

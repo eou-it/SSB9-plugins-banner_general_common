@@ -50,7 +50,7 @@ class CommunicationSendEmailMethod {
         props.put( "mail.smtp.from", senderOrganization.theSenderMailboxAccount.emailAddress );
 
         if (log.isDebugEnabled()) {
-            log.debug( "Connecting to email server with account username = " + sender.getUserName() );
+            log.debug( "Connecting to email server with account username = " + senderOrganization.theSenderMailboxAccount.getUserName() );
         }
         Session session = newSendSession();
         session.setDebug( true )
