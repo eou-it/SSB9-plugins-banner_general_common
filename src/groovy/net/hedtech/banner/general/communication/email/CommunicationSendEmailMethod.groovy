@@ -3,8 +3,10 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -23,31 +25,35 @@ class CommunicationSendEmailMethod {
     private Log log = LogFactory.getLog( this.getClass() )
 
     private CommunicationEmailMessage emailMessage;
-    private CommunicationMailboxAccount sender;
+    private CommunicationOrganization senderOrganization;
     private MimeMessage mimeMessage;
     private String optOutMessageId;
     private CommunicationEmailReceipt lastSend;
 
-    private CommunicationSendEmailMethod(CommunicationEmailMessage emailMessage, CommunicationMailboxAccount sender ) {
+    private CommunicationSendEmailMethod(CommunicationEmailMessage emailMessage, CommunicationOrganization senderOrganization ) {
         this.emailMessage = emailMessage;
-        this.sender = sender;
+        this.senderOrganization = senderOrganization;
     }
 
     public void execute() {
         CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
-        def senderAddress = new CommunicationEmailAddress(mailAddress:sender.emailAddress,displayName:sender.emailDisplayName)
+        def senderAddress = new CommunicationEmailAddress(
+            mailAddress: senderOrganization.theSenderMailboxAccount.emailAddress,
+            displayName: senderOrganization.theSenderMailboxAccount.emailDisplayName
+        )
         emailMessage.senders = [senderAddress] as Set
         minimumFieldsPresent( emailMessage, false );
         Properties props = new Properties();
         //adding smtp 'from' for handling bounce back emails.
 
-        emailReceipt.setFrom( sender.getEmailAddress());
-        props.put( "mail.smtp.from", sender.getEmailAddress() );
+        emailReceipt.setFrom( senderOrganization.theSenderMailboxAccount.emailAddress );
+        props.put( "mail.smtp.from", senderOrganization.theSenderMailboxAccount.emailAddress );
 
         if (log.isDebugEnabled()) {
             log.debug( "Connecting to email server with account username = " + sender.getUserName() );
         }
-        Session session = newSendSession(sender, props );
+        Session session = newSendSession();
+        session.setDebug( true )
 //        optOutMessageId = uuidService.fetchOneGuid();
 
         try {
@@ -157,7 +163,10 @@ class CommunicationSendEmailMethod {
             throws MessagingException {
         MimeMessage retMessage = new MimeMessage( session );
 
-        retMessage.setFrom( new InternetAddress(message.senders?.mailAddress,message.senders?.displayName) );
+        retMessage.setFrom( new InternetAddress(
+            message.senders?.mailAddress,
+            message.senders?.displayName
+        ) );
 
         // Set Reply-To
         InternetAddress [] addresses = getAddressArray(message.getReplyTo());
@@ -209,16 +218,29 @@ class CommunicationSendEmailMethod {
      * @param overrides properties to add to override in the session
      * @return
      */
-    private Session newSendSession( CommunicationMailboxAccount sender, Properties overrides ) {
-        Properties emailServerProperties = Holders.config?.communication?.email?.sendProperties.toProperties('mail.smtp')
-        log.debug "Mail server properties:" + emailServerProperties.toString()
-        if (!emailServerProperties) emailServerProperties = new Properties()
+    private Session newSendSession() {
+        Properties emailServerProperties = new Properties()
 
-        for (Object o : overrides.keySet()) {
-            emailServerProperties.setProperty( (String) o, overrides.getProperty( (String) o ) );
+        CommunicationEmailServerProperties sendEmailServerProperties = senderOrganization?.sendEmailServerProperties?.get(0)
+        CommunicationMailboxAccount senderMailboxAccount = senderOrganization?.senderMailboxAccountSettings?.get(0)
+
+        if (sendEmailServerProperties) {
+            emailServerProperties.setProperty( "mail.smtp.host", sendEmailServerProperties.host )
+            emailServerProperties.setProperty( "mail.smtp.port", String.valueOf( sendEmailServerProperties.port ) )
+            emailServerProperties.setProperty( "mail.smtp.auth", String.valueOf( senderMailboxAccount?.encryptedPassword != null ) )
+
+            if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.None) {
+            } else if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.SSL) {
+                emailServerProperties.setProperty( "mail.smtp.ssl.enable", String.valueOf( true ) )
+            } else if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.TLS) {
+                emailServerProperties.setProperty( "mail.smtp.starttls.enable", String.valueOf( true ) )
+            } else {
+                throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
+            }
         }
 
-        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( sender );
+        log.debug "Mail server properties:" + emailServerProperties.toString()
+        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.theSenderMailboxAccount );
         return Session.getInstance( emailServerProperties, auth );
     }
 

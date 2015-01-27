@@ -73,7 +73,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         assertNotNull communicationEmailServerProperties
 
         // Update domain values
-        communicationEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.Ssl
+        communicationEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.SSL
 
         communicationEmailServerProperties.save( failOnError: true, flush: true )
 
@@ -82,7 +82,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
         // Assert updated domain values
         assertNotNull communicationEmailServerProperties?.id
-        assertEquals( CommunicationEmailServerConnectionSecurity.Ssl, communicationEmailServerProperties.securityProtocol )
+        assertEquals( CommunicationEmailServerConnectionSecurity.SSL, communicationEmailServerProperties.securityProtocol )
 
     }
 

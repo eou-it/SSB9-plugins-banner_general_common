@@ -5,5 +5,6 @@ package net.hedtech.banner.general.communication.organization
  */
 public enum CommunicationEmailServerConnectionSecurity {
     None,
-    Ssl
+    SSL,
+    TLS
 }

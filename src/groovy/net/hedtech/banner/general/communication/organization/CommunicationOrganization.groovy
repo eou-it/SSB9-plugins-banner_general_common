@@ -139,11 +139,11 @@ class CommunicationOrganization implements Serializable {
 
     public void setTheSendEmailServerProperties( CommunicationEmailServerProperties settings ) {
         if (settings) {
-            receiveEmailServerProperties = [ settings ] as List
+            sendEmailServerProperties = [ settings ]
             settings.organization = this
             settings.type = CommunicationEmailServerPropertiesType.Send
         } else {
-            receiveEmailServerProperties = null
+            sendEmailServerProperties = null
         }
     }
 
@@ -157,7 +157,7 @@ class CommunicationOrganization implements Serializable {
 
     public void setTheReceiveEmailServerProperties( CommunicationEmailServerProperties settings ) {
         if (settings) {
-            receiveEmailServerProperties = [ settings ] as List
+            receiveEmailServerProperties = [ settings ]
             settings.organization = this
             settings.type = CommunicationEmailServerPropertiesType.Receive
         } else {
@@ -175,7 +175,7 @@ class CommunicationOrganization implements Serializable {
 
     public void setTheSenderMailboxAccount( CommunicationMailboxAccount settings ) {
         if (settings) {
-            senderMailboxAccountSettings = [ settings ] as List
+            senderMailboxAccountSettings = [ settings ]
             settings.organization = this
             settings.type = CommunicationMailboxAccountType.Sender
         } else {
@@ -193,7 +193,7 @@ class CommunicationOrganization implements Serializable {
 
     public void setTheReplyToMailboxAccount( CommunicationMailboxAccount settings ) {
         if (settings) {
-            replyToMailboxAccountSettings = [ settings ] as List
+            replyToMailboxAccountSettings = [ settings ]
             settings.organization = this
             settings.type = CommunicationMailboxAccountType.ReplyTo
         } else {

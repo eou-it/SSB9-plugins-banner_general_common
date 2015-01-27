@@ -49,14 +49,14 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         communicationGroupSendItemProcessingEngine.stopRunning()
         communicationJobProcessingEngine.stopRunning()
 
-//        super.tearDown()
+        super.tearDown()
         logout()
     }
 
 
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
-//        mailServer.start()
+        mailServer.start()
 
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create( newPopulationQuery( "testPop" ) )
         assertTrue( populationQuery.valid )

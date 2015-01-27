@@ -1,16 +1,18 @@
 package net.hedtech.banner.general.communication
 
-import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
+import com.icegreen.greenmail.util.*
 
 /**
  * A BaseIntegrationTestCase with added test support for communication artifacts.
@@ -39,6 +41,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
+    protected GreenMail mailServer
+    protected static final int smtp_port = 4025
 
     @Before
     public void setUp() {
@@ -49,6 +53,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
 
+        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
+        mailServer = new GreenMail( smtpServerSetup)
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
@@ -57,7 +63,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     @After
     public void tearDown() {
-        mailServer.stop()
+        if (mailServer) mailServer.stop()
 
         deleteAll()
         super.tearDown()
@@ -90,26 +96,35 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         }
     }
 
+/*
+
+
+     */
+
+
     protected void setUpDefaultOrganization() {
         List organizations = communicationOrganizationService.list()
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org", isRoot: true)
-            defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
-            communicationOrganizationService.encryptMailBoxAccountPassword()
 
-            defaultOrganization.theSenderMailboxAccount = new CommunicationMailboxAccount([
+            def cma = new CommunicationMailboxAccount(
                 emailAddress: 'rasul.shishehbor@ellucian.com',
-                clearPassword: "changeit",
-                userName: 'rshishehbor'
-            ])
+                encryptedPassword: communicationOrganizationService.encryptMailBoxAccountPassword( "changeit" ),
+                userName: 'rshishehbor',
+                organization: defaultOrganization,
+                type: CommunicationMailboxAccountType.Sender
+            )
+            defaultOrganization.senderMailboxAccountSettings = [cma]
 
-            defaultOrganization.theSendEmailServerProperties = new CommunicationEmailServerProperties(
+            def cesp = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                 host: "127.0.0.1",
-                port: Holders.config.greenmail?.ports?.smtp
+                port: smtp_port,
+                organization: defaultOrganization,
+                type: CommunicationEmailServerPropertiesType.Send
             )
-
-            defaultOrganization = communicationOrganizationService.update( defaultOrganization )
+            defaultOrganization.sendEmailServerProperties = [cesp]
+            defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }
