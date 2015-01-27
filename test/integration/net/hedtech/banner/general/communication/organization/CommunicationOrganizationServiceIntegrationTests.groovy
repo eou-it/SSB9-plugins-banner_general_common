@@ -20,7 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTestCase {
     def communicationOrganizationService
     def selfServiceBannerAuthenticationProvider
-    def encryptionKey = Holders.config.communication?.security?.password?.encKey
+    def clearTextPassword = "SuperSecretPassword"
 
 
     @Before
@@ -105,7 +105,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             communicationOrganizationService.create( sameNameOrganization )
             Assert.fail "Expected sameNameOrganization to fail because only one org can exist."
         } catch (ApplicationException e) {
-            assertTrue ("Failed to get expected exception onlyOneOrgCanExist",e.getMessage().contains( "onlyOneOrgCanExist" ))
+            assertTrue( "Failed to get expected exception onlyOneOrgCanExist", e.getMessage().contains( "onlyOneOrgCanExist" ) )
         }
 
     }
@@ -157,6 +157,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testCreateWithServerSettings() {
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword )
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -172,8 +173,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull( createdOrganization )
         assertEquals( "test", createdOrganization.name )
         assertEquals( "description", createdOrganization.description )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        assertEquals( encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        assertEquals( encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
 
     }
 
@@ -181,31 +182,43 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testSetAndResetPassword() {
         def organization = new CommunicationOrganization()
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword )
         organization.name = "test"
         organization.description = "description"
         def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
         def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
         organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
         organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
-        def createdOrganization = communicationOrganizationService.create( organization )
+        def savedOrganization = communicationOrganizationService.create( organization )
+        /* try to force a fetch */
+        def createdOrganization = CommunicationOrganization.findById( savedOrganization.id )
         assertNotNull( createdOrganization )
         assertEquals( "test", createdOrganization.name )
         assertEquals( "description", createdOrganization.description )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
-        assertNull( "senderMailboxAccount cleartext password is not null", createdOrganization.senderMailboxAccountSettings[0].clearTextPassword )
-        assertNull( "replyToMailboxAccount cleartext password is not null", createdOrganization.replyToMailboxAccountSettings[0].clearTextPassword )
+        assertEquals( "senderMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        assertEquals( "replyToMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
 
-        /* Do an update, with clearTextPassword null, the encrypted password should remain the same */
+        /* Do an update of senderMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
         createdOrganization.senderMailboxAccountSettings[0].userName = 'AstorPiazolla'
         def updatedOrganization = communicationOrganizationService.update( createdOrganization )
         assertNotNull( updatedOrganization.id )
-        assertEquals( "D359A3537A74FC42F284450BCCDDA734", createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        assertEquals( encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
         /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
         createdOrganization.senderMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
         updatedOrganization = communicationOrganizationService.update( createdOrganization )
         assertNotNull( updatedOrganization.id )
-        assertTrue( "New encrypted password was not generated", "D359A3537A74FC42F284450BCCDDA734" != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        assertTrue( "New encrypted password was not generated", encryptedPassword != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+
+        /* Do an update of replyToMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
+        createdOrganization.replyToMailboxAccountSettings[0].userName = 'DjangoRienhart'
+        updatedOrganization = communicationOrganizationService.update( createdOrganization )
+        assertNotNull( updatedOrganization.id )
+        assertEquals( encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
+        createdOrganization.replyToMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
+        updatedOrganization = communicationOrganizationService.update( createdOrganization )
+        assertNotNull( updatedOrganization.id )
+        assertTrue( "New encrypted password was not generated", encryptedPassword != createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
 
     }
 
@@ -213,10 +226,9 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testPasswordEncryptAndDecrypt() {
 
-        def thePassword = "someSecretThisIs"
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( thePassword )
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword )
         def decryptedPassword = communicationOrganizationService.decryptMailBoxAccountPassword( encryptedPassword )
-        assertEquals( thePassword, decryptedPassword )
+        assertEquals( clearTextPassword, decryptedPassword )
     }
 
 
@@ -234,7 +246,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
         def communicationMailboxAccount = new CommunicationMailboxAccount(
-                encryptedPassword: "D359A3537A74FC42F284450BCCDDA734",
+                clearTextPassword: clearTextPassword,
                 organization: organization,
                 type: communicationMailboxAccountType,
                 emailAddress: "Registrar@BannerUniversity.edu",
