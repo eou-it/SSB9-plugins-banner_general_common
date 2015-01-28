@@ -104,8 +104,10 @@ log4j = {
     trace 'net.hedtech.banner.general.communication.job'
     trace 'net.hedtech.banner.general.communication.email'
     trace 'com.icegreen.greenmail.util'
-    trace 'org.springframework.transaction'
-    trace 'org.springframework.orm.hibernate3.HibernateTransactionManager'
+    trace 'net.hedtech.banner.general.communication.job'
+//    trace 'org.springframework.transaction'
+//    trace 'org.springframework.orm.hibernate3.HibernateTransactionManager'
+
 }
 
 //Default communications config
