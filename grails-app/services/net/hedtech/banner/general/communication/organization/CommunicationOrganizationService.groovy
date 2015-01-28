@@ -22,10 +22,10 @@ class CommunicationOrganizationService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt( 0 )?.clearTextPassword) {
             communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theReplyToMailboxAccount.clearTextPassword )
         }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt( 0 )?.clearTextPassword) {
             communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theSenderMailboxAccount.clearTextPassword )
         }
 
@@ -57,12 +57,13 @@ class CommunicationOrganizationService extends ServiceBase {
 
     }
 
+
     def preUpdate( domainModelOrMap ) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt( 0 )?.clearTextPassword) {
             communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theReplyToMailboxAccount.clearTextPassword )
         }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt( 0 )?.clearTextPassword) {
             communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword( communicationOrganization.theSenderMailboxAccount.clearTextPassword )
         }
 
@@ -108,9 +109,10 @@ class CommunicationOrganizationService extends ServiceBase {
     def decryptMailBoxAccountPassword( String encryptedPassword ) {
         def decryptedPassword
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
-
+        if (encryptionKey == null)
+            throw new ApplicationException( CommunicationOrganization, "@@r1:security.keyMissing@@" )
         def sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        sql.call( "{$Sql.VARCHAR = call baninst1.gckencr.decrypt_string (${encryptionKey},${encryptedPassword})}" ) {
+        sql.call( "{$Sql.VARCHAR = call gckencr.decrypt_string (${encryptionKey},${encryptedPassword})}" ) {
             result -> decryptedPassword = result
         }
         decryptedPassword
@@ -120,12 +122,15 @@ class CommunicationOrganizationService extends ServiceBase {
     def encryptMailBoxAccountPassword( String clearTextPassword ) {
         def encryptedPassword
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
+        if (encryptionKey == null)
+              throw new ApplicationException( CommunicationOrganization, "@@r1:security.keyMissing@@" )
         def sql = new Sql( sessionFactory.getCurrentSession().connection() )
-        sql.call( "{$Sql.VARCHAR = call baninst1.gckencr.encrypt_string (${encryptionKey},${clearTextPassword})}" ) {
+        sql.call( "{$Sql.VARCHAR = call gckencr.encrypt_string (${encryptionKey},${clearTextPassword})}" ) {
             result -> encryptedPassword = result
         }
         encryptedPassword
     }
+
 
     @Override
     public boolean isDirty( model ) {
