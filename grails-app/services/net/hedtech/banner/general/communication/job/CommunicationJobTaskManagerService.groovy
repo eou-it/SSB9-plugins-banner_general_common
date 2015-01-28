@@ -92,7 +92,7 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
      */
     public void markComplete( AsynchronousTask task ) throws ApplicationException {
         CommunicationJob job = task as CommunicationJob
-        log.info( "Marking completed group send item id = ${job.id}." )
+        log.info( "Marking completed communication job id = ${job.id}." )
         communicationJobService.markCompleted( job.id )
     }
 
