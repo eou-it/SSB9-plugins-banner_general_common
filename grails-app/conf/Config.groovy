@@ -99,6 +99,13 @@ log4j = {
             }
             break
     }
+    trace 'net.hedtech.banner.general.communication.groupsend'
+    trace 'net.hedtech.banner.general.asynchronous.task'
+    trace 'net.hedtech.banner.general.communication.job'
+    trace 'net.hedtech.banner.general.communication.email'
+    trace 'com.icegreen.greenmail.util'
+    trace 'org.springframework.transaction'
+    trace 'org.springframework.orm.hibernate3.HibernateTransactionManager'
 }
 
 //Default communications config
