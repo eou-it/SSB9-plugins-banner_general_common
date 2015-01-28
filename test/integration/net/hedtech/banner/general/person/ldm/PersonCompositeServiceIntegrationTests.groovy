@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 import org.junit.Before
@@ -28,7 +28,6 @@ import org.junit.Ignore
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def personCompositeService
-    def personIdentificationNameService
     def personBasicPersonBaseService
 
     //Test data for creating new domain instance
@@ -93,6 +92,14 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_state_goriccr_data = "UNK"
     def i_success_zip_goriccr_data = "UNKNOWN"
     def i_success_street_line1 = "123 Main Line"
+    def i_success_credential_id1 = "Elevate0001"
+    def i_success_credential_type1 = "Banner Sourced ID"
+    def i_success_credential_id2 = "sjorden"
+    def i_success_credential_type2 = "Banner User Name"
+    def i_success_credential_id3 = "DSTERLIN"
+    def i_success_credential_type3 = "Banner UDC ID"
+    def i_success_credential_id4 = "HOSP0001"
+    def i_success_credential_type4 = "Banner ID"
 
 
     @Before
@@ -177,6 +184,27 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'date.invalid.format.message'
         }
     }
+
+    //GET- Person by guid API
+    @Test
+    void testGetPersonCredentialsByGuid() {
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', '50199')?.guid
+
+        def persons = personCompositeService.get(guid)
+
+        assertNotNull persons
+        assertNotNull persons.credentials
+        assertEquals 4, persons.credentials.size()
+        assertEquals i_success_credential_id1, persons.credentials[0].credentialId
+        assertEquals i_success_credential_type1, persons.credentials[0].credentialType
+        assertEquals i_success_credential_id2, persons.credentials[1].credentialId
+        assertEquals i_success_credential_type2, persons.credentials[1].credentialType
+        assertEquals i_success_credential_id3, persons.credentials[2].credentialId
+        assertEquals i_success_credential_type3, persons.credentials[2].credentialType
+        assertEquals i_success_credential_id4, persons.credentials[3].credentialId
+        assertEquals i_success_credential_type4, persons.credentials[3].credentialType
+    }
+
 
     //POST- Person Create API
     @Test
