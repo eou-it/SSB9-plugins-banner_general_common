@@ -82,7 +82,7 @@ class CommunicationGroupSendItemProcessorService {
     public void failGroupSendItem( Long groupSendItemId, String errorText ) {
         CommunicationGroupSendItem groupSendItem = communicationGroupSendItemService.get( groupSendItemId )
         groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Failed )
-        //TODO: store errorText on item record
+        groupSendItem.setErrorText( errorText )
         log.warn( "Group send item failed id = ${groupSendItemId}, errorText = ${errorText}.")
         groupSendItem.setStopDate( new Date() )
         communicationGroupSendItemService.update( groupSendItem )
