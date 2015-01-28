@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.job.CommunicationJob
+import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -56,6 +57,7 @@ class CommunicationGroupSendItemProcessorService {
 
             log.debug( "Creating communication job with reference id = " + recipientData.referenceId )
             CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
+            communicationJob.status = CommunicationJobStatus.PENDING
             communicationJob = communicationJobService.create( communicationJob )
 
             log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )

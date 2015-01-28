@@ -39,7 +39,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
 
         communicationGroupSendMonitor.startMonitoring()
         communicationGroupSendItemProcessingEngine.startRunning()
-        //communicationJobProcessingEngine.startRunning()
+        communicationJobProcessingEngine.startRunning()
     }
 
 
@@ -47,7 +47,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
     public void tearDown() {
         communicationGroupSendMonitor.shutdown()
         communicationGroupSendItemProcessingEngine.stopRunning()
-        //communicationJobProcessingEngine.stopRunning()
+        communicationJobProcessingEngine.stopRunning()
 
         super.tearDown()
         sessionFactory.currentSession?.close()

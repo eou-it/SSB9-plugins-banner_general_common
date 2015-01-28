@@ -23,6 +23,7 @@ class CommunicationJobService extends ServiceBase {
         if (job.getCreationDateTime() == null) {
             job.setCreationDateTime( new Date() )
         }
+        
     }
 
     public List fetchPending( Integer max = Integer.MAX_VALUE ) {
