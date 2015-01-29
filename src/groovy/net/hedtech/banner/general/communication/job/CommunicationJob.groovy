@@ -9,6 +9,7 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
 import net.hedtech.banner.service.DatabaseModifiesState
+import org.apache.log4j.Logger
 
 import javax.persistence.*
 
@@ -55,7 +56,7 @@ class CommunicationJob implements AsynchronousTask {
      */
     @Column(name = "GCBCJOB_STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
-    CommunicationJobStatus status = CommunicationJobStatus.PENDING
+    private CommunicationJobStatus status = CommunicationJobStatus.PENDING
 
     /**
      * VERSION: Optimistic lock token.
@@ -97,6 +98,22 @@ class CommunicationJob implements AsynchronousTask {
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = [ 'id' ]
+
+
+    CommunicationJobStatus getStatus() {
+        return status
+    }
+
+    void setStatus(CommunicationJobStatus status) {
+        try {
+            throw new RuntimeException( "Setting Status from ${this.status} to ${status}." )
+        } catch (RuntimeException e) {
+            e.printStackTrace()
+            Logger.getLogger( this.getClass() ).debug( "Setting Status from ${this.status} to ${status}.", e )
+        }
+
+        this.status = status
+    }
 
     public static List fetchPending( Integer max ) {
         def results

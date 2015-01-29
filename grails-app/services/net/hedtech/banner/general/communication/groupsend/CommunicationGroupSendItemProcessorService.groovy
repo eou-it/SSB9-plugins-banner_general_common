@@ -11,7 +11,6 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
-import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -82,7 +81,7 @@ class CommunicationGroupSendItemProcessorService {
     public void failGroupSendItem( Long groupSendItemId, String errorText ) {
         CommunicationGroupSendItem groupSendItem = communicationGroupSendItemService.get( groupSendItemId )
         groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Failed )
-        //TODO: store errorText on item record
+        groupSendItem.setErrorText( errorText )
         log.warn( "Group send item failed id = ${groupSendItemId}, errorText = ${errorText}.")
         groupSendItem.setStopDate( new Date() )
         communicationGroupSendItemService.update( groupSendItem )

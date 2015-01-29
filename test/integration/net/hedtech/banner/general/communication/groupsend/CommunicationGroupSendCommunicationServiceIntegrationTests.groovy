@@ -98,7 +98,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         // TODO: Fix this assertEquals( 5, countCompleted )
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 30 )
+        sleepUntilCommunicationJobsComplete( 5, 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
        // TODO: Fix this  assertEquals( 5, countCompleted )
         assertEquals( 5, countCompleted )
@@ -113,7 +113,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
-        final int interval = 1;                 // test every second
+        final int interval = 2;                 // test every second
         int count = maxSleepTime / interval;    // calculate max loop count
         while (count > 0) {
             count--;
@@ -128,7 +128,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
     }
 
     private void sleepUntilCommunicationJobsComplete( long totalNumJobs, int maxSleepTime ) {
-        final int interval = 1;                 // test every second
+        final int interval = 2;                 // test every second
         int count = maxSleepTime / interval;    // calculate max loop count
         while (count > 0) {
             count--;

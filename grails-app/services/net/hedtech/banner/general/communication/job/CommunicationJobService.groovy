@@ -21,7 +21,7 @@ class CommunicationJobService extends ServiceBase {
     def preCreate( domainModelOrMap ) {
         CommunicationJob job = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationJob
         if (job.getCreationDateTime() == null) {
-            job.setCreationDateTime( new Date() )
+            job.setCreationDateTime(new Date())
         }
     }
 
@@ -50,7 +50,7 @@ class CommunicationJobService extends ServiceBase {
                 log.error( "CommunicationJobService.acqure found more than one record with job id = ${jobId}." )
                 throw new RuntimeException( "CommunicationJobService.acquire aquire found ${rows} with job id = ${jobId} and status = ${CommunicationJobStatus.PENDING.toString()}." )
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error( e )
             throw e
         } finally {
@@ -75,7 +75,7 @@ class CommunicationJobService extends ServiceBase {
                 log.error( "CommunicationJobService.markCompleted updated more than one record with job id = ${jobId}." )
                 throw new RuntimeException( "CommunicationJobService.markCompleted attempted to update ${rows} with job id = ${jobId}." )
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error( e )
             throw e
         } finally {
