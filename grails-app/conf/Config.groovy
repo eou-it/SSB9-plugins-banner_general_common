@@ -99,15 +99,6 @@ log4j = {
             }
             break
     }
-    trace 'net.hedtech.banner.general.communication.groupsend'
-    trace 'net.hedtech.banner.general.asynchronous.task'
-    trace 'net.hedtech.banner.general.communication.job'
-    trace 'net.hedtech.banner.general.communication.email'
-    trace 'com.icegreen.greenmail.util'
-    trace 'net.hedtech.banner.general.communication.job'
-//    trace 'org.springframework.transaction'
-//    trace 'org.springframework.orm.hibernate3.HibernateTransactionManager'
-
 }
 
 //Default communications config
@@ -121,26 +112,17 @@ communication {
             maxThreads = 1
             maxQueueSize = 5000
             continuousPolling = true
-            pollingInterval = 2000
+            pollingInterval = 500
             deleteSuccessfullyCompleted = false
         }
         communicationJobEngine {
-            maxThreads = 1
+            maxThreads = 2
             maxQueueSize = 5000
             continuousPolling = true
-            pollingInterval = 2000
+            pollingInterval = 500
             deleteSuccessfullyCompleted = false
         }
     }
-//    email {
-//        sendProperties {
-//            host = 'localhost'
-//            port = 2025
-//            connectiontimeout = 30
-//            auth = false
-//            ssl.enable = false
-//        }
-//    }
 }
 // encKey must be exactly 32 chars
 communication.security.password.encKey = '772F9958BA824FCC861EBF7031EABB70'

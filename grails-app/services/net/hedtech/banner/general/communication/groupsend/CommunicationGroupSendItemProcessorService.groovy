@@ -5,14 +5,12 @@ package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
-import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -57,7 +55,6 @@ class CommunicationGroupSendItemProcessorService {
 
             log.debug( "Creating communication job with reference id = " + recipientData.referenceId )
             CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
-            communicationJob.status = CommunicationJobStatus.PENDING
             communicationJob = communicationJobService.create( communicationJob )
 
             log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )

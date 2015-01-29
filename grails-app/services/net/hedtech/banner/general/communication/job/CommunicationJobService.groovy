@@ -21,9 +21,8 @@ class CommunicationJobService extends ServiceBase {
     def preCreate( domainModelOrMap ) {
         CommunicationJob job = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationJob
         if (job.getCreationDateTime() == null) {
-            job.setCreationDateTime( new Date() )
+            job.setCreationDateTime(new Date())
         }
-        
     }
 
     public List fetchPending( Integer max = Integer.MAX_VALUE ) {
