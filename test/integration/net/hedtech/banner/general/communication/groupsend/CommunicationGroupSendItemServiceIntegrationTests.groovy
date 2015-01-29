@@ -4,7 +4,7 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
-import net.hedtech.banner.exceptions.ApplicationException
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -39,11 +39,24 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
     CommunicationEmailTemplate emailTemplate
     CommunicationPopulationSelectionList population
 
+    public void cleanUp() {
+        def sql
+        try {
+            sessionFactory.currentSession.with { session ->
+                sql = new Sql(session.connection())
+                sql.executeUpdate("Delete from GCRORAN")
+            }
+        } finally {
+            sql?.close()
+        }
+    }
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
 
+        cleanUp()
         organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
         organization = communicationOrganizationService.create(organization) as CommunicationOrganization
 
