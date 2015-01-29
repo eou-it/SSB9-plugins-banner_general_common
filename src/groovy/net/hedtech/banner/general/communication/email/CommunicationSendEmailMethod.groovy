@@ -19,7 +19,7 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
 /**
- * Created by mbrzycki on 1/6/15.
+ * Performs the details of assembling and sending out a java mail mime message.
  */
 class CommunicationSendEmailMethod {
     private Log log = LogFactory.getLog( this.getClass() )
@@ -37,23 +37,26 @@ class CommunicationSendEmailMethod {
 
     public void execute() {
         CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
+
         def senderAddress = new CommunicationEmailAddress(
             mailAddress: senderOrganization.theSenderMailboxAccount.emailAddress,
             displayName: senderOrganization.theSenderMailboxAccount.emailDisplayName
         )
         emailMessage.senders = [senderAddress] as Set
         minimumFieldsPresent( emailMessage, false );
+
+        assignReplyToAddress()
+
         Properties props = new Properties();
         //adding smtp 'from' for handling bounce back emails.
-
         emailReceipt.setFrom( senderOrganization.theSenderMailboxAccount.emailAddress );
         props.put( "mail.smtp.from", senderOrganization.theSenderMailboxAccount.emailAddress );
 
         if (log.isDebugEnabled()) {
             log.debug( "Connecting to email server with account username = " + senderOrganization.theSenderMailboxAccount.getUserName() );
         }
-        Session session = newSendSession();
-        session.setDebug( true )
+        Session session = newSendSession( props );
+        session.setDebug( log.isDebugEnabled() || log.isTraceEnabled() )
 //        optOutMessageId = uuidService.fetchOneGuid();
 
         try {
@@ -128,6 +131,24 @@ class CommunicationSendEmailMethod {
         } catch (Exception e) {
             log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
             throw new ApplicationException( CommunicationSendEmailMethod.class, "EmailServer.SendEmailMethod.execute", e );
+        }
+    }
+
+    /**
+     * Examines the sender organization and sets a reply to address (if present in the organization) on the current email message object.
+     * The mime message will later be constructed from the email message object.
+     */
+    private void assignReplyToAddress() {
+        if (senderOrganization?.replyToMailboxAccountSettings) {
+            List<CommunicationMailboxAccount> replyToList = senderOrganization?.replyToMailboxAccountSettings
+            if (replyToList.size() > 0) {
+                CommunicationMailboxAccount replyToMailboxAccount = replyToList.get(0)
+                def replyToAddress = new CommunicationEmailAddress(
+                        mailAddress: replyToMailboxAccount.emailAddress,
+                        displayName: replyToMailboxAccount.emailDisplayName
+                )
+                emailMessage.replyTo = [replyToAddress] as Set
+            }
         }
     }
 
@@ -218,7 +239,7 @@ class CommunicationSendEmailMethod {
      * @param overrides properties to add to override in the session
      * @return
      */
-    private Session newSendSession() {
+    private Session newSendSession( Properties overrides ) {
         Properties emailServerProperties = new Properties()
 
         CommunicationEmailServerProperties sendEmailServerProperties = senderOrganization?.sendEmailServerProperties?.get(0)
@@ -237,6 +258,10 @@ class CommunicationSendEmailMethod {
             } else {
                 throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
             }
+        }
+
+        for (Object o : overrides.keySet()) {
+            emailServerProperties.setProperty( (String) o, overrides.getProperty( (String) o ) );
         }
 
         log.debug "Mail server properties:" + emailServerProperties.toString()

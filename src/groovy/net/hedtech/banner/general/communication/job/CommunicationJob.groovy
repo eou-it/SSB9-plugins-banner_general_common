@@ -105,13 +105,6 @@ class CommunicationJob implements AsynchronousTask {
     }
 
     void setStatus(CommunicationJobStatus status) {
-        try {
-            throw new RuntimeException( "Setting Status from ${this.status} to ${status}." )
-        } catch (RuntimeException e) {
-            e.printStackTrace()
-            Logger.getLogger( this.getClass() ).debug( "Setting Status from ${this.status} to ${status}.", e )
-        }
-
         this.status = status
     }
 
