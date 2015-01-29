@@ -89,11 +89,14 @@ class CommunicationMailboxAccount implements Serializable {
     @Column(name = "GCRMBAC_USER_ID")
     String lastModifiedBy
 
-    /**
+
+ /**
+
      * DATA ORIGIN: Source system that created or updated the data.
      */
     @Column(name = "GCRMBAC_DATA_ORIGIN")
     String dataOrigin
+
 
 
     static constraints = {
@@ -106,6 +109,7 @@ class CommunicationMailboxAccount implements Serializable {
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )
         emailDisplayName( nullable: true )
+
         clearTextPassword( nullable: true )
     }
 
