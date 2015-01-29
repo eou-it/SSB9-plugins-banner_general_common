@@ -18,6 +18,7 @@ class SiteDetail {
 
     String guid
     def buildings = []
+    String type
 
     def SiteDetail(String guid) {
         this.campus = new Campus()
