@@ -19,6 +19,7 @@ class AvailableRoom {
     List occupancies
     String guid
     Metadata metadata
+    final String type = "room"
 
     AvailableRoom(String guid) {
         this.guid = guid

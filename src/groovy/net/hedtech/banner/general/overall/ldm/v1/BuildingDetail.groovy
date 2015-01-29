@@ -18,6 +18,8 @@ class BuildingDetail {
     private SiteDetail siteDetail
     Metadata metadata
     List rooms = []
+    String code
+    String description
 
     BuildingDetail ( guid ) {
         this.guid = guid
@@ -29,6 +31,8 @@ class BuildingDetail {
         this.guid = guid
         this.rooms = rooms
         this.metadata = metadata
+        this.code = housingLocationBuildingDescription.building.code
+        this.description = housingLocationBuildingDescription.building.description
     }
 
 
