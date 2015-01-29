@@ -92,7 +92,7 @@ class CommunicationGroupSendItem implements AsynchronousTask {
     /**
      * Parent communication job
      */
-    @ManyToOne( fetch = FetchType.LAZY )
+    @ManyToOne( fetch = FetchType.EAGER )
     @JoinColumn(name="GCRGSIM_GROUP_SEND_ID", referencedColumnName="GCBGSND_SURROGATE_ID")
     CommunicationGroupSend communicationGroupSend;
 

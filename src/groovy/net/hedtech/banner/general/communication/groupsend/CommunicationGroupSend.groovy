@@ -74,15 +74,15 @@ class CommunicationGroupSend implements Serializable {
     String mepCode
 
     @JoinColumn(name="GCBGSND_ORGANIZATION_ID" )
-    @ManyToOne( fetch = FetchType.LAZY )
+    @ManyToOne( fetch = FetchType.EAGER )
     CommunicationOrganization organization;
 
     @JoinColumn(name="GCBGSND_POPLIST_ID" )
-    @ManyToOne( fetch = FetchType.LAZY )
+    @ManyToOne( fetch = FetchType.EAGER )
     CommunicationPopulationSelectionList population;
 
     @JoinColumn(name="GCBGSND_TEMPLATE_ID" )
-    @ManyToOne( fetch = FetchType.LAZY )
+    @ManyToOne( fetch = FetchType.EAGER )
     CommunicationTemplate template;
 
     @Column(name="GCBGSND_STARTED_DATE", nullable = true)

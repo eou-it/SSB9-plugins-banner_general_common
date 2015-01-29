@@ -90,7 +90,7 @@ class CommunicationRecipientData {
     String dataOrigin
 
     @JoinColumn(name="GCBRDAT_ORGANIZATION_ID" )
-    @ManyToOne( fetch = FetchType.LAZY )
+    @ManyToOne( fetch = FetchType.EAGER )
     CommunicationOrganization organization
 
     public static List fetchByTemplateId(templateId) {
