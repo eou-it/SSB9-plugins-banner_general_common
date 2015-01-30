@@ -86,6 +86,17 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
     }
 
+    @Test
+      void testExtractParametersWithInvalidTemplate() {
+          String template = """hi \$firstname\$!,
+                  your last name is \$last %nbsp; name\$!
+                   and I see your last name fa second time is \$lastname\$
+                   Today is \$today\$ and you owe me \$amount\$
+                   But I would settle for \$someotheramount\$"""
+          shouldFail (){
+              communicationTemplateMergeService.extractTemplateVariables( template )
+          }
+      }
 
     private def newCommunicationField() {
         def communicationField = new CommunicationField(

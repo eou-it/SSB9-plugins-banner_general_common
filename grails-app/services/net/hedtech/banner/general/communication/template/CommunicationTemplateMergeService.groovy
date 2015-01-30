@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
-
+import org.stringtemplate.v4.NumberRenderer;
 /**
  * To clarify some naming confusion, the term CommunicationTemplate refers to the Communication Manager object
  * that contains several string fields. Each of these string fields can contain delimited template variables.
@@ -192,7 +192,15 @@ class CommunicationTemplateMergeService {
             stringTemplate
         }
     }
+
     /**
+     * Attempts to extract template variables. If an exception is thrown, it means that the template is not parsable.
+     * Things cause this can include a space inside a variable, such as $foo bar$.
+      */
+    boolean isTemplateParsable (Long templateId){
+
+    }
+     /**
      * Extracts all the template variables from the currently supported parts of an email template
      * @param communicationEmailTemplate
      * @return
@@ -225,11 +233,15 @@ class CommunicationTemplateMergeService {
 
         dataFieldNames = []
         char delimiter = '$'
-        /* TODO: get a listener working so  you can trap rendering errors
+        /* TODO: get a listener working so  you can trap rendering errors */
         STGroup group = new STGroup( delimiter, delimiter )
         CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
         group.setListener( errorListener )
-        group.defineTemplate( "foo", templateString ) */
+        /* The first parameter here is just a name, but we don't really name our String Templates.
+        * At some point, we could pass in the name of the template or data field that we're working on
+        */
+        group.defineTemplate( "templateString", templateString )
+        group.registerRenderer(Integer.class, new NumberRenderer());
         ST st = new org.stringtemplate.v4.ST( templateString, delimiter, delimiter );
 
         /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
