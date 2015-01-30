@@ -31,7 +31,6 @@ class CommunicationGroupSendItemProcessorService {
     def communicationJobService
     def communicationRecipientDataService
 
-
 //    def communicationTemplateService
 //    def communicationPopulationSelectionListService
     def communicationOrganizationService
@@ -60,31 +59,38 @@ class CommunicationGroupSendItemProcessorService {
             log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )
 
             def groupSendItemParamMap = [
-                id : groupSendItem.id,
-                version : groupSendItem.version,
-                currentExecutionState : CommunicationGroupSendItemExecutionState.Complete,
-                stopDate: new Date()
+                    id                   : groupSendItem.id,
+                    version              : groupSendItem.version,
+                    currentExecutionState: CommunicationGroupSendItemExecutionState.Complete,
+                    stopDate             : new Date()
             ]
             communicationGroupSendItemService.update( groupSendItemParamMap )
         } else {
             def groupSendItemParamMap = [
-                id : groupSendItem.id,
-                version : groupSendItem.version,
-                currentExecutionState : CommunicationGroupSendItemExecutionState.Stopped,
-                stopDate: new Date()
+                    id                   : groupSendItem.id,
+                    version              : groupSendItem.version,
+                    currentExecutionState: CommunicationGroupSendItemExecutionState.Stopped,
+                    stopDate             : new Date()
             ]
             communicationGroupSendItemService.update( groupSendItemParamMap )
         }
 
     }
 
+
     public void failGroupSendItem( Long groupSendItemId, String errorText ) {
         CommunicationGroupSendItem groupSendItem = communicationGroupSendItemService.get( groupSendItemId )
-        groupSendItem.setCurrentExecutionState( CommunicationGroupSendItemExecutionState.Failed )
-        groupSendItem.setErrorText( errorText )
-        log.warn( "Group send item failed id = ${groupSendItemId}, errorText = ${errorText}.")
-        groupSendItem.setStopDate( new Date() )
-        communicationGroupSendItemService.update( groupSendItem )
+        def groupSendItemParamMap = [
+                id                   : groupSendItem.id,
+                version              : groupSendItem.version,
+                currentExecutionState: CommunicationGroupSendItemExecutionState.Failed,
+                stopDate             : new Date(),
+                errorText            : errorText
+        ]
+
+        log.warn( "Group send item failed id = ${groupSendItemId}, errorText = ${errorText}." )
+
+        communicationGroupSendItemService.update( groupSendItemParamMap )
     }
 
 
@@ -122,20 +128,20 @@ class CommunicationGroupSendItemProcessorService {
                 if (communicationField) {
                     String value = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, recipientPidm )
                     CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
-                        value: value,
-                        renderAsHtml: communicationField.renderAsHtml
+                            value: value,
+                            renderAsHtml: communicationField.renderAsHtml
                     )
                     nameToValueMap.put( communicationField.name, communicationFieldValue )
                 }
             }
 
             return new CommunicationRecipientData(
-                pidm: recipientPidm,
-                templateId: template.id,
-                referenceId: referenceId,
-                ownerId: senderOracleUserName,
-                fieldValues: nameToValueMap,
-                organization: organization
+                    pidm: recipientPidm,
+                    templateId: template.id,
+                    referenceId: referenceId,
+                    ownerId: senderOracleUserName,
+                    fieldValues: nameToValueMap,
+                    organization: organization
             )
         } finally {
             SecurityContextHolder.getContext().setAuthentication( originalAuthentication )
