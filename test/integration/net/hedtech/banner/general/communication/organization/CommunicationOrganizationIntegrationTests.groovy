@@ -3,6 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.organization
 
+import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -24,12 +25,23 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     def i_invalid_name = "My Organization".padLeft( 1021 )
     def i_invalid_description = "My Organization".padLeft( 4001 )
 
+    public void cleanUp() {
+        def sql
+        try {
+            sessionFactory.currentSession.with { session ->
+                sql = new Sql(session.connection())
+                sql.executeUpdate("Delete from GCRORAN")
+            }
+        } finally {
+            sql?.close()
+        }
+    }
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-
+        cleanUp()
     }
 
 

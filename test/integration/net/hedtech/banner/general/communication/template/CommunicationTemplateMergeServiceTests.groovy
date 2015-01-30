@@ -10,6 +10,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.communication.template
 
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
@@ -53,6 +54,18 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def CommunicationFolder folder2
     def CommunicationOrganization i_valid_Organization
 
+    public void cleanUp() {
+        def sql
+        try {
+            sessionFactory.currentSession.with { session ->
+                sql = new Sql(session.connection())
+                sql.executeUpdate("Delete from GCRORAN")
+            }
+        } finally {
+            sql?.close()
+        }
+    }
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -65,6 +78,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         folder2.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
+        cleanUp()
         i_valid_Organization = createNewCommunicationOrganization()
     }
 

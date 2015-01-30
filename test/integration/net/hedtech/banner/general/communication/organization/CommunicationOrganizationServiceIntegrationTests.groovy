@@ -4,7 +4,8 @@
 
 package net.hedtech.banner.general.communication.organization
 
-import grails.util.Holders
+
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -23,13 +24,25 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     def clearTextPassword = "SuperSecretPassword"
 
 
+    public void cleanUp() {
+        def sql
+        try {
+            sessionFactory.currentSession.with { session ->
+                sql = new Sql(session.connection())
+                sql.executeUpdate("Delete from GCRORAN")
+            }
+        } finally {
+            sql?.close()
+        }
+    }
+
     @Before
     public void setUp() {
         formContext = ['SELFSERVICE']
         super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
-
+        cleanUp()
     }
 
 
