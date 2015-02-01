@@ -19,9 +19,10 @@ import net.hedtech.banner.general.person.PersonUtility
 import org.antlr.runtime.tree.CommonTree
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
-import org.stringtemplate.v4.NumberRenderer;
+
 /**
  * To clarify some naming confusion, the term CommunicationTemplate refers to the Communication Manager object
  * that contains several string fields. Each of these string fields can contain delimited template variables.
@@ -64,15 +65,16 @@ class CommunicationTemplateMergeService {
      * @return
      */
     CommunicationMergedEmailTemplate calculateTemplateByPidm( CommunicationEmailTemplate communicationTemplate, Long pidm ) {
+        if (log.isDebugEnabled())
+            log.debug( "Calculating template by pidm." )
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
         List<String> templateVariables = extractTemplateVariables( communicationTemplate.content )
         def recipientDataMap = calculateRecipientData( templateVariables, sqlParams )
-        def CommunicationMergedEmailTemplate communicationMergedEmailTemplate= new CommunicationMergedEmailTemplate()
+        def CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.content = renderTemplate( communicationTemplate.content, recipientDataMap )
         communicationMergedEmailTemplate
     }
-
 
     /**
      * Compute each communication field in the list and return the results. This data will become what is known
@@ -83,10 +85,12 @@ class CommunicationTemplateMergeService {
      * @return
      */
     Map<String, String> calculateRecipientData( List<String> communicationFieldNames, Map parameters ) {
+        if (log.isDebugEnabled())
+            log.debug( "Calculating recipient data." )
         def recipientData = [:]
         def CommunicationField communicationField
         if (parameters.containsKey( 'pidm' )) {
-            log.debug( "Calculating recipient data for pidm " + parameters.pidm)
+            log.debug( "Calculating recipient data for pidm " + parameters.pidm )
             communicationFieldNames.each {
                 communicationField = CommunicationField.findByName( it )
                 if (!(communicationField == null)) {
@@ -107,9 +111,9 @@ class CommunicationTemplateMergeService {
      * @return Fully rendered template as String
      */
     def String renderTemplate( String templateString, Map recipientData ) {
-        log.debug( "Merging recipient data into a template string")
-        char delimiter = '$'
-        ST st = new ST( templateString, delimiter, delimiter );
+        if (log.isDebugEnabled())
+            log.debug( "Merging recipient data into a template string" )
+        ST st = newST( templateString );
         recipientData.keySet().each { key ->
             st.add( key, recipientData[key] )
         }
@@ -124,7 +128,8 @@ class CommunicationTemplateMergeService {
      * @return CommunicationMergedEmailTemplate
      */
     CommunicationMergedEmailTemplate mergeEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate, CommunicationRecipientData recipientData ) {
-        log.debug( "Merging recipient data into a CommunicationEmailTemplate ")
+        if (log.isDebugEnabled())
+            log.debug( "Merging recipient data into a CommunicationEmailTemplate " )
 
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList, recipientData.fieldValues )
@@ -135,24 +140,24 @@ class CommunicationTemplateMergeService {
 
     /**
      * Returns the preview values for all the fields in the template rather than executing the data function.
-     * These serve in the place of recipient data when a preview is requested
+     * These serve in the place of recipient data when a preview is requested.
+     * If the variable is not a valid communicationField, it returns the just the name of the variable
      * @param templateString
      * @return
      */
     Map<String, String> renderPreviewValues( String templateString ) {
-        log.debug( "Extracting preview values from template string.")
+        if (log.isDebugEnabled())
+            log.debug( "Extracting preview values from template string." )
         List<String> templateVariables = extractTemplateVariables( templateString )
         def renderedCommunicationFields = [:]
 
         if (templateVariables.size() > 0) {
-
             templateVariables.each {
                 CommunicationField communicationField = CommunicationField.findByName( it )
                 if (communicationField) {
                     renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
-                    //throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:invalidDataField@@", it )
                 } else {
-                    renderedCommunicationFields.put( it, null )
+                    renderedCommunicationFields.put( it, "\$${it}\$")
                 }
             }
         }
@@ -165,11 +170,11 @@ class CommunicationTemplateMergeService {
      * @return CommunicationMergedEmailTemplate
      */
     CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
-        log.debug( "Rendering CommunicationTemplate with preview values only.")
+        if (log.isDebugEnabled()) log.debug( "Rendering CommunicationTemplate with preview values only." )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
-        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList?:" ", renderPreviewValues( communicationEmailTemplate.toList?:" " ) )
-        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject?:" ", renderPreviewValues( communicationEmailTemplate.subject?:" " ) )
-        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content?:" ", renderPreviewValues( communicationEmailTemplate.content?:" " ) )
+        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList ?: " ", renderPreviewValues( communicationEmailTemplate.toList ?: " " ) )
+        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject ?: " ", renderPreviewValues( communicationEmailTemplate.subject ?: " " ) )
+        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content ?: " ", renderPreviewValues( communicationEmailTemplate.content ?: " " ) )
         communicationMergedEmailTemplate
     }
 
@@ -180,9 +185,10 @@ class CommunicationTemplateMergeService {
      * @return A fully rendered String
      */
     String merge( String stringTemplate, Map<String, String> parameters ) {
+        if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
         if (!(stringTemplate == null || parameters == null)) {
-            char delimiter = '$'
-            ST st = new ST( stringTemplate, delimiter, delimiter );
+
+            ST st = newST( stringTemplate );
             parameters.keySet().each { key ->
                 st.add( key, parameters[key] )
             }
@@ -193,21 +199,40 @@ class CommunicationTemplateMergeService {
         }
     }
 
-    /**
-     * Attempts to extract template variables. If an exception is thrown, it means that the template is not parsable.
-     * Things cause this can include a space inside a variable, such as $foo bar$.
-      */
-    boolean isTemplateParsable (Long templateId){
-
-    }
-     /**
-     * Extracts all the template variables from the currently supported parts of an email template
-     * @param communicationEmailTemplate
-     * @return
+    /*
+    Extracts the template variables, then looks to see if it can find a communication data field for each one.
+    If all are found, return true, else false. Here we are not talking about a CommunicationTemplate, but just the
+    component strings (ie. fromList, content etc)
      */
 
+
+    public Boolean containsValidDataFields( List<String> fieldNames ) {
+        if (log.isDebugEnabled()) log.debug( "Testing if all variables in string ${stringTemplate} can be found" );
+        def invalidFields = []
+        if (fieldNames.size() > 0) {
+            fieldNames.each {
+                def CommunicationField communicationField = CommunicationField.findByName( it )
+                if (communicationField == null) {
+                    if (log.isDebugEnabled()) log.debug( "Cannot find a communicationField named ${it}." );
+                    invalidFields += it
+                }
+            }
+        }
+        if (invalidFields.size() > 0)
+            return false
+        else
+            return true
+    }
+
+/**
+ * Extracts all the template variables from the currently supported parts of an email template
+ * @param communicationEmailTemplate
+ * @return
+ */
+
     List<String> extractTemplateVariables( CommunicationEmailTemplate communicationEmailTemplate ) {
-        log.debug( "Extracting template variables from CommunicationEmailTemplate ${communicationEmailTemplate.name}.")
+        if (log.isDebugEnabled())
+            log.debug( "Extracting template variables from CommunicationEmailTemplate ${communicationEmailTemplate.name}." )
         def templateVariables = []
         extractTemplateVariables( communicationEmailTemplate.toList ).each {
             templateVariables << it
@@ -222,27 +247,20 @@ class CommunicationTemplateMergeService {
         templateVariables
     }
 
-    /**
-     *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
-     * @param template String
-     * @return set of unique string variables found in the template string
-     */
+/**
+ *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
+ *  This will throw an application exception if the template string cannot be parsed.
+ * @param template String
+ * @return set of unique string variables found in the template string
+ */
     List<String> extractTemplateVariables( String templateString ) {
-        log.debug( "Extracting template variables from template string.")
+        if (log.isDebugEnabled())
+            log.debug( "Extracting template variables from template string." )
         if (templateString == null) return new ArrayList<String>()
 
         dataFieldNames = []
-        char delimiter = '$'
-        /* TODO: get a listener working so  you can trap rendering errors */
-        STGroup group = new STGroup( delimiter, delimiter )
-        CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
-        group.setListener( errorListener )
-        /* The first parameter here is just a name, but we don't really name our String Templates.
-        * At some point, we could pass in the name of the template or data field that we're working on
-        */
-        group.defineTemplate( "templateString", templateString )
-        group.registerRenderer(Integer.class, new NumberRenderer());
-        ST st = new org.stringtemplate.v4.ST( templateString, delimiter, delimiter );
+
+        ST st = newST( templateString );
 
         /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
         down the branch looking for ID tokens to place in the global dataFieldNames */
@@ -257,11 +275,11 @@ class CommunicationTemplateMergeService {
         dataFieldNames.unique( false )
 
     }
-    /**
-     * Walks the ast tree and finds any tokens with the ID attribute
-     * @param treeNode
-     * @return
-     */
+/**
+ * Walks the ast tree and finds any tokens with the ID attribute
+ * @param treeNode
+ * @return
+ */
     def examineNodes( CommonTree treeNode ) {
         final int ID = 25
         if (treeNode) {
@@ -285,4 +303,17 @@ class CommunicationTemplateMergeService {
     }
 
 
+    def ST newST( String templateString ) {
+        char delimiter = '$'
+        STGroup group = new STGroup( delimiter, delimiter )
+        CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
+        group.setListener( errorListener )
+        /* The first parameter here is just a name, but we don't really name our String Templates.
+        * At some point, we could pass in the name of the template or data field that we're working on
+        */
+        group.defineTemplate( "templateString", templateString )
+        group.registerRenderer( Integer.class, new NumberRenderer() );
+        ST st = new org.stringtemplate.v4.ST( templateString, delimiter, delimiter );
+        st
+    }
 }

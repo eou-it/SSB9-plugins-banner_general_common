@@ -70,11 +70,18 @@ class CommunicationEmailTemplateService extends ServiceBase {
         if (map.id) {
             def communicationEmailTemplate = CommunicationEmailTemplate.get( map.id )
             /*
-            Attempt to extract the variables from the template. If this fails, the template is not parsable, it should throw an exception
+            Extract the variables from the template and make sure there is a communication field for each.
+            If this fails, the template is not parsable, it should throw an exception
              */
+            def List<String> communicationTemplateVariables
+            communicationTemplateVariables = communicationTemplateMergeService.extractTemplateVariables( communicationEmailTemplate )
 
-            communicationTemplateMergeService.extractTemplateVariables( communicationEmailTemplate )
-
+            if (communicationTemplateVariables) {
+                def containsValidDataFields = communicationTemplateMergeService.containsValidDataFields(communicationTemplateVariables)
+                if (!containsValidDataFields) {
+                    throw new ApplicationException( CommunicationEmailTemplate, "Template contains variables that do not match any data fields." )
+                }
+            }
 
             if (communicationEmailTemplate.published)
                 return

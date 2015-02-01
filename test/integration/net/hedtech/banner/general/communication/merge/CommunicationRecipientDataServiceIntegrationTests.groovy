@@ -230,19 +230,19 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         def field1 = newCommunicationField( folder1, "Fieldname1", "FormatString",
                  "Preview Value", "select 1 from dual" )
         field1 = field1.save( failOnError: true, flush: true )
-        field1 = communicationFieldService.publishDatafield([id:field1.id])
+        field1 = communicationFieldService.publishDataField([id:field1.id])
         def field2 = newCommunicationField( folder1, "Fieldname2", "FormatString",
                 "Preview Value", "select 1 from dual" )
         field2 = field2.save( failOnError: true, flush: true )
-        field2 = communicationFieldService.publishDatafield([id:field2.id])
+        field2 = communicationFieldService.publishDataField([id:field2.id])
         def field3 = newCommunicationField( folder2, "Fieldname3", "FormatString",
                 "Preview Value", "select 1 from dual" )
         field3 = field3.save( failOnError: true, flush: true )
-        field3 = communicationFieldService.publishDatafield([id:field3.id])
+        field3 = communicationFieldService.publishDataField([id:field3.id])
         def field4 = newCommunicationField( folder2, "Fieldname4", "FormatString",
                 "Preview Value", "select 1 from dual" )
         field4 = field4.save( failOnError: true, flush: true )
-        field4 = communicationFieldService.publishDatafield([id:field4.id])
+        field4 = communicationFieldService.publishDataField([id:field4.id])
         def finalFieldList = CommunicationFieldView.findAll()
         assertEquals( originalList.size + 4, finalFieldList.size() )
     }

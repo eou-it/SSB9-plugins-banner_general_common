@@ -6,15 +6,13 @@ package net.hedtech.banner.general.communication.field
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.service.ServiceBase
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryStatementParseService
 
 class CommunicationFieldService extends ServiceBase {
     boolean transactional = true
     def communicationPopulationQueryStatementParseService
+    def communicationTemplateMergeService
 
 
     def preCreate( domainModelOrMap ) {
@@ -39,7 +37,7 @@ class CommunicationFieldService extends ServiceBase {
                 communicationField.returnsArrayArguments = false
             }
             //check for sql injection and if it returns true then throw invalid exception
-            def parseResult = communicationPopulationQueryStatementParseService.parse(communicationField.ruleContent)
+            def parseResult = communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
         }
 
         validateFormatter( communicationField )
@@ -52,11 +50,11 @@ class CommunicationFieldService extends ServiceBase {
         else
             validateFolder( communicationField.getFolder().getId() )
 
-        if (communicationField.name.contains(" "))
-            throw new ApplicationException(CommunicationField, "@@r1:space.not.allowed@@")
+        if (communicationField.name.contains( " " ))
+            throw new ApplicationException( CommunicationField, "@@r1:space.not.allowed@@" )
 
-        if (CommunicationField.fetchByName(communicationField.name))
-            throw new ApplicationException(CommunicationField, "@@r1:fieldNameAlreadyExists@@")
+        if (CommunicationField.fetchByName( communicationField.name ))
+            throw new ApplicationException( CommunicationField, "@@r1:fieldNameAlreadyExists@@" )
 
         if (communicationField.immutableId == null)
             communicationField.immutableId = UUID.randomUUID().toString()
@@ -88,17 +86,17 @@ class CommunicationFieldService extends ServiceBase {
                 communicationField.returnsArrayArguments = false
             }
             //check for sql injection and if it returns true then throw invalid exception
-            def parseResult = communicationPopulationQueryStatementParseService.parse(communicationField.ruleContent)
+            def parseResult = communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
         }
 
         if (communicationField.name == null || communicationField.name == "")
             throw new ApplicationException( CommunicationField, "@@r1:nameCannotBeNull@@" )
 
-        if (communicationField.name.contains(" "))
-            throw new ApplicationException(CommunicationField, "@@r1:space.not.allowed@@")
+        if (communicationField.name.contains( " " ))
+            throw new ApplicationException( CommunicationField, "@@r1:space.not.allowed@@" )
 
-        if (CommunicationField.existsAnotherName(communicationField.id, communicationField.name))
-            throw new ApplicationException(CommunicationField, "@@r1:fieldNameAlreadyExists@@")
+        if (CommunicationField.existsAnotherName( communicationField.id, communicationField.name ))
+            throw new ApplicationException( CommunicationField, "@@r1:fieldNameAlreadyExists@@" )
 
 
         validateFormatter( communicationField )
@@ -127,26 +125,33 @@ class CommunicationFieldService extends ServiceBase {
         }
     }
 
-    def publishDatafield(map) {
+
+    def publishDataField( map ) {
 
         if (map.id) {
-            def temp = CommunicationField.get(map.id)
-            if (temp.status == CommunicationFieldStatus.PRODUCTION)
+            def communicationField = CommunicationField.get( map.id )
+            /*
+            Attempt to extract the variables from the format string, which functions as a StringTemplate iteself.
+            If this fails, the template is not parsable, it should throw an exception
+            */
+            communicationTemplateMergeService.extractTemplateVariables( communicationField.formatString )
+
+            if (communicationField.status == CommunicationFieldStatus.PRODUCTION)
                 return
-            if (temp.name != null && temp.folder != null  && temp.formatString != null ) {
-                if (temp.ruleContent != null) {
+            if (communicationField.name != null && communicationField.folder != null && communicationField.formatString != null) {
+                if (communicationField.ruleContent != null) {
                     //check for sql injection and if it returns true then throw invalid exception
-                    def parseResult = communicationPopulationQueryStatementParseService.parse(temp.ruleContent)
+                    def parseResult = communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
                     if (parseResult?.status != "Y") {
-                        throw new ApplicationException(CommunicationField, "@@r1:cannotPublishSqlStatementInvalid@@")
+                        throw new ApplicationException( CommunicationField, "@@r1:cannotPublishSqlStatementInvalid@@" )
                     }
                 }
-                temp.status = CommunicationFieldStatus.PRODUCTION
-                update(temp)
+                communicationField.status = CommunicationFieldStatus.PRODUCTION
+                update( communicationField )
             } else
-                throw new ApplicationException(CommunicationField, "@@r1:datafield.cannotBePublished@@")
+                throw new ApplicationException( CommunicationField, "@@r1:datafield.cannotBePublished@@" )
         } else
-            throw new ApplicationException(CommunicationField, "@@r1:idNotValid@@")
+            throw new ApplicationException( CommunicationField, "@@r1:idNotValid@@" )
     }
 
 

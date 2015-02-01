@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.field
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -71,7 +70,7 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         assertEquals true, communicationField.renderAsHtml
         assertEquals "TTTTTTTTTT", communicationField.ruleUri
         assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
-        def newPublishedField = communicationFieldService.publishDatafield([id:communicationField.id])
+        def newPublishedField = communicationFieldService.publishDataField([id:communicationField.id])
         assertEquals(CommunicationFieldStatus.PRODUCTION, newPublishedField.status)
     }
 
@@ -94,7 +93,7 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
         def newPublishedField
         shouldFail {
-            newPublishedField = communicationFieldService.publishDatafield([id: communicationField.id])
+            newPublishedField = communicationFieldService.publishDataField([id: communicationField.id])
         }
     }
 
