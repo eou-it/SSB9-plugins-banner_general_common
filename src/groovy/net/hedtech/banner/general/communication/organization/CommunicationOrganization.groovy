@@ -99,28 +99,28 @@ class CommunicationOrganization implements Serializable {
     /**
      * The send email server configuration properties
      */
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     @Where(clause = " GCBSPRP_TYPE = 'Send'")
     List<CommunicationEmailServerProperties> sendEmailServerProperties
 
     /**
      * The send email server configuration properties
      */
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     @Where(clause = "GCBSPRP_TYPE = 'Receive'")
     List<CommunicationEmailServerProperties> receiveEmailServerProperties
 
     /**
      * The sender email mailbox properties
      */
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     @Where(clause = "GCRMBAC_TYPE = 'Sender'")
     List<CommunicationMailboxAccount> senderMailboxAccountSettings
 
     /**
      * The replyTo email mailbox properties
      */
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "organization")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     @Where(clause = "GCRMBAC_TYPE = 'ReplyTo'")
     List<CommunicationMailboxAccount> replyToMailboxAccountSettings
 
