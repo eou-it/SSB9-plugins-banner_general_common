@@ -106,7 +106,11 @@ class CommunicationFieldService extends ServiceBase {
 
         if (communicationField.status == null)
             throw new ApplicationException( CommunicationField, "@@r1:statusCannotBeNull@@" )
-    }
+
+        if (communicationField.status == CommunicationFieldStatus.PRODUCTION && !(communicationField.name != null && communicationField.folder != null && communicationField.formatString != null)) {
+            throw new ApplicationException( CommunicationFieldService, "@@r1:datafield.cannotUpdatePublished@@" )
+        }
+        }
 
 
     void validateFormatter( CommunicationField communicationField ) {
