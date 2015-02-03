@@ -157,7 +157,7 @@ class CommunicationTemplateMergeService {
                 if (communicationField) {
                     renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
                 } else {
-                    renderedCommunicationFields.put( it, "\$${it}\$")
+                    renderedCommunicationFields.put( it, null)
                 }
             }
         }
@@ -199,30 +199,6 @@ class CommunicationTemplateMergeService {
         }
     }
 
-    /*
-    Extracts the template variables, then looks to see if it can find a communication data field for each one.
-    If all are found, return true, else false. Here we are not talking about a CommunicationTemplate, but just the
-    component strings (ie. fromList, content etc)
-     */
-
-
-    public Boolean containsValidDataFields( List<String> fieldNames ) {
-        if (log.isDebugEnabled()) log.debug( "Testing if all variables in string ${stringTemplate} can be found" );
-        def invalidFields = []
-        if (fieldNames.size() > 0) {
-            fieldNames.each {
-                def CommunicationField communicationField = CommunicationField.findByName( it )
-                if (communicationField == null) {
-                    if (log.isDebugEnabled()) log.debug( "Cannot find a communicationField named ${it}." );
-                    invalidFields += it
-                }
-            }
-        }
-        if (invalidFields.size() > 0)
-            return false
-        else
-            return true
-    }
 
 /**
  * Extracts all the template variables from the currently supported parts of an email template

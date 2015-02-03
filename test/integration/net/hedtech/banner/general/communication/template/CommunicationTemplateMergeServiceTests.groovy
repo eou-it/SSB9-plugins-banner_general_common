@@ -213,24 +213,10 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         assertNull( communicationMergedEmailTemplate.toList )
         assertNull( communicationMergedEmailTemplate.subject )
         // we don't care about whitespace, ST messes with things like line endings etc
-        assertEquals( expectedContent.trim().replaceAll("\\s+",""), result.content.trim().replaceAll("\\s+","") )
+        assertEquals( expectedContent.trim().replaceAll( "\\s+", "" ), result.content.trim().replaceAll( "\\s+", "" ) )
 
     }
 
-
-    @Test
-    void testRenderComplexTemplate() {
-        CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
-        def CommunicationField testCommunicationField
-        emailTemplate.content = """
-    \$code, reason:{ c,r |
-    \t<li>\$c\$, \$r\$</li>
-    }\$
-    \$SalutationTest\$
-            \$invitationTest\$
-            \$signedTest\$"""
-
-    }
 
 
     private def newValidForCreateFolder( String folderName ) {
