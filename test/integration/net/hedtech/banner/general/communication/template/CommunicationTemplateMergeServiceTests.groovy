@@ -123,10 +123,9 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         params = [:]
         params << ['pidm': i_valid_pidm]
 
-        println templateVariables
+
         templateVariables.each {
             variableName ->
-                println variableName
                 tempfield = CommunicationField.fetchByName( variableName )
                 assertNotNull( tempfield.immutableId )
                 fieldCalculationResult = communicationFieldCalculationService.calculateField( tempfield.immutableId, params )
@@ -176,24 +175,18 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         def CommunicationField testCommunicationField
         def expectedContent = """
-           Greetings George Washington,
-           First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.
            Yours Faithfully, DR CLEMENT OKON """
 
         emailTemplate.content = """
-           \$SalutationTest\$
-           \$invitationTest\$
+           \$UndefinedDataField\$
+           \$DefinedButWithoutPreviewValue\$
            \$signedTest\$"""
         emailTemplate.subject = "REQUEST FOR URGENT BUSINESS RELATIONSHIP "
         emailTemplate.save( failOnError: true, flush: true )
 
         // Now set up the fields
 
-        testCommunicationField = newCommunicationField( "SalutationTest", "Greetings \$fn\$ \$ln\$,", "Greetings George Washington,", null )
-        communicationFieldService.create( [domainModel: testCommunicationField] )
-
-        testCommunicationField = newCommunicationField( "invitationTest", "\$IntroParagraph\$",
-                """First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.""", null )
+        testCommunicationField = newCommunicationField( "DefinedButWithoutPreviewValue", "\$IntroParagraph\$", null, null )
         communicationFieldService.create( [domainModel: testCommunicationField] )
 
         testCommunicationField = newCommunicationField( "signedTest", "", """Yours Faithfully, DR CLEMENT OKON """, null )
@@ -204,12 +197,9 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
         CommunicationMergedEmailTemplate result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
-        communicationMergedEmailTemplate.content = """Greetings George Washington,\r
-        First, I must solicit your strictest confidence in this transaction. this is by virtue of its nature as being utterly confidential and 'top secret'.\r
-        Yours Faithfully, DR CLEMENT OKON """
+        communicationMergedEmailTemplate.content = """\r
+                Yours Faithfully, DR CLEMENT OKON """
         /* Since toList and subject contents are not communicationFields, they should render null */
-        println "debug: result content is: **" + result.content.replace( "\r\n", "\n" ).replace( "\r", "\n" ) + "**"
-        println "debug: template content is: **" + communicationMergedEmailTemplate.content.replace( "\r\n", "\n" ).replace( "\r", "\n" ) + "**"
         assertNull( communicationMergedEmailTemplate.toList )
         assertNull( communicationMergedEmailTemplate.subject )
         // we don't care about whitespace, ST messes with things like line endings etc
