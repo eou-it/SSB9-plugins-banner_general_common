@@ -3,7 +3,11 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.exceptions.ApplicationException
 import org.stringtemplate.v4.STErrorListener
 import org.stringtemplate.v4.misc.ErrorType
+import org.stringtemplate.v4.misc.STCompiletimeMessage
 import org.stringtemplate.v4.misc.STMessage
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.Token;
+import org.stringtemplate.v4.compiler.GroupParser;
 
 /**
  * Created by mbrzycki on 2/3/15.
@@ -13,7 +17,7 @@ public class CommunicationTemplateMissingPropertyCapture implements STErrorListe
 
     @Override
     public void compileTimeError(STMessage stMessage) {
-        throw new ApplicationException( CommunicationTemplate, "@@r1:compileErrorDuringParsing:${stMessage?.token?.toString()}@@" );
+        throw new ApplicationException( CommunicationTemplate, "@@r1:compileErrorDuringParsing:${stripSurprise( stMessage.arg )}@@" );
     }
 
     @Override
@@ -21,7 +25,7 @@ public class CommunicationTemplateMissingPropertyCapture implements STErrorListe
         if ( stMessage.error == ErrorType.NO_SUCH_ATTRIBUTE ) { // ignore these
             missingProperties.add(stMessage.arg);
         } else {
-            throw new ApplicationException( CommunicationTemplate, "@@r1:runtimeErrorDuringParsing:${stMessage?.token?.toString()}@@" );
+            throw new ApplicationException( CommunicationTemplate, "@@r1:runtimeErrorDuringParsing:${stMessage.arg}@@" );
         }
     }
 
@@ -34,4 +38,16 @@ public class CommunicationTemplateMissingPropertyCapture implements STErrorListe
     public void internalError(STMessage stMessage) {
         throw new ApplicationException( CommunicationTemplate, "@@r1:internalErrorDuringParsing:${stMessage.arg}@@" );
     }
+
+
+    private String stripSurprise( String s ) {
+        final CharSequence surpriseString = "' came as a complete surprise to me"
+        if (s) {
+            return s.replace( surpriseString, "'" )
+        } else {
+            return s
+        }
+
+    }
+
 }
