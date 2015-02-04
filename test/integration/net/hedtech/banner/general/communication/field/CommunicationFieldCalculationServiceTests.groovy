@@ -81,8 +81,9 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                  and I see your last name fa second time is \$lastname\$
                  Today is \$today\$ and you owe me \$amount\$
                  But I would settle for \$someotheramount\$"""
-        def parms = communicationTemplateMergeService.extractTemplateVariables( template )
-        assertTrue parms.findAll() == ['firstname', 'lastname', 'today', 'amount', 'someotheramount']
+        def variables = communicationTemplateMergeService.extractTemplateVariables( template )
+        assertEquals( 5, variables.size() )
+        assertEquals( ['firstname', 'lastname', 'today', 'amount', 'someotheramount'].sort().toArray(), variables.sort().toArray() )
 
     }
 

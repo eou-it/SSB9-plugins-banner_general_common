@@ -245,4 +245,5 @@ class CommunicationField implements Serializable {
         return (query != null)
     }
 
+
 }

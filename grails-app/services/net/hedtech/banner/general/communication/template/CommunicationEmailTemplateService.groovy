@@ -1,7 +1,6 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
- ********************************************************************************* */
-
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException

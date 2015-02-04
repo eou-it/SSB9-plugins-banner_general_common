@@ -175,6 +175,8 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         def CommunicationField testCommunicationField
         def expectedContent = """
+           \$UndefinedDataField\$
+           \$DefinedButWithoutPreviewValue\$
            Yours Faithfully, DR CLEMENT OKON """
 
         emailTemplate.content = """
@@ -196,12 +198,15 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         communicationEmailTemplateService.publishTemplate( id: emailTemplate.id )
 
         CommunicationMergedEmailTemplate result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate )
+
+
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.content = """\r
                 Yours Faithfully, DR CLEMENT OKON """
         /* Since toList and subject contents are not communicationFields, they should render null */
         assertNull( communicationMergedEmailTemplate.toList )
         assertNull( communicationMergedEmailTemplate.subject )
+
         // we don't care about whitespace, ST messes with things like line endings etc
         assertEquals( expectedContent.trim().replaceAll( "\\s+", "" ), result.content.trim().replaceAll( "\\s+", "" ) )
 

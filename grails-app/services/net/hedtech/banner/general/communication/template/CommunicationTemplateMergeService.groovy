@@ -1,13 +1,6 @@
-/** *****************************************************************************
- © 2014 SunGard Higher Education.  All Rights Reserved.
-
- CONFIDENTIAL BUSINESS INFORMATION
-
- THIS PROGRAM IS PROPRIETARY INFORMATION OF SUNGARD HIGHER EDUCATION
- AND IS NOT TO BE COPIED, REPRODUCED, LENT, OR DISPOSED OF,
- NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
- WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
- ****************************************************************************** */
+/*********************************************************************************
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
 import groovy.text.SimpleTemplateEngine
@@ -152,16 +145,13 @@ class CommunicationTemplateMergeService {
         def renderedCommunicationFields = [:]
 
         if (templateVariables.size() > 0) {
-            templateVariables.each {
-                CommunicationField communicationField = CommunicationField.findByName( it )
-                if (communicationField) {
-                    renderedCommunicationFields.put( communicationField.name, communicationField.previewValue )
-                } else {
-                    renderedCommunicationFields.put( it, null)
-                }
+            templateVariables.each { fieldName ->
+                CommunicationField communicationField = CommunicationField.findByName( fieldName )
+                String previewString = (communicationField && communicationField.previewValue && communicationField.previewValue.size() > 0) ? communicationField.previewValue : "\$${fieldName}\$"
+                renderedCommunicationFields.put( fieldName, previewString )
             }
         }
-        renderedCommunicationFields
+        return renderedCommunicationFields
     }
 
     /**
@@ -172,9 +162,9 @@ class CommunicationTemplateMergeService {
     CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationTemplate with preview values only." )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
-        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList ?: " ", renderPreviewValues( communicationEmailTemplate.toList ?: " " ) )
-        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject ?: " ", renderPreviewValues( communicationEmailTemplate.subject ?: " " ) )
-        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content ?: " ", renderPreviewValues( communicationEmailTemplate.content ?: " " ) )
+        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList ?: "", renderPreviewValues( communicationEmailTemplate.toList ?: "" ) )
+        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject ?: "", renderPreviewValues( communicationEmailTemplate.subject ?: "" ) )
+        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content ?: "", renderPreviewValues( communicationEmailTemplate.content ?: "" ) )
         communicationMergedEmailTemplate
     }
 
@@ -186,16 +176,15 @@ class CommunicationTemplateMergeService {
      */
     String merge( String stringTemplate, Map<String, String> parameters ) {
         if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
-        if (!(stringTemplate == null || parameters == null)) {
-
+        if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );
             parameters.keySet().each { key ->
                 st.add( key, parameters[key] )
             }
-            st.render()
+            return st.render()
         } else {
             // You have nothing to do, so just return the input templateString
-            stringTemplate
+            return stringTemplate
         }
     }
 
@@ -230,25 +219,30 @@ class CommunicationTemplateMergeService {
  * @return set of unique string variables found in the template string
  */
     List<String> extractTemplateVariables( String templateString ) {
-        if (log.isDebugEnabled())
+       if (log.isDebugEnabled())
             log.debug( "Extracting template variables from template string." )
         if (templateString == null) return new ArrayList<String>()
 
-        dataFieldNames = []
+        ST st = newST( templateString )
 
-        ST st = newST( templateString );
+        st.render()
+        CommunicationTemplateMissingPropertyCapture missingPropertyCapture = (CommunicationTemplateMissingPropertyCapture) st.groupThatCreatedThisInstance.getListener()
+        return missingPropertyCapture.missingProperties.toList()
 
-        /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
-        down the branch looking for ID tokens to place in the global dataFieldNames */
-
-        st.impl.ast.getChildren().each {
-            if (it != null) {
-                CommonTree child = it as CommonTree
-                examineNodes( child )
-            }
-        }
-
-        dataFieldNames.unique( false )
+//        try {
+//        } catch (Throwable t) {
+//            // If for some reason the template is unparsable as to properly render it above; we'll try one more pass by navigating the abstract syntax tree.
+//            dataFieldNames = []
+//            /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
+//            down the branch looking for ID tokens to place in the global dataFieldNames */
+//            st.impl.ast.getChildren().each {
+//                if (it != null) {
+//                    CommonTree child = it as CommonTree
+//                    examineNodes( child )
+//                }
+//            }
+//            dataFieldNames.unique( false )
+//        }
 
     }
 /**
@@ -256,40 +250,36 @@ class CommunicationTemplateMergeService {
  * @param treeNode
  * @return
  */
-    def examineNodes( CommonTree treeNode ) {
-        final int ID = 25
-        if (treeNode) {
-            //println "token type = " + treeNode.getToken().getType() + " text= " + treeNode.getToken().getText()
-            if (treeNode.getToken().getType() == ID) {
-                //println "ChildIndex= " + treeNode.childIndex + "string= " + treeNode.toStringTree()
-                dataFieldNames.add( treeNode.toString() )
-            }
-            treeNode.getChildren().each {
-                CommonTree nextNode = it as CommonTree
-                examineNodes( nextNode )
-            }
-        }
-    }
-
-
-    def String processGroovyTemplate( String templateString, bindings ) {
-        def engine = new SimpleTemplateEngine()
-        def template = engine.createTemplate( templateString ).make( bindings )
-        template
-    }
+//    def examineNodes( CommonTree treeNode ) {
+//        final int ID = 25
+//        if (treeNode) {
+//            //println "token type = " + treeNode.getToken().getType() + " text= " + treeNode.getToken().getText()
+//            if (treeNode.getToken().getType() == ID) {
+//                //println "ChildIndex= " + treeNode.childIndex + "string= " + treeNode.toStringTree()
+//                dataFieldNames.add( treeNode.toString() )
+//            }
+//            treeNode.getChildren().each {
+//                CommonTree nextNode = it as CommonTree
+//                examineNodes( nextNode )
+//            }
+//        }
+//    }
+//
+//
+//    def String processGroovyTemplate( String templateString, bindings ) {
+//        def engine = new SimpleTemplateEngine()
+//        def template = engine.createTemplate( templateString ).make( bindings )
+//        template
+//    }
 
 
     def ST newST( String templateString ) {
         char delimiter = '$'
+        CommunicationTemplateMissingPropertyCapture missingPropertyCapture = new CommunicationTemplateMissingPropertyCapture()
         STGroup group = new STGroup( delimiter, delimiter )
-        CommunicationStringTemplateErrorListener errorListener = new CommunicationStringTemplateErrorListener()
-        group.setListener( errorListener )
-        /* The first parameter here is just a name, but we don't really name our String Templates.
-        * At some point, we could pass in the name of the template or data field that we're working on
-        */
-        group.defineTemplate( "templateString", templateString )
+        group.setListener( missingPropertyCapture )
         group.registerRenderer( Integer.class, new NumberRenderer() );
-        ST st = new org.stringtemplate.v4.ST( templateString, delimiter, delimiter );
-        st
+        return new org.stringtemplate.v4.ST( group, templateString );
     }
 }
+
