@@ -15,13 +15,54 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-import org.springframework.context.i18n.LocaleContextHolder
+import org.stringtemplate.v4.NumberRenderer
+import org.stringtemplate.v4.ST
+import org.stringtemplate.v4.STGroup
 
 import java.sql.SQLException
 
 class CommunicationFieldCalculationService extends ServiceBase {
-    def communicationTemplateMergeService
+
+    /**
+     * Merges the data from the parameter map into the string template
+     * @param stringTemplate A stcring containing delimited token fields
+     * @param parameters Map of name value pairs representing tokens in the template and their values
+     * @return A fully rendered String
+     */
+    public String merge( String stringTemplate, Map<String, String> parameters ) {
+        if (log.isDebugEnabled()) log.debug( "Merging parameters into field formatter string." );
+        if (stringTemplate && parameters) {
+            ST st = newST( stringTemplate );
+            parameters.keySet().each { key ->
+                st.add( key, parameters[key] )
+            }
+            return st.render()
+        } else {
+            // You have nothing to do, so just return the input content
+            return stringTemplate
+        }
+    }
+
+
+    /**
+     *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
+     *  This will throw an application exception if the template string cannot be parsed.
+     * @param content the text to analyze
+     * @return set of unique string variables found in the template string
+     * Will throw a run time application exception if the content is completely unparsable
+     */
+    public List<String> extractVariables( String content ) {
+        if (log.isDebugEnabled()) log.debug( "Extracting field variables from field string." )
+
+        if (content == null) {
+            return new ArrayList<String>()
+        } else {
+            ST st = newST( content )
+            st.render()
+            CommunicationFieldMissingPropertyCapture missingPropertyCapture = (CommunicationFieldMissingPropertyCapture) st.groupThatCreatedThisInstance.getListener()
+            return missingPropertyCapture.missingProperties.toList()
+        }
+    }
 
 
     Map calculateFieldByBannerId( String immutableId, String bannerId ) {
@@ -92,12 +133,9 @@ class CommunicationFieldCalculationService extends ServiceBase {
                         }
                     }
                 }
-                if (communicationField.formatString != null) {
-                    return communicationTemplateMergeService.merge( communicationField.formatString, attributeMap )
-                }
-                def application = ApplicationHolder.application
-                def messageSource = application.mainContext.getBean( "messageSource" )
-                messageSource.getMessage( "net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService.noFormatterExists", null, LocaleContextHolder.getLocale() ) + "<br><br>" + attributeMap.toString()
+
+                String formatString = communicationField.formatString ?: ""
+                return merge( formatString, attributeMap )
             } catch (SQLException e) {
                 throw new ApplicationException( CommunicationFieldCalculationService, e.message )
             } catch (Exception e) {
@@ -106,5 +144,14 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 sql?.close()
             }
         }
+    }
+
+    private ST newST( String templateString ) {
+        char delimiter = '$'
+        CommunicationFieldMissingPropertyCapture missingPropertyCapture = new CommunicationFieldMissingPropertyCapture()
+        STGroup group = new STGroup( delimiter, delimiter )
+        group.setListener( missingPropertyCapture )
+        group.registerRenderer( Integer.class, new NumberRenderer() );
+        return new org.stringtemplate.v4.ST( group, templateString );
     }
 }

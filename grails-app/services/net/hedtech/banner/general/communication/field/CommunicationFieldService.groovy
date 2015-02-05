@@ -1,6 +1,6 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
- ********************************************************************************* */
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
 
 package net.hedtech.banner.general.communication.field
 
@@ -12,8 +12,7 @@ import net.hedtech.banner.service.ServiceBase
 class CommunicationFieldService extends ServiceBase {
     boolean transactional = true
     def communicationPopulationQueryStatementParseService
-    def communicationTemplateMergeService
-
+    def communicationFieldCalculationService
 
     def preCreate( domainModelOrMap ) {
         CommunicationField communicationField = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationField
@@ -37,7 +36,7 @@ class CommunicationFieldService extends ServiceBase {
                 communicationField.returnsArrayArguments = false
             }
             //check for sql injection and if it returns true then throw invalid exception
-            def parseResult = communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
+            communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
         }
 
         validateFormatter( communicationField )
@@ -86,7 +85,7 @@ class CommunicationFieldService extends ServiceBase {
                 communicationField.returnsArrayArguments = false
             }
             //check for sql injection and if it returns true then throw invalid exception
-            def parseResult = communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
+            communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
         }
 
         if (communicationField.name == null || communicationField.name == "")
@@ -138,7 +137,7 @@ class CommunicationFieldService extends ServiceBase {
             Attempt to extract the variables from the format string, which functions as a StringTemplate iteself.
             If this fails, the template is not parsable, it should throw an exception
             */
-            communicationTemplateMergeService.extractTemplateVariables( communicationField.formatString )
+            communicationFieldCalculationService.extractVariables( communicationField.formatString )
 
             if (communicationField.status == CommunicationFieldStatus.PRODUCTION)
                 return

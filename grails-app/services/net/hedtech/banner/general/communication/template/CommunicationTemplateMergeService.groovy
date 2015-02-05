@@ -212,66 +212,24 @@ class CommunicationTemplateMergeService {
         templateVariables
     }
 
-/**
- *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
- *  This will throw an application exception if the template string cannot be parsed.
- * @param template String
- * @return set of unique string variables found in the template string
- */
+    /**
+     *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
+     *  This will throw an application exception if the template string cannot be parsed.
+     * @param template String
+     * @return set of unique string variables found in the template string
+     */
     List<String> extractTemplateVariables( String templateString ) {
-       if (log.isDebugEnabled())
-            log.debug( "Extracting template variables from template string." )
-        if (templateString == null) return new ArrayList<String>()
+        if (log.isDebugEnabled()) log.debug( "Extracting template variables from template string." )
 
-        ST st = newST( templateString )
-
-        st.render()
-        CommunicationTemplateMissingPropertyCapture missingPropertyCapture = (CommunicationTemplateMissingPropertyCapture) st.groupThatCreatedThisInstance.getListener()
-        return missingPropertyCapture.missingProperties.toList()
-
-//        try {
-//        } catch (Throwable t) {
-//            // If for some reason the template is unparsable as to properly render it above; we'll try one more pass by navigating the abstract syntax tree.
-//            dataFieldNames = []
-//            /* Each chunk of the ast is returned by getChildren, then examineNodes recursively walks
-//            down the branch looking for ID tokens to place in the global dataFieldNames */
-//            st.impl.ast.getChildren().each {
-//                if (it != null) {
-//                    CommonTree child = it as CommonTree
-//                    examineNodes( child )
-//                }
-//            }
-//            dataFieldNames.unique( false )
-//        }
-
+        if (templateString == null) {
+            return new ArrayList<String>()
+        } else {
+            ST st = newST( templateString )
+            st.render()
+            CommunicationTemplateMissingPropertyCapture missingPropertyCapture = (CommunicationTemplateMissingPropertyCapture) st.groupThatCreatedThisInstance.getListener()
+            return missingPropertyCapture.missingProperties.toList()
+        }
     }
-/**
- * Walks the ast tree and finds any tokens with the ID attribute
- * @param treeNode
- * @return
- */
-//    def examineNodes( CommonTree treeNode ) {
-//        final int ID = 25
-//        if (treeNode) {
-//            //println "token type = " + treeNode.getToken().getType() + " text= " + treeNode.getToken().getText()
-//            if (treeNode.getToken().getType() == ID) {
-//                //println "ChildIndex= " + treeNode.childIndex + "string= " + treeNode.toStringTree()
-//                dataFieldNames.add( treeNode.toString() )
-//            }
-//            treeNode.getChildren().each {
-//                CommonTree nextNode = it as CommonTree
-//                examineNodes( nextNode )
-//            }
-//        }
-//    }
-//
-//
-//    def String processGroovyTemplate( String templateString, bindings ) {
-//        def engine = new SimpleTemplateEngine()
-//        def template = engine.createTemplate( templateString ).make( bindings )
-//        template
-//    }
-
 
     def ST newST( String templateString ) {
         char delimiter = '$'
