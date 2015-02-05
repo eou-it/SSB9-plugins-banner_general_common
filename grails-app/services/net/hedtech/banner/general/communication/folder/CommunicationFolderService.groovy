@@ -20,7 +20,7 @@ class CommunicationFolderService extends ServiceBase {
             throw new ApplicationException( CommunicationFolder, "@@r1:nameCannotBeNull@@" )
 
         if (CommunicationFolder.fetchByName( folder.name )) {
-            throw new ApplicationException( CommunicationFolder, "@@r1:folderExists@@", folder.name )
+            throw new ApplicationException( CommunicationFolder, "@@r1:folderExists:"+folder.name + "@@")
         }
     }
 
@@ -32,7 +32,7 @@ class CommunicationFolderService extends ServiceBase {
             throw new ApplicationException( CommunicationFolder, "@@r1:nameCannotBeNull@@" )
 
         if (CommunicationFolder.existsAnotherSameNameFolder( folder.id, folder.name ))
-            throw new ApplicationException( CommunicationFolder, "@@r1:folderExists@@", folder.name )
+            throw new ApplicationException( CommunicationFolder, "@@r1:folderExists:" + folder.name  + "@@")
     }
 
 }

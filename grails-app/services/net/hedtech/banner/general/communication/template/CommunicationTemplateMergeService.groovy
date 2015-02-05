@@ -37,12 +37,12 @@ class CommunicationTemplateMergeService {
     CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
         CommunicationEmailTemplate communicationTemplate = CommunicationEmailTemplate.get( templateId )
         if (communicationTemplate == null) {
-            throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist@@", templateId )
+            throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@")
         }
         def person = PersonUtility.getPerson( bannerId )
 
         if (person == null) {
-            throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist@@", bannerId )
+            throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist:" + bannerId + "@@" )
         }
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate
         communicationMergedEmailTemplate = calculateTemplateByPidm( communicationTemplate, person.pidm )

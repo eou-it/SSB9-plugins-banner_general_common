@@ -52,8 +52,11 @@ class CommunicationSendEmailService {
         emailItem.setOrganizationId( organization.id )
         emailItem.setReferenceId( recipientData.getReferenceId() )
         emailItem.setSubject( emailMessage.getSubjectLine() )
+        emailItem.setTemplateId(recipientData.templateId)
+        emailItem.setContent(emailMessage.messageBody)
         emailItem.setRecipientPidm( pidm )
         emailItem.setCreatedBy( recipientData.ownerId )
+        emailItem.setSentDate(emailMessage.dateSent)
         emailItem = communicationEmailItemService.create( emailItem )
         log.debug( "recorded email item sent with item id = ${emailItem.id}." )
     }
