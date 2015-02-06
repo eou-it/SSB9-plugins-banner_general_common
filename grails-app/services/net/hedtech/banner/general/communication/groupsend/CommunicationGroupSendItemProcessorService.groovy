@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
@@ -15,46 +16,44 @@ import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
+import java.sql.SQLException
+
 /**
  * Process a group send item to the point of creating recipient merge data values and submitting an individual communication job
  * for the recipient.
  */
 class CommunicationGroupSendItemProcessorService {
     boolean transactional = true
-
     def log = Logger.getLogger( this.getClass() )
-    def communicationGroupSendService
     def communicationGroupSendItemService
-    def asynchronousBannerAuthenticationSpoofer
     def communicationTemplateMergeService
     def communicationFieldCalculationService
     def communicationJobService
     def communicationRecipientDataService
-
-//    def communicationTemplateService
-//    def communicationPopulationSelectionListService
     def communicationOrganizationService
+    def sessionFactory
+    private static final int noWaitErrorCode = 54;
 
 
     public void performGroupSendItem( Long groupSendItemId ) {
         log.debug( "Performing group send item id = " + groupSendItemId )
-//        boolean locked = groupSendItemJdbcDaoSupport.lockGroupSendItem( groupSendItemKey, GroupSendItemExecutionState.Ready);
-//        if (!locked) {
-//            // Do nothing
-//            return;
-//        }
+        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready);
+        if (!locked) {
+            // Do nothing
+            return;
+        }
 
-        CommunicationGroupSendItem groupSendItem = communicationGroupSendItemService.get( groupSendItemId )
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get( groupSendItemId )
         CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
 
         if (!groupSend.getCurrentExecutionState().isTerminal()) {
             CommunicationRecipientData recipientData = buildRecipientData( groupSend.createdBy, groupSend.template, groupSendItem.referenceId, groupSendItem.recipientPidm, groupSend.organization )
-            recipientData = communicationRecipientDataService.create( recipientData )
+            recipientData = (CommunicationRecipientData) communicationRecipientDataService.create( recipientData )
             log.debug( "Created recipient data with referenceId = " + groupSendItem.referenceId + "." )
 
             log.debug( "Creating communication job with reference id = " + recipientData.referenceId )
             CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
-            communicationJob = communicationJobService.create( communicationJob )
+            communicationJobService.create( communicationJob )
 
             log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )
 
@@ -79,7 +78,7 @@ class CommunicationGroupSendItemProcessorService {
 
 
     public void failGroupSendItem( Long groupSendItemId, String errorText ) {
-        CommunicationGroupSendItem groupSendItem = communicationGroupSendItemService.get( groupSendItemId )
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get( groupSendItemId )
         def groupSendItemParamMap = [
                 id                   : groupSendItem.id,
                 version              : groupSendItem.version,
@@ -100,6 +99,8 @@ class CommunicationGroupSendItemProcessorService {
         CommunicationEmailTemplate emailTemplate
         if (template instanceof CommunicationEmailTemplate) {
             emailTemplate = (CommunicationEmailTemplate) template
+        } else {
+            throw new RuntimeException( "Template of type ${template?.getClass()?.getSimpleName()} is not supported." )
         }
 
         Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
@@ -146,6 +147,35 @@ class CommunicationGroupSendItemProcessorService {
         } finally {
             SecurityContextHolder.getContext().setAuthentication( originalAuthentication )
         }
-
     }
+
+
+    /**
+     * Attempts to create a pessimistic lock on the group send item record.
+     * @param groupSendItemId the primary key of the group send item.
+     * @param state the group send item execution state
+     * @return true if the record was successfully locked and false otherwise
+     */
+    public boolean lockGroupSendItem( final Long groupSendItemId, final CommunicationGroupSendItemExecutionState state ) {
+        Sql sql = null
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            int rows = sql.executeUpdate( "select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait", [groupSendItemId, state.name()] )
+
+            if (rows > 1) {
+                throw new RuntimeException( "Found more than one GCRGSIM row for a single group send item id" )
+            } else {
+                return rows == 1
+            }
+        } catch( SQLException e) {
+            if (e.getErrorCode() == noWaitErrorCode) {
+                return false
+            } else {
+                throw e
+            }
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+    }
+
 }

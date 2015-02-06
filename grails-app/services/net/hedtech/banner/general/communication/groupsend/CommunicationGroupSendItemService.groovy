@@ -6,6 +6,8 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
 
+import java.sql.SQLException
+
 /**
  * DAO service interface for communication group send item objects.
  */

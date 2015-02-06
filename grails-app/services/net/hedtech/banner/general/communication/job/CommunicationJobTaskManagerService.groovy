@@ -142,6 +142,7 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
         CommunicationJob job = (CommunicationJob) task
         job.refresh()
         job.setStatus( CommunicationJobStatus.FAILED )
+        job
         communicationJobService.update( job )
         if (cause) {
             log.info( "Marked job with id = ${job.id} as failed; cause = ${cause.toString()}." )
