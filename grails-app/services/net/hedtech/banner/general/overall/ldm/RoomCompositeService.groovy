@@ -386,28 +386,4 @@ class RoomCompositeService extends LdmService {
         }
         return room
     }
-
-    public AvailableRoom fetchByRoomBuildingAndTermAllRelations(String roomNumber, Building building, String termEffective) {
-        AvailableRoom room
-        if (roomNumber && building && termEffective) {
-            Map params = [building: building, termEffective: termEffective]
-            HousingRoomDescription housingRoomDescription = HousingRoomDescription.fetchValidRoomAndBuilding(roomNumber, params)
-            GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, housingRoomDescription.id)
-            if (!globalUniqueIdentifier) {
-                throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: "Room"))
-            }
-
-            HousingRoomDescriptionReadOnly housingRoomDescriptionReadOnly = HousingRoomDescriptionReadOnly.get(globalUniqueIdentifier.domainId)
-            if (!housingRoomDescriptionReadOnly) {
-                throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: "Room"))
-            }
-
-
-            BuildingDetail buildingDetail = buildingCompositeService.get(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescriptionReadOnly.buildingCode)?.guid)
-            List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-
-            room = new AvailableRoom(housingRoomDescriptionReadOnly, buildingDetail, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescriptionReadOnly.dataOrigin))
-        }
-        return room
-    }
 }
