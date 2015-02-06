@@ -10,6 +10,7 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.communication.field
 
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -141,6 +142,22 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         communicationField = communicationFieldService.update( communicationField )
         result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
         assertEquals( "", result )
+
+        // try one that doesn't exist
+        communicationField.formatString = "\$whose_mama\$"
+        communicationField = communicationFieldService.update( communicationField )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        assertEquals( "", result )
+
+        // try one that breaks parsing
+        communicationField.formatString = "\$whose mama\$"
+        communicationField = communicationFieldService.update( communicationField )
+        try {
+            communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+            fail( "compileErrorDuringParsing" )
+        } catch (ApplicationException ae ) {
+            assertApplicationException ae, "compileErrorDuringParsing"
+        }
     }
 
     private def newCommunicationField() {
