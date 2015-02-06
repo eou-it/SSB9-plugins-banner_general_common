@@ -18,9 +18,8 @@ import org.junit.Test
 
 class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase {
     def CommunicationFolder validFolder
-    def communicationFieldService
-    def communicationFieldCalculationService
-    def communicationTemplateMergeService
+    CommunicationFieldService communicationFieldService
+    CommunicationFieldCalculationService communicationFieldCalculationService
 
 
     @Before
@@ -81,7 +80,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                  and I see your last name fa second time is \$lastname\$
                  Today is \$today\$ and you owe me \$amount\$
                  But I would settle for \$someotheramount\$"""
-        def variables = communicationTemplateMergeService.extractTemplateVariables( template )
+        def variables = communicationFieldCalculationService.extractVariables( template )
         assertEquals( 5, variables.size() )
         assertEquals( ['firstname', 'lastname', 'today', 'amount', 'someotheramount'].sort().toArray(), variables.sort().toArray() )
 
@@ -95,9 +94,54 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                    Today is \$today\$ and you owe me \$amount\$
                    But I would settle for \$someotheramount\$"""
           shouldFail (){
-              communicationTemplateMergeService.extractTemplateVariables( template )
+              communicationFieldCalculationService.extractVariables( template )
           }
       }
+
+    @Test
+    void testCalculateFieldByPidm() {
+        CommunicationField communicationField = new CommunicationField(
+            folder: validFolder,
+            name: "PersonInfo",
+            returnsArrayArguments: false,
+            formatString: "Hello \$firstname\$ \$lastname\$",
+
+            ruleContent: """SELECT spriden_id
+                   ,spriden_last_name lastname
+                   ,spriden_first_name firstname
+                   ,spriden_mi mi
+                   ,spbpers_legal_name legalname
+                   ,sysdate today
+                   ,trim(' ') empty_string
+                   ,null null_string
+                   ,50.56 amount
+               FROM spriden, spbpers
+              WHERE     spriden_pidm = spbpers_pidm(+)
+                    AND spriden_change_ind IS NULL
+                    AND (spriden_pidm = :pidm or spriden_id = :bannerId)"""
+        )
+        communicationField = communicationFieldService.create( communicationField )
+        assertNotNull communicationField.immutableId
+
+        final Long pidm = 37815L
+        String result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        assertEquals( "Hello test carter roll", result )
+
+        communicationField.formatString = "\$firstname\$"
+        communicationField = communicationFieldService.update( communicationField )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        assertEquals( "test", result )
+
+        communicationField.formatString = "\$empty_string\$"
+        communicationField = communicationFieldService.update( communicationField )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        assertEquals( "", result )
+
+        communicationField.formatString = "\$null_string\$"
+        communicationField = communicationFieldService.update( communicationField )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        assertEquals( "", result )
+    }
 
     private def newCommunicationField() {
         def communicationField = new CommunicationField(

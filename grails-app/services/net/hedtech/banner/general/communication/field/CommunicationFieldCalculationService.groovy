@@ -65,33 +65,16 @@ class CommunicationFieldCalculationService extends ServiceBase {
     }
 
 
-    Map calculateFieldByBannerId( String immutableId, String bannerId ) {
-
-        def person = PersonUtility.getPerson( bannerId )
-
-        if (person == null) {
-            throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:idInvalid@@" )
-        }
-        if (immutableId == null) {
-            throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:immutableIdInvalid@@" )
-        }
-        def returnmap = [:]
-
-        def confdecmap = PersonUtility.isPersonConfidentialOrDeceased( person.pidm )
-        returnmap << ["confidential": confdecmap.confidential]
-        returnmap << ["deceased": confdecmap.deceased]
-        returnmap << ["name": PersonUtility.formatName( [lastName: person.lastName, firstName: person.firstName, mi: person.middleName] )]
-        returnmap << ["fieldResult": calculateFieldByPidm( immutableId, person.pidm )]
-        returnmap
-    }
-
     /**
-     * Convenience method to calculate a field with only a pidm as input
+     * Calculates a field with only a pidm as input
      * @param immutableId A CommunicationField immutable identifier
-     * @param pidm
+     * @param pidm a unique identifier for a person in Banner
      * @return
      */
-    String calculateFieldByPidm( String immutableId, Long pidm ) {
+    public String calculateFieldByPidm( String immutableId, Long pidm ) {
+        if (immutableId == null) throw new IllegalArgumentException( "immutableId may not be null" )
+        if (pidm == null) throw new IllegalArgumentException( "pidm may not be null" )
+
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
         calculateField( immutableId, sqlParams )
