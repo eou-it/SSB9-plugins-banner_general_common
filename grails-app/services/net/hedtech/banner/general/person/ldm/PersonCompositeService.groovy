@@ -1539,7 +1539,7 @@ class PersonCompositeService extends LdmService {
 
     private def updateSSN(String inputCredentialType, String credentialId, def personBase) {
         if (inputCredentialType == 'Social Security Number' || inputCredentialType == 'Social Security Number') {
-            if (personBase.ssn == null || personBase.ssn != credentialId) {
+            if (personBase.ssn == null) {
                 personBase.ssn = credentialId
             }
         }

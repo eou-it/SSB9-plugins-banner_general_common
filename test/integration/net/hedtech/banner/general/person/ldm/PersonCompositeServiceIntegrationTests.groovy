@@ -2,6 +2,7 @@
  Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
+
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -100,6 +101,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_credential_type3 = "Banner UDC ID"
     def i_success_credential_id4 = "HOSP0001"
     def i_success_credential_type4 = "Banner ID"
+    def i_failed_update_credential_id = "TTTT"
+    def i_failed_update_credential_type = "Social Security Number"
 
 
     @Before
@@ -205,7 +208,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_credential_type4, persons.credentials[3].credentialType
     }
 
-
     //POST- Person Create API
     @Test
     void testCreatePersonWithStateAndZipIntegrationSettingValue() {
@@ -306,7 +308,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 'CCCCC', personBasicPersonBase.preferenceFirstName
         assertEquals 'CCCCC', personBasicPersonBase.namePrefix
         assertEquals 'CCCCC', personBasicPersonBase.nameSuffix
-        assertEquals 'CCCCC', personBasicPersonBase.ssn
+        assertEquals 'TTTTT', personBasicPersonBase.ssn
     }
 
     @Test
@@ -613,6 +615,22 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_emailAddress_work, o_person_update2.emails[1].emailAddress
     }
 
+    //PUT- person update API
+    @Test
+    void testUpdateFailedPersonCredentialWithExistingSSN() {
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', '50199')?.guid
+        Map params = updatePersonWithModifiedExistingSSN(guid)
+
+        def o_person_update = personCompositeService.update(params)
+
+        assertNotNull o_person_update
+        assertNotNull o_person_update
+        assertNotNull o_person_update.credentials
+        assertEquals i_failed_update_credential_type, o_person_update.credentials[0].credentialType
+        assertNotSame(i_failed_update_credential_id, o_person_update.credentials[0].credentialId)
+    }
+
+
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
         String idSql = """select gb_common.f_generate_id bannerId, gb_common.f_generate_pidm pidm from dual """
@@ -681,16 +699,16 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithFirstNameChangeRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: 'CCCCCC', nameType: 'Primary']]
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: 'CCCCCC', nameType: 'Primary']]
         ]
         return params
     }
 
 
     private Map getPersonWithLastNameChangeRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: 'CCCCCC', middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary']]
+        Map params = [id   : guid,
+                      names: [[lastName: 'CCCCCC', middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary']]
         ]
         return params
     }
@@ -818,8 +836,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map newPersonWithAddressRequest() {
-        Map params = [names      : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
-                      addresses  : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]]
+        Map params = [names    : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      addresses: [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]]
         ]
 
         return params
@@ -827,8 +845,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map newPersonWithPreferredEmailRequest() {
-        Map params = [names      : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
-                      emails: [[guid: i_success_guid_personal, emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [guid: i_success_guid_institution, emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution],[emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_preferred]]
+        Map params = [names : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      emails: [[guid: i_success_guid_personal, emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [guid: i_success_guid_institution, emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution], [emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_preferred]]
         ]
 
         return params
@@ -840,6 +858,14 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                       emails: [[guid: i_success_guid_personal, emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [guid: i_success_guid_institution, emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution], [emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_preferred]]
         ]
 
+        return params
+    }
+
+
+    private Map updatePersonWithModifiedExistingSSN(guid) {
+        Map params = [id         : guid,
+                      credentials: [[credentialType: i_failed_update_credential_type, credentialId: i_failed_update_credential_id]],
+        ]
         return params
     }
 
