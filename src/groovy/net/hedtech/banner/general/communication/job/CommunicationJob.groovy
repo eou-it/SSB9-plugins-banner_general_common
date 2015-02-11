@@ -88,12 +88,17 @@ class CommunicationJob implements AsynchronousTask {
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
+    @Column(name="GCBCJOB_ERROR_TEXT")
+    @Lob
+    String errorText;
+
     static constraints = {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         referenceId(nullable: false, maxSize: 255)
         status(nullable: false, maxSize: 30)
+        errorText(nullable: true)
     }
 
     // Read Only fields that should be protected against update

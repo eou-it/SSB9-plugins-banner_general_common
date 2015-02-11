@@ -15,6 +15,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
+import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
@@ -135,6 +136,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         STGroup group = new STGroup( delimiter, delimiter )
         group.setListener( missingPropertyCapture )
         group.registerRenderer( Integer.class, new NumberRenderer() );
+        group.registerRenderer( Date.class, new DateRenderer() );
         return new org.stringtemplate.v4.ST( group, templateString );
     }
 }

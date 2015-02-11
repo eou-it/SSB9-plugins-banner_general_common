@@ -249,6 +249,9 @@ class CommunicationSendEmailMethod {
             emailServerProperties.setProperty( "mail.smtp.host", sendEmailServerProperties.host )
             emailServerProperties.setProperty( "mail.smtp.port", String.valueOf( sendEmailServerProperties.port ) )
             emailServerProperties.setProperty( "mail.smtp.auth", String.valueOf( senderMailboxAccount?.encryptedPassword != null ) )
+            emailServerProperties.setProperty( "mail.smtp.connectiontimeout", "30000" )
+            emailServerProperties.setProperty( "mail.smtp.timeout", "30000" )
+            emailServerProperties.setProperty( "mail.smtp.writetimeout", "30000" )
 
             if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.None) {
             } else if (sendEmailServerProperties.securityProtocol == CommunicationEmailServerConnectionSecurity.SSL) {

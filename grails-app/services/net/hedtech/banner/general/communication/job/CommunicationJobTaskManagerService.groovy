@@ -8,6 +8,7 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
+import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import org.apache.commons.lang.NotImplementedException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -142,7 +143,7 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
         CommunicationJob job = (CommunicationJob) task
         job.refresh()
         job.setStatus( CommunicationJobStatus.FAILED )
-        job
+        job.setErrorText( StringHelper.stackTraceToString( cause ) )
         communicationJobService.update( job )
         if (cause) {
             log.info( "Marked job with id = ${job.id} as failed; cause = ${cause.toString()}." )
