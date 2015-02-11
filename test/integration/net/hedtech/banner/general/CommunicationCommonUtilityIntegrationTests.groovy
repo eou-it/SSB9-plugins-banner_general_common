@@ -63,7 +63,7 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testBadStringInput() {
-        def userinput = "Tes@#\$^&()t"
+        def userinput = "Tes@#\$&()t"
         def expectedOutput = concatWildcard("test")
 
         def result = CommunicationCommonUtility.getScrubbedInput(userinput)
@@ -83,7 +83,7 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testReplaceWildcardOtherInput() {
-        def userinput = "Tes?(^#%<>:*_t"
+        def userinput = "Tes?(#%<>:*_t"
         def expectedOutput = concatWildcard("tes_%%_t")
 
         def result = CommunicationCommonUtility.getScrubbedInput(userinput)
