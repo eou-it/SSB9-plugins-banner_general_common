@@ -621,13 +621,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', '50199')?.guid
         Map params = updatePersonWithModifiedExistingSSN(guid)
 
-        def o_person_update = personCompositeService.update(params)
+        try {
+            personCompositeService.update(params)
+            fail("This should have failed as the course is missing")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'ssn.value.exists.message'
+        }
 
-        assertNotNull o_person_update
-        assertNotNull o_person_update
-        assertNotNull o_person_update.credentials
-        assertEquals i_failed_update_credential_type, o_person_update.credentials[0].credentialType
-        assertNotSame(i_failed_update_credential_id, o_person_update.credentials[0].credentialId)
     }
 
 
@@ -726,7 +726,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithPersonBasicPersonBaseChangeRequest(personIdentificationNameCurrent, guid) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'CCCCC']],
                       sex        : 'Female'
 
         ]
@@ -737,7 +736,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithNewAdressRequest(personIdentificationNameCurrent, guid) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex        : 'Male',
                       addresses  : [[addressType: 'Mailing', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398'], [addressType: 'Home', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778']]
         ]
@@ -748,7 +746,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithModifiedAdressRequest(personIdentificationNameCurrent, guid) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex        : 'Male',
                       addresses  : [[addressType: 'Mailing', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778'], [addressType: 'Home', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398']]
         ]
@@ -772,7 +769,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithNewPhonesRequest(personIdentificationNameCurrent, guid) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex        : 'Male',
                       phones     : [[phoneNumber: '6107435302', phoneType: 'Mobile'], [phoneNumber: '2297795715', phoneType: 'Home']]
         ]
@@ -783,7 +779,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithModifiedPhonesRequest(personIdentificationNameCurrent, guid) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex        : 'Male',
                       phones     : [[phoneNumber: '6107435333', phoneType: 'Mobile'], [phoneNumber: '2297795777', phoneType: 'Home']]
         ]
@@ -794,7 +789,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithNewRacesRequest(personIdentificationNameCurrent, guid, races) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex        : 'Male',
                       races      : [[guid: races[0].guid]]
         ]
@@ -805,7 +799,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithModifiedRacesRequest(personIdentificationNameCurrent, guid, races) {
         Map params = [id         : guid,
                       names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      credentials: [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex        : 'Male',
                       races      : [[guid: races[0].guid], [guid: races[1].guid]]
         ]
@@ -816,7 +809,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, guid, ethniciies) {
         Map params = [id             : guid,
                       names          : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      credentials    : [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex            : 'Male',
                       ethnicityDetail: [[guid: ethniciies[0].guid]]
         ]
@@ -827,7 +819,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private Map getPersonWithModifiedEthniciiesyRequest(personIdentificationNameCurrent, guid, ethniciies) {
         Map params = [id             : guid,
                       names          : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      credentials    : [[credentialType: 'Social Security Number', credentialId: 'TTTTT']],
                       sex            : 'Male',
                       ethnicityDetail: [[guid: ethniciies[1].guid]]
         ]
