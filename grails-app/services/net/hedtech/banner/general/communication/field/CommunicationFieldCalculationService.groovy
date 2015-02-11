@@ -38,6 +38,8 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 st.add( key, parameters[key] )
             }
             return st.render()
+        } else if (parameters) {
+            return parameters.toString()
         } else {
             // You have nothing to do, so just return the input content
             return stringTemplate
