@@ -95,12 +95,10 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
-        // TODO: Fix this assertEquals( 5, countCompleted )
         assertEquals( 5, countCompleted )
 
         sleepUntilCommunicationJobsComplete( 5, 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
-       // TODO: Fix this  assertEquals( 5, countCompleted )
         assertEquals( 5, countCompleted )
 
         MimeMessage[] messages = mailServer.getReceivedMessages();
@@ -141,49 +139,6 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
             }
         }
     }
-
-//    private createEmailTemplate() {
-//        def template = newValidForCreateEmailTemplate(folder1)
-//        def newTemplate = communicationEmailTemplateService.create([domainModel: template])
-//        //Test if the service set the created date, and the infrastructure set the modifiedby and date
-//        assertNotNull newTemplate.createDate
-//        assertNotNull(newTemplate.lastModified)
-//        assertNotNull(newTemplate.lastModifiedBy)
-//
-//        // Now test findall
-//        def foundEmailTemplates = communicationEmailTemplateService.findAll()
-//        assertEquals(1, foundEmailTemplates.size())
-//    }
-
-//    private void waitForGroupSendToGetPickedUp( long groupSendId ) {
-//        CommunicationGroupSend groupSend = communicationGroupSendService.fetch( groupSendId );
-//        long start = System.currentTimeMillis();
-//        while (!groupSend.isStarted() && (System.currentTimeMillis() - start < 300 * 1000)) {
-//            try {
-//                Thread.sleep( 100 );
-//            } catch (InterruptedException e) {
-//            }
-//            groupSend = getResourceLocator().getGroupSendService().fetch( groupSendKey );
-//        }
-//        assertTrue( groupSend.isStarted() );
-//    }
-//
-//    protected void waitForItemsToStop( final GroupSendKey groupSendKey ) throws Exception {
-//        new PatientRequest( "getRunningGroupSendItems" ) {
-//            @Override
-//            public boolean runImpl() throws Exception {
-//                try {
-//                    List<GroupSendItem> items = getResourceLocator().getGroupSendItemService().findByGroupSend( groupSendKey );
-//                    for(GroupSendItem item:items) {
-//                        if (item.isRunning()) return false;
-//                    }
-//                    return true;
-//                } catch (Exception e) {
-//                    throw e;
-//                }
-//            }
-//        }.run();
-//    }
 
 
     private def newPopulationQuery( String queryName ) {

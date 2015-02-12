@@ -15,6 +15,8 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
@@ -74,13 +76,14 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param pidm a unique identifier for a person in Banner
      * @return
      */
-    public String calculateFieldByPidm( String immutableId, Long pidm ) {
-        if (immutableId == null) throw new IllegalArgumentException( "immutableId may not be null" )
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
+    public String calculateFieldByPidm( CommunicationField communicationField, Long pidm ) {
+        if (communicationField == null) throw new IllegalArgumentException( "communicationField may not be null" )
         if (pidm == null) throw new IllegalArgumentException( "pidm may not be null" )
 
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
-        calculateField( immutableId, sqlParams )
+        calculateField( communicationField, sqlParams )
     }
 
     /**
@@ -89,9 +92,8 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of parameter values
      * @return
      */
-    private String calculateField( String immutableId, Map parameters ) {
+    private String calculateField( CommunicationField communicationField, Map parameters ) {
         def Sql sql
-        CommunicationField communicationField = CommunicationField.findByImmutableId( immutableId )
         // ToDo: decide if the upper bound should be configurable
         int maxRows = (!communicationField.returnsArrayArguments) ? 1 : 50
         String statement = communicationField.ruleContent

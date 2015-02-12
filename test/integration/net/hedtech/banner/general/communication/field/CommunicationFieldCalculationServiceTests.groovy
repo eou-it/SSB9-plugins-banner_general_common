@@ -52,7 +52,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def params = [:]
         params << ['pidm': 37815]
         params << ['bannerId': "AA0037815"]
-        def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
+        def resultSet = communicationFieldCalculationService.calculateField( communicationField, params )
         assertNotNull resultSet
 
     }
@@ -63,12 +63,16 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
         def newCommunicationField = newCommunicationField()
         newCommunicationField.ruleContent = null
+
+        Collection all = communicationFieldService.findAll()
+
+
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
         assertNotNull communicationField.immutableId
         def params = [:]
         params << ['pidm': 37815]
         params << ['bannerId': "AA0037815"]
-        def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
+        def resultSet = communicationFieldCalculationService.calculateField( communicationField, params )
         assertEquals( "Hello \$firstname\$ \$lastname\$", resultSet )
 
     }
@@ -103,7 +107,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     void testCalculateFieldByPidm() {
         CommunicationField communicationField = new CommunicationField(
             folder: validFolder,
-            name: "PersonInfo",
+            name: "generic_field",
             returnsArrayArguments: false,
             formatString: "Hello \$firstname\$ \$lastname\$",
 
@@ -121,39 +125,39 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                     AND spriden_change_ind IS NULL
                     AND (spriden_pidm = :pidm or spriden_id = :bannerId)"""
         )
-        communicationField = communicationFieldService.create( communicationField )
+        communicationField = communicationFieldService.create( [domainModel: communicationField] )
         assertNotNull communicationField.immutableId
 
         final Long pidm = 37815L
-        String result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        String result = communicationFieldCalculationService.calculateFieldByPidm( communicationField, pidm )
         assertEquals( "Hello test carter roll", result )
 
         communicationField.formatString = "\$firstname\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField, pidm )
         assertEquals( "test", result )
 
         communicationField.formatString = "\$empty_string\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField, pidm )
         assertEquals( "", result )
 
         communicationField.formatString = "\$null_string\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField, pidm )
         assertEquals( "", result )
 
         // try one that doesn't exist
         communicationField.formatString = "\$whose_mama\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField, pidm )
         assertEquals( "", result )
 
         // try one that breaks parsing
         communicationField.formatString = "\$whose mama\$"
         communicationField = communicationFieldService.update( communicationField )
         try {
-            communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+            communicationFieldCalculationService.calculateFieldByPidm( communicationField, pidm )
             fail( "compileErrorDuringParsing" )
         } catch (ApplicationException ae ) {
             assertApplicationException ae, "compileErrorDuringParsing"
@@ -165,7 +169,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                 // Required           fields
                 folder: validFolder,
                 //immutableId: validImmutableId,
-                name: "PersonInfo",
+                name: "CommunicationFieldCalculationServiceTests_newCommunicationField",
                 returnsArrayArguments: false,
 
                 // Nullable fields

@@ -128,7 +128,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
             variableName ->
                 tempfield = CommunicationField.fetchByName( variableName )
                 assertNotNull( tempfield.immutableId )
-                fieldCalculationResult = communicationFieldCalculationService.calculateField( tempfield.immutableId, params )
+                fieldCalculationResult = communicationFieldCalculationService.calculateField( tempfield, params )
                 fieldListByPidm.put( tempfield.name, new CommunicationFieldValue(
                         value: fieldCalculationResult,
                         renderAsHtml: false ) )

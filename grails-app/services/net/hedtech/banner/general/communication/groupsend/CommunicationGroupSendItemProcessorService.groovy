@@ -32,6 +32,7 @@ class CommunicationGroupSendItemProcessorService {
     def communicationRecipientDataService
     def communicationOrganizationService
     def sessionFactory
+    def asynchronousBannerAuthenticationSpoofer
     private static final int noWaitErrorCode = 54;
 
 
@@ -103,50 +104,46 @@ class CommunicationGroupSendItemProcessorService {
             throw new RuntimeException( "Template of type ${template?.getClass()?.getSimpleName()} is not supported." )
         }
 
-        Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
-        try {
-            FormContext.set( ['CMQUERYEXECUTE'] )
-            if (log.isDebugEnabled()) log.debug( "Spoofed as ${senderOracleUserName} for creating recipient data." )
+        if (log.isDebugEnabled()) log.debug( "Spoofed as ${senderOracleUserName} for creating recipient data." )
 
-            // Can this list be cached somewhere for similar processing
-            List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.toList?.toString() )
-            communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
-                fieldNames << it
-            }
-            communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
-                fieldNames << it
-            }
-            communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.content?.toString() ).each {
-                fieldNames << it
-            }
-            fieldNames = fieldNames.unique()
-
-            def nameToValueMap = [:]
-            fieldNames.each { fieldName ->
-                CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
-                // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
-                // Will come back to this to figure out desired behavior.
-                if (communicationField) {
-                    String value = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, recipientPidm )
-                    CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
-                            value: value,
-                            renderAsHtml: communicationField.renderAsHtml
-                    )
-                    nameToValueMap.put( communicationField.name, communicationFieldValue )
-                }
-            }
-
-            return new CommunicationRecipientData(
-                    pidm: recipientPidm,
-                    templateId: template.id,
-                    referenceId: referenceId,
-                    ownerId: senderOracleUserName,
-                    fieldValues: nameToValueMap,
-                    organization: organization
-            )
-        } finally {
-            SecurityContextHolder.getContext().setAuthentication( originalAuthentication )
+        // Can this list be cached somewhere for similar processing
+        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.toList?.toString() )
+        communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
+            fieldNames << it
         }
+        communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
+            fieldNames << it
+        }
+        communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.content?.toString() ).each {
+            fieldNames << it
+        }
+        fieldNames = fieldNames.unique()
+
+        def nameToValueMap = [:]
+        fieldNames.each { fieldName ->
+            CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
+            // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
+            // Will come back to this to figure out desired behavior.
+            if (communicationField) {
+
+                String value = calculateFieldForUser( communicationField, senderOracleUserName, recipientPidm )
+
+                CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
+                        value: value,
+                        renderAsHtml: communicationField.renderAsHtml
+                )
+                nameToValueMap.put( communicationField.name, communicationFieldValue )
+            }
+        }
+
+        return new CommunicationRecipientData(
+            pidm: recipientPidm,
+            templateId: template.id,
+            referenceId: referenceId,
+            ownerId: senderOracleUserName,
+            fieldValues: nameToValueMap,
+            organization: organization
+        )
     }
 
 
@@ -178,4 +175,21 @@ class CommunicationGroupSendItemProcessorService {
         }
     }
 
+
+    private String calculateFieldForUser(CommunicationField communicationField, String senderOracleUserName, Long recipientPidm) {
+        List<String> originalFormContext = FormContext.get()
+        Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
+        try {
+            FormContext.set(['CMQUERYEXECUTE'])
+            Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate(senderOracleUserName)
+            SecurityContextHolder.getContext().setAuthentication(auth)
+            if (log.isDebugEnabled()) log.debug("Authenticated as ${senderOracleUserName} for monitoring.")
+
+            // This method will start a nested transaction (see REQUIRES_NEW annotation) and consequently pick up a new db connection with the current oracle user name
+            return communicationFieldCalculationService.calculateFieldByPidm(communicationField, recipientPidm)
+        } finally {
+            FormContext.set(originalFormContext)
+            SecurityContextHolder.getContext().setAuthentication(originalAuthentication)
+        }
+    }
 }

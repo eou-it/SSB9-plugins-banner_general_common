@@ -198,7 +198,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                     fieldName ->
                         CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
                         if (communicationField) {
-                            resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
+                            resultSet = communicationFieldCalculationService.calculateField( communicationField, params )
                             fieldListByPidm.put( communicationField.name, newFieldValue( resultSet ) )
                         }
 

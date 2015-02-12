@@ -7,6 +7,7 @@ import groovy.text.SimpleTemplateEngine
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
+import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.person.PersonUtility
 import org.antlr.runtime.tree.CommonTree
@@ -87,7 +88,7 @@ class CommunicationTemplateMergeService {
             communicationFieldNames.each {
                 communicationField = CommunicationField.findByName( it )
                 if (!(communicationField == null)) {
-                    def fieldResult = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, parameters.getAt( 'pidm' ) )
+                    def fieldResult = communicationFieldCalculationService.calculateFieldByPidm( communicationField, parameters.getAt( 'pidm' ) )
                     recipientData[communicationField.name] = fieldResult
                 }
             }
@@ -174,12 +175,13 @@ class CommunicationTemplateMergeService {
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */
-    String merge( String stringTemplate, Map<String, String> parameters ) {
+    String merge( String stringTemplate, Map<String, Object> parameters ) {
         if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
         if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );
             parameters.keySet().each { key ->
-                st.add( key, parameters[key] )
+                Object o = parameters[key]
+                st.add( key, o ?: "" )
             }
             return st.render()
         } else {

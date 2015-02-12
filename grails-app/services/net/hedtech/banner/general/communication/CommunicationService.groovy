@@ -96,7 +96,7 @@ class CommunicationService {
             Map fieldToValueMap = [:]
             for (String fieldName : fieldNames) {
                 CommunicationField field = CommunicationField.fetchByName(fieldName)
-                String value = communicationFieldCalculationService.calculateFieldByPidm(fieldName, request.recipientPidm)
+                String value = communicationFieldCalculationService.calculateFieldByPidm(field, request.recipientPidm)
                 fieldToValueMap.put(field, new CommunicationFieldValue(value: value, renderAsHtml: field.renderAsHtml))
             }
 
