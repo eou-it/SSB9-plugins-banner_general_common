@@ -3,14 +3,11 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
-import groovy.text.SimpleTemplateEngine
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
-import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.person.PersonUtility
-import org.antlr.runtime.tree.CommonTree
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.NumberRenderer
@@ -27,7 +24,6 @@ import org.stringtemplate.v4.STGroup
 class CommunicationTemplateMergeService {
     private Log log = LogFactory.getLog( this.getClass() )
     def communicationFieldCalculationService
-    def dataFieldNames = []
 
     /**
      * Convenience method to fully render an email template. Looks up template, and pidm using banner id, and delegates to calculateTemplateByPidm
@@ -36,7 +32,7 @@ class CommunicationTemplateMergeService {
      * @return
      */
     CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
-        CommunicationEmailTemplate communicationTemplate = CommunicationEmailTemplate.get( templateId )
+        CommunicationEmailTemplate communicationTemplate = (CommunicationEmailTemplate) CommunicationEmailTemplate.get( templateId )
         if (communicationTemplate == null) {
             throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@")
         }
@@ -46,9 +42,8 @@ class CommunicationTemplateMergeService {
             throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist:" + bannerId + "@@" )
         }
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate
-        communicationMergedEmailTemplate = calculateTemplateByPidm( communicationTemplate, person.pidm )
-        communicationMergedEmailTemplate
-
+        communicationMergedEmailTemplate = calculateTemplateByPidm( communicationTemplate, (Long) person.pidm )
+        return communicationMergedEmailTemplate
     }
 
     /**
@@ -84,11 +79,17 @@ class CommunicationTemplateMergeService {
         def recipientData = [:]
         def CommunicationField communicationField
         if (parameters.containsKey( 'pidm' )) {
-            log.debug( "Calculating recipient data for pidm " + parameters.pidm )
+            Long pidm = (Long) parameters.get( 'pidm' )
+            log.debug( "Calculating recipient data for pidm ${pidm}." )
             communicationFieldNames.each {
                 communicationField = CommunicationField.findByName( it )
                 if (!(communicationField == null)) {
-                    def fieldResult = communicationFieldCalculationService.calculateFieldByPidm( communicationField, parameters.getAt( 'pidm' ) )
+                    def fieldResult = communicationFieldCalculationService.calculateFieldByPidm(
+                        communicationField.getRuleContent(),
+                        communicationField.returnsArrayArguments,
+                        communicationField.getFormatString(),
+                        pidm
+                    )
                     recipientData[communicationField.name] = fieldResult
                 }
             }
@@ -109,7 +110,7 @@ class CommunicationTemplateMergeService {
             log.debug( "Merging recipient data into a template string" )
         ST st = newST( templateString );
         recipientData.keySet().each { key ->
-            st.add( key, recipientData[key] )
+            st.add( (String) key, recipientData[key] )
         }
         st.render()
     }
@@ -239,7 +240,7 @@ class CommunicationTemplateMergeService {
         STGroup group = new STGroup( delimiter, delimiter )
         group.setListener( missingPropertyCapture )
         group.registerRenderer( Integer.class, new NumberRenderer() );
-        return new org.stringtemplate.v4.ST( group, templateString );
+        return new ST( group, templateString );
     }
 }
 
