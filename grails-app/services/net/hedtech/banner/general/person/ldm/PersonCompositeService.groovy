@@ -40,6 +40,7 @@ import net.hedtech.banner.general.system.MaritalStatus
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.State
 import net.hedtech.banner.general.system.TelephoneType
+import net.hedtech.banner.general.system.ldm.v1.EthnicityDetail
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.RaceDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -170,26 +171,13 @@ class PersonCompositeService extends LdmService {
         Map<Integer, Person> persons = [:]
         def newPersonIdentification
 
-        if (person?.credentials instanceof List) {
-            person?.credentials?.each { it ->
-                if (it instanceof Map) {
-                    def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
-                    if("v2".equals(getRequestedVersion())) {
-                        allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
-                    }
-                    validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
-                    person = createSSN(it.credentialType, it.credentialId, person)
-                }
-            }
-        }
-
         if (person.names instanceof List) {
             person?.names?.each { it ->
                 if (it instanceof Map) {
-                    if (it.nameType?.trim() == 'Primary') {
+                    if (it.firstName && it.lastName && it.nameType?.trim() == 'Primary') {
                         newPersonIdentification = it
                     } else {
-                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("nameType.invalid",[]))
+                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
                     }
                 }
             }
@@ -215,6 +203,12 @@ class PersonCompositeService extends LdmService {
         if (person?.credentials instanceof List) {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
+                    def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
+                    if ("v2".equals(getRequestedVersion())) {
+                        allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
+                    }
+                    validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
+                    person = createSSN(it.credentialType, it.credentialId, person)
                     if (it.credentialType && Credential.additionalIdMap.containsValue(it.credentialType)) {
                         additionalIds << createOrUpdateAdditionalId(newPersonIdentificationName, it, metadata)
                     }
@@ -235,22 +229,22 @@ class PersonCompositeService extends LdmService {
             throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("maritalStatus.invalid",[]))
         }
         person.put('maritalStatus', maritalStatus ? MaritalStatus.findByCode(maritalStatus?.code) : null)
-        def ethnicity
-        try {
-            if (person.ethnicityDetail instanceof Map) {
-                ethnicity = person.ethnicityDetail?.guid ? ethnicityCompositeService.get(person.ethnicityDetail?.guid) : null
+
+        EthnicityDetail ethnicityDetail
+        if (person.ethnicity instanceof Map) {
+            String ethnicityGuid = person.ethnicity?.guid?.trim()?.toLowerCase()
+            if (!ethnicityGuid) {
+                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("ethnicity.guid.required.message", []))
+            }
+            try {
+                ethnicityDetail = ethnicityCompositeService.get(ethnicityGuid)
+                person.put('ethnicity', ethnicityDetail.ethnicity)
+                person.put('ethnic', ethnicityDetail.ethnic)
+            } catch (ApplicationException ae) {
+                LdmService.throwBusinessLogicValidationException(ae)
             }
         }
-        catch (ApplicationException e) {
-            if (e.wrappedException instanceof NotFoundException) {
-                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("ethnicity.invalid",[]))
-                ethnicity = null
-            } else {
-                throw e
-            }
-        }
-        person.put('ethnicity', ethnicity ? Ethnicity.findByCode(ethnicity?.code) : null)
-        person.put('ethnic', ethnicity ? ethnicity.ethnic : null)
+
         person.put('deadIndicator', person.get('deadDate') ? 'Y' : null)
         person.put('pidm', newPersonIdentificationName?.pidm)
         person.put('armedServiceMedalVetIndicator', false)
