@@ -135,7 +135,7 @@ class CommunicationPopulationQuery implements Serializable {
         folder(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
-        description(nullable: true, maxSize: 2000)
+        description(nullable: true, maxSize: 2500)
         name(nullable: false, maxSize: 255)
         sqlString(nullable: true)
         valid(nullable: false)

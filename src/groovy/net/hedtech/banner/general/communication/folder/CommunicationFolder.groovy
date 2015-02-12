@@ -99,8 +99,8 @@ class CommunicationFolder implements Serializable {
     String dataOrigin
 
     static constraints = {
-        name(nullable: false, maxSize: 1020)
-        description(nullable: true, maxSize: 4000)
+        name(nullable: false, maxSize: 255)
+        description(nullable: true, maxSize: 2000)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
