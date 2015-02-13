@@ -132,8 +132,8 @@ public abstract class CommunicationTemplate implements Serializable {
     String dataOrigin
 
     static constraints = {
-        name(nullable: false, maxSize: 102)
-        description(nullable: true, maxSize: 4000)
+        name(nullable: false, maxSize: 250)
+        description(nullable: true, maxSize: 2000)
         personal(nullable: false)
         folder(nullable: false)
         validFrom(nullable: true)

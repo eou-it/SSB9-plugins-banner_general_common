@@ -176,8 +176,8 @@ class CommunicationField implements Serializable {
 
 
     static constraints = {
-        name(nullable: false, maxSize: 1020)
-        description(nullable: true, maxSize: 4000)
+        name(nullable: false, maxSize: 255)
+        description(nullable: true, maxSize: 2000)
         folder(nullable: false)
         formatString(nullable: true)
         groovyFormatter(nullable: true)
