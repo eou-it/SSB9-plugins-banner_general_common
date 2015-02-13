@@ -186,7 +186,7 @@ class CommunicationGroupSendItemProcessorService {
             if (log.isDebugEnabled()) log.debug("Authenticated as ${senderOracleUserName} for monitoring.")
 
             // This method will start a nested transaction (see REQUIRES_NEW annotation) and consequently pick up a new db connection with the current oracle user name
-            return communicationFieldCalculationService.calculateFieldByPidm(
+            return communicationFieldCalculationService.calculateFieldByPidmWithNewTransaction(
                 communicationField.getRuleContent(),
                 communicationField.returnsArrayArguments,
                 communicationField.getFormatString(),

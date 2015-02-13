@@ -77,15 +77,20 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public String calculateFieldByPidm( String sqlStatement, boolean returnsArrayArguments, String formatString, Long pidm ) {
-        def sqlParams = [:]
-        sqlParams << ['pidm': pidm]
-        calculateField( sqlStatement, returnsArrayArguments, formatString, sqlParams )
+    public String calculateFieldByPidmWithNewTransaction( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm ) {
+        calculateFieldByPidm( sqlStatement, returnsArrayArguments, formatString, pidm )
     }
 
-    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public String calculateFieldByMap( String sqlStatement, boolean returnsArrayArguments, String formatString, Map sqlParams ) {
-        calculateField( sqlStatement, returnsArrayArguments, formatString, sqlParams )
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm ) {
+        boolean returnsArray = returnsArrayArguments ?: false
+        def sqlParams = [:]
+        sqlParams << ['pidm': pidm]
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams )
+    }
+
+    public String calculateFieldByMap( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map sqlParams ) {
+        boolean returnsArray = returnsArrayArguments ?: false
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams )
     }
 
     /**
