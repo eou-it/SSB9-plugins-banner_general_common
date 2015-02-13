@@ -3,13 +3,11 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
-import groovy.text.SimpleTemplateEngine
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.person.PersonUtility
-import org.antlr.runtime.tree.CommonTree
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.NumberRenderer
@@ -37,7 +35,7 @@ class CommunicationTemplateMergeService {
     CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
         CommunicationEmailTemplate communicationTemplate = CommunicationEmailTemplate.get( templateId )
         if (communicationTemplate == null) {
-            throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@")
+            throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@" )
         }
         def person = PersonUtility.getPerson( bannerId )
 
@@ -87,8 +85,9 @@ class CommunicationTemplateMergeService {
             communicationFieldNames.each {
                 communicationField = CommunicationField.findByName( it )
                 if (!(communicationField == null)) {
+                    // don't bother saving it in recipientdata if you didn't get anything back
                     def fieldResult = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, parameters.getAt( 'pidm' ) )
-                    recipientData[communicationField.name] = fieldResult
+                    if (fieldResult) recipientData[communicationField.name] = fieldResult
                 }
             }
         } else {
@@ -179,7 +178,11 @@ class CommunicationTemplateMergeService {
         if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );
             parameters.keySet().each { key ->
-                st.add( key, parameters[key] )
+                // only add it if we have a value
+                if (parameters[key])
+                {
+                    st.add( key, parameters[key] )
+                }
             }
             return st.render()
         } else {
@@ -187,7 +190,6 @@ class CommunicationTemplateMergeService {
             return stringTemplate
         }
     }
-
 
 /**
  * Extracts all the template variables from the currently supported parts of an email template
@@ -230,6 +232,7 @@ class CommunicationTemplateMergeService {
             return missingPropertyCapture.missingProperties.toList()
         }
     }
+
 
     def ST newST( String templateString ) {
         char delimiter = '$'

@@ -13,7 +13,6 @@ package net.hedtech.banner.general.communication.field
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.service.ServiceBase
 import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
@@ -46,7 +45,6 @@ class CommunicationFieldCalculationService extends ServiceBase {
         }
     }
 
-
     /**
      *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
      *  This will throw an application exception if the template string cannot be parsed.
@@ -66,7 +64,6 @@ class CommunicationFieldCalculationService extends ServiceBase {
             return missingPropertyCapture.missingProperties.toList()
         }
     }
-
 
     /**
      * Calculates a field with only a pidm as input
@@ -105,23 +102,26 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 List<GroovyRowResult> resultSet = sql.rows( statement, parameters, 0, maxRows )
 
                 def attributeMap = [:]
-                resultSet.each { row ->
-                    row.each { column ->
-                        String attributeName = column.getKey().toString().toLowerCase()
-                        Object attributeValue = column.value
-                        if (maxRows <= 1) {
-                            attributeMap.put( attributeName, attributeValue )
-                        } else {
-                            // handle array of values per column name
-                            ArrayList values = attributeMap.containsKey( attributeName ) ? attributeMap.get( attributeName ) : new ArrayList()
-                            values.add( attributeValue )
-                            attributeMap.put( attributeName, values )
+                // If you got rows back, process them, otherwise just return null
+                if (resultSet.size() > 0) {
+                    resultSet.each { row ->
+                        row.each { column ->
+                            String attributeName = column.getKey().toString().toLowerCase()
+                            Object attributeValue = column.value
+                            if (maxRows <= 1) {
+                                attributeMap.put( attributeName, attributeValue )
+                            } else {
+                                // handle array of values per column name
+                                ArrayList values = attributeMap.containsKey( attributeName ) ? attributeMap.get( attributeName ) : new ArrayList()
+                                values.add( attributeValue )
+                                attributeMap.put( attributeName, values )
+                            }
                         }
                     }
-                }
-
-                String formatString = communicationField.formatString ?: ""
-                return merge( formatString, attributeMap )
+                    String formatString = communicationField.formatString ?: ""
+                    return merge( formatString, attributeMap )
+                } else
+                    return null
             } catch (SQLException e) {
                 throw new ApplicationException( CommunicationFieldCalculationService, e.message )
             } catch (Exception e) {
@@ -131,6 +131,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
             }
         }
     }
+
 
     private ST newST( String templateString ) {
         char delimiter = '$'

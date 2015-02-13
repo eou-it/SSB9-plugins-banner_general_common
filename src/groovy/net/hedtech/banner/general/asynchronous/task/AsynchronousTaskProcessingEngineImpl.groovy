@@ -115,7 +115,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
 
 //  ------------------------- Initialization Method(s) -------------------------
-    
+
     /**
      * Initializes the job processing engine.  This method starts the polling process.
      */
@@ -269,7 +269,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 //---------------------------- protected methods -------------------------------
     /*
      * Provide ability for subclasses to override the configuration settings in
-     * RecrutitingConfiguration.xml for MAX processing threads.     
+     * RecrutitingConfiguration.xml for MAX processing threads.
      */
     protected int getMaxProcessingThreads() {
         return maxThreads
@@ -377,7 +377,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           monitorThread.deregister( new AsynchronousTaskMonitorRecord( Thread.currentThread().getName(), job.getId() ) );
           //Job has been successfully completed.  As the very last step, we remove it from the pendingJobs set
           //to signal the polling thread that when all pending work has been completed, it should fetch more work.
-          pendingJobs.remove( job.getId() );
+              pendingJobs.remove( job.getId() );
 
 
         } catch (ApplicationException e) {

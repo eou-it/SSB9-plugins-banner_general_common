@@ -37,7 +37,7 @@ class CommunicationGroupSendItemProcessorService {
 
     public void performGroupSendItem( Long groupSendItemId ) {
         log.debug( "Performing group send item id = " + groupSendItemId )
-        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready);
+        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready );
         if (!locked) {
             // Do nothing
             return;
@@ -126,13 +126,16 @@ class CommunicationGroupSendItemProcessorService {
                 CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
                 // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
                 // Will come back to this to figure out desired behavior.
+                // Will also ignore any field that does not produce a not null value
                 if (communicationField) {
                     String value = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, recipientPidm )
-                    CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
-                            value: value,
-                            renderAsHtml: communicationField.renderAsHtml
-                    )
-                    nameToValueMap.put( communicationField.name, communicationFieldValue )
+                    if (value) {
+                        CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
+                                value: value,
+                                renderAsHtml: communicationField.renderAsHtml
+                        )
+                        nameToValueMap.put( communicationField.name, communicationFieldValue )
+                    }
                 }
             }
 
@@ -149,7 +152,6 @@ class CommunicationGroupSendItemProcessorService {
         }
     }
 
-
     /**
      * Attempts to create a pessimistic lock on the group send item record.
      * @param groupSendItemId the primary key of the group send item.
@@ -159,7 +161,7 @@ class CommunicationGroupSendItemProcessorService {
     public boolean lockGroupSendItem( final Long groupSendItemId, final CommunicationGroupSendItemExecutionState state ) {
         Sql sql = null
         try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
             int rows = sql.executeUpdate( "select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait", [groupSendItemId, state.name()] )
 
             if (rows > 1) {
@@ -167,7 +169,7 @@ class CommunicationGroupSendItemProcessorService {
             } else {
                 return rows == 1
             }
-        } catch( SQLException e) {
+        } catch (SQLException e) {
             if (e.getErrorCode() == noWaitErrorCode) {
                 return false
             } else {
