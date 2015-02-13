@@ -88,13 +88,13 @@ class CommunicationCommonUtility {
         def String[] fromstring = ["*", "?"]
         def String[] tostring = ["%", "_"]
 
-        def scrubbedInput = scrubPattern.matcher(userinput).replaceAll("").toLowerCase()
-        if (scrubbedInput == null || scrubbedInput == "") {
-            scrubbedInput = wildcardChar
-        } else {
-            scrubbedInput = StringUtils.replaceEach(scrubbedInput, fromstring, tostring)
-            scrubbedInput = wildcardChar + scrubbedInput + wildcardChar
-        }
+        //commenting out the scrubber as it was interfering with other language characters
+        //def scrubbedInput = scrubPattern.matcher(userinput).replaceAll("").toLowerCase()
+
+        def scrubbedInput = userinput
+        scrubbedInput = StringUtils.replaceEach(scrubbedInput, fromstring, tostring)
+        scrubbedInput = wildcardChar + scrubbedInput + wildcardChar
+
         return scrubbedInput;
     }
 

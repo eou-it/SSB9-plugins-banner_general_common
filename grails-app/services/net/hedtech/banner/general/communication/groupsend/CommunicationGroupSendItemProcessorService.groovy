@@ -38,7 +38,7 @@ class CommunicationGroupSendItemProcessorService {
 
     public void performGroupSendItem( Long groupSendItemId ) {
         log.debug( "Performing group send item id = " + groupSendItemId )
-        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready);
+        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready );
         if (!locked) {
             // Do nothing
             return;
@@ -146,7 +146,6 @@ class CommunicationGroupSendItemProcessorService {
         )
     }
 
-
     /**
      * Attempts to create a pessimistic lock on the group send item record.
      * @param groupSendItemId the primary key of the group send item.
@@ -156,7 +155,7 @@ class CommunicationGroupSendItemProcessorService {
     public boolean lockGroupSendItem( final Long groupSendItemId, final CommunicationGroupSendItemExecutionState state ) {
         Sql sql = null
         try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
             int rows = sql.executeUpdate( "select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait", [groupSendItemId, state.name()] )
 
             if (rows > 1) {
@@ -164,7 +163,7 @@ class CommunicationGroupSendItemProcessorService {
             } else {
                 return rows == 1
             }
-        } catch( SQLException e) {
+        } catch (SQLException e) {
             if (e.getErrorCode() == noWaitErrorCode) {
                 return false
             } else {

@@ -34,7 +34,7 @@ class CommunicationTemplateMergeService {
     CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
         CommunicationEmailTemplate communicationTemplate = (CommunicationEmailTemplate) CommunicationEmailTemplate.get( templateId )
         if (communicationTemplate == null) {
-            throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@")
+            throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@" )
         }
         def person = PersonUtility.getPerson( bannerId )
 
@@ -90,7 +90,7 @@ class CommunicationTemplateMergeService {
                         communicationField.getFormatString(),
                         pidm
                     )
-                    recipientData[communicationField.name] = fieldResult
+                    if (fieldResult) recipientData[communicationField.name] = fieldResult
                 }
             }
         } else {
@@ -181,8 +181,11 @@ class CommunicationTemplateMergeService {
         if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );
             parameters.keySet().each { key ->
-                Object o = parameters[key]
-                st.add( key, o ?: "" )
+                // only add it if we have a value
+                if (parameters[key])
+                {
+                    st.add( key, parameters[key] )
+                }
             }
             return st.render()
         } else {
@@ -190,7 +193,6 @@ class CommunicationTemplateMergeService {
             return stringTemplate
         }
     }
-
 
 /**
  * Extracts all the template variables from the currently supported parts of an email template
@@ -233,6 +235,7 @@ class CommunicationTemplateMergeService {
             return missingPropertyCapture.missingProperties.toList()
         }
     }
+
 
     def ST newST( String templateString ) {
         char delimiter = '$'
