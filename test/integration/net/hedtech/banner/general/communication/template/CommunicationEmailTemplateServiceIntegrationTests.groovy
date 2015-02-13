@@ -119,6 +119,8 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertEquals(1, foundEmailTemplates.size())
     }
 
+    //TODO: test that publish fails if template contains invalid data fields or if any of the following are null: name ,toList,content,subject 
+    //
     @Test
     void testPublishTemplate() {
         def originalListCount = communicationEmailTemplateService.list().size()

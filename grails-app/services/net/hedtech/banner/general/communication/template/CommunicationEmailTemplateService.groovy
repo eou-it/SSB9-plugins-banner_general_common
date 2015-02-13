@@ -77,7 +77,11 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
             if (communicationEmailTemplate.published)
                 return
-            if (communicationEmailTemplate.name != null && communicationEmailTemplate.folder != null && communicationEmailTemplate.toList != null && communicationEmailTemplate.content != null && communicationEmailTemplate.subject != null) {
+            if (communicationEmailTemplate.name != null && communicationEmailTemplate.folder != null &&
+                    communicationEmailTemplate.toList != null &&
+                    communicationEmailTemplate.content != null &&
+                    communicationEmailTemplate.subject != null &&
+                    communicationTemplateMergeService.allTemplateVariablesExist( communicationEmailTemplate.id )) {
                 communicationEmailTemplate.published = true
                 communicationEmailTemplate.active = getTemplateStatus( communicationEmailTemplate )
                 update( communicationEmailTemplate )

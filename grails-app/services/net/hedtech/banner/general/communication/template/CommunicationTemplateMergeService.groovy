@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
+import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.person.PersonUtility
 import org.apache.commons.logging.Log
@@ -113,12 +114,31 @@ class CommunicationTemplateMergeService {
     }
 
     /**
-     * Merges each of the email specific template fields with the recipient data previously calculated
-     *
-     * @param template The template containing the tokens
-     * @param data the map of values that will be substituted for each matching token
-     * @return CommunicationMergedEmailTemplate
+     * Validate template variables.
+     * Checks to make sure that each of the variables defined in the template actually exists.
      */
+    Boolean allTemplateVariablesExist( Long templateId ) {
+        Boolean result = true
+        List<String> templateVariables = extractTemplateVariables( templateId )
+
+        if (templateVariables.size() > 0) {
+            templateVariables.each { fieldName ->
+                CommunicationField communicationField = CommunicationField.findByName( fieldName )
+                if (communicationField == null || communicationField?.status != CommunicationFieldStatus.PRODUCTION) {
+                    result = false
+                }
+            }
+        }
+        result
+    }
+
+/**
+ * Merges each of the email specific template fields with the recipient data previously calculated
+ *
+ * @param template The template containing the tokens
+ * @param data the map of values that will be substituted for each matching token
+ * @return CommunicationMergedEmailTemplate
+ */
     CommunicationMergedEmailTemplate mergeEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate, CommunicationRecipientData recipientData ) {
         if (log.isDebugEnabled())
             log.debug( "Merging recipient data into a CommunicationEmailTemplate " )
@@ -130,13 +150,13 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate
     }
 
-    /**
-     * Returns the preview values for all the fields in the template rather than executing the data function.
-     * These serve in the place of recipient data when a preview is requested.
-     * If the variable is not a valid communicationField, it returns the just the name of the variable
-     * @param templateString
-     * @return
-     */
+/**
+ * Returns the preview values for all the fields in the template rather than executing the data function.
+ * These serve in the place of recipient data when a preview is requested.
+ * If the variable is not a valid communicationField, it returns the just the name of the variable
+ * @param templateString
+ * @return
+ */
     Map<String, String> renderPreviewValues( String templateString ) {
         if (log.isDebugEnabled())
             log.debug( "Extracting preview values from template string." )
@@ -153,11 +173,11 @@ class CommunicationTemplateMergeService {
         return renderedCommunicationFields
     }
 
-    /**
-     * Returns a CommunicationMergedEmailTemplate containing the template content with all data fields replaced with their preview value
-     * @param CommunicationEmailTemplate
-     * @return CommunicationMergedEmailTemplate
-     */
+/**
+ * Returns a CommunicationMergedEmailTemplate containing the template content with all data fields replaced with their preview value
+ * @param CommunicationEmailTemplate
+ * @return CommunicationMergedEmailTemplate
+ */
     CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationTemplate with preview values only." )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
@@ -167,20 +187,19 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate
     }
 
-    /**
-     * Merges the data from the parameter map into the string template
-     * @param stringTemplate A stcring containing delimited token fields
-     * @param parameters Map of name value pairs representing tokens in the template and their values
-     * @return A fully rendered String
-     */
+/**
+ * Merges the data from the parameter map into the string template
+ * @param stringTemplate A stcring containing delimited token fields
+ * @param parameters Map of name value pairs representing tokens in the template and their values
+ * @return A fully rendered String
+ */
     String merge( String stringTemplate, Map<String, String> parameters ) {
         if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
         if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );
             parameters.keySet().each { key ->
                 // only add it if we have a value
-                if (parameters[key])
-                {
+                if (parameters[key]) {
                     st.add( key, parameters[key] )
                 }
             }
@@ -191,6 +210,17 @@ class CommunicationTemplateMergeService {
         }
     }
 
+/**
+ * Extracts all the template variables from the currently supported parts of an email template
+ * @param communicationEmailTemplate id
+ * @return
+ */
+
+    List<String> extractTemplateVariables( Long templateId ) {
+        CommunicationEmailTemplate communicationEmailTemplate = CommunicationEmailTemplate.get( templateId )
+        List<String> extractedTemplateVariables = extractTemplateVariables( communicationEmailTemplate )
+        extractedTemplateVariables
+    }
 /**
  * Extracts all the template variables from the currently supported parts of an email template
  * @param communicationEmailTemplate
@@ -214,12 +244,12 @@ class CommunicationTemplateMergeService {
         templateVariables
     }
 
-    /**
-     *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
-     *  This will throw an application exception if the template string cannot be parsed.
-     * @param template String
-     * @return set of unique string variables found in the template string
-     */
+/**
+ *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
+ *  This will throw an application exception if the template string cannot be parsed.
+ * @param template String
+ * @return set of unique string variables found in the template string
+ */
     List<String> extractTemplateVariables( String templateString ) {
         if (log.isDebugEnabled()) log.debug( "Extracting template variables from template string." )
 
@@ -242,5 +272,7 @@ class CommunicationTemplateMergeService {
         group.registerRenderer( Integer.class, new NumberRenderer() );
         return new org.stringtemplate.v4.ST( group, templateString );
     }
+
+
 }
 
