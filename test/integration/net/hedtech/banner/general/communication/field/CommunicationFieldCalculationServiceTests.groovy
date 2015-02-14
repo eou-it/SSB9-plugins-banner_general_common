@@ -65,7 +65,6 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
     @Test
     void testExecuteCommunicationFieldWithNullStatement() {
-
         def newCommunicationField = newCommunicationField()
         newCommunicationField.ruleContent = null
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
@@ -78,8 +77,38 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                 (Boolean) communicationField.returnsArrayArguments,
                 (String) communicationField.formatString,
                 (Map) params )
-        assertEquals( "Hello \$firstname\$ \$lastname\$", resultSet )
+        assertEquals( "Hello  ", resultSet )
+    }
 
+
+    @Test
+    void testMergeWithEmptyValues() {
+        String templateString = "Hello \$firstname\$ \$lastname\$"
+        Map params = [:]
+        params << ['firstname': '']
+        params << ['lastname': '' ]
+        String result = communicationFieldCalculationService.merge( templateString, params )
+        assertEquals( "Hello  ", result )
+    }
+
+
+    @Test
+    void testMergeWithUndefinedValues() {
+        String templateString = "Hello \$firstname\$ \$lastname\$"
+        Map params = [:]
+        String result = communicationFieldCalculationService.merge( templateString, params )
+        assertEquals( "Hello  ", result )
+    }
+
+
+    @Test
+    void testMergeWithValues() {
+        String templateString = "Hello \$firstname\$ \$lastname\$"
+        Map params = [:]
+        params.put( "firstname", "Michael" )
+        params.put( "lastname", "Brzycki" )
+        String result = communicationFieldCalculationService.merge( templateString, params )
+        assertEquals( "Hello Michael Brzycki", result )
     }
 
 

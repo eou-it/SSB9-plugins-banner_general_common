@@ -32,19 +32,27 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */
-    public String merge( String stringTemplate, Map<String, String> parameters ) {
+    public String merge( String stringTemplate, Map parameters ) {
         if (log.isDebugEnabled()) log.debug( "Merging parameters into field formatter string." );
-        if (stringTemplate && parameters) {
-            ST st = newST( stringTemplate );
-            parameters.keySet().each { key ->
-                st.add( key, parameters[key] )
+        if (stringTemplate == null || stringTemplate.size() == 0) return ""
+
+        if (parameters == null) parameters = [:]
+
+        ST st = newST( stringTemplate );
+        parameters.keySet().each { key ->
+            st.add( key, parameters[key] )
+        }
+        String firstPass = st.render()
+
+        // Check if any missing parameters and if so replace them with an empty String.
+        CommunicationFieldMissingPropertyCapture missingPropertyCapture = (CommunicationFieldMissingPropertyCapture) st.groupThatCreatedThisInstance.getListener()
+        if (missingPropertyCapture.missingProperties.size() == 0) {
+            return firstPass
+        } else {
+            missingPropertyCapture.missingProperties.each { String property ->
+                st.add( property, "" )
             }
             return st.render()
-        } else if (parameters) {
-            return parameters.toString()
-        } else {
-            // You have nothing to do, so just return the input content
-            return stringTemplate
         }
     }
 
@@ -98,21 +106,15 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters ) {
+        def attributeMap = [:]
         def Sql sql
-        // ToDo: decide if the upper bound should be configurable
-        int maxRows = (!returnsArrayArguments) ? 1 : 50
-        String statement = sqlStatement
-        if (statement == null) {
-            /* there is no statement to execute, so just return the formatter contents */
-            return formatString ?: ""
-        } else {
-            try {
+        try {
+            if (sqlStatement != null && sqlStatement.size() > 0) {
+                // ToDo: decide if the upper bound should be configurable
+                int maxRows = (!returnsArrayArguments) ? 1 : 50
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
 
-                List<GroovyRowResult> resultSet = sql.rows( statement, parameters, 0, maxRows )
-
-                def attributeMap = [:]
-
+                List<GroovyRowResult> resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
                 resultSet.each { row ->
                     row.each { column ->
                         String attributeName = column.getKey().toString().toLowerCase()
@@ -127,15 +129,15 @@ class CommunicationFieldCalculationService extends ServiceBase {
                         }
                     }
                 }
-
-                return merge( formatString ?: "", attributeMap )
-            } catch (SQLException e) {
-                throw new ApplicationException( CommunicationFieldCalculationService, e.message )
-            } catch (Exception e) {
-                throw new ApplicationException( CommunicationFieldCalculationService, e.message )
-            } finally {
-                sql?.close()
             }
+
+            return merge( formatString ?: "", attributeMap )
+        } catch (SQLException e) {
+            throw new ApplicationException( CommunicationFieldCalculationService, e.message )
+        } catch (Exception e) {
+            throw new ApplicationException( CommunicationFieldCalculationService, e.message )
+        } finally {
+            sql?.close()
         }
     }
 
