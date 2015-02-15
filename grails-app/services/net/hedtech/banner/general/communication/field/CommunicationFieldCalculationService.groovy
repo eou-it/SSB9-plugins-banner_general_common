@@ -14,11 +14,14 @@ import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
 
+import java.sql.Connection
 import java.sql.SQLException
 
 class CommunicationFieldCalculationService extends ServiceBase {
@@ -29,19 +32,27 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */
-    public String merge( String stringTemplate, Map<String, String> parameters ) {
+    public String merge( String stringTemplate, Map parameters ) {
         if (log.isDebugEnabled()) log.debug( "Merging parameters into field formatter string." );
-        if (stringTemplate && parameters) {
-            ST st = newST( stringTemplate );
-            parameters.keySet().each { key ->
-                st.add( key, parameters[key] )
+        if (stringTemplate == null || stringTemplate.size() == 0) return ""
+
+        if (parameters == null) parameters = [:]
+
+        ST st = newST( stringTemplate );
+        parameters.keySet().each { key ->
+            st.add( key, parameters[key] )
+        }
+        String firstPass = st.render()
+
+        // Check if any missing parameters and if so replace them with an empty String.
+        CommunicationFieldMissingPropertyCapture missingPropertyCapture = (CommunicationFieldMissingPropertyCapture) st.groupThatCreatedThisInstance.getListener()
+        if (missingPropertyCapture.missingProperties.size() == 0) {
+            return firstPass
+        } else {
+            missingPropertyCapture.missingProperties.each { String property ->
+                st.add( property, "" )
             }
             return st.render()
-        } else if (parameters) {
-            return parameters.toString()
-        } else {
-            // You have nothing to do, so just return the input content
-            return stringTemplate
         }
     }
 
@@ -71,13 +82,21 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param pidm a unique identifier for a person in Banner
      * @return
      */
-    public String calculateFieldByPidm( String immutableId, Long pidm ) {
-        if (immutableId == null) throw new IllegalArgumentException( "immutableId may not be null" )
-        if (pidm == null) throw new IllegalArgumentException( "pidm may not be null" )
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
+    public String calculateFieldByPidmWithNewTransaction( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm ) {
+        calculateFieldByPidm( sqlStatement, returnsArrayArguments, formatString, pidm )
+    }
 
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm ) {
+        boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
-        calculateField( immutableId, sqlParams )
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams )
+    }
+
+    public String calculateFieldByMap( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map sqlParams ) {
+        boolean returnsArray = returnsArrayArguments ?: false
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams )
     }
 
     /**
@@ -86,60 +105,49 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of parameter values
      * @return
      */
-    private String calculateField( String immutableId, Map parameters ) {
+    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters ) {
+        def attributeMap = [:]
         def Sql sql
-        CommunicationField communicationField = CommunicationField.findByImmutableId( immutableId )
-        // ToDo: decide if the upper bound should be configurable
-        int maxRows = (!communicationField.returnsArrayArguments) ? 1 : 50
-        String statement = communicationField.ruleContent
-        if (statement == null) {
-            /* there is no statement to execute, so just return the formatter contents */
-            return communicationField.formatString
-        } else {
-            try {
-                sql = new Sql( sessionFactory.getCurrentSession().connection() )
+        try {
+            if (sqlStatement != null && sqlStatement.size() > 0) {
+                // ToDo: decide if the upper bound should be configurable
+                int maxRows = (!returnsArrayArguments) ? 1 : 50
+                sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
 
-                List<GroovyRowResult> resultSet = sql.rows( statement, parameters, 0, maxRows )
-
-                def attributeMap = [:]
-                // If you got rows back, process them, otherwise just return null
-                if (resultSet.size() > 0) {
-                    resultSet.each { row ->
-                        row.each { column ->
-                            String attributeName = column.getKey().toString().toLowerCase()
-                            Object attributeValue = column.value
-                            if (maxRows <= 1) {
-                                attributeMap.put( attributeName, attributeValue )
-                            } else {
-                                // handle array of values per column name
-                                ArrayList values = attributeMap.containsKey( attributeName ) ? attributeMap.get( attributeName ) : new ArrayList()
-                                values.add( attributeValue )
-                                attributeMap.put( attributeName, values )
-                            }
+                List<GroovyRowResult> resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
+                resultSet.each { row ->
+                    row.each { column ->
+                        String attributeName = column.getKey().toString().toLowerCase()
+                        Object attributeValue = column.value
+                        if (maxRows <= 1) {
+                            attributeMap.put( attributeName, attributeValue )
+                        } else {
+                            // handle array of values per column name
+                            ArrayList values = attributeMap.containsKey( attributeName ) ? (ArrayList) attributeMap.get( attributeName ) : new ArrayList()
+                            values.add( attributeValue )
+                            attributeMap.put( attributeName, values )
                         }
                     }
-                    String formatString = communicationField.formatString ?: ""
-                    return merge( formatString, attributeMap )
-                } else
-                    return null
-            } catch (SQLException e) {
-                throw new ApplicationException( CommunicationFieldCalculationService, e.message )
-            } catch (Exception e) {
-                throw new ApplicationException( CommunicationFieldCalculationService, e.message )
-            } finally {
-                sql?.close()
+                }
             }
+
+            return merge( formatString ?: "", attributeMap )
+        } catch (SQLException e) {
+            throw new ApplicationException( CommunicationFieldCalculationService, e.message )
+        } catch (Exception e) {
+            throw new ApplicationException( CommunicationFieldCalculationService, e.message )
+        } finally {
+            sql?.close()
         }
     }
 
-
-    private ST newST( String templateString ) {
+    private static ST newST( String templateString ) {
         char delimiter = '$'
         CommunicationFieldMissingPropertyCapture missingPropertyCapture = new CommunicationFieldMissingPropertyCapture()
         STGroup group = new STGroup( delimiter, delimiter )
         group.setListener( missingPropertyCapture )
         group.registerRenderer( Integer.class, new NumberRenderer() );
         group.registerRenderer( Date.class, new DateRenderer() );
-        return new org.stringtemplate.v4.ST( group, templateString );
+        return new ST( group, templateString );
     }
 }

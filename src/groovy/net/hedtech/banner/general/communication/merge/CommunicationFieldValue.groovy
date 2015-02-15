@@ -22,11 +22,11 @@ class CommunicationFieldValue implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCRFVAL_RENDER_AS_HTML")
-    Boolean renderAsHtml
+    Boolean renderAsHtml = Boolean.FALSE
 
    /* Just return value so that StringTemplate can render it into the template correctly */
     @Override
     public String toString() {
-        return value;
+        return value ?: "";
     }
 }

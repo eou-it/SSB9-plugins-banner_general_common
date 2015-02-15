@@ -37,6 +37,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     def communicationJobService
     def communicationItemService
     def communicationEmailItemService
+    def communicationFieldService
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder

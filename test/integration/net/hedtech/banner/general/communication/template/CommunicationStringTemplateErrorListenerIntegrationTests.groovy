@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 import static org.junit.Assert.*
@@ -38,8 +39,8 @@ class CommunicationStringTemplateErrorListenerIntegrationTests extends BaseInteg
     @Test
     void testMergeCompileTimeError() {
         String template = "simple parameter swap \$p i\$"
-        Map<String, String> nameValueMap = new HashMap<String,String>()
-        nameValueMap.put( "pi", "3.14" )
+        Map<String, Object> nameValueMap = new HashMap<String,Object>()
+        nameValueMap.put( "pi", new CommunicationFieldValue( value:"3.14" ) )
 
         try {
             communicationTemplateMergeService.merge( template, nameValueMap )
@@ -52,8 +53,8 @@ class CommunicationStringTemplateErrorListenerIntegrationTests extends BaseInteg
     @Test
     void testMissingFieldReferenceGetsIgnored() {
         String template = "simple parameter swap \$pi\$"
-        Map<String, String> nameValueMap = new HashMap<String,String>()
-        nameValueMap.put( "e", "2.7" )
+        Map<String, Object> nameValueMap = new HashMap<String,Object>()
+        nameValueMap.put( "e", new CommunicationFieldValue( value:"2.7" ) )
 
         String result = communicationTemplateMergeService.merge( template, nameValueMap )
         assertEquals( "simple parameter swap ", result )
@@ -74,11 +75,21 @@ class CommunicationStringTemplateErrorListenerIntegrationTests extends BaseInteg
         assertFalse( fieldReferences.contains( "n" ) )
         assertFalse( fieldReferences.contains( "p" ) )
 
-        HashMap<String,String> nameValueMap = new HashMap<String,String>()
-        nameValueMap.put( "pi", "3.14" )
-        nameValueMap.put( "mi", "7" )
-        nameValueMap.put( "names", ['mike', 'ed', 'lakshmi', 'carol'] )
-        nameValueMap.put( "phones", ['1', '2', '3', '4'] )
+        HashMap<String,Object> nameValueMap = new HashMap<String,Object>()
+        nameValueMap.put( "pi", new CommunicationFieldValue( value:"3.14" ) )
+        nameValueMap.put( "mi", new CommunicationFieldValue( value:"7" ) )
+        nameValueMap.put( "names", [
+            new CommunicationFieldValue( value:'mike' ),
+            new CommunicationFieldValue( value:'ed' ),
+            new CommunicationFieldValue( value:'lakshmi' ),
+            new CommunicationFieldValue( value:'carol' )
+        ] )
+        nameValueMap.put( "phones", [
+                new CommunicationFieldValue( value:'1' ),
+                new CommunicationFieldValue( value:'2' ),
+                new CommunicationFieldValue( value:'3' ),
+                new CommunicationFieldValue( value:'4' )
+        ] )
         String result = communicationTemplateMergeService.merge( template, nameValueMap )
         assertEquals( "simple parameter swap 3.14 and 7. mike : 1 ed : 2 lakshmi : 3 carol : 4", result )
     }

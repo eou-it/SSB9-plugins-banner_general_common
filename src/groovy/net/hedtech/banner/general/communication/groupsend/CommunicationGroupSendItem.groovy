@@ -50,6 +50,12 @@ import javax.persistence.Version
                      WHERE gsi.communicationGroupSend = :groupSend
                      and gsi.currentExecutionState = :executionState
                      ORDER by gsi.creationDateTime asc"""
+    ),
+    @NamedQuery(name = "CommunicationGroupSendItem.fetchByFailedExecutionStateAndGroupSend",
+            query = """ FROM CommunicationGroupSendItem gsi
+                     WHERE gsi.communicationGroupSend = :groupSend
+                     and gsi.currentExecutionState = :executionState
+                     ORDER by gsi.creationDateTime asc"""
     )
 ])
 class CommunicationGroupSendItem implements AsynchronousTask {
@@ -149,6 +155,19 @@ class CommunicationGroupSendItem implements AsynchronousTask {
             results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend' )
                 .setParameter( 'groupSend', groupSend )
                 .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Complete )
+                .setFirstResult( 0 )
+                .setMaxResults( max )
+                .list()
+        }
+        return results
+    }
+
+    public static List fetchByFailedExecutionStateAndGroupSend( CommunicationGroupSend groupSend, Integer max = Integer.MAX_VALUE ) {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByFailedExecutionStateAndGroupSend' )
+                .setParameter( 'groupSend', groupSend )
+                .setParameter( 'executionState', CommunicationGroupSendItemExecutionState.Failed )
                 .setFirstResult( 0 )
                 .setMaxResults( max )
                 .list()

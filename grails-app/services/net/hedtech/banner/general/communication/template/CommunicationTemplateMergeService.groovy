@@ -25,7 +25,6 @@ import org.stringtemplate.v4.STGroup
 class CommunicationTemplateMergeService {
     private Log log = LogFactory.getLog( this.getClass() )
     def communicationFieldCalculationService
-    def dataFieldNames = []
 
     /**
      * Convenience method to fully render an email template. Looks up template, and pidm using banner id, and delegates to calculateTemplateByPidm
@@ -34,7 +33,7 @@ class CommunicationTemplateMergeService {
      * @return
      */
     CommunicationMergedEmailTemplate calculateTemplateByBannerId( Long templateId, String bannerId ) {
-        CommunicationEmailTemplate communicationTemplate = CommunicationEmailTemplate.get( templateId )
+        CommunicationEmailTemplate communicationTemplate = (CommunicationEmailTemplate) CommunicationEmailTemplate.get( templateId )
         if (communicationTemplate == null) {
             throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@" )
         }
@@ -44,9 +43,8 @@ class CommunicationTemplateMergeService {
             throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist:" + bannerId + "@@" )
         }
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate
-        communicationMergedEmailTemplate = calculateTemplateByPidm( communicationTemplate, person.pidm )
-        communicationMergedEmailTemplate
-
+        communicationMergedEmailTemplate = calculateTemplateByPidm( communicationTemplate, (Long) person.pidm )
+        return communicationMergedEmailTemplate
     }
 
     /**
@@ -82,12 +80,17 @@ class CommunicationTemplateMergeService {
         def recipientData = [:]
         def CommunicationField communicationField
         if (parameters.containsKey( 'pidm' )) {
-            log.debug( "Calculating recipient data for pidm " + parameters.pidm )
+            Long pidm = (Long) parameters.get( 'pidm' )
+            log.debug( "Calculating recipient data for pidm ${pidm}." )
             communicationFieldNames.each {
                 communicationField = CommunicationField.findByName( it )
                 if (!(communicationField == null)) {
-                    // don't bother saving it in recipientdata if you didn't get anything back
-                    def fieldResult = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, parameters.getAt( 'pidm' ) )
+                    def fieldResult = communicationFieldCalculationService.calculateFieldByPidm(
+                        communicationField.getRuleContent(),
+                        communicationField.returnsArrayArguments,
+                        communicationField.getFormatString(),
+                        pidm
+                    )
                     if (fieldResult) recipientData[communicationField.name] = fieldResult
                 }
             }
@@ -108,7 +111,7 @@ class CommunicationTemplateMergeService {
             log.debug( "Merging recipient data into a template string" )
         ST st = newST( templateString );
         recipientData.keySet().each { key ->
-            st.add( key, recipientData[key] )
+            st.add( (String) key, recipientData[key] )
         }
         st.render()
     }
@@ -187,6 +190,7 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate
     }
 
+<<<<<<< HEAD
 /**
  * Merges the data from the parameter map into the string template
  * @param stringTemplate A stcring containing delimited token fields
@@ -194,6 +198,15 @@ class CommunicationTemplateMergeService {
  * @return A fully rendered String
  */
     String merge( String stringTemplate, Map<String, String> parameters ) {
+=======
+    /**
+     * Merges the data from the parameter map into the string template
+     * @param stringTemplate A stcring containing delimited token fields
+     * @param parameters Map of name value pairs representing tokens in the template and their values
+     * @return A fully rendered String
+     */
+    String merge( String stringTemplate, Map<String, Object> parameters ) {
+>>>>>>> 4053d4b8db2e0fdfd5200633975999dd65edd766
         if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
         if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );
@@ -270,7 +283,7 @@ class CommunicationTemplateMergeService {
         STGroup group = new STGroup( delimiter, delimiter )
         group.setListener( missingPropertyCapture )
         group.registerRenderer( Integer.class, new NumberRenderer() );
-        return new org.stringtemplate.v4.ST( group, templateString );
+        return new ST( group, templateString );
     }
 
 

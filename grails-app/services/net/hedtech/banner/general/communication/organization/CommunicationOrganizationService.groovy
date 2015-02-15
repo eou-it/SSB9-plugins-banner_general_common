@@ -70,8 +70,12 @@ class CommunicationOrganizationService extends ServiceBase {
             if (communicationOrganization.sendEmailServerProperties?.getAt(0) == null) {
                 communicationOrganization.sendEmailServerProperties?.add(new CommunicationEmailServerProperties())
             }
-            communicationOrganization.sendEmailServerProperties[0].host = sendEmailServerProperties.host
-            communicationOrganization.sendEmailServerProperties[0].port = (sendEmailServerProperties.port instanceof String ? Integer.parseInt(sendEmailServerProperties.port) : sendEmailServerProperties.port)
+            communicationOrganization.sendEmailServerProperties[0].host = sendEmailServerProperties.host ? sendEmailServerProperties.host : null
+            if (sendEmailServerProperties.port == null || sendEmailServerProperties.port == "") {
+                communicationOrganization.sendEmailServerProperties[0].port = 0
+            } else {
+                communicationOrganization.sendEmailServerProperties[0].port = (sendEmailServerProperties.port instanceof String ? Integer.parseInt(sendEmailServerProperties.port) : sendEmailServerProperties.port)
+            }
             if (sendEmailServerProperties?.securityProtocol instanceof String)
                 communicationOrganization.sendEmailServerProperties[0].securityProtocol = sendEmailServerProperties?.securityProtocol
             else if (sendEmailServerProperties?.securityProtocol == null)
@@ -84,8 +88,12 @@ class CommunicationOrganizationService extends ServiceBase {
             if (communicationOrganization.receiveEmailServerProperties?.getAt(0) == null) {
                 communicationOrganization.receiveEmailServerProperties?.add(new CommunicationEmailServerProperties())
             }
-            communicationOrganization.receiveEmailServerProperties[0].host = receiveEmailServerProperties.host
-            communicationOrganization.receiveEmailServerProperties[0].port = (receiveEmailServerProperties.port instanceof String ? Integer.parseInt(receiveEmailServerProperties.port) : receiveEmailServerProperties.port)
+            communicationOrganization.receiveEmailServerProperties[0].host = receiveEmailServerProperties.host ? receiveEmailServerProperties.host : null
+            if (receiveEmailServerProperties.port == null || receiveEmailServerProperties.port == "") {
+                communicationOrganization.receiveEmailServerProperties[0].port = 0
+            } else {
+                communicationOrganization.receiveEmailServerProperties[0].port = (receiveEmailServerProperties.port instanceof String ? Integer.parseInt(receiveEmailServerProperties.port) : receiveEmailServerProperties.port)
+            }
             if (receiveEmailServerProperties?.securityProtocol instanceof String)
                 communicationOrganization.receiveEmailServerProperties[0]?.securityProtocol = receiveEmailServerProperties?.securityProtocol
             else if (receiveEmailServerProperties?.securityProtocol == null)
@@ -101,7 +109,7 @@ class CommunicationOrganizationService extends ServiceBase {
             communicationOrganization.senderMailboxAccountSettings[0].userName = senderMailbox.userName
             communicationOrganization.senderMailboxAccountSettings[0].clearTextPassword = senderMailbox.clearTextPassword
             communicationOrganization.senderMailboxAccountSettings[0].emailAddress = senderMailbox.emailAddress
-            communicationOrganization.senderMailboxAccountSettings[0].emailDisplayName = senderMailbox.emailDisplayName
+            communicationOrganization.senderMailboxAccountSettings[0].emailDisplayName = senderMailbox.emailDisplayName ? senderMailbox.emailDisplayName : null
         }
 
         if (replyToMailbox) {
@@ -109,19 +117,17 @@ class CommunicationOrganizationService extends ServiceBase {
                 communicationOrganization.replyToMailboxAccountSettings.add(new CommunicationMailboxAccount())
             }
 
-            communicationOrganization.replyToMailboxAccountSettings[0].emailDisplayName =  replyToMailbox.emailDisplayName
+            communicationOrganization.replyToMailboxAccountSettings[0].emailDisplayName =  replyToMailbox.emailDisplayName ? replyToMailbox.emailDisplayName : null
             communicationOrganization.replyToMailboxAccountSettings[0].emailAddress = replyToMailbox.emailAddress
             communicationOrganization.replyToMailboxAccountSettings[0].clearTextPassword = replyToMailbox.clearTextPassword
             communicationOrganization.replyToMailboxAccountSettings[0].userName = replyToMailbox.userName
         }
 
 /* ensure both username and email address are populated*/
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0) && !((communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName != null) ||
-                (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress == null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName == null))) {
+        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName != null)) {
             throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
         }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !((communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null) ||
-                (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress == null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName == null))) {
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null) ) {
             throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
         }
 

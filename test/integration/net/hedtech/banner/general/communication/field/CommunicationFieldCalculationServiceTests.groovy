@@ -52,7 +52,12 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def params = [:]
         params << ['pidm': 37815]
         params << ['bannerId': "AA0037815"]
-        def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
+
+        def resultSet = communicationFieldCalculationService.calculateFieldByMap(
+                (String) communicationField.ruleContent,
+                (Boolean) communicationField.returnsArrayArguments,
+                (String) communicationField.formatString,
+                (Map) params )
         assertNotNull resultSet
 
     }
@@ -60,7 +65,6 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
     @Test
     void testExecuteCommunicationFieldWithNullStatement() {
-
         def newCommunicationField = newCommunicationField()
         newCommunicationField.ruleContent = null
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
@@ -68,9 +72,43 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def params = [:]
         params << ['pidm': 37815]
         params << ['bannerId': "AA0037815"]
-        def resultSet = communicationFieldCalculationService.calculateField( communicationField.immutableId, params )
-        assertEquals( "Hello \$firstname\$ \$lastname\$", resultSet )
+        def resultSet = communicationFieldCalculationService.calculateFieldByMap(
+                (String) communicationField.ruleContent,
+                (Boolean) communicationField.returnsArrayArguments,
+                (String) communicationField.formatString,
+                (Map) params )
+        assertEquals( "Hello  ", resultSet )
+    }
 
+
+    @Test
+    void testMergeWithEmptyValues() {
+        String templateString = "Hello \$firstname\$ \$lastname\$"
+        Map params = [:]
+        params << ['firstname': '']
+        params << ['lastname': '' ]
+        String result = communicationFieldCalculationService.merge( templateString, params )
+        assertEquals( "Hello  ", result )
+    }
+
+
+    @Test
+    void testMergeWithUndefinedValues() {
+        String templateString = "Hello \$firstname\$ \$lastname\$"
+        Map params = [:]
+        String result = communicationFieldCalculationService.merge( templateString, params )
+        assertEquals( "Hello  ", result )
+    }
+
+
+    @Test
+    void testMergeWithValues() {
+        String templateString = "Hello \$firstname\$ \$lastname\$"
+        Map params = [:]
+        params.put( "firstname", "Michael" )
+        params.put( "lastname", "Brzycki" )
+        String result = communicationFieldCalculationService.merge( templateString, params )
+        assertEquals( "Hello Michael Brzycki", result )
     }
 
 
@@ -103,7 +141,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     void testCalculateFieldByPidm() {
         CommunicationField communicationField = new CommunicationField(
             folder: validFolder,
-            name: "PersonInfo",
+            name: "testCalculateFieldByPidm",
             returnsArrayArguments: false,
             formatString: "Hello \$firstname\$ \$lastname\$",
 
@@ -125,35 +163,65 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         assertNotNull communicationField.immutableId
 
         final Long pidm = 37815L
-        String result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        String result = communicationFieldCalculationService.calculateFieldByPidm(
+            (String) communicationField.ruleContent,
+            (Boolean) communicationField.returnsArrayArguments,
+            (String) communicationField.formatString,
+            (Long) pidm
+        )
         assertEquals( "Hello test carter roll", result )
 
         communicationField.formatString = "\$firstname\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm(
+            (String) communicationField.ruleContent,
+            (Boolean) communicationField.returnsArrayArguments,
+            (String) communicationField.formatString,
+            (Long) pidm
+        )
         assertEquals( "test", result )
 
         communicationField.formatString = "\$empty_string\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm(
+            (String) communicationField.ruleContent,
+            (Boolean) communicationField.returnsArrayArguments,
+            (String) communicationField.formatString,
+            (Long) pidm
+        )
         assertEquals( "", result )
 
         communicationField.formatString = "\$null_string\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm(
+            (String) communicationField.ruleContent,
+            (Boolean) communicationField.returnsArrayArguments,
+            (String) communicationField.formatString,
+            (Long) pidm
+        )
         assertEquals( "", result )
 
         // try one that doesn't exist
         communicationField.formatString = "\$whose_mama\$"
         communicationField = communicationFieldService.update( communicationField )
-        result = communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+        result = communicationFieldCalculationService.calculateFieldByPidm(
+            (String) communicationField.ruleContent,
+            (Boolean) communicationField.returnsArrayArguments,
+            (String) communicationField.formatString,
+            (Long) pidm
+        )
         assertEquals( "", result )
 
         // try one that breaks parsing
         communicationField.formatString = "\$whose mama\$"
         communicationField = communicationFieldService.update( communicationField )
         try {
-            communicationFieldCalculationService.calculateFieldByPidm( communicationField.immutableId, pidm )
+            communicationFieldCalculationService.calculateFieldByPidm(
+                (String) communicationField.ruleContent,
+                (Boolean) communicationField.returnsArrayArguments,
+                (String) communicationField.formatString,
+                (Long) pidm
+            )
             fail( "compileErrorDuringParsing" )
         } catch (ApplicationException ae ) {
             assertApplicationException ae, "compileErrorDuringParsing"

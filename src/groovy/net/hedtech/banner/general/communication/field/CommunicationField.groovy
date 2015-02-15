@@ -114,7 +114,7 @@ class CommunicationField implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCRCFLD_RETURNS_ARRAY")
-    Boolean returnsArrayArguments
+    Boolean returnsArrayArguments = Boolean.FALSE
 
     /**
      * TYPE: Type of rule content. Valid values are SQL_PREPARED_STATEMENT, SQL_CALLABLE_STATEMENT, and GROOVY_STATEMENT.

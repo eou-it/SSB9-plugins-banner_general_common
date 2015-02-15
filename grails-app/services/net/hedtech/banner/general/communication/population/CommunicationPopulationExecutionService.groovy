@@ -44,46 +44,46 @@ class CommunicationPopulationExecutionService {
      */
     def execute(Long populationQueryId) {
 
-
-        //throw exception if the banner security for query execution is not setup for this user
-        if (!CommunicationCommonUtility.userCanExecuteQuery()) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
-        }
-
-        if (!populationQueryId) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nullPopulationQueryId@@")
-        }
-        def populationQuery = communicationPopulationQueryService.get(populationQueryId)
-        if (!populationQuery) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
-        }
-
-        def parseresult = parse(populationQuery.id)
-        populationQuery.valid = (parseresult?.status == 'Y')
-        populationQuery.save()
-
-        populationQuery = communicationPopulationQueryService.get(populationQueryId)
-
-        /* Make sure it's valid */
-        if (!populationQuery?.valid) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalid@@")
-        }
-
-        //make sure the sql statement only selects one value
-
-        Matcher matcher = multipattern.matcher(populationQuery.sqlString.toUpperCase());
-        while (matcher.find()) {
-            if (matcher.group(1).contains(",")) {
-                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryHasMultiple@@")
-            }
-        }
-
-        CommunicationPopulationSelectionList populationSelectionList = new CommunicationPopulationSelectionList()
-
-
-
-        def populationSelectionListId = null
         try {
+            //throw exception if the banner security for query execution is not setup for this user
+            if (!CommunicationCommonUtility.userCanExecuteQuery()) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+            }
+
+            if (!populationQueryId) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nullPopulationQueryId@@")
+            }
+            def populationQuery = communicationPopulationQueryService.get(populationQueryId)
+            if (!populationQuery) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
+            }
+
+            def parseresult = parse(populationQuery.id)
+            populationQuery.valid = (parseresult?.status == 'Y')
+            populationQuery.save()
+
+            populationQuery = communicationPopulationQueryService.get(populationQueryId)
+
+            /* Make sure it's valid */
+            if (!populationQuery?.valid) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalid@@")
+            }
+
+            //make sure the sql statement only selects one value
+
+            Matcher matcher = multipattern.matcher(populationQuery.sqlString.toUpperCase());
+            while (matcher.find()) {
+                if (matcher.group(1).contains(",")) {
+                    throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryHasMultiple@@")
+                }
+            }
+
+            CommunicationPopulationSelectionList populationSelectionList = new CommunicationPopulationSelectionList()
+
+
+
+            def populationSelectionListId = null
+
             def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
