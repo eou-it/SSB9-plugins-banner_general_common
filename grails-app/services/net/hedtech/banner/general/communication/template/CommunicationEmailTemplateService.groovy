@@ -49,10 +49,9 @@ class CommunicationEmailTemplateService extends ServiceBase {
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
         def oldTemplate = CommunicationTemplate.get(template?.id)
-println "i am here before"
+
         //check if user is authorized. user should be admin or author
         if (!CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
-            println "i am in the controller not created by"
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
         }
 
@@ -108,4 +107,15 @@ println "i am here before"
         }
         return communicationEmailTemplateList
     }
+
+    def preDelete( domainModelOrMap ) {
+
+        def oldTemplate = CommunicationTemplate.get(domainModelOrMap?.id ?: domainModelOrMap?.domainModel?.id)
+
+        //check if user is authorized. user should be admin or author
+        if (oldTemplate == null || !CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
+            throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
+        }
+    }
+
 }
