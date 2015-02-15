@@ -15,6 +15,10 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
 
+        if (!CommunicationCommonUtility.userCanCreate()) {
+            throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
+        }
+
         CommunicationEmailTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationEmailTemplate
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
@@ -44,6 +48,14 @@ class CommunicationEmailTemplateService extends ServiceBase {
         CommunicationEmailTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationEmailTemplate
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
+        def oldTemplate = CommunicationTemplate.get(template?.id)
+println "i am here before"
+        //check if user is authorized. user should be admin or author
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
+            println "i am in the controller not created by"
+            throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
+        }
+
         if (template.getName() == null || template.getName() == "")
             throw new ApplicationException( CommunicationEmailTemplate, "@@r1:nameCannotBeNull@@" )
 
@@ -54,6 +66,19 @@ class CommunicationEmailTemplateService extends ServiceBase {
         template.validFrom = template.validFrom ?: new Date()
         if (template.validTo != null && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
             throw new ApplicationException( CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
+        }
+
+        if (template.published) {
+            /*
+              Extract the variables from the template and make sure there is a communication field for each.
+              If this fails, the template is not parsable, it should throw an exception
+           */
+            communicationTemplateMergeService.extractTemplateVariables(template)
+
+            if (template.name != null && template.folder != null && template.toList != null && template.content != null && template.subject != null) {
+                template.active = getTemplateStatus(template)
+            } else
+                throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
         }
     }
 
@@ -68,21 +93,8 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
         if (map.id) {
             def communicationEmailTemplate = CommunicationEmailTemplate.get( map.id )
-            /*
-            Extract the variables from the template and make sure there is a communication field for each.
-            If this fails, the template is not parsable, it should throw an exception
-             */
-
-            communicationTemplateMergeService.extractTemplateVariables( communicationEmailTemplate )
-
-            if (communicationEmailTemplate.published)
-                return
-            if (communicationEmailTemplate.name != null && communicationEmailTemplate.folder != null && communicationEmailTemplate.toList != null && communicationEmailTemplate.content != null && communicationEmailTemplate.subject != null) {
-                communicationEmailTemplate.published = true
-                communicationEmailTemplate.active = getTemplateStatus( communicationEmailTemplate )
-                update( communicationEmailTemplate )
-            } else
-                throw new ApplicationException( CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@" )
+            communicationEmailTemplate.published = true
+            update( communicationEmailTemplate )
         } else
             throw new ApplicationException( CommunicationEmailTemplate, "@@r1:idNotValid@@" )
     }

@@ -11,6 +11,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Tests crud methods provided by communication item service.
@@ -73,11 +75,17 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     def CommunicationFolder folder1
     def CommunicationFolder folder2
 
+    def selfServiceBannerAuthenticationProvider
+
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU', 'SELFSERVICE']
+        formContext = ['SELFSERVICE']
         super.setUp()
+
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         folder1 = newValidForCreateFolder( i_valid_folder_name1 )
         folder1.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned

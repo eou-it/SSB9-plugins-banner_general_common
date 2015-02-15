@@ -75,8 +75,10 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
 
         folder1 = newValidForCreateFolder(i_valid_folder_name1)
         folder1.save(failOnError: true, flush: true)
@@ -101,6 +103,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 

@@ -10,6 +10,8 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     //folder
@@ -40,12 +42,16 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder folder
     def CommunicationEmailItem emailTemplate
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU','SELFSERVICE']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         folder = newValidForCreateFolder()
         folder.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -79,7 +85,7 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_valid_emailTemplate_fromList, emailTemplate.fromList
         assertEquals i_valid_emailTemplate_subject, emailTemplate.subject
         assertEquals i_valid_emailTemplate_toList, emailTemplate.toList
-        assertEquals "grails_user", emailTemplate.lastModifiedBy
+        assertEquals "BCMADMIN", emailTemplate.lastModifiedBy
         /* you can't predict what lastModified will get set to, so just check not null */
         assertNotNull emailTemplate.lastModified
         /* gets set to Banner by the framework */
