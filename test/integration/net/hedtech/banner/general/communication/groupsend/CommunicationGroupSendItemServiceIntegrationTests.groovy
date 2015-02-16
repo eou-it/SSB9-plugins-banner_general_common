@@ -39,17 +39,19 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
     CommunicationEmailTemplate emailTemplate
     CommunicationPopulationSelectionList population
 
+
     public void cleanUp() {
         def sql
         try {
             sessionFactory.currentSession.with { session ->
-                sql = new Sql(session.connection())
-                sql.executeUpdate("Delete from GCRORAN")
+                sql = new Sql( session.connection() )
+                sql.executeUpdate( "Delete from GCRORAN" )
             }
         } finally {
             sql?.close()
         }
     }
+
 
     @Before
     public void setUp() {
@@ -57,13 +59,13 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
         super.setUp()
 
         cleanUp()
-        organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
-        organization = communicationOrganizationService.create(organization) as CommunicationOrganization
+        organization = new CommunicationOrganization( name: "Test Org", isRoot: true )
+        organization = communicationOrganizationService.create( organization ) as CommunicationOrganization
 
-        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         assertNotNull auth
-        SecurityContextHolder.getContext().setAuthentication(auth)
-        assertTrue(auth instanceof BannerAuthenticationToken)
+        SecurityContextHolder.getContext().setAuthentication( auth )
+        assertTrue( auth instanceof BannerAuthenticationToken )
         bannerAuthenticationToken = auth as BannerAuthenticationToken
         assertNotNull bannerAuthenticationToken.getPidm()
 
@@ -73,14 +75,14 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
                 name: "Test Query",
                 sqlString: "select 2086 spriden_pidm from dual"
         )
-        populationQuery = communicationPopulationQueryService.create(populationQuery) as CommunicationPopulationQuery
+        populationQuery = communicationPopulationQueryService.create( populationQuery ) as CommunicationPopulationQuery
 
-        CommunicationFolder folder = CommunicationFolder.fetchByName("test folder")
+        CommunicationFolder folder = CommunicationFolder.fetchByName( "test folder" )
         if (!folder) {
             folder = new CommunicationFolder(
                     name: "test folder"
             )
-            folder = communicationFolderService.create(folder) as CommunicationFolder
+            folder = communicationFolderService.create( folder ) as CommunicationFolder
         }
         assertNotNull folder.getId()
 
@@ -95,13 +97,15 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
                 content: "test content",
                 fromList: "testfrom",
                 subject: "test subject",
-                toList: "testto"
+                toList: "testto",
+                validFrom: new Date() - 200,
+                validTo: new Date() + 200
         )
-        communicationEmailTemplateService.create(emailTemplate) as CommunicationEmailTemplate
+        communicationEmailTemplateService.create( emailTemplate ) as CommunicationEmailTemplate
         assertNotNull emailTemplate.getId()
 
-        def populationId = communicationPopulationExecutionService.execute(populationQuery.id)
-        population = CommunicationPopulationSelectionList.get(populationId)
+        def populationId = communicationPopulationExecutionService.execute( populationQuery.id )
+        population = CommunicationPopulationSelectionList.get( populationId )
         assertNotNull population.getId()
     }
 
@@ -140,29 +144,31 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
         assertEquals( 0, runningCount )
     }
 
+
     private CommunicationGroupSend createGroupSend() {
         return communicationGroupSendService.create(
-            new CommunicationGroupSend(
-                organization: organization,
-                population: population,
-                template: emailTemplate,
-                ownerPidm: bannerAuthenticationToken.getPidm()
-            )
+                new CommunicationGroupSend(
+                        organization: organization,
+                        population: population,
+                        template: emailTemplate,
+                        ownerPidm: bannerAuthenticationToken.getPidm()
+                )
         ) as CommunicationGroupSend
     }
+
 
     private CommunicationGroupSendItem createGroupSendItem( CommunicationGroupSend groupSend, Long recipientPidm ) {
         if (!groupSend.id) throw new IllegalArgumentException( "groupSend must be persisted first" )
 
         Date now = new Date()
         return communicationGroupSendItemService.create(
-            new CommunicationGroupSendItem (
-                communicationGroupSend: groupSend,
-                recipientPidm: recipientPidm,
-                currentExecutionState: CommunicationGroupSendItemExecutionState.Ready,
-                startedDate: now,
-                referenceId: UUID.randomUUID().toString()
-            )
+                new CommunicationGroupSendItem(
+                        communicationGroupSend: groupSend,
+                        recipientPidm: recipientPidm,
+                        currentExecutionState: CommunicationGroupSendItemExecutionState.Ready,
+                        startedDate: now,
+                        referenceId: UUID.randomUUID().toString()
+                )
         ) as CommunicationGroupSendItem
     }
 

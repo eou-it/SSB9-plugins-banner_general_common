@@ -5,16 +5,18 @@ package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.service.ServiceBase
 
 class CommunicationEmailTemplateService extends ServiceBase {
 
     def dateConverterService
     def communicationTemplateMergeService
+    def communicationFieldService
 
 
     def preCreate( domainModelOrMap ) {
-
         if (!CommunicationCommonUtility.userCanCreate()) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
         }
@@ -22,24 +24,10 @@ class CommunicationEmailTemplateService extends ServiceBase {
         CommunicationEmailTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationEmailTemplate
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
-        if (template.getName() == null || template.getName() == "")
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:nameCannotBeNull@@" )
-
-        if (template.folder == null)
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:folderNameCannotBeNull@@" )
-
-        if (template.fetchByTemplateNameAndFolderName( template.name, template.folder.name )) {
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
-        }
-
-        template.published = false
-        template.active = false
         template.createdBy = CommunicationCommonUtility.getUserOracleUserName()
         template?.createDate = new Date()
-        template.validFrom = template.validFrom ?: new Date()
-        if (template.validTo != null && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
-        }
+
+        stampAndValidate( template )
     }
 
 
@@ -55,36 +43,15 @@ class CommunicationEmailTemplateService extends ServiceBase {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
         }
 
-        if (template.getName() == null || template.getName() == "")
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:nameCannotBeNull@@" )
-
-        if (template.existsAnotherNameFolder( template.id, template.name, template.folder.name ))
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
-
-        template.active = getTemplateStatus( template )
-        template.validFrom = template.validFrom ?: new Date()
-        if (template.validTo != null && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
-        }
-
-        if (template.published) {
-            /*
-              Extract the variables from the template and make sure there is a communication field for each.
-              If this fails, the template is not parsable, it should throw an exception
-           */
-            communicationTemplateMergeService.extractTemplateVariables(template)
-
-            if (template.name != null && template.folder != null && template.toList != null && template.content != null && template.subject != null) {
-                template.active = getTemplateStatus(template)
-            } else
-                throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-        }
+        stampAndValidate( template )
     }
 
 
     def Boolean getTemplateStatus( CommunicationEmailTemplate temp ) {
         def today = new Date()
-        return temp.validFrom <= today && temp.validTo >= today && temp.published;
+        return temp.published &&
+               temp.validFrom <= today &&
+               temp.validTo >= today;
     }
 
 
@@ -92,25 +59,6 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
         if (map.id) {
             def communicationEmailTemplate = CommunicationEmailTemplate.get( map.id )
-            /*
-            Extract the variables from the template and make sure there is a communication field for each.
-            If this fails, the template is not parsable, it should throw an exception
-             */
-
-            communicationTemplateMergeService.extractTemplateVariables( communicationEmailTemplate )
-
-            if (communicationEmailTemplate.published)
-                return
-            if (communicationEmailTemplate.name != null && communicationEmailTemplate.folder != null &&
-                    communicationEmailTemplate.toList != null &&
-                    communicationEmailTemplate.content != null &&
-                    communicationEmailTemplate.subject != null &&
-                    communicationTemplateMergeService.allTemplateVariablesExist( communicationEmailTemplate.id )) {
-                communicationEmailTemplate.published = true
-                communicationEmailTemplate.active = getTemplateStatus( communicationEmailTemplate )
-                update( communicationEmailTemplate )
-            } else
-                throw new ApplicationException( CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@" )
             communicationEmailTemplate.published = true
             update( communicationEmailTemplate )
         } else
@@ -134,6 +82,50 @@ class CommunicationEmailTemplateService extends ServiceBase {
         //check if user is authorized. user should be admin or author
         if (oldTemplate == null || !CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
+        }
+    }
+
+    private void stampAndValidate( CommunicationEmailTemplate template ) {
+        stamp( template )
+        validate( template )
+    }
+
+    private void stamp( CommunicationEmailTemplate template ) {
+        template.validFrom = template.validFrom ?: new Date()
+        template.active = getTemplateStatus( template ) // TODO: shouldn't be calculating this at all
+    }
+
+    private void validate( CommunicationEmailTemplate template ) {
+        if (template.getName() == null || template.getName().size() == 0 ) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:nameCannotBeNull@@" )
+
+        if (template.folder == null) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:folderNameCannotBeNull@@" )
+
+        if (template.id) {
+            if (template.existsAnotherNameFolder( template.id, template.name, template.folder.name )) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
+        } else {
+            if (template.fetchByTemplateNameAndFolderName( template.name, template.folder.name )) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
+        }
+
+        if (template.validTo != null && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
+            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
+        }
+
+        // TODO: Throw more specific validation messages
+        if (template.published) {
+            if (!template.folder ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+            if (!template.active ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+            if (!template.toList ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+            if (!template.subject ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+            if (!template.content ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
+            if (fieldNameList) {
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName( fieldName )
+                    if (!field) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+                }
+            }
         }
     }
 

@@ -49,7 +49,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_personal = false
-    def i_valid_emailTemplate_published = true
+    def i_valid_emailTemplate_published = false
 
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
     def i_invalid_emailTemplate_subject = """You're a winner!""".padLeft(1021)
@@ -122,7 +122,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertEquals(1, foundEmailTemplates.size())
     }
 
-    //TODO: test that publish fails if template contains invalid data fields or if any of the following are null: name ,toList,content,subject 
+    //TODO: test that publish fails if template contains invalid data fields or if any of the following are null: name ,toList,content,subject
     //
     @Test
     void testPublishTemplate() {
@@ -133,7 +133,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertNotNull newTemplate.createDate
         assertNotNull(newTemplate.lastModified)
         assertNotNull(newTemplate.lastModifiedBy)
-        assertFalse(newTemplate.published)
+        assertFalse("Should not be published", newTemplate.published)
 
         newTemplate.toList = null
         def template1 = communicationEmailTemplateService.update([domainModel:newTemplate])
@@ -146,7 +146,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         def template2 = communicationEmailTemplateService.update([domainModel:newTemplate])
 
         def pubtemp = communicationEmailTemplateService.publishTemplate(["id":newTemplate.id])
-        assertTrue(pubtemp.published)
+        assertTrue("Should be published",pubtemp.published)
 
         // Now test findall
         def foundEmailTemplates = communicationEmailTemplateService.findAll()
@@ -242,6 +242,8 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     void testFetchPublishedActivePublicByFolderId() {
 
         def emailTemplate = newValidForCreateEmailTemplate( folder1 )
+        // We are testing that we can fetch published templates, so create it as published
+        emailTemplate.published=true
         emailTemplate.save( failOnError: true, flush: true )
         assertNotNull( emailTemplate.folder.name )
         def emailTemplates = communicationEmailTemplateService.fetchPublishedActivePublicByFolderId( folder1.id )

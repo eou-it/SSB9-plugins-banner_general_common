@@ -190,15 +190,6 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate
     }
 
-<<<<<<< HEAD
-/**
- * Merges the data from the parameter map into the string template
- * @param stringTemplate A stcring containing delimited token fields
- * @param parameters Map of name value pairs representing tokens in the template and their values
- * @return A fully rendered String
- */
-    String merge( String stringTemplate, Map<String, String> parameters ) {
-=======
     /**
      * Merges the data from the parameter map into the string template
      * @param stringTemplate A stcring containing delimited token fields
@@ -206,7 +197,6 @@ class CommunicationTemplateMergeService {
      * @return A fully rendered String
      */
     String merge( String stringTemplate, Map<String, Object> parameters ) {
->>>>>>> 4053d4b8db2e0fdfd5200633975999dd65edd766
         if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
         if (stringTemplate && parameters) {
             ST st = newST( stringTemplate );

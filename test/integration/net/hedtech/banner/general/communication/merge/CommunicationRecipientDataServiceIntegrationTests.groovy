@@ -81,8 +81,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def i_valid_emailTemplate_toList = """Valid Emailtemplate Tolist"""
     def i_invalid_emailTemplate_toList = "foo@bar.com".padLeft( 1021 )
 
-    def i_valid_emailTemplate_validFrom = new Date()
-    def i_valid_emailTemplate_validTo = new Date()
+    def i_valid_emailTemplate_validFrom = new Date()-200
+    def i_valid_emailTemplate_validTo = new Date()+200
 
     def i_valid_folder_description = "Valid older description"
     def i_valid_folder_internal = true
@@ -348,7 +348,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 previewValue: previewValue,
                 renderAsHtml: true,
                 ruleUri: null,
-                status: CommunicationFieldStatus.DEVELOPMENT,
+                status: CommunicationFieldStatus.PRODUCTION,
                 statmentType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
                 ruleContent: ruleContent
         )

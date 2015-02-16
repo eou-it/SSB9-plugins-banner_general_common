@@ -96,7 +96,9 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
                 content: "test content",
                 fromList: "testfrom",
                 subject: "test subject",
-                toList: "testto"
+                toList: "testto",
+                validFrom: new Date()-200,
+                validTo: new Date()+200
         )
         communicationEmailTemplateService.create(emailTemplate) as CommunicationEmailTemplate
         assertNotNull emailTemplate.getId()
