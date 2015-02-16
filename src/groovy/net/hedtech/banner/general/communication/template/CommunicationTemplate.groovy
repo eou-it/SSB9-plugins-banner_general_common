@@ -61,7 +61,7 @@ public abstract class CommunicationTemplate implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCBTMPL_ACTIVE")
-    Boolean active = false
+    Boolean active = true
 
     /**
      * Indicates if this is a one-off version of the template (1=Yes or 0=No).

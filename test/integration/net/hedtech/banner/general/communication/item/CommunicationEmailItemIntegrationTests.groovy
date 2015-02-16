@@ -90,7 +90,6 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull emailTemplate.lastModified
         /* gets set to Banner by the framework */
         assertEquals "Banner", emailTemplate.dataOrigin
-        assertEquals i_valid_emailTemplate_active, emailTemplate.active
         assertEquals i_valid_emailTemplate_oneOff, emailTemplate.oneOff
         assertEquals i_valid_emailTemplate_published, emailTemplate.published
         assertEquals i_valid_emailTemplate_validFrom, emailTemplate.validFrom
@@ -163,7 +162,6 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
                 description: i_valid_emailTemplate_description,
                 personal: i_valid_emailTemplate_personal,
                 name: i_valid_emailTemplate_name,
-                active: i_valid_emailTemplate_active,
                 oneOff: i_valid_emailTemplate_oneOff,
                 published: i_valid_emailTemplate_published,
                 createdBy: i_valid_emailTemplate_createdBy,

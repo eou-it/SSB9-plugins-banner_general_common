@@ -313,7 +313,6 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 description: i_valid_emailTemplate_description,
                 personal: i_valid_emailTemplate_personal,
                 name: i_valid_emailTemplate_name,
-                active: i_valid_emailTemplate_active,
                 oneOff: i_valid_emailTemplate_oneOff,
                 published: i_valid_emailTemplate_published,
                 createdBy: i_valid_emailTemplate_createdBy,

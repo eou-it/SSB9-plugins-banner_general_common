@@ -175,7 +175,6 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             defaultEmailTemplate = new CommunicationEmailTemplate (
                     name: "CommunicationGroupSendCommunicationServiceTests_template",
                     personal: false,
-                    active: true,
                     oneOff: false,
                     folder: defaultFolder,
                     toList: "test@test.edu",

@@ -11,7 +11,6 @@ import net.hedtech.banner.service.ServiceBase
 
 class CommunicationEmailTemplateService extends ServiceBase {
 
-    def dateConverterService
     def communicationTemplateMergeService
     def communicationFieldService
 
@@ -44,14 +43,6 @@ class CommunicationEmailTemplateService extends ServiceBase {
         }
 
         stampAndValidate( template )
-    }
-
-
-    def Boolean getTemplateStatus( CommunicationEmailTemplate temp ) {
-        def today = new Date()
-        return temp.published &&
-               temp.validFrom <= today &&
-               temp.validTo >= today;
     }
 
 
@@ -92,7 +83,6 @@ class CommunicationEmailTemplateService extends ServiceBase {
 
     private void stamp( CommunicationEmailTemplate template ) {
         template.validFrom = template.validFrom ?: new Date()
-        template.active = getTemplateStatus( template ) // TODO: shouldn't be calculating this at all
     }
 
     private void validate( CommunicationEmailTemplate template ) {
@@ -110,20 +100,18 @@ class CommunicationEmailTemplateService extends ServiceBase {
             throw new ApplicationException( CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
         }
 
-        // TODO: Throw more specific validation messages
+        // TODO: Throw more specific validation messages for generic cannot be published; currently recycled message from communication template merge service.
         if (template.published) {
             if (!template.folder ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-            if (!template.active ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-            if (!template.toList ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-            if (!template.subject ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-            if (!template.content ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+            if (!template.toList || template.toList.trim().size() == 0 ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+            if (!template.subject || template.subject.size() == 0 ) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
 
             List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
             if (fieldNameList) {
                 fieldNameList.each { String fieldName ->
                     CommunicationField field = CommunicationField.fetchByName( fieldName )
-                    if (!field) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
-                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) throw new ApplicationException(CommunicationEmailTemplate, "@@r1:template.cannotBePublished@@")
+                    if (!field) throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
+                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
                 }
             }
         }

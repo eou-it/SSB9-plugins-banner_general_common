@@ -86,7 +86,6 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertNotNull folder.getId()
 
         emailTemplate = new CommunicationEmailTemplate(
-                active: true,
                 description: "test email template description",
                 personal: true,
                 name: "test",
