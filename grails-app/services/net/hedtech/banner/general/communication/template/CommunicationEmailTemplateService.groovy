@@ -91,9 +91,9 @@ class CommunicationEmailTemplateService extends ServiceBase {
         if (template.folder == null) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:folderNameCannotBeNull@@" )
 
         if (template.id) {
-            if (template.existsAnotherNameFolder( template.id, template.name, template.folder.name )) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
+            if (template.existsAnotherNameFolder( template.id, template.name, template.folder.name )) throw new ApplicationException( CommunicationTemplateService, "@@r1:templateExists:${template.name}@@" )
         } else {
-            if (template.fetchByTemplateNameAndFolderName( template.name, template.folder.name )) throw new ApplicationException( CommunicationEmailTemplate, "@@r1:not.unique.message:" + template.name + " name@@" )
+            if (template.fetchByTemplateNameAndFolderName( template.name, template.folder.name )) throw new ApplicationException( CommunicationTemplateService, "@@r1:templateExists:${template.name}@@" )
         }
 
         if (template.validTo != null && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
