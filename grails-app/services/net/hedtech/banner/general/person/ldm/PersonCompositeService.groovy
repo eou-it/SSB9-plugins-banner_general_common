@@ -1569,7 +1569,7 @@ class PersonCompositeService extends LdmService {
 
 
     private String getRequestedVersion() {
-        String representationVersion = LdmService.getRepresentationVersion()
+        String representationVersion = LdmService.getResponseRepresentationVersion()
         if (representationVersion == null) {
             // Assume latest (current) version
             representationVersion = "v2"
