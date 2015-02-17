@@ -1032,7 +1032,7 @@ class PersonCompositeService extends LdmService {
         personRacesList.each { activeRace ->
             Person currentRecord = persons.get(activeRace.pidm)
             def race = raceCompositeService.fetchByRaceCode(activeRace.race)
-            race.dataOrigin = activeRace.dataOrigin
+            race.metadata.dataOrigin = activeRace.dataOrigin
             currentRecord.races << race
             persons.put(activeRace.pidm, currentRecord)
         }
