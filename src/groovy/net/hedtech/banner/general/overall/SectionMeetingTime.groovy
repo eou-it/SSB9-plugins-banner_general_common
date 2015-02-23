@@ -3,10 +3,8 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import grails.converters.JSON
 import net.hedtech.banner.service.DatabaseModifiesState
 import net.hedtech.banner.general.system.*
-import org.hibernate.annotations.Type
 import javax.persistence.*
 
 /**
