@@ -90,16 +90,18 @@ class InstructionalPlatformCompositeService {
 
     List<InstructionalPlatform> fetchAllByIntegrationPartnerSystemCode(List<String> codes) {
         List<InstructionalPlatform> instructionalPlatformList = []
-        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = IntegrationPartnerSystemRule.fetchAllByCode(codes)
-        Map integrationPartnerSystemRuleIdMap = [:]
-        integrationPartnerSystemRuleList.each {
-            integrationPartnerSystemRuleIdMap.put(it.id, it)
-        }
+        if(codes&&codes.size()>0){
+            List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = IntegrationPartnerSystemRule.fetchAllByCode(codes)
+            Map integrationPartnerSystemRuleIdMap = [:]
+            integrationPartnerSystemRuleList.each {
+                integrationPartnerSystemRuleIdMap.put(it.id, it)
+            }
 
-        List<GlobalUniqueIdentifier> integrationPartnerSystemRuleGuids = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(LDM_NAME, integrationPartnerSystemRuleIdMap.keySet())
-        integrationPartnerSystemRuleGuids.each {
-            IntegrationPartnerSystemRule integrationPartnerSystemRule = integrationPartnerSystemRuleIdMap.get(it.domainId)
-            instructionalPlatformList << new InstructionalPlatform(integrationPartnerSystemRule, new Metadata(integrationPartnerSystemRule.dataOrigin), it.guid)
+            List<GlobalUniqueIdentifier> integrationPartnerSystemRuleGuids = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(LDM_NAME, integrationPartnerSystemRuleIdMap.keySet())
+            integrationPartnerSystemRuleGuids.each {
+                IntegrationPartnerSystemRule integrationPartnerSystemRule = integrationPartnerSystemRuleIdMap.get(it.domainId)
+                instructionalPlatformList << new InstructionalPlatform(integrationPartnerSystemRule, new Metadata(integrationPartnerSystemRule.dataOrigin), it.guid)
+            }
         }
         return instructionalPlatformList
     }

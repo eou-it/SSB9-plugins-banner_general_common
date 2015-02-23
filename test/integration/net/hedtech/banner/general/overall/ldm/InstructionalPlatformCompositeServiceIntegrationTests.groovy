@@ -52,7 +52,7 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
         Map paginationParams = [max: '20', offset: '0']
         List instructionalPlatforms = instructionalPlatformCompositeService.list( paginationParams )
         assertNotNull instructionalPlatforms
-        assertEquals 20, instructionalPlatforms.size()
+        assertTrue instructionalPlatforms.size()<=20
     }
 
 
@@ -154,6 +154,18 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
         }
     }
 
+
+    @Test
+    void testFetchAllByIntegrationPartnerSystemCode(){
+        assertEquals([],instructionalPlatformCompositeService.fetchAllByIntegrationPartnerSystemCode(null))
+        assertEquals([],instructionalPlatformCompositeService.fetchAllByIntegrationPartnerSystemCode([]))
+
+        List<InstructionalPlatform> instructionalPlatformList =  instructionalPlatformCompositeService.fetchAllByIntegrationPartnerSystemCode(['1', '2'])
+        assertNotNull(instructionalPlatformList)
+        assertEquals(2,instructionalPlatformList.size())
+        assertEquals('1',instructionalPlatformList[0].code)
+        assertEquals('2',instructionalPlatformList[1].code)
+    }
 
     private IntegrationPartnerSystemRule newValidForCreateIntegrationPartnerSystem() {
         assertNotNull i_success_integrationPartner
