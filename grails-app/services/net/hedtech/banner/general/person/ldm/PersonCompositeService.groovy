@@ -9,6 +9,7 @@ import com.google.i18n.phonenumbers.Phonenumber
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
@@ -78,6 +79,7 @@ class PersonCompositeService extends LdmService {
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
+    private static final String PERSON_FILTER_LDM_NAME = "person-filters"
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -119,26 +121,81 @@ class PersonCompositeService extends LdmService {
             log.info "Person Duplicate service:"
             log.debug "Request parameters: ${params}"
 
-            def primaryName = params.names.find { primaryNameType ->
-                primaryNameType.nameType == "Primary"
+            def contentType=LdmService.getRequestRepresentation()
+
+            if (contentType.contains('personFilter')){
+                def selId = params.get("person-filter")
+
+                if (!selId)
+                {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterCannotBeNull",[]))
+                }
+                def popSelEntity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
+
+                if (!popSelEntity) {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterInvalid",[]))
+                }
+
+                // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
+                def domainKeyParts = splitDomainKey(popSelEntity.domainKey)
+
+
+                pidms = PopulationSelectionExtract.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,domainKeyParts.selection,domainKeyParts.creatorId,domainKeyParts.lastModifiedBy)
+
+            }
+            else {
+                def primaryName = params.names.find { primaryNameType ->
+                    primaryNameType.nameType == "Primary"
+                }
+
+                if (primaryName?.firstName && primaryName?.lastName) {
+                    pidms = searchPerson(params)
+                } else {
+                    throw new ApplicationException("Person", new BusinessLogicValidationException("missing.first.last.name", []))
+                }
+
             }
 
-            if (primaryName?.firstName && primaryName?.lastName) {
-                pidms = searchPerson(params)
-            } else {
-                throw new ApplicationException("Person", new BusinessLogicValidationException("missing.first.last.name",[]))
-            }
         } else {
             //Add DynamicFinder on PersonIdentificationName in future.
-            if (params.role) {
-                String role = params.role?.trim()?.toLowerCase()
-                if(role == "faculty" || role == "student") {
-                    pidms = userRoleCompositeService.fetchAllByRole([role: params.role, sortAndPaging: sortParams])
-                } else {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported",[]))
+            if (params.containsKey("person-filter") && params.containsKey("role"))
+            {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalidFilterSelection",[]))
+            }
+
+            if (params.containsKey("person-filter"))
+            {
+                def selId = params.get("person-filter")
+
+                if (!selId)
+                {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterCannotBeNull",[]))
                 }
-            } else {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required",[]))
+                def popSelEntity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
+
+                if (!popSelEntity) {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterInvalid",[]))
+                }
+
+                // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
+                def domainKeyParts = splitDomainKey(popSelEntity.domainKey)
+
+
+                pidms = PopulationSelectionExtract.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,domainKeyParts.selection,domainKeyParts.creatorId,domainKeyParts.lastModifiedBy)
+            }
+            else {
+
+
+                if (params.role) {
+                    String role = params.role?.trim()?.toLowerCase()
+                    if (role == "faculty" || role == "student") {
+                        pidms = userRoleCompositeService.fetchAllByRole([role: params.role, sortAndPaging: sortParams])
+                    } else {
+                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
+                    }
+                } else {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", []))
+                }
             }
 
         }
@@ -1588,6 +1645,32 @@ class PersonCompositeService extends LdmService {
         }
 
         return preferredEmail
+    }
+
+    // To split the domain key of population selection into Application, Selection, Creator and User ID
+    private def splitDomainKey(String domainKey) {
+        def domainKeyParts = [:]
+
+        if (domainKey) {
+            List tokens = domainKey.tokenize(DOMAIN_KEY_DELIMITER)
+            if (tokens.size() < 4) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.domain.key.message", ["BusinessLogicValidationException"]))
+            }
+
+            domainKeyParts << [application: tokens[0]]
+            log.debug("application: ${tokens[0]}")
+
+            domainKeyParts << [selection: tokens[1]]
+            log.debug("selection: ${tokens[1]}")
+
+            domainKeyParts << [creatorId: tokens[2]]
+            log.debug("creatorId: ${tokens[2]}")
+
+            domainKeyParts << [lastModifiedBy: tokens[3]]
+            log.debug("lastModifiedBy: ${tokens[3]}")
+        }
+
+        return domainKeyParts
     }
 
 }
