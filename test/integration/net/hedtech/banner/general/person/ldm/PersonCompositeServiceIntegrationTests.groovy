@@ -3,6 +3,8 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import net.hedtech.banner.general.overall.ldm.LdmService
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -186,6 +188,46 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'date.invalid.format.message'
         }
+    }
+
+    @Test
+    void testListQapiWithInvalidPersonfilter() {
+
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
+
+        //String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
+
+        Map params = getParamsForPersonFilter()
+
+        params.put("person-filter","xxxx")
+
+        try {
+            personCompositeService.list(params)
+            fail('This should have failed as person filter GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'personFilterInvalid'
+        }
+    }
+
+    @Ignore
+    @Test
+    void testListQapiWithValidPersonfilter() {
+
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
+
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
+
+        Map params = getParamsForPersonFilter()
+
+        params.put("person-filter",guid)
+
+        List persons = personCompositeService.list(params)
+        assertNotNull persons
+
     }
 
     //GET- Person by guid API
@@ -858,6 +900,12 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                       credentials: [[credentialType: i_failed_update_credential_type, credentialId: i_failed_update_credential_id]],
         ]
         return params
+    }
+
+    private Map getParamsForPersonFilter() {
+        return [
+                action     : [POST: "list"],
+        ]
     }
 
 }
