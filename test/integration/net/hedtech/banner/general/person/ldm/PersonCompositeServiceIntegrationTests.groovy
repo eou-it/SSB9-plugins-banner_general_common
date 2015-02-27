@@ -211,10 +211,32 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-    @Ignore
+    @Test
+    void testListQapiWithPersonfilterNull() {
+
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
+
+        //String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
+
+        Map params = getParamsForPersonFilter()
+
+        params.put("person-filter","")
+
+        try {
+            personCompositeService.list(params)
+            fail('This should have failed as person filter GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'personFilterCannotBeNull'
+        }
+    }
+
     @Test
     void testListQapiWithValidPersonfilter() {
 
+
+        def persons = [:]
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
@@ -225,7 +247,51 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         params.put("person-filter",guid)
 
-        List persons = personCompositeService.list(params)
+        persons = personCompositeService.list(params)
+        assertNotNull persons
+
+    }
+
+
+    @Test
+    void testListapiWithInvalidPersonfilter() {
+
+        def params =[:]
+        params.put("person-filter","xxxx")
+
+        try {
+            personCompositeService.list(params)
+            fail('This should have failed as person filter GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'personFilterInvalid'
+        }
+    }
+
+    @Test
+    void testListapiWithPersonfilterNull() {
+
+        def params =[:]
+        params.put("person-filter","")
+
+        try {
+            personCompositeService.list(params)
+            fail('This should have failed as person filter GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'personFilterCannotBeNull'
+        }
+    }
+
+    @Test
+    void testListapiWithValidPersonfilter() {
+
+
+        def persons = [:]
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
+        def params = [:]
+
+        params.put("person-filter",guid)
+
+        persons = personCompositeService.list(params)
         assertNotNull persons
 
     }
@@ -852,7 +918,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         Map params = [id             : guid,
                       names          : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
                       sex            : 'Male',
-                      ethnicityDetail: [[guid: ethniciies[0].guid]]
+                      ethnicityDetail: [guid: ethniciies[0].guid]
         ]
         return params
     }
@@ -862,7 +928,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         Map params = [id             : guid,
                       names          : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
                       sex            : 'Male',
-                      ethnicityDetail: [[guid: ethniciies[1].guid]]
+                      ethnicityDetail: [guid: ethniciies[1].guid]
         ]
         return params
     }
