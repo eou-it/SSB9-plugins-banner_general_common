@@ -10,6 +10,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
+import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
@@ -67,6 +68,7 @@ class PersonCompositeService extends LdmService {
     def personRaceService
     def userRoleCompositeService
     def additionalIDService
+    def personFilterCompositeService
 
     static final String ldmName = 'persons'
     static final String PERSON_ADDRESS_TYPE = "PERSON.ADDRESSES.ADDRESSTYPE"
@@ -126,21 +128,7 @@ class PersonCompositeService extends LdmService {
             if (contentType.contains('personFilter')){
                 def selId = params.get("person-filter")
 
-                if (!selId)
-                {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterCannotBeNull",[]))
-                }
-                def popSelEntity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
-
-                if (!popSelEntity) {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterInvalid",[]))
-                }
-
-                // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
-                def domainKeyParts = splitDomainKey(popSelEntity.domainKey)
-
-
-                pidms = PopulationSelectionExtract.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,domainKeyParts.selection,domainKeyParts.creatorId,domainKeyParts.lastModifiedBy)
+                pidms = getPidmsForPersonFilter(selId)
 
             }
             else {
@@ -160,28 +148,13 @@ class PersonCompositeService extends LdmService {
             //Add DynamicFinder on PersonIdentificationName in future.
             if (params.containsKey("person-filter") && params.containsKey("role"))
             {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalidFilterSelection",[]))
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination",[]))
             }
 
             if (params.containsKey("person-filter"))
             {
                 def selId = params.get("person-filter")
-
-                if (!selId)
-                {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterCannotBeNull",[]))
-                }
-                def popSelEntity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
-
-                if (!popSelEntity) {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("personFilterInvalid",[]))
-                }
-
-                // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
-                def domainKeyParts = splitDomainKey(popSelEntity.domainKey)
-
-
-                pidms = PopulationSelectionExtract.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,domainKeyParts.selection,domainKeyParts.creatorId,domainKeyParts.lastModifiedBy)
+                pidms = getPidmsForPersonFilter(selId)
             }
             else {
 
@@ -1671,6 +1644,28 @@ class PersonCompositeService extends LdmService {
         }
 
         return domainKeyParts
+    }
+
+    private List getPidmsForPersonFilter(String selId){
+
+        def pidms=[]
+
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
+
+        if (!globalUniqueIdentifier) {
+            throw new ApplicationException("personFilter", new BusinessLogicValidationException("not.found.message",[]))
+        }
+
+        def popSelEntity = personFilterCompositeService.get(selId)
+
+
+        // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
+        def domainKeyParts = splitDomainKey(popSelEntity.title)
+
+
+        pidms = PopulationSelectionExtract.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,domainKeyParts.selection,domainKeyParts.creatorId,domainKeyParts.lastModifiedBy)
+
+        return pidms
     }
 
 }

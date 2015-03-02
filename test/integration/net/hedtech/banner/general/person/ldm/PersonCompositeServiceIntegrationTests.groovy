@@ -207,7 +207,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             personCompositeService.list(params)
             fail('This should have failed as person filter GUID is invalid')
         } catch (ApplicationException ae) {
-            assertApplicationException ae, 'personFilterInvalid'
+            assertApplicationException ae, 'not.found.message'
         }
     }
 
@@ -226,9 +226,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         try {
             personCompositeService.list(params)
-            fail('This should have failed as person filter GUID is invalid')
+            fail('This should have failed as person filter GUID is null')
         } catch (ApplicationException ae) {
-            assertApplicationException ae, 'personFilterCannotBeNull'
+            assertApplicationException ae, 'not.found.message'
         }
     }
 
@@ -263,7 +263,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             personCompositeService.list(params)
             fail('This should have failed as person filter GUID is invalid')
         } catch (ApplicationException ae) {
-            assertApplicationException ae, 'personFilterInvalid'
+            assertApplicationException ae, 'not.found.message'
         }
     }
 
@@ -275,9 +275,24 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         try {
             personCompositeService.list(params)
-            fail('This should have failed as person filter GUID is invalid')
+            fail('This should have failed as person filter GUID is null')
         } catch (ApplicationException ae) {
-            assertApplicationException ae, 'personFilterCannotBeNull'
+            assertApplicationException ae, 'not.found.message'
+        }
+    }
+
+    @Test
+    void testListapiWithPersonfilterAndRole() {
+
+        def params =[:]
+        params.put("person-filter","xxxx")
+        params.put("role","faculty")
+
+        try {
+            personCompositeService.list(params)
+            fail('This should have failed as person filter and role both present')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'UnsupportedFilterCombination'
         }
     }
 
