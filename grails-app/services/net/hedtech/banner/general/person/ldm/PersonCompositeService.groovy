@@ -88,7 +88,7 @@ class PersonCompositeService extends LdmService {
     def get(id) {
         def entity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ldmName, id)
         if (!entity) {
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Person.class.simpleName))
+            throw new ApplicationException("Person", new NotFoundException())
         }
         List<PersonIdentificationNameCurrent> personIdentificationList =
                 PersonIdentificationNameCurrent.findAllByPidmInList([entity.domainKey?.toInteger()])
@@ -344,7 +344,7 @@ class PersonCompositeService extends LdmService {
                 return create(person)
             }
         } else {
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Person.class.simpleName))
+            throw new ApplicationException("Person", new NotFoundException())
         }
 
         def primaryName
