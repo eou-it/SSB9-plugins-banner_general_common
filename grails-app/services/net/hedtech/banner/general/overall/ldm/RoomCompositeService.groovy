@@ -252,10 +252,10 @@ class RoomCompositeService extends LdmService {
     AvailableRoom get(String guid) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(AvailableRoom.LDM_NAME, guid)
         if (!globalUniqueIdentifier)
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: "Room"))
+            throw new ApplicationException("room", new NotFoundException())
         HousingRoomDescriptionReadOnly housingRoomDescription = HousingRoomDescriptionReadOnly.get(globalUniqueIdentifier.domainId)
         if (!housingRoomDescription)
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: "Room"))
+            throw new ApplicationException("room", new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
         return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
