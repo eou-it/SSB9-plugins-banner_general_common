@@ -9,8 +9,6 @@ import com.google.i18n.phonenumbers.Phonenumber
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
-import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
@@ -1617,32 +1615,6 @@ class PersonCompositeService extends LdmService {
         return preferredEmail
     }
 
-    // To split the domain key of population selection into Application, Selection, Creator and User ID
-    private def splitDomainKey(String domainKey) {
-        def domainKeyParts = [:]
-
-        if (domainKey) {
-            List tokens = domainKey.tokenize(DOMAIN_KEY_DELIMITER)
-            if (tokens.size() < 4) {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.domain.key.message", ["BusinessLogicValidationException"]))
-            }
-
-            domainKeyParts << [application: tokens[0]]
-            log.debug("application: ${tokens[0]}")
-
-            domainKeyParts << [selection: tokens[1]]
-            log.debug("selection: ${tokens[1]}")
-
-            domainKeyParts << [creatorId: tokens[2]]
-            log.debug("creatorId: ${tokens[2]}")
-
-            domainKeyParts << [lastModifiedBy: tokens[3]]
-            log.debug("lastModifiedBy: ${tokens[3]}")
-        }
-
-        return domainKeyParts
-    }
-
 
     private List getPidmsForPersonFilter(String selId, Map sortParams) {
         def pidms = []
@@ -1655,7 +1627,7 @@ class PersonCompositeService extends LdmService {
         def popSelEntity = personFilterCompositeService.get(selId)
 
         // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
-        def domainKeyParts = splitDomainKey(popSelEntity.title)
+        def domainKeyParts = personFilterCompositeService.splitDomainKey(popSelEntity.title)
 
         String query = "select a.pidm from PersonIdentificationNameCurrent a, " +
                 "PopulationSelectionExtract b where 1=1 " +
