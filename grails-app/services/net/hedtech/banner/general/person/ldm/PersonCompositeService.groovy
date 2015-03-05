@@ -126,10 +126,8 @@ class PersonCompositeService extends LdmService {
             def contentType=LdmService.getRequestRepresentation()
 
             if (contentType.contains('personFilter')){
-                def selId = params.get("person-filter")
-
-                pidms = getPidmsForPersonFilter(selId)
-
+                String selId = params.get("person-filter")
+                pidms = getPidmsForPersonFilter(selId, sortParams)
             }
             else {
                 def primaryName = params.names.find { primaryNameType ->
@@ -151,10 +149,9 @@ class PersonCompositeService extends LdmService {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination",[]))
             }
 
-            if (params.containsKey("person-filter"))
-            {
-                def selId = params.get("person-filter")
-                pidms = getPidmsForPersonFilter(selId)
+            if (params.containsKey("person-filter")) {
+                String selId = params.get("person-filter")
+                pidms = getPidmsForPersonFilter(selId, sortParams)
             }
             else {
 
@@ -1646,25 +1643,30 @@ class PersonCompositeService extends LdmService {
         return domainKeyParts
     }
 
-    private List getPidmsForPersonFilter(String selId){
 
-        def pidms=[]
+    private List getPidmsForPersonFilter(String selId, Map sortParams) {
+        def pidms = []
 
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
-
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException("personFilter", new BusinessLogicValidationException("not.found.message",[]))
+            throw new ApplicationException("personFilter", new BusinessLogicValidationException("not.found.message", []))
         }
 
         def popSelEntity = personFilterCompositeService.get(selId)
 
-
         // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
         def domainKeyParts = splitDomainKey(popSelEntity.title)
 
+        String query = "select a.pidm from PersonIdentificationNameCurrent a, " +
+                "PopulationSelectionExtract b where 1=1 " +
+                "and a.pidm = b.key " +
+                "and b.application = '${domainKeyParts.application}' " +
+                "and b.selection = '${domainKeyParts.selection}' " +
+                "and b.creatorId = '${domainKeyParts.creatorId}' " +
+                "and b.lastModifiedBy = '${domainKeyParts.lastModifiedBy}' " +
+                "order by a.${sortParams.sort} ${sortParams.order}"
 
-        pidms = PopulationSelectionExtract.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,domainKeyParts.selection,domainKeyParts.creatorId,domainKeyParts.lastModifiedBy)
-
+        pidms = PersonIdentificationNameCurrent.executeQuery(query)
         return pidms
     }
 
