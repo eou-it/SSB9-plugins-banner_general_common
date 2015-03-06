@@ -195,13 +195,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.person-filter.v2+json")
 
         //String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
 
         Map params = getParamsForPersonFilter()
 
-        params.put("person-filter","xxxx")
+        params.put("personFilter","xxxx")
 
         try {
             personCompositeService.list(params)
@@ -216,13 +216,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.person-filter.v2+json")
 
         //String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
 
         Map params = getParamsForPersonFilter()
 
-        params.put("person-filter","")
+        params.put("personFilter","")
 
         try {
             personCompositeService.list(params)
@@ -239,13 +239,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def persons = [:]
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.personFilter.v2+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.person-filter.v2+json")
 
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
 
         Map params = getParamsForPersonFilter()
 
-        params.put("person-filter",guid)
+        params.put("personFilter",guid)
 
         persons = personCompositeService.list(params)
         assertNotNull persons

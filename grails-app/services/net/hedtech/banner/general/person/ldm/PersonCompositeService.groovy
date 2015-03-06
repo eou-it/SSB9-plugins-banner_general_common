@@ -123,8 +123,8 @@ class PersonCompositeService extends LdmService {
 
             def contentType=LdmService.getRequestRepresentation()
 
-            if (contentType.contains('personFilter')){
-                String selId = params.get("person-filter")
+            if (contentType.contains('person-filter')){
+                String selId = params.get("personFilter")
                 pidms = getPidmsForPersonFilter(selId, sortParams)
             }
             else {
