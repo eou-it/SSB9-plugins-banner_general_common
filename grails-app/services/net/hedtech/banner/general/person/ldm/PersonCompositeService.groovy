@@ -142,13 +142,13 @@ class PersonCompositeService extends LdmService {
 
         } else {
             //Add DynamicFinder on PersonIdentificationName in future.
-            if (params.containsKey("person-filter") && params.containsKey("role"))
+            if (params.containsKey("personFilter") && params.containsKey("role"))
             {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination",[]))
             }
 
-            if (params.containsKey("person-filter")) {
-                String selId = params.get("person-filter")
+            if (params.containsKey("personFilter")) {
+                String selId = params.get("personFilter")
                 pidms = getPidmsForPersonFilter(selId, sortParams)
             }
             else {

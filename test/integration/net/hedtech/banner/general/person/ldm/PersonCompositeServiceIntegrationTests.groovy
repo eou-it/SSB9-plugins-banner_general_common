@@ -257,7 +257,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithInvalidPersonfilter() {
 
         def params =[:]
-        params.put("person-filter","xxxx")
+        params.put("personFilter","xxxx")
 
         try {
             personCompositeService.list(params)
@@ -271,7 +271,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithPersonfilterNull() {
 
         def params =[:]
-        params.put("person-filter","")
+        params.put("personFilter","")
 
         try {
             personCompositeService.list(params)
@@ -285,7 +285,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithPersonfilterAndRole() {
 
         def params =[:]
-        params.put("person-filter","xxxx")
+        params.put("personFilter","xxxx")
         params.put("role","faculty")
 
         try {
@@ -304,7 +304,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
         def params = [:]
 
-        params.put("person-filter",guid)
+        params.put("personFilter",guid)
 
         persons = personCompositeService.list(params)
         assertNotNull persons
