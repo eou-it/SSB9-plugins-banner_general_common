@@ -82,7 +82,6 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
-    private static final String[] versions = ["v2","v3"]
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -233,7 +232,7 @@ class PersonCompositeService extends LdmService {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
                     def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
-                    if (versions.contains(getRequestedVersion())) {
+                    if (["v2","v3"].contains(getRequestedVersion())) {
                         allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
                     }
                     validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
@@ -391,7 +390,7 @@ class PersonCompositeService extends LdmService {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
                     def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
-                    if (versions.contains(getRequestedVersion())) {
+                    if (["v2","v3"].contains(getRequestedVersion())) {
                         allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
                     }
                     validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
@@ -813,9 +812,11 @@ class PersonCompositeService extends LdmService {
             if (it instanceof Map) {
                 if (!processedEmailTypes.contains { it.emailType.trim() }) {
                     Boolean preferredIndicator = false
-                    if (versions.contains(getRequestedVersion()) && preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
-                        preferredIndicator = true
-                        tempPreferredIndicator = preferredIndicator
+                    if(["v2","v3"].contains(getRequestedVersion())) {
+                        if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
+                            preferredIndicator = true
+                            tempPreferredIndicator = preferredIndicator
+                        }
                     }
                     PersonEmail personEmail = createPersonEmail(it.guid?.trim()?.toLowerCase(), pidm, metadata, it, preferredIndicator)
                     personEmailsList << personEmail
@@ -883,9 +884,11 @@ class PersonCompositeService extends LdmService {
                     PersonEmail existingPersonEmail = existingPersonEmails?.find { existingPersonEmail -> existingPersonEmail.emailType.code == rule.value && existingPersonEmail.emailAddress == it.emailAddress }
                     if (existingPersonEmail) {
                         existingPersonEmail.statusIndicator = "A"
-                        if (versions.contains(getRequestedVersion()) && preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
-                            existingPersonEmail.preferredIndicator = true
-                            tempPreferredIndicator = true
+                        if(["v2","v3"].contains(getRequestedVersion())) {
+                            if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
+                                existingPersonEmail.preferredIndicator = true
+                                tempPreferredIndicator = true
+                            }
                         }
                         personEmail = personEmailService.update([domainModel: existingPersonEmail])
                         String domainKey = "${existingPersonEmail.pidm}${DOMAIN_KEY_DELIMITER}${existingPersonEmail.emailType}${DOMAIN_KEY_DELIMITER}${existingPersonEmail.emailAddress}"
@@ -899,9 +902,11 @@ class PersonCompositeService extends LdmService {
                         existingPersonEmails.remove(existingPersonEmail)
                     } else {
                         Boolean preferredIndicator = false
-                        if (versions.contains(getRequestedVersion()) && preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
-                            preferredIndicator = true
-                            tempPreferredIndicator = true
+                        if(["v2","v3"].contains(getRequestedVersion())) {
+                            if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
+                                preferredIndicator = true
+                                tempPreferredIndicator = true
+                            }
                         }
                         personEmail = createPersonEmail(it.guid?.trim()?.toLowerCase(), pidm, metadata, it, preferredIndicator)
                     }
@@ -953,20 +958,15 @@ class PersonCompositeService extends LdmService {
             name.setNameType("Primary")
             currentRecord.names << name
             if ("v3".equals(getRequestedVersion())) {
-                IntegrationConfiguration birthNameType = IntegrationConfiguration.fetchByProcessCodeAndSettingNameAndValue('HeDM', PERSON_NAME_TYPE, NameType.findByCode("BRTH")?.code)
-                if (birthNameType?.value) {
-                    PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchByPidmAndNameType(identification.pidm, birthNameType.value)
-                    if (personIdentificationNameAlternate) {
-                        def birthName = new Name(personIdentificationNameAlternate, currentRecord)
-                        birthName.setNameType(birthNameType.translationValue)
-                        currentRecord.names << birthName
-                    }
+                def birthName = getPersonIdentificationNameAlternateByNameType(identification.pidm, currentRecord)
+                if(birthName) {
+                    currentRecord.names << birthName
                 }
             }
 
             domainIds << identification.id
             currentRecord.metadata = new Metadata(identification.dataOrigin)
-            if (versions.contains(getRequestedVersion())) {
+            if (["v2","v3"].contains(getRequestedVersion())) {
                 def sourcedIdBase = ImsSourcedIdBase.findByPidm(identification.pidm)
                 if(sourcedIdBase?.sourcedId) {
                     currentRecord.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
@@ -1556,8 +1556,10 @@ class PersonCompositeService extends LdmService {
 
 
     def validateEmailRequiredFields(email) {
-        if (versions.contains(getRequestedVersion()) && !email.guid) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailGuid.invalid",[]))
+        if(["v2","v3"].contains(getRequestedVersion())) {
+            if (!email.guid) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailGuid.invalid", []))
+            }
         }
         if (!email.emailType) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailType.invalid",[]))
@@ -1622,7 +1624,7 @@ class PersonCompositeService extends LdmService {
 
     private def getPreferredEmail(List<Map> emailsInRequest) {
         def preferredEmail = null
-        if (versions.contains(getRequestedVersion())) {
+        if (["v2","v3"].contains(getRequestedVersion())) {
             preferredEmail = emailsInRequest.findAll { it.get("emailType")?.trim() == PERSON_EMAIL_TYPE_PREFERRED }[0]
             if (preferredEmail) {
                 emailsInRequest.removeAll { it.get("emailType").trim() == PERSON_EMAIL_TYPE_PREFERRED }
@@ -1657,6 +1659,20 @@ class PersonCompositeService extends LdmService {
 
         pidms = PersonIdentificationNameCurrent.executeQuery(query)
         return pidms
+    }
+
+
+    private def getPersonIdentificationNameAlternateByNameType(Integer pidm, Person currentRecord) {
+        def birthName
+        IntegrationConfiguration birthNameType = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, 'Birth')[0]
+        if (birthNameType?.value) {
+            PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchByPidmAndNameType(pidm, birthNameType.value)
+            if (personIdentificationNameAlternate) {
+                birthName = new Name(personIdentificationNameAlternate, currentRecord)
+                birthName.setNameType(birthNameType.translationValue)
+            }
+        }
+        return birthName
     }
 
 }
