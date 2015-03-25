@@ -953,7 +953,7 @@ class PersonCompositeService extends LdmService {
             name.setNameType("Primary")
             currentRecord.names << name
             if ("v3".equals(getRequestedVersion())) {
-                IntegrationConfiguration birthNameType = IntegrationConfiguration.fetchByProcessCodeAndSettingNameAndValue('HEDM', PERSON_NAME_TYPE, NameType.findByCode("BRTH")?.code)
+                IntegrationConfiguration birthNameType = IntegrationConfiguration.fetchByProcessCodeAndSettingNameAndValue('HeDM', PERSON_NAME_TYPE, NameType.findByCode("BRTH")?.code)
                 if (birthNameType?.value) {
                     PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchByPidmAndNameType(identification.pidm, birthNameType.value)
                     if (personIdentificationNameAlternate) {
