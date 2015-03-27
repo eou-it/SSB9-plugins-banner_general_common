@@ -68,6 +68,7 @@ class PersonCompositeService extends LdmService {
     def userRoleCompositeService
     def additionalIDService
     def personFilterCompositeService
+    def personIdentificationNameAlternateService
 
     static final String ldmName = 'persons'
     static final String PERSON_ADDRESS_TYPE = "PERSON.ADDRESSES.ADDRESSTYPE"
@@ -130,16 +131,30 @@ class PersonCompositeService extends LdmService {
                 pidms = getPidmsForPersonFilter(selId, sortParams)
             }
             else {
+                def name
                 def primaryName = params.names.find { primaryNameType ->
-                    primaryNameType.nameType == "Primary"
+                    primaryNameType.nameType == "Primary" && primaryNameType.firstName && primaryNameType.lastName
+                }
+                if(primaryName) {
+                    name = primaryName
+                }
+                if ("v3".equals(getRequestedVersion())) {
+                    def birthName = params.names.find { birthNameType ->
+                        birthNameType.nameType == "Birth" && birthNameType.firstName && birthNameType.lastName
+                    }
+                    if (name && birthName) {
+                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("filter.together.not.supported", []))
+                    }
+                    if(!name && birthName) {
+                        name = birthName
+                    } else if(!name){
+                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.and.type.required.message", []))
+                    }
+                } else if (!name) {
+                    throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
                 }
 
-                if (primaryName?.firstName && primaryName?.lastName) {
-                    pidms = searchPerson(params)
-                } else {
-                    throw new ApplicationException("Person", new BusinessLogicValidationException("missing.first.last.name", []))
-                }
-
+                pidms = searchPerson(params, name)
             }
 
         } else {
@@ -469,16 +484,13 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private List<Integer> searchPerson(Map params) {
+    private List<Integer> searchPerson(Map params, def name) {
         def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
         def sessionFactory = ctx.sessionFactory
 
         List<Integer> personList = []
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_MATCH_RULE)
 
-        def primaryName = params.names.find { primaryNameType ->
-            primaryNameType.nameType == "Primary"
-        }
         def ssnCredentials = params.credentials.find { credential ->
             credential.credentialType == "Social Security Number"
         }
@@ -522,9 +534,9 @@ class PersonCompositeService extends LdmService {
             sqlCall = connection.prepareCall(matchPersonQuery)
 
             sqlCall.setString(1, personMatchRule?.value)
-            sqlCall.setString(2, primaryName?.firstName)
-            sqlCall.setString(3, primaryName?.lastName)
-            sqlCall.setString(4, primaryName?.middleName)
+            sqlCall.setString(2, name.firstName)
+            sqlCall.setString(3, name.lastName)
+            sqlCall.setString(4, name.middleName)
             sqlCall.setString(5, dob)
             sqlCall.setString(6, params?.gender)
             sqlCall.setString(7, ssnCredentials?.credentialType)
@@ -958,7 +970,7 @@ class PersonCompositeService extends LdmService {
             name.setNameType("Primary")
             currentRecord.names << name
             if ("v3".equals(getRequestedVersion())) {
-                def birthName = getPersonIdentificationNameAlternateByNameType(identification.pidm, currentRecord)
+                def birthName = getPersonIdentificationNameAlternateByNameType(identification.pidm)
                 if(birthName) {
                     currentRecord.names << birthName
                 }
@@ -1662,13 +1674,13 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private def getPersonIdentificationNameAlternateByNameType(Integer pidm, Person currentRecord) {
+    private def getPersonIdentificationNameAlternateByNameType(Integer pidm) {
         def birthName
         IntegrationConfiguration birthNameType = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, 'Birth')[0]
         if (birthNameType?.value) {
             PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchByPidmAndNameType(pidm, birthNameType.value)
             if (personIdentificationNameAlternate) {
-                birthName = new Name(personIdentificationNameAlternate, currentRecord)
+                birthName = new Name(personIdentificationNameAlternate, null)
                 birthName.setNameType(birthNameType.translationValue)
             }
         }
