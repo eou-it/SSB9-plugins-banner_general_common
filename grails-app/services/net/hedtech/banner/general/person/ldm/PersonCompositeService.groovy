@@ -87,14 +87,20 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def get(id) {
-        def entity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ldmName, id)
+        PersonIdentificationNameCurrent personIdentificationNameCurrent = getPersonIdentificationNameCurrentByGUID(id)
+        def resultList = buildLdmPersonObjects([personIdentificationNameCurrent])
+        resultList.get(personIdentificationNameCurrent.pidm)
+    }
+	
+	
+	PersonIdentificationNameCurrent getPersonIdentificationNameCurrentByGUID(String guid) {
+        def entity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ldmName, guid)
         if (!entity) {
             throw new ApplicationException("Person", new NotFoundException())
         }
-        List<PersonIdentificationNameCurrent> personIdentificationList =
-                PersonIdentificationNameCurrent.findAllByPidmInList([entity.domainKey?.toInteger()])
-        def resultList = buildLdmPersonObjects(personIdentificationList)
-        resultList.get(entity.domainKey?.toInteger())
+        PersonIdentificationNameCurrent personIdentificationNameCurrent =
+                PersonIdentificationNameCurrent.findByPidm(entity.domainKey?.toInteger())
+        return personIdentificationNameCurrent
     }
 
 
