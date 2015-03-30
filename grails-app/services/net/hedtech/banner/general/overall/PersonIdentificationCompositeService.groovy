@@ -4,9 +4,12 @@
 
 package net.hedtech.banner.general.overall
 
+import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.person.PersonIdentificationName
 
 class PersonIdentificationCompositeService {
+
+    static final String ldmName = 'persons'
 
     def list(Map params) {
 
@@ -62,22 +65,32 @@ class PersonIdentificationCompositeService {
         }
         if( buildSelectionList(identificationEntities,
                 'personidentificationname').size() > 0)
-        identificationEntities = processResults(identificationEntities, 
+        identificationEntities = processResults(identificationEntities,
                                                 PersonIdentificationName.fetchBannerPersonList(buildSelectionList(identificationEntities,
                                                                                                                    'personidentificationname')))
-        identificationEntities = processResults(identificationEntities, 
+        identificationEntities = processResults(identificationEntities,
                                                 PidmAndUDCIdMapping.findAllByPidmInList(buildSelectionList(identificationEntities,
                                                                                                         'pidmandudcidmapping')))
-        identificationEntities = processResults(identificationEntities, 
+        identificationEntities = processResults(identificationEntities,
                                                 ImsSourcedIdBase.findAllByPidmInList(buildSelectionList(identificationEntities,
                                                                                                         'imssourcedidbase')))
-        identificationEntities = processResults(identificationEntities, 
+        identificationEntities = processResults(identificationEntities,
                                                 ThirdPartyAccess.findAllByPidmInList(buildSelectionList(identificationEntities,
                                                                                                         'thirdpartyaccess')))
+
+        def domainIds = []
+        identificationEntities.each { key, value ->
+            domainIds << value.personidentificationname.id
+        }
+
+        buildPersonGuids(domainIds, identificationEntities)
+
         def results = []
         identificationEntities.each { key, value ->
             results << new PersonIdentificationDecorator(value)
         }
+
+
         def resultsList
         try {  // Avoid restful-api plugin dependencies.
             resultsList = this.class.classLoader.loadClass('net.hedtech.restfulapi.PagedResultArrayList').newInstance(results, results.size())
@@ -93,7 +106,7 @@ class PersonIdentificationCompositeService {
         entities.each { key, value ->
             if( value[type] == null ) toProcess << key
         }
-        toProcess      
+        toProcess
     }
 
     def processResults( Map entities, def results ) {
@@ -101,7 +114,7 @@ class PersonIdentificationCompositeService {
             def child = entities[result?.pidm]
             child.put(result.class.simpleName.toLowerCase(), result)
             entities.put(result?.pidm, child)
-        } 
+        }
         entities
     }
 
@@ -114,6 +127,16 @@ class PersonIdentificationCompositeService {
         }
         identificationEntity.put( (entity ? entity.class.simpleName.toLowerCase() : 'personidentificationname'), entity)
         identificationEntity
+    }
+
+
+    def buildPersonGuids(List domainIds, Map identificationEntities) {
+        GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domainIds).each { guid ->
+            def currentRecord = identificationEntities.get(guid.domainKey.toInteger())
+            currentRecord.guid = guid.guid
+            identificationEntities.put(guid.domainKey.toInteger(), currentRecord)
+        }
+        identificationEntities
     }
 
 }

@@ -60,12 +60,12 @@ class BuildingCompositeService {
     BuildingDetail get( String guid ) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( LDM_NAME, guid )
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( Building.class.simpleName ) ) )
+            throw new ApplicationException("building", new NotFoundException())
         }
 
         HousingLocationBuildingDescription housingLocationBuildingDescription = housingLocationBuildingDescriptionService.get( globalUniqueIdentifier.domainId )
         if (!housingLocationBuildingDescription) {
-            throw new ApplicationException( GlobalUniqueIdentifierService.API, new NotFoundException( id: GrailsNameUtils.getNaturalName( Building.class.simpleName ) ) )
+            throw new ApplicationException("building", new NotFoundException())
         }
 
         SiteDetail siteDetail = siteDetailCompositeService.fetchByCampusCode( housingLocationBuildingDescription?.campus?.code )

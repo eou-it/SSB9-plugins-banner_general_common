@@ -82,7 +82,7 @@ class EmsConfigurationCompositeService {
             configuration
         }
         else {
-            throw new ApplicationException("EmsConfiguration", new NotFoundException(EmsConfiguration.simpleName, id))
+            throw new ApplicationException("EmsConfiguration", new NotFoundException())
         }
 
     }
