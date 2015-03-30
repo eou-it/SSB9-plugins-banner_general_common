@@ -169,8 +169,6 @@ class PersonCompositeService extends LdmService {
                 pidms = getPidmsForPersonFilter(selId, sortParams)
             }
             else {
-
-
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
                     if (role == "faculty" || role == "student") {
@@ -182,7 +180,6 @@ class PersonCompositeService extends LdmService {
                     throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", []))
                 }
             }
-
         }
         if( pidms.size() ) {
             def pageParams = [:]
@@ -211,28 +208,37 @@ class PersonCompositeService extends LdmService {
     def create(Map person) {
         Map<Integer, Person> persons = [:]
         def newPersonIdentification
-
+        PersonIdentificationNameCurrent newPersonIdentificationName
+        PersonIdentificationNameAlternate personIdentificationNameAlternate
+        Map metadata = person.metadata
         if (person.names instanceof List) {
-            person.names.each { it ->
-                if (it instanceof Map) {
-                    if (it.firstName && it.lastName && it.nameType?.trim() == 'Primary') {
-                        newPersonIdentification = it
-                    } else {
-                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
-                    }
+            def primaryName = person.names.find { primaryNameType ->
+                primaryNameType.nameType == "Primary" && primaryNameType.firstName && primaryNameType.lastName
+            }
+            if (primaryName) {
+                newPersonIdentification = primaryName
+                newPersonIdentification.put('bannerId', 'GENERATED')
+                newPersonIdentification.put('entityIndicator', 'P')
+                newPersonIdentification.put('changeIndicator', null)
+                newPersonIdentification.put('dataOrigin', metadata?.dataOrigin)
+                newPersonIdentification.remove('nameType') // ID won't generate if this is set.
+                //Create the new PersonIdentification record
+                newPersonIdentificationName = personIdentificationNameCurrentService.create(newPersonIdentification)
+            } else {
+                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
+            }
+            if ("v3".equals(getRequestedVersion())) {
+                def birthName = person.names.find { birthNameType ->
+                    birthNameType.nameType == "Birth" && birthNameType.firstName && birthNameType.lastName
+                }
+                if (birthName) {
+                    personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, birthName, metadata)
                 }
             }
         } else {
             throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("names.required.message", []))
         }
-        Map metadata = person.metadata
-        newPersonIdentification.put('bannerId', 'GENERATED')
-        newPersonIdentification.put('entityIndicator', 'P')
-        newPersonIdentification.put('changeIndicator', null)
-        newPersonIdentification.put('dataOrigin', metadata?.dataOrigin)
-        newPersonIdentification.remove('nameType') // ID won't generate if this is set.
-        //Create the new PersonIdentification record
-        PersonIdentificationNameCurrent newPersonIdentificationName = personIdentificationNameCurrentService.create(newPersonIdentification)
+
         //Fix the GUID if provided as DB will assign one
         if (person.guid) {
             updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
@@ -306,6 +312,13 @@ class PersonCompositeService extends LdmService {
         def name = new Name(newPersonIdentificationName, newPersonBase)
         name.setNameType("Primary")
         currentRecord.names << name
+        if("v3".equals(getRequestedVersion())) {
+            if (personIdentificationNameAlternate) {
+                def birth = new Name(personIdentificationNameAlternate, null)
+                birth.setNameType("Birth")
+                currentRecord.names << birth
+            }
+        }
         //Store the credential we already have
         currentRecord.credentials = []
         currentRecord.credentials << new Credential("Banner ID", newPersonIdentificationName.bannerId, null, null)
@@ -360,13 +373,19 @@ class PersonCompositeService extends LdmService {
         }
 
         def primaryName
-        person?.names?.each { it ->
-            if (it.nameType?.trim() == 'Primary') {
-                primaryName = it
-            } else {
-                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("nameType.invalid",[]))
+        def birthName
+        if (person.names instanceof List) {
+            primaryName = person.names.find { primaryNameType ->
+                primaryNameType.nameType == "Primary"
+            }
+            if ("v3".equals(getRequestedVersion())) {
+                birthName = person.names.find { birthNameType ->
+                    birthNameType.nameType == "Birth" && birthNameType.firstName && birthNameType.lastName
+                }
             }
         }
+
+
         def pidmToUpdate = globalUniqueIdentifier.domainKey?.toInteger()
         List<PersonIdentificationNameCurrent> personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList([pidmToUpdate])
 
@@ -442,7 +461,23 @@ class PersonCompositeService extends LdmService {
         def name = new Name(newPersonIdentificationName, newPersonBase)
         name.setNameType("Primary")
         names << name
-
+        if("v3".equals(getRequestedVersion())) {
+            PersonIdentificationNameAlternate personIdentificationNameAlternate
+            if (birthName) {
+                personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, birthName, person?.metadata)
+            }
+            def birth
+            if (personIdentificationNameAlternate) {
+                birth = new Name(personIdentificationNameAlternate, null)
+                birth.setNameType("Birth")
+                names << birth
+            } else {
+                birth = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm)
+                if(birth) {
+                    names << birth
+                }
+            }
+        }
         def ethnicityDetail = newPersonBase.ethnicity ? ethnicityCompositeService.fetchByEthnicityCode(newPersonBase.ethnicity?.code) : null
         def maritalStatusDetail = newPersonBase.maritalStatus ? maritalStatusCompositeService.fetchByMaritalStatusCode(newPersonBase.maritalStatus?.code) : null
         //update Address
@@ -1685,6 +1720,32 @@ class PersonCompositeService extends LdmService {
             }
         }
         return birthName
+    }
+
+
+    private PersonIdentificationNameAlternate createPersonIdentificationNameAlternateByNameType(PersonIdentificationNameCurrent currentPerson, def nameInRequest, Map metadata) {
+        PersonIdentificationNameAlternate personIdentificationNameAlternate
+
+        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, nameInRequest.nameType.trim())[0]
+        if (!rule) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message",[PERSON_NAME_TYPE]))
+        }
+        if (rule.value) {
+            PersonIdentificationNameAlternate newPersonIdentificationNameAlternate = new PersonIdentificationNameAlternate(
+                    pidm: currentPerson.pidm,
+                    bannerId: currentPerson.bannerId,
+                    lastName: nameInRequest.lastName.trim(),
+                    firstName: nameInRequest.firstName.trim(),
+                    middleName: nameInRequest.middleName?.trim(),
+                    changeIndicator: 'N',
+                    entityIndicator: 'P',
+                    nameType: NameType.findByCode(rule.value),
+                    dataOrigin: metadata?.dataOrigin
+            )
+            personIdentificationNameAlternate = personIdentificationNameAlternateService.create(newPersonIdentificationNameAlternate)
+        }
+
+        return personIdentificationNameAlternate
     }
 
 }
