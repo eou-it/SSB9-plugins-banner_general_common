@@ -1743,6 +1743,7 @@ class PersonCompositeService extends LdmService {
                     lastName: nameInRequest.lastName.trim(),
                     firstName: nameInRequest.firstName.trim(),
                     middleName: nameInRequest.middleName?.trim(),
+                    surnamePrefix: nameInRequest.surnamePrefix?.trim(),
                     changeIndicator: 'N',
                     entityIndicator: 'P',
                     nameType: NameType.findByCode(rule.value),
