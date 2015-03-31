@@ -218,9 +218,7 @@ class PersonCompositeService extends LdmService {
         PersonIdentificationNameAlternate personIdentificationNameAlternate
         Map metadata = person.metadata
         if (person.names instanceof List) {
-            def primaryName = person.names.find { primaryNameType ->
-                primaryNameType.nameType == "Primary" && primaryNameType.firstName && primaryNameType.lastName
-            }
+            def primaryName = person.names.find { it.nameType == "Primary" && it.firstName && it.lastName }
             if (primaryName) {
                 newPersonIdentification = primaryName
                 newPersonIdentification.put('bannerId', 'GENERATED')
@@ -234,9 +232,7 @@ class PersonCompositeService extends LdmService {
                 throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
             }
             if ("v3".equals(getRequestedVersion())) {
-                def birthName = person.names.find { birthNameType ->
-                    birthNameType.nameType == "Birth" && birthNameType.firstName && birthNameType.lastName
-                }
+                def birthName = person.names.find { it.nameType == "Birth" && it.firstName && it.lastName }
                 if (birthName) {
                     personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, birthName, metadata)
                 }
@@ -381,13 +377,9 @@ class PersonCompositeService extends LdmService {
         def primaryName
         def birthName
         if (person.names instanceof List) {
-            primaryName = person.names.find { primaryNameType ->
-                primaryNameType.nameType == "Primary"
-            }
+            primaryName = person.names.find { it.nameType == "Primary" }
             if ("v3".equals(getRequestedVersion())) {
-                birthName = person.names.find { birthNameType ->
-                    birthNameType.nameType == "Birth" && birthNameType.firstName && birthNameType.lastName
-                }
+                birthName = person.names.find { it.nameType == "Birth" && it.firstName && it.lastName }
             }
         }
 
@@ -661,25 +653,10 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private void updateGuidValue(def id, def guid, String ldmName) {
-        // Update the GUID to the one we received.
-        GlobalUniqueIdentifier newEntity = GlobalUniqueIdentifier.findByLdmNameAndDomainId(ldmName, id)
-        if (!newEntity) {
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Person.class.simpleName))
-        }
-        if (!newEntity) {
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Person.class.simpleName))
-        }
-        newEntity.guid = guid
-        globalUniqueIdentifierService.update(newEntity)
-    }
-
-
     private PersonBasicPersonBase createPersonBasicPersonBase(person, newPersonIdentificationName, newPersonIdentification) {
         PersonBasicPersonBase newPersonBase
         if (person.guid) {
             updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
-
         } else {
             def entity = GlobalUniqueIdentifier.findByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
             person.put('guid', entity)
@@ -1717,41 +1694,51 @@ class PersonCompositeService extends LdmService {
 
     private def getPersonIdentificationNameAlternateByNameType(Integer pidm) {
         def birthName
-        IntegrationConfiguration birthNameType = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, 'Birth')[0]
-        if (birthNameType?.value) {
-            PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchByPidmAndNameType(pidm, birthNameType.value)
-            if (personIdentificationNameAlternate) {
-                birthName = new Name(personIdentificationNameAlternate, null)
-                birthName.setNameType(birthNameType.translationValue)
-            }
+        NameType nameType = getBannerNameTypeFromHeDMNameType('Birth')
+
+        PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchByPidmAndNameType(pidm, nameType.code)
+        if (personIdentificationNameAlternate) {
+            birthName = new Name(personIdentificationNameAlternate, null)
+            birthName.setNameType('Birth')
         }
+
         return birthName
     }
 
 
-    private PersonIdentificationNameAlternate createPersonIdentificationNameAlternateByNameType(PersonIdentificationNameCurrent currentPerson, def nameInRequest, Map metadata) {
+    private PersonIdentificationNameAlternate createPersonIdentificationNameAlternateByNameType(PersonIdentificationNameCurrent currentPerson,
+                                                                                                def nameInRequest, Map metadata) {
         PersonIdentificationNameAlternate personIdentificationNameAlternate
+        NameType nameType = getBannerNameTypeFromHeDMNameType(nameInRequest.nameType.trim())
 
-        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, nameInRequest.nameType.trim())[0]
-        if (!rule) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message",[PERSON_NAME_TYPE]))
-        }
-        if (rule.value) {
-            PersonIdentificationNameAlternate newPersonIdentificationNameAlternate = new PersonIdentificationNameAlternate(
-                    pidm: currentPerson.pidm,
-                    bannerId: currentPerson.bannerId,
-                    lastName: nameInRequest.lastName.trim(),
-                    firstName: nameInRequest.firstName.trim(),
-                    middleName: nameInRequest.middleName?.trim(),
-                    changeIndicator: 'N',
-                    entityIndicator: 'P',
-                    nameType: NameType.findByCode(rule.value),
-                    dataOrigin: metadata?.dataOrigin
-            )
-            personIdentificationNameAlternate = personIdentificationNameAlternateService.create(newPersonIdentificationNameAlternate)
-        }
+        PersonIdentificationNameAlternate newPersonIdentificationNameAlternate = new PersonIdentificationNameAlternate(
+                pidm: currentPerson.pidm,
+                bannerId: currentPerson.bannerId,
+                lastName: nameInRequest.lastName.trim(),
+                firstName: nameInRequest.firstName.trim(),
+                middleName: nameInRequest.middleName?.trim(),
+                changeIndicator: 'N',
+                entityIndicator: 'P',
+                nameType: nameType,
+                dataOrigin: metadata?.dataOrigin
+        )
+        personIdentificationNameAlternate = personIdentificationNameAlternateService.create(newPersonIdentificationNameAlternate)
 
         return personIdentificationNameAlternate
+    }
+
+
+    private NameType getBannerNameTypeFromHeDMNameType(def nameTypeInRequest) {
+        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, nameTypeInRequest)[0]
+        if (!rule) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.not.found.message', [PERSON_NAME_TYPE]))
+        }
+        NameType nameType = NameType.findByCode(rule.value)
+        if (!nameType) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.invalid.value.message', [PERSON_NAME_TYPE]))
+        }
+
+        return nameType
     }
 
 }
