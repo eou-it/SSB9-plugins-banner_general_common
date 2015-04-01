@@ -974,34 +974,26 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonCredentials(Map credentialsMap, Map persons, List<PersonIdentificationNameCurrent> personIdentificationList) {
-        personIdentificationList?.each {
-            Person currentRecord = persons.get(it.pidm) ?: new Person(null)
-            if("v2".equals(getRequestedVersion())) {
-                ImsSourcedIdBase sourcedIdBase = credentialsMap.imsSourcedIdBaseList?.find { imsSourcedIdBase ->
-                    imsSourcedIdBase.pidm == it.pidm
-                }
-                if (sourcedIdBase) {
-                    currentRecord.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
-                }
-                ThirdPartyAccess thirdPartyAccess = credentialsMap.thirdPartyAccessList?.find { thirdPartyAcc ->
-                    thirdPartyAcc.pidm == it.pidm
-                }
-                if (thirdPartyAccess) {
-                    currentRecord.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
-                }
-                PidmAndUDCIdMapping pidmAndUDCIdMapping = credentialsMap.pidmAndUDCIdMappingList?.find { udcIdMapping ->
-                    udcIdMapping.pidm == it.pidm
-                }
-                if (pidmAndUDCIdMapping) {
-                    currentRecord.credentials << new Credential("Banner UDC ID", pidmAndUDCIdMapping.udcId, null, null)
+        if("v2".equals(getRequestedVersion())) {
+            credentialsMap.imsSourcedIdBaseList.each { sourcedIdBase ->
+                Person person = persons.get(sourcedIdBase.pidm)
+                person.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
+            }
+            credentialsMap.thirdPartyAccessList.each { thirdPartyAccess ->
+                if( thirdPartyAccess.externalUser ) {
+                    Person person = persons.get(thirdPartyAccess.pidm)
+                    person.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
                 }
             }
-            if(it.bannerId) {
-                currentRecord.credentials << new Credential("Banner ID", it.bannerId, null, null)
+            credentialsMap.pidmAndUDCIdMappingList.each { pidmAndUDCIdMapping ->
+                Person person = persons.get(pidmAndUDCIdMapping.pidm)
+                person.credentials << new Credential("Banner UDC ID", pidmAndUDCIdMapping.udcId, null, null)
             }
-            persons.put(it.pidm, currentRecord)
         }
-
+        personIdentificationList?.each { currentRecord ->
+            Person person = persons.get(currentRecord.pidm)
+            person.credentials << new Credential("Banner ID", currentRecord.bannerId, null, null)
+        }
         return persons
     }
 
