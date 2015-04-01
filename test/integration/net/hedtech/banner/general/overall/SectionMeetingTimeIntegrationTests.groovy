@@ -843,11 +843,10 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testFetchDetailsByTermAndCourseReferenceNumberExistingRecord() {
-        def result = SectionMeetingTime.fetchByTermAndCourseReferenceNumber(
+        def result = SectionMeetingTime.fetchDetailsByTermAndCourseReferenceNumber(
                 u_success_existing_term, u_success_existing_courseReferenceNumber)
 
         assertEquals 1, result.size()
-        asserNotNull result[0].id
         assertEquals "M", result[0].monday
         assertEquals "W", result[0].wednesday
         assertEquals "F", result[0].friday
