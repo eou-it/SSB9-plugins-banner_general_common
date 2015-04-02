@@ -1021,11 +1021,13 @@ class PersonCompositeService extends LdmService {
     def buildPersonAlternateByNameType(List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList, Map persons) {
         personIdentificationNameAlternateList.each {
             Person person = persons.get(it.pidm)
-            def birthName = new Name(it, null)
-            birthName.setNameType('Birth')
-            person.names << birthName
+            def birthNameType = person.names.find { it.nameType == 'Birth' }
+            if(!birthNameType) {
+                def birthName = new Name(it, null)
+                birthName.setNameType('Birth')
+                person.names << birthName
+            }
         }
-
         return persons
     }
 
