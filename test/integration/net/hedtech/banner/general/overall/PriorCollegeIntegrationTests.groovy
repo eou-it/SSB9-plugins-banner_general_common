@@ -172,6 +172,18 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testFetchByPidmList() {
+        def priorCollege = newValidForCreatePriorCollege()
+        priorCollege.save(failOnError: true, flush: true)
+
+        def priorCollegeList = PriorCollege.fetchByPidmList([priorCollege.pidm])
+
+        assertNotNull priorCollegeList
+        assertFalse priorCollegeList.isEmpty()
+        assertTrue priorCollegeList.contains(priorCollege)
+    }
+
+
     private def newValidForCreatePriorCollege() {
         def priorCollege = new PriorCollege(
                 pidm: PersonUtility.getPerson("HOR000001").pidm,
