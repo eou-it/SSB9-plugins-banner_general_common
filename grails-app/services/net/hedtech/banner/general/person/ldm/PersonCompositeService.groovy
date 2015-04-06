@@ -1745,6 +1745,19 @@ class PersonCompositeService extends LdmService {
     }
 
 
+    private def getPersonIdentificationNameAlternateByNameType(Integer pidm) {
+        def birthName
+        NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
+        PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType([pidm], nameType.code)[0]
+        if (personIdentificationNameAlternate) {
+            birthName = new Name(personIdentificationNameAlternate, null)
+            birthName.setNameType('Birth')
+        }
+
+        return birthName
+    }
+
+
     private NameType getBannerNameTypeFromHEDMNameType(def nameTypeInRequest) {
         IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HEDM', PERSON_NAME_TYPE, nameTypeInRequest)[0]
         if (!rule) {
