@@ -1000,7 +1000,7 @@ class PersonCompositeService extends LdmService {
             persons.put(identification.pidm, currentRecord)
         }
         if ("v3".equals(getRequestedVersion())) {
-            NameType nameType = getBannerNameTypeFromHeDMNameType('Birth')
+            NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
             List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
             if(personIdentificationNameAlternateList) {
                 persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
@@ -1726,7 +1726,7 @@ class PersonCompositeService extends LdmService {
     private PersonIdentificationNameAlternate createPersonIdentificationNameAlternateByNameType(PersonIdentificationNameCurrent currentPerson,
                                                                                                 def nameInRequest, Map metadata) {
         PersonIdentificationNameAlternate personIdentificationNameAlternate
-        NameType nameType = getBannerNameTypeFromHeDMNameType(nameInRequest.nameType.trim())
+        NameType nameType = getBannerNameTypeFromHEDMNameType(nameInRequest.nameType.trim())
 
         PersonIdentificationNameAlternate newPersonIdentificationNameAlternate = new PersonIdentificationNameAlternate(
                 pidm: currentPerson.pidm,
@@ -1745,8 +1745,8 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private NameType getBannerNameTypeFromHeDMNameType(def nameTypeInRequest) {
-        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HeDM', PERSON_NAME_TYPE, nameTypeInRequest)[0]
+    private NameType getBannerNameTypeFromHEDMNameType(def nameTypeInRequest) {
+        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HEDM', PERSON_NAME_TYPE, nameTypeInRequest)[0]
         if (!rule) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.not.found.message', [PERSON_NAME_TYPE]))
         }
