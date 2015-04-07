@@ -13,7 +13,6 @@ import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
-import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.person.AdditionalID
 import net.hedtech.banner.general.person.PersonAddress
 import net.hedtech.banner.general.person.PersonBasicPersonBase
@@ -60,7 +59,6 @@ class PersonCompositeService extends LdmService {
     def personAddressService
     def personTelephoneService
     def personEmailService
-    def globalUniqueIdentifierService
     def maritalStatusCompositeService
     def ethnicityCompositeService
     def raceCompositeService
@@ -647,8 +645,9 @@ class PersonCompositeService extends LdmService {
 
     public Integer getPidm(String guid) {
         def entity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ldmName, guid?.toLowerCase())
-        if (!entity)
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Person.class.simpleName))
+        if (!entity) {
+            throw new ApplicationException("Person", new NotFoundException())
+        }
         return entity.domainKey?.toInteger()
     }
 

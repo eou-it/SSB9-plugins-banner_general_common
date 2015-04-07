@@ -105,6 +105,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_credential_type4 = "Banner ID"
     def i_failed_update_credential_id = "TTTT"
     def i_failed_update_credential_type = "Social Security Number"
+    def i_success_alternate_first_name = "John"
+    def i_success_alternate_middle_name = "A"
+    def i_success_alternate_last_name = "Jorden"
+    def i_success_alternate_birth_name_type = "Birth"
 
 
     @Before
@@ -331,6 +335,58 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_credential_type4, persons.credentials[3].credentialType
     }
 
+    //GET Person By Guid API
+    @Test
+    void testGetPersonWithAlternateNameHavingBirthNameType() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.nameType == "Primary" }
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
+        assertNotNull o_birth_name_create
+        assertEquals i_success_alternate_first_name, o_birth_name_create.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_create.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
+
+        def o_success_person_get = personCompositeService.get(o_success_person_create.guid)
+
+        assertNotNull o_success_person_get
+        assertNotNull o_success_person_get.guid
+        assertEquals 2, o_success_person_get.names?.size()
+
+        def o_primary_name_get = o_success_person_get.names.find { it.nameType == "Primary" }
+        def o_birth_name_get = o_success_person_get.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_get
+        assertEquals o_primary_name_create.firstName, o_primary_name_get.firstName
+        assertEquals o_primary_name_create.middleName, o_primary_name_get.middleName
+        assertEquals o_primary_name_create.lastName, o_primary_name_get.lastName
+        assertEquals o_primary_name_create.nameType, o_primary_name_get.nameType
+        assertEquals o_primary_name_create.title, o_primary_name_get.title
+        assertEquals o_primary_name_create.pedigree, o_primary_name_get.pedigree
+        assertEquals o_primary_name_create.preferredName, o_primary_name_get.preferredName
+        assertNotNull o_birth_name_get
+        assertEquals o_birth_name_create.firstName, o_birth_name_get.firstName
+        assertEquals o_birth_name_create.middleName, o_birth_name_get.middleName
+        assertEquals o_birth_name_create.lastName, o_birth_name_get.lastName
+        assertEquals o_birth_name_create.nameType, o_birth_name_get.nameType
+    }
+
     //POST- Person Create API
     @Test
     void testCreatePersonWithStateAndZipIntegrationSettingValue() {
@@ -372,6 +428,36 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_emailType_institution, o_success_person_create.emails[2].emailType
         assertEquals i_success_emailAddress_institution, o_success_person_create.emails[2].emailAddress
     }
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithAlternateNameHavingBirthNameType() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.nameType == "Primary" }
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
+        assertNotNull o_birth_name_create
+        assertEquals i_success_alternate_first_name, o_birth_name_create.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_create.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
+    }
+
 
     @Test
     void testUpdatePersonFirstNameAndLastNameChange() {
@@ -753,6 +839,34 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+    //PUT- person update API
+    @Test
+    void testUpdatePersonWithAlternateNameHavingBirthNameType() {
+        Map content = newPersonWithPreferredEmailRequest()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+        assertNull o_birth_name_create
+
+        //update the email records
+        Map params = [id   : o_success_person_create.guid,
+                      names: [[lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
+        ]
+
+        def o_person_update = personCompositeService.update(params)
+
+        def o_birth_name_update = o_person_update.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_birth_name_update
+        assertEquals i_success_alternate_first_name, o_birth_name_update.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_update.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_update.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_update.nameType
+    }
+
 
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -983,10 +1097,19 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         return params
     }
 
+
     private Map getParamsForPersonFilter() {
         return [
                 action     : [POST: "list"],
         ]
+    }
+
+
+    private Map newPersonWithAlternateNameHavingBirthNameType() {
+        Map params = [names: [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName], [lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
+
+        ]
+        return params
     }
 
 }
