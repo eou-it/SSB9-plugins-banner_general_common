@@ -236,6 +236,53 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
+    @Test
+    void testListPersonQapiWithBirthNameType() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.nameType == "Primary" }
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
+        assertNotNull o_birth_name_create
+        assertEquals i_success_alternate_first_name, o_birth_name_create.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_create.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
+
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/json")
+
+        Map params = getPersonBirthNameTypeFields()
+        def o_success_persons = personCompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+        def firstPerson = o_success_persons.first()
+        assertNotNull firstPerson
+        o_success_persons.each { person ->
+            def birthName = person.names.find { it.nameType == i_success_alternate_birth_name_type }
+            assertEquals i_success_alternate_first_name, birthName.firstName
+            assertEquals i_success_alternate_last_name, birthName.lastName
+        }
+    }
+
+
     @Test
     void testListQapiWithValidPersonfilter() {
 
@@ -1110,6 +1157,18 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         ]
         return params
+    }
+
+
+    private Map getPersonBirthNameTypeFields() {
+        return [
+                action     : [POST: "list"],
+                names      : [[
+                                      nameType : i_success_alternate_birth_name_type,
+                                      firstName: i_success_alternate_first_name,
+                                      lastName : i_success_alternate_last_name
+                              ]]
+        ]
     }
 
 }
