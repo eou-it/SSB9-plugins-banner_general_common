@@ -27,6 +27,7 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.ldm.v1.Email
 import net.hedtech.banner.general.person.ldm.v1.Name
+import net.hedtech.banner.general.person.ldm.v1.NameAlternate
 import net.hedtech.banner.general.person.ldm.v1.Person
 import net.hedtech.banner.general.person.ldm.v1.Phone
 import net.hedtech.banner.general.system.AdditionalIdentificationType
@@ -314,7 +315,7 @@ class PersonCompositeService extends LdmService {
         currentRecord.names << name
         if("v3".equals(getRequestedVersion())) {
             if (personIdentificationNameAlternate) {
-                def birth = new Name(personIdentificationNameAlternate, null)
+                def birth = new NameAlternate(personIdentificationNameAlternate)
                 birth.setNameType("Birth")
                 currentRecord.names << birth
             }
@@ -464,7 +465,7 @@ class PersonCompositeService extends LdmService {
             }
             def birth
             if (personIdentificationNameAlternate) {
-                birth = new Name(personIdentificationNameAlternate, null)
+                birth = new NameAlternate(personIdentificationNameAlternate)
                 birth.setNameType("Birth")
                 names << birth
             } else {
@@ -1022,7 +1023,7 @@ class PersonCompositeService extends LdmService {
             Person person = persons.get(it.pidm)
             def birthNameType = person.names.find { it.nameType == 'Birth' }
             if(!birthNameType) {
-                def birthName = new Name(it, null)
+                def birthName = new NameAlternate(it)
                 birthName.setNameType('Birth')
                 person.names << birthName
             }
@@ -1749,7 +1750,7 @@ class PersonCompositeService extends LdmService {
         NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
         PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType([pidm], nameType.code)[0]
         if (personIdentificationNameAlternate) {
-            birthName = new Name(personIdentificationNameAlternate, null)
+            birthName = new NameAlternate(personIdentificationNameAlternate)
             birthName.setNameType('Birth')
         }
 
