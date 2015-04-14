@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- Copyright 2009-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -814,47 +814,6 @@ class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "01", result[0].category
         assertEquals "0900", result[0].beginTime
         assertEquals "1000", result[0].endTime
-    }
-
-    @Test
-    void testFetchDetailsByTermAndCourseReferenceNumberNewRecord() {
-        def sectionMeetingTime = newValidForCreateSectionMeetingTime()
-        sectionMeetingTime.save(failOnError: true, flush: true)
-        def result = SectionMeetingTime.fetchDetailsByTermAndCourseReferenceNumber(
-                sectionMeetingTime.term, sectionMeetingTime.courseReferenceNumber)
-
-        assertEquals 1, result.size()
-        assertEquals i_success_courseReferenceNumber, result[0].courseReferenceNumber
-        assertEquals i_success_term, result[0].term
-        assertEquals i_success_startDate, result[0].startDate
-        assertEquals i_success_endDate, result[0].endDate
-        assertEquals i_success_sunday, result[0].sunday
-        assertEquals i_success_monday, result[0].monday
-        assertEquals i_success_tuesday, result[0].tuesday
-        assertEquals i_success_wednesday, result[0].wednesday
-        assertEquals i_success_thursday, result[0].thursday
-        assertEquals i_success_friday, result[0].friday
-        assertEquals i_success_saturday, result[0].saturday
-        assertEquals i_success_category, result[0].category
-        assertEquals i_success_beginTime, result[0].beginTime
-        assertEquals i_success_endTime, result[0].endTime
-
-    }
-
-    @Test
-    void testFetchDetailsByTermAndCourseReferenceNumberExistingRecord() {
-        def result = SectionMeetingTime.fetchDetailsByTermAndCourseReferenceNumber(
-                u_success_existing_term, u_success_existing_courseReferenceNumber)
-
-        assertEquals 1, result.size()
-        assertEquals "M", result[0].monday
-        assertEquals "W", result[0].wednesday
-        assertEquals "F", result[0].friday
-        assertEquals "01", result[0].category
-        assertEquals "0900", result[0].beginTime
-        assertEquals "1000", result[0].endTime
-        assertNotNull result[0].startDate
-        assertNotNull result[0].endDate
     }
 
 
