@@ -929,6 +929,15 @@ class PersonCompositeService extends LdmService {
         List<PersonTelephone> personTelephoneList = PersonTelephone.fetchActiveTelephoneByPidmInList(pidms)
         def personEmailList = PersonEmail.findAllByStatusIndicatorAndPidmInList('A', pidms)
         List<PersonRace> personRaceList = PersonRace.findAllByPidmInList(pidms)
+
+        Map credentialsMap = [:]
+        if("v2".equals(getRequestedVersion())) {
+            List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
+            List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
+            List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+            credentialsMap = [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
+        }
+
         personBaseList.each { personBase ->
             Person currentRecord = new Person(personBase)
             currentRecord.maritalStatusDetail = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
@@ -950,27 +959,9 @@ class PersonCompositeService extends LdmService {
             domainIds << identification.id
             currentRecord.metadata = new Metadata(identification.dataOrigin)
             currentRecord.names << name
-            if("v2".equals(getRequestedVersion())) {
-                def sourcedIdBase = ImsSourcedIdBase.findByPidm(identification.pidm)
-                if(sourcedIdBase?.sourcedId) {
-                    currentRecord.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
-                }
-
-                def thirdPartyAccess = ThirdPartyAccess.findByPidm(identification.pidm)
-                if(thirdPartyAccess?.externalUser) {
-                    currentRecord.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
-                }
-
-                def udcIdMapping = PidmAndUDCIdMapping.findByPidm(identification.pidm)
-                if(udcIdMapping?.udcId) {
-                    currentRecord.credentials << new Credential("Banner UDC ID", udcIdMapping.udcId, null, null)
-                }
-            }
-            if(identification.bannerId) {
-                currentRecord.credentials << new Credential("Banner ID", identification.bannerId, null, null)
-            }
             persons.put(identification.pidm, currentRecord)
         }
+        persons = buildPersonCredentials(credentialsMap, persons, personIdentificationList)
         persons = buildPersonGuids(domainIds, persons)
         persons = buildPersonAddresses(personAddressList, persons)
         persons = buildPersonTelephones(personTelephoneList, persons)
@@ -978,6 +969,32 @@ class PersonCompositeService extends LdmService {
         persons = buildPersonRaces(personRaceList, persons)
         persons = buildPersonRoles(persons)
         persons // Map of person objects with pidm as index.
+    }
+
+
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    def buildPersonCredentials(Map credentialsMap, Map persons, List<PersonIdentificationNameCurrent> personIdentificationList) {
+        if("v2".equals(getRequestedVersion())) {
+            credentialsMap.imsSourcedIdBaseList.each { sourcedIdBase ->
+                Person person = persons.get(sourcedIdBase.pidm)
+                person.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
+            }
+            credentialsMap.thirdPartyAccessList.each { thirdPartyAccess ->
+                if( thirdPartyAccess.externalUser ) {
+                    Person person = persons.get(thirdPartyAccess.pidm)
+                    person.credentials << new Credential("Banner User Name", thirdPartyAccess.externalUser, null, null)
+                }
+            }
+            credentialsMap.pidmAndUDCIdMappingList.each { pidmAndUDCIdMapping ->
+                Person person = persons.get(pidmAndUDCIdMapping.pidm)
+                person.credentials << new Credential("Banner UDC ID", pidmAndUDCIdMapping.udcId, null, null)
+            }
+        }
+        personIdentificationList?.each { currentRecord ->
+            Person person = persons.get(currentRecord.pidm)
+            person.credentials << new Credential("Banner ID", currentRecord.bannerId, null, null)
+        }
+        return persons
     }
 
 
