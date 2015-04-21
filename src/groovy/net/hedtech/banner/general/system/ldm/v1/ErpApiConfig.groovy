@@ -109,5 +109,11 @@ class ErpApiConfig {
             '/subjects/',
             ['CDM.Subject.STVSUBJ']
         )
+        resourceMap << new ApiResource(
+                'section-registrations',
+                1,
+                '/section-registrations/',
+                null
+        )
     }
 }
