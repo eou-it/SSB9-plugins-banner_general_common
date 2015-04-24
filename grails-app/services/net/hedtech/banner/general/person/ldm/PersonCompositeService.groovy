@@ -1617,11 +1617,11 @@ class PersonCompositeService extends LdmService {
 
 
     def validateEmailRequiredFields(email) {
-        if(["v2","v3"].contains(getRequestedVersion())) {
+        /*if(["v2","v3"].contains(getRequestedVersion())) {
             if (!email.guid) {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailGuid.invalid", []))
             }
-        }
+        }*/
         if (!email.emailType) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailType.invalid",[]))
         }
