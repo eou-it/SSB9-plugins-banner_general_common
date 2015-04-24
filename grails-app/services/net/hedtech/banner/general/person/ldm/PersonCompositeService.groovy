@@ -1224,7 +1224,7 @@ class PersonCompositeService extends LdmService {
                     try {
                         ethnicityDetail = ethnicityCompositeService.get(ethnicityGuid)
                         personBase.ethnicity = ethnicityDetail.ethnicity
-                        personBase.ethnic = person.ethnic == "Non-Hispanic" ? '1' : (person.ethnic == "Hispanic" ? '2' : null)
+                        personBase.ethnic = ethnicityDetail.parentCategory == "Non-Hispanic" ? '1' : (ethnicityDetail.parentCategory == "Hispanic" ? '2' : null)
                     } catch (ApplicationException ae) {
                         LdmService.throwBusinessLogicValidationException(ae)
                     }
