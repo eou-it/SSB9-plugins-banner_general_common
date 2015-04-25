@@ -29,9 +29,8 @@ class RoomCompositeService extends LdmService {
     private static final String MINUTE_FORMAT = '[0-5][0-9]'
     private static final String SECOND_FORMAT = '[0-5][0-9]'
     private static final String LDM_NAME = 'rooms'
-    private static final String PROCESS_CODE = "LDM"
+    private static final String PROCESS_CODE = "HEDM"
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
-    def buildingCompositeService
 
 
     List<AvailableRoom> list(Map params) {

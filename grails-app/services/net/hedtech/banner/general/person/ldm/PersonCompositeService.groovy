@@ -70,13 +70,13 @@ class PersonCompositeService extends LdmService {
     def personIdentificationNameAlternateService
 
     static final String ldmName = 'persons'
+    static final String PROCESS_CODE = "HEDM"
     static final String PERSON_ADDRESS_TYPE = "PERSON.ADDRESSES.ADDRESSTYPE"
     static final String PERSON_REGION = "PERSON.ADDRESSES.REGION"
     static final String PERSON_POSTAL_CODE = "PERSON.ADDRESSES.POSTAL.CODE"
     static final String PERSON_PHONE_TYPE = "PERSON.PHONES.PHONETYPE"
     static final String PERSON_EMAIL_TYPE = "PERSON.EMAILS.EMAILTYPE"
     static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
-    static final String PROCESS_CODE = "LDM"
     static final String PERSON_MATCH_RULE = "PERSON.MATCHRULE"
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
