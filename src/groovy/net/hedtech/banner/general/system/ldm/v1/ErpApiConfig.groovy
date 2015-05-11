@@ -23,7 +23,7 @@ class ErpApiConfig {
                 '/sections/',
                 null
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'academic-levels',
             1,
             '/academic-levels/',
@@ -60,15 +60,16 @@ class ErpApiConfig {
             '/marital-statuses/',
             ['CDM.MaritalStatus.STVMRTL']
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'organizations',
             1,
             '/organizations/',
             ['CDM.College.STVCOLL']
         )
-        resourceMap << new ApiResource( 
+        //TODO: changing persons API version to 3. this needs to be reverted to 1.
+        resourceMap << new ApiResource(
             'persons',
-            1,
+            3,
             '/persons/',
             ['CDM.Person.GOREMAL',
             'CDM.Person.GORPRAC',
@@ -78,32 +79,32 @@ class ErpApiConfig {
             'CDM.Person.SPRTELE',
             'CDM.Faculty.SIBINST']
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'races',
             1,
             '/races/',
             ['CDM.Race.GORRACE']
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'restriction-types',
             1,
             '/restriction-types/',
             ['CDM.HoldType.STVHLDD']
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'rooms',
             1,
             '/rooms/',
             ['CDM.Room.SLBRDEF']
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'sites',
             1,
             '/sites/',
             ['CDM.Campus.STVCAMP',
              'CDM.Campus.SLBBLDG']
         )
-        resourceMap << new ApiResource( 
+        resourceMap << new ApiResource(
             'subjects',
             1,
             '/subjects/',
