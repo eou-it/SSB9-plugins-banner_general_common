@@ -105,6 +105,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_credential_type4 = "Banner ID"
     def i_failed_update_credential_id = "TTTT"
     def i_failed_update_credential_type = "Social Security Number"
+    def i_success_credential_type4_filter="BannerId"
+    def i_failure_credential_type4_filter="Banner Id"
+    def i_failure_credential_id4="HOSP00"
 
 
     @Before
@@ -753,6 +756,54 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+    //Filter on CredentialId and Credential Type
+    @Test
+    public void testCredentialsFilterOnPerson(){
+        def persons = [:]
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        persons = personCompositeService.list(params);
+        assert persons.size()>0
+        assertEquals 1,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4)
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'not.found.message'
+        }
+
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4);
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+    }
 
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())

@@ -99,7 +99,7 @@ class PersonCompositeService extends LdmService {
     def list(params) {
         def pidms = []
         def resultList = [:]
-
+        def credentialTypeList=["BannerId"]
         def sortParams = [:]
         def allowedSortFields = ["firstName", "lastName"]
         if (params.containsKey('sort')) sortParams.put('sort', params.sort)
@@ -150,8 +150,18 @@ class PersonCompositeService extends LdmService {
             if (params.containsKey("personFilter")) {
                 String selId = params.get("personFilter")
                 pidms = getPidmsForPersonFilter(selId, sortParams)
-            }
-            else {
+            } else if(params.containsKey("credentialType") && params.containsKey("credentialId")){
+                if(params.credentialId && credentialTypeList.contains(params.credentialType)){
+                    String credential=params.credentialId;
+                    PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
+                    if(null == personIdentificationNameCurrent){
+                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("not.found.message", []))
+                    }
+                    pidms<<personIdentificationNameCurrent?.pidm
+                }else{
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
+                }
+            }else {
 
 
                 if (params.role) {
