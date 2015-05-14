@@ -67,7 +67,7 @@ class PersonCompositeService extends LdmService {
     def userRoleCompositeService
     def additionalIDService
     def personFilterCompositeService
-
+ 
     static final String ldmName = 'persons'
     static final String PERSON_ADDRESS_TYPE = "PERSON.ADDRESSES.ADDRESSTYPE"
     static final String PERSON_REGION = "PERSON.ADDRESSES.REGION"
