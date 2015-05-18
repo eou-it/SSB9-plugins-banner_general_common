@@ -1004,13 +1004,14 @@ class PersonCompositeService extends LdmService {
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonAlternateByNameType(List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList, Map persons) {
         personIdentificationNameAlternateList.each {
-            Person person = persons.get(it.pidm)
-            def birthNameType = person.names.find { it.nameType == 'Birth' }
+            Person currentRecord = persons.get(it.pidm) ?: new Person(null)
+            def birthNameType = currentRecord.names.find { it.nameType == 'Birth' }
             if(!birthNameType) {
                 def birthName = new NameAlternate(it)
                 birthName.setNameType('Birth')
-                person.names << birthName
+                currentRecord.names << birthName
             }
+            persons.put(it.pidm, currentRecord)
         }
         return persons
     }
