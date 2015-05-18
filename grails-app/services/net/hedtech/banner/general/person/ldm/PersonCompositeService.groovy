@@ -1026,6 +1026,7 @@ class PersonCompositeService extends LdmService {
             name.setNameType("Primary")
             currentRecord.names << name
             currentRecord.metadata = new Metadata(it.dataOrigin)
+            persons.put(it.pidm, currentRecord)
             if ("v3".equals(getRequestedVersion())) {
                 NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
                 List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
@@ -1033,7 +1034,6 @@ class PersonCompositeService extends LdmService {
                     persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
                 }
             }
-            persons.put(it.pidm, currentRecord)
         }
         return persons
     }
