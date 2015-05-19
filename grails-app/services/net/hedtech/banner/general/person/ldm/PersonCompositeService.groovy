@@ -996,7 +996,7 @@ class PersonCompositeService extends LdmService {
         persons = buildPersonTelephones(personTelephoneList, persons)
         persons = buildPersonEmails(personEmailList, persons)
         persons = buildPersonRaces(personRaceList, persons)
-        persons = buildPersonRoles(persons, personIdentificationList, true)
+        persons = buildPersonRoles(persons, personIdentificationList, studentRole)
         persons // Map of person objects with pidm as index.
     }
 
