@@ -138,9 +138,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-    @Ignore
     @Test
     void testListQapiWithValidFirstAndLastName() {
+        //we will forcefully set the content type so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
         Map params = getParamsWithReqiuredFields()
         def persons = personCompositeService.list(params)
 
@@ -159,9 +161,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-    @Ignore
     @Test
     void testListQapiWithInValidFirstAndLastName() {
+        //we will forcefully set the content type so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
         Map params = getParamsWithReqiuredFields()
         params.names[0].firstName = "MarkTT"
         params.names[0].lastName = "Kole"
@@ -171,9 +175,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue persons.isEmpty()
     }
 
-    @Ignore
     @Test
     void testListQapiWithInValidDateOfBirth() {
+        //we will forcefully set the content type so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
         Map params = getParamsWithReqiuredFields()
 
         params.dateOfBirth = "12-1973-30"
