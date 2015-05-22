@@ -331,7 +331,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
               log.debug( "Setting form context." )
               FormContext.set( ['CMQUERYEXECUTE'] )
 
-              String monitorOracleUserName = 'BCMADMIN'
+              String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
               Authentication auth
               try {
                   auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
@@ -419,7 +419,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
               if (!SecurityContextHolder.getContext().getAuthentication()) {
                   FormContext.set( ['CMQUERYEXECUTE'] )
 
-                  String monitorOracleUserName = 'BCMADMIN'
+                  String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                   Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                   SecurityContextHolder.getContext().setAuthentication( auth )
                   if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process polling thread." )
@@ -479,7 +479,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
                   if (!SecurityContextHolder.getContext().getAuthentication()) {
                       FormContext.set( ['CMQUERYEXECUTE'] )
 
-                      String monitorOracleUserName = 'BCMADMIN'
+                      String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                       Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                       SecurityContextHolder.getContext().setAuthentication( auth )
                       if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process monitor thread." )
@@ -563,7 +563,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
               if (!SecurityContextHolder.getContext().getAuthentication()) {
                   FormContext.set( ['CMQUERYEXECUTE'] )
 
-                  String monitorOracleUserName = 'BCMADMIN'
+                  String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                   Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                   SecurityContextHolder.getContext().setAuthentication( auth )
                   if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process polling thread." )

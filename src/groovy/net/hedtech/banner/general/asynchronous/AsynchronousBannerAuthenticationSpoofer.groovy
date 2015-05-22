@@ -74,7 +74,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
                 pidm = row.gobeacc_pidm
             }
 
-            if ( pidm ) {
+            if ( pidm || oracleUserName) {
                 // check if the oracle user account is locked
                 def sqlStatement1 = '''select account_status,lock_date from dba_users where username=?'''
                 db.eachRow( sqlStatement1, [oracleUserName.toUpperCase()] ) { row ->

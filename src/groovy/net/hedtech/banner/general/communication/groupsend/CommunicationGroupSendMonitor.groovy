@@ -62,7 +62,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
         if (!SecurityContextHolder.getContext().getAuthentication()) {
 //            FormContext.set( ['SELFSERVICE'] )
             FormContext.set( ['CMQUERYEXECUTE'] )
-            String monitorOracleUserName = 'BCMADMIN'
+            String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
             Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
             SecurityContextHolder.getContext().setAuthentication( auth )
             if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for monitoring." )
