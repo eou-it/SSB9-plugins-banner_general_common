@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.asynchronous
 
 import groovy.sql.Sql
+import net.hedtech.banner.security.AuthenticationProviderUtility
 import net.hedtech.banner.security.BannerAuthenticationProvider
 import net.hedtech.banner.security.FormContext
 import net.hedtech.banner.security.SelfServiceBannerAuthenticationProvider
@@ -39,10 +40,10 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
             def authenticationResults = trustedAuthentication( oracleUserName, db )
 
             // Next, we'll verify the authenticationResults (and throw appropriate exceptions for expired pin, disabled account, etc.)
-            BannerAuthenticationProvider.verifyAuthenticationResults( this, authentication, authenticationResults )
+            AuthenticationProviderUtility.verifyAuthenticationResults( this, authentication, authenticationResults )
             authenticationResults['authorities'] = BannerAuthenticationProvider.determineAuthorities( authenticationResults, db )
             authenticationResults['fullName'] = getFullName( authenticationResults.name.toUpperCase(), dataSource ) as String
-            return BannerAuthenticationProvider.newAuthenticationToken( this, authenticationResults )
+            return AuthenticationProviderUtility.newAuthenticationToken( this, authenticationResults )
         } finally {
             conn?.close()
         }
