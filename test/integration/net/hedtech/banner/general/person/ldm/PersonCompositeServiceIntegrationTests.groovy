@@ -309,6 +309,27 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+    @Test
+    void testListapiWithRoleFacultyAndPagination() {
+        def params =[role:"faculty", max:'10', offset:'5']
+
+        def persons = personCompositeService.list(params)
+        persons.each {
+            it.roles.role == "Faculty"
+        }
+    }
+
+
+    @Test
+    void testListapiWithRoleStudentAndPagination() {
+        def params =[role:"student", max:'10', offset:'5']
+
+        def persons = personCompositeService.list(params)
+        persons.each {
+            it.roles.role == "Student"
+        }
+    }
+
 
     @Test
     void testListapiWithInvalidPersonfilter() {

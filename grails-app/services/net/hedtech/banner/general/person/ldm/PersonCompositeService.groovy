@@ -110,7 +110,7 @@ class PersonCompositeService extends LdmService {
         def resultList = [:]
         def allowedSortFields = ["firstName", "lastName"]
         Boolean studentRole = false
-
+        List<PersonIdentificationNameCurrent> personIdentificationList = []
         if (params.sort) {
             RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         } else {
@@ -174,14 +174,15 @@ class PersonCompositeService extends LdmService {
             } else {
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
-                    if (role == "faculty") {
-                        pidms = userRoleCompositeService.fetchAllByRole(params)
-                    } else if (role == "student") {
-                        studentRole = true
+                    if (role == "faculty" || role == "student") {
                         RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
-                        def students = userRoleCompositeService.fetchAllByRole(params)
-                        resultList = buildLdmPersonObjects(students, studentRole)
-                        total = userRoleCompositeService.fetchAllByRole(params, studentRole)
+                        pidms = userRoleCompositeService.fetchAllByRole(params)
+                        personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms)
+                        if(role == "student") {
+                            studentRole = true
+                        }
+                        resultList = buildLdmPersonObjects(personIdentificationList, studentRole)
+                        total = userRoleCompositeService.fetchAllByRole(params, true)?.toInteger()
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
                     }
@@ -190,7 +191,7 @@ class PersonCompositeService extends LdmService {
                 }
             }
         }
-        if( pidms?.size() && !studentRole) {
+        if( pidms?.size() && !params.role) {
             total = pidms.size()
             def pageParams = [:]
             //Need to provide pre-sorted full lists of pidms for count...
@@ -201,8 +202,7 @@ class PersonCompositeService extends LdmService {
             def endCount = (pageParams.max.toInteger() + pageParams.offset.toInteger()) > (pidms.size() - 1) ?
                     pidms.size() - 1 : pageParams.max.toInteger() + pageParams.offset.toInteger() - 1
 
-            List<PersonIdentificationNameCurrent> personIdentificationList =
-                    PersonIdentificationNameCurrent.findAllByPidmInList(pidms[pageParams.offset.toInteger()..endCount], params)
+            personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms[pageParams.offset.toInteger()..endCount], params)
             resultList = buildLdmPersonObjects(personIdentificationList)
         }
 
@@ -955,25 +955,26 @@ class PersonCompositeService extends LdmService {
         return personEmails
     }
 
+
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def buildLdmPersonObjects(def personIdentificationList, Boolean studentRole = false) {
+    def buildLdmPersonObjects(List<PersonIdentificationNameCurrent> personIdentificationList, Boolean studentRole = false) {
         def persons = [:]
         def pidms = []
-        def domainIds = []
-        personIdentificationList.each {
-            pidms << it.pidm
-            domainIds << it.id
-            persons.put(it.pidm, null) //Preserve list order.
+        personIdentificationList.each { personIdentification ->
+            pidms << personIdentification.pidm
+            persons.put(personIdentification.pidm, null) //Preserve list order.
         }
         if (pidms.size() < 1) {
             return persons
         } else if (pidms.size() > 1000) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("max.results.exceeded",[]))
         }
+        List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList(pidms)
         List<PersonAddress> personAddressList = PersonAddress.fetchActiveAddressesByPidmInList(pidms)
         List<PersonTelephone> personTelephoneList = PersonTelephone.fetchActiveTelephoneByPidmInList(pidms)
         def personEmailList = PersonEmail.findAllByStatusIndicatorAndPidmInList('A', pidms)
         List<PersonRace> personRaceList = PersonRace.findAllByPidmInList(pidms)
+
         Map credentialsMap = [:]
         if(["v2","v3"].contains(getRequestedVersion())) {
             List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
@@ -982,21 +983,43 @@ class PersonCompositeService extends LdmService {
             credentialsMap = [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
         }
 
-        if(!studentRole) {
-            List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList(pidms)
-            persons = buildMaritalStatusAndEthnicities(persons, personBaseList)
-            persons = buildNames(persons, personIdentificationList, pidms)
-        } else {
-            persons = buildMaritalStatusEthnicitiesAndNames(persons, personIdentificationList, pidms)
-        }
+        personBaseList.each { personBase ->
+            Person currentRecord = new Person(personBase)
+            currentRecord.maritalStatusDetail = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
+            currentRecord.ethnicityDetail = personBase.ethnicity?.code ? ethnicityCompositeService.fetchByEthnicityCode(personBase.ethnicity?.code) : null
+            /*  if( personBase.ssn ) {
+                currentRecord.credentials << new Credential("Social Security Number",
+                        personBase.ssn,
+                        null,
+                        null)
+            } Not spitting out SSNs at this time*/
 
+            persons.put(currentRecord.pidm, currentRecord)
+        }
+        def domainIds = []
+        personIdentificationList.each { identification ->
+            Person currentRecord = persons.get(identification.pidm) ?: new Person(null)
+            def name = new Name(identification, currentRecord)
+            name.setNameType("Primary")
+            currentRecord.names << name
+            domainIds << identification.id
+            currentRecord.metadata = new Metadata(identification.dataOrigin)
+            persons.put(identification.pidm, currentRecord)
+        }
+        if ("v3".equals(getRequestedVersion())) {
+            NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
+            List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
+            if(personIdentificationNameAlternateList) {
+                persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
+            }
+        }
         persons = buildPersonCredentials(credentialsMap, persons, personIdentificationList)
         persons = buildPersonGuids(domainIds, persons)
         persons = buildPersonAddresses(personAddressList, persons)
         persons = buildPersonTelephones(personTelephoneList, persons)
         persons = buildPersonEmails(personEmailList, persons)
         persons = buildPersonRaces(personRaceList, persons)
-        persons = buildPersonRoles(persons, personIdentificationList, studentRole)
+        persons = buildPersonRoles(persons, studentRole)
         persons // Map of person objects with pidm as index.
     }
 
@@ -1010,62 +1033,6 @@ class PersonCompositeService extends LdmService {
                 def birthName = new NameAlternate(it)
                 birthName.setNameType('Birth')
                 currentRecord.names << birthName
-            }
-        }
-        return persons
-    }
-
-
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def buildMaritalStatusEthnicitiesAndNames(Map persons, def personIdentificationList, def pidms) {
-        personIdentificationList.each {
-            Person currentRecord = persons.get(it.pidm) ?: new Person(null)
-            currentRecord.maritalStatusDetail = it.maritalStatus?.code ? maritalStatusCompositeService.fetchByMaritalStatusCode(it.maritalStatus?.code) : null
-            currentRecord.ethnicityDetail = it.ethnicity?.code ? ethnicityCompositeService.fetchByEthnicityCode(it.ethnicity?.code) : null
-            def name = new Name(it)
-            name.setNameType("Primary")
-            currentRecord.names << name
-            currentRecord.metadata = new Metadata(it.dataOrigin)
-            persons.put(it.pidm, currentRecord)
-        }
-        if ("v3".equals(getRequestedVersion())) {
-            NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
-            List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
-            if (personIdentificationNameAlternateList) {
-                persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
-            }
-        }
-        return persons
-    }
-
-
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def buildMaritalStatusAndEthnicities(Map persons, def personBaseList) {
-        personBaseList.each {
-            Person currentRecord = new Person(it)
-            currentRecord.maritalStatusDetail = it.maritalStatus?.code ? maritalStatusCompositeService.fetchByMaritalStatusCode(it.maritalStatus?.code) : null
-            currentRecord.ethnicityDetail = it.ethnicity?.code ? ethnicityCompositeService.fetchByEthnicityCode(it.ethnicity?.code) : null
-            persons.put(currentRecord.pidm, currentRecord)
-        }
-        return persons
-    }
-
-
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def buildNames(Map persons, def personIdentificationList, def pidms) {
-        personIdentificationList.each {
-            Person currentRecord = persons.get(it.pidm) ?: new Person(null)
-            def name = new Name(it, currentRecord)
-            name.setNameType("Primary")
-            currentRecord.names << name
-            currentRecord.metadata = new Metadata(it.dataOrigin)
-            persons.put(it.pidm, currentRecord)
-        }
-        if ("v3".equals(getRequestedVersion())) {
-            NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
-            List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
-            if (personIdentificationNameAlternateList) {
-                persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
             }
         }
         return persons
@@ -1183,14 +1150,14 @@ class PersonCompositeService extends LdmService {
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def buildPersonRoles(Map persons, def students = [], Boolean studentRole = false) {
+    def buildPersonRoles(Map persons, Boolean studentRole = false) {
         def pidms = []
         persons.each { key, value ->
             pidms << key
         }
-        userRoleCompositeService.fetchAllRolesByPidmInList(pidms, students, studentRole).each { role ->
-            Person currentRecord = persons.get(role.key)
-            currentRecord.roles = role.value
+        userRoleCompositeService.fetchAllRolesByPidmInList(pidms, studentRole).each { role ->
+            Person currentRecord = persons.get(role.key.toInteger())
+            currentRecord.roles << role.value
         }
 
         persons
