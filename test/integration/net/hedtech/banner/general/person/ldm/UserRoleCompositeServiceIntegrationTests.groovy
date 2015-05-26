@@ -82,6 +82,13 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
+    void testListFacultyPersonsCount() {
+        def results = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
+
+        assertTrue results > 0
+    }
+
+    @Test
     void testListFacultyPersons() {
         def results = userRoleCompositeService.fetchAllByRole([role: "faculty", max: '10', offset: '5'])
 

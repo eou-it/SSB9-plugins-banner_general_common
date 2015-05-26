@@ -345,6 +345,20 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
+    @Test
+    void testGetapiWithInvalidGuid() {
+        def invalidGuid = 'xxxxxx'
+
+        try {
+            personCompositeService.get(invalidGuid)
+            fail('This should have failed as person filter GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'NotFoundException'
+        }
+    }
+
+
     @Test
     void testListapiWithPersonfilterNull() {
 
@@ -1138,8 +1152,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map newPersonWithAddressRequest() {
-        Map params = [names    : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
-                      addresses: [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]]
+        String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', i_success_ethnicity?.code)?.guid
+        String maritalStatusGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('marital-status', i_success_maritalStatus?.code)?.guid
+
+        Map params = [names              : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      addresses          : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]],
+                      ethnicityDetail    : [guid: ethnicityGuid],
+                      maritalStatusDetail: [guid: maritalStatusGuid]
         ]
 
         return params
