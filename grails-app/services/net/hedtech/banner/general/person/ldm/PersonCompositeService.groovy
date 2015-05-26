@@ -99,7 +99,7 @@ class PersonCompositeService extends LdmService {
     def list(params) {
         def pidms = []
         def resultList = [:]
-        def credentialTypeList=["BannerId"]
+        def credentialTypeList=["Banner ID"]
         def sortParams = [:]
         def allowedSortFields = ["firstName", "lastName"]
         if (params.containsKey('sort')) sortParams.put('sort', params.sort)
