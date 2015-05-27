@@ -60,13 +60,9 @@ class CommunicationGroupSendMonitor implements DisposableBean {
         if (log.isDebugEnabled()) log.debug( "Checking group sends for status updates." )
         // begin setup
         if (!SecurityContextHolder.getContext().getAuthentication()) {
-//            FormContext.set( ['SELFSERVICE'] )
             FormContext.set( ['CMQUERYEXECUTE'] )
-            String monitorOracleUserName = 'BCMADMIN' // change to COMMMGR (oracle account) - should be exempt from MEP policies
-            // need to create a different kind of authentication for a pure oracle user:
-            // for commmgr do not look up the (non-existant) gobeac record. The gobeac record was just used to get
-            // the oracle account. We can still do the same checks (active, etc) for the oracle account.
-            //TODO: Add set of assertions in launch to make sure Bnanner DS assumptions for robot thread
+
+            String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
             Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
             SecurityContextHolder.getContext().setAuthentication( auth )
             if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for monitoring." )
