@@ -8,6 +8,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.security.FormContext
+import net.hedtech.banner.security.MepContextHolder
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean;
@@ -330,7 +331,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           if (!SecurityContextHolder.getContext().getAuthentication()) {
               log.debug( "Setting form context." )
               FormContext.set( ['CMQUERYEXECUTE'] )
-
+              MepContextHolder.set( 'BANNER' )
               String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
               Authentication auth
               try {
@@ -418,7 +419,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           public void run() {
               if (!SecurityContextHolder.getContext().getAuthentication()) {
                   FormContext.set( ['CMQUERYEXECUTE'] )
-
+                  MepContextHolder.set( 'BANNER' )
                   String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                   Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                   SecurityContextHolder.getContext().setAuthentication( auth )
@@ -478,7 +479,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
               while (_keepRunning) {
                   if (!SecurityContextHolder.getContext().getAuthentication()) {
                       FormContext.set( ['CMQUERYEXECUTE'] )
-
+                      MepContextHolder.set( 'BANNER' )
                       String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                       Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                       SecurityContextHolder.getContext().setAuthentication( auth )
@@ -562,7 +563,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           public void run() {
               if (!SecurityContextHolder.getContext().getAuthentication()) {
                   FormContext.set( ['CMQUERYEXECUTE'] )
-
+                  MepContextHolder.set( 'BANNER' )
                   String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                   Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                   SecurityContextHolder.getContext().setAuthentication( auth )

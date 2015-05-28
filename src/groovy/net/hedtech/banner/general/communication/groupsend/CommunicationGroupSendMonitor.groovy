@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.security.FormContext
+import net.hedtech.banner.security.MepContextHolder
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
@@ -61,7 +62,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
         // begin setup
         if (!SecurityContextHolder.getContext().getAuthentication()) {
             FormContext.set( ['CMQUERYEXECUTE'] )
-
+            MepContextHolder.set( 'BANNER' )
             String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
             Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
             SecurityContextHolder.getContext().setAuthentication( auth )
