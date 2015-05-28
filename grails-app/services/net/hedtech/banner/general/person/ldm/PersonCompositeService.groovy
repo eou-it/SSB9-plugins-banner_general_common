@@ -195,8 +195,14 @@ class PersonCompositeService extends LdmService {
             total = pidms.size()
             def pageParams = [:]
             //Need to provide pre-sorted full lists of pidms for count...
-            if (params.containsKey('max')) pageParams.put('max', params.max)
-            if (params.containsKey('offset')) pageParams.put('offset', params.offset)
+            if (params.containsKey('max')) {
+                pageParams.put('max', params.max)
+                params.remove("max")
+            }
+            if (params.containsKey('offset')) {
+                pageParams.put('offset', params.offset)
+                params.remove("offset")
+            }
             RestfulApiValidationUtility.correctMaxAndOffset(pageParams, 500, 0)
             pageParams.offset = pageParams.offset ?: "0"
             def endCount = (pageParams.max.toInteger() + pageParams.offset.toInteger()) > (pidms.size() - 1) ?
