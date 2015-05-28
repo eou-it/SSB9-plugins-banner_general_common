@@ -24,8 +24,15 @@ class UserRoleCompositeService {
     def fetchAllByRole(Map params, boolean count = false) {
         def results = []
         String sortField
-        String order = params.sortAndPaging?.order ? params.sortAndPaging?.order.trim() : "asc"
-        if (params.sortAndPaging?.sort == "firstName") {
+        String order
+        if(params.order) {
+            order = params.order.trim()
+        }
+        else {
+            order = "asc"
+        }
+
+        if (params.sort?.trim() == "firstName") {
             sortField = "a.spriden_first_name"
         } else {
             sortField = "a.spriden_last_name"
@@ -70,11 +77,10 @@ class UserRoleCompositeService {
                                                         and c.stvfcst_active_ind = 'A'
                                                         and c.sibinst_schd_ind = 'Y'
                                                         and sysdate < e.stvterm_end_date)
-                                  and a.spriden_change_ind is null"""
-                            query += orderByString
-                            query += """) pidms
-                                    where rownum <= ?)
-                                    where rn > ?"""
+                                  and a.spriden_change_ind is null
+                                  $orderByString) pidms
+                                  where rownum <= ?)
+                                  where rn > ?"""
                         results = sql.rows(query, [max, offset])?.collect { it.spriden_pidm?.toInteger() }
                     }
                 } catch (SQLException e) {
@@ -105,13 +111,13 @@ class UserRoleCompositeService {
                     } else {
                         def query = """select * from
                                   (select pidms.*, rownum rn from
-                                  (select a.spriden_pidm from spriden a where exists
-                                   (select 1 from sgbstdn b
-                                   where a.spriden_pidm = b.sgbstdn_pidm)
-                                   and a.spriden_change_ind is null
-                                   $orderByString) pidms
-                                    where rownum <= ?)
-                                    where rn > ?"""
+                                      (select a.spriden_pidm from spriden a where exists
+                                         (select 1 from sgbstdn b
+                                         where a.spriden_pidm = b.sgbstdn_pidm)
+                                         and a.spriden_change_ind is null
+                                         $orderByString) pidms
+                                  where rownum <= ?)
+                                  where rn > ?"""
                         results = sql.rows(query, [max, offset])?.collect { it.spriden_pidm?.toInteger() }
                     }
                 } catch (SQLException e) {

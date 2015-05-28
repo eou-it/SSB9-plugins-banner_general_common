@@ -177,7 +177,7 @@ class PersonCompositeService extends LdmService {
                     if (role == "faculty" || role == "student") {
                         RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
                         pidms = userRoleCompositeService.fetchAllByRole(params)
-                        personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms)
+                        personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms, params)
                         if(role == "student") {
                             studentRole = true
                         }
