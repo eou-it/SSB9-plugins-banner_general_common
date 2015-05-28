@@ -211,7 +211,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map params = getParamsForPersonFilter()
 
-        params.put("personFilter","xxxx")
+        params.put("personFilter", "xxxx")
 
         try {
             personCompositeService.list(params)
@@ -232,7 +232,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map params = getParamsForPersonFilter()
 
-        params.put("personFilter","")
+        params.put("personFilter", "")
 
         try {
             personCompositeService.list(params)
@@ -302,7 +302,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map params = getParamsForPersonFilter()
 
-        params.put("personFilter",guid)
+        params.put("personFilter", guid)
 
         persons = personCompositeService.list(params)
         assertNotNull persons
@@ -311,7 +311,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithRoleFacultyAndPagination() {
-        def params =[role:"faculty", max:'10', offset:'5']
+        def params = [role: "faculty", max: '10', offset: '5']
 
         def persons = personCompositeService.list(params)
         persons.each {
@@ -322,7 +322,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithRoleStudentAndPagination() {
-        def params =[role:"student", max:'10', offset:'5']
+        def params = [role: "student", max: '10', offset: '5']
 
         def persons = personCompositeService.list(params)
         persons.each {
@@ -334,8 +334,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListapiWithInvalidPersonfilter() {
 
-        def params =[:]
-        params.put("personFilter","xxxx")
+        def params = [:]
+        params.put("personFilter", "xxxx")
 
         try {
             personCompositeService.list(params)
@@ -362,8 +362,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListapiWithPersonfilterNull() {
 
-        def params =[:]
-        params.put("personFilter","")
+        def params = [:]
+        params.put("personFilter", "")
 
         try {
             personCompositeService.list(params)
@@ -376,9 +376,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListapiWithPersonfilterAndRole() {
 
-        def params =[:]
-        params.put("personFilter","xxxx")
-        params.put("role","faculty")
+        def params = [:]
+        params.put("personFilter", "xxxx")
+        params.put("role", "faculty")
 
         try {
             personCompositeService.list(params)
@@ -396,7 +396,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
         def params = [:]
 
-        params.put("personFilter",guid)
+        params.put("personFilter", guid)
 
         persons = personCompositeService.list(params)
         assertNotNull persons
@@ -548,14 +548,18 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testUpdatePersonFirstNameAndLastNameChange() {
+    void testUpdatePersonFirstNameAndLastNameChangeWithCreatingPersonBase() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
         PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.findAllByPidmInList([personBasicPersonBase.pidm]).get(0)
         GlobalUniqueIdentifier uniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainKey("persons", personIdentificationNameCurrent.pidm)
         assertNotNull uniqueIdentifier
         Map params = getPersonWithFirstNameChangeRequest(personIdentificationNameCurrent, uniqueIdentifier.guid);
+        //checking the update method creating the person base record if not present.
+        def id = personBasicPersonBase.id
+        personBasicPersonBaseService.delete([domainModel: personBasicPersonBase])
+        assertNull "PersonBasicPersonBase should have been deleted", personBasicPersonBase.get(id)
 
-        //update person with FirstName change
+        //update person with FirstName change and add the person base record
         personCompositeService.update(params)
         PersonIdentificationNameCurrent newPersonIdentificationName = PersonIdentificationNameCurrent.findAllByPidmInList([personBasicPersonBase.pidm]).get(0)
         assertEquals newPersonIdentificationName.firstName, 'CCCCCC'
@@ -1049,9 +1053,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithPersonBasicPersonBaseChangeRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      sex        : 'Female'
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
+                      sex  : 'Female'
 
         ]
         return params
@@ -1059,20 +1063,20 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithNewAdressRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      sex        : 'Male',
-                      addresses  : [[addressType: 'Mailing', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398'], [addressType: 'Home', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778']]
+        Map params = [id       : guid,
+                      names    : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
+                      sex      : 'Male',
+                      addresses: [[addressType: 'Mailing', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', streetLine2: 'New street', streetLine3: 'Wilson Garden', zip: '19398'], [addressType: 'Home', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778']]
         ]
         return params
     }
 
 
     private Map getPersonWithModifiedAdressRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      sex        : 'Male',
-                      addresses  : [[addressType: 'Mailing', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778'], [addressType: 'Home', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398']]
+        Map params = [id       : guid,
+                      names    : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
+                      sex      : 'Male',
+                      addresses: [[addressType: 'Mailing', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', streetLine2: 'New street', streetLine3: 'Wilson Garden', zip: '31778'], [addressType: 'Home', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398', county: "Chester", nation: [code: "CA", value: "Canada"]]]
         ]
         return params
     }
@@ -1092,40 +1096,40 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithNewPhonesRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      phones     : [[phoneNumber: '6107435302', phoneType: 'Mobile'], [phoneNumber: '2297795715', phoneType: 'Home']]
+        Map params = [id    : guid,
+                      names : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex   : 'Male',
+                      phones: [[phoneNumber: '6107435302', phoneType: 'Mobile'], [phoneNumber: '2297795715', phoneType: 'Home']]
         ]
         return params
     }
 
 
     private Map getPersonWithModifiedPhonesRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      phones     : [[phoneNumber: '6107435333', phoneType: 'Mobile'], [phoneNumber: '2297795777', phoneType: 'Home']]
+        Map params = [id    : guid,
+                      names : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex   : 'Male',
+                      phones: [[phoneNumber: '6107435333', phoneType: 'Mobile'], [phoneNumber: '2297795777', phoneType: 'Home']]
         ]
         return params
     }
 
 
     private Map getPersonWithNewRacesRequest(personIdentificationNameCurrent, guid, races) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      races      : [[guid: races[0].guid]]
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex  : 'Male',
+                      races: [[guid: races[0].guid]]
         ]
         return params
     }
 
 
     private Map getPersonWithModifiedRacesRequest(personIdentificationNameCurrent, guid, races) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      races      : [[guid: races[0].guid], [guid: races[1].guid]]
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex  : 'Male',
+                      races: [[guid: races[0].guid], [guid: races[1].guid]]
         ]
         return params
     }
@@ -1156,8 +1160,16 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String maritalStatusGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('marital-status', i_success_maritalStatus?.code)?.guid
 
         Map params = [names              : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
-                      addresses          : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]],
-                      ethnicityDetail    : [guid: ethnicityGuid],
+                      addresses          : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip, county: "Chester", nation: [code: "CA", value: "Canada"]], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]],
+                      credentials        : [[
+                                                    credentialType: "Social Security Number",
+                                                    credentialId  : "111111111"
+                                            ],
+                                            [
+                                                "credentialType": "Elevate ID",
+                                                "credentialId": "E11111111"
+                                            ]],
+                      ethnicityDetail  : [guid: ethnicityGuid],
                       maritalStatusDetail: [guid: maritalStatusGuid]
         ]
 
@@ -1193,14 +1205,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map getParamsForPersonFilter() {
         return [
-                action     : [POST: "list"],
+                action: [POST: "list"],
         ]
     }
 
 
     private Map newPersonWithAlternateNameHavingBirthNameType() {
         Map params = [names: [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName], [lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
-
         ]
         return params
     }
@@ -1208,12 +1219,12 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map getPersonBirthNameTypeFields() {
         return [
-                action     : [POST: "list"],
-                names      : [[
-                                      nameType : i_success_alternate_birth_name_type,
-                                      firstName: i_success_alternate_first_name,
-                                      lastName : i_success_alternate_last_name
-                              ]]
+                action: [POST: "list"],
+                names : [[
+                                 nameType : i_success_alternate_birth_name_type,
+                                 firstName: i_success_alternate_first_name,
+                                 lastName : i_success_alternate_last_name
+                         ]]
         ]
     }
 
