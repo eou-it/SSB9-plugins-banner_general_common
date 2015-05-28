@@ -27,88 +27,108 @@ class ErpApiConfig {
             'academic-levels',
             1,
             '/academic-levels/',
-            ['CDM.Level.STVLEVL']
+            ['HEDM.Level.STVLEVL']
         )
         resourceMap << new ApiResource (
             'buildings',
             1,
             '/buildings/',
-            ['CDM.Building.SLBBLDG',
-             'CDM.Building.SLBRDEF']
+            ['HEDM.Building.SLBBLDG',
+             'HEDM.Building.SLBRDEF']
         )
         resourceMap << new ApiResource (
             'ethnicities',
             1,
             '/ethnicities/',
-            ['CDM.Ethnicity.STVETHN']
+            ['HEDM.Ethnicity.STVETHN']
         )
         resourceMap << new ApiResource (
             'grade-schemes',
             1,
             '/grade-schemes/',
-            ['CDM.GradeMode.STVGMOD']
+            ['HEDM.GradeMode.STVGMOD']
         )
         resourceMap << new ApiResource (
             'instructional-methods',
             1,
             '/instructional-methods/',
-            ['CDM.ScheduleType.STVSCHD']
+            ['HEDM.ScheduleType.STVSCHD']
         )
         resourceMap << new ApiResource (
             'marital-statuses',
             1,
             '/marital-statuses/',
-            ['CDM.MaritalStatus.STVMRTL']
+            ['HEDM.MaritalStatus.STVMRTL']
         )
         resourceMap << new ApiResource(
             'organizations',
             1,
             '/organizations/',
-            ['CDM.College.STVCOLL']
+            ['HEDM.College.STVCOLL']
         )
         //TODO: changing persons API version to 3. this needs to be reverted to 1.
         resourceMap << new ApiResource(
             'persons',
             3,
             '/persons/',
-            ['CDM.Person.GOREMAL',
-            'CDM.Person.GORPRAC',
-            'CDM.Person.SPBPERS',
-            'CDM.Person.SPRADDR',
-            'CDM.Person.SPRIDEN',
-            'CDM.Person.SPRTELE',
-            'CDM.Faculty.SIBINST']
+            ['HEDM.Person.GOREMAL',
+            'HEDM.Person.GORPRAC',
+            'HEDM.Person.SPBPERS',
+            'HEDM.Person.SPRADDR',
+            'HEDM.Person.SPRIDEN',
+            'HEDM.Person.SPRTELE',
+            'HEDM.Faculty.SIBINST']
         )
         resourceMap << new ApiResource(
             'races',
             1,
             '/races/',
-            ['CDM.Race.GORRACE']
+            ['HEDM.Race.GORRACE']
         )
         resourceMap << new ApiResource(
             'restriction-types',
             1,
             '/restriction-types/',
-            ['CDM.HoldType.STVHLDD']
+            ['HEDM.HoldType.STVHLDD']
         )
         resourceMap << new ApiResource(
             'rooms',
             1,
             '/rooms/',
-            ['CDM.Room.SLBRDEF']
+            ['HEDM.Room.SLBRDEF']
         )
         resourceMap << new ApiResource(
             'sites',
             1,
             '/sites/',
-            ['CDM.Campus.STVCAMP',
-             'CDM.Campus.SLBBLDG']
+            ['HEDM.Campus.STVCAMP',
+             'HEDM.Campus.SLBBLDG']
         )
         resourceMap << new ApiResource(
             'subjects',
             1,
             '/subjects/',
-            ['CDM.Subject.STVSUBJ']
+            ['HEDM.Subject.STVSUBJ']
+        )
+        resourceMap << new ApiResource(
+            'academic-periods',
+            3,
+            '/academic-periods/',
+            ['HEDM.AcademicPeriods.STVACYR',
+             'HEDM.AcademicPeriods.SOBTERM',
+             'HEDM.AcademicPeriods.SOBPTRM']
+        )
+        resourceMap << new ApiResource(
+            'instructional-platforms',
+            3,
+            '/instructional-platforms/',
+            ['HEDM.InstructionalPlatforms.GORINTG']
+        )
+        resourceMap << new ApiResource(
+            'person-filters',
+            3,
+            '/person-filters/',
+            ['HEDM.PersonFilters.GLBSLCT']
         )
         resourceMap << new ApiResource(
                 'section-registrations',
