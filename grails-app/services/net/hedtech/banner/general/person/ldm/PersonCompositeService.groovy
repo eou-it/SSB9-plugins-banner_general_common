@@ -177,13 +177,8 @@ class PersonCompositeService extends LdmService {
                     if (role == "faculty" || role == "student") {
                         RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
                         pidms = userRoleCompositeService.fetchAllByRole(params)
-                        if (params.containsKey('max')) {
-                            params.remove("max")
-                        }
-                        if (params.containsKey('offset')) {
-                            params.remove("offset")
-                        }
-                        personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms, params)
+                        Map sortAndOrderParams = [sort: params.sort, order: params.order]
+                        personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms, sortAndOrderParams)
                         if(role == "student") {
                             studentRole = true
                         }
@@ -203,18 +198,16 @@ class PersonCompositeService extends LdmService {
             //Need to provide pre-sorted full lists of pidms for count...
             if (params.containsKey('max')) {
                 pageParams.put('max', params.max)
-                params.remove("max")
             }
             if (params.containsKey('offset')) {
                 pageParams.put('offset', params.offset)
-                params.remove("offset")
             }
             RestfulApiValidationUtility.correctMaxAndOffset(pageParams, 500, 0)
             pageParams.offset = pageParams.offset ?: "0"
             def endCount = (pageParams.max.toInteger() + pageParams.offset.toInteger()) > (pidms.size() - 1) ?
                     pidms.size() - 1 : pageParams.max.toInteger() + pageParams.offset.toInteger() - 1
-
-            personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms[pageParams.offset.toInteger()..endCount], params)
+            Map sortAndOrderParams = [sort: params.sort, order: params.order]
+            personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms[pageParams.offset.toInteger()..endCount], sortAndOrderParams)
             resultList = buildLdmPersonObjects(personIdentificationList)
         }
 
