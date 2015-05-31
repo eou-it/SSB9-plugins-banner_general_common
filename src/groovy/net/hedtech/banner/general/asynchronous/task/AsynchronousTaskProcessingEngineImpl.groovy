@@ -331,7 +331,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           if (!SecurityContextHolder.getContext().getAuthentication()) {
               log.debug( "Setting form context." )
               FormContext.set( ['CMQUERYEXECUTE'] )
-              MepContextHolder.set( 'BANNER' )
               String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
               Authentication auth
               try {
@@ -419,7 +418,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           public void run() {
               if (!SecurityContextHolder.getContext().getAuthentication()) {
                   FormContext.set( ['CMQUERYEXECUTE'] )
-                  MepContextHolder.set( 'BANNER' )
                   String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                   Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                   SecurityContextHolder.getContext().setAuthentication( auth )
@@ -479,7 +477,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
               while (_keepRunning) {
                   if (!SecurityContextHolder.getContext().getAuthentication()) {
                       FormContext.set( ['CMQUERYEXECUTE'] )
-                      MepContextHolder.set( 'BANNER' )
                       String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                       Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                       SecurityContextHolder.getContext().setAuthentication( auth )
@@ -563,7 +560,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           public void run() {
               if (!SecurityContextHolder.getContext().getAuthentication()) {
                   FormContext.set( ['CMQUERYEXECUTE'] )
-                  MepContextHolder.set( 'BANNER' )
                   String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
                   Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
                   SecurityContextHolder.getContext().setAuthentication( auth )

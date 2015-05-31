@@ -1,11 +1,16 @@
 package net.hedtech.banner.general.asynchronous
 
 import groovy.sql.Sql
+import net.hedtech.banner.mep.MultiEntityProcessingService
 import net.hedtech.banner.security.AuthenticationProviderUtility
 import net.hedtech.banner.security.BannerAuthenticationProvider
+import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.security.FormContext
+import net.hedtech.banner.security.MepContextHolder
 import net.hedtech.banner.security.SelfServiceBannerAuthenticationProvider
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.springframework.context.ApplicationContext
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -20,6 +25,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
     private static final Logger log = Logger.getLogger( "net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider" )
 
     def dataSource  // injected by Spring
+    MultiEntityProcessingService multiEntityProcessingService
 
 
     public Authentication authenticate( String oracleUserName ) {
@@ -35,6 +41,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
         def conn
         try {
             conn = dataSource.unproxiedConnection
+            setMep(conn,oracleUserName)
             Sql db = new Sql( conn )
 
             def authenticationResults = trustedAuthentication( oracleUserName, db )
@@ -55,6 +62,27 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
         return clazz instanceof AsynchronousBannerToken
     }
 
+    private MultiEntityProcessingService getMultiEntityProcessingService() {
+        if (!multiEntityProcessingService) {
+            ApplicationContext ctx = (ApplicationContext) ApplicationHolder.getApplication().getMainContext()
+            multiEntityProcessingService = (MultiEntityProcessingService) ctx.getBean("multiEntityProcessingService")
+        }
+        multiEntityProcessingService
+    }
+
+    private setMep(conn, user) {
+        log.info( "setting mep conn user ${user}. The mep context holder values is ${MepContextHolder.get()}" )
+        if (getMultiEntityProcessingService().isMEP(conn)) {
+            if (!MepContextHolder.get()) {
+                getMultiEntityProcessingService().setMepOnAccess(user.toUpperCase(), conn)
+                MepContextHolder.set(getMultiEntityProcessingService().getHomeContext(conn))
+            }
+            else {
+                getMultiEntityProcessingService().setHomeContext(MepContextHolder.get(), conn)
+                getMultiEntityProcessingService().setProcessContext(MepContextHolder.get(), conn)
+            }
+        }
+    }
 
     private getFullName ( String name, dataSource ) {
         BannerAuthenticationProvider.getFullName( name, dataSource )
