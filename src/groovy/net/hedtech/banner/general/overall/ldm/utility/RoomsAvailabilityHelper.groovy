@@ -52,6 +52,8 @@ class RoomsAvailabilityHelper {
                             AND ${tableIdentifier}.termEffective.startDate <= :startDate
                             AND (${tableIdentifier}.termTo is null OR termToOfA.startDate > :endDate)
                             AND nvl(${tableIdentifier}.roomStatusInactiveIndicator,'N') != 'Y'
+                            AND ${tableIdentifier}.buildingCode = :buildingCode
+                            AND ${tableIdentifier}.campusCode = :siteCode
                             AND NOT EXISTS ( FROM SectionMeetingTime b
                                                                 WHERE b.building.code IS NOT NULL
                                                                 AND b.room IS NOT NULL
