@@ -10,6 +10,8 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Tests crud methods provided by folder service.
@@ -17,18 +19,22 @@ import org.junit.Test
 class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationFolderService
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
     }
 
 
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
