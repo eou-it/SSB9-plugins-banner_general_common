@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.overall.ldm.utility
 
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
+import net.hedtech.banner.general.overall.ldm.RoomCompositeService
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.query.DynamicFinder
 
@@ -11,10 +12,20 @@ import net.hedtech.banner.query.DynamicFinder
  */
 class RoomsAvailabilityHelper {
 
-    static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, boolean count = false) {
+    static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, String contentTypeVersion, boolean count = false) {
         parseInputParameters(filterData)
         def query = """FROM HousingRoomDescriptionReadOnly a left join a.termTo termToOfA
-                       WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
+                       WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a",contentTypeVersion)
+
+        if (contentTypeVersion.equals( RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2 )){
+            if(filterData.params.containsKey('building')){
+                query += """AND a.buildingCode = :buildingCode"""
+            }
+            if(filterData.params.containsKey('site')){
+                query += """AND a.campusCode = :siteCode"""
+            }
+        }
+
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
         def result
         if (count) {
@@ -52,8 +63,6 @@ class RoomsAvailabilityHelper {
                             AND ${tableIdentifier}.termEffective.startDate <= :startDate
                             AND (${tableIdentifier}.termTo is null OR termToOfA.startDate > :endDate)
                             AND nvl(${tableIdentifier}.roomStatusInactiveIndicator,'N') != 'Y'
-                            AND ${tableIdentifier}.buildingCode = :buildingCode
-                            AND ${tableIdentifier}.campusCode = :siteCode
                             AND NOT EXISTS ( FROM SectionMeetingTime b
                                                                 WHERE b.building.code IS NOT NULL
                                                                 AND b.room IS NOT NULL
@@ -88,5 +97,4 @@ class RoomsAvailabilityHelper {
                                                             AND  d.termEffective = ${tableIdentifier}.termEffective
                                                             AND d.mustMatch = 'Y')"""
     }
-
 }

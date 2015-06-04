@@ -33,6 +33,8 @@ class RoomCompositeService extends LdmService {
     private static final String LDM_NAME = 'rooms'
     private static final String PROCESS_CODE = "LDM"
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
+    public static final String CONTENT_TYPE_ROOM_AVAILABILITY_V2 = "application/vnd.hedtech.integration.room-availability.v2+json"
+    private static final String VERSION_V2 = "v2"
     def buildingCompositeService
 
 
@@ -47,7 +49,7 @@ class RoomCompositeService extends LdmService {
             // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
-            def listOfObjectArrays = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
+            def listOfObjectArrays = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams,CONTENT_TYPE_ROOM_AVAILABILITY_V2)
             entities = []
             listOfObjectArrays?.each {
                 entities << it[0]
@@ -237,22 +239,34 @@ class RoomCompositeService extends LdmService {
             inputData.put('capacity', null)
         }
 
-        if (params.building?.guid) {
-            GlobalUniqueIdentifier buildingGUID = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, params.building.guid)
-            if(buildingGUID){
-                inputData.put('buildingCode', buildingGUID.domainKey)
-            } else {
-                inputData.put('buildingCode', "")
+        def contentType = LdmService.getRequestRepresentation()
+        if(contentType == CONTENT_TYPE_ROOM_AVAILABILITY_V2) {
+            if(params.containsKey('building')){
+                if (params.building.guid) {
+                    GlobalUniqueIdentifier buildingGUID = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, params.building.guid)
+                    if(buildingGUID){
+                        inputData.put('buildingCode', buildingGUID.domainKey)
+                    } else {
+                        throw new ApplicationException("building", new NotFoundException())
+                    }
+                } else {
+                    inputData.put('buildingCode', null)
+                }
             }
-        }
 
-        if (params.site?.guid) {
-            GlobalUniqueIdentifier siteGUID = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, params.site.guid)
-            if(siteGUID){
-                inputData.put('siteCode', siteGUID.domainKey)
-            } else {
-                inputData.put('siteCode', "")
+            if(params.containsKey('site')){
+                if (params.site.guid) {
+                    GlobalUniqueIdentifier siteGUID = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, params.site.guid)
+                    if(siteGUID){
+                        inputData.put('siteCode', siteGUID.domainKey)
+                    } else {
+                        throw new ApplicationException("site", new NotFoundException())
+                    }
+                } else {
+                    inputData.put('siteCode', null)
+                }
             }
+
         }
 
         def filterData = [params: inputData, criteria: []]
@@ -277,9 +291,14 @@ class RoomCompositeService extends LdmService {
         if (!housingRoomDescription)
             throw new ApplicationException("room", new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
-        //SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-        return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+        if(VERSION_V2.equals(getRequestedVersion())){
+            SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
+            return new AvailableRoomV2(housingRoomDescription, building, site, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+        } else {
+            return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+        }
+
     }
 
 
@@ -390,11 +409,15 @@ class RoomCompositeService extends LdmService {
         listHousingRoomDescriptionReadOnly?.each { HousingRoomDescriptionReadOnly housingRoomDescription ->
             List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
             String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid
-            //String siteGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid
             String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid
             BuildingDetail building = buildingGuid ? new BuildingDetail(buildingGuid) : null
-            //SiteDetail site = siteGuid ? new SiteDetail( siteGuid ) : null
-            availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+            if(VERSION_V2.equals(getRequestedVersion())){
+                String siteGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid
+                SiteDetail site = siteGuid ? new SiteDetail( siteGuid ) : null
+                availableRooms << new AvailableRoom(housingRoomDescription, building, site, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+            } else{
+                availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+            }
         }
         return availableRooms
     }
@@ -408,5 +431,15 @@ class RoomCompositeService extends LdmService {
             room = get(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, housingRoomDescription.id)?.guid?.toLowerCase())
         }
         return room
+    }
+
+
+    private String getRequestedVersion() {
+        String representationVersion = LdmService.getResponseRepresentationVersion()
+        if (representationVersion == null) {
+            // Assume latest (current) version
+            representationVersion = VERSION_V2
+        }
+        return representationVersion
     }
 }
