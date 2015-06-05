@@ -36,6 +36,9 @@ class CommunicationPopulationSelectionList implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRSLIS_SEQ_GEN")
     Long id
 
+    @Column(name = "GCRSLIS_NAME")
+    String name
+
     /**
      *
      */
@@ -96,6 +99,7 @@ class CommunicationPopulationSelectionList implements Serializable {
 
 
     static constraints = {
+        name(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

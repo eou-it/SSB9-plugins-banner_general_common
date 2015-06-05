@@ -128,6 +128,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
              populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, 'GRAILS_USER')
         assertNotNull populationQuerySelectionList
         assertEquals(populationSelectionListId, populationQuerySelectionList.id)
+        assertEquals("TTTTTTTTTT", populationQuerySelectionList.name)
 
         /* Test that the new count values are populated in the selectionList */
         assertTrue(populationQuerySelectionList.lastCalculatedCount > 0)

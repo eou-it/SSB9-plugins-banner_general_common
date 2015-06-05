@@ -30,7 +30,7 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
         SecurityContextHolder.getContext().setAuthentication(auth)
 
         globalTestPopulationQuery = newPopulationQuery().save()
-        globalTestPopulationSelectionList = newPopulationSelectionList()
+        globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
         globalTestPopulationSelectionList.populationQueryId = globalTestPopulationQuery.id
         globalTestPopulationSelectionList.save()
         assertNotNull(globalTestPopulationSelectionList.id)
@@ -170,10 +170,11 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
     }
 
 
-    private def newPopulationSelectionList() {
+    private def newPopulationSelectionList(String popname) {
         def populationSelectionList = new CommunicationPopulationSelectionList(
                 // Required fields
                 // Nullable fields
+                name: popname,
                 status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
         )
 

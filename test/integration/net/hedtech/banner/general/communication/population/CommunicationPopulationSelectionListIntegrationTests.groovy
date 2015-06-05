@@ -45,6 +45,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         populationSelectionList.save(failOnError: true, flush: true)
 
         // Assert domain values
+        assertNotNull(populationSelectionList.name)
         assertNotNull populationSelectionList?.id
         assertEquals globalTestPopulationQuery.id, populationSelectionList.populationQueryId
         assertEquals CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION, populationSelectionList.status
@@ -160,6 +161,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
     private def newPopulationSelectionList() {
         def populationSelectionList = new CommunicationPopulationSelectionList(
                 // Required fields
+                name: globalTestPopulationQuery.name,
                 populationQueryId: globalTestPopulationQuery.id,
 
                 // Nullable fields

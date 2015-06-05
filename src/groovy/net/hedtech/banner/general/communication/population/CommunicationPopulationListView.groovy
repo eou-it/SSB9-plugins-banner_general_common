@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.query.DynamicFinder
 import org.hibernate.criterion.Order
 
 import javax.persistence.*
@@ -36,6 +35,9 @@ class CommunicationPopulationListView implements Serializable {
     @Id
     @Column(name = "GCRSLIS_SURROGATE_ID")
     Long id
+
+    @Column(name = "GCRSLIS_NAME")
+    String name
 
     /**
      * VERSION: Optimistic lock token.
@@ -108,6 +110,7 @@ class CommunicationPopulationListView implements Serializable {
 
 
     static constraints = {
+        name(nullable: false)
         populationQueryId(nullable: false)
         lastCalculatedBy(nullable: true, maxSize: 30)
         lastCalculatedTime(nullable: true)
@@ -141,7 +144,8 @@ class CommunicationPopulationListView implements Serializable {
         return populationListView
     }
 
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
 

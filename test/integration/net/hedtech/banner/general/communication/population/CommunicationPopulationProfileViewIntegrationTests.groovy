@@ -31,7 +31,7 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
 
         newPerson()
         globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
-        globalTestPopulationSelectionList = newPopulationSelectionList()
+        globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
         globalTestPopulationSelectionList.populationQueryId = globalTestPopulationQuery.id
         globalTestPopulationSelectionList = globalTestPopulationSelectionList.save(failOnError: true, flush: true)
         assertNotNull(globalTestPopulationSelectionList.id)
@@ -119,10 +119,11 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
     }
 
 
-    private def newPopulationSelectionList() {
+    private def newPopulationSelectionList(String popname) {
         def populationSelectionList = new CommunicationPopulationSelectionList(
                 // Required fields
                 // Nullable fields
+                name: popname,
                 lastCalculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
                 status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,

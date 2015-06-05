@@ -36,7 +36,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         //Test if the generated entity now has an id assigned
         assertNotNull folder.id
         globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
-        globalTestPopulationSelectionList = newPopulationSelectionList()
+        globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
         globalTestPopulationSelectionList.populationQueryId = globalTestPopulationQuery.id
         globalTestPopulationSelectionList.save(failOnError: true, flush: true)
         assertNotNull(globalTestPopulationSelectionList.id)
@@ -106,10 +106,11 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
     }
 
 
-    private def newPopulationSelectionList() {
+    private def newPopulationSelectionList(String popname) {
         def populationSelectionList = new CommunicationPopulationSelectionList(
                 // Required fields
                 // Nullable fields
+                name: popname,
                 lastCalculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
                 status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
