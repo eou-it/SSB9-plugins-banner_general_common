@@ -12,18 +12,17 @@ import net.hedtech.banner.query.DynamicFinder
  */
 class RoomsAvailabilityHelper {
 
-    static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, String contentTypeVersion, boolean count = false) {
+    static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, boolean count = false) {
         parseInputParameters(filterData)
         def query = """FROM HousingRoomDescriptionReadOnly a left join a.termTo termToOfA
-                       WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a",contentTypeVersion)
+                       WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
 
-        if (contentTypeVersion.equals( RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2 )){
-            if(filterData.params.containsKey('building')){
-                query += """AND a.buildingCode = :buildingCode"""
-            }
-            if(filterData.params.containsKey('site')){
-                query += """AND a.campusCode = :siteCode"""
-            }
+        if (filterData.params.containsKey( 'building' )) {
+            query += """AND a.buildingCode = :buildingCode"""
+        }
+
+        if (filterData.params.containsKey( 'site' )) {
+            query += """AND a.campusCode = :siteCode"""
         }
 
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
