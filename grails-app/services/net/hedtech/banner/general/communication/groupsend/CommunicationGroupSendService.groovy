@@ -5,6 +5,7 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import grails.gorm.DetachedCriteria
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -21,6 +22,9 @@ class CommunicationGroupSendService extends ServiceBase {
         if (groupSend.getCreationDateTime() == null) {
             groupSend.setCreationDateTime( new Date() )
         };
+        if (groupSend.getName() == null) {
+            groupSend.setName(CommunicationTemplate.get(groupSend.template.id).getName())
+        }
         groupSend.setDeleted( false );
     }
 

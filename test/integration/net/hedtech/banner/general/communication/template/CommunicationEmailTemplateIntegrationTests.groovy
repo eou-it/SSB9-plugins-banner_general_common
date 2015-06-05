@@ -105,7 +105,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         assertEquals i_valid_emailTemplate_fromList, emailTemplate.fromList
         assertEquals i_valid_emailTemplate_subject, emailTemplate.subject
         assertEquals i_valid_emailTemplate_toList, emailTemplate.toList
-        assertEquals "grails_user", emailTemplate.lastModifiedBy
+        assertEquals "grails_user".toUpperCase(), emailTemplate.lastModifiedBy.toUpperCase()
         /* you can't predict what lastModified will get set to, so just check not null */
         assertNotNull emailTemplate.lastModified
         /* gets set to Banner by the framework */

@@ -40,6 +40,9 @@ class CommunicationGroupSend implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "gcbgsnd_SEQ_GEN")
     Long id
 
+    @Column(name = "GCBGSND_NAME")
+    String name
+
     /**
      *  Optimistic lock token.
      */
@@ -107,6 +110,7 @@ class CommunicationGroupSend implements Serializable {
 
     static constraints = {
         mepCode(nullable: true)
+        name(nullable:false)
         population(nullable: false)
         organization(nullable: false)
         createdBy(nullable:false, maxSize: 30)

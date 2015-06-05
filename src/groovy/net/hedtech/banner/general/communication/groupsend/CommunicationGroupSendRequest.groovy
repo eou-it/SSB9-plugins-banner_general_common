@@ -8,6 +8,7 @@ import groovy.transform.ToString
 @EqualsAndHashCode
 @ToString
 class CommunicationGroupSendRequest implements Serializable {
+    String name
     Long populationId
     Long templateId
     Long organizationId
