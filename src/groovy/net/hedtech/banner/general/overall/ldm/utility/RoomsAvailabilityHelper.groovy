@@ -18,11 +18,23 @@ class RoomsAvailabilityHelper {
                        WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
 
         if (filterData.params.containsKey( 'buildingCode' )) {
-            query += """ AND a.buildingCode = :buildingCode"""
+            if(filterData.params.get('buildingCode')){
+                query += """ AND a.buildingCode = :buildingCode"""
+            } else {
+                filterData.params.remove('buildingCode')
+                query += """ AND a.buildingCode is null"""
+            }
+
         }
 
         if (filterData.params.containsKey( 'siteCode' )) {
-            query += """ AND a.campusCode = :siteCode"""
+            if(filterData.params.get('siteCode')){
+                query += """ AND a.campusCode = :siteCode"""
+            } else {
+                filterData.params.remove('siteCode')
+                query += """ AND a.campusCode is null"""
+            }
+
         }
 
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
