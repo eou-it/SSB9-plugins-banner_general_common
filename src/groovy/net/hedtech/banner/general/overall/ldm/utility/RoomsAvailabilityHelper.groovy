@@ -17,12 +17,12 @@ class RoomsAvailabilityHelper {
         def query = """FROM HousingRoomDescriptionReadOnly a left join a.termTo termToOfA
                        WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
 
-        if (filterData.params.containsKey( 'building' )) {
-            query += """AND a.buildingCode = :buildingCode"""
+        if (filterData.params.containsKey( 'buildingCode' )) {
+            query += """ AND a.buildingCode = :buildingCode"""
         }
 
-        if (filterData.params.containsKey( 'site' )) {
-            query += """AND a.campusCode = :siteCode"""
+        if (filterData.params.containsKey( 'siteCode' )) {
+            query += """ AND a.campusCode = :siteCode"""
         }
 
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
