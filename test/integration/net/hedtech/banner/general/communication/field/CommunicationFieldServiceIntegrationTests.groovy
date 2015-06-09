@@ -8,18 +8,24 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationFieldService
     def CommunicationFolder validFolder
     def String validImmutableId
+    def selfServiceBannerAuthenticationProvider
 
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         validFolder = newValidForCreateFolder()
         validFolder.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
@@ -31,6 +37,7 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 

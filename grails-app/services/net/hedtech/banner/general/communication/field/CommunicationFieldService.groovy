@@ -6,15 +6,25 @@ package net.hedtech.banner.general.communication.field
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.security.FormContext
 import net.hedtech.banner.service.ServiceBase
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationFieldService extends ServiceBase {
     boolean transactional = true
     def communicationPopulationQueryStatementParseService
     def communicationFieldCalculationService
+    def asynchronousBannerAuthenticationSpoofer
 
     def preCreate( domainModelOrMap ) {
+
+        if (!CommunicationCommonUtility.userCanCreate()) {
+            throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
+        }
+
         CommunicationField communicationField = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationField
         communicationField.folder = (communicationField.folder ?: domainModelOrMap.folder)
         /* The default for renderAsHtml is false */
@@ -70,6 +80,20 @@ class CommunicationFieldService extends ServiceBase {
 
     def preUpdate( domainModelOrMap ) {
         CommunicationField communicationField = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationField
+
+        if (communicationField.id == null)
+            throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
+
+        def oldfield = CommunicationField.get(communicationField.id)
+
+        if (oldfield.id == null)
+            throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
+
+        //check if user is authorized. user should be admin or author
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldfield.lastModifiedBy)) {
+            throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
+        }
+
         /* Supply default values */
         if (communicationField.ruleContent == null) {
             communicationField.statementType = null
@@ -157,5 +181,18 @@ class CommunicationFieldService extends ServiceBase {
             throw new ApplicationException( CommunicationField, "@@r1:idNotValid@@" )
     }
 
+    def preDelete(domainModelOrMap) {
 
+        if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null))
+            throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
+
+        def oldfield = CommunicationField.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
+
+        if (oldfield.id == null)
+            throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
+
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldfield.lastModifiedBy)) {
+            throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
+        }
+    }
 }

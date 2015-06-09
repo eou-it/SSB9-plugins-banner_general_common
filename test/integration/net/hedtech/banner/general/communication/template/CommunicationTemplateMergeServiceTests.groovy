@@ -22,6 +22,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
@@ -31,6 +33,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def communicationRecipientDataService
     def communicationOrganizationService
     def communicationEmailTemplateService
+    def selfServiceBannerAuthenticationProvider
 
     def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
@@ -71,8 +74,11 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
+        formContext = ['SELFSERVICE']
         super.setUp()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         folder1 = newValidForCreateFolder( i_valid_folder_name1 )
         folder1.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
@@ -89,6 +95,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     @After
     public void tearDown() {
         super.tearDown()
+        logout()
     }
 
 
