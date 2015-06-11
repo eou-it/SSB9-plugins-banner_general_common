@@ -29,7 +29,7 @@ class RoomCompositeService extends LdmService {
     private static final String MINUTE_FORMAT = '[0-5][0-9]'
     private static final String SECOND_FORMAT = '[0-5][0-9]'
     private static final String LDM_NAME = 'rooms'
-    private static final String PROCESS_CODE = "LDM"
+    private static final String PROCESS_CODE = "HEDM"
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
 
 
@@ -251,10 +251,10 @@ class RoomCompositeService extends LdmService {
     AvailableRoom get(String guid) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(AvailableRoom.LDM_NAME, guid)
         if (!globalUniqueIdentifier)
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: "Room"))
+            throw new ApplicationException("room", new NotFoundException())
         HousingRoomDescriptionReadOnly housingRoomDescription = HousingRoomDescriptionReadOnly.get(globalUniqueIdentifier.domainId)
         if (!housingRoomDescription)
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: "Room"))
+            throw new ApplicationException("room", new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
         return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
@@ -385,5 +385,4 @@ class RoomCompositeService extends LdmService {
         }
         return room
     }
-
 }

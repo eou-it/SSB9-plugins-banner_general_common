@@ -621,6 +621,16 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
         }
     }
 
+    @Test
+    void testfetchAllByCampuses(){
+        List<String> campusCodes = HousingLocationBuildingDescription.findAll().unique {it.campus?.code}.campus.code
+        List<HousingLocationBuildingDescription> buildingDescriptionList = HousingLocationBuildingDescription.fetchAllByCampuses(campusCodes)
+        assertNotNull buildingDescriptionList
+        buildingDescriptionList.collect {
+            assertTrue campusCodes.contains(it.campus.code)
+        }
+    }
+
     /**
      * add wildcard and change to upper case for searching
      * @param filter

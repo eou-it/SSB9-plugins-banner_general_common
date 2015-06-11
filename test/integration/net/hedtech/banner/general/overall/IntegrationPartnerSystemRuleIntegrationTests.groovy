@@ -131,6 +131,30 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
         assertErrorsFor(integrationPartnerSystemRule, 'maxSize', ['code', 'description'])
     }
 
+    @Test
+    void testFetchAllByCode(){
+        IntegrationPartnerSystemRule integrationPartnerSystemRule1 = newIntegrationPartnerSystemRuleForCodeAndDesc('test1','test-desc1')
+        IntegrationPartnerSystemRule integrationPartnerSystemRule2 = newIntegrationPartnerSystemRuleForCodeAndDesc('test2','test-desc2')
+
+        integrationPartnerSystemRule1.save(flush:true, failOnError: true)
+        integrationPartnerSystemRule2.save(flush:true, failOnError: true)
+
+        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = IntegrationPartnerSystemRule.fetchAllByCode(['test1','test2'])
+        assertNotNull(integrationPartnerSystemRuleList)
+        assertEquals(2, integrationPartnerSystemRuleList.size())
+        assertEquals(integrationPartnerSystemRule1,integrationPartnerSystemRuleList[0])
+        assertEquals(integrationPartnerSystemRule2,integrationPartnerSystemRuleList[1])
+    }
+
+    private def newIntegrationPartnerSystemRuleForCodeAndDesc(String code, String desc){
+        def intp = new IntegrationPartner(
+                    code: code,
+                    description: desc)
+        intp.save(flush: true, failOnError: true)
+        new IntegrationPartnerSystemRule(code: code,
+                                        description: desc,
+                                        integrationPartner: intp)
+    }
 
     private def newIntegrationPartnerSystemRule() {
         def intp = new IntegrationPartner(

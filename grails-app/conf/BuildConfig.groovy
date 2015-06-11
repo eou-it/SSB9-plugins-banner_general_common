@@ -43,6 +43,7 @@ grails.project.dependency.resolution = {
         compile ":tomcat:7.0.52.1"
         compile ':resources:1.2.7' // If the functional-test plugin is being used
         compile ":functional-test:2.0.0" // If the functional-test plugin is being used
+        test ':code-coverage:2.0.3-3'
     }
 
     dependencies {
@@ -56,3 +57,8 @@ grails.project.dependency.resolution = {
 
 
 }
+
+// CodeNarc rulesets
+codenarc.ruleSetFiles="rulesets/banner.groovy"
+codenarc.reportName="target/CodeNarcReport.html"
+codenarc.propertiesFile="grails-app/conf/codenarc.properties"

@@ -12,6 +12,10 @@ import org.junit.Test
 
 class SqlProcessParameterByProcessIntegrationTests extends BaseIntegrationTestCase {
 
+
+    static final PROCESS_CODE = 'HEDM'
+
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -59,7 +63,7 @@ class SqlProcessParameterByProcessIntegrationTests extends BaseIntegrationTestCa
         lastModified:new Date(),
         lastModifiedBy:"GRAILS_USER",
         dataOrigin:"Banner",
-        entriesForSqlProcess:"LDM",
+        entriesForSqlProcess:PROCESS_CODE,
         parameterForSqlProcess:"PIDM")
     }
 }

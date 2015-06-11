@@ -1,3 +1,6 @@
+/*********************************************************************************
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.system.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
@@ -6,16 +9,25 @@ import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.system.ldm.v1.EmsConfiguration
 
 /**
- * Created by rshishehbor on 10/15/14.
+ * RESTful APIs for EMS
  */
 class EmsConfigurationCompositeService {
 
-    public static List<String> ROUTING_KEYS = ["CDM.*.*"]
+    public static List<String> ROUTING_KEYS = ["HEDM.*.*"]
 
+    def erpApiConfig
+
+    /**
+     * GET /api/ems/<id>
+     *
+     * @param id
+     * @return
+     */
     EmsConfiguration get(String id) {
         List<IntegrationConfiguration> settings = IntegrationConfiguration.findAllByProcessCode("EMS-" + id.toUpperCase())
-        if(settings.size()) {
+        if (settings.size()) {
             EmsConfiguration configuration = new EmsConfiguration(id)
+            configuration.erpApiConfig = erpApiConfig
             configuration.erpApiConfig.erpname = "Banner"
             settings.each { setting ->
                 switch (setting.settingName) {
@@ -80,10 +92,9 @@ class EmsConfigurationCompositeService {
                 }
             }
             configuration
+        } else {
+            throw new ApplicationException("EmsConfiguration", new NotFoundException())
         }
-        else {
-            throw new ApplicationException("EmsConfiguration", new NotFoundException(EmsConfiguration.simpleName, id))
-        }
-
     }
+
 }

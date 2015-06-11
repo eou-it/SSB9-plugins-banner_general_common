@@ -45,12 +45,12 @@ class SiteDetailCompositeService {
     SiteDetail get(String guid) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Site.class.simpleName))
+            throw new ApplicationException("site", new NotFoundException())
         }
 
         Campus campus = Campus.get(globalUniqueIdentifier.domainId)
         if (!campus) {
-            throw new ApplicationException(GlobalUniqueIdentifierService.API, new NotFoundException(id: Site.class.simpleName))
+            throw new ApplicationException("site", new NotFoundException())
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
         return new SiteDetail(guid, campus, buildings, new Metadata(campus.dataOrigin));

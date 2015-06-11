@@ -10,6 +10,8 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.Table
 import javax.persistence.Version
 import javax.persistence.SequenceGenerator
@@ -26,9 +28,14 @@ import javax.persistence.TemporalType
  */
 @Entity
 @Table( name="GV_GORINTG" )
-@DatabaseModifiesState 
+@NamedQueries(
+        @NamedQuery(name="IntegrationPartnerSystemRule.fetchAllByCode",
+                query="""FROM IntegrationPartnerSystemRule a
+                        WHERE a.code in (:codes)""")
+)
+@DatabaseModifiesState
 class IntegrationPartnerSystemRule implements Serializable {
-	
+
 	/**
 	 * Surrogate ID for GORINTG
     */
@@ -85,8 +92,17 @@ class IntegrationPartnerSystemRule implements Serializable {
     @Version
 	@Column(name="GORINTG_VERSION", nullable = false, length=19)
 	Long version
-  	
-	
+
+
+    public static fetchAllByCode(List codes){
+        def integrationPartnerSystemRuleList
+        IntegrationPartnerSystemRule.withSession{
+            session ->
+                integrationPartnerSystemRuleList = session.getNamedQuery("IntegrationPartnerSystemRule.fetchAllByCode").setParameterList('codes',codes).list()
+        }
+        return integrationPartnerSystemRuleList
+    }
+
 	public String toString() {
 		"IntegrationPartnerSystemRule[id=$id, code=$code, description=$description, integrationPartner=$integrationPartner, lastModifiedBy=$lastModifiedBy, lastModified=$lastModified, dataOrigin=$dataOrigin, version=$version]"
 	}
@@ -135,5 +151,5 @@ class IntegrationPartnerSystemRule implements Serializable {
 		lastModified(nullable:true)
 		dataOrigin(nullable:true, maxSize:30)
     }
-    
+
 }
