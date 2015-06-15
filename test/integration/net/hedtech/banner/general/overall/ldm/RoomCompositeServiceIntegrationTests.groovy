@@ -8,6 +8,7 @@ import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -404,6 +405,73 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    @Test
+    void testListForBuildingAndSite(){
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+
+        Map params = getParamsForRoomQueryWithBuildingAndSite()
+
+        List<AvailableRoom> availableRooms = roomCompositeService.list(params)
+        assertNotNull availableRooms
+        assertFalse availableRooms.isEmpty()
+        assertTrue availableRooms.size() > 1
+    }
+
+    @Test
+    void testListForBuildingAndSiteNULL(){
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+
+        Map params = getParamsForRoomQueryWithBuildingAndSite()
+
+        params.put('building', null)
+        params.put('site', null)
+
+        List<AvailableRoom> availableRooms = roomCompositeService.list(params)
+        assertNotNull availableRooms
+        assertTrue availableRooms.isEmpty()
+    }
+
+
+    @Test
+    void testListForBuildingNotFound(){
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+
+        Map params = getParamsForRoomQueryWithBuildingAndSite()
+        params.put('building', 'xyz')
+
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as Building GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'NotFoundException'
+        }
+    }
+
+
+    @Test
+    void testListForSiteNotFound(){
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+
+        Map params = getParamsForRoomQueryWithBuildingAndSite()
+        params.put('site', 'xyz')
+
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as Site GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'NotFoundException'
+        }
+    }
+
+
     private Map getParamsForRoomQuery() {
         return [
                 max        : "20",
@@ -420,6 +488,14 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                         byDay: ["Monday", "Wednesday", "Friday"]
                 ],
         ]
+    }
+
+
+    private Map getParamsForRoomQueryWithBuildingAndSite(){
+        Map params = getParamsForRoomQuery()
+        params.put('building','192c0c64-8f32-4d5f-af30-4fd40493a898')
+        params.put('site','b19a2075-3cc6-4c69-837b-3530002b2d4e')
+        return params
     }
 
 }
