@@ -16,6 +16,7 @@ import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
+import java.sql.ResultSet
 import java.sql.SQLException
 
 /**
@@ -156,13 +157,17 @@ class CommunicationGroupSendItemProcessorService {
         Sql sql = null
         try {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            int rows = sql.executeUpdate( "select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait", [groupSendItemId, state.name()] )
+            def rows = sql.rows( "select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait",
+                [groupSendItemId, state.name()],
+                0, 2
+            )
 
-            if (rows > 1) {
+            if (rows.size() > 1) {
                 throw new RuntimeException( "Found more than one GCRGSIM row for a single group send item id" )
             } else {
-                return rows == 1
+                return rows.size() == 1
             }
+
         } catch (SQLException e) {
             if (e.getErrorCode() == noWaitErrorCode) {
                 return false
