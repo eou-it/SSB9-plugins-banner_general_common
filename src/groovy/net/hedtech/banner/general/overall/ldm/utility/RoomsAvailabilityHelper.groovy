@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.overall.ldm.utility
 
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
+import net.hedtech.banner.general.overall.ldm.RoomCompositeService
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.query.DynamicFinder
 
@@ -15,6 +16,27 @@ class RoomsAvailabilityHelper {
         parseInputParameters(filterData)
         def query = """FROM HousingRoomDescriptionReadOnly a left join a.termTo termToOfA
                        WHERE """ + fetchConditionalClauseForAvailableRoomSearch("a")
+
+        if (filterData.params.containsKey( 'buildingCode' )) {
+            if(filterData.params.get('buildingCode')){
+                query += """ AND a.buildingCode = :buildingCode"""
+            } else {
+                filterData.params.remove('buildingCode')
+                query += """ AND a.buildingCode is null"""
+            }
+
+        }
+
+        if (filterData.params.containsKey( 'siteCode' )) {
+            if(filterData.params.get('siteCode')){
+                query += """ AND a.campusCode = :siteCode"""
+            } else {
+                filterData.params.remove('siteCode')
+                query += """ AND a.campusCode is null"""
+            }
+
+        }
+
         DynamicFinder dynamicFinder = new DynamicFinder(HousingRoomDescriptionReadOnly.class, query, "a")
         def result
         if (count) {
@@ -86,5 +108,4 @@ class RoomsAvailabilityHelper {
                                                             AND  d.termEffective = ${tableIdentifier}.termEffective
                                                             AND d.mustMatch = 'Y')"""
     }
-
 }
