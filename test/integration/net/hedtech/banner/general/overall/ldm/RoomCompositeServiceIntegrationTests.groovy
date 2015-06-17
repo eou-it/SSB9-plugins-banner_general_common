@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.system.Building
+import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
@@ -19,6 +20,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     HousingRoomDescription i_success_housingRoomDescription
     def roomCompositeService
+    Campus icampus
+    Building ibuilding
 
 
     @Before
@@ -38,6 +41,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private void initiializeDataReferences() {
         Building building = Building.findByCode('CIS')
         i_success_housingRoomDescription = HousingRoomDescription.findByBuildingAndRoomNumber(building, '100')
+        icampus = Campus.findByCode("M")
+        ibuilding = Building.findByCode("GENERL")
     }
 
 
@@ -408,7 +413,6 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    @Ignore
     void testListForBuildingAndSite(){
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
@@ -496,8 +500,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map getParamsForRoomQueryWithBuildingAndSite(){
         Map params = getParamsForRoomQuery()
-        params.put('building', GlobalUniqueIdentifier.findAllByLdmName(BuildingCompositeService.LDM_NAME)[0].guid)
-        params.put('site', GlobalUniqueIdentifier.findAllByLdmName(SiteDetailCompositeService.LDM_NAME)[0].guid)
+        params.put('building', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME,ibuilding.code)[0].guid)
+        params.put('site', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME,icampus.code)[0].guid)
         return params
     }
 
