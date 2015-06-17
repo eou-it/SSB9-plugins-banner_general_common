@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
@@ -120,7 +120,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull existingAvailRoom.guid
 
         AvailableRoom room = roomCompositeService.get(existingAvailRoom.guid)
-        assertNotNull room
+        assertNotNull room.toString()
         assertEquals existingAvailRoom, room
         assertEquals existingAvailRoom.metadata.dataOrigin, room.metadata.dataOrigin
         assertEquals existingAvailRoom.buildingDetail, room.buildingDetail

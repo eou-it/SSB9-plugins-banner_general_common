@@ -50,17 +50,6 @@ class AvailableRoom {
     }
 
 
-    int hashCode() {
-        int result
-        result = (availableRoomDescription != null ? availableRoomDescription.hashCode() : 0)
-        result = 31 * result + (buildingDetail != null ? buildingDetail.hashCode() : 0)
-        result = 31 * result + (occupancies != null ? occupancies.hashCode() : 0)
-        result = 31 * result + (guid != null ? guid.hashCode() : 0)
-        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
-        return result
-    }
-
-
     public String toString() {
         """Room[
                     availableRoomDescription=$availableRoomDescription,
