@@ -456,7 +456,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             roomCompositeService.list(params)
             fail('This should have failed as Building GUID is invalid')
         } catch (ApplicationException ae) {
-            assertApplicationException ae, 'NotFoundException'
+            assertApplicationException ae, 'not.found.message'
         }
     }
 
@@ -474,7 +474,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             roomCompositeService.list(params)
             fail('This should have failed as Site GUID is invalid')
         } catch (ApplicationException ae) {
-            assertApplicationException ae, 'NotFoundException'
+            assertApplicationException ae, 'not.found.message'
         }
     }
 

@@ -249,7 +249,7 @@ class RoomCompositeService extends LdmService {
                     if(globalUniqueIdentifier){
                         inputData.put('buildingCode', globalUniqueIdentifier.domainKey)
                     } else {
-                        throw new ApplicationException("building", new NotFoundException())
+                        throw new ApplicationException("building", new BusinessLogicValidationException("not.found.message",null))
                     }
                 } else {
                     inputData.put('buildingCode', null)
@@ -262,7 +262,7 @@ class RoomCompositeService extends LdmService {
                     if(globalUniqueIdentifier){
                         inputData.put('siteCode', globalUniqueIdentifier.domainKey)
                     } else {
-                        throw new ApplicationException("site", new NotFoundException())
+                        throw new ApplicationException("site", new BusinessLogicValidationException("not.found.message",null))
                     }
                 } else {
                     inputData.put('siteCode', null)
