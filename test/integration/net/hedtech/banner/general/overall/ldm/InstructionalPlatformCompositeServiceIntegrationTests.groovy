@@ -104,11 +104,12 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
 
         assertNotNull instructionalPlatforms[0].guid
         InstructionalPlatform instructionalPlatform = instructionalPlatformCompositeService.get( instructionalPlatforms[0].guid )
-        assertNotNull instructionalPlatform
+        assertNotNull instructionalPlatform.toString()
         assertEquals instructionalPlatforms[0].guid, instructionalPlatform.guid
         assertEquals instructionalPlatforms[0].code, instructionalPlatform.code
         assertEquals instructionalPlatforms[0].description, instructionalPlatform.description
         assertEquals instructionalPlatforms[0].metadata.dataOrigin, instructionalPlatform.metadata.dataOrigin
+        assertEquals instructionalPlatforms[0], instructionalPlatform
     }
 
 
