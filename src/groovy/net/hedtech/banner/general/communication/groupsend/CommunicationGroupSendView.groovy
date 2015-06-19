@@ -47,11 +47,14 @@ class CommunicationGroupSendView implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
+    @Column(name = "group_send_name")
+    String groupSendName;
+
     @Column(name = "template_name")
     String templateName;
 
-    @Column(name = "query_name")
-    String queryName;
+    @Column(name = "population_name")
+    String populationName;
 
     @Column(name = "population_id")
     Long populationId
@@ -72,11 +75,20 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "group_items_processing")
     Long groupItemsProcessingCount
 
+    @Column(name = "group_items_failed")
+    Long groupItemsFailedCount
+
+    @Column(name = "group_items_stopped")
+    Long groupItemsStoppedCount
+
     @Column(name = "group_items_processed")
     Long groupItemsProcessedCount
 
     @Column(name = "communication_jobs_processing")
     Long jobsProcessingCount
+
+    @Column(name = "communication_jobs_failed")
+    Long jobsFailedCount
 
     @Column(name = "communication_jobs_processed")
     Long jobsProcessedCount

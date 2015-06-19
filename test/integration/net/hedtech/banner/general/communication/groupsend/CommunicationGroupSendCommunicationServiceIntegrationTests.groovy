@@ -32,7 +32,7 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
     @Before
     public void setUp() {
         //super.setUseTransactions( false )
-        FormContext.set(['SELFSERVICE'])
+        formContext = ['SELFSERVICE']
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
         super.setUp()
@@ -89,6 +89,9 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         assertEquals( 5, groupSendItemList.size() )
         CommunicationGroupSendItem found = groupSendItemList.get( 0 ) as CommunicationGroupSendItem
         assertEquals( CommunicationGroupSendItemExecutionState.Ready, found.currentExecutionState)
+
+        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+        assertEquals(5, sendItemViewDetails.size())
 
         assertEquals( 5, CommunicationGroupSendItem.fetchByReadyExecutionState().size() )
 
