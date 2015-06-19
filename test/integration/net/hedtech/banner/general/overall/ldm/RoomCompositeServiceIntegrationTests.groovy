@@ -13,7 +13,6 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {

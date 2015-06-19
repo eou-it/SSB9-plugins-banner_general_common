@@ -1,7 +1,9 @@
+/*******************************************************************************
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.banner.general.overall.ldm.utility
 
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
-import net.hedtech.banner.general.overall.ldm.RoomCompositeService
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.query.DynamicFinder
 
