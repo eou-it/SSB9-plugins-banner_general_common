@@ -34,9 +34,7 @@ class RoomCompositeService extends LdmService {
     private static final String LDM_NAME = 'rooms'
     private static final String PROCESS_CODE = "HEDM"
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
-    public static final String CONTENT_TYPE_ROOM_AVAILABILITY_V2 = "application/vnd.hedtech.integration.room-availability.v2+json"
     private static final String LATEST_VERSION = "v2"
-    def buildingCompositeService
 
 
     List<AvailableRoom> list(Map params) {
@@ -240,29 +238,28 @@ class RoomCompositeService extends LdmService {
             inputData.put('capacity', null)
         }
 
-        def contentType = LdmService.getRequestRepresentation()
-        if(contentType == CONTENT_TYPE_ROOM_AVAILABILITY_V2) {
-            if(params.containsKey('building')){
+        if (!"v1".equals(getContentTypeVersion())) {
+            if (params.containsKey('building')) {
                 String buildingGuid = params.building?.trim()?.toLowerCase()
                 if (buildingGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, buildingGuid)
-                    if(globalUniqueIdentifier){
+                    if (globalUniqueIdentifier) {
                         inputData.put('buildingCode', globalUniqueIdentifier.domainKey)
                     } else {
-                        throw new ApplicationException("building", new BusinessLogicValidationException("not.found.message",null))
+                        throw new ApplicationException("building", new BusinessLogicValidationException("not.found.message", null))
                     }
                 } else {
                     inputData.put('buildingCode', null)
                 }
             }
-            if(params.containsKey('site')){
+            if (params.containsKey('site')) {
                 String siteGuid = params.site?.trim()?.toLowerCase()
                 if (siteGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, siteGuid)
-                    if(globalUniqueIdentifier){
+                    if (globalUniqueIdentifier) {
                         inputData.put('siteCode', globalUniqueIdentifier.domainKey)
                     } else {
-                        throw new ApplicationException("site", new BusinessLogicValidationException("not.found.message",null))
+                        throw new ApplicationException("site", new BusinessLogicValidationException("not.found.message", null))
                     }
                 } else {
                     inputData.put('siteCode', null)
@@ -293,12 +290,12 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException("room", new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-        if("v2".equals(getAcceptVersion())){
+        if ("v2".equals(getAcceptVersion())) {
             SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
             return new Room(housingRoomDescription, building, site, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
         } else {
-        return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
-    }
+            return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+        }
     }
 
 
@@ -411,13 +408,13 @@ class RoomCompositeService extends LdmService {
             String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid
             String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid
             BuildingDetail building = buildingGuid ? new BuildingDetail(buildingGuid) : null
-            if("v2".equals(getAcceptVersion())){
+            if ("v2".equals(getAcceptVersion())) {
                 String siteGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid
-                SiteDetail site = siteGuid ? new SiteDetail( siteGuid ) : null
+                SiteDetail site = siteGuid ? new SiteDetail(siteGuid) : null
                 availableRooms << new Room(housingRoomDescription, building, site, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
-            } else{
-            availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
-        }
+            } else {
+                availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+            }
         }
         return availableRooms
     }
@@ -436,6 +433,16 @@ class RoomCompositeService extends LdmService {
 
     private String getAcceptVersion() {
         String representationVersion = LdmService.getResponseRepresentationVersion()
+        if (representationVersion == null) {
+            // Assume latest (current) version
+            representationVersion = LATEST_VERSION
+        }
+        return representationVersion
+    }
+
+
+    private String getContentTypeVersion() {
+        String representationVersion = LdmService.getRequestRepresentationVersion()
         if (representationVersion == null) {
             // Assume latest (current) version
             representationVersion = LATEST_VERSION

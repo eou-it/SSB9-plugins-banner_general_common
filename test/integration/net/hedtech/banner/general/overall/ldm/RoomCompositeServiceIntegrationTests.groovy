@@ -17,6 +17,9 @@ import org.junit.Test
 
 class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
+    private static
+    final String CONTENT_TYPE_ROOM_AVAILABILITY_V2 = "application/vnd.hedtech.integration.room-availability.v2+json"
+
     HousingRoomDescription i_success_housingRoomDescription
     def roomCompositeService
     Campus icampus
@@ -402,7 +405,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForValidParams() {
+    void testQApiRoomAvailabilityV1ForValidParams() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.room-availability.v1+json")
         Map params = getParamsForRoomQuery()
         List<AvailableRoom> availableRooms = roomCompositeService.list(params)
         assertNotNull availableRooms
@@ -412,10 +418,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForBuildingAndSite(){
+    void testListForBuildingAndSite() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
 
         Map params = getParamsForRoomQueryWithBuildingAndSite()
 
@@ -425,11 +431,27 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue availableRooms.size() > 1
     }
 
+
     @Test
-    void testListForBuildingAndSiteNULL(){
+    void testQApiRoomAvailabilityV1_GenericMediaTypes() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/json")
+        request.addHeader("Content-Type", "application/json")
+
+        Map params = getParamsForRoomQueryWithBuildingAndSite()
+
+        List<AvailableRoom> availableRooms = roomCompositeService.list(params)
+        assertNotNull availableRooms
+        assertFalse availableRooms.isEmpty()
+        assertTrue availableRooms.size() > 1
+    }
+
+
+    @Test
+    void testListForBuildingAndSiteNULL() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
 
         Map params = getParamsForRoomQueryWithBuildingAndSite()
 
@@ -443,10 +465,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForBuildingNotFound(){
+    void testListForBuildingNotFound() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
 
         Map params = getParamsForRoomQueryWithBuildingAndSite()
         params.put('building', 'xyz')
@@ -461,10 +483,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForSiteNotFound(){
+    void testListForSiteNotFound() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", RoomCompositeService.CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
 
         Map params = getParamsForRoomQueryWithBuildingAndSite()
         params.put('site', 'xyz')
@@ -497,10 +519,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    private Map getParamsForRoomQueryWithBuildingAndSite(){
+    private Map getParamsForRoomQueryWithBuildingAndSite() {
         Map params = getParamsForRoomQuery()
-        params.put('building', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME,ibuilding.code)[0].guid)
-        params.put('site', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME,icampus.code)[0].guid)
+        params.put('building', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME, ibuilding.code)[0].guid)
+        params.put('site', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid)
         return params
     }
 
