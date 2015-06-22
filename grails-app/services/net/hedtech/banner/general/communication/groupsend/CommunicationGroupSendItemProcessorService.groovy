@@ -16,7 +16,6 @@ import org.apache.log4j.Logger
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
-import java.sql.ResultSet
 import java.sql.SQLException
 
 /**
@@ -25,7 +24,7 @@ import java.sql.SQLException
  */
 class CommunicationGroupSendItemProcessorService {
     boolean transactional = true
-    def log = Logger.getLogger( this.getClass() )
+    def log = Logger.getLogger(this.getClass())
     def communicationGroupSendItemService
     def communicationTemplateMergeService
     def communicationFieldCalculationService
@@ -37,27 +36,27 @@ class CommunicationGroupSendItemProcessorService {
     private static final int noWaitErrorCode = 54;
 
 
-    public void performGroupSendItem( Long groupSendItemId ) {
-        log.debug( "Performing group send item id = " + groupSendItemId )
-        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready );
+    public void performGroupSendItem(Long groupSendItemId) {
+        log.debug("Performing group send item id = " + groupSendItemId)
+        boolean locked = lockGroupSendItem(groupSendItemId, CommunicationGroupSendItemExecutionState.Ready);
         if (!locked) {
             // Do nothing
             return;
         }
 
-        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get( groupSendItemId )
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get(groupSendItemId)
         CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
-
+        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), groupSendItem.mepCode)
         if (!groupSend.getCurrentExecutionState().isTerminal()) {
-            CommunicationRecipientData recipientData = buildRecipientData( groupSend.createdBy, groupSend.template, groupSendItem.referenceId, groupSendItem.recipientPidm, groupSend.organization )
-            recipientData = (CommunicationRecipientData) communicationRecipientDataService.create( recipientData )
-            log.debug( "Created recipient data with referenceId = " + groupSendItem.referenceId + "." )
+            CommunicationRecipientData recipientData = buildRecipientData(groupSend.createdBy, groupSend.template, groupSendItem.referenceId, groupSendItem.recipientPidm, groupSendItem.mepCode,groupSend.organization)
+            recipientData = (CommunicationRecipientData) communicationRecipientDataService.create(recipientData)
+            log.debug("Created recipient data with referenceId = " + groupSendItem.referenceId + ".")
 
-            log.debug( "Creating communication job with reference id = " + recipientData.referenceId )
-            CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
-            communicationJobService.create( communicationJob )
+            log.debug("Creating communication job with reference id = " + recipientData.referenceId)
+            CommunicationJob communicationJob = new CommunicationJob(referenceId: recipientData.referenceId)
+            communicationJobService.create(communicationJob)
 
-            log.debug( "Updating group send item to mark it complete with reference id = " + recipientData.referenceId )
+            log.debug("Updating group send item to mark it complete with reference id = " + recipientData.referenceId)
 
             def groupSendItemParamMap = [
                     id                   : groupSendItem.id,
@@ -65,7 +64,7 @@ class CommunicationGroupSendItemProcessorService {
                     currentExecutionState: CommunicationGroupSendItemExecutionState.Complete,
                     stopDate             : new Date()
             ]
-            communicationGroupSendItemService.update( groupSendItemParamMap )
+            communicationGroupSendItemService.update(groupSendItemParamMap)
         } else {
             def groupSendItemParamMap = [
                     id                   : groupSendItem.id,
@@ -73,14 +72,14 @@ class CommunicationGroupSendItemProcessorService {
                     currentExecutionState: CommunicationGroupSendItemExecutionState.Stopped,
                     stopDate             : new Date()
             ]
-            communicationGroupSendItemService.update( groupSendItemParamMap )
+            communicationGroupSendItemService.update(groupSendItemParamMap)
         }
 
     }
 
 
-    public void failGroupSendItem( Long groupSendItemId, String errorText ) {
-        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get( groupSendItemId )
+    public void failGroupSendItem(Long groupSendItemId, String errorText) {
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get(groupSendItemId)
         def groupSendItemParamMap = [
                 id                   : groupSendItem.id,
                 version              : groupSendItem.version,
@@ -89,61 +88,61 @@ class CommunicationGroupSendItemProcessorService {
                 errorText            : errorText
         ]
 
-        log.warn( "Group send item failed id = ${groupSendItemId}, errorText = ${errorText}." )
+        log.warn("Group send item failed id = ${groupSendItemId}, errorText = ${errorText}.")
 
-        communicationGroupSendItemService.update( groupSendItemParamMap )
+        communicationGroupSendItemService.update(groupSendItemParamMap)
     }
 
 
-    private CommunicationRecipientData buildRecipientData( String senderOracleUserName, CommunicationTemplate template, String referenceId, Long recipientPidm, CommunicationOrganization organization ) {
-        log.debug( "Creating recipient data with referenceId = " + referenceId + "." )
+    private CommunicationRecipientData buildRecipientData(String senderOracleUserName, CommunicationTemplate template, String referenceId, Long recipientPidm, String mepCode, CommunicationOrganization organization) {
+        log.debug("Creating recipient data with referenceId = " + referenceId + ".")
 
         CommunicationEmailTemplate emailTemplate
         if (template instanceof CommunicationEmailTemplate) {
             emailTemplate = (CommunicationEmailTemplate) template
         } else {
-            throw new RuntimeException( "Template of type ${template?.getClass()?.getSimpleName()} is not supported." )
+            throw new RuntimeException("Template of type ${template?.getClass()?.getSimpleName()} is not supported.")
         }
 
-        if (log.isDebugEnabled()) log.debug( "Spoofed as ${senderOracleUserName} for creating recipient data." )
+        if (log.isDebugEnabled()) log.debug("Spoofed as ${senderOracleUserName} for creating recipient data.")
 
         // Can this list be cached somewhere for similar processing
-        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.toList?.toString() )
-        communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
+        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.toList?.toString())
+        communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.subject?.toString()).each {
             fieldNames << it
         }
-        communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.subject?.toString() ).each {
+        communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.subject?.toString()).each {
             fieldNames << it
         }
-        communicationTemplateMergeService.extractTemplateVariables( emailTemplate?.content?.toString() ).each {
+        communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.content?.toString()).each {
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
 
         def nameToValueMap = [:]
         fieldNames.each { fieldName ->
-            CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
+            CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
             // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
             // Will come back to this to figure out desired behavior.
             if (communicationField) {
 
-                String value = calculateFieldForUser( communicationField, senderOracleUserName, recipientPidm )
+                String value = calculateFieldForUser(communicationField, senderOracleUserName, recipientPidm, mepCode)
 
                 CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
                         value: value,
                         renderAsHtml: communicationField.renderAsHtml
                 )
-                nameToValueMap.put( communicationField.name, communicationFieldValue )
+                nameToValueMap.put(communicationField.name, communicationFieldValue)
             }
         }
 
         return new CommunicationRecipientData(
-            pidm: recipientPidm,
-            templateId: template.id,
-            referenceId: referenceId,
-            ownerId: senderOracleUserName,
-            fieldValues: nameToValueMap,
-            organization: organization
+                pidm: recipientPidm,
+                templateId: template.id,
+                referenceId: referenceId,
+                ownerId: senderOracleUserName,
+                fieldValues: nameToValueMap,
+                organization: organization
         )
     }
 
@@ -153,17 +152,17 @@ class CommunicationGroupSendItemProcessorService {
      * @param state the group send item execution state
      * @return true if the record was successfully locked and false otherwise
      */
-    public boolean lockGroupSendItem( final Long groupSendItemId, final CommunicationGroupSendItemExecutionState state ) {
+    public boolean lockGroupSendItem(final Long groupSendItemId, final CommunicationGroupSendItemExecutionState state) {
         Sql sql = null
         try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            def rows = sql.rows( "select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait",
-                [groupSendItemId, state.name()],
-                0, 2
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            def rows = sql.rows("select GCRGSIM_SURROGATE_ID from GCRGSIM where GCRGSIM_SURROGATE_ID = ? and GCRGSIM_CURRENT_STATE = ? for update nowait",
+                    [groupSendItemId, state.name()],
+                    0, 2
             )
 
             if (rows.size() > 1) {
-                throw new RuntimeException( "Found more than one GCRGSIM row for a single group send item id" )
+                throw new RuntimeException("Found more than one GCRGSIM row for a single group send item id")
             } else {
                 return rows.size() == 1
             }
@@ -180,25 +179,23 @@ class CommunicationGroupSendItemProcessorService {
     }
 
 
-    private String calculateFieldForUser(CommunicationField communicationField, String senderOracleUserName, Long recipientPidm) {
-        List<String> originalFormContext = FormContext.get()
-        Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
-        try {
-            FormContext.set(['CMQUERYEXECUTE'])
-            Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate(senderOracleUserName)
-            SecurityContextHolder.getContext().setAuthentication(auth)
-            if (log.isDebugEnabled()) log.debug("Authenticated as ${senderOracleUserName} for monitoring.")
+    private String calculateFieldForUser(CommunicationField communicationField, String senderOracleUserName, Long recipientPidm, String mepCode) {
 
+        def origmap
+        try {
+            origmap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(senderOracleUserName, mepCode)
+            if (log.isDebugEnabled()) log.debug("Authenticated as ${senderOracleUserName} for monitoring.")
             // This method will start a nested transaction (see REQUIRES_NEW annotation) and consequently pick up a new db connection with the current oracle user name
             return communicationFieldCalculationService.calculateFieldByPidmWithNewTransaction(
-                communicationField.getRuleContent(),
-                communicationField.returnsArrayArguments,
-                communicationField.getFormatString(),
-                recipientPidm
+                    communicationField.getRuleContent(),
+                    communicationField.returnsArrayArguments,
+                    communicationField.getFormatString(),
+                    recipientPidm,
+                    mepCode
             )
-        } finally {
-            FormContext.set(originalFormContext)
-            SecurityContextHolder.getContext().setAuthentication(originalAuthentication)
+        }
+        finally {
+            asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext(origmap)
         }
     }
 }

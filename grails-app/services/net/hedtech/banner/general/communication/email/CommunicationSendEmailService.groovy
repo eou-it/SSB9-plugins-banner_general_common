@@ -17,6 +17,9 @@ class CommunicationSendEmailService {
     private Log log = LogFactory.getLog( this.getClass() )
     def communicationEmailItemService
     def communicationOrganizationService
+    def sessionFactory
+    def asynchronousBannerAuthenticationSpoofer
+
 
     /**
      * Sends an email message (single) based on the contents of EmailMessage passed.
@@ -33,6 +36,7 @@ class CommunicationSendEmailService {
         if (organization?.theSenderMailboxAccount.encryptedPassword != null) {
             organization.theSenderMailboxAccount.clearTextPassword = communicationOrganizationService.decryptMailBoxAccountPassword( organization.theSenderMailboxAccount.encryptedPassword )
         }
+        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, organization );
         sendEmailMethod.execute();
 

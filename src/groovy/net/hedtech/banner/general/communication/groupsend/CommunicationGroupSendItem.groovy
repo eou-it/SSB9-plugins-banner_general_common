@@ -82,6 +82,9 @@ class CommunicationGroupSendItem implements AsynchronousTask {
     @Column(name = "GCRGSIM_USER_ID")
     String lastModifiedBy
 
+    @Column(name = "GCRGSIM_VPDI_CODE")
+    String mepCode
+
     /**
      *  Date that record was created or last updated.
      */
@@ -136,6 +139,7 @@ class CommunicationGroupSendItem implements AsynchronousTask {
         dataOrigin(nullable: true, maxSize: 30)
         stopDate(nullable:true)
         errorText(nullable:true)
+        mepCode(nullable:true)
     }
 
     public static List fetchByGroupSend( CommunicationGroupSend groupSend ) {

@@ -328,22 +328,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
     void handleTask( AsynchronousTask job ) {
         log.debug( "Asynchronous Task Processing Engine handler will process job " + job.getId() );
         try {
-          if (!SecurityContextHolder.getContext().getAuthentication()) {
-              log.debug( "Setting form context." )
-              FormContext.set( ['CMQUERYEXECUTE'] )
-              String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
-              Authentication auth
-              try {
-                  auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
-              } catch (Throwable t) {
-                  log.error( t )
-                  t.printStackTrace()
-              }
-              SecurityContextHolder.getContext().setAuthentication( auth )
-              log.debug( "Authenticated as ${monitorOracleUserName} for async process handler." )
-          } else {
-              log.debug( "Already authenticated as ${SecurityContextHolder.getContext().getAuthentication().principal.toString()}." )
-          }
+            asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
 
           // This is a short-lived transactional method, and if successful the job has been marked as acquired.
           log.debug( "Acquiring job " + job.getId() )
@@ -416,14 +401,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
            */
           @Override
           public void run() {
-              if (!SecurityContextHolder.getContext().getAuthentication()) {
-                  FormContext.set( ['CMQUERYEXECUTE'] )
-                  String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
-                  Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
-                  SecurityContextHolder.getContext().setAuthentication( auth )
-                  if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process polling thread." )
-              }
-
+              asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
               boolean foundItems = false;
               while (keepRunning) {
                   isRunning = true;
@@ -475,14 +453,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           @Override
           public void run() {
               while (_keepRunning) {
-                  if (!SecurityContextHolder.getContext().getAuthentication()) {
-                      FormContext.set( ['CMQUERYEXECUTE'] )
-                      String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
-                      Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
-                      SecurityContextHolder.getContext().setAuthentication( auth )
-                      if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process monitor thread." )
-                  }
-
+                  asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
                   ArrayList monitored = null;
                   synchronized (monitoredThreads) {
                       monitored = (ArrayList) monitoredThreads.clone();
@@ -558,13 +529,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
           }
 
           public void run() {
-              if (!SecurityContextHolder.getContext().getAuthentication()) {
-                  FormContext.set( ['CMQUERYEXECUTE'] )
-                  String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
-                  Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
-                  SecurityContextHolder.getContext().setAuthentication( auth )
-                  if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for async task process polling thread." )
-              }
+              asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
               try {
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                   jobManager.markFailed( job, cause );

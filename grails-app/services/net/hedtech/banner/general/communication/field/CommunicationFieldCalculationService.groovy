@@ -26,6 +26,7 @@ import java.sql.SQLException
 
 class CommunicationFieldCalculationService extends ServiceBase {
 
+    def asynchronousBannerAuthenticationSpoofer
     /**
      * Merges the data from the parameter map into the string template
      * @param stringTemplate A stcring containing delimited token fields
@@ -83,20 +84,20 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public String calculateFieldByPidmWithNewTransaction( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm ) {
-        calculateFieldByPidm( sqlStatement, returnsArrayArguments, formatString, pidm )
+    public String calculateFieldByPidmWithNewTransaction( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
+        calculateFieldByPidm( sqlStatement, returnsArrayArguments, formatString, pidm, mepCode )
     }
 
-    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm ) {
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
         boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
         sqlParams << ['pidm': pidm]
-        calculateField( sqlStatement, returnsArray, formatString, sqlParams )
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
 
-    public String calculateFieldByMap( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map sqlParams ) {
+    public String calculateFieldByMap( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map sqlParams, String mepCode=null ) {
         boolean returnsArray = returnsArrayArguments ?: false
-        calculateField( sqlStatement, returnsArray, formatString, sqlParams )
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
 
     /**
@@ -105,15 +106,16 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param parameters Map of parameter values
      * @return
      */
-    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters ) {
+    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters, String mepCode=null ) {
         def attributeMap = [:]
         def Sql sql
         try {
             if (sqlStatement != null && sqlStatement.size() > 0) {
                 // ToDo: decide if the upper bound should be configurable
                 int maxRows = (!returnsArrayArguments) ? 1 : 50
+                Connection conn = (Connection) sessionFactory.getCurrentSession().connection()
+                asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
-
                 List<GroovyRowResult> resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
                 resultSet.each { row ->
                     row.each { column ->

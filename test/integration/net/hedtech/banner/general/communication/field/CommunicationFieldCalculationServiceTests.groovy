@@ -166,7 +166,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                     AND spriden_change_ind IS NULL
                     AND (spriden_pidm = :pidm or spriden_id = :bannerId)"""
         )
-        communicationField = communicationFieldService.create( communicationField )
+        communicationField = communicationFieldService.create( [domainModel: communicationField] )
         assertNotNull communicationField.immutableId
 
         final Long pidm = 37815L

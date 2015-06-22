@@ -54,6 +54,8 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_OWNER_ID")
     String ownerId
 
+    @Column(name = "GCBRDAT_VPDI_CODE")
+    String mepCode
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "GCRFVAL_canonicalForm", insertable = false, updatable = false)
@@ -92,6 +94,13 @@ class CommunicationRecipientData {
     @JoinColumn(name="GCBRDAT_ORGANIZATION_ID" )
     @ManyToOne( fetch = FetchType.EAGER )
     CommunicationOrganization organization
+
+    static constraints = {
+        lastModified(nullable: true)
+        lastModifiedBy(nullable: true, maxSize: 30)
+        dataOrigin(nullable: true, maxSize: 30)
+        mepCode(nullable:true)
+    }
 
     public static List fetchByTemplateId(templateId) {
 

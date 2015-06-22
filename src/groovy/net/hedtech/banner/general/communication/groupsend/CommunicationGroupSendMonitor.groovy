@@ -60,14 +60,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
     public void monitorGroupSends() {
         if (log.isDebugEnabled()) log.debug( "Checking group sends for status updates." )
         // begin setup
-        if (!SecurityContextHolder.getContext().getAuthentication()) {
-            FormContext.set( ['CMQUERYEXECUTE'] )
-            String monitorOracleUserName = 'COMMMGR' //'BCMADMIN'
-            Authentication auth = asynchronousBannerAuthenticationSpoofer.authenticate( monitorOracleUserName )
-            SecurityContextHolder.getContext().setAuthentication( auth )
-            if (log.isDebugEnabled()) log.debug( "Authenticated as ${monitorOracleUserName} for monitoring." )
-        }
-
+        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
         try {
             List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
             if (log.isDebugEnabled()) log.debug( "Running group send count = " + groupSendList.size() + "." );

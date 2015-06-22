@@ -57,8 +57,6 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
         def expectedOutput = concatWildcard(userinput)
 
         def result = CommunicationCommonUtility.getScrubbedInput(userinput)
-println "THE RESUTLS IS "+result
-        println "THE EXPECT IS "+expectedOutput
         assertTrue(result.equals(expectedOutput))
     }
 
