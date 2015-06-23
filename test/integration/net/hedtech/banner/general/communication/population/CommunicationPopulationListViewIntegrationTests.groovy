@@ -62,7 +62,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         assertEquals 9199999999999999999, populationSelectionListEntry.pidm
         assertEquals globalTestPopulationSelectionList, populationSelectionListEntry.populationSelectionList
 
-        def allView = CommunicationPopulationListView.findByNameWithPagingAndSortParams([params: ["queryName":'%']], [sortColumn: "queryName", sortDirection: "asc", max: 20, offset: 0])
+        def allView = CommunicationPopulationListView.findByNameWithPagingAndSortParams([params: ["queryName":'%', "lastCalculatedBy":globalTestPopulationSelectionList.lastCalculatedBy]], [sortColumn: "queryName", sortDirection: "asc", max: 20, offset: 0])
         assertNotNull allView
         assertTrue allView.size() >= 1
         assertTrue allView.getTotalCount() >= 1
