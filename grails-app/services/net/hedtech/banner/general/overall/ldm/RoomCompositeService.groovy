@@ -303,7 +303,7 @@ class RoomCompositeService extends LdmService {
         boolean roomAvailable = false
         validateParams(params)
         if (params.roomNumber?.trim() && params.building?.trim()) {
-            Map filterParams = prepareSearchParams(params)
+            Map filterParams = prepareSearchParams(RestfulApiValidationUtility.cloneMapExcludingKeys(params, ["roomNumber", "building"]))
             filterParams.filterData.params << [roomNumber: params.roomNumber.toString()?.trim(), buildingCode: params.building?.trim()]
             roomAvailable = AvailableRoomHelper.checkExistsAvailableRoomByRoomAndBuilding(filterParams.filterData)
         }
