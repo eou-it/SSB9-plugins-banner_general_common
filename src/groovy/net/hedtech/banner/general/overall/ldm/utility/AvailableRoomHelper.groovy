@@ -12,7 +12,7 @@ import net.hedtech.banner.query.DynamicFinder
  * for building the SQL Query AND Runtime parameters AND uses DynamicFinder
  * to find the results
  */
-class RoomsAvailabilityHelper {
+class AvailableRoomHelper {
 
     static def fetchSearchAvailableRoom(Map filterData, Map pagingAndSortParams, boolean count = false) {
         parseInputParameters(filterData)

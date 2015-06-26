@@ -9,7 +9,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.ldm.utility.RoomsAvailabilityHelper
+import net.hedtech.banner.general.overall.ldm.utility.AvailableRoomHelper
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
@@ -48,7 +48,7 @@ class RoomCompositeService extends LdmService {
             // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
-            def listOfObjectArrays = RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
+            def listOfObjectArrays = AvailableRoomHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
             entities = []
             listOfObjectArrays?.each {
                 entities << it[0]
@@ -71,7 +71,7 @@ class RoomCompositeService extends LdmService {
     Long count(Map params) {
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
             Map filterParams = prepareSearchParams(params)
-            RoomsAvailabilityHelper.fetchSearchAvailableRoom(filterParams.filterData, null, true)
+            AvailableRoomHelper.fetchSearchAvailableRoom(filterParams.filterData, null, true)
         } else {
             Map filterData = prepareParams(params)
             def roomTypes
@@ -305,7 +305,7 @@ class RoomCompositeService extends LdmService {
         if (params.roomNumber?.trim() && params.building?.trim()) {
             Map filterParams = prepareSearchParams(params)
             filterParams.filterData.params << [roomNumber: params.roomNumber.toString()?.trim(), buildingCode: params.building?.trim()]
-            roomAvailable = RoomsAvailabilityHelper.checkExistsAvailableRoomByRoomAndBuilding(filterParams.filterData)
+            roomAvailable = AvailableRoomHelper.checkExistsAvailableRoomByRoomAndBuilding(filterParams.filterData)
         }
         return roomAvailable
     }
