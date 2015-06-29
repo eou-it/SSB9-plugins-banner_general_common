@@ -5,6 +5,8 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import grails.gorm.DetachedCriteria
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.ApplicationExceptionFactory
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
@@ -28,22 +30,26 @@ class CommunicationGroupSendService extends ServiceBase {
         groupSend.setDeleted( false );
     }
 
+    def preUpdate( domainModelOrMap ) {
+        CommunicationGroupSend groupSend = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationGroupSend
+
+        // Make sure we are not transitioning from a group send that already completed, erred, or was previously stopped.
+        CommunicationGroupSend originalGroupSend = get( groupSend.id )
+        if (originalGroupSend.currentExecutionState.isTerminal()) {
+            log.error( "Group send with id = ${groupSend.id} has already concluded with execution state ${originalGroupSend.currentExecutionState.toString()}." )
+//            throw ApplicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "cannotStopConcludedGroupSend" )
+            throw ApplicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "cannotStopConcludedGroupSend" )
+        }
+    }
+
     public List findRunning() {
         return CommunicationGroupSend.findRunning()
     }
 
     public CommunicationGroupSend stopGroupSend( Long groupSendId ) {
-        if (log.isDebugEnabled()) log.debug( "Stopping group send with id = " + groupSendId + "." )
+        if (log.isDebugEnabled()) log.debug( "Stopping group send with id = ${groupSendId}." )
 
         CommunicationGroupSend groupSend = get( groupSendId )
-
-        if (groupSend.currentExecutionState.isTerminal()) {
-            if (log.isWarnEnabled()) log.warn( "Group send with id = " + groupSendId + " has already concluded." )
-            return groupSend
-        }
-
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
-        groupSend.stopDate = new Date()
 
         // Note: Scheduled is not enabled for CR1, but this is how we would do the check:
 //        if (groupSend.getScheduledStartJobID() != null && !groupSend.isStarted()) {
@@ -54,6 +60,9 @@ class CommunicationGroupSendService extends ServiceBase {
 //            }
 //        }
 
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
+        groupSend.stopDate = new Date()
+
         return update( groupSend )
     }
 
@@ -62,10 +71,6 @@ class CommunicationGroupSendService extends ServiceBase {
 
         CommunicationGroupSend groupSend = get( groupSendId )
 
-        if (groupSend.currentExecutionState.isTerminal()) {
-            if (log.isWarnEnabled()) log.warn( "Group send with id = " + groupSendId + " has already concluded." )
-            return groupSend
-        }
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
         groupSend.stopDate = new Date()
         //TODO: Figure out why ServiceBase.update is not working with this domain.
