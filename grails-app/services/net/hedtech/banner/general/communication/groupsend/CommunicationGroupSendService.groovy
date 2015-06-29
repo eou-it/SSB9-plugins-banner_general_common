@@ -4,10 +4,17 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.ApplicationExceptionFactory
+import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
+
+import java.sql.Connection
+import java.sql.SQLException
 
 /**
  * Manages group send instances.
@@ -54,7 +61,12 @@ class CommunicationGroupSendService extends ServiceBase {
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
         groupSend.stopDate = new Date()
 
-        return update( groupSend )
+        groupSend = update( groupSend )
+
+        // fetch any communication jobs for this group send and marked as stopped
+        stopPendingCommunicationJobs( groupSend.id )
+
+        return groupSend
     }
 
     public CommunicationGroupSend completeGroupSend( Long groupSendId ) {
@@ -66,6 +78,23 @@ class CommunicationGroupSendService extends ServiceBase {
         groupSend.stopDate = new Date()
         //TODO: Figure out why ServiceBase.update is not working with this domain.
         return groupSend.save() //update( groupSend )
+    }
+
+    private void stopPendingCommunicationJobs( Long groupSendId ) {
+        def Sql sql
+        try {
+            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
+            sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+            int rowsUpdated = sql.executeUpdate( "update GCBCJOB set GCBCJOB_STATUS='STOPPED', GCBCJOB_ACTIVITY_DATE = SYSDATE where " +
+                    "GCBCJOB_STATUS in ('PENDING', 'DISPATCHED') and GCBCJOB_REFERENCE_ID in " +
+                    "(select GCRGSIM_REFERENCE_ID from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId} and GCRGSIM_CURRENT_STATE = 'Complete')" )
+        } catch (SQLException e) {
+            throw new ApplicationException( CommunicationGroupSendService, e.message )
+        } catch (Exception e) {
+            throw new ApplicationException( CommunicationGroupSendService, e.message )
+        } finally {
+            sql?.close()
+        }
     }
 
 }

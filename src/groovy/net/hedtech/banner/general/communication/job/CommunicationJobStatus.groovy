@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.job
 public enum CommunicationJobStatus {
     PENDING,   // The job has not yet been processed.
     DISPATCHED,  // The job has been given to a thread for execution
+    STOPPED, // The job has been requested to stop
     FAILED,    // The job has been processed, but failed
     COMPLETED; // The job has been processed successfully
 
