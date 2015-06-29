@@ -180,6 +180,48 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
+    @Test
+    void testStopStoppedGroupSend() {
+        CommunicationGroupSend groupSend = createGroupSend()
+
+        List runningList = communicationGroupSendService.findRunning()
+        assertEquals( 1, runningList.size() )
+
+        assertTrue( groupSend.currentExecutionState.isRunning() )
+        groupSend = communicationGroupSendService.stopGroupSend( groupSend.id )
+        assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
+        assertTrue( groupSend.currentExecutionState.isTerminal() )
+
+        runningList = communicationGroupSendService.findRunning()
+        assertEquals( 0, runningList.size() )
+
+        try{
+            communicationGroupSendService.stopGroupSend( groupSend.id )
+            fail( "Shouldn't be able to stop a group send that has already concluded." )
+        } catch( ApplicationException e ) {
+            assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
+        }
+    }
+
+    @Test
+    void testStopCompletedGroupSend() {
+        def groupSend = createGroupSend()
+
+        assertTrue(groupSend.currentExecutionState.isRunning())
+        groupSend = communicationGroupSendService.completeGroupSend(groupSend.id)
+        assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
+
+        List runningList = communicationGroupSendService.findRunning()
+        assertEquals(0, runningList.size())
+
+        try {
+            communicationGroupSendService.stopGroupSend(groupSend.id)
+            fail("Shouldn't be able to stop a group send that has already concluded.")
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
+        }
+    }
+
 
     private CommunicationGroupSend createGroupSend() {
         return communicationGroupSendService.create(
