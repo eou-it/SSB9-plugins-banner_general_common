@@ -5,6 +5,9 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
+import org.hibernate.annotations.Type
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -72,6 +75,10 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "group_send_current_state")
     String currentExecutionState
 
+    @Type(type="yes_no")
+    @Column(name = "errors_exist")
+    boolean errors_exist
+
     @Column(name = "group_items_processing")
     Long groupItemsProcessingCount
 
@@ -90,6 +97,9 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "communication_jobs_failed")
     Long jobsFailedCount
 
+    @Column(name = "communication_jobs_stopped")
+    Long jobsStoppedCount
+
     @Column(name = "communication_jobs_processed")
     Long jobsProcessedCount
 
@@ -106,6 +116,20 @@ class CommunicationGroupSendView implements Serializable {
 
                 }
         return query
+    }
+
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationGroupSendView.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("populationName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.populationName))
+            ilike("templateName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.templateName))
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
     }
 }
 
