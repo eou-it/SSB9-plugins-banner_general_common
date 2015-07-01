@@ -433,7 +433,7 @@ class RoomCompositeService extends LdmService {
 
     private String getAcceptVersion() {
         String representationVersion = LdmService.getResponseRepresentationVersion()
-        if (representationVersion == null) {
+        if (representationVersion == null || representationVersion > LATEST_VERSION) {
             // Assume latest (current) version
             representationVersion = LATEST_VERSION
         }
@@ -443,7 +443,7 @@ class RoomCompositeService extends LdmService {
 
     private String getContentTypeVersion() {
         String representationVersion = LdmService.getRequestRepresentationVersion()
-        if (representationVersion == null) {
+        if (representationVersion == null || representationVersion > LATEST_VERSION) {
             // Assume latest (current) version
             representationVersion = LATEST_VERSION
         }
