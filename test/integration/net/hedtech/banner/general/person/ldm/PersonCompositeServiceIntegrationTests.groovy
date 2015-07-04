@@ -3,21 +3,30 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import net.hedtech.banner.general.overall.ldm.LdmService
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
+
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationName
 import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.system.*
+import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.Ethnicity
+import net.hedtech.banner.general.system.Legacy
+import net.hedtech.banner.general.system.MaritalStatus
+import net.hedtech.banner.general.system.Nation
+import net.hedtech.banner.general.system.Religion
+import net.hedtech.banner.general.system.State
+import net.hedtech.banner.general.system.UnitOfMeasure
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
-import org.junit.After
-import org.junit.Before
 import org.junit.Ignore
-import org.junit.Test
+
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -96,9 +105,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_credential_type4 = "Banner ID"
     def i_failed_update_credential_id = "TTTT"
     def i_failed_update_credential_type = "Social Security Number"
-    def i_success_credential_type4_filter="Banner ID"
-    def i_failure_credential_type4_filter="BannerId"
-    def i_failure_credential_id4="HOSP00"
+    def i_success_alternate_first_name = "John"
+    def i_success_alternate_middle_name = "A"
+    def i_success_alternate_last_name = "Jorden"
+    def i_success_alternate_birth_name_type = "Birth"
 
 
     @Before
@@ -128,9 +138,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-    @Ignore
     @Test
     void testListQapiWithValidFirstAndLastName() {
+        //we will forcefully set the content type so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
         Map params = getParamsWithReqiuredFields()
         def persons = personCompositeService.list(params)
 
@@ -149,9 +161,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-    @Ignore
     @Test
     void testListQapiWithInValidFirstAndLastName() {
+        //we will forcefully set the content type so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
         Map params = getParamsWithReqiuredFields()
         params.names[0].firstName = "MarkTT"
         params.names[0].lastName = "Kole"
@@ -161,9 +175,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue persons.isEmpty()
     }
 
-    @Ignore
     @Test
     void testListQapiWithInValidDateOfBirth() {
+        //we will forcefully set the content type so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
         Map params = getParamsWithReqiuredFields()
 
         params.dateOfBirth = "12-1973-30"
@@ -195,7 +211,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map params = getParamsForPersonFilter()
 
-        params.put("personFilter","xxxx")
+        params.put("personFilter", "xxxx")
 
         try {
             personCompositeService.list(params)
@@ -216,7 +232,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map params = getParamsForPersonFilter()
 
-        params.put("personFilter","")
+        params.put("personFilter", "")
 
         try {
             personCompositeService.list(params)
@@ -225,6 +241,53 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'not.found.message'
         }
     }
+
+
+    @Test
+    void testListPersonQapiWithBirthNameType() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.nameType == "Primary" }
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
+        assertNotNull o_birth_name_create
+        assertEquals i_success_alternate_first_name, o_birth_name_create.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_create.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
+
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/json")
+
+        Map params = getPersonBirthNameTypeFields()
+        def o_success_persons = personCompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+        def firstPerson = o_success_persons.first()
+        assertNotNull firstPerson
+        o_success_persons.each { person ->
+            def birthName = person.names.find { it.nameType == i_success_alternate_birth_name_type }
+            assertEquals i_success_alternate_first_name, birthName.firstName
+            assertEquals i_success_alternate_last_name, birthName.lastName
+        }
+    }
+
 
     @Test
     void testListQapiWithValidPersonfilter() {
@@ -239,19 +302,40 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map params = getParamsForPersonFilter()
 
-        params.put("personFilter",guid)
+        params.put("personFilter", guid)
 
         persons = personCompositeService.list(params)
         assertNotNull persons
 
     }
 
+    @Test
+    void testListapiWithRoleFacultyAndPagination() {
+        def params = [role: "faculty", max: '10', offset: '5']
+
+        def persons = personCompositeService.list(params)
+        persons.each {
+            it.roles.role == "Faculty"
+        }
+    }
+
+
+    @Test
+    void testListapiWithRoleStudentAndPagination() {
+        def params = [role: "student", max: '10', offset: '5']
+
+        def persons = personCompositeService.list(params)
+        persons.each {
+            it.roles.role == "Student"
+        }
+    }
+
 
     @Test
     void testListapiWithInvalidPersonfilter() {
 
-        def params =[:]
-        params.put("personFilter","xxxx")
+        def params = [:]
+        params.put("personFilter", "xxxx")
 
         try {
             personCompositeService.list(params)
@@ -261,11 +345,25 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
+    @Test
+    void testGetapiWithInvalidGuid() {
+        def invalidGuid = 'xxxxxx'
+
+        try {
+            personCompositeService.get(invalidGuid)
+            fail('This should have failed as person filter GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'NotFoundException'
+        }
+    }
+
+
     @Test
     void testListapiWithPersonfilterNull() {
 
-        def params =[:]
-        params.put("personFilter","")
+        def params = [:]
+        params.put("personFilter", "")
 
         try {
             personCompositeService.list(params)
@@ -278,9 +376,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListapiWithPersonfilterAndRole() {
 
-        def params =[:]
-        params.put("personFilter","xxxx")
-        params.put("role","faculty")
+        def params = [:]
+        params.put("personFilter", "xxxx")
+        params.put("role", "faculty")
 
         try {
             personCompositeService.list(params)
@@ -298,7 +396,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
         def params = [:]
 
-        params.put("personFilter",guid)
+        params.put("personFilter", guid)
 
         persons = personCompositeService.list(params)
         assertNotNull persons
@@ -323,6 +421,58 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_credential_type3, persons.credentials[2].credentialType
         assertEquals i_success_credential_id4, persons.credentials[3].credentialId
         assertEquals i_success_credential_type4, persons.credentials[3].credentialType
+    }
+
+    //GET Person By Guid API
+    @Test
+    void testGetPersonWithAlternateNameHavingBirthNameType() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.nameType == "Primary" }
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
+        assertNotNull o_birth_name_create
+        assertEquals i_success_alternate_first_name, o_birth_name_create.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_create.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
+
+        def o_success_person_get = personCompositeService.get(o_success_person_create.guid)
+
+        assertNotNull o_success_person_get
+        assertNotNull o_success_person_get.guid
+        assertEquals 2, o_success_person_get.names?.size()
+
+        def o_primary_name_get = o_success_person_get.names.find { it.nameType == "Primary" }
+        def o_birth_name_get = o_success_person_get.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_get
+        assertEquals o_primary_name_create.firstName, o_primary_name_get.firstName
+        assertEquals o_primary_name_create.middleName, o_primary_name_get.middleName
+        assertEquals o_primary_name_create.lastName, o_primary_name_get.lastName
+        assertEquals o_primary_name_create.nameType, o_primary_name_get.nameType
+        assertEquals o_primary_name_create.title, o_primary_name_get.title
+        assertEquals o_primary_name_create.pedigree, o_primary_name_get.pedigree
+        assertEquals o_primary_name_create.preferredName, o_primary_name_get.preferredName
+        assertNotNull o_birth_name_get
+        assertEquals o_birth_name_create.firstName, o_birth_name_get.firstName
+        assertEquals o_birth_name_create.middleName, o_birth_name_get.middleName
+        assertEquals o_birth_name_create.lastName, o_birth_name_get.lastName
+        assertEquals o_birth_name_create.nameType, o_birth_name_get.nameType
     }
 
     //POST- Person Create API
@@ -367,15 +517,49 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_emailAddress_institution, o_success_person_create.emails[2].emailAddress
     }
 
+    //POST- Person Create API
     @Test
-    void testUpdatePersonFirstNameAndLastNameChange() {
+    void testCreatePersonWithAlternateNameHavingBirthNameType() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.nameType == "Primary" }
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
+        assertNotNull o_birth_name_create
+        assertEquals i_success_alternate_first_name, o_birth_name_create.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_create.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
+    }
+
+
+    @Test
+    void testUpdatePersonFirstNameAndLastNameChangeWithCreatingPersonBase() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
         PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.findAllByPidmInList([personBasicPersonBase.pidm]).get(0)
         GlobalUniqueIdentifier uniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainKey("persons", personIdentificationNameCurrent.pidm)
         assertNotNull uniqueIdentifier
         Map params = getPersonWithFirstNameChangeRequest(personIdentificationNameCurrent, uniqueIdentifier.guid);
+        //checking the update method creating the person base record if not present.
+        def id = personBasicPersonBase.id
+        personBasicPersonBaseService.delete([domainModel: personBasicPersonBase])
+        assertNull "PersonBasicPersonBase should have been deleted", personBasicPersonBase.get(id)
 
-        //update person with FirstName change
+        //update person with FirstName change and add the person base record
         personCompositeService.update(params)
         PersonIdentificationNameCurrent newPersonIdentificationName = PersonIdentificationNameCurrent.findAllByPidmInList([personBasicPersonBase.pidm]).get(0)
         assertEquals newPersonIdentificationName.firstName, 'CCCCCC'
@@ -747,108 +931,34 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-    //Filter on CredentialId and Credential Type
+    //PUT- person update API
     @Test
-    public void testCredentialsFilterOnPerson(){
-        def persons = [:]
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","faculty")
-        persons = personCompositeService.list(params);
-        assert persons.size()==0
-        assertEquals 0,persons.size()
+    void testUpdatePersonWithAlternateNameHavingBirthNameType() {
+        Map content = newPersonWithPreferredEmailRequest()
 
-        persons.clear()
-        params.clear()
+        def o_success_person_create = personCompositeService.create(content)
 
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","student")
-        persons = personCompositeService.list(params);
-        assert persons.size()>0
-        assertEquals 1,persons.size()
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        def o_birth_name_create = o_success_person_create.names.find { it.nameType == "Birth" }
+        assertNull o_birth_name_create
 
-        persons.clear()
-        params.clear()
+        //update the email records
+        Map params = [id   : o_success_person_create.guid,
+                      names: [[lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
+        ]
 
+        def o_person_update = personCompositeService.update(params)
 
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4)
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'not.found.message'
-        }
+        def o_birth_name_update = o_person_update.names.find { it.nameType == "Birth" }
 
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4);
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
+        assertNotNull o_birth_name_update
+        assertEquals i_success_alternate_first_name, o_birth_name_update.firstName
+        assertEquals i_success_alternate_middle_name, o_birth_name_update.middleName
+        assertEquals i_success_alternate_last_name, o_birth_name_update.lastName
+        assertEquals i_success_alternate_birth_name_type, o_birth_name_update.nameType
     }
+
 
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -943,9 +1053,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithPersonBasicPersonBaseChangeRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      sex        : 'Female'
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
+                      sex  : 'Female'
 
         ]
         return params
@@ -953,20 +1063,20 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithNewAdressRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      sex        : 'Male',
-                      addresses  : [[addressType: 'Mailing', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398'], [addressType: 'Home', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778']]
+        Map params = [id       : guid,
+                      names    : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
+                      sex      : 'Male',
+                      addresses: [[addressType: 'Mailing', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', streetLine2: 'New street', streetLine3: 'Wilson Garden', zip: '19398'], [addressType: 'Home', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778']]
         ]
         return params
     }
 
 
     private Map getPersonWithModifiedAdressRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
-                      sex        : 'Male',
-                      addresses  : [[addressType: 'Mailing', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', zip: '31778'], [addressType: 'Home', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398']]
+        Map params = [id       : guid,
+                      names    : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'CCCCC', nameSuffix: 'CCCCC', preferenceFirstName: 'CCCCC']],
+                      sex      : 'Male',
+                      addresses: [[addressType: 'Mailing', city: 'Pavo', state: 'GA', streetLine1: '123 Main Line', streetLine2: 'New street', streetLine3: 'Wilson Garden', zip: '31778'], [addressType: 'Home', city: 'Southeastern', state: 'CA', streetLine1: '5890 139th Ave', zip: '19398', county: "Chester", nation: [code: "CA", value: "Canada"]]]
         ]
         return params
     }
@@ -986,40 +1096,40 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map getPersonWithNewPhonesRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      phones     : [[phoneNumber: '6107435302', phoneType: 'Mobile'], [phoneNumber: '2297795715', phoneType: 'Home']]
+        Map params = [id    : guid,
+                      names : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex   : 'Male',
+                      phones: [[phoneNumber: '6107435302', phoneType: 'Mobile'], [phoneNumber: '2297795715', phoneType: 'Home']]
         ]
         return params
     }
 
 
     private Map getPersonWithModifiedPhonesRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      phones     : [[phoneNumber: '6107435333', phoneType: 'Mobile'], [phoneNumber: '2297795777', phoneType: 'Home']]
+        Map params = [id    : guid,
+                      names : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex   : 'Male',
+                      phones: [[phoneNumber: '6107435333', phoneType: 'Mobile'], [phoneNumber: '2297795777', phoneType: 'Home']]
         ]
         return params
     }
 
 
     private Map getPersonWithNewRacesRequest(personIdentificationNameCurrent, guid, races) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      races      : [[guid: races[0].guid]]
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex  : 'Male',
+                      races: [[guid: races[0].guid]]
         ]
         return params
     }
 
 
     private Map getPersonWithModifiedRacesRequest(personIdentificationNameCurrent, guid, races) {
-        Map params = [id         : guid,
-                      names      : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
-                      sex        : 'Male',
-                      races      : [[guid: races[0].guid], [guid: races[1].guid]]
+        Map params = [id   : guid,
+                      names: [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
+                      sex  : 'Male',
+                      races: [[guid: races[0].guid], [guid: races[1].guid]]
         ]
         return params
     }
@@ -1046,8 +1156,21 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map newPersonWithAddressRequest() {
-        Map params = [names    : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
-                      addresses: [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]]
+        String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', i_success_ethnicity?.code)?.guid
+        String maritalStatusGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('marital-status', i_success_maritalStatus?.code)?.guid
+
+        Map params = [names              : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      addresses          : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip, county: "Chester", nation: [code: "CA", value: "Canada"]], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]],
+                      credentials        : [[
+                                                    credentialType: "Social Security Number",
+                                                    credentialId  : "111111111"
+                                            ],
+                                            [
+                                                    "credentialType": "Elevate ID",
+                                                    "credentialId": "E11111111"
+                                            ]],
+                      ethnicityDetail  : [guid: ethnicityGuid],
+                      maritalStatusDetail: [guid: maritalStatusGuid]
         ]
 
         return params
@@ -1079,9 +1202,29 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         return params
     }
 
+
     private Map getParamsForPersonFilter() {
         return [
-                action     : [POST: "list"],
+                action: [POST: "list"],
+        ]
+    }
+
+
+    private Map newPersonWithAlternateNameHavingBirthNameType() {
+        Map params = [names: [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName], [lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
+        ]
+        return params
+    }
+
+
+    private Map getPersonBirthNameTypeFields() {
+        return [
+                action: [POST: "list"],
+                names : [[
+                                 nameType : i_success_alternate_birth_name_type,
+                                 firstName: i_success_alternate_first_name,
+                                 lastName : i_success_alternate_last_name
+                         ]]
         ]
     }
 

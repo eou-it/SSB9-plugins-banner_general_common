@@ -1,5 +1,5 @@
 /** *******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm
 
@@ -64,12 +64,13 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         assertTrue siteList.size() > 0
         assertNotNull siteList[0].guid
         def site = siteDetailCompositeService.get(siteList[0].guid)
-        assertNotNull site
+        assertNotNull site.toString()
         assertEquals siteList[0].code, site.code
         assertEquals siteList[0].description, site.description
         assertEquals siteList[0].guid, site.guid
         assertEquals siteList[0].metadata, site.metadata
         assertEquals siteList[0].buildings, site.buildings
+        assertEquals siteList[0], site
     }
 
     /**

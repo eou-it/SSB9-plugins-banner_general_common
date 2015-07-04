@@ -126,6 +126,8 @@ class HousingRoomDescriptionReadOnly {
 					capacity=$capacity,
 					sex=$sex,
 					roomType=$roomType,
+                    roomStatusCode=$roomStatusCode,
+                    roomStatusInactiveIndicator=$roomStatusInactiveIndicator,
 					buildingCode=$buildingCode,
 					campusCode=$campusCode,
 					siteCode=$siteCode]"""
@@ -147,6 +149,8 @@ class HousingRoomDescriptionReadOnly {
         if (capacity != that.capacity) return false
         if (sex != that.sex) return false
         if (roomType != that.roomType) return false
+        if (roomStatusCode != that.roomStatusCode) return false
+        if (roomStatusInactiveIndicator != that.roomStatusInactiveIndicator) return false
         if (buildingCode != that.buildingCode) return false
         if (campusCode != that.campusCode) return false
         if (siteCode != that.siteCode) return false
@@ -167,6 +171,8 @@ class HousingRoomDescriptionReadOnly {
         result = 31 * result + (capacity != null ? capacity.hashCode() : 0)
         result = 31 * result + (sex != null ? sex.hashCode() : 0)
         result = 31 * result + (roomType != null ? roomType.hashCode() : 0)
+        result = 31 * result + (roomStatusCode != null ? roomStatusCode.hashCode() : 0)
+        result = 31 * result + (roomStatusInactiveIndicator != null ? roomStatusInactiveIndicator.hashCode() : 0)
         result = 31 * result + (buildingCode != null ? buildingCode.hashCode() : 0)
         result = 31 * result + (campusCode != null ? campusCode.hashCode() : 0)
         result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0)

@@ -70,7 +70,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testSqlProcessCompositeServiceTestGetSqlProcessResultsTerms() {
-        def params = [sqlCode: 'DERIVE_TERM', sqlProcessCode: 'LDM', input_date: new java.sql.Date(LdmService.convertString2Date('2014-06-01').time)]
+        def params = [sqlCode: 'DERIVE_TERM', sqlProcessCode: 'HEDM', input_date: new java.sql.Date(LdmService.convertString2Date('2014-06-01').time)]
         def results = sqlProcessCompositeService.getSqlProcessResults(params)
         assertEquals results[0][0], "201410"
     }
@@ -91,7 +91,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
             db?.close()
         }
 
-        // Create three identical processes that act on a pidm. It will return the spriden_id of the pereson with the pidm
+        // Create three identical processes that act on a pidm. It will return the spriden_id of the person with the pidm
         def entriesForSql = getEntriesForSql()
         def entriesForSqlProcess = getEntriesForSqlProcess()
         def resultMap = [:]
