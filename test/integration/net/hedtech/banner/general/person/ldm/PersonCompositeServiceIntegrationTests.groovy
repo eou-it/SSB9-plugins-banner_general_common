@@ -807,25 +807,29 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         GlobalUniqueIdentifier uniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainKey("persons", personIdentificationNameCurrent.pidm)
         assertNotNull uniqueIdentifier
 
-        def ethnicities = GlobalUniqueIdentifier.findAllByLdmName('ethnicities')
-        Map newEthnicities = getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, uniqueIdentifier.guid, ethnicities)
+        def ethnicity1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', '3')
+        Map newEthnicities = getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, uniqueIdentifier.guid, ethnicity1)
 
         // create new Ethnicity through update()
         def ethnicityDetail = personCompositeService.update(newEthnicities).ethnicityDetail
 
         //assertEquals ethnicityDetail.size ,1
-        assertEquals ethnicityDetail.guid, ethnicities[0].guid
+        assertEquals ethnicityDetail.guid, ethnicity1.guid
+        assertEquals "Hispanic", ethnicityDetail.parentCategory
 
         //  update Ethnicity using same request
         def unchangedEthnicityDetail = personCompositeService.update(newEthnicities).ethnicityDetail
-        assertEquals unchangedEthnicityDetail.guid, ethnicities[0].guid
+        assertEquals unchangedEthnicityDetail.guid, ethnicity1.guid
+        assertEquals "Hispanic", ethnicityDetail.parentCategory
 
         //update with new Ethnicity
-        Map modifiedEthnicity = getPersonWithModifiedEthniciiesyRequest(personIdentificationNameCurrent, uniqueIdentifier.guid, ethnicities)
+        def ethnicity2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', '4')
+        Map modifiedEthnicity = getPersonWithModifiedEthniciiesyRequest(personIdentificationNameCurrent, uniqueIdentifier.guid, ethnicity2)
 
         // create new Ethnicity through update()
         def modifiedEthnicityDetail = personCompositeService.update(modifiedEthnicity).ethnicityDetail
-        assertEquals modifiedEthnicityDetail.guid, ethnicities[1].guid
+        assertEquals modifiedEthnicityDetail.guid, ethnicity2.guid
+        assertEquals "Non-Hispanic", modifiedEthnicityDetail.parentCategory
 
     }
 
@@ -1135,21 +1139,21 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
-    private Map getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, guid, ethniciies) {
+    private Map getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, guid, ethnicity) {
         Map params = [id             : guid,
                       names          : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
                       sex            : 'Male',
-                      ethnicityDetail: [guid: ethniciies[0].guid]
+                      ethnicityDetail: [guid: ethnicity.guid]
         ]
         return params
     }
 
 
-    private Map getPersonWithModifiedEthniciiesyRequest(personIdentificationNameCurrent, guid, ethniciies) {
+    private Map getPersonWithModifiedEthniciiesyRequest(personIdentificationNameCurrent, guid, ethnicity) {
         Map params = [id             : guid,
                       names          : [[lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, nameType: 'Primary', namePrefix: 'TTTTT', nameSuffix: 'TTTTT', preferenceFirstName: 'TTTTT']],
                       sex            : 'Male',
-                      ethnicityDetail: [guid: ethniciies[1].guid]
+                      ethnicityDetail: [guid: ethnicity.guid]
         ]
         return params
     }
