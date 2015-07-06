@@ -6,9 +6,11 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -19,6 +21,13 @@ import javax.persistence.*
 @Table(name = "GVQ_GCRGSIM")
 @EqualsAndHashCode
 @ToString
+@NamedQueries(value = [
+        @NamedQuery(name = "CommunicationGroupSendItemView.fetchByGroupSendId",
+                query = """ FROM CommunicationGroupSendItemView a
+                            WHERE  a.groupSendId = :groupSendId
+                            ORDER BY a.lastModified desc
+                        """)
+])
 class CommunicationGroupSendItemView implements Serializable {
 
     /**
@@ -109,5 +118,29 @@ class CommunicationGroupSendItemView implements Serializable {
     @Type(type = "yes_no")
     @Column(name = "DECEASED_IND")
     Boolean deceased
+
+    public static List<CommunicationGroupSendItemView> fetchByGroupSendId(Long groupSendId) {
+
+        def query =
+                CommunicationGroupSendItemView.withSession { session ->
+                    session.getNamedQuery('CommunicationGroupSendItemView.fetchByGroupSendId')
+                            .setLong('groupSendId', groupSendId)
+                            .list()
+
+                }
+        return query
+    }
+
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationGroupSendItemView.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
+    }
 
 }
