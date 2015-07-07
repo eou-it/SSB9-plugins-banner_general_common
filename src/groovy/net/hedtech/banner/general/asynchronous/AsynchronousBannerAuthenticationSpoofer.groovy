@@ -21,7 +21,8 @@ import java.sql.SQLException
  * An authentication provider for batch threads that authorize a user using behind a batch job thread.
  */
 public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationProvider {
-    private static final Logger log = Logger.getLogger( "net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider" )
+    private static
+    final Logger log = Logger.getLogger("net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider")
 
     def dataSource  // injected by Spring
     MultiEntityProcessingService multiEntityProcessingService
@@ -53,7 +54,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
     }
 
 
-    public authenticateAndSetFormContextForExecuteAndSave(String username = null, String mepCode=null) {
+    public authenticateAndSetFormContextForExecuteAndSave(String username = null, String mepCode = null) {
         List<String> originalFormContext = FormContext.get()
         Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
         FormContext.set(['CMQUERYEXECUTE'])
@@ -114,6 +115,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
         }
     }
 
+
     public boolean supports(Class clazz) {
         log.debug "Saying supports for " + clazz
         return clazz instanceof AsynchronousBannerToken
@@ -144,7 +146,6 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
             }
         }
     }
-
 
 
     private getFullName(String name, dataSource) {

@@ -4,78 +4,79 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
-import net.hedtech.banner.security.FormContext
-import net.hedtech.banner.security.MepContextHolder
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Required
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
-
 
 /**
  * Created by mbrzycki on 12/5/14.
  */
 class CommunicationGroupSendMonitor implements DisposableBean {
-    private Log log = LogFactory.getLog( this.getClass() )
+    private Log log = LogFactory.getLog(this.getClass())
     private CommunicationGroupSendMonitorThread monitorThread
     private CommunicationGroupSendService communicationGroupSendService
     private CommunicationGroupSendItemService communicationGroupSendItemService
     private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
     public int monitorIntervalInSeconds = 10
 
+
     @Required
     void setAsynchronousBannerAuthenticationSpoofer(AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer) {
         this.asynchronousBannerAuthenticationSpoofer = asynchronousBannerAuthenticationSpoofer
     }
 
+
     @Required
-    public void setCommunicationGroupSendService( CommunicationGroupSendService communicationGroupSendService ) {
+    public void setCommunicationGroupSendService(CommunicationGroupSendService communicationGroupSendService) {
         this.communicationGroupSendService = communicationGroupSendService
     }
 
+
     @Required
-    public void setCommunicationGroupSendItemService( CommunicationGroupSendItemService communicationGroupSendItemService ) {
+    public void setCommunicationGroupSendItemService(CommunicationGroupSendItemService communicationGroupSendItemService) {
         this.communicationGroupSendItemService = communicationGroupSendItemService
     }
 
+
     public void init() {
-        log.info( "Initialized." );
-        this.monitorThread = new CommunicationGroupSendMonitorThread( this );
+        log.info("Initialized.");
+        this.monitorThread = new CommunicationGroupSendMonitorThread(this);
     }
+
 
     @Override
     void destroy() throws Exception {
-        log.info( "Calling disposable bean method." );
+        log.info("Calling disposable bean method.");
         this.monitorThread.stopRunning()
     }
 
+
     public void startMonitoring() {
-        log.info( "Monitor thread started.")
+        log.info("Monitor thread started.")
         this.monitorThread.start();
     }
 
 
     public void monitorGroupSends() {
-        if (log.isDebugEnabled()) log.debug( "Checking group sends for status updates." )
+        if (log.isDebugEnabled()) log.debug("Checking group sends for status updates.")
         // begin setup
         asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
         try {
             List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
-            if (log.isDebugEnabled()) log.debug( "Running group send count = " + groupSendList.size() + "." );
+            if (log.isDebugEnabled()) log.debug("Running group send count = " + groupSendList.size() + ".");
 
-            for(CommunicationGroupSend groupSend:groupSendList) {
-                if (groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Processing)) {
-                    int runningCount = communicationGroupSendItemService.fetchRunningGroupSendItemCount( groupSend.id )
+            for (CommunicationGroupSend groupSend : groupSendList) {
+                if (groupSend.currentExecutionState.equals(CommunicationGroupSendExecutionState.Processing)) {
+                    int runningCount = communicationGroupSendItemService.fetchRunningGroupSendItemCount(groupSend.id)
                     if (runningCount == 0) {
-                        communicationGroupSendService.completeGroupSend( groupSend.id )
+                        communicationGroupSendService.completeGroupSend(groupSend.id)
                     }
                 }
             }
-        } catch( Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace()
-            log.error( t )
+            log.error(t)
         }
 
 //            List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
@@ -111,14 +112,13 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 
 
     public void shutdown() {
-        log.debug( "Shutting down." );
+        log.debug("Shutting down.");
         this.monitorThread.stopRunning();
         try {
             this.monitorThread.join();
         } catch (InterruptedException e) {
         }
     }
-
 
 
 }
