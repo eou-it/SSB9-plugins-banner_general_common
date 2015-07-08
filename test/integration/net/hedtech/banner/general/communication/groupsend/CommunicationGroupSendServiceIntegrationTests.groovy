@@ -13,12 +13,12 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.security.BannerAuthenticationToken
-import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
 /**
@@ -33,6 +33,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     def communicationPopulationExecutionService
     def communicationFolderService
     def communicationEmailTemplateService
+    def communicationGroupSendCommunicationService
 
     CommunicationOrganization organization
     BannerAuthenticationToken bannerAuthenticationToken
@@ -41,7 +42,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     CommunicationPopulationSelectionList population
 
     public void cleanUp() {
-        def sql
+        def sql = null
         try {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
@@ -61,11 +62,11 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         organization = new CommunicationOrganization(name: "Test Org", isRoot: true)
         organization = communicationOrganizationService.create(organization) as CommunicationOrganization
 
-        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
-        assertNotNull auth
-        SecurityContextHolder.getContext().setAuthentication(auth)
-        assertTrue(auth instanceof BannerAuthenticationToken)
-        bannerAuthenticationToken = auth as BannerAuthenticationToken
+        Authentication authentication = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        assertNotNull authentication
+        SecurityContextHolder.getContext().setAuthentication( authentication )
+        assertTrue( authentication instanceof BannerAuthenticationToken )
+        bannerAuthenticationToken = authentication as BannerAuthenticationToken
         assertNotNull bannerAuthenticationToken.getPidm()
 
         populationQuery = new CommunicationPopulationQuery(
@@ -134,7 +135,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         groupSend.setStartedDate( startedDate )
         communicationGroupSendService.update( groupSend )
 
-        CommunicationGroupSend found = communicationGroupSendService.get( groupSendId )
+        CommunicationGroupSend found = (CommunicationGroupSend) communicationGroupSendService.get( groupSendId )
         assertNotNull found
         assertEquals( startedDate, found.startedDate )
     }
@@ -150,7 +151,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
 
         try {
             communicationGroupSendService.get( groupSendId )
-        } catch (ApplicationException e) {
+        } catch (ApplicationException ignore) {
             // expected.
         }
 
@@ -158,7 +159,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
 
     @Test
     void testFindRunning() {
-        CommunicationGroupSend groupSendA = createGroupSend()
+        createGroupSend()
         CommunicationGroupSend groupSendB = createGroupSend()
         CommunicationGroupSend groupSendC = createGroupSend()
 
@@ -166,13 +167,13 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals( 3, runningList.size() )
 
         assertTrue( groupSendB.currentExecutionState.isRunning() )
-        groupSendB = communicationGroupSendService.stopGroupSend( groupSendB.id )
+        groupSendB = communicationGroupSendCommunicationService.stopGroupSend( groupSendB.id )
         assertTrue( groupSendB.currentExecutionState.isTerminal() )
 
         runningList = communicationGroupSendService.findRunning()
         assertEquals( 2, runningList.size() )
 
-        groupSendC = communicationGroupSendService.completeGroupSend( groupSendC.id )
+        groupSendC = communicationGroupSendCommunicationService.completeGroupSend( groupSendC.id )
         assertTrue( groupSendC.currentExecutionState.isTerminal() )
 
         runningList = communicationGroupSendService.findRunning()
@@ -188,7 +189,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals( 1, runningList.size() )
 
         assertTrue( groupSend.currentExecutionState.isRunning() )
-        groupSend = communicationGroupSendService.stopGroupSend( groupSend.id )
+        groupSend = communicationGroupSendCommunicationService.stopGroupSend( groupSend.id )
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
         assertTrue( groupSend.currentExecutionState.isTerminal() )
 
@@ -196,7 +197,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals( 0, runningList.size() )
 
         try{
-            communicationGroupSendService.stopGroupSend( groupSend.id )
+            communicationGroupSendCommunicationService.stopGroupSend( groupSend.id )
             fail( "Shouldn't be able to stop a group send that has already concluded." )
         } catch( ApplicationException e ) {
             assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
@@ -208,14 +209,14 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         def groupSend = createGroupSend()
 
         assertTrue(groupSend.currentExecutionState.isRunning())
-        groupSend = communicationGroupSendService.completeGroupSend(groupSend.id)
+        groupSend = communicationGroupSendCommunicationService.completeGroupSend(groupSend.id)
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
 
         List runningList = communicationGroupSendService.findRunning()
         assertEquals(0, runningList.size())
 
         try {
-            communicationGroupSendService.stopGroupSend(groupSend.id)
+            communicationGroupSendCommunicationService.stopGroupSend(groupSend.id)
             fail("Shouldn't be able to stop a group send that has already concluded.")
         } catch (ApplicationException e) {
             assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
@@ -229,7 +230,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
                 organization: organization,
                 population: population,
                 template: emailTemplate,
-                ownerPidm: bannerAuthenticationToken.getPidm()
+                createdBy: bannerAuthenticationToken.getOracleUserName()
             )
         ) as CommunicationGroupSend
     }

@@ -1,6 +1,8 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import grails.gorm.DetachedCriteria
+import groovy.sql.Sql
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationEmailItem
@@ -23,18 +25,18 @@ import javax.mail.internet.MimeMessage
 import java.util.concurrent.TimeUnit
 
 /**
- * Created by mbrzycki on 12/3/14.
+ * Tests group send communication with all the services running.
  */
 class CommunicationGroupSendCommunicationServiceIntegrationTests extends CommunicationBaseIntegrationTestCase {
-    def log = LogFactory.getLog( this.class )
+    def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
 
     @Before
     public void setUp() {
         //super.setUseTransactions( false )
         formContext = ['SELFSERVICE']
-        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
-        SecurityContextHolder.getContext().setAuthentication( auth )
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
         super.setUp()
 
         communicationGroupSendMonitor.startMonitoring()
@@ -54,9 +56,14 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
         logout()
     }
 
-
     @Test
-    public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
+    public void testGroupSendCommunication() {
+        testGroupSendRequestByTemplateByPopulationSendImmediately()
+
+        testDeleteGroupSend()
+    }
+
+    private void testGroupSendRequestByTemplateByPopulationSendImmediately() {
         mailServer.start()
         CommunicationGroupSend groupSend
         sessionFactory.currentSession.with { session ->  //Ensure a transaction is started and committed for async threads.
@@ -111,6 +118,72 @@ class CommunicationGroupSendCommunicationServiceIntegrationTests extends Communi
             System.out.println( "Display message content to out: ")
             System.out.println( messages )
         }
+    }
+
+    private void testDeleteGroupSend() {
+        CommunicationGroupSend groupSend
+        sessionFactory.currentSession.with { session ->  //Ensure a transaction is started and committed for async threads.
+            def tx = session.beginTransaction()
+            CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testDeleteGroupSend"))
+            assertTrue(populationQuery.valid)
+
+            Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
+            CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
+            assertEquals(5, selectionList.getLastCalculatedCount())
+
+            CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                    populationId: populationSelectionListId,
+                    templateId: defaultEmailTemplate.id,
+                    organizationId: defaultOrganization.id,
+                    referenceId: UUID.randomUUID().toString()
+            )
+
+            groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+            assertNotNull(groupSend)
+            tx.commit()
+        }
+
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
+
+        try {
+            communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotStopRunningGroupSend@@", e.getWrappedException().getMessage() )
+        }
+
+        groupSend = communicationGroupSendCommunicationService.completeGroupSend( groupSend.id )
+
+        communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+    }
+
+    private int fetchGroupSendCount( Long groupSendId ) {
+        def sql
+        def result
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            result = sql.firstRow( "select count(*) as rowcount from GCBGSND where GCBGSND_SURROGATE_ID = ${groupSendId}" )
+            println( result.rowcount )
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+        return result.rowcount
+    }
+
+    private int fetchGroupSendItemCount( Long groupSendId ) {
+        def sql
+        def result
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
+            println( result.rowcount )
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+        return result.rowcount
     }
 
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
