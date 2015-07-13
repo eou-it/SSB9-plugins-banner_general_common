@@ -51,17 +51,22 @@ class CommunicationPopulationQueryStatementParseService {
             }
         }
         catch (SQLException ae) {
+            populationQueryParseResult.status = 'N'
+            populationQueryParseResult.message = ae.message
+
             log.debug "SqlException in parse ${ae}"
             log.debug ae.stackTrace
-            throw ae
+            //throw ae
         }
         catch (Exception ae) {
+            populationQueryParseResult.status = 'N'
+            populationQueryParseResult.message = ae.message
             log.debug "Exception in parse ${ae}"
             log.debug ae.stackTrace
-            throw ae
+            //throw ae
+        } finally {
+            return populationQueryParseResult
         }
-
-        return populationQueryParseResult
     }
 
 }
