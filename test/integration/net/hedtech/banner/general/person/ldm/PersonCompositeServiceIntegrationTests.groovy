@@ -3,21 +3,30 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import net.hedtech.banner.general.overall.ldm.LdmService
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.junit.Before
+import org.junit.Test
+import org.junit.After
+
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationName
 import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.system.*
+import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.Ethnicity
+import net.hedtech.banner.general.system.Legacy
+import net.hedtech.banner.general.system.MaritalStatus
+import net.hedtech.banner.general.system.Nation
+import net.hedtech.banner.general.system.Religion
+import net.hedtech.banner.general.system.State
+import net.hedtech.banner.general.system.UnitOfMeasure
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
-import org.junit.After
-import org.junit.Before
 import org.junit.Ignore
-import org.junit.Test
+
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -96,9 +105,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_credential_type4 = "Banner ID"
     def i_failed_update_credential_id = "TTTT"
     def i_failed_update_credential_type = "Social Security Number"
-    def i_success_credential_type4_filter="Banner ID"
-    def i_failure_credential_type4_filter="BannerId"
-    def i_failure_credential_id4="HOSP00"
 
 
     @Before
@@ -747,108 +753,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
-    //Filter on CredentialId and Credential Type
-    @Test
-    public void testCredentialsFilterOnPerson(){
-        def persons = [:]
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","faculty")
-        persons = personCompositeService.list(params);
-        assert persons.size()==0
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","student")
-        persons = personCompositeService.list(params);
-        assert persons.size()>0
-        assertEquals 1,persons.size()
-
-        persons.clear()
-        params.clear()
-
-
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4)
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'not.found.message'
-        }
-
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4);
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
-        }
-        assertEquals 0,persons.size()
-
-    }
 
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
