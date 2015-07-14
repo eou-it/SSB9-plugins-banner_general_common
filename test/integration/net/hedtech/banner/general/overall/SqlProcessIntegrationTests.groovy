@@ -3,6 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.After
 
@@ -443,6 +444,7 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
 	}
 
 
+    @Ignore
     @Test
     void testFetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode() {
         // setup test data
@@ -454,10 +456,10 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
         sqlProcessParameter.save(failOnError: true, flush: true)
         def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcesss: entriesForSqlProcesss, sqlProcessParameter: sqlProcessParameter)
         sqlProcessParameterByProcess.save(failOnError: true, flush: true)
-        
+
         // define a relatively simple sql statement
         def sqlStatement = "select sgbstdn_pidm, decode(sgbstdn_styp_code,'T','Y','N') from sgbstdn where sgbstdn_pidm in :INTEGRATION_TEST_PARAM"
-        
+
         // validate the sql statement to ensure lists of parameters are acceptable for use with GORRSQL
         def sql = new Sql(sessionFactory.currentSession.connection())
         sql.executeUpdate(
@@ -480,7 +482,7 @@ begin
     raise invalid_sql;
   end if;
 end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
-        
+
         // create the SQL statement
         def sqlProcess = new SqlProcess(
                 sequenceNumber: 1,
@@ -499,35 +501,35 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
         // test sql statement retrieval
         def sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 1, sqlStatements.size()
-        
+
         // update SQL statement to be invalid and re-test retrieval
         sqlProcess.validatedIndicator = false
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 0, sqlStatements.size()
         sqlProcess.validatedIndicator = true
-        
+
         // update SQL statement to be inactive and re-test retrieval
         sqlProcess.activeIndicator = false
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 0, sqlStatements.size()
         sqlProcess.activeIndicator = true
-        
+
         // update SQL statement to have no parsed sql and re-test retrieval
         sqlProcess.parsedSql = null
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 0, sqlStatements.size()
         sqlProcess.parsedSql = sqlStatement
-        
+
         // update SQL statement where start date not yet met and re-test retrieval
         sqlProcess.startDate = new Date() + 1
         sqlProcess.endDate = new Date() + 7
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 0, sqlStatements.size()
-        
+
         // update SQL statement where end date is passed and re-test retrieval
         sqlProcess.startDate = new Date() - 7
         sqlProcess.endDate = new Date() - 1
@@ -539,7 +541,7 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
         sqlProcess.startDate = new Date()
         sqlProcess.endDate = null
         sqlProcess.save(failOnError: true, flush: true)
-        
+
         // add annother statement and re-test
         sqlProcess = new SqlProcess(
                 sequenceNumber: 2,
