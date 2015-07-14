@@ -1,0 +1,364 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- *****************************************************************************
+Copyright 2015 Ellucian Company L.P. and its affiliates.
+****************************************************************************** -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="ar-acadlevels" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-levels</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-levels/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Level.STVLEVL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-acadperiods" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-periods</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>3</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-periods/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.AcademicPeriods.STVACYR</value>
+                <value>HEDM.AcademicPeriods.SOBTERM</value>
+                <value>HEDM.AcademicPeriods.SOBPTRM</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-buildings" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>buildings</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/buildings/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Building.SLBBLDG</value>
+                <value>HEDM.Building.SLBRDEF</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>courses</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/courses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <null/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-ethnicities" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>ethnicities</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/ethnicities/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Ethnicity.STVETHN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-gradeschemes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>grade-schemes</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/grade-schemes/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.GradeMode.STVGMOD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-instmethods" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>instructional-methods</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructional-methods/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.ScheduleType.STVSCHD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-instplatforms" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>instructional-platforms</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>3</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructional-platforms/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.InstructionalPlatforms.GORINTG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-maritalstatuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>marital-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/marital-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.MaritalStatus.STVMRTL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-organizations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>organizations</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/organizations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.College.STVCOLL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-persons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>persons</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>3</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/persons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Person.GOREMAL</value>
+                <value>HEDM.Person.GORPRAC</value>
+                <value>HEDM.Person.SPBPERS</value>
+                <value>HEDM.Person.SPRADDR</value>
+                <value>HEDM.Person.SPRIDEN</value>
+                <value>HEDM.Person.SPRTELE</value>
+                <value>HEDM.Faculty.SIBINST</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personfilters" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-filters</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>3</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-filters/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.PersonFilters.GLBSLCT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-races" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>races</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/races/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Race.GORRACE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-restritypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>restriction-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/restriction-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.HoldType.STVHLDD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-rooms" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>rooms</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/rooms/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Room.SLBRDEF</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>sections</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/sections/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <null/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-secregistrations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>section-registrations</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>3</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/section-registrations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.SectionRegistration.SFRSTCR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-sites" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>sites</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/sites/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Campus.STVCAMP</value>
+                <value>HEDM.Campus.SLBBLDG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-subjects" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>subjects</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>1</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/subjects/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Subject.STVSUBJ</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="erpApiConfig" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
+        <property name="resourceMap">
+            <list>
+                <ref bean="ar-acadlevels"/>
+                <ref bean="ar-acadperiods"/>
+                <ref bean="ar-buildings"/>
+                <ref bean="ar-courses"/>
+                <ref bean="ar-ethnicities"/>
+                <ref bean="ar-gradeschemes"/>
+                <ref bean="ar-instmethods"/>
+                <ref bean="ar-instplatforms"/>
+                <ref bean="ar-maritalstatuses"/>
+                <ref bean="ar-organizations"/>
+                <ref bean="ar-persons"/>
+                <ref bean="ar-personfilters"/>
+                <ref bean="ar-races"/>
+                <ref bean="ar-restritypes"/>
+                <ref bean="ar-rooms"/>
+                <ref bean="ar-sections"/>
+                <ref bean="ar-secregistrations"/>
+                <ref bean="ar-sites"/>
+                <ref bean="ar-subjects"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>
