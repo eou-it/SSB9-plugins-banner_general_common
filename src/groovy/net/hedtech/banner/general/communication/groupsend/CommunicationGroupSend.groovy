@@ -27,6 +27,10 @@ import javax.persistence.*
         query = """ FROM CommunicationGroupSend gs
                     WHERE gs.currentExecutionState = :new_ or
                           gs.currentExecutionState = :processing_ """
+    ),
+    @NamedQuery( name = "CommunicationGroupSend.fetchCompleted",
+            query = """ FROM CommunicationGroupSend gs
+                WHERE gs.currentExecutionState = :complete_ """
     )
 ])
 class CommunicationGroupSend implements Serializable {
@@ -123,6 +127,7 @@ class CommunicationGroupSend implements Serializable {
         currentExecutionState(nullable: false)
     }
 
+
     public static List findRunning() {
         def query
         CommunicationGroupSend.withSession { session ->
@@ -132,6 +137,16 @@ class CommunicationGroupSend implements Serializable {
                 .list()
         }
         return query
+    }
+
+    public static List fetchCompleted() {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSend.fetchCompleted' )
+                    .setParameter( 'complete_', CommunicationGroupSendExecutionState.Complete )
+                    .list()
+        }
+        return results
     }
 
 }

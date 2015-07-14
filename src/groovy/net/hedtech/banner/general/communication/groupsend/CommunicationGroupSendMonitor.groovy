@@ -40,22 +40,46 @@ class CommunicationGroupSendMonitor implements DisposableBean {
     }
 
 
+    @Required
+    public void setCommunicationGroupSendCommunicationService(CommunicationGroupSendCommunicationService communicationGroupSendCommunicationService) {
+        this.communicationGroupSendCommunicationService = communicationGroupSendCommunicationService
+    }
+
+
     public void init() {
         log.info("Initialized.");
-        this.monitorThread = new CommunicationGroupSendMonitorThread(this);
+
     }
 
 
     @Override
     void destroy() throws Exception {
         log.info("Calling disposable bean method.");
-        this.monitorThread.stopRunning()
+        if (monitorThread) {
+            monitorThread.stopRunning()
+        }
     }
 
 
     public void startMonitoring() {
         log.info("Monitor thread started.")
-        this.monitorThread.start();
+        if (!monitorThread) {
+            monitorThread = new CommunicationGroupSendMonitorThread(this);
+        }
+        monitorThread.start();
+    }
+
+
+    public void shutdown() {
+        log.debug("Shutting down.");
+        if (monitorThread) {
+            monitorThread.stopRunning();
+            try {
+                this.monitorThread.join();
+            } catch (InterruptedException e) {
+            }
+        }
+        monitorThread = null
     }
 
 
@@ -109,16 +133,6 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 //                log.error( t )
 //            }
 //        } as Callable )
-    }
-
-
-    public void shutdown() {
-        log.debug("Shutting down.");
-        this.monitorThread.stopRunning();
-        try {
-            this.monitorThread.join();
-        } catch (InterruptedException e) {
-        }
     }
 
 

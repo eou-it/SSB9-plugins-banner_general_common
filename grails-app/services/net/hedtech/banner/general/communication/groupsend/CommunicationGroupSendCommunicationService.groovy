@@ -70,6 +70,7 @@ class CommunicationGroupSendCommunicationService {
         return groupSend
     }
 
+
     /**
      * Deletes a group send and it's dependent objects. The group send must not bre running otherwise an
      * application exception will be thrown.
@@ -87,18 +88,11 @@ class CommunicationGroupSendCommunicationService {
         }
 
         if (groupSend.currentExecutionState.running) {
-            throw ExceptionFactory.createApplicationException( CommunicationGroupSendCommunicationService.class, "cannotStopRunningGroupSend" )
+            throw ExceptionFactory.createApplicationException( CommunicationGroupSendCommunicationService.class, "cannotDeleteRunningGroupSend" )
         }
 
-        // should do as a batch update if not done in a single sql command
-//        iterate through each group send id {
-//            get the reference id
-//            if a communication job exists with the reference id, remove
-//            if a recipient data exists with the reference id, remove
-//            delete the group send item
-//        }
-//        delete the group send
-
+        deleteCommunicationJobsByGroupSendId( groupSendId )
+        deleteRecipientDataByGroupSendId( groupSendId )
         communicationGroupSendService.delete( groupSendId )
     }
 
@@ -129,7 +123,7 @@ class CommunicationGroupSendCommunicationService {
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
         groupSend.stopDate = new Date()
 
-        groupSend = communicationGroupSendService.update( groupSend )
+        groupSend = saveGroupSend( groupSend )
 
         // fetch any communication jobs for this group send and marked as stopped
         stopPendingCommunicationJobs( groupSend.id )
@@ -145,12 +139,66 @@ class CommunicationGroupSendCommunicationService {
     public CommunicationGroupSend completeGroupSend( Long groupSendId ) {
         if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
 
-        CommunicationGroupSend groupSend = communicationGroupSendService.get( groupSendId )
-
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
-        groupSend.stopDate = new Date()
-        return communicationGroupSendService.update( groupSend )
+        CommunicationGroupSend aGroupSend = communicationGroupSendService.get( groupSendId )
+        aGroupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
+        aGroupSend.stopDate = new Date()
+        return saveGroupSend( aGroupSend )
     }
+
+    private CommunicationGroupSend saveGroupSend( CommunicationGroupSend groupSend ) {
+        //TODO: Figure out why ServiceBase.update is not working with this domain.
+        return groupSend.save( flush:true ) //update( groupSend )
+    }
+
+    /**
+     * Removes all communication job records referenced by a group send id.
+     *
+     * @param groupSendId the long id of the group send.
+     */
+    private void deleteCommunicationJobsByGroupSendId( Long groupSendId ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "Attempting to delete all communication jobs referenced by group send id = ${groupSendId}.")
+        }
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        try {
+            int rows = sql.executeUpdate("DELETE FROM gcbcjob a WHERE EXISTS (SELECT b.gcrgsim_surrogate_id FROM gcrgsim b, gcbgsnd c WHERE a.gcbcjob_reference_id = b.gcrgsim_reference_id AND b.gcrgsim_group_send_id = c.gcbgsnd_surrogate_id AND c.gcbgsnd_surrogate_id = ?)",
+                    [ groupSendId ] )
+            if (log.isDebugEnabled()) {
+                log.debug( "Deleting ${rows} communication jobs referenced by group send id = ${groupSendId}.")
+            }
+        } catch (Exception e) {
+            log.error( e )
+            throw e
+        } finally {
+            sql?.close()
+        }
+    }
+
+
+    /**
+     * Removes all recipient data records referenced by a group send id.
+     *
+     * @param groupSendId the long id of the group send.
+     */
+    private void deleteRecipientDataByGroupSendId( Long groupSendId ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "Attempting to delete all recipient data referenced by group send id = ${groupSendId}.")
+        }
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        try {
+            int rows = sql.executeUpdate("DELETE FROM gcbrdat a WHERE EXISTS (SELECT b.gcrgsim_surrogate_id FROM gcrgsim b, gcbgsnd c WHERE a.gcbrdat_reference_id = b.gcrgsim_reference_id AND b.gcrgsim_group_send_id = c.gcbgsnd_surrogate_id AND c.gcbgsnd_surrogate_id = ?)",
+                    [ groupSendId ] )
+            if (log.isDebugEnabled()) {
+                log.debug( "Deleting ${rows} recipient data referenced by group send id = ${groupSendId}.")
+            }
+        } catch (Exception e) {
+            log.error( e )
+            throw e
+        } finally {
+            sql?.close()
+        }
+    }
+
 
     private void stopPendingCommunicationJobs( Long groupSendId ) {
         def Sql sql
