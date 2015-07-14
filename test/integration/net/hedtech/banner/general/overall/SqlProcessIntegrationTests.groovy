@@ -3,7 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.After
 
@@ -444,7 +443,6 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
 	}
 
 
-    @Ignore
     @Test
     void testFetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode() {
         // setup test data
@@ -454,7 +452,7 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
         entriesForSql.save(failOnError: true, flush: true)
         def sqlProcessParameter = new SqlProcessParameter(code: 'INTEGRATION_TEST_PARAM', description: 'INTEGRATION_TEST_PARAM', dataType: 'N', startDate: new Date(), endDate: new Date() + 1)
         sqlProcessParameter.save(failOnError: true, flush: true)
-        def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcesss: entriesForSqlProcesss, sqlProcessParameter: sqlProcessParameter)
+        def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcess: entriesForSqlProcesss.code, parameterForSqlProcess: sqlProcessParameter.code)
         sqlProcessParameterByProcess.save(failOnError: true, flush: true)
 
         // define a relatively simple sql statement
@@ -494,7 +492,7 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
                 endDate: null,
                 parsedSql: sqlStatement,
                 systemRequiredIndicator: true,
-                entriesForSqlProcesss: entriesForSqlProcesss,
+                entriesForSqlProcess: entriesForSqlProcesss,
                 entriesForSql: entriesForSql)
         sqlProcess.save(failOnError: true, flush: true)
 
@@ -553,7 +551,7 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
                 endDate: new Date(),
                 parsedSql: sqlStatement,
                 systemRequiredIndicator: true,
-                entriesForSqlProcesss: entriesForSqlProcesss,
+                entriesForSqlProcess: entriesForSqlProcesss,
                 entriesForSql: entriesForSql)
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
