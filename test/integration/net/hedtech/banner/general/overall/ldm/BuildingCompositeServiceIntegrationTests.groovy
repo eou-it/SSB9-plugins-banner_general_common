@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
+import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.Before
 import org.junit.Test
@@ -150,6 +151,83 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue buildings.size() <= 20
     }
 
+    /**
+     * Test to check the BuildingCompositeService list method with valid sort and order field and supported version
+     * If No "Accept" header is provided, by default it takes the latest supported version
+     */
+    @Test
+    void testListWithValidSortAndOrderFieldWithSupportedVersion() {
+        def params = [order: 'ASC', sort: 'code', max: '20', offset: '0']
+        List<BuildingDetail> buildings = buildingCompositeService.list(params)
+        assertNotNull buildings
+        assertTrue buildings.size() <= 20
+        assertNotNull buildings[0].guid
+        BuildingDetail building = buildingCompositeService.get( buildings[0].guid )
+        assertNotNull building
+        assertEquals buildings[0], building
+        assertEquals buildings[0].guid, building.guid
+        assertEquals buildings[0].rooms, building.rooms
+    }
 
+
+    /**
+     * Test to check the BuildingCompositeService list method with invalid order field
+     */
+    @Test
+    void testListWithInvalidSortOrder() {
+        shouldFail(RestfulApiValidationException) {
+            def map = [order: 'test', max: '20', offset: '0']
+            buildingCompositeService.list(map)
+        }
+    }
+
+    /**
+     * Test to check the BuildingCompositeService list method with invalid sort field
+     */
+    @Test
+    void testListWithInvalidSortField() {
+        shouldFail(RestfulApiValidationException) {
+            def map = [sort: 'test', max: '20', offset: '0']
+            buildingCompositeService.list(map)
+        }
+    }
+
+
+    /**
+     * Test to check the sort by code on BuildingCompositeService
+     * */
+    @Test
+    public void testSortByCode(){
+        params.order='ASC'
+        params.sort='code'
+        List<BuildingDetail> list = buildingCompositeService.list(params)
+        assertNotNull list
+        def tempParam=null
+        list.each{
+            building->
+                String code=building.code
+                if(!tempParam){
+                    tempParam=code
+                }
+                assertTrue tempParam.compareTo(code)<0 || tempParam.compareTo(code)==0
+                tempParam=code
+        }
+
+        params.clear()
+        params.order='DESC'
+        params.sort='code'
+        list = buildingCompositeService.list(params)
+        assertNotNull list
+        tempParam=null
+        list.each{
+            building->
+                String code=building.code
+                if(!tempParam){
+                    tempParam=code
+                }
+                assertTrue tempParam.compareTo(code)>0 || tempParam.compareTo(code)==0
+                tempParam=code
+        }
+    }
 
 }

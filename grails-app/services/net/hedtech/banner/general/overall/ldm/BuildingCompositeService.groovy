@@ -26,17 +26,19 @@ class BuildingCompositeService {
     public static final String LDM_NAME = 'buildings'
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
+    private static final List<String> VERSIONS = ["v1", "v2","v3","v4"]
 
 
     private HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: 'building.code',
-            title       : 'building.description'
+            title       : 'building.description',
+            code        : 'building.code'
     ]
 
 
     List<BuildingDetail> list( Map params ) {
         List buildings = []
-        List allowedSortFields = ['abbreviation', 'title']
+        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
         RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(params.order)
