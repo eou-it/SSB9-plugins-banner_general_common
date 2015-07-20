@@ -50,6 +50,10 @@ class CommunicationGroupSendView implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
+    @Column(name = "group_send_end_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date groupSendEndDate;
+
     @Column(name = "group_send_name")
     String groupSendName;
 
@@ -105,6 +109,10 @@ class CommunicationGroupSendView implements Serializable {
 
     @Column(name = "communication_item_count")
     Long communicationItemCount
+
+    @Column(name = "as_of_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date asOfDate
 
     public static List<CommunicationGroupSendView> fetchByPopulationId(Long populationId) {
 

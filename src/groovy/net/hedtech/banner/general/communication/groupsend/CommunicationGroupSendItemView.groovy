@@ -134,11 +134,21 @@ class CommunicationGroupSendItemView implements Serializable {
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
-        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+        def searchStatus = filterData?.params?.status
 
         def queryCriteria = CommunicationGroupSendItemView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+            eq ("groupSendId", filterData?.params?.jobId)
+            ilike ("currentExecutionState", searchStatus)
+            or {
+                ilike("lastName", searchName)
+                ilike("firstName", searchName)
+                ilike("bannerId", searchName)
+            }
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+
         }
         return results
     }
