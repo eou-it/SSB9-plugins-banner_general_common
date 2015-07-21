@@ -1,12 +1,11 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
-import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.Before
@@ -165,8 +164,6 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         BuildingDetail building = buildingCompositeService.get( buildings[0].guid )
         assertNotNull building
         assertEquals buildings[0], building
-        assertEquals buildings[0].guid, building.guid
-        assertEquals buildings[0].rooms, building.rooms
     }
 
 

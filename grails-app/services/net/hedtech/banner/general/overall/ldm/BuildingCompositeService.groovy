@@ -1,16 +1,14 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
-import grails.util.GrailsNameUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
-import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
 import net.hedtech.banner.general.system.ldm.v1.Metadata

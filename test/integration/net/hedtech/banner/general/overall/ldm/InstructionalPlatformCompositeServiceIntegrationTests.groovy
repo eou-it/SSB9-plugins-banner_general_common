@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.IntegrationPartnerSystemRule
 import net.hedtech.banner.general.overall.ldm.v2.InstructionalPlatform
 import net.hedtech.banner.general.system.IntegrationPartner
+import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.Before
 import org.junit.Test
@@ -23,6 +24,7 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
 
     String i_success_code = "TW"
     String i_success_description = "Test IntegPartner Description"
+    private String invalid_sort_orderErrorMessage = 'RestfulApiValidationUtility.invalidSortField'
 
 
     @Before
@@ -177,5 +179,87 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
                 integrationPartner: i_success_integrationPartner
         )
         return integrationPartnerSystemRule
+    }
+
+    /**
+     * Test to check the InstructionalPlatformCompositeService list method with valid sort and order field and supported version
+     * If No "Accept" header is provided, by default it takes the latest supported version
+     */
+    @Test
+    void testListWithValidSortAndOrderFieldWithSupportedVersion() {
+        def params = [order: 'ASC', sort: 'code']
+        def instructionalPlatformList = instructionalPlatformCompositeService.list(params)
+        assertNotNull instructionalPlatformList
+        assertFalse instructionalPlatformList.isEmpty()
+        assertNotNull instructionalPlatformList.code
+        assertEquals IntegrationPartnerSystemRule.count(), instructionalPlatformList.size()
+        assertNotNull i_success_integrationPartnerSystem
+        assertTrue instructionalPlatformList.code.contains(i_success_integrationPartnerSystem.code)
+        assertTrue instructionalPlatformList.description.contains(i_success_integrationPartnerSystem.description)
+        assertTrue instructionalPlatformList.dataOrigin.contains(i_success_integrationPartnerSystem.dataOrigin)
+
+    }
+
+    /**
+     * Test to check the sort by code on InstructionalPlatformCompositeService
+     * */
+    @Test
+    public void testSortByCode(){
+        params.order='ASC'
+        params.sort='code'
+        List list = instructionalPlatformCompositeService.list(params)
+        assertNotNull list
+        def tempParam=null
+        list.each{
+            instructionalPlatform->
+                String code=instructionalPlatform.code
+                if(!tempParam){
+                    tempParam=code
+                }
+                assertTrue tempParam.compareTo(code)<0 || tempParam.compareTo(code)==0
+                tempParam=code
+        }
+
+        params.clear()
+        params.order='DESC'
+        params.sort='code'
+        list = instructionalPlatformCompositeService.list(params)
+        assertNotNull list
+        tempParam=null
+        list.each{
+            instructionalPlatform->
+                String code=instructionalPlatform.code
+                if(!tempParam){
+                    tempParam=code
+                }
+                assertTrue tempParam.compareTo(code)>0 || tempParam.compareTo(code)==0
+                tempParam=code
+        }
+    }
+
+    /**
+     * Test to check the InstructionalPlatformCompositeService list method with invalid sort field
+     */
+    @Test
+    void testListWithInvalidSortOrder() {
+        try {
+            def map = [sort: 'test']
+            instructionalPlatformCompositeService.list(map)
+            fail()
+        } catch (RestfulApiValidationException e) {
+            assertEquals 400, e.getHttpStatusCode()
+            assertEquals invalid_sort_orderErrorMessage , e.messageCode.toString()
+        }
+    }
+
+    /**
+     * Test to check the InstructionalPlatformCompositeService list method with invalid sort field
+     */
+    @Test
+    void testListWithInvalidSortField() {
+        shouldFail(RestfulApiValidationException) {
+            def map = [order: 'test']
+            instructionalPlatformCompositeService.list(map)
+        }
     }
 }
