@@ -82,14 +82,10 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
      */
     private String parentMessageId;
 
-    /**
-     * status of the EmailMessage.
-     */
-    private String status;
 
 
 
-    /**
+   /**
      * Returns the bcc attribute value for the email message as a set of email addresses.
      * @return Set<EmailAddress> email address in the bcc list
      */
@@ -301,22 +297,6 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
     }
 
 
-    /**
-     * @return the status
-     */
-    public String getStatus() {
-        return status;
-    }
-
-
-    /**
-     * @param status the status to set
-     */
-    public void setStatus( String status ) {
-        this.status = status;
-    }
-
-
     /*
      * (non-Javadoc)
      * @see java.lang.Object#clone()
@@ -354,7 +334,6 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
         if (null != parentMessageId) {
             newMessage.setParentMessageId( parentMessageId );
         }
-        newMessage.setStatus( status );
         return newMessage;
     }
 

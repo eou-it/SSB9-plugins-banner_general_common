@@ -53,6 +53,7 @@ grails.project.dependency.resolution = {
         compile "javax.mail:javax.mail-api:1.5.1"
         runtime "com.sun.mail:javax.mail:1.5.1"
         compile 'com.icegreen:greenmail:1.3'
+        compile 'org.apache.commons:commons-email:1.3.1'
     }
 
 
