@@ -241,7 +241,7 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
      * Test to check the InstructionalPlatformCompositeService list method with invalid sort field
      */
     @Test
-    void testListWithInvalidSortOrder() {
+    void testListWithInvalidSortField() {
         try {
             def map = [sort: 'test']
             instructionalPlatformCompositeService.list(map)
@@ -253,10 +253,10 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
     }
 
     /**
-     * Test to check the InstructionalPlatformCompositeService list method with invalid sort field
+     * Test to check the InstructionalPlatformCompositeService list method with invalid order field
      */
     @Test
-    void testListWithInvalidSortField() {
+    void testListWithInvalidOrderField() {
         shouldFail(RestfulApiValidationException) {
             def map = [order: 'test']
             instructionalPlatformCompositeService.list(map)
