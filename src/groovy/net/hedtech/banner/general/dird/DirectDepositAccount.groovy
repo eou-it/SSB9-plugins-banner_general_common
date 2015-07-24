@@ -72,10 +72,10 @@ class DirectDepositAccount implements Serializable {
 	String bankRoutingNum
 	
 	@Column(name = "GXRDIRD_AMOUNT")
-	BigDecimal amount
+	double amount
 	
 	@Column(name = "GXRDIRD_PERCENT")
-	BigDecimal percent
+	double percent
 	
 	@Column(name = "GXRDIRD_ACCT_TYPE")
 	String accountType
@@ -142,13 +142,37 @@ class DirectDepositAccount implements Serializable {
 		apAchTransactionTypeCode(nullable: true, maxSize: 8)
 	}
 	
-	public static fetchByPidm(Map parms) {
+	public boolean equals(object) {
+		if (this.is(object)) return true
+		if (!(object instanceof DirectDepositAccount)) return false
+		if (!super.equals(object)) return false
+
+		DirectDepositAccount that = (DirectDepositAccount) object
+
+		if (pidm != that.pidm) return false
+		if (bankAccountNum != that.bankAccountNum) return false
+		if (bankRoutingNum != that.bankRoutingNum) return false
+		
+		return true
+	}
+	
+	public int hashCode() {
+		int result = super.hashCode()
+		result = 31 * result + (id != null ? id.hashCode() : 0)
+		result = 31 * result + (version != null ? version.hashCode() : 0)
+		result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
+		result = 31 * result + (bankAccountNum != null ? bankAccountNum.hashCode() : 0)
+		result = 31 * result + (bankRoutingNum != null ? bankRoutingNum.hashCode() : 0)
+		return result
+	}
+	
+	public static fetchByPidm(String pidm) {
 		def dirdAccounts
 
 		DirectDepositAccount.withSession { session ->
 			dirdAccounts = session.getNamedQuery(
-					'LeaveTitle.fetchByPidm')
-					.setString('pidm', parms?.pidm).list()[0]
+					'DirectDepositAccount.fetchByPidm')
+					.setString('pidm', pidm).list()
 		}
 		return dirdAccounts
 	}
