@@ -39,7 +39,6 @@ import net.hedtech.banner.general.system.NameType
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.State
 import net.hedtech.banner.general.system.TelephoneType
-import net.hedtech.banner.general.system.ldm.v1.EthnicityDetail
 import net.hedtech.banner.general.system.ldm.v1.MaritalStatusDetail
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.RaceDetail
@@ -83,6 +82,7 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
     private static final List<String> VERSIONS = ["v1","v2","v3"]
+    List<GlobalUniqueIdentifier> allEthnicities
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -299,19 +299,9 @@ class PersonCompositeService extends LdmService {
             person.put('maritalStatus', maritalStatusDetail.maritalStatus)
         }
 
-        EthnicityDetail ethnicityDetail
+        def ethnicityDetail
         if (person.ethnicityDetail instanceof Map) {
-            String ethnicityGuid = person.ethnicityDetail.guid?.trim()?.toLowerCase()
-            if (!ethnicityGuid) {
-                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("ethnicity.guid.required.message", []))
-            }
-            try {
-                ethnicityDetail = ethnicityCompositeService.get(ethnicityGuid)
-                person.put('ethnicity', ethnicityDetail.ethnicity)
-                person.put('ethnic', ethnicityDetail.ethnic)
-            } catch (ApplicationException ae) {
-                LdmService.throwBusinessLogicValidationException(ae)
-            }
+            ethnicityDetail = createOrUpdatePersonEthnicity(person)
         }
 
         person.put('deadIndicator', person.get('deadDate') ? 'Y' : null)
@@ -487,7 +477,9 @@ class PersonCompositeService extends LdmService {
                 }
             }
         }
-        def ethnicityDetail = newPersonBase.ethnicity ? ethnicityCompositeService.fetchByEthnicityCode(newPersonBase.ethnicity?.code) : null
+
+        def ethnicityDetail = buildPersonEthnicity(newPersonBase)
+
         def maritalStatusDetail = newPersonBase.maritalStatus ? maritalStatusCompositeService.fetchByMaritalStatusCode(newPersonBase.maritalStatus?.code) : null
         //update Address
         def addresses = []
@@ -711,19 +703,8 @@ class PersonCompositeService extends LdmService {
             person.put('maritalStatus', maritalStatusDetail.maritalStatus)
         }
 
-        EthnicityDetail ethnicityDetail
         if (person.ethnicityDetail instanceof Map) {
-            String ethnicityGuid = person.ethnicityDetail.guid?.trim()?.toLowerCase()
-            if (!ethnicityGuid) {
-                throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("ethnicity.guid.required.message", []))
-            }
-            try {
-                ethnicityDetail = ethnicityCompositeService.get(ethnicityGuid)
-                person.put('ethnicity', ethnicityDetail.ethnicity)
-                person.put('ethnic', ethnicityDetail.ethnic)
-            } catch (ApplicationException ae) {
-                LdmService.throwBusinessLogicValidationException(ae)
-            }
+            createOrUpdatePersonEthnicity(person)
         }
 
         person.put('deadIndicator', person.get('deadDate') ? 'Y' : null)
@@ -989,10 +970,13 @@ class PersonCompositeService extends LdmService {
             credentialsMap = [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
         }
 
+        if("v3".equals(getAcceptVersion(VERSIONS))) {
+            allEthnicities = ethnicityCompositeService.getUnitedStatesEthnicCodes()
+        }
         personBaseList.each { personBase ->
             Person currentRecord = new Person(personBase)
             currentRecord.maritalStatusDetail = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
-            currentRecord.ethnicityDetail = personBase.ethnicity?.code ? ethnicityCompositeService.fetchByEthnicityCode(personBase.ethnicity?.code) : null
+            currentRecord.ethnicityDetail = buildPersonEthnicity(personBase, allEthnicities)
             /*  if( personBase.ssn ) {
                 currentRecord.credentials << new Credential("Social Security Number",
                         personBase.ssn,
@@ -1229,19 +1213,12 @@ class PersonCompositeService extends LdmService {
                     personBase.maritalStatus = maritalStatusDetail.maritalStatus
                 }
 
-                EthnicityDetail ethnicityDetail
                 if (person.ethnicityDetail instanceof Map) {
-                    String ethnicityGuid = person.ethnicityDetail.guid?.trim()?.toLowerCase()
-                    if (!ethnicityGuid) {
-                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("ethnicity.guid.required.message", []))
+                    createOrUpdatePersonEthnicity(person)
+                    if (["v1","v2"].contains(getAcceptVersion(VERSIONS))) {
+                        personBase.ethnicity = person.get('ethnicity')
                     }
-                    try {
-                        ethnicityDetail = ethnicityCompositeService.get(ethnicityGuid)
-                        personBase.ethnicity = ethnicityDetail.ethnicity
-                        personBase.ethnic = ethnicityDetail.parentCategory == "Non-Hispanic" ? '1' : (ethnicityDetail.parentCategory == "Hispanic" ? '2' : null)
-                    } catch (ApplicationException ae) {
-                        LdmService.throwBusinessLogicValidationException(ae)
-                    }
+                    personBase.ethnic = person.get('ethnic')
                 }
 
                 if (person.containsKey('deadDate')) {
@@ -1773,5 +1750,55 @@ class PersonCompositeService extends LdmService {
 
         return nameType
     }
+
+
+    private def createOrUpdatePersonEthnicity(def person) {
+        def ethnicityDetail
+        String ethnicityGuid = person.ethnicityDetail.guid?.trim()?.toLowerCase()
+        if (!ethnicityGuid) {
+            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("ethnicity.guid.required.message", []))
+        }
+        try {
+            if (["v1", "v2"].contains(getAcceptVersion(VERSIONS))) {
+                ethnicityDetail = ethnicityCompositeService.get(ethnicityGuid)
+                person.put('ethnicity', ethnicityDetail.ethnicity)
+                person.put('ethnic', ethnicityDetail.ethnic)
+            } else if ("v3".equals(getAcceptVersion(VERSIONS))) {
+                allEthnicities = ethnicityCompositeService.getUnitedStatesEthnicCodes()
+                Long ethnic = allEthnicities.find { it.guid == ethnicityGuid }?.domainId
+                if (!ethnic?.toString()) {
+                    throw new ApplicationException("ethnicity", new NotFoundException())
+                }
+                person.put('ethnic', (ethnic != 0 ? ethnic.toString() : null))
+                ethnicityDetail = ["guid": ethnicityGuid]
+            }
+        } catch (ApplicationException ae) {
+            LdmService.throwBusinessLogicValidationException(ae)
+        }
+        return ethnicityDetail
+    }
+
+
+    private def buildPersonEthnicity(def personBase, List<GlobalUniqueIdentifier> globalUniqueIdentifier = null) {
+        def ethnicityDetail
+        if (["v1", "v2"].contains(getAcceptVersion(VERSIONS))) {
+            if (personBase.ethnicity) {
+                ethnicityDetail = ethnicityCompositeService.fetchByEthnicityCode(personBase.ethnicity.code)
+            }
+        } else if ("v3".equals(getAcceptVersion(VERSIONS))) {
+            if(!globalUniqueIdentifier) {
+                allEthnicities = ethnicityCompositeService.getUnitedStatesEthnicCodes()
+            }
+            String guid
+            if (personBase.ethnic) {
+                guid = allEthnicities.find { Long.parseLong(personBase.ethnic) == it.domainId }?.guid
+            } else {
+                guid = allEthnicities.find { it.domainId == 0 }?.guid
+            }
+            ethnicityDetail = ["guid": guid]
+        }
+        return ethnicityDetail
+    }
+
 
 }

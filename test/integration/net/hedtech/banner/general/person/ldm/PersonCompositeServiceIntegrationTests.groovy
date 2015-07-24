@@ -478,6 +478,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     //POST- Person Create API
     @Test
     void testCreatePersonWithStateAndZipIntegrationSettingValue() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         Map content = newPersonWithAddressRequest()
 
         def o_success_person_create = personCompositeService.create(content)
@@ -809,7 +811,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def ethnicity1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', '3')
         Map newEthnicities = getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, uniqueIdentifier.guid, ethnicity1)
-
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         // create new Ethnicity through update()
         def ethnicityDetail = personCompositeService.update(newEthnicities).ethnicityDetail
 
