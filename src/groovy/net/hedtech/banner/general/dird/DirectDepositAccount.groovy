@@ -53,7 +53,7 @@ class DirectDepositAccount implements Serializable {
 	Integer priority
 	
 	@Column(name = "GXRDIRD_AP_IND")
-	Integer apIndicator
+	String apIndicator
 	
 	@Column(name = "GXRDIRD_HR_IND")
 	String hrIndicator
@@ -72,10 +72,10 @@ class DirectDepositAccount implements Serializable {
 	String bankRoutingNum
 	
 	@Column(name = "GXRDIRD_AMOUNT")
-	double amount
+	Double amount
 	
 	@Column(name = "GXRDIRD_PERCENT")
-	double percent
+	Double percent
 	
 	@Column(name = "GXRDIRD_ACCT_TYPE")
 	String accountType
@@ -140,30 +140,6 @@ class DirectDepositAccount implements Serializable {
 		intlAchTransactionIndicator(nullable: false, maxSize: 8)
 		isoCode(nullable: true, maxSize: 8)
 		apAchTransactionTypeCode(nullable: true, maxSize: 8)
-	}
-	
-	public boolean equals(object) {
-		if (this.is(object)) return true
-		if (!(object instanceof DirectDepositAccount)) return false
-		if (!super.equals(object)) return false
-
-		DirectDepositAccount that = (DirectDepositAccount) object
-
-		if (pidm != that.pidm) return false
-		if (bankAccountNum != that.bankAccountNum) return false
-		if (bankRoutingNum != that.bankRoutingNum) return false
-		
-		return true
-	}
-	
-	public int hashCode() {
-		int result = super.hashCode()
-		result = 31 * result + (id != null ? id.hashCode() : 0)
-		result = 31 * result + (version != null ? version.hashCode() : 0)
-		result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-		result = 31 * result + (bankAccountNum != null ? bankAccountNum.hashCode() : 0)
-		result = 31 * result + (bankRoutingNum != null ? bankRoutingNum.hashCode() : 0)
-		return result
 	}
 	
 	public static fetchByPidm(String pidm) {
