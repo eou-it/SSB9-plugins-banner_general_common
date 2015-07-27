@@ -25,7 +25,6 @@ import net.hedtech.banner.general.system.Religion
 import net.hedtech.banner.general.system.State
 import net.hedtech.banner.general.system.UnitOfMeasure
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.junit.Ignore
 
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -475,6 +474,24 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals o_birth_name_create.nameType, o_birth_name_get.nameType
     }
 
+    //GET Person By Guid API
+    @Test
+    void testGetPersonWithUSEthnicity() {
+        Map content = newPersonWithUSEthnicity()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+
+        def o_success_person_get = personCompositeService.get(o_success_person_create.guid)
+
+        assertNotNull o_success_person_get
+        assertNotNull o_success_person_get.guid
+        assertEquals o_success_person_create.guid, o_success_person_get.guid
+        assertEquals o_success_person_create.ethnicityDetail.guid, o_success_person_get.ethnicityDetail.guid
+    }
+
     //POST- Person Create API
     @Test
     void testCreatePersonWithStateAndZipIntegrationSettingValue() {
@@ -548,6 +565,46 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
     }
 
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithEthnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        Map content = newPersonWithAddressRequest()
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals content.ethnicityDetail.guid, o_success_person_create.ethnicityDetail.guid
+    }
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithUSethnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        Map content = newPersonWithUSEthnicity()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals content.ethnicityDetail.guid, o_success_person_create.ethnicityDetail.guid
+    }
+
+    @Test
+    void testCreatePersonWithInvalidUSethnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        Map content = newPersonWithAddressRequest()
+
+        try {
+            personCompositeService.create(content)
+            fail('This should have failed as US ethnicity GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'not.found.message'
+        }
+    }
 
     @Test
     void testUpdatePersonFirstNameAndLastNameChangeWithCreatingPersonBase() {
@@ -966,6 +1023,29 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_alternate_birth_name_type, o_birth_name_update.nameType
     }
 
+    //PUT- person update API
+    @Test
+    void testUpdatePersonWithUSethnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        Map content = newPersonWithUSEthnicity()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals content.ethnicityDetail.guid, o_success_person_create.ethnicityDetail.guid
+
+        String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us', 2)?.guid
+        Map content1 = [id: o_success_person_create.guid, ethnicityDetail: [guid: ethnicityGuid]]
+        def o_success_person_update = personCompositeService.update(content1)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals o_success_person_create.guid, o_success_person_update.guid
+        assertEquals content1.ethnicityDetail.guid, o_success_person_update.ethnicityDetail.guid
+    }
+
 
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -1173,10 +1253,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                                                     credentialId  : "111111111"
                                             ],
                                             [
-                                                "credentialType": "Elevate ID",
-                                                "credentialId": "E11111111"
+                                                    "credentialType": "Elevate ID",
+                                                    "credentialId"  : "E11111111"
                                             ]],
-                      ethnicityDetail  : [guid: ethnicityGuid],
+                      ethnicityDetail    : [guid: ethnicityGuid],
                       maritalStatusDetail: [guid: maritalStatusGuid]
         ]
 
@@ -1233,6 +1313,16 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                                  lastName : i_success_alternate_last_name
                          ]]
         ]
+    }
+
+
+    private Map newPersonWithUSEthnicity() {
+        String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us', 1)?.guid
+        Map params = [names          : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      ethnicityDetail: [guid: ethnicityGuid]
+        ]
+
+        return params
     }
 
 }
