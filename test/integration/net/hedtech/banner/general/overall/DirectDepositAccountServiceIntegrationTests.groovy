@@ -38,6 +38,8 @@ class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTes
         assertNotNull directDepositAccount.id
         assertEquals 36948575, directDepositAccount.bankAccountNum
         assertEquals 123478902, directDepositAccount.bankRoutingNum
+		assertEquals "I", directDepositAccount.apIndicator
+		assertEquals "A", directDepositAccount.hrIndicator
         def id = directDepositAccount.id
 
         directDepositAccount = directDepositAccount.get(id)
@@ -64,6 +66,8 @@ class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTes
 			intlAchTransactionIndicator: "N"
 //			isoCode: $isoCode,
 //			apAchTransactionTypeCode: $apAchTransactionTypeCode
+//			iatAddressTypeCode: $iatAddressTypeCode
+//			iatAddessSequenceNum: $iatAddessSequenceNum
 		)
 
 		return domain
