@@ -151,7 +151,6 @@ class PersonCompositeService extends LdmService {
             if (params.containsKey("personFilter")) {
                 String selId = params.get("personFilter")
                 RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
-                println "params ${params}"
                 pidms = getPidmsForPersonFilter(selId, params)
 
             } else {

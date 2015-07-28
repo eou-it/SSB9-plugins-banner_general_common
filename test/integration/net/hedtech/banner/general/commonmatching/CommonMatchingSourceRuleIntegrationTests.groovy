@@ -140,7 +140,6 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     void testOptimisticLock() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule = commonMatchingSourceRule.save(failOnError: true, flush: true)
-        println(' the id is ' + commonMatchingSourceRule.version)
         def sql
         try {
             sql = new Sql(sessionFactory.getCurrentSession().connection())

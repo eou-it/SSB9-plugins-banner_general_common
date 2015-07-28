@@ -259,7 +259,6 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
             cnt += 1
             person2.find {
                 if ( it.pidm == pers.pidm) {
-                    println ("${cnt} pidms match ${it.pidm} ${pers.pidm}")
                     match += 1
                 } }
         }

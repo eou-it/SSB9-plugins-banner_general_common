@@ -516,7 +516,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             persextract2502.find { pers2 ->
                 cnt += 1
                 if ( pers2.pidm == pers.pidm) {
-                    println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
+                   // println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
                     matchextract += 1
                 } }
         }
@@ -526,7 +526,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             persextract250.find { pers2 ->
                 cnt += 1
                 if ( pers2.pidm == pers.pidm) {
-                    println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
+                   // println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
                     matchextract += 1
                 } }
         }
