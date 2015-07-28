@@ -3,6 +3,8 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ldm.LdmService
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
@@ -25,8 +27,6 @@ import net.hedtech.banner.general.system.Religion
 import net.hedtech.banner.general.system.State
 import net.hedtech.banner.general.system.UnitOfMeasure
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.junit.Ignore
-
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -391,8 +391,12 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListapiWithValidPersonfilter() {
 
+        def popsel = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("GENERAL", 'ALL', 'BANNER', 'GRAILS')
+        assertEquals 2, popsel.size()
+        def pidm1 = popsel[0].pidm
+        def pidm2 = popsel[1].pidm
 
-        def persons = [:]
+        def persons
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
         def params = [:]
 
@@ -400,8 +404,156 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         persons = personCompositeService.list(params)
         assertNotNull persons
+        assertNotNull persons.find { it.person.pidm == pidm1 }
+        assertNotNull persons.find { it.person.pidm == pidm2 }
 
     }
+
+    @Test
+    void testListapiWithValidPersonfilterAndPagination() {
+        // verify our test case has 7 records
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDM')
+        assertEquals 7, popsel.size()
+        assertEquals 7, popsel.findAll { it.creatorId == "BANNER" }?.size()
+        assertEquals 7, popsel.findAll { it.lastModifiedBy == "GRAILS" }?.size()
+
+        // set up params for call
+        def persons = []
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')?.guid
+        assertNotNull guid
+        String guid2 =  GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters',  'STUDENT-^HEDM-^BANNER-^GRAILS' )[0]
+        assertNotNull guid2
+        def params = [  personFilter : 'STUDENT-^HEDM-^BANNER-^GRAILS', max: '3', offset: '0' ]
+
+        persons = personCompositeService.list(params)
+        assertEquals 3,   persons.size()
+
+        // no pagination
+        def params2 = [  personFilter  : 'STUDENT-^HEDM-^BANNER-^GRAILS'  ]
+
+        persons = personCompositeService.list(params2)
+        assertEquals 7,   persons.size()
+
+    }
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndPagination() {
+        // verify our test case has 7 records
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDM')
+        assertEquals 7, popsel.size()
+        assertEquals 7, popsel.findAll { it.creatorId == "BANNER" }?.size()
+        assertEquals 7, popsel.findAll { it.lastModifiedBy == "GRAILS" }?.size()
+
+        // set up params for call
+        def persons = []
+
+        String guid2 =  GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters',  'STUDENT-^HEDM-^BANNER-^GRAILS' )[0].guid
+        assertNotNull guid2
+        def params = [  personFilter : guid2, max: '3', offset: '0' ]
+
+        persons = personCompositeService.list(params)
+        assertEquals 3,   persons.size()
+
+        // no pagination
+        def params2 = [  personFilter  : guid2  ]
+
+        persons = personCompositeService.list(params2)
+        assertEquals 7,   persons.size()
+
+    }
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndPaginationForPerformance() {
+        // verify our test case has 7 records
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if ( popsel.size() > 0 ){
+            popsel.each {
+                it.delete(flush:true, failOnError:true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+        def insertCount = sql.executeUpdate(idSql)
+        assertTrue insertCount > 500
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+        def pidmlist = persextract.groupBy {it.pidm }
+        // verify the list of pidms is unique
+        pidmlist.each {
+            assertEquals 1, it.value.size()
+        }
+        // test pagination
+        def persextract250 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS",[max: '250', offset: '0'])
+        def persextract2502 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS",[max: '250', offset: '250'])
+        assertEquals 250, persextract250.size()
+        assertEquals 250, persextract2502.size()
+        def matchextract = 0
+        def cnt = 0
+        persextract250.each { pers ->
+            persextract2502.find { pers2 ->
+                cnt += 1
+                if ( pers2.pidm == pers.pidm) {
+                    println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
+                    matchextract += 1
+                } }
+        }
+        assertEquals 0, matchextract
+        matchextract = 0
+        persextract2502.each { pers ->
+            persextract250.find { pers2 ->
+                cnt += 1
+                if ( pers2.pidm == pers.pidm) {
+                    println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
+                    matchextract += 1
+                } }
+        }
+        assertEquals 0, matchextract
+
+        // set up params for call
+        def persons = []
+
+        String guid2 =  GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters',  'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS' )[0].guid
+        assertNotNull guid2
+
+
+        def params = [  personFilter : guid2, max: '250', offset: '0'  ]
+
+        persons = personCompositeService.list(params)
+        assertEquals 250,   persons.size()
+
+        // second page
+
+        params = [  personFilter : guid2, max: '250', offset: '250'  ]
+
+        def persons2 = personCompositeService.list(params)
+        assertEquals 250,   persons2.size()
+
+
+    }
+
 
     //GET- Person by guid API
     @Test
