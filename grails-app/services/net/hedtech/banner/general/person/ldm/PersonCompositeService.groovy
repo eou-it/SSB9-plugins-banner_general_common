@@ -460,21 +460,22 @@ class PersonCompositeService extends LdmService {
         def name = new Name(newPersonIdentificationName, newPersonBase)
         name.setNameType("Primary")
         names << name
-        if("v3".equals(getAcceptVersion(VERSIONS))) {
+        if ("v3".equals(getAcceptVersion(VERSIONS))) {
             PersonIdentificationNameAlternate personIdentificationNameAlternate
+            def birth = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm)
+            def newBirthName = null
             if (birthName) {
-                personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, birthName, person?.metadata)
-            }
-            def birth
-            if (personIdentificationNameAlternate) {
-                birth = new NameAlternate(personIdentificationNameAlternate)
-                birth.setNameType("Birth")
-                names << birth
-            } else {
-                birth = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm)
-                if(birth) {
-                    names << birth
+                if (!birth || !(birth?.firstName == birthName.firstName) || !(birth?.lastName == birthName.lastName) || !(birth?.middleName == birthName.middleName)) {
+                    personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, birthName, person?.metadata)
+                    if (personIdentificationNameAlternate) {
+                        newBirthName = new NameAlternate(personIdentificationNameAlternate)
+                        newBirthName.setNameType("Birth")
+                        names << newBirthName
+                    }
                 }
+            }
+            if (birth && !newBirthName) {
+                names << birth
             }
         }
 
