@@ -375,12 +375,12 @@ class PersonCompositeService extends LdmService {
             throw new ApplicationException("Person", new NotFoundException())
         }
 
-        def primaryName
-        def birthName
+        def namesElementPrimary
+        def namesElementBirth
         if (person.names instanceof List) {
-            primaryName = person.names.find { it.nameType == "Primary" }
+            namesElementPrimary = person.names.find { it.nameType == "Primary" }
             if ("v3".equals(getAcceptVersion(VERSIONS))) {
-                birthName = person.names.find { it.nameType == "Birth" && it.firstName && it.lastName }
+                namesElementBirth = person.names.find { it.nameType == "Birth" && it.firstName && it.lastName }
             }
         }
 
@@ -397,11 +397,11 @@ class PersonCompositeService extends LdmService {
         //update PersonIdentificationNameCurrent
         PersonIdentificationNameCurrent newPersonIdentificationName
         PersonIdentificationNameCurrent oldPersonIdentificationName = new PersonIdentificationNameCurrent(personIdentification.properties)
-        if (primaryName) {
-            if(primaryName.containsKey('firstName')) personIdentification.firstName = primaryName.firstName
-            if(primaryName.containsKey('lastName')) personIdentification.lastName = primaryName.lastName
-            if(primaryName.containsKey('middleName')) personIdentification.middleName = primaryName.middleName
-            if(primaryName.containsKey('surnamePrefix')) personIdentification.surnamePrefix = primaryName.surnamePrefix
+        if (namesElementPrimary) {
+            if(namesElementPrimary.containsKey('firstName')) personIdentification.firstName = namesElementPrimary.firstName
+            if(namesElementPrimary.containsKey('lastName')) personIdentification.lastName = namesElementPrimary.lastName
+            if(namesElementPrimary.containsKey('middleName')) personIdentification.middleName = namesElementPrimary.middleName
+            if(namesElementPrimary.containsKey('surnamePrefix')) personIdentification.surnamePrefix = namesElementPrimary.surnamePrefix
             if (!personIdentification.equals(oldPersonIdentificationName)) {
                 PersonIdentificationNameAlternate.findAllByPidm(oldPersonIdentificationName.pidm).each { oldRecord ->
                     if (oldPersonIdentificationName.firstName == oldRecord.firstName &&
@@ -441,7 +441,7 @@ class PersonCompositeService extends LdmService {
         if (!newPersonIdentificationName)
             newPersonIdentificationName = personIdentification
         //update PersonBasicPersonBase
-        PersonBasicPersonBase newPersonBase = updatePersonBasicPersonBase(pidmToUpdate, newPersonIdentificationName, person, primaryName)
+        PersonBasicPersonBase newPersonBase = updatePersonBasicPersonBase(pidmToUpdate, newPersonIdentificationName, person, namesElementPrimary)
         def credentials = []
         if (newPersonBase && newPersonBase.ssn) {
             credentials << new Credential("Social Security Number",
@@ -457,25 +457,26 @@ class PersonCompositeService extends LdmService {
                     null)
         }
         def names = []
-        def name = new Name(newPersonIdentificationName, newPersonBase)
-        name.setNameType("Primary")
-        names << name
+        Name namePrimary = new Name(newPersonIdentificationName, newPersonBase)
+        namePrimary.setNameType("Primary")
+        names << namePrimary
         if ("v3".equals(getAcceptVersion(VERSIONS))) {
-            PersonIdentificationNameAlternate personIdentificationNameAlternate
-            def birth = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm)
-            def newBirthName = null
-            if (birthName) {
-                if (!birth || !(birth?.firstName == birthName.firstName) || !(birth?.lastName == birthName.lastName) || !(birth?.middleName == birthName.middleName)) {
-                    personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, birthName, person?.metadata)
-                    if (personIdentificationNameAlternate) {
-                        newBirthName = new NameAlternate(personIdentificationNameAlternate)
-                        newBirthName.setNameType("Birth")
-                        names << newBirthName
-                    }
+            PersonIdentificationNameAlternate existingPersonBirthRecord = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm)
+            PersonIdentificationNameAlternate newPersonBirthRecord = null
+            if (namesElementBirth) {
+                if (!isNamesElementBirthIsSameAsExisting(namesElementBirth, existingPersonBirthRecord)) {
+                    newPersonBirthRecord = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName, namesElementBirth, person?.metadata)
                 }
             }
-            if (birth && !newBirthName) {
-                names << birth
+            NameAlternate personBirthRecord
+            if (newPersonBirthRecord) {
+                personBirthRecord = new NameAlternate(newPersonBirthRecord)
+                personBirthRecord.setNameType("Birth")
+                names << personBirthRecord
+            } else if (existingPersonBirthRecord) {
+                personBirthRecord = new NameAlternate(existingPersonBirthRecord)
+                personBirthRecord.setNameType("Birth")
+                names << personBirthRecord
             }
         }
 
@@ -1712,9 +1713,9 @@ class PersonCompositeService extends LdmService {
         PersonIdentificationNameAlternate newPersonIdentificationNameAlternate = new PersonIdentificationNameAlternate(
                 pidm: currentPerson.pidm,
                 bannerId: currentPerson.bannerId,
-                lastName: nameInRequest.lastName.trim(),
-                firstName: nameInRequest.firstName.trim(),
-                middleName: nameInRequest.middleName?.trim(),
+                lastName: nameInRequest.lastName,
+                firstName: nameInRequest.firstName,
+                middleName: nameInRequest.middleName,
                 changeIndicator: 'N',
                 entityIndicator: 'P',
                 nameType: nameType,
@@ -1726,16 +1727,11 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private def getPersonIdentificationNameAlternateByNameType(Integer pidm) {
-        def birthName
+    private PersonIdentificationNameAlternate getPersonIdentificationNameAlternateByNameType(Integer pidm) {
         NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
         PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType([pidm], nameType.code)[0]
-        if (personIdentificationNameAlternate) {
-            birthName = new NameAlternate(personIdentificationNameAlternate)
-            birthName.setNameType('Birth')
-        }
 
-        return birthName
+        return personIdentificationNameAlternate
     }
 
 
@@ -1799,6 +1795,16 @@ class PersonCompositeService extends LdmService {
             ethnicityDetail = ["guid": guid]
         }
         return ethnicityDetail
+    }
+
+
+    private boolean isNamesElementBirthIsSameAsExisting(def namesElementBirth, PersonIdentificationNameAlternate existingPersonBirthRecord) {
+        boolean exists = true
+        if (!existingPersonBirthRecord || !(existingPersonBirthRecord?.firstName == namesElementBirth.firstName) || !(existingPersonBirthRecord?.lastName == namesElementBirth.lastName) || !(existingPersonBirthRecord?.middleName == namesElementBirth.middleName)) {
+            exists = false
+        }
+
+        return exists
     }
 
 
