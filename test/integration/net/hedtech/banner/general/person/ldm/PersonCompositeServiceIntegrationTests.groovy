@@ -15,6 +15,7 @@ import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
@@ -24,6 +25,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def personCompositeService
     def personBasicPersonBaseService
+    private static final log = Logger.getLogger(getClass())
 
     //Test data for creating new domain instance
     //Valid test data (For success tests)
@@ -501,7 +503,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                   where old.glbextr_key = to_char(spriden_pidm)
                   and old.glbextr_application = 'STUDENT'
                   and old.glbextr_selection = 'HEDMPERFORM') """
-           insertCount = sql.executeUpdate(idSql)
+            insertCount = sql.executeUpdate(idSql)
         }
         finally {
             sql?.close()
@@ -551,45 +553,53 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
         def params = [personFilter: guid2, max: '250', offset: '0']
-
-        sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
-            sql.execute("ALTER SESSION SET tracefile_identifier=person_api")
-        }
-        finally {
-            sql?.close()
+        log.debug "turn logging on "
+        if (log.isDebugEnabled()) {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            try {
+                sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
+                sql.execute("ALTER SESSION SET tracefile_identifier=person_api")
+            }
+            finally {
+                sql?.close()
+            }
         }
 
         persons = personCompositeService.list(params)
         assertEquals 250, persons.size()
-        sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
-        }
-        finally {
-            sql?.close()
+        if (log.isDebugEnabled()) {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            try {
+                sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
+            }
+            finally {
+                sql?.close()
+            }
         }
 
         // second page
 
         params = [personFilter: guid2, max: '250', offset: '250']
-        sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
-            sql.execute("ALTER SESSION SET tracefile_identifier=person_api2")
-        }
-        finally {
-            sql?.close()
+        if (log.isDebugEnabled()) {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            try {
+                sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
+                sql.execute("ALTER SESSION SET tracefile_identifier=person_api2")
+            }
+            finally {
+                sql?.close()
+            }
         }
         def persons2 = personCompositeService.list(params)
         assertEquals 250, persons2.size()
-        sql = new Sql(sessionFactory.getCurrentSession().connection())
-        try {
-            sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
-        }
-        finally {
-            sql?.close()
+        if (log.isDebugEnabled()) {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            try {
+                sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
+            }
+            finally {
+                sql?.close()
+            }
         }
 
     }
