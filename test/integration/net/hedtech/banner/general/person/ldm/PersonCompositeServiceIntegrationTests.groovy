@@ -25,6 +25,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def personCompositeService
     def personBasicPersonBaseService
+    def userRoleCompositeService
     private static final log = Logger.getLogger(getClass())
 
     //Test data for creating new domain instance
@@ -32,7 +33,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_legacy
     def i_success_ethnicity
     def i_success_maritalStatus
-    def i_success_religion
+    def i_success_religionail
     def i_success_citizenType
     def i_success_stateBirth
     def i_success_stateDriver
@@ -321,6 +322,22 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
+    void testListapiWithRoleStudentAndLargePagination() {
+        def params1 = [role: "student"]
+        def resultCount = userRoleCompositeService.fetchAllByRole(params1, true)
+        assertTrue resultCount > 2000
+
+        def params = [role: "student", max: '2000', offset: '100']
+
+        def persons = personCompositeService.list(params)
+        // verify pagination capped at 500
+        assertEquals 2000, persons.size()
+        persons.each {
+            it.roles.role == "Student"
+        }
+    }
+
+    @Test
     void testListapiWithRoleStudentAndPagination() {
         def params = [role: "student", max: '10', offset: '5']
 
@@ -601,6 +618,85 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 sql?.close()
             }
         }
+
+    }
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndLargePaginationForPerformance() {
+        // verify our test case has 7 records
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+        }
+        finally {
+            sql?.close()
+        }
+        assertTrue insertCount > 2000
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+
+        def params = [personFilter: guid2, max: '2000', offset: '0']
+        log.debug "turn logging on "
+        if (log.isDebugEnabled()) {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            try {
+                sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
+                sql.execute("ALTER SESSION SET tracefile_identifier=person_api")
+            }
+            finally {
+                sql?.close()
+            }
+        }
+
+        persons = personCompositeService.list(params)
+        assertEquals 2000, persons.size()
+        if (log.isDebugEnabled()) {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            try {
+                sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
+            }
+            finally {
+                sql?.close()
+            }
+        }
+
 
     }
 

@@ -160,7 +160,7 @@ class PersonCompositeService extends LdmService {
                         RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
                         pidms = userRoleCompositeService.fetchAllByRole(params)
                         Map sortAndOrderParams = [sort: params.sort, order: params.order]
-                        personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList(pidms, sortAndOrderParams)
+                        personIdentificationList = PersonIdentificationNameCurrent.fetchByPidms(pidms, sortAndOrderParams)
                         if (role == "student") {
                             studentRole = true
                         }
@@ -917,23 +917,45 @@ class PersonCompositeService extends LdmService {
             pidms << personIdentification.pidm
             persons.put(personIdentification.pidm, null) //Preserve list order.
         }
+
         if (pidms.size() < 1) {
             return persons
-        } else if (pidms.size() > 1000) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("max.results.exceeded", []))
         }
-        List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList(pidms)
-        List<PersonAddress> personAddressList = PersonAddress.fetchActiveAddressesByPidmInList(pidms)
-        List<PersonTelephone> personTelephoneList = PersonTelephone.fetchActiveTelephoneByPidmInList(pidms)
-        def personEmailList = PersonEmail.findAllByStatusIndicatorAndPidmInList('A', pidms)
-        List<PersonRace> personRaceList = PersonRace.findAllByPidmInList(pidms)
-
+        def pidmLists = SystemUtility.splitList(pidms, 1000)
+        List<PersonBasicPersonBase> personBaseList = []
+        List<PersonAddress> personAddressList = []
+        List<PersonTelephone> personTelephoneList = []
+        List<PersonEmail> personEmailList = []
+        List<PersonRace> personRaceList = []
+        List<ImsSourcedIdBase> imsSourcedIdBaseList = []
+        List<ThirdPartyAccess> thirdPartyAccessList = []
+        List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = []
         Map credentialsMap = [:]
-        if (["v2", "v3"].contains(getAcceptVersion())) {
-            List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
-            List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
-            List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
-            credentialsMap = [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
+        pidmLists.each { pidmPartition ->
+
+            def personBases = PersonBasicPersonBase.fetchByPidmList(pidmPartition)
+            personBaseList.addAll(personBases)
+            def personAddresses = PersonAddress.fetchActiveAddressesByPidmInList(pidmPartition)
+            personAddressList.addAll(personAddresses)
+            def personTelephones = PersonTelephone.fetchActiveTelephoneByPidmInList(pidmPartition)
+            personTelephoneList.addAll(personTelephones)
+            def personEmails = PersonEmail.fetchByPidmsAndActvieStatus(pidmPartition)
+            personEmailList.addAll(personEmails)
+            def personRaces = PersonRace.findAllByPidmInList(pidmPartition)
+            personRaceList.addAll(personRaces)
+
+            credentialsMap = [:]
+            if (["v2", "v3"].contains(getAcceptVersion())) {
+                def imsSourcedIdBases = ImsSourcedIdBase.findAllByPidmInList(pidmPartition)
+                imsSourcedIdBaseList.addAll(imsSourcedIdBases)
+                def thirdPartyAccesss = ThirdPartyAccess.findAllByPidmInList(pidmPartition)
+                thirdPartyAccessList.addAll(thirdPartyAccesss)
+                def pidmAndUDCIdMappings = PidmAndUDCIdMapping.findAllByPidmInList(pidmPartition)
+                pidmAndUDCIdMappingList.addAll(pidmAndUDCIdMappings)
+                credentialsMap = [imsSourcedIdBaseList   : imsSourcedIdBaseList,
+                                  thirdPartyAccessList   : thirdPartyAccessList,
+                                  pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
+            }
         }
 
         personBaseList.each { personBase ->
@@ -953,11 +975,14 @@ class PersonCompositeService extends LdmService {
             currentRecord.metadata = new Metadata(name.personName.dataOrigin)
             persons.put(identification.pidm, currentRecord)
         }
+
         if ("v3".equals(getAcceptVersion())) {
-            NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
-            List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
-            if (personIdentificationNameAlternateList) {
-                persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
+            pidmLists.each { pidmPartition ->
+                NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
+                List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidmPartition, nameType.code)
+                if (personIdentificationNameAlternateList) {
+                    persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
+                }
             }
         }
         persons = buildPersonCredentials(credentialsMap, persons, personIdentificationList)
@@ -1075,10 +1100,13 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonGuids(List domainIds, Map persons) {
-        GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domainIds).each { guid ->
-            Person currentRecord = persons.get(guid.domainKey.toInteger())
-            currentRecord.guid = guid.guid
-            persons.put(guid.domainKey.toInteger(), currentRecord)
+        def pidmPartitions = SystemUtility.splitList(domainIds, 1000)
+        pidmPartitions.each { domains ->
+            GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domains).each { guid ->
+                Person currentRecord = persons.get(guid.domainKey.toInteger())
+                currentRecord.guid = guid.guid
+                persons.put(guid.domainKey.toInteger(), currentRecord)
+            }
         }
         persons
     }
@@ -1103,9 +1131,12 @@ class PersonCompositeService extends LdmService {
         persons.each { key, value ->
             pidms << key
         }
-        userRoleCompositeService.fetchAllRolesByPidmInList(pidms, studentRole).each { role ->
-            Person currentRecord = persons.get(role.key.toInteger())
-            currentRecord.roles << role.value
+        def pidmPartitions = SystemUtility.splitList(pidms, 1000)
+        pidmPartitions.each { pidmList ->
+            userRoleCompositeService.fetchAllRolesByPidmInList(pidmList, studentRole).each { role ->
+                Person currentRecord = persons.get(role.key.toInteger())
+                currentRecord.roles << role.value
+            }
         }
 
         persons
