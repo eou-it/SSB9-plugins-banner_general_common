@@ -3,30 +3,22 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
-import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
-import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
-import net.hedtech.banner.general.overall.ldm.LdmService
-import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
-import org.junit.Before
-import org.junit.Test
-import org.junit.After
-
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
+import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationName
 import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.Ethnicity
-import net.hedtech.banner.general.system.Legacy
-import net.hedtech.banner.general.system.MaritalStatus
-import net.hedtech.banner.general.system.Nation
-import net.hedtech.banner.general.system.Religion
-import net.hedtech.banner.general.system.State
-import net.hedtech.banner.general.system.UnitOfMeasure
+import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -138,6 +130,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
+
     @Test
     void testListQapiWithValidFirstAndLastName() {
         //we will forcefully set the content type so that the tests go through all possible code flows
@@ -161,6 +154,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListQapiWithInValidFirstAndLastName() {
         //we will forcefully set the content type so that the tests go through all possible code flows
@@ -174,6 +168,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull persons
         assertTrue persons.isEmpty()
     }
+
 
     @Test
     void testListQapiWithInValidDateOfBirth() {
@@ -200,6 +195,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListQapiWithInvalidPersonfilter() {
 
@@ -220,6 +216,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'not.found.message'
         }
     }
+
 
     @Test
     void testListQapiWithPersonfilterNull() {
@@ -309,6 +306,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testListapiWithRoleFacultyAndPagination() {
         def params = [role: "faculty", max: '10', offset: '5']
@@ -373,6 +371,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListapiWithPersonfilterAndRole() {
 
@@ -387,6 +386,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'UnsupportedFilterCombination'
         }
     }
+
 
     @Test
     void testListapiWithValidPersonfilter() {
@@ -409,6 +409,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testListapiWithValidPersonfilterAndPagination() {
         // verify our test case has 7 records
@@ -421,20 +422,21 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def persons = []
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')?.guid
         assertNotNull guid
-        String guid2 =  GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters',  'STUDENT-^HEDM-^BANNER-^GRAILS' )[0]
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')[0]
         assertNotNull guid2
-        def params = [  personFilter : 'STUDENT-^HEDM-^BANNER-^GRAILS', max: '3', offset: '0' ]
+        def params = [personFilter: 'STUDENT-^HEDM-^BANNER-^GRAILS', max: '3', offset: '0']
 
         persons = personCompositeService.list(params)
-        assertEquals 3,   persons.size()
+        assertEquals 3, persons.size()
 
         // no pagination
-        def params2 = [  personFilter  : 'STUDENT-^HEDM-^BANNER-^GRAILS'  ]
+        def params2 = [personFilter: 'STUDENT-^HEDM-^BANNER-^GRAILS']
 
         persons = personCompositeService.list(params2)
-        assertEquals 7,   persons.size()
+        assertEquals 7, persons.size()
 
     }
+
 
     @Test
     void testListapiWithValidPersonfilterAsGuidAndPagination() {
@@ -447,33 +449,36 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         // set up params for call
         def persons = []
 
-        String guid2 =  GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters',  'STUDENT-^HEDM-^BANNER-^GRAILS' )[0].guid
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')[0].guid
         assertNotNull guid2
-        def params = [  personFilter : guid2, max: '3', offset: '0' ]
+        def params = [personFilter: guid2, max: '3', offset: '0']
 
         persons = personCompositeService.list(params)
-        assertEquals 3,   persons.size()
+        assertEquals 3, persons.size()
 
         // no pagination
-        def params2 = [  personFilter  : guid2  ]
+        def params2 = [personFilter: guid2]
 
         persons = personCompositeService.list(params2)
-        assertEquals 7,   persons.size()
+        assertEquals 7, persons.size()
 
     }
+
 
     @Test
     void testListapiWithValidPersonfilterAsGuidAndPaginationForPerformance() {
         // verify our test case has 7 records
         def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
-        if ( popsel.size() > 0 ){
+        if (popsel.size() > 0) {
             popsel.each {
-                it.delete(flush:true, failOnError:true)
+                it.delete(flush: true, failOnError: true)
             }
         }
         // create big list
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        String idSql = """INSERT INTO GLBEXTR
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
                   (glbextr_key,
                    glbextr_application,
                    glbextr_selection,
@@ -496,18 +501,22 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                   where old.glbextr_key = to_char(spriden_pidm)
                   and old.glbextr_application = 'STUDENT'
                   and old.glbextr_selection = 'HEDMPERFORM') """
-        def insertCount = sql.executeUpdate(idSql)
+           insertCount = sql.executeUpdate(idSql)
+        }
+        finally {
+            sql?.close()
+        }
         assertTrue insertCount > 500
         def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
         assertEquals insertCount, persextract.size()
-        def pidmlist = persextract.groupBy {it.pidm }
+        def pidmlist = persextract.groupBy { it.pidm }
         // verify the list of pidms is unique
         pidmlist.each {
             assertEquals 1, it.value.size()
         }
         // test pagination
-        def persextract250 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS",[max: '250', offset: '0'])
-        def persextract2502 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS",[max: '250', offset: '250'])
+        def persextract250 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS", [max: '250', offset: '0'])
+        def persextract2502 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS", [max: '250', offset: '250'])
         assertEquals 250, persextract250.size()
         assertEquals 250, persextract2502.size()
         def matchextract = 0
@@ -515,45 +524,75 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         persextract250.each { pers ->
             persextract2502.find { pers2 ->
                 cnt += 1
-                if ( pers2.pidm == pers.pidm) {
-                   // println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
+                if (pers2.pidm == pers.pidm) {
+                    // println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
                     matchextract += 1
-                } }
+                }
+            }
         }
         assertEquals 0, matchextract
         matchextract = 0
         persextract2502.each { pers ->
             persextract250.find { pers2 ->
                 cnt += 1
-                if ( pers2.pidm == pers.pidm) {
-                   // println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
+                if (pers2.pidm == pers.pidm) {
+                    // println ("${cnt} pidms match ${pers2.pidm} ${pers.pidm}")
                     matchextract += 1
-                } }
+                }
+            }
         }
         assertEquals 0, matchextract
 
         // set up params for call
         def persons = []
 
-        String guid2 =  GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters',  'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS' )[0].guid
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
         assertNotNull guid2
 
 
-        def params = [  personFilter : guid2, max: '250', offset: '0'  ]
+        def params = [personFilter: guid2, max: '250', offset: '0']
+
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
+        try {
+            sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
+            sql.execute("ALTER SESSION SET tracefile_identifier=person_api")
+        }
+        finally {
+            sql?.close()
+        }
 
         persons = personCompositeService.list(params)
-        assertEquals 250,   persons.size()
+        assertEquals 250, persons.size()
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
+        try {
+            sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
+        }
+        finally {
+            sql?.close()
+        }
 
         // second page
 
-        params = [  personFilter : guid2, max: '250', offset: '250'  ]
-
+        params = [personFilter: guid2, max: '250', offset: '250']
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
+        try {
+            sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
+            sql.execute("ALTER SESSION SET tracefile_identifier=person_api2")
+        }
+        finally {
+            sql?.close()
+        }
         def persons2 = personCompositeService.list(params)
-        assertEquals 250,   persons2.size()
-
+        assertEquals 250, persons2.size()
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
+        try {
+            sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
+        }
+        finally {
+            sql?.close()
+        }
 
     }
-
 
     //GET- Person by guid API
     @Test
@@ -729,6 +768,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals personIdentificationNameAlternate.changeIndicator, 'N'
     }
 
+
     @Test
     void testUpdatePersonIDChange() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
@@ -745,6 +785,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchAllByPidm(personBasicPersonBase.pidm).get(0)
         assertEquals personIdentificationNameAlternate.changeIndicator, 'I'
     }
+
 
     @Test
     void testUpdatePersonPersonBasicPersonBase() {
@@ -763,6 +804,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 'CCCCC', personBasicPersonBase.nameSuffix
         assertEquals 'TTTTT', personBasicPersonBase.ssn
     }
+
 
     @Test
     void testUpdatetestPersonAddressValidUpdate() {
@@ -842,6 +884,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testUpdatetestPersonPhonesValidUpdate() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
@@ -919,6 +962,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testUpdatetestPersonRacesValidUpdate() {
 
@@ -950,6 +994,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals modifiedRacesList[0].guid, races[0].guid
         assertEquals modifiedRacesList[1].guid, races[1].guid
     }
+
 
     @Test
     void testUpdatetestPersonEthnicityValidUpdate() {
@@ -1322,10 +1367,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                                                     credentialId  : "111111111"
                                             ],
                                             [
-                                                "credentialType": "Elevate ID",
-                                                "credentialId": "E11111111"
+                                                    "credentialType": "Elevate ID",
+                                                    "credentialId"  : "E11111111"
                                             ]],
-                      ethnicityDetail  : [guid: ethnicityGuid],
+                      ethnicityDetail    : [guid: ethnicityGuid],
                       maritalStatusDetail: [guid: maritalStatusGuid]
         ]
 
