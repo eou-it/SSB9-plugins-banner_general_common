@@ -33,7 +33,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_legacy
     def i_success_ethnicity
     def i_success_maritalStatus
-    def i_success_religionail
+    def i_success_religion
     def i_success_citizenType
     def i_success_stateBirth
     def i_success_stateDriver
