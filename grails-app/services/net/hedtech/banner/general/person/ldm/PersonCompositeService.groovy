@@ -176,7 +176,7 @@ class PersonCompositeService extends LdmService {
         }
         if (pidms?.size() && !params.role) {
             total = pidms.size()
-            resultList = buildLdmPersonObjects(pidms, false, params)
+            resultList = buildLdmPersonObjects(pidms, true, params)
         }
 
         try {  // Avoid restful-api plugin dependencies.
@@ -614,7 +614,7 @@ class PersonCompositeService extends LdmService {
         if (person.guid) {
             updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
         } else {
-            def entity = GlobalUniqueIdentifier.findByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
+            def entity = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
             person.put('guid', entity)
         }
         if (person?.credentials instanceof List) {
@@ -941,7 +941,7 @@ class PersonCompositeService extends LdmService {
             personTelephoneList.addAll(personTelephones)
             def personEmails = PersonEmail.fetchByPidmsAndActvieStatus(pidmPartition)
             personEmailList.addAll(personEmails)
-            def personRaces = PersonRace.findAllByPidmInList(pidmPartition)
+            def personRaces = PersonRace.fetchByPidmList(pidmPartition)
             personRaceList.addAll(personRaces)
 
             credentialsMap = [:]
@@ -1046,7 +1046,7 @@ class PersonCompositeService extends LdmService {
             if (rule?.value == activeEmail?.emailType?.code && !currentRecord.emails.contains {
                 it.emailType == rule?.translationValue
             }) {
-                GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainId(PERSON_EMAILS_LDM_NAME, activeEmail.id)
+                GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(PERSON_EMAILS_LDM_NAME, activeEmail.id)[0]
                 String guid = globalUniqueIdentifier.guid
                 def email = new Email(guid, activeEmail)
                 email.emailType = rule?.translationValue
@@ -1102,7 +1102,7 @@ class PersonCompositeService extends LdmService {
     def buildPersonGuids(List domainIds, Map persons) {
         def pidmPartitions = SystemUtility.splitList(domainIds, 1000)
         pidmPartitions.each { domains ->
-            GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domains).each { guid ->
+            GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(ldmName, domains).each { guid ->
                 Person currentRecord = persons.get(guid.domainKey.toInteger())
                 currentRecord.guid = guid.guid
                 persons.put(guid.domainKey.toInteger(), currentRecord)
@@ -1420,7 +1420,7 @@ class PersonCompositeService extends LdmService {
         def races = []
         List<PersonRace> personRaceList = PersonRace.fetchByPidm(pidm)
         personRaceList.each { currentRace ->
-            def raceGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('races', currentRace.race)?.guid
+            def raceGuid = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('races', currentRace.race)[0]?.guid
             def activeRaces = newRaces.findAll { it ->
                 it.guid == raceGuid
             }

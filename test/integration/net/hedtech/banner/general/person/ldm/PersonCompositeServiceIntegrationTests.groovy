@@ -9,10 +9,15 @@ import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonAddress
 import net.hedtech.banner.general.person.PersonBasicPersonBase
+import net.hedtech.banner.general.person.PersonEmail
 import net.hedtech.banner.general.person.PersonIdentificationName
 import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.person.PersonRace
+import net.hedtech.banner.general.person.PersonTelephone
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.log4j.Logger
@@ -486,7 +491,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithValidPersonfilterAsGuidAndPaginationForPerformance() {
-        // verify our test case has 7 records
+        // remove if pop sel exists
         def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
         if (popsel.size() > 0) {
             popsel.each {
@@ -623,7 +628,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithValidPersonfilterAsGuidAndLargePaginationForPerformance() {
-        // verify our test case has 7 records
+        // remove if pop sel exists
         def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
         if (popsel.size() > 0) {
             popsel.each {
@@ -658,6 +663,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                   and old.glbextr_application = 'STUDENT'
                   and old.glbextr_selection = 'HEDMPERFORM') """
             insertCount = sql.executeUpdate(idSql)
+
         }
         finally {
             sql?.close()
@@ -674,7 +680,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def params = [personFilter: guid2, max: '2000', offset: '0']
         log.debug "turn logging on "
-        if (log.isDebugEnabled()) {
+       // if (log.isDebugEnabled()) {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             try {
                 sql.execute("ALTER SESSION SET SQL_TRACE TRUE")
@@ -683,11 +689,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             finally {
                 sql?.close()
             }
-        }
+     //  }
 
         persons = personCompositeService.list(params)
         assertEquals 2000, persons.size()
-        if (log.isDebugEnabled()) {
+      //  if (log.isDebugEnabled()) {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             try {
                 sql.execute("ALTER SESSION SET SQL_TRACE FALSE")
@@ -695,15 +701,218 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             finally {
                 sql?.close()
             }
-        }
+      //  }
 
 
     }
 
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndLargePaginationAndDetailedPerson() {
+        // find our person hofse2000 who has all data
+        def perId = PersonUtility.getPerson("HOSFE2000")
+        assertNotNull perId
+        def perbio = PersonBasicPersonBase.findByPidm(perId.pidm)
+        assertNotNull perbio
+        def perAddr = PersonAddress.findAllByPidm(perId.pidm)
+        assertEquals 1, perAddr.size()
+        assertNotNull perAddr[0]
+        assertEquals "MA", perAddr[0].addressType.code
+        def perTel = PersonTelephone.findAllByPidm(perId.pidm)
+        assertEquals 1, perTel.size()
+        assertNotNull perTel[0]
+        assertEquals "CELL", perTel[0].telephoneType.code
+        def perEmail = PersonEmail.findAllByPidm(perId.pidm)
+        assertEquals 1, perEmail.size()
+        assertNotNull perEmail[0]
+        assertEquals "HOME", perEmail[0].emailType.code
+        def perRace = PersonRace.findByPidm(perId.pidm)
+        assertNotNull perRace
+        assertEquals "WHT", perRace.race
+
+        // set up our pop sel
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+
+        }
+        finally {
+            sql?.close()
+        }
+        assertTrue insertCount > 2000
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+
+        // find our test person HOSFE2000
+        def cnt = 0
+        def found = 0
+        persextract.each { per ->
+            cnt += 1
+            if ( per.bannerId == "HOSFE2000"){
+                found = cnt
+            }
+        }
+        assertTrue found > 1100
+        def offset = found - 1100
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+
+        def params = [personFilter: guid2, max: '2000', offset: offset.toString()]
+        log.debug "turn logging on "
+
+        persons = personCompositeService.list(params)
+        assertEquals 2000, persons.size()
+
+        def testPerson = persons.find { it.names[0].personName.bannerId == "HOSFE2000"}
+        assertNotNull testPerson
+        assertEquals testPerson.person.id, perbio.id
+        assertEquals "MA", testPerson.addresses[0].address.addressType.code
+        assertEquals perAddr[0].id, testPerson.addresses[0].address.id
+        assertEquals "CELL", testPerson.phones[0].phone.telephoneType.code
+        assertEquals perTel[0].id, testPerson.phones[0].phone.id
+        assertEquals "HOME", testPerson.emails[0].email.emailType.code
+        assertEquals perEmail[0].id, testPerson.emails[0].email.id
+        assertEquals perRace.race, testPerson.races[0].raceDecorator.race
+        assertNotNull testPerson.roles[0][0].role in ["faculty", "student"]
+        assertNotNull testPerson.roles[1][0].role in ["faculty", "student"]
+
+    }
+
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndSinglePersonAndDetailedPerson() {
+        // find our person hofse2000 who has all data
+        def perId = PersonUtility.getPerson("HOSFE2000")
+        assertNotNull perId
+        def perbio = PersonBasicPersonBase.findByPidm(perId.pidm)
+        assertNotNull perbio
+        def perAddr = PersonAddress.findAllByPidm(perId.pidm)
+        assertEquals 1, perAddr.size()
+        assertNotNull perAddr[0]
+        assertEquals "MA", perAddr[0].addressType.code
+        def perTel = PersonTelephone.findAllByPidm(perId.pidm)
+        assertEquals 1, perTel.size()
+        assertNotNull perTel[0]
+        assertEquals "CELL", perTel[0].telephoneType.code
+        def perEmail = PersonEmail.findAllByPidm(perId.pidm)
+        assertEquals 1, perEmail.size()
+        assertNotNull perEmail[0]
+        assertEquals "HOME", perEmail[0].emailType.code
+        def perRace = PersonRace.findByPidm(perId.pidm)
+        assertNotNull perRace
+        assertEquals "WHT", perRace.race
+        // set up our pop sel
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and spriden_id = 'HOSFE2000'
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+
+        }
+        finally {
+            sql?.close()
+        }
+        assertEquals 1,  insertCount
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+
+        // find our test person HOSFE2000
+        assertEquals perId.pidm,  persextract[0].pidm
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+
+        def params = [personFilter: guid2, max: '2000', offset: 0]
+        log.debug "turn logging on "
+
+        persons = personCompositeService.list(params)
+        assertEquals 1, persons.size()
+
+        def testPerson = persons.find { it.names[0].personName.bannerId == "HOSFE2000"}
+        assertNotNull testPerson
+        assertEquals testPerson.person.id, perbio.id
+        assertEquals "MA", testPerson.addresses[0].address.addressType.code
+        assertEquals perAddr[0].id, testPerson.addresses[0].address.id
+        assertEquals "CELL", testPerson.phones[0].phone.telephoneType.code
+        assertEquals perTel[0].id, testPerson.phones[0].phone.id
+        assertEquals "HOME", testPerson.emails[0].email.emailType.code
+        assertEquals perEmail[0].id, testPerson.emails[0].email.id
+        assertEquals perRace.race, testPerson.races[0].raceDecorator.race
+        assertNotNull testPerson.roles[0][0].role in ["faculty", "student"]
+        assertNotNull testPerson.roles[1][0].role in ["faculty", "student"]
+    }
+
+
     //GET- Person by guid API
     @Test
     void testGetPersonCredentialsByGuid() {
-        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', '50199')?.guid
+        def person = PersonUtility.getPerson("HOSP0001")
+        assertNotNull person
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', person.pidm.toString())?.guid
 
         def persons = personCompositeService.get(guid)
 
