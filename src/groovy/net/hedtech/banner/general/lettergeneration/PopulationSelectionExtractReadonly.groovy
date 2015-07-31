@@ -167,6 +167,9 @@ class PopulationSelectionExtractReadonly implements Serializable {
                         def orderBy
                         if (params.sort) {
                             orderBy = " order by a." + params.sort
+                            if ( params.sort != "bannerId"){
+                                orderBy += " , a.bannerId"
+                            }
                         }
                         else {
                             orderBy = " order by a.lastName, a.firstName, a.mi, a.bannerId"

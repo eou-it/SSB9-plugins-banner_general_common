@@ -117,36 +117,71 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         assertEquals "Emily", person.firstName
         assertEquals "Jamison", person.lastName
 
-        CallableStatement sqlCall
+        def result
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
         try {
-            def connection = sessionFactory.currentSession.connection()
-            String matchPersonQuery = "{ call spkcmth.p_common_mtch(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) }"
-            sqlCall = connection.prepareCall(matchPersonQuery)
+            sql.call("""
+              declare
+                cmsc  varchar2(100) := 'HEDM_PERSON_MATCH' ;
+                lv_last_name varchar2(100) := ? ;
+                lv_first_name varchar2(100) := ?;
+                lv_mi varchar2(100);
+                lv_email varchar2(100);
+                lv_ssn  varchar2(100);
+                lv_birth date;
+                lv_banner_id varchar2(100);
+                lv_gender varchar2(100);
 
-            sqlCall.setString(1, 'HEDM_PERSON_MATCH')
-            sqlCall.setString(2, "Emily")
-            sqlCall.setString(3, "Jamison")
-            sqlCall.setString(4, null)
-            sqlCall.setString(5, null)
-            sqlCall.setString(6, "F")
-            sqlCall.setString(7, null)
-            sqlCall.setString(8, null)
-            sqlCall.setString(9, null)
-            sqlCall.setString(10, null)
-            sqlCall.setString(11, null)
-            sqlCall.setString(12, null)
-            sqlCall.setString(13, null)
-            sqlCall.setString(14, null)
-            sqlCall.setString(15, null)
-            sqlCall.setString(16, null)
+                lv_day varchar2(100);
+                lv_month varchar2(100);
+                lv_year varchar2(100);
 
-            sqlCall.registerOutParameter(17, java.sql.Types.VARCHAR)
-            sqlCall.executeQuery()
+                resultind varchar2(100);
+                new_pidm number;
+                begin
 
-            String errorCode = sqlCall.getString(17)
+                delete gotcmme;
+
+                gokcmpk.p_insert_gotcmme (p_last_name     => lv_last_name,
+                                              p_entity_cde    => 'P' ,
+                                              p_first_name    => lv_first_name,
+                                              p_mi            => lv_mi ,
+                                              p_id            => lv_banner_id ,
+                                              p_street_line1  => '',
+                                              p_street_line2  => '',
+                                              p_street_line3  => '',
+                                              p_city          => '',
+                                              p_stat_code    => '',
+                                              p_zip          => '',
+                                              p_natn_code    => '',
+                                              p_cnty_code    => '',
+                                              p_phone_area    => '',
+                                              p_phone_number  => '',
+                                              p_phone_ext     => '',
+                                              p_ssn          => '',
+                                              p_birth_day    => lv_day,
+                                              p_birth_mon   =>  lv_month,
+                                              p_birth_year  =>  lv_year,
+                                              p_sex          => lv_gender,
+                                              p_email_address => lv_email,
+                                              p_atyp_code      => '',
+                                              p_tele_code     => '',
+                                              p_emal_code      => '',
+                                              p_asrc_code      => '',
+                                              p_addid_code   => '',
+                                              p_addid         => '');
+
+                gokcmpk.p_common_matching(p_cmsc_code => cmsc,
+                      p_match_status_out  => resultind,
+                      p_match_pidm_out   => new_pidm);
+
+                end;
+             """, [person.lastName, person.firstName]){ output_info ->
+                result = output_info
+            }
         }
         finally {
-            sqlCall?.close()
+            sql?.close()
         }
 
     }
@@ -163,39 +198,70 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
         assertNotNull list1
         assertTrue list1.cnt > 20
         assertNotNull list1.spriden_last_name
-        String errorCode
-        CallableStatement sqlCall
-        try {
-            def connection = sessionFactory.currentSession.connection()
-            String matchPersonQuery = "{ call spkcmth.p_common_mtch(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) }"
-            sqlCall = connection.prepareCall(matchPersonQuery)
+        def result
+         try {
+            sql.call("""
+              declare
+                cmsc  varchar2(100) := 'HEDM_LASTNAME_MATCH' ;
+                lv_last_name varchar2(100) := ? ;
+                lv_first_name varchar2(100) ;
+                lv_mi varchar2(100);
+                lv_email varchar2(100);
+                lv_ssn  varchar2(100);
+                lv_birth date;
+                lv_banner_id varchar2(100);
+                lv_gender varchar2(100);
 
-            sqlCall.setString(1, 'HEDM_LASTNAME_MATCH')
-            sqlCall.setString(2, null)
-            sqlCall.setString(3, list1.spriden_last_name )
-            sqlCall.setString(4, null)
-            sqlCall.setString(5, null)
-            sqlCall.setString(6, null)
-            sqlCall.setString(7, null)
-            sqlCall.setString(8, null)
-            sqlCall.setString(9, null)
-            sqlCall.setString(10, null)
-            sqlCall.setString(11, null)
-            sqlCall.setString(12, null)
-            sqlCall.setString(13, null)
-            sqlCall.setString(14, null)
-            sqlCall.setString(15, null)
-            sqlCall.setString(16, null)
+                lv_day varchar2(100);
+                lv_month varchar2(100);
+                lv_year varchar2(100);
 
-            sqlCall.registerOutParameter(17, java.sql.Types.VARCHAR)
-            sqlCall.executeQuery()
+                resultind varchar2(100);
+                new_pidm number;
+                begin
 
-            errorCode = sqlCall.getString(17)
+                delete gotcmme;
 
+                gokcmpk.p_insert_gotcmme (p_last_name     => lv_last_name,
+                                              p_entity_cde    => 'P' ,
+                                              p_first_name    => lv_first_name,
+                                              p_mi            => lv_mi ,
+                                              p_id            => lv_banner_id ,
+                                              p_street_line1  => '',
+                                              p_street_line2  => '',
+                                              p_street_line3  => '',
+                                              p_city          => '',
+                                              p_stat_code    => '',
+                                              p_zip          => '',
+                                              p_natn_code    => '',
+                                              p_cnty_code    => '',
+                                              p_phone_area    => '',
+                                              p_phone_number  => '',
+                                              p_phone_ext     => '',
+                                              p_ssn          => '',
+                                              p_birth_day    => lv_day,
+                                              p_birth_mon   =>  lv_month,
+                                              p_birth_year  =>  lv_year,
+                                              p_sex          => lv_gender,
+                                              p_email_address => lv_email,
+                                              p_atyp_code      => '',
+                                              p_tele_code     => '',
+                                              p_emal_code      => '',
+                                              p_asrc_code      => '',
+                                              p_addid_code   => '',
+                                              p_addid         => '');
+
+                gokcmpk.p_common_matching(p_cmsc_code => cmsc,
+                      p_match_status_out  => resultind,
+                      p_match_pidm_out   => new_pidm);
+
+                end;
+             """, [list1.spriden_last_name]){ output_info ->
+                result = output_info
+            }
         }
         finally {
-            sqlCall?.close()
+            sql?.close()
         }
-        assertNull errorCode
     }
 }

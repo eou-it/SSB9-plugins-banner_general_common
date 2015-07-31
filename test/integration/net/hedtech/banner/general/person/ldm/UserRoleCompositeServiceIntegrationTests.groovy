@@ -5,6 +5,7 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.general.person.PersonUtility
+import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -19,6 +20,9 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+
+        def institution = InstitutionalDescription.fetchByKey()
+        assertTrue institution.studentInstalled
     }
 
 
@@ -88,6 +92,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue results > 0
     }
 
+
     @Test
     void testListFacultyPersonsWithPagination() {
         def count = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
@@ -105,18 +110,20 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 0, results3?.size()
     }
 
+
     @Test
     void testListFacultyPersonsWithoutPagination() {
         def count = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
         def results = userRoleCompositeService.fetchAllByRole([role: "faculty"])
         def actual = 0
-        if ( count > 500 ) actual = 500
+        if (count > 500) actual = 500
         else actual = count.toInteger()
         assertEquals actual, results?.size()
         results.each { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
     }
+
 
     @Test
     void testListStudentPersonsWithPagination() {
@@ -143,19 +150,47 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testListStudentPersonsWithOutPagination() {
         def count = userRoleCompositeService.fetchAllByRole([role: "student"], true)
         def results = userRoleCompositeService.fetchAllByRole([role: "student"])
 
         def actual = 0
-        if ( count > 500 ) actual = 500
+        if (count > 500) actual = 500
         else actual = count.toInteger()
 
+        // service forces pagination of 500
         assertEquals actual, results?.size()
         results.each { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
+    }
+
+
+    @Test
+    void testFacultyListWhenStudentNotInstalled() {
+        def institution = InstitutionalDescription.fetchByKey()
+        institution.studentInstalled = false
+        institution.save(flush: true, failOnError: true)
+
+        def count = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
+        assertEquals 0, count
+        def results = userRoleCompositeService.fetchAllByRole([role: "faculty"])
+        assertEquals 0, results.size()
+    }
+
+
+    @Test
+    void testStudentListWhenStudentNotInstalled() {
+        def institution = InstitutionalDescription.fetchByKey()
+        institution.studentInstalled = false
+        institution.save(flush: true, failOnError: true)
+
+        def count = userRoleCompositeService.fetchAllByRole([role: "student"], true)
+        assertEquals 0, count
+        def results = userRoleCompositeService.fetchAllByRole([role: "student"])
+        assertEquals 0, results.size()
     }
 
 }
