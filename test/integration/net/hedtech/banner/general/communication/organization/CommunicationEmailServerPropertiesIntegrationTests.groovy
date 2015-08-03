@@ -16,11 +16,23 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegrationTestCase {
     def organization
 
+    public void cleanUp() {
+        def sql
+        try {
+            sessionFactory.currentSession.with { session ->
+                sql = new Sql(session.connection())
+                sql.executeUpdate("Delete from GCRORAN")
+            }
+        } finally {
+            sql?.close()
+        }
+    }
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        cleanUp()
         organization = newValidForCreateOrganization()
         organization.save( failOnError: true, flush: true )
         assertNotNull organization.id
@@ -185,7 +197,8 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     private def newValidForCreateOrganization() {
         def organization = new CommunicationOrganization(
                 description: "Organization one",
-                name: "This is a description of Organization one"
+                name: "This is a description of Organization one",
+                isRoot: true
         )
     }
 }

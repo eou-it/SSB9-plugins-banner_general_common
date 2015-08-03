@@ -30,8 +30,8 @@ class CommunicationOrganizationService extends ServiceBase {
         }
 
         def existingOrg = CommunicationOrganization.findAll()
-        if (existingOrg.size() > 0)
-            throw new ApplicationException(CommunicationOrganization, "@@r1:onlyOneOrgCanExist@@")
+        communicationOrganization.isRoot = (existingOrg.size() == 0)
+
 
         if (communicationOrganization.dateFormat != null) {
             try {

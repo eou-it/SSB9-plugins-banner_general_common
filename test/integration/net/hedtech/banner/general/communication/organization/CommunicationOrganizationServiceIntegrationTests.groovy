@@ -65,8 +65,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
             long addedListCount = communicationOrganizationService.list().size()
             assertEquals( originalListCount + 1, addedListCount )
-        } else {
-            fail( "Cannot test, an organization already exists" )
+            assertTrue(organization.isRoot)
+            assertFalse(organization.isActive)
         }
     }
 
@@ -80,19 +80,23 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull( createdOrganization )
         assertEquals( "test", createdOrganization.name )
         assertEquals( "description", createdOrganization.description )
+        assertTrue(createdOrganization.isRoot)
+        assertFalse(createdOrganization.isActive)
 
         CommunicationOrganization foundOrganization = CommunicationOrganization.findByName( "test" )
         assertEquals( createdOrganization, foundOrganization )
+
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        assertEquals(rootorg.id, createdOrganization.id)
 
         CommunicationOrganization sameNameOrganization = new CommunicationOrganization()
         sameNameOrganization.name = "test"
         sameNameOrganization.description = "another organization with same name"
         try {
             communicationOrganizationService.create( sameNameOrganization )
-            Assert.fail "Expected sameNameOrganization to fail because of name unique constraint."
+            Assert.fail "Expected sameNameOrganization to fail because of check constraint."
         } catch (ApplicationException e) {
-            assertTrue e.getMessage().contains( "onlyOneOrgCanExist" )
-            //assertTrue e.getSqlException().toString().contains( "ORA-00001: unique constraint (GENERAL.GCRORAN_KEY_INDEX) violated" )
+            assertTrue e.getMessage().contains( "ConstraintViolationException" )
         }
 
     }
@@ -107,6 +111,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull( createdOrganization )
         assertEquals( "test", createdOrganization.name )
         assertEquals( "description", createdOrganization.description )
+        assertTrue(createdOrganization.isRoot)
 
         CommunicationOrganization foundOrganization = CommunicationOrganization.findByName( "test" )
         assertEquals( createdOrganization, foundOrganization )
@@ -116,10 +121,25 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         sameNameOrganization.description = "another organization that shouldnt be created"
         try {
             communicationOrganizationService.create( sameNameOrganization )
-            Assert.fail "Expected sameNameOrganization to fail because only one org can exist."
+            Assert.fail "Expected sameNameOrganization to fail because only one root org can exist."
         } catch (ApplicationException e) {
-            assertTrue( "Failed to get expected exception onlyOneOrgCanExist", e.getMessage().contains( "onlyOneOrgCanExist" ) )
+            assertTrue( "Failed to get expected exception ConstraintViolationException", e.getMessage().contains( "ConstraintViolationException" ) )
         }
+
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        assertEquals(rootorg.id, createdOrganization.id)
+
+        CommunicationOrganization anotherOrganization = new CommunicationOrganization()
+        anotherOrganization.name = "testAnother"
+        anotherOrganization.description = "another org description"
+        anotherOrganization.setParent(rootorg.id)
+        def anotherCreatedOrg = communicationOrganizationService.create(anotherOrganization)
+        assertEquals("testAnother",anotherCreatedOrg.name)
+        assertFalse(anotherCreatedOrg.isRoot)
+
+        def orgCount = communicationOrganizationService.list()
+        assertEquals(2,orgCount.size())
+
 
     }
 

@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.hibernate.annotations.Type
 import org.hibernate.annotations.Where
 
 import javax.persistence.*
@@ -22,7 +23,13 @@ import javax.persistence.*
                     WHERE a.id = :id"""),
         @NamedQuery(name = "CommunicationOrganization.fetchByName",
                 query = """ FROM CommunicationOrganization a
-                    WHERE a.name = :name""")
+                    WHERE a.name = :name"""),
+        @NamedQuery(name = "CommunicationOrganization.fetchActive",
+                query = """ FROM CommunicationOrganization a
+                    WHERE a.isActive = true"""),
+        @NamedQuery(name = "CommunicationOrganization.fetchRoot",
+                query = """ FROM CommunicationOrganization a
+                    WHERE a.isRoot = true"""),
 ])
 class CommunicationOrganization implements Serializable {
     /**
@@ -43,8 +50,13 @@ class CommunicationOrganization implements Serializable {
     /**
      * Indicates if the organization is the root organization (1=Yes or 0=No). Only one organization can be identified as the root organization.
      */
+    @Type(type = "yes_no")
     @Column(name = "GCRORAN_IS_ROOT")
-    Boolean isRoot
+    Boolean isRoot = false
+
+    @Type(type = "yes_no")
+    @Column(name = "GCRORAN_ACTIVE_IND")
+    Boolean isActive = false
 
     /**
      * Foreign key reference to the parent Organization (REL_ORGANIZATION) of which this organization
@@ -207,6 +219,7 @@ class CommunicationOrganization implements Serializable {
         description( nullable: true, maxSize: 2000 )
         parent( nullable: true )
         isRoot( nullable: true )
+        isActive( nullable: true )
         dateFormat( nullable: true )
         dayOfWeekFormat( nullable: true )
         timeOfDayFormat( nullable: true )
@@ -233,6 +246,7 @@ class CommunicationOrganization implements Serializable {
         if (description != that.description) return false
         if (id != that.id) return false
         if (isRoot != that.isRoot) return false
+        if (isActive != that.isActive) return false
         if (lastModified != that.lastModified) return false
         if (lastModifiedBy != that.lastModifiedBy) return false
         if (name != that.name) return false
@@ -253,6 +267,7 @@ class CommunicationOrganization implements Serializable {
         result = (id != null ? id.hashCode() : 0)
         result = 31 * result + (name != null ? name.hashCode() : 0)
         result = 31 * result + (isRoot != null ? isRoot.hashCode() : 0)
+        result = 31 * result + (isActive != null ? isActive.hashCode() : 0)
         result = 31 * result + (parent != null ? parent.hashCode() : 0)
         result = 31 * result + (description != null ? description.hashCode() : 0)
         result = 31 * result + (dateFormat != null ? dateFormat.hashCode() : 0)
@@ -286,6 +301,21 @@ class CommunicationOrganization implements Serializable {
         return query
     }
 
+    public static List<CommunicationOrganization> fetchActive() {
+        def query
+        CommunicationOrganization.withSession { session ->
+            query = session.getNamedQuery( 'CommunicationOrganization.fetchActive' ).list()
+        }
+        return query
+    }
+
+    public static CommunicationOrganization fetchRoot() {
+        def query
+        CommunicationOrganization.withSession { session ->
+            query = session.getNamedQuery( 'CommunicationOrganization.fetchRoot' ).list()[0]
+        }
+        return query
+    }
 
     @Override
     public String toString() {
@@ -293,6 +323,7 @@ class CommunicationOrganization implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", isRoot=" + isRoot +
+                ", isActive=" + isActive +
                 ", parent=" + parent +
                 ", description='" + description + '\'' +
                 ", dateFormat='" + dateFormat + '\'' +

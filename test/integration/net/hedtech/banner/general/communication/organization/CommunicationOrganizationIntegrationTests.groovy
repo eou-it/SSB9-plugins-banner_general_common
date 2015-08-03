@@ -54,6 +54,8 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testCreateValidOrganization() {
         def organization = newValidForCreateOrganization()
+        organization.isActive = true
+        organization.isRoot = true
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
         def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
         organization.receiveEmailServerProperties = [receiveProperties]
@@ -61,6 +63,8 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         organization.save( failOnError: true, flush: true )
         assertNotNull organization.receiveEmailServerProperties
         assertNotNull organization.sendEmailServerProperties
+        assertTrue(organization.isRoot)
+        assertTrue(organization.isActive)
 
 
     }
@@ -84,16 +88,21 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         organization.save()
         //Test if the generated entity now has an id assigned
         assertNotNull organization.id
+        assertTrue(organization.isRoot)
+        assertFalse(organization.isActive)
         organization.description = u_valid_description
-
+        organization.isRoot = true
+        organization.isActive = true
         organization.name = u_valid_name
 
         organization.save()
         def id = organization.id
         def updatedOrganization = organization.get( id )
-        assertEquals( "Updated description", u_valid_description, organization.description )
+        assertEquals( "Updated description", u_valid_description, updatedOrganization.description )
 
-        assertEquals( "Updated name", u_valid_name, organization.name )
+        assertEquals( "Updated name", u_valid_name, updatedOrganization.name )
+        assertTrue(updatedOrganization.isRoot)
+        assertTrue(updatedOrganization.isActive)
         // Test update of dependent objects
         def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
         organization.receiveEmailServerProperties = [receiveProperties]
@@ -177,7 +186,8 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
      private def newValidForCreateOrganization() {
         def organization = new CommunicationOrganization(
                 description: i_valid_description,
-                name: i_valid_name
+                name: i_valid_name,
+                isRoot: true
         )
         return organization
     }
