@@ -1,5 +1,5 @@
 /** *******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm.v1
 
@@ -48,19 +48,6 @@ class SiteDetail {
         if (campus != that.campus) return false
         if (buildings != that.buildings) return false
         return true
-    }
-
-    /**
-     *  returns hash code
-     * @return int
-     */
-    int hashCode() {
-        int result
-        result = (campus != null ? campus.hashCode() : 0)
-        result = 31 * result + (guid != null ? guid.hashCode() : 0)
-        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
-        result = 31 * result + (buildings != null ? buildings.hashCode() : 0)
-        return result
     }
 
 

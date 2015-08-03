@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm.v1
 
@@ -45,16 +45,6 @@ class BuildingDetail {
         if (metadata != that.metadata) return false
         if (rooms != that.rooms) return false
         return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (housingLocationBuildingDescription != null ? housingLocationBuildingDescription.hashCode() : 0)
-        result = 31 * result + (guid != null ? guid.hashCode() : 0)
-        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
-        result = 31 * result + (rooms != null ? rooms.hashCode() : 0)
-        return result
     }
 
 

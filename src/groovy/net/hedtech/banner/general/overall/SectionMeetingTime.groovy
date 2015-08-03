@@ -5,7 +5,6 @@ package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.service.DatabaseModifiesState
 import net.hedtech.banner.general.system.*
-import org.hibernate.annotations.Type
 import javax.persistence.*
 
 /**
@@ -47,11 +46,53 @@ query = """select MIN(a.startDate), MAX(a.endDate) FROM SectionMeetingTime a
                         FROM SectionMeetingTime a
                         WHERE a.term = :term
                         AND a.courseReferenceNumber = :courseReferenceNumber
-                        ORDER BY a.id ASC""")
+                        ORDER BY a.id ASC"""),
+@NamedQuery(name = "SectionMeetingTime.fetchDetailsByTermAndCourseReferenceNumber",
+        query = """select a.id, a.courseReferenceNumber, a.term ,a.category
+                        FROM SectionMeetingTime a
+                                   WHERE a.term = :term
+                                   AND a.courseReferenceNumber = :courseReferenceNumber
+                                   order by a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime""")
+
 ] )
 @DatabaseModifiesState
 class SectionMeetingTime implements Serializable {
 
+    public SectionMeetingTime(){
+
+    }
+
+
+    public SectionMeetingTime( def id, def courseReferenceNumber, def term, def category, def startDate, def sunday, def monday, def tuesday, def wednesday, def thursday, def friday, def saturday, def beginTime, def endTime, def endDate ){
+
+        this.id = id
+        this.courseReferenceNumber = courseReferenceNumber
+        this.term = term
+        this.category = category
+        this.startDate = startDate
+        this.sunday = sunday
+        this.monday = monday
+        this.tuesday = tuesday
+        this.wednesday = wednesday
+        this.thursday = thursday
+        this.friday = friday
+        this.saturday = saturday
+        this.beginTime = beginTime
+        this.endTime = endTime
+        this.endDate = endDate
+    }
+
+    public SectionMeetingTime( def sunday, def monday, def tuesday, def wednesday, def thursday, def friday, def saturday, def beginTime ){
+
+        this.sunday = sunday
+        this.monday = monday
+        this.tuesday = tuesday
+        this.wednesday = wednesday
+        this.thursday = thursday
+        this.friday = friday
+        this.saturday = saturday
+        this.beginTime = beginTime
+    }
     /**
      * Surrogate ID for SSRMEET
      */
@@ -587,6 +628,31 @@ class SectionMeetingTime implements Serializable {
             }
         }
         return categories
+    }
+
+    public static List fetchDetailsByTermAndCourseReferenceNumber( String term,
+                                                                   String courseReferenceNumber ) {
+
+        def queryStr= """SELECT new net.hedtech.banner.general.overall.SectionMeetingTime( a.id, a.courseReferenceNumber, a.term, a.category, a.startDate, a.sunday, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.beginTime,
+                         a.endTime, a.endDate) FROM SectionMeetingTime a WHERE a.term = :term and a.courseReferenceNumber = :courseReferenceNumber
+                         ORDER BY a.startDate, a.monday, a.tuesday, a.wednesday, a.thursday, a.friday, a.saturday, a.sunday, a.beginTime"""
+
+        def sectionMeetingTimes = SectionMeetingTime.withSession { session ->
+            session.createQuery( queryStr).setString("term", term).setString("courseReferenceNumber",courseReferenceNumber).list()
+        }
+        return sectionMeetingTimes
+    }
+
+
+    public static List fetchBySectionMeetingId(Long sectionMeetingId) {
+
+        def queryStr= """SELECT new net.hedtech.banner.general.overall.SectionMeetingTime( nvl( a.sunday, 'false' ), nvl( a.monday, 'false' ), nvl( a.tuesday, 'false' ), nvl( a.wednesday, 'false' ), nvl( a.thursday, 'false' ), nvl( a.friday, 'false' ), nvl( a.saturday, 'false' ),
+                         a.beginTime ) FROM SectionMeetingTime a WHERE a.id = :sectionMeetingId """
+
+        def sectionMeetingTimes = SectionMeetingTime.withSession { session ->
+            session.createQuery( queryStr).setLong("sectionMeetingId", sectionMeetingId).list()
+        }
+        return sectionMeetingTimes
     }
 
 }
