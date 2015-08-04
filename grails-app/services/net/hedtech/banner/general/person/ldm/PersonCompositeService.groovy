@@ -507,37 +507,20 @@ class PersonCompositeService extends LdmService {
         def bannerIdCredentials = params.credentials.find { credential ->
             credential.credentialType == "Banner ID"
         }
-        def emailInstitution = params.emails.find { email ->
-            email.emailType == "Institution"
-        }
-        def emailInstitutionRuleValue
-        if (emailInstitution?.emailType) {
-            emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, emailInstitution['emailType'])[0]?.value
-        }
 
-        def emailPersonal = params.emails.find { email ->
-            email.emailType == "Personal"
-        }
-        def emailPersonalRuleValue
-        if (emailPersonal?.emailType) {
-            emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, emailPersonal['emailType'])[0]?.value
-        }
+        def emailInstitutionRuleValue  = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Institution")[0]?.value
+        def emailPersonalRuleValue  = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Personal")[0]?.value
+        def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Work")[0]?.value
+        def emailInstitution = params.emails.find { email -> email.emailType  == emailInstitutionRuleValue }
+        def emailPersonal = params.emails.find { email -> email.emailType   == emailPersonalRuleValue }
+        def emailWork = params.emails.find { email -> email.emailType  == emailWorkRuleValue }
 
-        def emailWork = params.emails.find { email ->
-            email.emailType == "Work"
-        }
-        def emailWorkRuleValue
-        if (emailWork?.emailType) {
-            emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, emailWork['emailType'])[0]?.value
-        }
 
-        String dob = null
+        Date dob = null
         if (params?.dateOfBirth) {
-            Date date = LdmService.convertString2Date(params?.dateOfBirth)
-            dob = date.format("dd-MMM-yyyy")
+           dob = LdmService.convertString2Date(params?.dateOfBirth)
         }
 
-        // TODO mah
         Boolean matchFound = false
         commonMatchingCompositeService.commonMatchingCleanup()
         [[email: emailInstitution?.emailAddress, type: emailInstitutionRuleValue],
@@ -546,7 +529,7 @@ class PersonCompositeService extends LdmService {
             if (!matchFound) {
                 def cm_params = [source   : personMatchRule?.value,
                                  lastName : name?.lastName, firstName: name?.firstName, mi: name?.middleName,
-                                 day      : dob?.format("dd"), month: dob?.format("MM"), year: dob?.format("yyyy"),
+                                 birthDay : dob?.format("dd"), birthMonth: dob?.format("MM"), birthYear: dob?.format("yyyy"),
                                  sex      : params?.gender, ssn: ssnCredentials?.credentialId,
                                  bannerId : bannerIdCredentials?.credentialId, email: emailAddr?.email,
                                  emailType: emailAddr?.type]
@@ -561,14 +544,6 @@ class PersonCompositeService extends LdmService {
             }
         }
         return personList
-    }
-
-
-    private def getCommonMatchingResults(def params) {
-
-        def personPidmList = CommonMatchingPersonResult.fetchAllMatchResults(params)
-
-        return personPidmList
     }
 
 
@@ -963,7 +938,7 @@ class PersonCompositeService extends LdmService {
         persons = buildPersonTelephones(personTelephoneList, persons)
         persons = buildPersonEmails(personEmailList, persons)
         persons = buildPersonRaces(personRaceList, persons)
-        persons = buildPersonRoles(persons, studentRole)
+        persons = buildPersonRoles(persons, studentRole,pidmLists)
 
         persons // Map of person objects with pidm as index.
     }
@@ -1098,20 +1073,24 @@ class PersonCompositeService extends LdmService {
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    // TODO send in pidm partition list to eliminate the persons split here
-    def buildPersonRoles(Map persons, Boolean studentRole = false) {
+    def buildPersonRoles(Map persons, Boolean studentRole = false, List pidmList = []) {
         def pidms = []
-        persons.each { key, value ->
-            pidms << key
+        def pidmPartitions = []
+        if ( pidmList?.size()){
+            pidmPartitions.addAll(pidmList)
         }
-        def pidmPartitions = SystemUtility.splitList(pidms, 1000)
-        pidmPartitions.each { pidmList ->
-            userRoleCompositeService.fetchAllRolesByPidmInList(pidmList, studentRole).each { role ->
+        else {
+            persons.each { key, value ->
+                pidms << key
+            }
+            pidmPartitions = SystemUtility.splitList(pidms, 1000)
+        }
+        pidmPartitions.each { pidmSet ->
+            userRoleCompositeService.fetchAllRolesByPidmInList(pidmSet, studentRole).each { role ->
                 Person currentRecord = persons.get(role.key.toInteger())
                 currentRecord.roles << role.value
             }
         }
-
         persons
     }
 
