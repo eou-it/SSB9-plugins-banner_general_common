@@ -16,17 +16,17 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
  */
 class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTestCase {
 
-	@Before
-	public void setUp() {
-		formContext = ['GUAGMNU']
-		super.setUp()
-	}
+    @Before
+    public void setUp() {
+        formContext = ['GUAGMNU']
+        super.setUp()
+    }
 
 
-	@After
-	public void tearDown() {
-		super.tearDown()
-	}
+    @After
+    public void tearDown() {
+        super.tearDown()
+    }
 
     @Test
     void testCreateDirectDepositAccount() {
@@ -38,38 +38,38 @@ class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTes
         assertNotNull directDepositAccount.id
         assertEquals 36948575, directDepositAccount.bankAccountNum
         assertEquals 123478902, directDepositAccount.bankRoutingNum
-		assertEquals "I", directDepositAccount.apIndicator
-		assertEquals "A", directDepositAccount.hrIndicator
+        assertEquals "I", directDepositAccount.apIndicator
+        assertEquals "A", directDepositAccount.hrIndicator
         def id = directDepositAccount.id
 
         directDepositAccount = directDepositAccount.get(id)
         assertNotNull directDepositAccount
     }
-	
-	private def newDirectDepositAccount() {
-		def domain = new DirectDepositAccount(
-			pidm: 36732,
-			status: "A",
-			documentType: "D",
-			priority: 3,
-			apIndicator: "I",
-			hrIndicator: "A",
-//			lastModified: $lastModified,
-//			lastModifiedBy: $lastModifiedBy,
-			bankAccountNum: 36948575,
-			bankRoutingNum: 123478902,
-			amount: null,
-			percent: 11.0,
-			accountType: "C",
-//			addressTypeCode: $addressTypeCode,
-//			addressSequenceNum: $addressSequenceNum,
-			intlAchTransactionIndicator: "N"
-//			isoCode: $isoCode,
-//			apAchTransactionTypeCode: $apAchTransactionTypeCode
-//			iatAddressTypeCode: $iatAddressTypeCode
-//			iatAddessSequenceNum: $iatAddessSequenceNum
-		)
+    
+    private def newDirectDepositAccount() {
+        def domain = new DirectDepositAccount(
+            pidm: 36732,
+            status: "A",
+            documentType: "D",
+            priority: 3,
+            apIndicator: "I",
+            hrIndicator: "A",
+//            lastModified: $lastModified,
+//            lastModifiedBy: $lastModifiedBy,
+            bankAccountNum: 36948575,
+            bankRoutingNum: 123478902,
+            amount: null,
+            percent: 11.0,
+            accountType: "C",
+//            addressTypeCode: $addressTypeCode,
+//            addressSequenceNum: $addressSequenceNum,
+            intlAchTransactionIndicator: "N"
+//            isoCode: $isoCode,
+//            apAchTransactionTypeCode: $apAchTransactionTypeCode
+//            iatAddressTypeCode: $iatAddressTypeCode
+//            iatAddessSequenceNum: $iatAddessSequenceNum
+        )
 
-		return domain
-	}
+        return domain
+    }
 }
