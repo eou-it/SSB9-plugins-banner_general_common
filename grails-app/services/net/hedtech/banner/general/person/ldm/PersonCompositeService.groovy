@@ -29,9 +29,6 @@ import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
-import java.sql.CallableStatement
-import java.sql.SQLException
-
 @Transactional
 class PersonCompositeService extends LdmService {
 
@@ -540,19 +537,27 @@ class PersonCompositeService extends LdmService {
             dob = date.format("dd-MMM-yyyy")
         }
 
-
-        [ [email: emailInstitution?.emailAddress, type: emailInstitutionRuleValue],
-          [email: emailPersonal?.emailAddress , type: emailPersonalRuleValue],
-          [email: emailWork?.emailAddress, type: emailWorkRuleValue]].each  { emailAddr ->
-            def cm_params = [source  : personMatchRule?.value,
-                             lastName: name.lastName, firstName: name.firstName, mi: middleName,
-                             day     : dob.foramt("dd"), month: dob.format("MM"), year: dob.format("yyyy"),
-                             sex     : params?.gender, ssn: ssnCredentials?.credentialId,
-                             bannerId: bannerIdCredentials?.credentialId, email: emailAddr.email,
-            emailType: emailAddr.type]
-            def matchList = commonMatchingCompositeService(cm_params)
-            matchList.each {
-                personList << it.pidm
+        // TODO mah
+        Boolean matchFound = false
+        commonMatchingCompositeService.commonMatchingCleanup()
+        [[email: emailInstitution?.emailAddress, type: emailInstitutionRuleValue],
+         [email: emailPersonal?.emailAddress, type: emailPersonalRuleValue],
+         [email: emailWork?.emailAddress, type: emailWorkRuleValue]].each { emailAddr ->
+            if (!matchFound) {
+                def cm_params = [source   : personMatchRule?.value,
+                                 lastName : name?.lastName, firstName: name?.firstName, mi: name?.middleName,
+                                 day      : dob?.format("dd"), month: dob?.format("MM"), year: dob?.format("yyyy"),
+                                 sex      : params?.gender, ssn: ssnCredentials?.credentialId,
+                                 bannerId : bannerIdCredentials?.credentialId, email: emailAddr?.email,
+                                 emailType: emailAddr?.type]
+                def matchList = commonMatchingCompositeService.commonMatching(cm_params)
+                if (matchList.find { it.resultIndicator == "M" }) {
+                    matchFound = true
+                    matchList.each {
+                        if (it.resultIndicator == "M")
+                            personList << it
+                    }
+                }
             }
         }
         return personList
@@ -1592,7 +1597,8 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private def validateCredentialType(String inputCredentialType, def allowedCredentialTypes, String credentialId) {
+    private def validateCredentialType(String inputCredentialType,
+                                       def allowedCredentialTypes, String credentialId) {
         if (!allowedCredentialTypes.contains(inputCredentialType)) {
             throw new ApplicationException('Person', new BusinessLogicValidationException("invalid.code.message:credentialType", []))
         }
@@ -1646,7 +1652,9 @@ class PersonCompositeService extends LdmService {
     private def getPreferredEmail(List<Map> emailsInRequest) {
         def preferredEmail = null
         if (["v2", "v3"].contains(getAcceptVersion())) {
-            preferredEmail = emailsInRequest.findAll { it.get("emailType")?.trim() == PERSON_EMAIL_TYPE_PREFERRED }[0]
+            preferredEmail = emailsInRequest.findAll {
+                it.get("emailType")?.trim() == PERSON_EMAIL_TYPE_PREFERRED
+            }[0]
             if (preferredEmail) {
                 emailsInRequest.removeAll { it.get("emailType").trim() == PERSON_EMAIL_TYPE_PREFERRED }
             }

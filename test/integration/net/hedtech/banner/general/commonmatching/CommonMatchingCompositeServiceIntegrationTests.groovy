@@ -255,18 +255,18 @@ class CommonMatchingCompositeServiceIntegrationTests extends BaseIntegrationTest
 
         def map = [source  : sourceCode.code, lastName: person.lastName, firstName: person.firstName, bannerId: person.bannerId,
                    mi: person.middleName,
-                   ssn     : bio.ssn, birthDay: bio.birthDate.format("dd"), birthMonth: bio.birthDate.format("MM"),
-                   birthYear    : bio.birthDate.format("yyyy"),
-                   sex     : bio.sex, street1: address.streetLine1, street2: address.streetLine2,
-                   street3 : address.streetLine3, city: address.city, state: address.state?.code,
-                   zip     : address.zip, county: address.county?.code, nation: address?.nation?.code,
-                   phone   : phone.phoneArea, phoneNumber: phone.phoneNumber, phoneExtension: phone.phoneExtension,
-                   email   : email[0].emailAddress ]
+                   ssn     : bio?.ssn, birthDay: bio?.birthDate?.format("dd"), birthMonth: bio?.birthDate?.format("MM"),
+                   birthYear    : bio?.birthDate?.format("yyyy"),
+                   sex     : bio?.sex, street1: address?.streetLine1, street2: address?.streetLine2,
+                   street3 : address?.streetLine3, city: address?.city, state: address?.state?.code,
+                   zip     : address?.zip, county: address?.county?.code, nation: address?.nation?.code,
+                   phone   : phone?.phoneArea, phoneNumber: phone?.phoneNumber, phoneExtension: phone?.phoneExtension,
+                   email   : email[0]?.emailAddress ]
         def results = commonMatchingCompositeService.commonMatching(map)
         // assertEquals 1, results.size()
         def matchResults = CommonMatchingResult.findAll()
         assertTrue matchResults.size() > 0
-        assertEquals person.pidm, results[0].pidm
+        assertEquals person.pidm, matchResults[0].pidm
     }
 
 
