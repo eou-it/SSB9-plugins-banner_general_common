@@ -48,6 +48,7 @@ class PersonCompositeService extends LdmService {
     def additionalIDService
     def personFilterCompositeService
     def personIdentificationNameAlternateService
+    def commonMatchingCompositeService
 
     static final String ldmName = 'persons'
     static final String PROCESS_CODE = "HEDM"
@@ -539,55 +540,21 @@ class PersonCompositeService extends LdmService {
             dob = date.format("dd-MMM-yyyy")
         }
 
-        CallableStatement sqlCall
-        try {
-            def connection = sessionFactory.currentSession.connection()
-            String matchPersonQuery = "{ call spkcmth.p_common_mtch(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) }"
-            sqlCall = connection.prepareCall(matchPersonQuery)
 
-            sqlCall.setString(1, personMatchRule?.value)
-            sqlCall.setString(2, name.firstName)
-            sqlCall.setString(3, name.lastName)
-            sqlCall.setString(4, name.middleName)
-            sqlCall.setString(5, dob)
-            sqlCall.setString(6, params?.gender)
-            sqlCall.setString(7, ssnCredentials?.credentialType)
-            sqlCall.setString(8, ssnCredentials?.credentialId)
-            sqlCall.setString(9, bannerIdCredentials?.credentialType ?: null)
-            sqlCall.setString(10, bannerIdCredentials?.credentialId ?: null)
-            sqlCall.setString(11, emailInstitutionRuleValue ?: null)
-            sqlCall.setString(12, emailInstitution?.emailAddress)
-            sqlCall.setString(13, emailPersonalRuleValue ?: null)
-            sqlCall.setString(14, emailPersonal?.emailAddress)
-            sqlCall.setString(15, emailWorkRuleValue ?: null)
-            sqlCall.setString(16, emailWork?.emailAddress)
-
-            sqlCall.registerOutParameter(17, java.sql.Types.VARCHAR)
-            sqlCall.executeQuery()
-
-            String errorCode = sqlCall.getString(17)
-            if (!errorCode) {
-                personList = getCommonMatchingResults(params)
-            } else {
-                throw new ApplicationException(this.class.name, errorCode)
+        [ [email: emailInstitution?.emailAddress, type: emailInstitutionRuleValue],
+          [email: emailPersonal?.emailAddress , type: emailPersonalRuleValue],
+          [email: emailWork?.emailAddress, type: emailWorkRuleValue]].each  { emailAddr ->
+            def cm_params = [source  : personMatchRule?.value,
+                             lastName: name.lastName, firstName: name.firstName, mi: middleName,
+                             day     : dob.foramt("dd"), month: dob.format("MM"), year: dob.format("yyyy"),
+                             sex     : params?.gender, ssn: ssnCredentials?.credentialId,
+                             bannerId: bannerIdCredentials?.credentialId, email: emailAddr.email,
+            emailType: emailAddr.type]
+            def matchList = commonMatchingCompositeService(cm_params)
+            matchList.each {
+                personList << it.pidm
             }
         }
-        catch (SQLException sqlEx) {
-            log.error "Error executing spkcmth.p_common_mtch: " + sqlEx.stackTrace
-            throw new ApplicationException(this.class.name, sqlEx)
-        }
-        catch (Exception ex) {
-            log.error "Exception while searching person ${ex}" + ex.stackTrace
-            throw new ApplicationException(this.class.name, ex)
-        }
-        finally {
-            try {
-                sqlCall?.close()
-            } catch (SQLException sqlEx) {
-                log.trace "Sql Statement is already closed, no need to close it."
-            }
-        }
-
         return personList
     }
 
@@ -1126,6 +1093,7 @@ class PersonCompositeService extends LdmService {
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    // TODO send in pidm partition list to eliminate the persons split here
     def buildPersonRoles(Map persons, Boolean studentRole = false) {
         def pidms = []
         persons.each { key, value ->

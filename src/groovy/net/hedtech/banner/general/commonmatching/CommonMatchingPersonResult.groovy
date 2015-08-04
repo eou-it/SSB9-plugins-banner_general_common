@@ -11,7 +11,9 @@ import javax.persistence.*
 @NamedQueries(value = [
         @NamedQuery(name = "CommonMatchingPersonResult.fetchAllMatchResults",
                 query = """FROM CommonMatchingPersonResult a
-                           WHERE a.resultIndicator = 'M'""")])
+                           WHERE a.resultIndicator = 'M'""") ,
+        @NamedQuery(name = "CommonMatchingPersonResult.fetchAllResults",
+                query = """FROM CommonMatchingPersonResult a """)])
 class CommonMatchingPersonResult implements Serializable {
 
     /**
@@ -151,6 +153,41 @@ class CommonMatchingPersonResult implements Serializable {
         return pidmsres
     }
 
+    public static List fetchAllResults(def params = [:]) {
+
+        def pidmsres = []
+
+        pidmsres = CommonMatchingPersonResult.withSession
+                { session ->
+                    org.hibernate.Query query1 = session.getNamedQuery('CommonMatchingPersonResult.fetchAllResults')
+                    def orderBy
+                    if (params.sort) {
+                        orderBy = " order by a." + params.sort
+                    }
+                    else {
+                        orderBy = " order by a.lastName, a.firstName, a.mi, a.bannerId"
+                    }
+                    org.hibernate.Query query = session.createQuery(query1.getQueryString() + orderBy)
+
+                    def max
+                    def offset
+                    if (params.max) {
+                        if (params.max instanceof String) max = params.max.toInteger()
+                        else max = params.max
+                        query.setMaxResults(max)
+                    }
+                    if (params.offset) {
+                        if (params.offset instanceof String) offset = params.offset.toInteger()
+                        else offset = params.offset
+                        query.setFirstResult(offset)
+                    }
+                    query.list()
+                }
+
+        return pidmsres
+    }
+
+
 
     @Override
     public String toString() {
@@ -168,8 +205,7 @@ class CommonMatchingPersonResult implements Serializable {
                 ", resultType='" + resultType + '\'' +
                 ", message='" + message + '\'' +
                 ", resultIndicator='" + resultIndicator + '\'' +
-                ", name='" + name + '\'' +
-                ", matchedId='" + matchedId + '\'' +
+                ", name='" + name + '\''  +
                 ", dataOrigin='" + dataOrigin + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
