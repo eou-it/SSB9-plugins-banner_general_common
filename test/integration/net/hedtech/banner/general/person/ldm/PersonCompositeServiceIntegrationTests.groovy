@@ -696,6 +696,37 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
+    void testCMSearchWithName() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        personMatchRule.value = 'HEDM_LASTNAME_MATCH'
+        personMatchRule.save(flush: true, failOnError: true)
+
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_LAST_NAME" }
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_LAST_NAME" }
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: "Jamison", firstName: "Emily", nameType: "Primary"]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertTrue matched_persons.size() > 0
+    }
+
+
+    @Test
     void testListQapiWithValidPersonfilter() {
 
 
