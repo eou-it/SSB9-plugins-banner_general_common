@@ -16,6 +16,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
  */
 class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTestCase {
 
+    def directDepositAccountService
+    
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -31,7 +33,7 @@ class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTes
     @Test
     void testCreateDirectDepositAccount() {
         def directDepositAccount = newDirectDepositAccount()
-        directDepositAccount = directDepositAccount.create([domainModel: directDepositAccount])
+        directDepositAccountService.create([domainModel: directDepositAccount])
 
         // Assert domain values
         assertNotNull directDepositAccount
@@ -51,7 +53,7 @@ class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTes
             pidm: 36732,
             status: "A",
             documentType: "D",
-            priority: 3,
+            priority: 16,
             apIndicator: "I",
             hrIndicator: "A",
 //            lastModified: $lastModified,

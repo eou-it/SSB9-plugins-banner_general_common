@@ -14,7 +14,11 @@ import javax.persistence.*
 @Table(name = "GXRDIRD")
 @NamedQueries(value = [
     @NamedQuery(name = "DirectDepositAccount.fetchByPidm",
-             query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """)
+             query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """),
+    @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndApIndicator",
+        query = """ FROM DirectDepositAccount a 
+                   WHERE a.pidm = :pidm 
+                     AND a.apIndicator = 'A'""")
 ])
 class DirectDepositAccount implements Serializable {
     
@@ -223,6 +227,17 @@ class DirectDepositAccount implements Serializable {
         DirectDepositAccount.withSession { session ->
             dirdAccounts = session.getNamedQuery(
                     'DirectDepositAccount.fetchByPidm')
+                    .setInteger('pidm', pidm).list()
+        }
+        return dirdAccounts
+    }
+    
+    public static fetchByPidmAndApIndicator(Integer pidm) {
+        def dirdAccounts
+
+        DirectDepositAccount.withSession { session ->
+            dirdAccounts = session.getNamedQuery(
+                    'DirectDepositAccount.fetchByPidmAndApIndicator')
                     .setInteger('pidm', pidm).list()
         }
         return dirdAccounts
