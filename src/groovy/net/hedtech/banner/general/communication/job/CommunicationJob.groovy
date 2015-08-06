@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.job
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
 import net.hedtech.banner.service.DatabaseModifiesState
@@ -92,6 +93,13 @@ class CommunicationJob implements AsynchronousTask {
     @Lob
     String errorText;
 
+    /**
+     * Error Code: The error code for the error scenario that failed the Communication Job
+     */
+    @Column(name = "GCBCJOB_ERROR_CODE")
+    @Enumerated(EnumType.STRING)
+    CommunicationErrorCode errorCode
+
     static constraints = {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
@@ -99,6 +107,7 @@ class CommunicationJob implements AsynchronousTask {
         referenceId(nullable: false, maxSize: 255)
         status(nullable: false, maxSize: 30)
         errorText(nullable: true)
+        errorCode(nullable: true)
     }
 
     // Read Only fields that should be protected against update

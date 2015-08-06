@@ -104,6 +104,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
 
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
+        <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>
 
     </session-factory>
 </hibernate-configuration>

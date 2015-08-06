@@ -536,7 +536,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         private final AsynchronousTask job;
         private final Throwable cause;
 
-
         ErrorHandler(AsynchronousTask job, Throwable cause) {
             this.job = job;
             this.cause = cause;

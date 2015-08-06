@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -13,6 +14,8 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.mail.EmailException
 import org.apache.commons.mail.HtmlEmail
+import javax.mail.AuthenticationFailedException
+import javax.mail.MessagingException
 import javax.mail.internet.InternetAddress
 
 /**
@@ -96,15 +99,24 @@ class CommunicationSendEmailMethod {
             email.send()
             this.lastSend = emailReceipt;
         } catch (EmailException e) {
-                 log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
-                 // throw custom system exception here MJB
-                 String fromList = InternetAddress.toString( email.getFromAddress() )
-                 String recipientList = email.getToAddresses().toListString()
-                 String replyToList = email.getReplyToAddresses().toListString()
-                 throw ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e)
+            log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
+            // throw custom system exception here MJB
+            String fromList = InternetAddress.toString( email.getFromAddress() )
+            String recipientList = email.getToAddresses().toListString()
+            String replyToList = email.getReplyToAddresses().toListString()
+            if(e.getCause() instanceof AuthenticationFailedException) {
+                 throw ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+            }
+            else if(e.getCause() instanceof MessagingException) {
+                throw ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.EMAIL_SERVER_CONNECTION_FAILED.name())
+            }
+            else
+            {
+                throw ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
+            }
         } catch (Exception e) {
             log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
-            throw new ApplicationException( CommunicationSendEmailMethod.class, "EmailServer.SendEmailMethod.execute", e );
+            throw ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }
 
@@ -255,13 +267,13 @@ class CommunicationSendEmailMethod {
         ApplicationException exception = null;
 
         if (null == message) {
-            exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.nullMessage" );
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.nullMessage", CommunicationErrorCode.UNKNOWN_ERROR.name())
         } else if (null == message.getSenders()) {
-            exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.sendersEmpty" );
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.sendersEmpty", CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
         } else if (false == ignoreToList && (null == message.getToList() || 0 == message.getToList().size())) {
-            exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.recipientsEmpty" );
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.recipientsEmpty", CommunicationErrorCode.EMPTY_RECIPIENT_ADDRESS.name())
         } else if (null == message.getSubjectLine() || 0 == message.getSubjectLine().trim().length()) {
-            exception = new ApplicationException( CommunicationSendEmailMethod.class, "exception.communication.email.subjectEmpty" );
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.subjectEmpty", CommunicationErrorCode.EMPTY_EMAIL_SUBJECT.name())
         }
         if (null != exception) {
             throw exception;

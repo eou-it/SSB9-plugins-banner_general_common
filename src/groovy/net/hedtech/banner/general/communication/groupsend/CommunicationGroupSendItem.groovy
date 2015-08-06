@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 
@@ -133,6 +134,13 @@ class CommunicationGroupSendItem implements AsynchronousTask {
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
+    /**
+     * Error Code: The error code for the error scenario that failed the Communication Job
+     */
+    @Column(name = "GCRGSIM_ERROR_CODE")
+    @Enumerated(EnumType.STRING)
+    CommunicationErrorCode errorCode
+
     static constraints = {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
@@ -140,6 +148,7 @@ class CommunicationGroupSendItem implements AsynchronousTask {
         stopDate(nullable:true)
         errorText(nullable:true)
         mepCode(nullable:true)
+        errorCode(nullable:true)
     }
 
     public static List fetchByGroupSend( CommunicationGroupSend groupSend ) {

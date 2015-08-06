@@ -4,7 +4,9 @@
 package net.hedtech.banner.general.communication.email;
 
 import groovy.transform.EqualsAndHashCode;
-import groovy.transform.ToString;
+import groovy.transform.ToString
+import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.communication.CommunicationErrorCode;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -76,7 +78,7 @@ public class CommunicationEmailAddress implements Serializable {
         if (isValidEmailAddress( mailAddress ) == true) {
             this.mailAddress = mailAddress;
         } else {
-            throw new AddressException( "RFC 822 address format violation.", mailAddress );
+            throw ExceptionFactory.createApplicationException(CommunicationEmailAddress.class, new AddressException( "RFC 822 address format violation.", mailAddress ), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
         }
     }
 

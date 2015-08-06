@@ -13,6 +13,8 @@ package net.hedtech.banner.general.communication.field
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -137,7 +139,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         } catch (SQLException e) {
             throw new ApplicationException( CommunicationFieldCalculationService, e.message )
         } catch (Exception e) {
-            throw new ApplicationException( CommunicationFieldCalculationService, e.message )
+            throw ExceptionFactory.createApplicationException(CommunicationFieldCalculationService, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
         } finally {
             sql?.close()
         }
