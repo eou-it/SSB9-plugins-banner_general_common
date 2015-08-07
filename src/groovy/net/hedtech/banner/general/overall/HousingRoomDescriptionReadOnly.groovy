@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -112,6 +112,14 @@ class HousingRoomDescriptionReadOnly {
     ])
     Term termTo
 
+    @Column(name = "ROOM_GUID")
+    String roomGUID
+
+    @Column(name = "BUILDING_GUID")
+    String buildingGUID
+
+    @Column(name = "SITE_GUID")
+    String siteGUID
 
     public String toString() {
         """HousingRoomDescriptionReadOnly[
@@ -130,7 +138,10 @@ class HousingRoomDescriptionReadOnly {
                     roomStatusInactiveIndicator=$roomStatusInactiveIndicator,
 					buildingCode=$buildingCode,
 					campusCode=$campusCode,
-					siteCode=$siteCode]"""
+					siteCode=$siteCode,
+                    roomGUID=$roomGUID,
+                    buildingGUID=$buildingGUID,
+                    siteGUID=$siteGUID]"""
     }
 
 
@@ -154,6 +165,9 @@ class HousingRoomDescriptionReadOnly {
         if (buildingCode != that.buildingCode) return false
         if (campusCode != that.campusCode) return false
         if (siteCode != that.siteCode) return false
+        if (roomGUID != that.roomGUID) return false
+        if (buildingGUID != that.buildingGUID) return false
+        if (siteGUID != that.siteGUID) return false
         return true
     }
 
@@ -176,6 +190,9 @@ class HousingRoomDescriptionReadOnly {
         result = 31 * result + (buildingCode != null ? buildingCode.hashCode() : 0)
         result = 31 * result + (campusCode != null ? campusCode.hashCode() : 0)
         result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0)
+        result = 31 * result + (roomGUID != null ? roomGUID.hashCode() : 0)
+        result = 31 * result + (buildingGUID != null ? buildingGUID.hashCode() : 0)
+        result = 31 * result + (siteGUID != null ? siteGUID.hashCode() : 0)
         return result
     }
 
