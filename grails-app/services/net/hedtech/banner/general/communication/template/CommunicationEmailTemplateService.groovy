@@ -14,7 +14,6 @@ class CommunicationEmailTemplateService extends ServiceBase {
     def communicationTemplateMergeService
     def communicationFieldService
 
-
     def preCreate( domainModelOrMap ) {
         if (!CommunicationCommonUtility.userCanCreate()) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
@@ -45,6 +44,20 @@ class CommunicationEmailTemplateService extends ServiceBase {
         stampAndValidate( template )
     }
 
+
+    /**
+     * Marks the template as published and there by useable for communications.
+     * @param domainModelOrMap
+     * @return
+     */
+    def publish( domainModelOrMap ) {
+        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
+        if (!template.published) {
+            template.setPublished( true )
+            template = this.update( template )
+        }
+        return template
+    }
 
     def publishTemplate( map ) {
 
