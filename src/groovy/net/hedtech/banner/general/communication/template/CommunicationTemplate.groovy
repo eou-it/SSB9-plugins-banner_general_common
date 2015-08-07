@@ -17,6 +17,23 @@ import javax.persistence.*
 @Inheritance(strategy = InheritanceType.JOINED)
 @EqualsAndHashCode
 @ToString
+@NamedQueries(value = [
+        @NamedQuery(name = "CommunicationTemplate.fetchByTemplateNameAndFolderName",
+                query = """ FROM CommunicationTemplate a
+                    WHERE a.folder.name = :folderName
+                      AND upper(a.name) = upper(:templateName)"""),
+        @NamedQuery(name = "CommunicationTemplate.existsAnotherNameFolder",
+                query = """ FROM CommunicationTemplate a
+                    WHERE a.folder.name = :folderName
+                    AND   upper(a.name) = upper(:templateName)
+                    AND   a.id <> :id"""),
+        @NamedQuery(name = "CommunicationTemplate.fetchPublishedActivePublicByFolderId",
+                query = """ FROM CommunicationTemplate a
+                    WHERE a.folder.id = :folderId
+                    AND a.published = 'Y'
+                    AND SYSDATE between NVL(validFrom,SYSDATE) and NVL(validTo, SYSDATE)
+                    AND personal = 'N'""")
+])
 public abstract class CommunicationTemplate implements Serializable {
     /**
      * KEY: Generated unique key.
@@ -146,4 +163,100 @@ public abstract class CommunicationTemplate implements Serializable {
     }
 
 
+    /******************* Named Queries *******************/
+
+    public static CommunicationTemplate fetchByTemplateNameAndFolderName(String templateName, String folderName) {
+
+        def query
+        CommunicationTemplate.withSession { session ->
+            query = session.getNamedQuery('CommunicationTemplate.fetchByTemplateNameAndFolderName')
+                    .setString('folderName', folderName)
+                    .setString('templateName', templateName)
+                    .list()[0]
+        }
+        return query
+    }
+
+    public static List<CommunicationTemplate> fetchPublishedActivePublicByFolderId(Long id) {
+
+        def templateList
+        CommunicationTemplate.withSession { session ->
+            templateList = session.getNamedQuery('CommunicationTemplate.fetchPublishedActivePublicByFolderId')
+                    .setLong('folderId', id)
+                    .list()
+        }
+        return templateList
+    }
+
+    public static Boolean existsAnotherNameFolder(Long templateId, String templateName, String folderName) {
+
+        def query
+        CommunicationTemplate.withSession { session ->
+            query = session.getNamedQuery('CommunicationTemplate.existsAnotherNameFolder')
+                    .setString('folderName', folderName)
+                    .setString('templateName', templateName)
+                    .setLong('id', templateId).list()[0]
+
+        }
+        return (query != null)
+    }
+
+    /**
+     * Return list of templates along with count for display on list page
+     * will return all shared templates and personal templates belonging to the current user
+     * @param filterData
+     * @param pagingAndSortParams
+     * @return
+     */
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationTemplate.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            and {
+                or {
+                    eq("personal",false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                }
+            }
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
+    }
+
+    /**
+     * Returns a list of templates to be used when sending messages to a population
+     * will return all templates that are active, shared and personal templates belonging to the user will be returned
+     * @param filterData
+     * @return
+     */
+    public static findByFolderForSend(filterData) {
+
+        def currentDate = new Date()
+        def queryCriteria = CommunicationTemplate.createCriteria()
+
+        def results = queryCriteria.list {
+            folder {
+                eq("name", filterData?.params?.folderName?.toLowerCase(), [ignoreCase: true])
+            }
+            eq("published",true)
+            and {
+                or {
+                    eq("personal",false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                }
+            }
+            le("validFrom",currentDate)
+            and {
+                or {
+                    isNull("validTo")
+                    ge("validTo",currentDate)
+                }
+            }
+            order( Order.asc("name").ignoreCase())
+        }
+        return results
+    }
 }

@@ -139,7 +139,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         } catch (SQLException e) {
             throw new ApplicationException( CommunicationFieldCalculationService, e.message )
         } catch (Exception e) {
-            throw ExceptionFactory.createApplicationException(CommunicationFieldCalculationService, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
+            throw ExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
         } finally {
             sql?.close()
         }
