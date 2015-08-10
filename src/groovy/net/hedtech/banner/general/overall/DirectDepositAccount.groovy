@@ -1,5 +1,5 @@
 /*******************************************************************************
-Copyright 2014 Ellucian Company L.P. and its affiliates.
+Copyright 2015 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -18,6 +18,14 @@ import javax.persistence.*
     @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndApIndicator",
         query = """ FROM DirectDepositAccount a 
                    WHERE a.pidm = :pidm 
+                     AND a.apIndicator = 'A'
+                     AND a.status != 'I'"""),
+    @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndAccountInfo",
+        query = """ FROM DirectDepositAccount a
+                   WHERE a.pidm = :pidm
+                     AND a.bankRoutingNum = :bankRoutingNum
+                     AND a.bankAccountNum = :bankAccountNum
+                     AND a.accountType = :accountType
                      AND a.apIndicator = 'A'""")
 ])
 class DirectDepositAccount implements Serializable {
@@ -239,6 +247,21 @@ class DirectDepositAccount implements Serializable {
             dirdAccounts = session.getNamedQuery(
                     'DirectDepositAccount.fetchByPidmAndApIndicator')
                     .setInteger('pidm', pidm).list()
+        }
+        return dirdAccounts
+    }
+    
+    public static fetchByPidmAndAccountInfo(Integer pidm, String bankRoutingNum, String bankAccountNum, String accountType) {
+        def dirdAccounts
+        
+        DirectDepositAccount.withSession { session ->
+            dirdAccounts = session.getNamedQuery(
+                    'DirectDepositAccount.fetchByPidmAndAccountInfo')
+                    .setInteger('pidm', pidm)
+                    .setString('bankRoutingNum', bankRoutingNum)
+                    .setString('bankAccountNum', bankAccountNum)
+                    .setString('accountType', accountType)
+                    .list()
         }
         return dirdAccounts
     }
