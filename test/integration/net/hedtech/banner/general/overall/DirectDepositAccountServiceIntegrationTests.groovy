@@ -1,6 +1,7 @@
+/*******************************************************************************
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.overall
-
-
 
 import org.junit.Before
 import org.junit.Test
@@ -14,8 +15,10 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 /**
  *
  */
-class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTestCase {
+class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCase {
 
+    def directDepositAccountService
+    
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -31,27 +34,38 @@ class DirectDepositAccountServiceIntegrationTestsSpec extends BaseIntegrationTes
     @Test
     void testCreateDirectDepositAccount() {
         def directDepositAccount = newDirectDepositAccount()
-        directDepositAccount = directDepositAccount.create([domainModel: directDepositAccount])
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
 
         // Assert domain values
         assertNotNull directDepositAccount
         assertNotNull directDepositAccount.id
-        assertEquals 36948575, directDepositAccount.bankAccountNum
-        assertEquals 123478902, directDepositAccount.bankRoutingNum
+        assertEquals "36948575", directDepositAccount.bankAccountNum
+        assertEquals "123478902", directDepositAccount.bankRoutingNum
+        assertEquals "C", directDepositAccount.accountType
         assertEquals "I", directDepositAccount.apIndicator
         assertEquals "A", directDepositAccount.hrIndicator
+        assertNotNull directDepositAccount.version
+        assertNotNull directDepositAccount.dataOrigin
+        assertNotNull directDepositAccount.lastModifiedBy
+        assertNotNull directDepositAccount.lastModified
+        
         def id = directDepositAccount.id
 
         directDepositAccount = directDepositAccount.get(id)
         assertNotNull directDepositAccount
     }
     
+    //TODO test creation of additional AP account
+    /*@Test
+     * test creation of additional active AP account, shouldn't be allowed
+     */
+    
     private def newDirectDepositAccount() {
         def domain = new DirectDepositAccount(
             pidm: 36732,
-            status: "A",
+            status: "P",
             documentType: "D",
-            priority: 3,
+            priority: 16,
             apIndicator: "I",
             hrIndicator: "A",
 //            lastModified: $lastModified,
