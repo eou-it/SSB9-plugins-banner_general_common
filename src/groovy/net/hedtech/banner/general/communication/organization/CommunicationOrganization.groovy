@@ -3,8 +3,10 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.organization
 
+import net.hedtech.banner.general.CommunicationCommonUtility
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.Where
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -313,6 +315,18 @@ class CommunicationOrganization implements Serializable {
             query = session.getNamedQuery('CommunicationOrganization.fetchRoot').list()[0]
         }
         return query
+    }
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+
+        def queryCriteria = CommunicationOrganization.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
     }
 
 
