@@ -3,10 +3,10 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.organization
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.Where
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -29,7 +29,7 @@ import javax.persistence.*
                     WHERE a.isActive = true"""),
         @NamedQuery(name = "CommunicationOrganization.fetchRoot",
                 query = """ FROM CommunicationOrganization a
-                    WHERE a.isRoot = true"""),
+                    WHERE a.parent is null"""),
 ])
 class CommunicationOrganization implements Serializable {
     /**
@@ -47,12 +47,6 @@ class CommunicationOrganization implements Serializable {
     @Column(name = "GCRORAN_NAME")
     String name
 
-    /**
-     * Indicates if the organization is the root organization (1=Yes or 0=No). Only one organization can be identified as the root organization.
-     */
-    @Type(type = "yes_no")
-    @Column(name = "GCRORAN_IS_ROOT")
-    Boolean isRoot = false
 
     @Type(type = "yes_no")
     @Column(name = "GCRORAN_ACTIVE_IND")
@@ -144,14 +138,15 @@ class CommunicationOrganization implements Serializable {
     public CommunicationEmailServerProperties getTheSendEmailServerProperties() {
         CommunicationEmailServerProperties settings = null
         if (sendEmailServerProperties && sendEmailServerProperties.size() > 0) {
-            settings = sendEmailServerProperties.get( 0 )
+            settings = sendEmailServerProperties.get(0)
         }
         return settings
     }
 
-    public void setTheSendEmailServerProperties( CommunicationEmailServerProperties settings ) {
+
+    public void setTheSendEmailServerProperties(CommunicationEmailServerProperties settings) {
         if (settings) {
-            sendEmailServerProperties = [ settings ]
+            sendEmailServerProperties = [settings]
             settings.organization = this
             settings.type = CommunicationEmailServerPropertiesType.Send
         } else {
@@ -159,17 +154,19 @@ class CommunicationOrganization implements Serializable {
         }
     }
 
+
     public CommunicationEmailServerProperties getTheReceiveEmailServerProperties() {
         CommunicationEmailServerProperties settings = null
         if (receiveEmailServerProperties && receiveEmailServerProperties.size() > 0) {
-            settings = receiveEmailServerProperties.get( 0 )
+            settings = receiveEmailServerProperties.get(0)
         }
         return settings
     }
 
-    public void setTheReceiveEmailServerProperties( CommunicationEmailServerProperties settings ) {
+
+    public void setTheReceiveEmailServerProperties(CommunicationEmailServerProperties settings) {
         if (settings) {
-            receiveEmailServerProperties = [ settings ]
+            receiveEmailServerProperties = [settings]
             settings.organization = this
             settings.type = CommunicationEmailServerPropertiesType.Receive
         } else {
@@ -177,17 +174,19 @@ class CommunicationOrganization implements Serializable {
         }
     }
 
+
     public CommunicationMailboxAccount getTheSenderMailboxAccount() {
         CommunicationMailboxAccount settings = null
         if (senderMailboxAccountSettings && senderMailboxAccountSettings.size() > 0) {
-            settings = senderMailboxAccountSettings.get( 0 )
+            settings = senderMailboxAccountSettings.get(0)
         }
         return settings
     }
 
-    public void setTheSenderMailboxAccount( CommunicationMailboxAccount settings ) {
+
+    public void setTheSenderMailboxAccount(CommunicationMailboxAccount settings) {
         if (settings) {
-            senderMailboxAccountSettings = [ settings ]
+            senderMailboxAccountSettings = [settings]
             settings.organization = this
             settings.type = CommunicationMailboxAccountType.Sender
         } else {
@@ -195,17 +194,19 @@ class CommunicationOrganization implements Serializable {
         }
     }
 
+
     public CommunicationMailboxAccount getTheReplyToMailboxAccount() {
         CommunicationMailboxAccount settings = null
         if (replyToMailboxAccountSettings && replyToMailboxAccountSettings.size() > 0) {
-            settings = replyToMailboxAccountSettings.get( 0 )
+            settings = replyToMailboxAccountSettings.get(0)
         }
         return settings
     }
 
-    public void setTheReplyToMailboxAccount( CommunicationMailboxAccount settings ) {
+
+    public void setTheReplyToMailboxAccount(CommunicationMailboxAccount settings) {
         if (settings) {
-            replyToMailboxAccountSettings = [ settings ]
+            replyToMailboxAccountSettings = [settings]
             settings.organization = this
             settings.type = CommunicationMailboxAccountType.ReplyTo
         } else {
@@ -215,21 +216,20 @@ class CommunicationOrganization implements Serializable {
 
 
     static constraints = {
-        name( nullable: false, maxSize: 1020 )
-        description( nullable: true, maxSize: 2000 )
-        parent( nullable: true )
-        isRoot( nullable: true )
-        isActive( nullable: true )
-        dateFormat( nullable: true )
-        dayOfWeekFormat( nullable: true )
-        timeOfDayFormat( nullable: true )
-        lastModified( nullable: true )
-        lastModifiedBy( nullable: true, maxSize: 30 )
-        dataOrigin( nullable: true, maxSize: 30 )
-        receiveEmailServerProperties( nullable: true )
-        sendEmailServerProperties( nullable: true )
-        replyToMailboxAccountSettings( nullable: true )
-        senderMailboxAccountSettings( nullable: true )
+        name(nullable: false, maxSize: 1020)
+        description(nullable: true, maxSize: 2000)
+        parent(nullable: true)
+        isActive(nullable: true)
+        dateFormat(nullable: true)
+        dayOfWeekFormat(nullable: true)
+        timeOfDayFormat(nullable: true)
+        lastModified(nullable: true)
+        lastModifiedBy(nullable: true, maxSize: 30)
+        dataOrigin(nullable: true, maxSize: 30)
+        receiveEmailServerProperties(nullable: true)
+        sendEmailServerProperties(nullable: true)
+        replyToMailboxAccountSettings(nullable: true)
+        senderMailboxAccountSettings(nullable: true)
 
     }
 
@@ -245,7 +245,6 @@ class CommunicationOrganization implements Serializable {
         if (dayOfWeekFormat != that.dayOfWeekFormat) return false
         if (description != that.description) return false
         if (id != that.id) return false
-        if (isRoot != that.isRoot) return false
         if (isActive != that.isActive) return false
         if (lastModified != that.lastModified) return false
         if (lastModifiedBy != that.lastModifiedBy) return false
@@ -266,7 +265,6 @@ class CommunicationOrganization implements Serializable {
         int result
         result = (id != null ? id.hashCode() : 0)
         result = 31 * result + (name != null ? name.hashCode() : 0)
-        result = 31 * result + (isRoot != null ? isRoot.hashCode() : 0)
         result = 31 * result + (isActive != null ? isActive.hashCode() : 0)
         result = 31 * result + (parent != null ? parent.hashCode() : 0)
         result = 31 * result + (description != null ? description.hashCode() : 0)
@@ -281,48 +279,62 @@ class CommunicationOrganization implements Serializable {
     }
 
 
-    public static CommunicationOrganization fetchById( Long id ) {
+    public static CommunicationOrganization fetchById(Long id) {
 
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationOrganization.fetchById' )
-                    .setLong( 'id', id ).list()[0]
+            query = session.getNamedQuery('CommunicationOrganization.fetchById')
+                    .setLong('id', id).list()[0]
 
         }
         return query
     }
 
 
-    public static CommunicationOrganization fetchByName( String name ) {
+    public static CommunicationOrganization fetchByName(String name) {
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationOrganization.fetchByName' ).setString( 'name', name ).list()[0]
+            query = session.getNamedQuery('CommunicationOrganization.fetchByName').setString('name', name).list()[0]
         }
         return query
     }
+
 
     public static List<CommunicationOrganization> fetchActive() {
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationOrganization.fetchActive' ).list()
+            query = session.getNamedQuery('CommunicationOrganization.fetchActive').list()
         }
         return query
     }
 
+
     public static CommunicationOrganization fetchRoot() {
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationOrganization.fetchRoot' ).list()[0]
+            query = session.getNamedQuery('CommunicationOrganization.fetchRoot').list()[0]
         }
         return query
     }
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+
+        def queryCriteria = CommunicationOrganization.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
+    }
+
 
     @Override
     public String toString() {
         return "CommunicationOrganization{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", isRoot=" + isRoot +
                 ", isActive=" + isActive +
                 ", parent=" + parent +
                 ", description='" + description + '\'' +

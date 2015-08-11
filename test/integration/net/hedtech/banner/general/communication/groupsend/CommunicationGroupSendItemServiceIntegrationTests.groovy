@@ -60,7 +60,7 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
         super.setUp()
 
         cleanUp()
-        organization = new CommunicationOrganization( name: "Test Org", isRoot: true )
+        organization = new CommunicationOrganization( name: "Test Org" )
         organization = communicationOrganizationService.create( organization ) as CommunicationOrganization
 
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )

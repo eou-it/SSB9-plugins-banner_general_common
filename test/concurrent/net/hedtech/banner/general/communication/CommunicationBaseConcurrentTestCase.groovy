@@ -203,7 +203,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     protected void setUpDefaultOrganization() {
         List organizations = communicationOrganizationService.list()
         if (organizations.size() == 0) {
-            defaultOrganization = new CommunicationOrganization(name: "Test Org", isRoot: true)
+            defaultOrganization = new CommunicationOrganization(name: "Test Org")
 
             def cma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',

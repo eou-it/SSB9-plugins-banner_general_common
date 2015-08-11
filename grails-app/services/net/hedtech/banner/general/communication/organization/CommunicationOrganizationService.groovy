@@ -29,9 +29,11 @@ class CommunicationOrganizationService extends ServiceBase {
             communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
         }
 
-        def existingOrg = CommunicationOrganization.findAll()
-        communicationOrganization.isRoot = (existingOrg.size() == 0)
-
+        def rootOrg = CommunicationOrganization.fetchRoot()
+        if (rootOrg == null)
+            communicationOrganization.parent = null
+        else if (communicationOrganization.parent == null)
+            throw new ApplicationException(CommunicationOrganization, "@@r1:onlyOneRootOrgCanExist")
 
         if (communicationOrganization.dateFormat != null) {
             try {
@@ -117,7 +119,7 @@ class CommunicationOrganizationService extends ServiceBase {
                 communicationOrganization.replyToMailboxAccountSettings.add(new CommunicationMailboxAccount())
             }
 
-            communicationOrganization.replyToMailboxAccountSettings[0].emailDisplayName =  replyToMailbox.emailDisplayName ? replyToMailbox.emailDisplayName : null
+            communicationOrganization.replyToMailboxAccountSettings[0].emailDisplayName = replyToMailbox.emailDisplayName ? replyToMailbox.emailDisplayName : null
             communicationOrganization.replyToMailboxAccountSettings[0].emailAddress = replyToMailbox.emailAddress
             communicationOrganization.replyToMailboxAccountSettings[0].clearTextPassword = replyToMailbox.clearTextPassword
             communicationOrganization.replyToMailboxAccountSettings[0].userName = replyToMailbox.userName
@@ -127,7 +129,7 @@ class CommunicationOrganizationService extends ServiceBase {
         if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName != null)) {
             throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
         }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null) ) {
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null)) {
             throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
         }
 

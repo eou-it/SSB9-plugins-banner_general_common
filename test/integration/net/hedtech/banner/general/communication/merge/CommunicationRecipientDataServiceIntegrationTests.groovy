@@ -132,7 +132,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         assertNotNull( validTemplate.id )
 
         /* Create an organization */
-        organization = new CommunicationOrganization( name: "Test Org", isRoot: true )
+        organization = new CommunicationOrganization( name: "Test Org" )
         def orgList = communicationOrganizationService.list()
         if (orgList.size() > 0) {
             organization = orgList[0]

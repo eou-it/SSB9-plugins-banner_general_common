@@ -16,6 +16,7 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegrationTestCase {
     def organization
 
+
     public void cleanUp() {
         def sql
         try {
@@ -28,13 +29,14 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         }
     }
 
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
         cleanUp()
         organization = newValidForCreateOrganization()
-        organization.save( failOnError: true, flush: true )
+        organization.save(failOnError: true, flush: true)
         assertNotNull organization.id
     }
 
@@ -47,12 +49,12 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testCreateCommunicationEmailServerProperties() {
-        def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive )
-        def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send )
+        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
+        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
         receiveProperties.organization = organization
-        receiveProperties.save( failOnError: true, flush: true )
+        receiveProperties.save(failOnError: true, flush: true)
         sendProperties.organization = organization
-        sendProperties.save( failOnError: true, flush: true )
+        sendProperties.save(failOnError: true, flush: true)
 
         // Assert domain values
         assertNotNull receiveProperties?.id
@@ -72,51 +74,51 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testUpdateCommunicationEmailServerProperties() {
-        def communicationEmailServerProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send )
+        def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
         communicationEmailServerProperties.organization = organization
-        communicationEmailServerProperties.save( failOnError: true, flush: true )
+        communicationEmailServerProperties.save(failOnError: true, flush: true)
 
         // Assert domain values
         assertNotNull communicationEmailServerProperties?.id
         def id = communicationEmailServerProperties.id
 
         // Find the domain
-        communicationEmailServerProperties = communicationEmailServerProperties.get( id )
+        communicationEmailServerProperties = communicationEmailServerProperties.get(id)
         assertNotNull communicationEmailServerProperties
 
         // Update domain values
         communicationEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.SSL
 
-        communicationEmailServerProperties.save( failOnError: true, flush: true )
+        communicationEmailServerProperties.save(failOnError: true, flush: true)
 
         // Find the updated domain
-        communicationEmailServerProperties = communicationEmailServerProperties.get( id )
+        communicationEmailServerProperties = communicationEmailServerProperties.get(id)
 
         // Assert updated domain values
         assertNotNull communicationEmailServerProperties?.id
-        assertEquals( CommunicationEmailServerConnectionSecurity.SSL, communicationEmailServerProperties.securityProtocol )
+        assertEquals(CommunicationEmailServerConnectionSecurity.SSL, communicationEmailServerProperties.securityProtocol)
 
     }
 
 
     @Test
     void testDeleteCommunicationEmailServerProperties() {
-        def communicationEmailServerProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive )
-        communicationEmailServerProperties.save( failOnError: true, flush: true )
+        def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
+        communicationEmailServerProperties.save(failOnError: true, flush: true)
 
         // Assert domain values
         assertNotNull communicationEmailServerProperties?.id
         def id = communicationEmailServerProperties.id
 
         // Find the domain
-        communicationEmailServerProperties = communicationEmailServerProperties.get( id )
+        communicationEmailServerProperties = communicationEmailServerProperties.get(id)
         assertNotNull communicationEmailServerProperties
 
         // Delete the domain
         communicationEmailServerProperties.delete()
 
         // Attempt to find the deleted domain
-        communicationEmailServerProperties = communicationEmailServerProperties.get( id )
+        communicationEmailServerProperties = communicationEmailServerProperties.get(id)
         assertNull communicationEmailServerProperties
     }
 
@@ -124,31 +126,31 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     @Test
     void testNullValidationFailure() {
         // Instantiate an empty domain
-        def communicationEmailServerProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive )
+        def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         // TODO: implement these assertions
-         // Assert for domain validation
-       // assertFalse "communicationEmailServerProperties should have failed null value validation", communicationEmailServerProperties.validate()
+        // Assert for domain validation
+        // assertFalse "communicationEmailServerProperties should have failed null value validation", communicationEmailServerProperties.validate()
 
         // Assert for specific field validation
-       /* assertErrorsFor communicationEmailServerProperties, 'nullable',
-                ['securityProtocol',
-                 'smtpHost',
-                 'smtpPort',
-                 'organization'
-                ]
-        assertNoErrorsFor communicationEmailServerProperties,
-                [
+        /* assertErrorsFor communicationEmailServerProperties, 'nullable',
+                 ['securityProtocol',
+                  'smtpHost',
+                  'smtpPort',
+                  'organization'
+                 ]
+         assertNoErrorsFor communicationEmailServerProperties,
+                 [
 
-                ]*/
+                 ]*/
     }
 
 
     @Test
     void testMaxSizeValidationFailure() {
-        def communicationEmailServerProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive )
+        def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
 
         // Set domain values to exceed maximum allowed length
-        communicationEmailServerProperties.host = """To Long""".padLeft( 2001 )
+        communicationEmailServerProperties.host = """To Long""".padLeft(2001)
 
         // Assert for domain
         assertFalse "communicationEmailServerProperties should have failed max size validation", communicationEmailServerProperties.validate()
@@ -163,25 +165,27 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testOptimisticLock() {
-        def communicationEmailServerProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive )
-        communicationEmailServerProperties.save( failOnError: true, flush: true )
+        def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
+        communicationEmailServerProperties.save(failOnError: true, flush: true)
         assertNotNull communicationEmailServerProperties?.id
 
         def sql
         try {
-            sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.executeUpdate( "UPDATE gcbsprp SET gcbsprp_version = 999 WHERE gcbsprp_surrogate_id = ?", [communicationEmailServerProperties.id] )
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.executeUpdate("UPDATE gcbsprp SET gcbsprp_version = 999 WHERE gcbsprp_surrogate_id = ?", [communicationEmailServerProperties.id])
         } finally {
             sql?.close()
         }
 
         // Update the entity
         communicationEmailServerProperties.dataOrigin = "OPT_TEST"
-        shouldFail( HibernateOptimisticLockingFailureException ) { communicationEmailServerProperties.save( failOnError: true, flush: true ) }
+        shouldFail(HibernateOptimisticLockingFailureException) {
+            communicationEmailServerProperties.save(failOnError: true, flush: true)
+        }
     }
 
 
-    private def newCommunicationEmailServerProperties( serverType ) {
+    private def newCommunicationEmailServerProperties(serverType) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
@@ -197,8 +201,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     private def newValidForCreateOrganization() {
         def organization = new CommunicationOrganization(
                 description: "Organization one",
-                name: "This is a description of Organization one",
-                isRoot: true
+                name: "This is a description of Organization one"
         )
     }
 }

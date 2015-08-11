@@ -36,12 +36,13 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         }
     }
 
+
     @Before
     public void setUp() {
         formContext = ['SELFSERVICE']
         super.setUp()
-        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
-        SecurityContextHolder.getContext().setAuthentication( auth )
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
         cleanUp()
     }
 
@@ -60,12 +61,12 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             CommunicationOrganization organization = new CommunicationOrganization();
             organization.name = "test"
             organization.description = "description"
-            CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
-            assertNotNull( createdOrganization )
+            CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+            assertNotNull(createdOrganization)
 
             long addedListCount = communicationOrganizationService.list().size()
-            assertEquals( originalListCount + 1, addedListCount )
-            assertTrue(organization.isRoot)
+            assertEquals(originalListCount + 1, addedListCount)
+            assertNull(organization.parent)
             assertFalse(organization.isActive)
         }
     }
@@ -76,15 +77,15 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
-        assertNotNull( createdOrganization )
-        assertEquals( "test", createdOrganization.name )
-        assertEquals( "description", createdOrganization.description )
-        assertTrue(createdOrganization.isRoot)
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("test", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertNull(createdOrganization.parent)
         assertFalse(createdOrganization.isActive)
 
-        CommunicationOrganization foundOrganization = CommunicationOrganization.findByName( "test" )
-        assertEquals( createdOrganization, foundOrganization )
+        CommunicationOrganization foundOrganization = CommunicationOrganization.findByName("test")
+        assertEquals(createdOrganization, foundOrganization)
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
         assertEquals(rootorg.id, createdOrganization.id)
@@ -93,10 +94,10 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         sameNameOrganization.name = "test"
         sameNameOrganization.description = "another organization with same name"
         try {
-            communicationOrganizationService.create( sameNameOrganization )
+            communicationOrganizationService.create(sameNameOrganization)
             Assert.fail "Expected sameNameOrganization to fail because of check constraint."
         } catch (ApplicationException e) {
-            assertTrue e.getMessage().contains( "ConstraintViolationException" )
+            assertTrue("Failed to get expected exception Only one root", e.getMessage().contains("onlyOneRootOrgCanExist"))
         }
 
     }
@@ -107,23 +108,23 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
-        assertNotNull( createdOrganization )
-        assertEquals( "test", createdOrganization.name )
-        assertEquals( "description", createdOrganization.description )
-        assertTrue(createdOrganization.isRoot)
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("test", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertNull(createdOrganization.parent)
 
-        CommunicationOrganization foundOrganization = CommunicationOrganization.findByName( "test" )
-        assertEquals( createdOrganization, foundOrganization )
+        CommunicationOrganization foundOrganization = CommunicationOrganization.findByName("test")
+        assertEquals(createdOrganization, foundOrganization)
 
         CommunicationOrganization sameNameOrganization = new CommunicationOrganization()
         sameNameOrganization.name = "testAnother"
         sameNameOrganization.description = "another organization that shouldnt be created"
         try {
-            communicationOrganizationService.create( sameNameOrganization )
+            communicationOrganizationService.create(sameNameOrganization)
             Assert.fail "Expected sameNameOrganization to fail because only one root org can exist."
         } catch (ApplicationException e) {
-            assertTrue( "Failed to get expected exception ConstraintViolationException", e.getMessage().contains( "ConstraintViolationException" ) )
+            assertTrue("Failed to get expected exception Only one root", e.getMessage().contains("onlyOneRootOrgCanExist"))
         }
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
@@ -134,11 +135,11 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         anotherOrganization.description = "another org description"
         anotherOrganization.setParent(rootorg.id)
         def anotherCreatedOrg = communicationOrganizationService.create(anotherOrganization)
-        assertEquals("testAnother",anotherCreatedOrg.name)
-        assertFalse(anotherCreatedOrg.isRoot)
+        assertEquals("testAnother", anotherCreatedOrg.name)
+        assertNotNull(anotherCreatedOrg.parent)
 
         def orgCount = communicationOrganizationService.list()
-        assertEquals(2,orgCount.size())
+        assertEquals(2, orgCount.size())
 
 
     }
@@ -148,15 +149,15 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     void testUpdate() {
         CommunicationOrganization organization1 = new CommunicationOrganization()
         organization1.name = "organization1"
-        organization1 = communicationOrganizationService.create( organization1 )
+        organization1 = communicationOrganizationService.create(organization1)
 
-        organization1 = CommunicationOrganization.get( organization1.getId() )
-        organization1.setName( "organization1 changed" )
-        organization1.setDescription( "description changed" )
-        organization1 = communicationOrganizationService.update( organization1 )
+        organization1 = CommunicationOrganization.get(organization1.getId())
+        organization1.setName("organization1 changed")
+        organization1.setDescription("description changed")
+        organization1 = communicationOrganizationService.update(organization1)
 
-        assertEquals( "organization1 changed", organization1.getName() )
-        assertEquals( "description changed", organization1.getDescription() )
+        assertEquals("organization1 changed", organization1.getName())
+        assertEquals("description changed", organization1.getDescription())
 
     }
 
@@ -166,8 +167,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         CommunicationOrganization organization1 = new CommunicationOrganization();
         organization1.name = "test"
         organization1.description = "description"
-        CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization1 )
-        assertNotNull( createdOrganization )
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization1)
+        assertNotNull(createdOrganization)
         Long id = createdOrganization.getId()
 
         long count = communicationOrganizationService.list().size()
@@ -175,39 +176,39 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         //set the flush mode to auto to prevent the write mode error during test
         //ssessionFactory.currentSession.flushMode = FlushMode.AUTO
         // Delete the domain
-        communicationOrganizationService.delete( createdOrganization )
+        communicationOrganizationService.delete(createdOrganization)
 
-        assertEquals( count - 1, communicationOrganizationService.list().size() )
+        assertEquals(count - 1, communicationOrganizationService.list().size())
 
         try {
-            assertNull( communicationOrganizationService.get( id ) )
+            assertNull(communicationOrganizationService.get(id))
             Assert.fail "Expected get by id to fail because does not exist."
         } catch (ApplicationException e) {
-            assertEquals( "NotFoundException", e.getType() )
+            assertEquals("NotFoundException", e.getType())
         }
     }
 
 
     @Test
     void testCreateWithServerSettings() {
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword )
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword(clearTextPassword)
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        def receiveProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Receive, organization )
-        def sendProperties = newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType.Send, organization )
-        def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
-        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
+        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
+        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
+        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
+        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
         organization.receiveEmailServerProperties = [receiveProperties]
         organization.sendEmailServerProperties = [sendProperties]
         organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
         organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
-        CommunicationOrganization createdOrganization = communicationOrganizationService.create( organization )
-        assertNotNull( createdOrganization )
-        assertEquals( "test", createdOrganization.name )
-        assertEquals( "description", createdOrganization.description )
-        assertEquals( encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
-        assertEquals( encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("test", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertEquals(encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
+        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
 
     }
 
@@ -215,43 +216,43 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testSetAndResetPassword() {
         def organization = new CommunicationOrganization()
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword )
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword(clearTextPassword)
         organization.name = "test"
         organization.description = "description"
-        def senderMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.Sender, organization )
-        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties( CommunicationMailboxAccountType.ReplyTo, organization )
+        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
+        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
         organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
         organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
-        def savedOrganization = communicationOrganizationService.create( organization )
+        def savedOrganization = communicationOrganizationService.create(organization)
         /* try to force a fetch */
-        def createdOrganization = CommunicationOrganization.findById( savedOrganization.id )
-        assertNotNull( createdOrganization )
-        assertEquals( "test", createdOrganization.name )
-        assertEquals( "description", createdOrganization.description )
-        assertEquals( "senderMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
-        assertEquals( "replyToMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        def createdOrganization = CommunicationOrganization.findById(savedOrganization.id)
+        assertNotNull(createdOrganization)
+        assertEquals("test", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertEquals("senderMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
+        assertEquals("replyToMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
 
         /* Do an update of senderMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
         createdOrganization.senderMailboxAccountSettings[0].userName = 'AstorPiazolla'
-        def updatedOrganization = communicationOrganizationService.update( createdOrganization )
-        assertNotNull( updatedOrganization.id )
-        assertEquals( encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        def updatedOrganization = communicationOrganizationService.update(createdOrganization)
+        assertNotNull(updatedOrganization.id)
+        assertEquals(encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
         /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
         createdOrganization.senderMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
-        updatedOrganization = communicationOrganizationService.update( createdOrganization )
-        assertNotNull( updatedOrganization.id )
-        assertTrue( "New encrypted password was not generated", encryptedPassword != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword )
+        updatedOrganization = communicationOrganizationService.update(createdOrganization)
+        assertNotNull(updatedOrganization.id)
+        assertTrue("New encrypted password was not generated", encryptedPassword != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
 
         /* Do an update of replyToMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
         createdOrganization.replyToMailboxAccountSettings[0].userName = 'DjangoRienhart'
-        updatedOrganization = communicationOrganizationService.update( createdOrganization )
-        assertNotNull( updatedOrganization.id )
-        assertEquals( encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        updatedOrganization = communicationOrganizationService.update(createdOrganization)
+        assertNotNull(updatedOrganization.id)
+        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
         /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
         createdOrganization.replyToMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
-        updatedOrganization = communicationOrganizationService.update( createdOrganization )
-        assertNotNull( updatedOrganization.id )
-        assertTrue( "New encrypted password was not generated", encryptedPassword != createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword )
+        updatedOrganization = communicationOrganizationService.update(createdOrganization)
+        assertNotNull(updatedOrganization.id)
+        assertTrue("New encrypted password was not generated", encryptedPassword != createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
 
     }
 
@@ -259,13 +260,13 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testPasswordEncryptAndDecrypt() {
 
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword )
-        def decryptedPassword = communicationOrganizationService.decryptMailBoxAccountPassword( encryptedPassword )
-        assertEquals( clearTextPassword, decryptedPassword )
+        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword(clearTextPassword)
+        def decryptedPassword = communicationOrganizationService.decryptMailBoxAccountPassword(encryptedPassword)
+        assertEquals(clearTextPassword, decryptedPassword)
     }
 
 
-    private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
+    private def newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType serverType, organization) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
                 host: "TTTTTTTTTT",
@@ -277,7 +278,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     }
 
 
-    private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
+    private
+    def newCommunicationMailBoxProperties(CommunicationMailboxAccountType communicationMailboxAccountType, organization) {
         def communicationMailboxAccount = new CommunicationMailboxAccount(
                 clearTextPassword: clearTextPassword,
                 organization: organization,
