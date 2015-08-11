@@ -32,8 +32,9 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     def communicationPopulationQueryService
     def communicationPopulationExecutionService
     def communicationFolderService
-    def communicationEmailTemplateService
     def communicationGroupSendCommunicationService
+    def communicationTemplateService
+    def communicationEmailTemplateService
 
     CommunicationOrganization organization
     BannerAuthenticationToken bannerAuthenticationToken
