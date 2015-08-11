@@ -84,7 +84,7 @@ class CommunicationGroupSendAccessControlIntegrationExample {
 //                    content: "test content is \$testDataField\$"
 //            )
 //            emailTemplate = communicationEmailTemplateService.create( emailTemplate )
-//            emailTemplate = communicationTemplateService.publish( emailTemplate )
+//            emailTemplate = communicationEmailTemplateService.publish( emailTemplate )
 //
 //            CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
 //                    populationId: populationSelectionListId,

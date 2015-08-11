@@ -196,7 +196,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         println "From: " + emailTemplate.validFrom
         println "To:" + emailTemplate.validTo
         assertNotNull( emailTemplate.folder.name )
-        def emailTemplates = CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId( folder.id )
+        def emailTemplates = CommunicationTemplate.fetchPublishedActivePublicByFolderId( folder.id )
         assertEquals( 1, emailTemplates.size() )
     }
 

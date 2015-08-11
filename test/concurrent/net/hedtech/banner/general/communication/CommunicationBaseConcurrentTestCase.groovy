@@ -279,7 +279,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                     content: "test content",
             )
             defaultEmailTemplate = communicationEmailTemplateService.create( defaultEmailTemplate )
-            defaultEmailTemplate = communicationTemplateService.publish( defaultEmailTemplate )
+            defaultEmailTemplate = communicationEmailTemplateService.publish( defaultEmailTemplate )
         }
     }
 

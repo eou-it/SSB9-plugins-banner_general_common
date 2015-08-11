@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests crud methods provided by communication template service.
  */
-class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationTestCase {
+class CommunicationTemplateServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_valid_emailTemplate_active = true
 
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
@@ -66,6 +66,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     def i_valid_folder_name2 = "Valid Folder2 Name"
 
 
+    def communicationTemplateService
     def communicationEmailTemplateService
     def selfServiceBannerAuthenticationProvider
 
@@ -109,7 +110,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Test
     void testCreateTemplate() {
-        def originalListCount = communicationEmailTemplateService.list().size()
+        def originalListCount = communicationTemplateService.list().size()
         def template = newValidForCreateEmailTemplate(folder1)
         def newTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
@@ -118,7 +119,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertNotNull(newTemplate.lastModifiedBy)
 
         // Now test findall
-        def foundEmailTemplates = communicationEmailTemplateService.findAll()
+        def foundEmailTemplates = communicationTemplateService.findAll()
         assertEquals(1, foundEmailTemplates.size())
     }
 
@@ -126,7 +127,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     //
     @Test
     void testPublishTemplate() {
-        def originalListCount = communicationEmailTemplateService.list().size()
+        def originalListCount = communicationTemplateService.list().size()
         def template = newValidForCreateEmailTemplate(folder1)
         def newTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
@@ -149,7 +150,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertTrue("Should be published",pubtemp.published)
 
         // Now test findall
-        def foundEmailTemplates = communicationEmailTemplateService.findAll()
+        def foundEmailTemplates = communicationTemplateService.findAll()
         assertEquals(1, foundEmailTemplates.size())
     }
 
@@ -180,18 +181,18 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Test
     void testDeleteTemplate() {
-        def originalListCount = communicationEmailTemplateService.list().size()
+        def originalListCount = communicationTemplateService.list().size()
         def template = newValidForCreateEmailTemplate(folder1)
         def createdTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the generated entity now has an id assigned
         assertNotNull createdTemplate.id
 
         //delete the newly created template and check if count is back to original
-        communicationEmailTemplateService.delete(createdTemplate)
+        communicationTemplateService.delete(createdTemplate)
         def createdId = createdTemplate.id
         shouldFail
                 {
-                    (communicationEmailTemplateService.get(createdId))
+                    (communicationTemplateService.get(createdId))
                 }
     }
 
@@ -246,7 +247,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         emailTemplate.published=true
         emailTemplate.save( failOnError: true, flush: true )
         assertNotNull( emailTemplate.folder.name )
-        def emailTemplates = communicationEmailTemplateService.fetchPublishedActivePublicByFolderId( folder1.id )
+        def emailTemplates = communicationTemplateService.fetchPublishedActivePublicByFolderId( folder1.id )
         assertEquals( 1, emailTemplates.size() )
     }
 

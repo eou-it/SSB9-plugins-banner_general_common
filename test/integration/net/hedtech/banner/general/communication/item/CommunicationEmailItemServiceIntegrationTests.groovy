@@ -68,14 +68,14 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     def i_valid_folder_name1 = "Valid Folder1 Name"
     def i_valid_folder_name2 = "Valid Folder2 Name"
 
-
-    def communicationEmailTemplateService
     def communicationEmailItemService
 
     def CommunicationFolder folder1
     def CommunicationFolder folder2
 
     def selfServiceBannerAuthenticationProvider
+    def communicationTemplateService
+    def communicationEmailTemplateService
 
 
     @Before
@@ -107,7 +107,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
     @Test
     void testCreateEmailItem() {
-        def originalListCount = communicationEmailTemplateService.list().size()
+        def originalListCount = communicationTemplateService.list().size()
         def template = newValidForCreateEmailTemplate( folder1 )
         def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
@@ -116,7 +116,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
         assertNotNull( newTemplate.lastModifiedBy )
 
         // Now test findall
-        def foundEmailTemplates = communicationEmailTemplateService.findAll()
+        def foundEmailTemplates = communicationTemplateService.findAll()
         assertEquals( 1, foundEmailTemplates.size() )
 
         def newEmailItem = communicationEmailItemService.create( [domainModel: newValidForCreateEmailItem()] )
@@ -127,7 +127,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
 @Test
    void testDeleteEmailItem() {
-       def originalListCount = communicationEmailTemplateService.list().size()
+       def originalListCount = communicationTemplateService.list().size()
        def template = newValidForCreateEmailTemplate( folder1 )
        def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
        //Test if the service set the created date, and the infrastructure set the modifiedby and date
@@ -136,7 +136,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
        assertNotNull( newTemplate.lastModifiedBy )
 
        // Now test findall
-       def foundEmailTemplates = communicationEmailTemplateService.findAll()
+       def foundEmailTemplates = communicationTemplateService.findAll()
        assertEquals( 1, foundEmailTemplates.size() )
 
        def newEmailItem = communicationEmailItemService.create( [domainModel: newValidForCreateEmailItem()] )

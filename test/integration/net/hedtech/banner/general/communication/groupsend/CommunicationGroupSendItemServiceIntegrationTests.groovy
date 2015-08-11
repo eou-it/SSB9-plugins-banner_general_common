@@ -31,6 +31,7 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
     def communicationPopulationQueryService
     def communicationPopulationExecutionService
     def communicationFolderService
+    def communicationTemplateService
     def communicationEmailTemplateService
 
     CommunicationOrganization organization

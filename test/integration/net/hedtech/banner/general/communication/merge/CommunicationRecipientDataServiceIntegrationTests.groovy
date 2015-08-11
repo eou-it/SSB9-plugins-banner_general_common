@@ -22,7 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationRecipientDataService
-    def communicationEmailTemplateService
     def communicationTemplateMergeService
     def communicationPopulationQueryService
     def communicationPopulationExecutionService
@@ -31,7 +30,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationFieldService
     def selfServiceBannerAuthenticationProvider
     def communicationOrganizationService
-
+    def communicationTemplateService
+    def communicationEmailTemplateService
 
     def CommunicationFolder validFolder
     def CommunicationEmailTemplate emailTemplate

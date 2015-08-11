@@ -32,6 +32,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def communicationFieldCalculationService
     def communicationRecipientDataService
     def communicationOrganizationService
+    def communicationTemplateService
     def communicationEmailTemplateService
     def selfServiceBannerAuthenticationProvider
 

@@ -20,7 +20,7 @@ class CommunicationTemplateService extends ServiceBase {
             throw ExceptionFactory.createApplicationException( CommunicationTemplate, "operation.not.authorized" )
         }
 
-        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
+        def template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap)
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
         template.createdBy = CommunicationCommonUtility.getUserOracleUserName()
@@ -32,7 +32,7 @@ class CommunicationTemplateService extends ServiceBase {
 
     def preUpdate( domainModelOrMap ) {
 
-        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
+        def template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap)
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
         def oldTemplate = CommunicationTemplate.get(template?.id)
@@ -52,7 +52,7 @@ class CommunicationTemplateService extends ServiceBase {
      * @return
      */
     def publish( domainModelOrMap ) {
-        CommunicationTemplate template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationTemplate
+        def template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap)
         if (!template.published) {
             template.setPublished( true )
             template = this.update( template )
@@ -74,7 +74,7 @@ class CommunicationTemplateService extends ServiceBase {
     public List<CommunicationTemplate> fetchPublishedActivePublicByFolderId( Long folderId ) {
 
         def communicationTemplateList = CommunicationEmailTemplate.withSession { session ->
-            org.hibernate.Query query = session.getNamedQuery( 'CommunicationEmailTemplate.fetchPublishedActivePublicByFolderId' )
+            org.hibernate.Query query = session.getNamedQuery( 'CommunicationTemplate.fetchPublishedActivePublicByFolderId' )
                     .setLong( 'folderId', folderId ); query.list()
         }
         return communicationTemplateList
