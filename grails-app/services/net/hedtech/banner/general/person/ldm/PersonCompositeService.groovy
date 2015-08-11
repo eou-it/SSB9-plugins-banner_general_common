@@ -495,8 +495,6 @@ class PersonCompositeService extends LdmService {
 
 
     private List<Integer> searchPerson(Map params, def name) {
-        def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
-        def sessionFactory = ctx.sessionFactory
 
         List<Integer> personList = []
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_MATCH_RULE)
@@ -918,7 +916,7 @@ class PersonCompositeService extends LdmService {
             def name = new Name(PersonIdentificationNameCurrent.fetchByPidm(identification.pidm), currentRecord)
             name.setNameType("Primary")
             currentRecord.names << name
-            domainIds << identification.id
+            domainIds << name.personName.id
             currentRecord.metadata = new Metadata(name.personName.dataOrigin)
             persons.put(identification.pidm, currentRecord)
         }
@@ -933,7 +931,7 @@ class PersonCompositeService extends LdmService {
             }
         }
         persons = buildPersonCredentials(credentialsMap, persons, personIdentificationList)
-        persons = buildPersonGuids(domainIds, persons)
+        persons = buildPersonGuids(domainIds,persons)
         persons = buildPersonAddresses(personAddressList, persons)
         persons = buildPersonTelephones(personTelephoneList, persons)
         persons = buildPersonEmails(personEmailList, persons)
@@ -1047,12 +1045,23 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonGuids(List domainIds, Map persons) {
+        def cnt = 0
         def pidmPartitions = SystemUtility.splitList(domainIds, 1000)
         pidmPartitions.each { domains ->
             GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(ldmName, domains).each { guid ->
-                Person currentRecord = persons.get(guid.domainKey.toInteger())
-                currentRecord.guid = guid.guid
-                persons.put(guid.domainKey.toInteger(), currentRecord)
+                cnt += 1
+                Person currentRecord
+                try {
+                    currentRecord = persons.get(guid.domainKey.toInteger())
+                    currentRecord.guid = guid.guid
+                    persons.put(guid.domainKey.toInteger(), currentRecord)
+                }
+                catch(ApplicationException ae){
+                    println "AE ${cnt} Current record in failure guid record: ${guid} current record: ${currentRecord}  "
+                }
+                catch(Exception ae){
+                    println "Exception ${cnt} Current record in failure guid record: ${guid} current record: ${currentRecord}  "
+                }
             }
         }
         persons

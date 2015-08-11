@@ -1028,6 +1028,61 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+    @Test
+    void testListapiWithValidPersonfilterAsGuidLargeListsNoPagination() {
+        // remove if pop sel exists
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+        }
+        finally {
+            sql?.close()
+        }
+        assertTrue insertCount > 500
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertTrue persextract.size() > 500
+
+        // set up params for call
+        def persons = []
+          String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+        // get first page
+        def params = [personFilter: guid2]
+        persons = personCompositeService.list(params)
+        assertEquals 500, persons.size()
+
+    }
+
 
     @Test
     void testListapiWithValidPersonfilterAsGuidAndLargePaginationAndDetailedPerson() {
