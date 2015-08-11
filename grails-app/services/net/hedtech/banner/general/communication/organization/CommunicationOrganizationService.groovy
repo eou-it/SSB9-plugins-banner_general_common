@@ -33,7 +33,7 @@ class CommunicationOrganizationService extends ServiceBase {
         if (rootOrg == null)
             communicationOrganization.parent = null
         else if (communicationOrganization.parent == null)
-            throw new ApplicationException(CommunicationOrganization, "@@r1:onlyOneRootOrgCanExist")
+            communicationOrganization.parent = rootOrg.id
 
         if (communicationOrganization.dateFormat != null) {
             try {

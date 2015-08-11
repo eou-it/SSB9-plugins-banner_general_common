@@ -324,6 +324,7 @@ class CommunicationOrganization implements Serializable {
         def queryCriteria = CommunicationOrganization.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            isNotNull("parent")
             order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results

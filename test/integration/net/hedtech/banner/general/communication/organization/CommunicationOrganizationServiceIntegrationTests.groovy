@@ -95,9 +95,9 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         sameNameOrganization.description = "another organization with same name"
         try {
             communicationOrganizationService.create(sameNameOrganization)
-            Assert.fail "Expected sameNameOrganization to fail because of check constraint."
+            Assert.fail "Expected sameNameOrganization to fail because of unique name."
         } catch (ApplicationException e) {
-            assertTrue("Failed to get expected exception Only one root", e.getMessage().contains("onlyOneRootOrgCanExist"))
+            assertTrue("Failed to get expected exception key index constraint violation exception", e.getMessage().contains("GCRORAN_KEY_INDEX"))
         }
 
     }
@@ -120,26 +120,23 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         CommunicationOrganization sameNameOrganization = new CommunicationOrganization()
         sameNameOrganization.name = "testAnother"
         sameNameOrganization.description = "another organization that shouldnt be created"
-        try {
-            communicationOrganizationService.create(sameNameOrganization)
-            Assert.fail "Expected sameNameOrganization to fail because only one root org can exist."
-        } catch (ApplicationException e) {
-            assertTrue("Failed to get expected exception Only one root", e.getMessage().contains("onlyOneRootOrgCanExist"))
-        }
+        sameNameOrganization = communicationOrganizationService.create(sameNameOrganization)
+        assertEquals(foundOrganization.id,sameNameOrganization.parent );
+
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
         assertEquals(rootorg.id, createdOrganization.id)
 
         CommunicationOrganization anotherOrganization = new CommunicationOrganization()
-        anotherOrganization.name = "testAnother"
+        anotherOrganization.name = "testAnotherOne"
         anotherOrganization.description = "another org description"
         anotherOrganization.setParent(rootorg.id)
         def anotherCreatedOrg = communicationOrganizationService.create(anotherOrganization)
-        assertEquals("testAnother", anotherCreatedOrg.name)
+        assertEquals("testAnotherOne", anotherCreatedOrg.name)
         assertNotNull(anotherCreatedOrg.parent)
 
         def orgCount = communicationOrganizationService.list()
-        assertEquals(2, orgCount.size())
+        assertEquals(3, orgCount.size())
 
 
     }
