@@ -8,7 +8,6 @@ import com.google.i18n.phonenumbers.Phonenumber
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.commonmatching.CommonMatchingPersonResult
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
@@ -24,8 +23,6 @@ import net.hedtech.banner.general.system.ldm.v1.MaritalStatusDetail
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.RaceDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
@@ -506,17 +503,17 @@ class PersonCompositeService extends LdmService {
             credential.credentialType == "Banner ID"
         }
 
-        def emailInstitutionRuleValue  = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Institution")[0]?.value
-        def emailPersonalRuleValue  = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Personal")[0]?.value
+        def emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Institution")[0]?.value
+        def emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Personal")[0]?.value
         def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, "Work")[0]?.value
-        def emailInstitution = params.emails.find { email -> email.emailType  == emailInstitutionRuleValue }
-        def emailPersonal = params.emails.find { email -> email.emailType   == emailPersonalRuleValue }
-        def emailWork = params.emails.find { email -> email.emailType  == emailWorkRuleValue }
+        def emailInstitution = params.emails.find { email -> email.emailType == emailInstitutionRuleValue }
+        def emailPersonal = params.emails.find { email -> email.emailType == emailPersonalRuleValue }
+        def emailWork = params.emails.find { email -> email.emailType == emailWorkRuleValue }
 
 
         Date dob = null
         if (params?.dateOfBirth) {
-           dob = LdmService.convertString2Date(params?.dateOfBirth)
+            dob = LdmService.convertString2Date(params?.dateOfBirth)
         }
 
         Boolean matchFound = false
@@ -931,12 +928,12 @@ class PersonCompositeService extends LdmService {
             }
         }
         persons = buildPersonCredentials(credentialsMap, persons, personIdentificationList)
-        persons = buildPersonGuids(domainIds,persons)
+        persons = buildPersonGuids(domainIds, persons)
         persons = buildPersonAddresses(personAddressList, persons)
         persons = buildPersonTelephones(personTelephoneList, persons)
         persons = buildPersonEmails(personEmailList, persons)
         persons = buildPersonRaces(personRaceList, persons)
-        persons = buildPersonRoles(persons, studentRole,pidmLists)
+        persons = buildPersonRoles(persons, studentRole, pidmLists)
 
         persons // Map of person objects with pidm as index.
     }
@@ -1045,23 +1042,13 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonGuids(List domainIds, Map persons) {
-        def cnt = 0
         def pidmPartitions = SystemUtility.splitList(domainIds, 1000)
         pidmPartitions.each { domains ->
             GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(ldmName, domains).each { guid ->
-                cnt += 1
                 Person currentRecord
-                try {
-                    currentRecord = persons.get(guid.domainKey.toInteger())
-                    currentRecord.guid = guid.guid
-                    persons.put(guid.domainKey.toInteger(), currentRecord)
-                }
-                catch(ApplicationException ae){
-                    println "AE ${cnt} Current record in failure guid record: ${guid} current record: ${currentRecord}  "
-                }
-                catch(Exception ae){
-                    println "Exception ${cnt} Current record in failure guid record: ${guid} current record: ${currentRecord}  "
-                }
+                currentRecord = persons.get(guid.domainKey.toInteger())
+                currentRecord.guid = guid.guid
+                persons.put(guid.domainKey.toInteger(), currentRecord)
             }
         }
         persons
@@ -1085,10 +1072,9 @@ class PersonCompositeService extends LdmService {
     def buildPersonRoles(Map persons, Boolean studentRole = false, List pidmList = []) {
         def pidms = []
         def pidmPartitions = []
-        if ( pidmList?.size()){
+        if (pidmList?.size()) {
             pidmPartitions.addAll(pidmList)
-        }
-        else {
+        } else {
             persons.each { key, value ->
                 pidms << key
             }
