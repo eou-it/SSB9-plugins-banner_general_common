@@ -1401,7 +1401,7 @@ class PersonCompositeService extends LdmService {
                     } else {
                         def phoneDecorator = new Phone(currentPhone)
                         phoneDecorator.phoneType = activePhone.phoneType
-                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ? + currentPhone.countryPhone : "") +
+                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?:"") +
                                 (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
                         phones << phoneDecorator
                         newPhones.remove(activePhone)
@@ -1416,7 +1416,7 @@ class PersonCompositeService extends LdmService {
         createPhones(pidm, metadata, newPhones).each { currentPhone ->
             def phoneDecorator = new Phone(currentPhone)
             phoneDecorator.phoneType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType.code)?.translationValue
-            phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ? "+" + currentPhone.countryPhone : "") +
+            phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") +
                     (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
             phones << phoneDecorator
         }
