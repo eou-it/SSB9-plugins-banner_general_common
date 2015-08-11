@@ -1401,7 +1401,7 @@ class PersonCompositeService extends LdmService {
                     } else {
                         def phoneDecorator = new Phone(currentPhone)
                         phoneDecorator.phoneType = activePhone.phoneType
-                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ? "+" + currentPhone.countryPhone : "") +
+                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ? + currentPhone.countryPhone : "") +
                                 (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
                         phones << phoneDecorator
                         newPhones.remove(activePhone)
