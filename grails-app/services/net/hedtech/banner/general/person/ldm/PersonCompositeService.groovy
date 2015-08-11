@@ -106,6 +106,8 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def list(params) {
+        log.trace "list:Begin"
+        log.debug "Request parameters: ${params}"
         def pidms = []
         def total = 0
         def resultList = [:]
@@ -218,6 +220,7 @@ class PersonCompositeService extends LdmService {
         catch (ClassNotFoundException e) {
             resultList = resultList.values()
         }
+        log.trace "list:End"
         resultList
     }
 
@@ -1091,7 +1094,7 @@ class PersonCompositeService extends LdmService {
                     !(currentRecord.phones.contains { it.phoneType == rule?.translationValue })) {
                 def phone = new Phone(activePhone)
                 phone.phoneType = rule?.translationValue
-                phone.phoneNumberDetail = formatPhoneNumber((phone.countryPhone ? "+" + phone.countryPhone : "") + (phone.phoneArea ?: "") + (phone.phoneNumber ?: ""))
+                phone.phoneNumberDetail = formatPhoneNumber((phone.countryPhone ?: "") + (phone.phoneArea ?: "") + (phone.phoneNumber ?: ""))
                 currentRecord.phones << phone
             }
             persons.put(activePhone.pidm, currentRecord)
@@ -1362,7 +1365,7 @@ class PersonCompositeService extends LdmService {
 
     private updatePhones(def pidm, Map metadata, List<Map> newPhones) {
         def phones = []
-        List<PersonTelephone> personTelephoneList = PersonTelephone.fetchActiveTelephoneByPidmInList([pidm]).each { currentPhone ->
+        PersonTelephone.fetchActiveTelephoneByPidmInList([pidm]).each { currentPhone ->
             def thisType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType?.code)?.translationValue
             def activePhones = newPhones.findAll { it ->
                 it.phoneType == thisType
@@ -1482,32 +1485,51 @@ class PersonCompositeService extends LdmService {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
             parsedResult = phoneUtil.parse(phoneNumber, countryLdmCode?.scodIso ?: 'US')
             if (phoneUtil.isValidNumber(parsedResult)) {
-                String nationalNumber = parsedResult.getNationalNumber()
-                def nationalDestinationCodeLength = phoneUtil.getLengthOfNationalDestinationCode(parsedResult);
-                if (nationalDestinationCodeLength > 0) {
-                    parsedNumber.put('phoneArea', nationalNumber[0..(nationalDestinationCodeLength - 1)])
-                    parsedNumber.put('phoneNumber', nationalNumber[nationalDestinationCodeLength..-1])
-                } else {
-                    parsedNumber.put('phoneNumber', nationalNumber)
-                }
-                parsedNumber.put('countryPhone', parsedResult.getCountryCode())
+                setValidPhoneNumber(parsedNumber, parsedResult, phoneUtil)
             } else {
-                if (phoneNumber.length() < 12) {
-                    parsedNumber.put('phoneNumber', phoneNumber)
-                }
-                else {
-                    throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("phoneNumber.malformed",[phoneNumber]))
-                }
+                setInvalidPhoneNumber(parsedNumber, phoneNumber)
             }
         }
         catch (Exception e) {
-            log.debug e.toString()
-            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("phoneNumber.malformed",[phoneNumber]))
-
+            setInvalidPhoneNumber(parsedNumber, phoneNumber)
         }
+
+        parsedNumber
+    }
+
+
+    private Map setValidPhoneNumber(Map parsedNumber, Phonenumber.PhoneNumber parsedResult, PhoneNumberUtil phoneUtil) {
+        String nationalNumber = parsedResult.getNationalNumber()
+        def nationalDestinationCodeLength = phoneUtil.getLengthOfNationalDestinationCode(parsedResult);
+        if (nationalDestinationCodeLength > 0) {
+            parsedNumber.put('phoneArea', nationalNumber[0..(nationalDestinationCodeLength - 1)])
+            parsedNumber.put('phoneNumber', nationalNumber[nationalDestinationCodeLength..-1])
+        } else {
+            parsedNumber.put('phoneNumber', nationalNumber)
+        }
+        parsedNumber.put('countryPhone', parsedResult.getCountryCode())
+
         if (parsedResult.getExtension()) {
             parsedNumber.put('phoneExtension', parsedResult.getExtension())
         }
+
+        parsedNumber
+    }
+
+
+    private Map setInvalidPhoneNumber(Map parsedNumber, String phoneNumber) {
+        if (phoneNumber.length() <= 12) {
+            parsedNumber.put('phoneNumber', phoneNumber)
+        } else {
+            parsedNumber.put('countryPhone', phoneNumber.substring(0, 4))
+            parsedNumber.put('phoneArea', phoneNumber.substring(4, 10))
+            String number = phoneNumber.substring(10, phoneNumber.length())
+            if (number.length() > 12) {
+                number = number.substring(0, 12)
+            }
+            parsedNumber.put('phoneNumber', number)
+        }
+
         parsedNumber
     }
 
@@ -1523,14 +1545,15 @@ class PersonCompositeService extends LdmService {
         try {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
             parsedResult = phoneUtil.parse(phoneNumber, countryLdmCode?.scodIso ?: 'US')
-            log.debug "AfterPhone:" + phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
-            return phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+            if (phoneUtil.isValidNumber(parsedResult)) {
+                log.debug "AfterPhone:" + phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+                return phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
+            } else {
+                return phoneNumber
+            }
         }
         catch (Exception e) {
-            log.debug e.toString()
             return phoneNumber
-            //throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("phoneNumber.malformed",[]))
-
         }
     }
 
