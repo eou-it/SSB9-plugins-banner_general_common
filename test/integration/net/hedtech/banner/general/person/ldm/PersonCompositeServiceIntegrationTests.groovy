@@ -696,7 +696,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     //PUT- Person Update API
     @Test
-    void testUpdatePersonWithInvalidPhoneNumber() {
+    void testUpdatePersonWithExisitingInvalidPhoneNumber() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
         Map content_create = newPersonRequestWithInvalidShortPhoneNumber()
@@ -729,6 +729,52 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_phone_type_residence, o_phone_type_residence_create.phoneType
         assertEquals i_success_phone_extension, o_phone_type_residence_create.phoneExtension
         assertEquals i_succes_invalid_phone_number_short4, o_phone_type_residence_create.phoneNumberDetail
+
+        //update the phone number
+        Map content_update = newPersonRequestWithInvalidLongPhoneNumber()
+        content_update.put("id", o_success_person_create.guid)
+
+        def o_success_person_update = personCompositeService.update(content_update)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals  o_success_person_create.guid, o_success_person_update.guid
+
+        def o_phone_type_mobile_update = o_success_person_update.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_update
+        assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long1, o_phone_type_mobile_update.phoneNumberDetail
+
+        def o_phone_type_home_update = o_success_person_update.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_update
+        assertEquals i_success_phone_type_home, o_phone_type_home_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_home_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home_update.phoneNumberDetail
+
+        def o_phone_type_work_update = o_success_person_update.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_update
+        assertEquals i_success_phone_type_work, o_phone_type_work_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_work_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long3, o_phone_type_work_update.phoneNumberDetail
+
+        def o_phone_type_residence_update = o_success_person_update.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_update
+        assertEquals i_success_phone_type_residence, o_phone_type_residence_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_residence_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence_update.phoneNumberDetail
+    }
+
+    //PUT- Person Update API
+    @Test
+    void testUpdatePersonWithNewInvalidPhoneNumber() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        Map content_create= newPersonWithAddressRequest()
+        def o_success_person_create = personCompositeService.create(content_create)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
 
         //update the phone number
         Map content_update = newPersonRequestWithInvalidLongPhoneNumber()

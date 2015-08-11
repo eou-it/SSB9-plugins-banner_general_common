@@ -343,7 +343,7 @@ class PersonCompositeService extends LdmService {
         def addresses = createAddresses(newPersonIdentificationName.pidm, metadata,
                 person.addresses instanceof List ? person.addresses : [])
         persons = buildPersonAddresses(addresses, persons)
-        def phones = createPhones(newPersonIdentificationName.pidm, metadata,
+        List<PersonTelephone> phones = createPhones(newPersonIdentificationName.pidm, metadata,
                 person.phones instanceof List ? person.phones : [])
         persons = buildPersonTelephones(phones, persons)
         def emails = createPersonEmails(newPersonIdentificationName.pidm, metadata,
@@ -494,8 +494,9 @@ class PersonCompositeService extends LdmService {
 
         //update Telephones
         def phones = []
-        if (person.containsKey('phones') && person.phones instanceof List)
+        if (person.containsKey('phones') && person.phones instanceof List) {
             phones = updatePhones(pidmToUpdate, person.metadata, person.phones)
+        }
 
         def emails = []
 
@@ -509,8 +510,9 @@ class PersonCompositeService extends LdmService {
         personMap.put(pidmToUpdate, personDecorator)
         if (addresses.size() == 0)
             personMap = buildPersonAddresses(PersonAddress.fetchActiveAddressesByPidmInList([pidmToUpdate]), personMap)
-        if (phones.size() == 0)
+        if (phones.size() == 0) {
             personMap = buildPersonTelephones(PersonTelephone.fetchActiveTelephoneByPidmInList([pidmToUpdate]), personMap)
+        }
         //update Emails
         if (person.containsKey('emails') && person.emails instanceof List) {
             emails = updatePersonEmails(pidmToUpdate, person.metadata, person.emails)
@@ -802,8 +804,8 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    def createPhones(def pidm, Map metadata, List<Map> newPhones) {
-        def phones = []
+    List<PersonTelephone> createPhones(def pidm, Map metadata, List<Map> newPhones) {
+        List<PersonTelephone> phones = []
         newPhones?.each { activePhone ->
             if (activePhone instanceof Map) {
                 IntegrationConfiguration rule = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_PHONE_TYPE, activePhone.phoneType)
@@ -1401,8 +1403,7 @@ class PersonCompositeService extends LdmService {
                     } else {
                         def phoneDecorator = new Phone(currentPhone)
                         phoneDecorator.phoneType = activePhone.phoneType
-                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?:"") +
-                                (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
+                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") + (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
                         phones << phoneDecorator
                         newPhones.remove(activePhone)
                     }
@@ -1416,8 +1417,7 @@ class PersonCompositeService extends LdmService {
         createPhones(pidm, metadata, newPhones).each { currentPhone ->
             def phoneDecorator = new Phone(currentPhone)
             phoneDecorator.phoneType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType.code)?.translationValue
-            phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") +
-                    (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
+            phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") + (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
             phones << phoneDecorator
         }
         phones
@@ -1474,16 +1474,11 @@ class PersonCompositeService extends LdmService {
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     Map parsePhoneNumber(String phoneNumber) {
         Map parsedNumber = [:]
-        List<InstitutionalDescription> institutions = InstitutionalDescription.list()
-        def institution = institutions.size() > 0 ? institutions[0] : null
-        Nation countryLdmCode
-        if (institution?.natnCode) {
-            countryLdmCode = Nation.findByCode(institution.natnCode)
-        }
+
         Phonenumber.PhoneNumber parsedResult
         try {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
-            parsedResult = phoneUtil.parse(phoneNumber, countryLdmCode?.scodIso ?: 'US')
+            parsedResult = phoneUtil.parse(phoneNumber, getDefaultCountryCode())
             if (phoneUtil.isValidNumber(parsedResult)) {
                 setValidPhoneNumber(parsedNumber, parsedResult, phoneUtil)
             } else {
@@ -1498,53 +1493,58 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private Map setValidPhoneNumber(Map parsedNumber, Phonenumber.PhoneNumber parsedResult, PhoneNumberUtil phoneUtil) {
-        String nationalNumber = parsedResult.getNationalNumber()
-        def nationalDestinationCodeLength = phoneUtil.getLengthOfNationalDestinationCode(parsedResult);
-        if (nationalDestinationCodeLength > 0) {
-            parsedNumber.put('phoneArea', nationalNumber[0..(nationalDestinationCodeLength - 1)])
-            parsedNumber.put('phoneNumber', nationalNumber[nationalDestinationCodeLength..-1])
-        } else {
-            parsedNumber.put('phoneNumber', nationalNumber)
+    private String getDefaultCountryCode() {
+        List<InstitutionalDescription> institutions = InstitutionalDescription.list()
+        InstitutionalDescription institution = institutions.size() > 0 ? institutions[0] : null
+        Nation nation
+        if (institution?.natnCode) {
+            nation = Nation.findByCode(institution.natnCode)
         }
-        parsedNumber.put('countryPhone', parsedResult.getCountryCode())
-
-        if (parsedResult.getExtension()) {
-            parsedNumber.put('phoneExtension', parsedResult.getExtension())
-        }
-
-        parsedNumber
+        return nation?.scodIso ?: 'US'
     }
 
 
-    private Map setInvalidPhoneNumber(Map parsedNumber, String phoneNumber) {
-        if (phoneNumber.length() <= 12) {
-            parsedNumber.put('phoneNumber', phoneNumber)
+    private Map setValidPhoneNumber(Map phoneNumberParts, Phonenumber.PhoneNumber parsedResult, PhoneNumberUtil phoneUtil) {
+        String nationalNumber = parsedResult.getNationalNumber()
+        def nationalDestinationCodeLength = phoneUtil.getLengthOfNationalDestinationCode(parsedResult);
+        if (nationalDestinationCodeLength > 0) {
+            phoneNumberParts.put('phoneArea', nationalNumber[0..(nationalDestinationCodeLength - 1)])
+            phoneNumberParts.put('phoneNumber', nationalNumber[nationalDestinationCodeLength..-1])
         } else {
-            parsedNumber.put('countryPhone', phoneNumber.substring(0, 4))
-            parsedNumber.put('phoneArea', phoneNumber.substring(4, 10))
+            phoneNumberParts.put('phoneNumber', nationalNumber)
+        }
+        phoneNumberParts.put('countryPhone', parsedResult.getCountryCode())
+
+        if (parsedResult.getExtension()) {
+            phoneNumberParts.put('phoneExtension', parsedResult.getExtension())
+        }
+
+        phoneNumberParts
+    }
+
+
+    private Map setInvalidPhoneNumber(Map phoneNumberParts, String phoneNumber) {
+        if (phoneNumber.length() <= 12) {
+            phoneNumberParts.put('phoneNumber', phoneNumber)
+        } else {
+            phoneNumberParts.put('countryPhone', phoneNumber.substring(0, 4))
+            phoneNumberParts.put('phoneArea', phoneNumber.substring(4, 10))
             String number = phoneNumber.substring(10, phoneNumber.length())
             if (number.length() > 12) {
                 number = number.substring(0, 12)
             }
-            parsedNumber.put('phoneNumber', number)
+            phoneNumberParts.put('phoneNumber', number)
         }
 
-        parsedNumber
+        phoneNumberParts
     }
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     String formatPhoneNumber(String phoneNumber) {
-        List<InstitutionalDescription> institutions = InstitutionalDescription.list()
-        def institution = institutions.size() > 0 ? institutions[0] : null
-        Nation countryLdmCode
-        if (institution?.natnCode) {
-            countryLdmCode = Nation.findByCode(institution.natnCode)
-        }
         Phonenumber.PhoneNumber parsedResult
         try {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
-            parsedResult = phoneUtil.parse(phoneNumber, countryLdmCode?.scodIso ?: 'US')
+            parsedResult = phoneUtil.parse(phoneNumber, getDefaultCountryCode())
             if (phoneUtil.isValidNumber(parsedResult)) {
                 log.debug "AfterPhone:" + phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
                 return phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
