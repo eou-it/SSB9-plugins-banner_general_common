@@ -35,6 +35,8 @@ class CommunicationOrganizationService extends ServiceBase {
         else if (communicationOrganization.parent == null)
             communicationOrganization.parent = rootOrg.id
 
+        communicationOrganization.isActive = communicationOrganization.isActive ?: false;
+
         if (communicationOrganization.dateFormat != null) {
             try {
                 def datestring = validateDateFormat(communicationOrganization.dateFormat)
@@ -140,6 +142,8 @@ class CommunicationOrganizationService extends ServiceBase {
         if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
             communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
         }
+
+        communicationOrganization.isActive = communicationOrganization.isActive ?: false;
 
         if (communicationOrganization.dateFormat != null) {
             try {
