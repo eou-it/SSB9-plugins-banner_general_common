@@ -117,7 +117,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_succes_invalid_phone_number_short2 = "+91-234-5678"
     def i_succes_invalid_phone_number_short3 = "123 456 78"
     def i_succes_invalid_phone_number_short4 = "+91 234 5678"
-    def i_succes_invalid_phone_number_long1 = "+441234567890123"
+    def i_succes_invalid_phone_number_long1 = "+4412345678901235624351345314654756835651324135234647"
     def i_succes_invalid_phone_number_long2 = "+01-123-456-7890"
     def i_succes_invalid_phone_number_long3 = "123 456 7890123"
     def i_succes_invalid_phone_number_long4 = "+01 123 456 7890"
@@ -636,18 +636,24 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile.phoneExtension
         assertEquals i_succes_invalid_phone_number_short1, o_phone_type_mobile.phoneNumberDetail
+        String phoneNumberMobile = (o_phone_type_mobile.countryPhone ?: "") + (o_phone_type_mobile.phoneArea ?: "") + (o_phone_type_mobile.phoneNumber ?: "")
+        assertEquals phoneNumberMobile, o_phone_type_mobile.phoneNumberDetail
 
         def o_phone_type_home = o_success_person_create.phones.find { it.phoneType == "Home" }
         assertNotNull o_phone_type_home
         assertEquals i_success_phone_type_home, o_phone_type_home.phoneType
         assertEquals i_success_phone_extension, o_phone_type_home.phoneExtension
         assertEquals i_succes_invalid_phone_number_short2, o_phone_type_home.phoneNumberDetail
+        String phoneNumberHome = (o_phone_type_home.countryPhone ?: "") + (o_phone_type_home.phoneArea ?: "") + (o_phone_type_home.phoneNumber ?: "")
+        assertEquals phoneNumberHome, o_phone_type_home.phoneNumberDetail
 
         def o_phone_type_work = o_success_person_create.phones.find { it.phoneType == "Work" }
         assertNotNull o_phone_type_work
         assertEquals i_success_phone_type_work, o_phone_type_work.phoneType
         assertEquals i_success_phone_extension, o_phone_type_work.phoneExtension
         assertEquals i_succes_invalid_phone_number_short3, o_phone_type_work.phoneNumberDetail
+        String phoneNumberWork = (o_phone_type_work.countryPhone ?: "") + (o_phone_type_work.phoneArea ?: "") + (o_phone_type_work.phoneNumber ?: "")
+        assertEquals phoneNumberWork, o_phone_type_work.phoneNumberDetail
 
 
         def o_phone_type_residence = o_success_person_create.phones.find { it.phoneType == "Residence" }
@@ -655,6 +661,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_phone_type_residence, o_phone_type_residence.phoneType
         assertEquals i_success_phone_extension, o_phone_type_residence.phoneExtension
         assertEquals i_succes_invalid_phone_number_short4, o_phone_type_residence.phoneNumberDetail
+        String phoneNumberResidence = (o_phone_type_residence.countryPhone ?: "") + (o_phone_type_residence.phoneArea ?: "") + (o_phone_type_residence.phoneNumber ?: "")
+        assertEquals phoneNumberResidence, o_phone_type_residence.phoneNumberDetail
     }
 
     //POST- Person Create API
@@ -672,26 +680,33 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_phone_type_mobile
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile.phoneExtension
-        assertEquals i_succes_invalid_phone_number_long1, o_phone_type_mobile.phoneNumberDetail
+        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile.phoneNumberDetail
+        String phoneNumberMobile = (o_phone_type_mobile.countryPhone ?: "") + (o_phone_type_mobile.phoneArea ?: "") + (o_phone_type_mobile.phoneNumber ?: "")
+        assertEquals phoneNumberMobile, o_phone_type_mobile.phoneNumberDetail
 
         def o_phone_type_home = o_success_person_create.phones.find { it.phoneType == "Home" }
         assertNotNull o_phone_type_home
         assertEquals i_success_phone_type_home, o_phone_type_home.phoneType
         assertEquals i_success_phone_extension, o_phone_type_home.phoneExtension
         assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home.phoneNumberDetail
+        String phoneNumberHome = (o_phone_type_home.countryPhone ?: "") + (o_phone_type_home.phoneArea ?: "") + (o_phone_type_home.phoneNumber ?: "")
+        assertEquals phoneNumberHome, o_phone_type_home.phoneNumberDetail
 
         def o_phone_type_work = o_success_person_create.phones.find { it.phoneType == "Work" }
         assertNotNull o_phone_type_work
         assertEquals i_success_phone_type_work, o_phone_type_work.phoneType
         assertEquals i_success_phone_extension, o_phone_type_work.phoneExtension
         assertEquals i_succes_invalid_phone_number_long3, o_phone_type_work.phoneNumberDetail
-
+        String phoneNumberWork = (o_phone_type_work.countryPhone ?: "") + (o_phone_type_work.phoneArea ?: "") + (o_phone_type_work.phoneNumber ?: "")
+        assertEquals phoneNumberWork, o_phone_type_work.phoneNumberDetail
 
         def o_phone_type_residence = o_success_person_create.phones.find { it.phoneType == "Residence" }
         assertNotNull o_phone_type_residence
         assertEquals i_success_phone_type_residence, o_phone_type_residence.phoneType
         assertEquals i_success_phone_extension, o_phone_type_residence.phoneExtension
         assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence.phoneNumberDetail
+        String phoneNumberResidence = (o_phone_type_residence.countryPhone ?: "") + (o_phone_type_residence.phoneArea ?: "") + (o_phone_type_residence.phoneNumber ?: "")
+        assertEquals phoneNumberResidence, o_phone_type_residence.phoneNumberDetail
     }
 
     //PUT- Person Update API
@@ -710,25 +725,32 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile_create.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile_create.phoneExtension
         assertEquals i_succes_invalid_phone_number_short1, o_phone_type_mobile_create.phoneNumberDetail
+        String phoneNumberMobileCreate = (o_phone_type_mobile_create.countryPhone ?: "") + (o_phone_type_mobile_create.phoneArea ?: "") + (o_phone_type_mobile_create.phoneNumber ?: "")
+        assertEquals phoneNumberMobileCreate, o_phone_type_mobile_create.phoneNumberDetail
 
         def o_phone_type_home_create = o_success_person_create.phones.find { it.phoneType == "Home" }
         assertNotNull o_phone_type_home_create
         assertEquals i_success_phone_type_home, o_phone_type_home_create.phoneType
         assertEquals i_success_phone_extension, o_phone_type_home_create.phoneExtension
         assertEquals i_succes_invalid_phone_number_short2, o_phone_type_home_create.phoneNumberDetail
+        String phoneNumberHomeCreate = (o_phone_type_home_create.countryPhone ?: "") + (o_phone_type_home_create.phoneArea ?: "") + (o_phone_type_home_create.phoneNumber ?: "")
+        assertEquals phoneNumberHomeCreate, o_phone_type_home_create.phoneNumberDetail
 
         def o_phone_type_work_create = o_success_person_create.phones.find { it.phoneType == "Work" }
         assertNotNull o_phone_type_work_create
         assertEquals i_success_phone_type_work, o_phone_type_work_create.phoneType
         assertEquals i_success_phone_extension, o_phone_type_work_create.phoneExtension
         assertEquals i_succes_invalid_phone_number_short3, o_phone_type_work_create.phoneNumberDetail
-
+        String phoneNumberWorkCreate = (o_phone_type_work_create.countryPhone ?: "") + (o_phone_type_work_create.phoneArea ?: "") + (o_phone_type_work_create.phoneNumber ?: "")
+        assertEquals phoneNumberWorkCreate, o_phone_type_work_create.phoneNumberDetail
 
         def o_phone_type_residence_create = o_success_person_create.phones.find { it.phoneType == "Residence" }
         assertNotNull o_phone_type_residence_create
         assertEquals i_success_phone_type_residence, o_phone_type_residence_create.phoneType
         assertEquals i_success_phone_extension, o_phone_type_residence_create.phoneExtension
         assertEquals i_succes_invalid_phone_number_short4, o_phone_type_residence_create.phoneNumberDetail
+        String phoneNumberResidenceCreate = (o_phone_type_residence_create.countryPhone ?: "") + (o_phone_type_residence_create.phoneArea ?: "") + (o_phone_type_residence_create.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceCreate, o_phone_type_residence_create.phoneNumberDetail
 
         //update the phone number
         Map content_update = newPersonRequestWithInvalidLongPhoneNumber()
@@ -744,25 +766,33 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_phone_type_mobile_update
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
-        assertEquals i_succes_invalid_phone_number_long1, o_phone_type_mobile_update.phoneNumberDetail
+        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile_update.phoneNumberDetail
+        String phoneNumberMobileUpdate = (o_phone_type_mobile_update.countryPhone ?: "") + (o_phone_type_mobile_update.phoneArea ?: "") + (o_phone_type_mobile_update.phoneNumber ?: "")
+        assertEquals phoneNumberMobileUpdate, o_phone_type_mobile_update.phoneNumberDetail
 
         def o_phone_type_home_update = o_success_person_update.phones.find { it.phoneType == "Home" }
         assertNotNull o_phone_type_home_update
         assertEquals i_success_phone_type_home, o_phone_type_home_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_home_update.phoneExtension
         assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home_update.phoneNumberDetail
+        String phoneNumberHomeUpdate = (o_phone_type_home_update.countryPhone ?: "") + (o_phone_type_home_update.phoneArea ?: "") + (o_phone_type_home_update.phoneNumber ?: "")
+        assertEquals phoneNumberHomeUpdate, o_phone_type_home_update.phoneNumberDetail
 
         def o_phone_type_work_update = o_success_person_update.phones.find { it.phoneType == "Work" }
         assertNotNull o_phone_type_work_update
         assertEquals i_success_phone_type_work, o_phone_type_work_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_work_update.phoneExtension
         assertEquals i_succes_invalid_phone_number_long3, o_phone_type_work_update.phoneNumberDetail
+        String phoneNumberWorkUpdate = (o_phone_type_work_update.countryPhone ?: "") + (o_phone_type_work_update.phoneArea ?: "") + (o_phone_type_work_update.phoneNumber ?: "")
+        assertEquals phoneNumberWorkUpdate, o_phone_type_work_update.phoneNumberDetail
 
         def o_phone_type_residence_update = o_success_person_update.phones.find { it.phoneType == "Residence" }
         assertNotNull o_phone_type_residence_update
         assertEquals i_success_phone_type_residence, o_phone_type_residence_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_residence_update.phoneExtension
         assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence_update.phoneNumberDetail
+        String phoneNumberResidenceUpdate = (o_phone_type_residence_update.countryPhone ?: "") + (o_phone_type_residence_update.phoneArea ?: "") + (o_phone_type_residence_update.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceUpdate, o_phone_type_residence_update.phoneNumberDetail
     }
 
     //PUT- Person Update API
@@ -790,13 +820,17 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_phone_type_mobile_update
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
-        assertEquals i_succes_invalid_phone_number_long1, o_phone_type_mobile_update.phoneNumberDetail
+        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile_update.phoneNumberDetail
+        String phoneNumberMobileUpdate = (o_phone_type_mobile_update.countryPhone ?: "") + (o_phone_type_mobile_update.phoneArea ?: "") + (o_phone_type_mobile_update.phoneNumber ?: "")
+        assertEquals phoneNumberMobileUpdate, o_phone_type_mobile_update.phoneNumberDetail
 
         def o_phone_type_home_update = o_success_person_update.phones.find { it.phoneType == "Home" }
         assertNotNull o_phone_type_home_update
         assertEquals i_success_phone_type_home, o_phone_type_home_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_home_update.phoneExtension
         assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home_update.phoneNumberDetail
+        String phoneNumberHomeUpdate = (o_phone_type_home_update.countryPhone ?: "") + (o_phone_type_home_update.phoneArea ?: "") + (o_phone_type_home_update.phoneNumber ?: "")
+        assertEquals phoneNumberHomeUpdate, o_phone_type_home_update.phoneNumberDetail
 
         def o_phone_type_work_update = o_success_person_update.phones.find { it.phoneType == "Work" }
         assertNotNull o_phone_type_work_update
@@ -809,6 +843,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_phone_type_residence, o_phone_type_residence_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_residence_update.phoneExtension
         assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence_update.phoneNumberDetail
+        String phoneNumberResidenceUpdate = (o_phone_type_residence_update.countryPhone ?: "") + (o_phone_type_residence_update.phoneArea ?: "") + (o_phone_type_residence_update.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceUpdate, o_phone_type_residence_update.phoneNumberDetail
     }
 
     @Test
