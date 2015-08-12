@@ -145,9 +145,9 @@ class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskMa
      * @param cause the cause of the failure
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
-    public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
+    public void markFailed( AsynchronousTask task, String errorCode, Throwable cause ) throws ApplicationException {
         CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) task
-        communicationGroupSendItemProcessorService.failGroupSendItem( groupSendItem.getId(), StringHelper.stackTraceToString( cause ) );
+        communicationGroupSendItemProcessorService.failGroupSendItem( groupSendItem.getId(), errorCode, StringHelper.stackTraceToString( cause ) );
         if (log.isDebugEnabled()) {
             log.debug( "GroupSendItemManager.markFailed(task=" + groupSendItem.getId() + ") has marked the task as failed " );
         }

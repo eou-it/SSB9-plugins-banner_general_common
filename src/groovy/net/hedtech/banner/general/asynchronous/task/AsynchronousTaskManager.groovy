@@ -94,10 +94,11 @@ public interface AsynchronousTaskManager {
     /**
      * Marks a task as having failed.
      * @param task    the task that failed
+     * @param errorCode the error code representing the caue of the failure
      * @param cause the cause of the failure
      */
     @DenyAll
-    public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException;
+    public void markFailed( AsynchronousTask task, String errorCode, Throwable cause ) throws ApplicationException;
 
 
 

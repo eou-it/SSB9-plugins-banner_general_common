@@ -78,14 +78,15 @@ class CommunicationGroupSendItemProcessorService {
     }
 
 
-    public void failGroupSendItem(Long groupSendItemId, String errorText) {
+    public void failGroupSendItem(Long groupSendItemId, String errorCode, String errorText ) {
         CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get(groupSendItemId)
         def groupSendItemParamMap = [
                 id                   : groupSendItem.id,
                 version              : groupSendItem.version,
                 currentExecutionState: CommunicationGroupSendItemExecutionState.Failed,
                 stopDate             : new Date(),
-                errorText            : errorText
+                errorText            : errorText,
+                errorCode            : errorCode
         ]
 
         log.warn("Group send item failed id = ${groupSendItemId}, errorText = ${errorText}.")

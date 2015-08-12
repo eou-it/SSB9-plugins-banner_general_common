@@ -7,6 +7,7 @@ import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
@@ -546,7 +547,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
             asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
             try {
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
-                jobManager.markFailed(job, cause);
+                if(cause instanceof ApplicationException) {
+                    jobManager.markFailed(job, cause.getType(), cause );
+                }
+                else
+                {
+                    jobManager.markFailed(job, CommunicationErrorCode.UNKNOWN_ERROR.name(), cause);
+                }
             } catch (Throwable t) {
                 log.error("JobProcessingEngine " + this + " - An error handler could not mark job " + job.getId() + " as in error", t);
             } finally {

@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import org.apache.commons.lang.NotImplementedException
@@ -139,11 +140,12 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
      * @param cause the cause of the failure
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
-    public void markFailed( AsynchronousTask task, Throwable cause ) throws ApplicationException {
+    public void markFailed( AsynchronousTask task, String errorCode, Throwable cause  ) throws ApplicationException {
         CommunicationJob job = (CommunicationJob) task
         job.refresh()
         job.setStatus( CommunicationJobStatus.FAILED )
         job.setErrorText( StringHelper.stackTraceToString( cause ) )
+        job.setErrorCode(CommunicationErrorCode.valueOf(errorCode))
         communicationJobService.update( job )
         if (cause) {
             log.info( "Marked job with id = ${job.id} as failed; cause = ${cause.toString()}." )
