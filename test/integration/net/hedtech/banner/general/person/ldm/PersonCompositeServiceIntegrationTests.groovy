@@ -506,6 +506,64 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals o_success_person_create.ethnicityDetail.guid, o_success_person_get.ethnicityDetail.guid
     }
 
+    //GET Person By Guid API
+    @Test
+    void testGetPersonWithInvalidPhoneNumber() {
+        Map content = newPersonRequestWithInvalidShortPhoneNumber()
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+
+        def o_success_person_get = personCompositeService.get(o_success_person_create.guid)
+
+        assertNotNull o_success_person_get
+        assertNotNull o_success_person_get.guid
+        assertEquals o_success_person_create.guid, o_success_person_get.guid
+
+        def o_phone_type_mobile_create = o_success_person_create.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_create
+        def o_phone_type_mobile_get = o_success_person_get.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_get
+        assertEquals o_phone_type_mobile_create.phoneType, o_phone_type_mobile_get.phoneType
+        assertEquals o_phone_type_mobile_create.phoneExtension, o_phone_type_mobile_get.phoneExtension
+        assertEquals o_phone_type_mobile_create.phoneNumberDetail, o_phone_type_mobile_get.phoneNumberDetail
+        String phoneNumberMobileGet = (o_phone_type_mobile_get.countryPhone ?: "") + (o_phone_type_mobile_get.phoneArea ?: "") + (o_phone_type_mobile_get.phoneNumber ?: "")
+        assertEquals phoneNumberMobileGet, o_phone_type_mobile_get.phoneNumberDetail
+
+        def o_phone_type_home_create = o_success_person_create.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_create
+        def o_phone_type_home_get = o_success_person_get.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_get
+        assertEquals o_phone_type_home_create.phoneType, o_phone_type_home_get.phoneType
+        assertEquals o_phone_type_home_create.phoneExtension, o_phone_type_home_get.phoneExtension
+        assertEquals o_phone_type_home_create.phoneNumberDetail, o_phone_type_home_get.phoneNumberDetail
+        String phoneNumberHomeGet = (o_phone_type_home_get.countryPhone ?: "") + (o_phone_type_home_get.phoneArea ?: "") + (o_phone_type_home_get.phoneNumber ?: "")
+        assertEquals phoneNumberHomeGet, o_phone_type_home_get.phoneNumberDetail
+
+        def o_phone_type_work_create = o_success_person_create.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_create
+        def o_phone_type_work_get = o_success_person_get.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_get
+        assertEquals o_phone_type_work_create.phoneType, o_phone_type_work_get.phoneType
+        assertEquals o_phone_type_work_create.phoneExtension, o_phone_type_work_get.phoneExtension
+        assertEquals o_phone_type_work_create.phoneNumberDetail, o_phone_type_work_get.phoneNumberDetail
+        String phoneNumberWorkGet = (o_phone_type_work_get.countryPhone ?: "") + (o_phone_type_work_get.phoneArea ?: "") + (o_phone_type_work_get.phoneNumber ?: "")
+        assertEquals phoneNumberWorkGet, o_phone_type_work_get.phoneNumberDetail
+
+        def o_phone_type_residence_create = o_success_person_create.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_create
+        def o_phone_type_residence_get = o_success_person_get.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_get
+        assertEquals o_phone_type_residence_create.phoneType, o_phone_type_residence_get.phoneType
+        assertEquals o_phone_type_residence_create.phoneExtension, o_phone_type_residence_get.phoneExtension
+        assertEquals o_phone_type_residence_create.phoneNumberDetail, o_phone_type_residence_get.phoneNumberDetail
+        String phoneNumberResidenceGet = (o_phone_type_residence_get.countryPhone ?: "") + (o_phone_type_residence_get.phoneArea ?: "") + (o_phone_type_residence_get.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceGet, o_phone_type_residence_get.phoneNumberDetail
+    }
+
     //POST- Person Create API
     @Test
     void testCreatePersonWithStateAndZipIntegrationSettingValue() {
