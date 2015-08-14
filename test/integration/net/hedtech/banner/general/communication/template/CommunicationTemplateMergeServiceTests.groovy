@@ -152,7 +152,8 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
                 organization: i_valid_Organization,
                 referenceId: 1,
                 ownerId: getUser(),
-                fieldValues: fieldListByPidm
+                fieldValues: fieldListByPidm,
+                communicationChannel: emailTemplate.communicationChannel
         )
 
         communicationRecipientDataService.create( communicationRecipientData )

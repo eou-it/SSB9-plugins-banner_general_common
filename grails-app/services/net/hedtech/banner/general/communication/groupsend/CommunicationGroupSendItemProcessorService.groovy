@@ -143,7 +143,8 @@ class CommunicationGroupSendItemProcessorService {
                 referenceId: referenceId,
                 ownerId: senderOracleUserName,
                 fieldValues: nameToValueMap,
-                organization: organization
+                organization: organization,
+                communicationChannel: template.communicationChannel
         )
     }
 

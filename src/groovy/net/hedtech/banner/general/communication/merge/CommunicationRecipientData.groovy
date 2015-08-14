@@ -1,11 +1,12 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
- ********************************************************************************* */
-
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.merge
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 
 import javax.persistence.*
@@ -47,6 +48,10 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_TEMPLATE_ID")
     Long templateId
 
+    /** Describes which communication channel of the template the recipient data refers to. **/
+    @Column(name = "GCBRDAT_COMM_CHANNEL")
+    @Enumerated(EnumType.STRING)
+    CommunicationChannel communicationChannel
 
     @Column(name = "GCBRDAT_REFERENCE_ID")
     String referenceId
@@ -96,6 +101,7 @@ class CommunicationRecipientData {
     CommunicationOrganization organization
 
     static constraints = {
+        communicationChannel(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

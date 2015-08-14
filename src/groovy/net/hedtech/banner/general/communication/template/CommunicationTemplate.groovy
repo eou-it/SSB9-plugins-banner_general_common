@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -162,6 +163,13 @@ public abstract class CommunicationTemplate implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
     }
 
+    /**
+     * Temporary method implemented by subclasses to indicate which kind of communication channel each serves.
+     * Eventually templates will support more than one kind of communication channel and the choice of channel
+     * between will be a runtime decision based on channels supported by the template and the parameters of
+     * the communication plan.
+     */
+    public abstract CommunicationChannel getCommunicationChannel()
 
     /******************* Named Queries *******************/
 

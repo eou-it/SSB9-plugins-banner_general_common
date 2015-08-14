@@ -1,10 +1,14 @@
+/*********************************************************************************
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.item
 
 public enum CommunicationChannel implements Serializable {
 
     EMAIL,
-    LETTER,
-    ERROR;
+    MOBILE_NOTIFICATION,
+    LETTER, // reserved
+    ERROR // reserved
 
     /**
      * Returns a Set of all predefined CommunicationChannel.

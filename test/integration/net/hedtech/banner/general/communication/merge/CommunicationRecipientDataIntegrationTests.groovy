@@ -99,7 +99,8 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
                 templateId: emailTemplate.id,
                 referenceId: 1,
                 ownerId: "OWNER",
-                fieldValues: ["name": fieldValue1]
+                fieldValues: ["name": fieldValue1],
+                communicationChannel: emailTemplate.communicationChannel
         )
         return communicationRecipientData
     }

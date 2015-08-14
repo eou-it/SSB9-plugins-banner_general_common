@@ -8,6 +8,7 @@ import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationFieldView
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
@@ -213,7 +214,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                                 referenceId:  UUID.randomUUID().toString(),
                                 ownerId: getUser(),
                                 fieldValues: fieldListByPidm,
-                                organization: this.organization
+                                organization: this.organization,
+                                communicationChannel: validTemplate.communicationChannel
                         )
                         communicationRecipientDataService.create( recipient )
                 }
@@ -261,7 +263,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 referenceId: UUID.randomUUID().toString(),
                 ownerId: getUser(),
                 fieldValues: ["name": fieldValue],
-                organization: this.organization
+                organization: this.organization,
+                communicationChannel: CommunicationChannel.EMAIL
         )
         return communicationRecipientData
     }
