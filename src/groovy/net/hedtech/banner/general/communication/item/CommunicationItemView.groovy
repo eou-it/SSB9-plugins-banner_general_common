@@ -75,7 +75,7 @@ class CommunicationItemView implements Serializable {
      * Email, Letter, etc
      */
     @Column(name = "communication_channel")
-    String communicationChannel
+    CommunicationChannel communicationChannel
 
     /**
      * VERSION: Optimistic lock token.

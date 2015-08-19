@@ -267,13 +267,13 @@ class CommunicationSendEmailMethod {
         ApplicationException exception = null;
 
         if (null == message) {
-            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.nullMessage", CommunicationErrorCode.UNKNOWN_ERROR.name())
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("exception.communication.email.nullMessage"), CommunicationErrorCode.UNKNOWN_ERROR.name())
         } else if (null == message.getSenders()) {
-            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.sendersEmpty", CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("exception.communication.email.sendersEmpty"), CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
         } else if (false == ignoreToList && (null == message.getToList() || 0 == message.getToList().size())) {
-            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.recipientsEmpty", CommunicationErrorCode.EMPTY_RECIPIENT_ADDRESS.name())
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("exception.communication.email.recipientsEmpty"), CommunicationErrorCode.EMPTY_RECIPIENT_ADDRESS.name())
         } else if (null == message.getSubjectLine() || 0 == message.getSubjectLine().trim().length()) {
-            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, "exception.communication.email.subjectEmpty", CommunicationErrorCode.EMPTY_EMAIL_SUBJECT.name())
+            exception = ExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("exception.communication.email.subjectEmpty"), CommunicationErrorCode.EMPTY_EMAIL_SUBJECT.name())
         }
         if (null != exception) {
             throw exception;

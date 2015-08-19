@@ -32,7 +32,7 @@ public abstract class CommunicationItem implements Serializable {
      */
     @Column(name = "GCRCITM_COMM_CHANNEL")
     @Enumerated(value = EnumType.STRING)
-    String communicationChannel
+    CommunicationChannel communicationChannel
 
     /**
      *  The user ID of the person who inserted or last updated this record.

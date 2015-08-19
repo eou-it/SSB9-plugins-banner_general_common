@@ -188,7 +188,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
     private def newValidForCreateEmailItem() {
         def emailItem = new CommunicationEmailItem(
-                communicationChannel: "EMAIL",
+                communicationChannel: CommunicationChannel.EMAIL,
                 createdBy: i_valid_emailTemplate_createdBy,
                 createDate: i_valid_emailTemplate_createDate,
                 recipientPidm: 999999999,
