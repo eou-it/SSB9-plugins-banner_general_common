@@ -98,7 +98,7 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
         assertEquals 7, popsel.findAll { it.lastModifiedBy == "GRAILS" }?.size()
         popsel.each {
             assertNotNull it.numericKey
-            assertEquals it.numericKey,  it.key.toLong()
+            assertEquals it.numericKey, it.key.toLong()
         }
 
         def popselFetched =
@@ -153,6 +153,7 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
 
     }
 
+
     @Test
     void testFetchAllPidmsByApplicationSelectionCreatorIdLastModifiedByWithAlphaPaginationAndSort() {
 
@@ -176,6 +177,22 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
 
     }
 
+
+    @Test
+    void testFetchCountByApplicationSelectionCreatorIdLastModifiedByWithAlphaPaginationAndSort() {
+
+        def popsel = PopulationSelectionExtractReadonly.findAllByApplicationAndSelection("STUDENT", 'HEDM')
+        assertEquals 7, popsel.size()
+        assertEquals 7, popsel.findAll { it.creatorId == "BANNER" }?.size()
+        assertEquals 7, popsel.findAll { it.lastModifiedBy == "GRAILS" }?.size()
+
+        def popselFetched =
+                PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDM", "BANNER", "GRAILS")
+
+        assertEquals 7, popselFetched
+    }
+
+
     @Test
     void testFetchAllPidmsByApplicationSelectionCreatorIdLastModifiedByWithAlphaPaginationAndNoSort() {
 
@@ -198,13 +215,14 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
 
     }
 
+
     @Test
     void testPaginationForPerformanceUniqueLists() {
         // verify our test case has 7 records
         def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
-        if ( popsel.size() > 0 ){
+        if (popsel.size() > 0) {
             popsel.each {
-                it.delete(flush:true, failOnError:true)
+                it.delete(flush: true, failOnError: true)
             }
         }
         // create big list
@@ -236,7 +254,7 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
         assertTrue insertCount > 500
         def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
         assertEquals insertCount, persextract.size()
-        def pidmlist = persextract.groupBy {it.pidm }
+        def pidmlist = persextract.groupBy { it.pidm }
         // verify the list of pidms is unique
         pidmlist.each {
             assertEquals 1, it.value.size()
@@ -251,16 +269,17 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
                         [max: '250', offset: '250'])
         assertEquals 250, person1.size()
         // no overlap on first person
-        assertTrue  person1[249].pidm != person2[0].pidm
+        assertTrue person1[249].pidm != person2[0].pidm
         // verfiy people are not the same
         def cnt = 0
         def match = 0
         person1.each { pers ->
             cnt += 1
             person2.find {
-                if ( it.pidm == pers.pidm) {
+                if (it.pidm == pers.pidm) {
                     match += 1
-                } }
+                }
+            }
         }
         assertEquals 0, match
     }

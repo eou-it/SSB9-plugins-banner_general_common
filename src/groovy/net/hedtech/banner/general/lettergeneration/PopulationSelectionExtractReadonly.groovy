@@ -17,6 +17,13 @@ import javax.persistence.*
                     WHERE a.application = :application
 		            AND   a.selection = :selection
 		            AND   a.creatorId = :creatorId
+		            AND   a.lastModifiedBy = :lastModifiedBy"""),
+        @NamedQuery(name = "PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy",
+                query = """select count(*)
+                    FROM PopulationSelectionExtractReadonly a
+                    WHERE a.application = :application
+		            AND   a.selection = :selection
+		            AND   a.creatorId = :creatorId
 		            AND   a.lastModifiedBy = :lastModifiedBy""")])
 class PopulationSelectionExtractReadonly implements Serializable {
 
@@ -97,15 +104,15 @@ class PopulationSelectionExtractReadonly implements Serializable {
     @Column(name = "GLBEXTR_DATA_ORIGIN")
     String dataOrigin
 
-    @Column(name="SPRIDEN_PIDM")
+    @Column(name = "SPRIDEN_PIDM")
     Integer pidm
-    @Column(name="SPRIDEN_LAST_NAME")
+    @Column(name = "SPRIDEN_LAST_NAME")
     String lastName
-    @Column(name="SPRIDEN_FIRST_NAME")
+    @Column(name = "SPRIDEN_FIRST_NAME")
     String firstName
-    @Column(name="SPRIDEN_MI")
+    @Column(name = "SPRIDEN_MI")
     String mi
-    @Column(name="SPRIDEN_ID")
+    @Column(name = "SPRIDEN_ID")
     String bannerId
 
 
@@ -130,8 +137,6 @@ class PopulationSelectionExtractReadonly implements Serializable {
                     bannerId=$bannerId
                     ]"""
     }
-
-
 
 
     static constraints = {
@@ -167,11 +172,10 @@ class PopulationSelectionExtractReadonly implements Serializable {
                         def orderBy
                         if (params.sort) {
                             orderBy = " order by a." + params.sort
-                            if ( params.sort != "bannerId"){
+                            if (params.sort != "bannerId") {
                                 orderBy += " , a.bannerId"
                             }
-                        }
-                        else {
+                        } else {
                             orderBy = " order by a.lastName, a.firstName, a.mi, a.bannerId"
                         }
                         org.hibernate.Query query = session.createQuery(query1.getQueryString() + orderBy)
@@ -180,12 +184,12 @@ class PopulationSelectionExtractReadonly implements Serializable {
                                 .setString('creatorId', creatorId).setString('lastModifiedBy', lastModifiedBy)
                         def max
                         def offset
-                        if ( params.max) {
+                        if (params.max) {
                             if (params.max instanceof String) max = params.max.toInteger()
                             else max = params.max
                             query.setMaxResults(max)
                         }
-                        if ( params.offset) {
+                        if (params.offset) {
                             if (params.offset instanceof String) offset = params.offset.toInteger()
                             else offset = params.offset
                             query.setFirstResult(offset)
@@ -194,6 +198,19 @@ class PopulationSelectionExtractReadonly implements Serializable {
                     }
         }
         return pidmsres
+    }
+
+
+    public static def fetchCountByApplicationSelectionCreatorIdLastModifiedBy(String application,
+                                                                              String selection,
+                                                                              String creatorId,
+                                                                              String lastModifiedBy) {
+        def count = PopulationSelectionExtractReadonly.withSession { session ->
+            session.getNamedQuery('PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy')
+                    .setString('application', application).setString('selection', selection)
+                    .setString('creatorId', creatorId).setString('lastModifiedBy', lastModifiedBy).uniqueResult()
+        }
+        return count
     }
 
 }

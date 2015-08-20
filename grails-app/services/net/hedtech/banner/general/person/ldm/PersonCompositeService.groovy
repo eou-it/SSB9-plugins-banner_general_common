@@ -109,7 +109,9 @@ class PersonCompositeService extends LdmService {
             if (contentType.contains('person-filter')) {
                 String selId = params.get("personFilter")
                 RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
-                pidms = getPidmsForPersonFilter(selId, params)
+                def popsel =   getPidmsForPersonFilter(selId, params)
+                pidms = popsel.pidms
+                total = popsel.count
             } else {
                 def name
                 def primaryName = params.names.find { primaryNameType ->
@@ -134,7 +136,9 @@ class PersonCompositeService extends LdmService {
                     throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
                 }
                 RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
-                pidms = searchPerson(params, name)
+                def searchResult = searchPerson(params, name)
+                pidms = searchResult.pidms
+                total  = searchResult.count
             }
 
         } else {
@@ -146,7 +150,9 @@ class PersonCompositeService extends LdmService {
             if (params.containsKey("personFilter")) {
                 String selId = params.get("personFilter")
                 RestfulApiValidationUtility.correctMaxAndOffset(params, 500, 0)
-                pidms = getPidmsForPersonFilter(selId, params)
+                def popsel =   getPidmsForPersonFilter(selId, params)
+                pidms = popsel.pidms
+                total = popsel.count
 
             } else {
                 if (params.role) {
@@ -170,7 +176,6 @@ class PersonCompositeService extends LdmService {
             }
         }
         if (pidms?.size() && !params.role) {
-            total = pidms.size()
             resultList = buildLdmPersonObjects(pidms, true, params)
         }
 
@@ -181,6 +186,7 @@ class PersonCompositeService extends LdmService {
         catch (ClassNotFoundException e) {
             resultList = resultList.values()
         }
+
         resultList
     }
 
@@ -491,7 +497,7 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private List<Integer> searchPerson(Map params, def name) {
+    private def  searchPerson(Map params, def name) {
 
         List<Integer> personList = []
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_MATCH_RULE)
@@ -538,7 +544,7 @@ class PersonCompositeService extends LdmService {
                 }
             }
         }
-        return personList
+        return [pidms: personList,  count: personList.size() ]
     }
 
 
@@ -1638,7 +1644,7 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private List getPidmsForPersonFilter(String selId, Map sortParams) {
+    private def getPidmsForPersonFilter(String selId, Map sortParams) {
         def pidms = []
 
         // params may come in as pop sel domain values or guid
@@ -1656,9 +1662,11 @@ class PersonCompositeService extends LdmService {
         def domainKeyParts = personFilterCompositeService.splitDomainKey(popSelEntity.title)
         pidms = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
                 domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy, sortParams)
+        def totalCount = PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
+                domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy)
 
 
-        return pidms
+        return [pidms : pidms, count: totalCount]
     }
 
 
