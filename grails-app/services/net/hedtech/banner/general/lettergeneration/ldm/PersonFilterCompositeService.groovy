@@ -134,6 +134,7 @@ class PersonFilterCompositeService {
             query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
             result = PopulationSelectionExtract.executeQuery(query, namedParams)?.size()
         } else {
+            query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
             Integer max = content.max.trim().toInteger()
             Integer offset = content.offset?.trim()?.toInteger() ?: 0
             if (content.sort) {
