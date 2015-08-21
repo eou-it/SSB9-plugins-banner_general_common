@@ -18,19 +18,19 @@ import javax.persistence.*
 class CommunicationMobileNotificationTemplate extends CommunicationTemplate implements Serializable {
 
     @Column(name = "GCBMNTL_MOBILE_HEADLINE", nullable = false)
-    String mobileHeadline // 250 max
+    String mobileHeadline
 
     @Column(name = "GCBMNTL_HEADLINE", nullable = true)
-    String headline // 250 max
+    String headline
 
-    @Column(name = "GCBMNTL_BODY", nullable = true)
-    String body // 2500 max
+    @Column(name = "GCBMNTL_DESCRIPTION", nullable = true)
+    String description
 
     @Column(name = "GCBMNTL_DESTINATION_LINK", nullable = true)
-    String destinationLink // 250 max
+    String destinationLink
 
     @Column(name = "GCBMNTL_DESTINATION_LABEL", nullable = true)
-    String destinationLabel // 250 max
+    String destinationLabel
 
     @Column(name = "GCBMNTL_EXPIRATION_POLICY", nullable = false)
     String expirationPolicy // enum NO_EXPIRATION, ELAPSED_TIME, DATE_TIME // varchar(64)
@@ -51,11 +51,11 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     boolean sticky
 
     static constraints = {
-        mobileHeadline(nullable: false, maxSize: 250)
-        headline(nullable: true, maxSize: 250)
-        body(nullable: true, maxSize: 2500)
-        destinationLink(nullable: true, maxSize: 250)
-        destinationLabel(nullable: true, maxSize: 250)
+        mobileHeadline(nullable: false, maxSize: 160)
+        headline(nullable: true, maxSize: 255)
+        body(nullable: true, maxSize: 4000)
+        destinationLink(nullable: true, maxSize: 2048)
+        destinationLabel(nullable: true, maxSize: 255)
         expirationPolicy(nullable: true)
         elapsedTimeSeconds(nullable: true)
         expirationDateTime(nullable: true)
