@@ -1,7 +1,13 @@
+/*********************************************************************************
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
 /**
- * Created by mbrzycki on 8/21/15.
+ * CommunicationMobileNotificationExpirationPolicy describes how the message expiration will be set.
  */
-class CommunicationMobileNotificationExpirationPolicy {
+public enum CommunicationMobileNotificationExpirationPolicy implements Serializable {
+    NO_EXPIRATION,
+    ELAPSED_TIME,
+    DATE_TIME;
 }

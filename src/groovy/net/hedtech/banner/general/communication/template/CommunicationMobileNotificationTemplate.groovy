@@ -33,7 +33,8 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     String destinationLabel
 
     @Column(name = "GCBMNTL_EXPIRATION_POLICY", nullable = false)
-    String expirationPolicy // enum NO_EXPIRATION, ELAPSED_TIME, DATE_TIME // varchar(64)
+    @Enumerated(EnumType.STRING)
+    CommunicationMobileNotificationExpirationPolicy expirationPolicy = CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION
 
     @Column(name = "GCBMNTL_ELAPSED_TIME_SECS", nullable = true)
     Long elapsedTimeSeconds
@@ -44,19 +45,19 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
 
     @Column(name = "GCBMNTL_PUSH", nullable = false)
     @Type(type="yes_no")
-    boolean push
+    boolean push = false
 
     @Column(name = "GCBMNTL_STICKY", nullable = false)
     @Type(type="yes_no")
-    boolean sticky
+    boolean sticky = false
 
     static constraints = {
-        mobileHeadline(nullable: false, maxSize: 160)
-        headline(nullable: true, maxSize: 255)
-        body(nullable: true, maxSize: 4000)
-        destinationLink(nullable: true, maxSize: 2048)
-        destinationLabel(nullable: true, maxSize: 255)
-        expirationPolicy(nullable: true)
+        mobileHeadline(nullable: true)
+        headline(nullable: true)
+        description(nullable: true)
+        destinationLink(nullable: true)
+        destinationLabel(nullable: true)
+        expirationPolicy(nullable: false)
         elapsedTimeSeconds(nullable: true)
         expirationDateTime(nullable: true)
         push(nullable: false)
