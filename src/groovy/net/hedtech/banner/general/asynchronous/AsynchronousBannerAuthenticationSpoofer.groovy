@@ -6,7 +6,6 @@ import net.hedtech.banner.mep.MultiEntityProcessingService
 import net.hedtech.banner.security.AuthenticationProviderUtility
 import net.hedtech.banner.security.BannerAuthenticationProvider
 import net.hedtech.banner.security.FormContext
-import net.hedtech.banner.security.MepContextHolder
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.context.ApplicationContext
@@ -96,22 +95,16 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
     public setMepContext(conn, String mepCode = null) {
         log.info("setting mep. The mep context value is ${mepCode}")
 
-        if (getMultiEntityProcessingService().isMEP(conn)) {
-            if (mepCode != null) {
+        if (getMultiEntityProcessingService().isMEP(conn) && mepCode) {
                 getMultiEntityProcessingService().setHomeContext(mepCode, conn)
                 getMultiEntityProcessingService().setProcessContext(mepCode, conn)
-            } else if (MepContextHolder.get()) {
-                getMultiEntityProcessingService().setHomeContext(MepContextHolder.get(), conn)
-                getMultiEntityProcessingService().setProcessContext(MepContextHolder.get(), conn)
-            }
         }
     }
 
 
     public setMepProcessContext(conn, mepCode) {
-        log.info(" The mep context holder values is ${MepContextHolder.get()}")
-        if (getMultiEntityProcessingService().isMEP(conn) && (mepCode || MepContextHolder.get())) {
-            getMultiEntityProcessingService().setProcessContext(mepCode ? mepCode : MepContextHolder.get(), conn)
+        if (getMultiEntityProcessingService().isMEP(conn) && (mepCode)) {
+            getMultiEntityProcessingService().setProcessContext(mepCode, conn)
         }
     }
 
@@ -132,17 +125,12 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
 
 
     private setMep(conn, user, mepCode = null) {
-        log.info("setting mep conn user ${user}. The mep context holder values is ${MepContextHolder.get()}")
         if (getMultiEntityProcessingService().isMEP(conn)) {
             if (mepCode != null) {
                 getMultiEntityProcessingService().setHomeContext(mepCode, conn)
                 getMultiEntityProcessingService().setProcessContext(mepCode, conn)
-            } else if (!MepContextHolder.get()) {
-                getMultiEntityProcessingService().setMepOnAccess(user.toUpperCase(), conn)
-                MepContextHolder.set(getMultiEntityProcessingService().getHomeContext(conn))
             } else {
-                getMultiEntityProcessingService().setHomeContext(MepContextHolder.get(), conn)
-                getMultiEntityProcessingService().setProcessContext(MepContextHolder.get(), conn)
+                getMultiEntityProcessingService().setMepOnAccess(user.toUpperCase(), conn)
             }
         }
     }
