@@ -24,9 +24,9 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationOrganization.fetchByName",
                 query = """ FROM CommunicationOrganization a
                     WHERE a.name = :name"""),
-        @NamedQuery(name = "CommunicationOrganization.fetchActive",
+        @NamedQuery(name = "CommunicationOrganization.fetchAvailable",
                 query = """ FROM CommunicationOrganization a
-                    WHERE a.isActive = true"""),
+                    WHERE a.isAvailable = true"""),
         @NamedQuery(name = "CommunicationOrganization.fetchRoot",
                 query = """ FROM CommunicationOrganization a
                     WHERE a.parent is null"""),
@@ -49,8 +49,8 @@ class CommunicationOrganization implements Serializable {
 
 
     @Type(type = "yes_no")
-    @Column(name = "GCRORAN_ACTIVE_IND")
-    Boolean isActive = false
+    @Column(name = "GCRORAN_AVAILABLE_IND")
+    Boolean isAvailable = false
 
     /**
      * Foreign key reference to the parent Organization (REL_ORGANIZATION) of which this organization
@@ -101,6 +101,23 @@ class CommunicationOrganization implements Serializable {
      */
     @Column(name = "GCRORAN_DATA_ORIGIN")
     String dataOrigin
+
+    @Column(name = "GCRORAN_NOTFN_ENDPOINT_URL")
+    String mobileEndPointUrl
+
+
+    @Column(name = "GCRORAN_NOTFN_APPL_NAME")
+    String mobileApplicationName
+
+
+    @Column(name = "GCRORAN_NOTFN_APPL_KEY")
+    String mobileApplicationKey
+
+    /**
+     * Clear text password
+     */
+    @Transient
+    String clearTextPassword
 
     /**
      * The send email server configuration properties
@@ -219,7 +236,7 @@ class CommunicationOrganization implements Serializable {
         name(nullable: false, maxSize: 1020)
         description(nullable: true, maxSize: 2000)
         parent(nullable: true)
-        isActive(nullable: true)
+        isAvailable(nullable: true)
         dateFormat(nullable: true)
         dayOfWeekFormat(nullable: true)
         timeOfDayFormat(nullable: true)
@@ -230,6 +247,9 @@ class CommunicationOrganization implements Serializable {
         sendEmailServerProperties(nullable: true)
         replyToMailboxAccountSettings(nullable: true)
         senderMailboxAccountSettings(nullable: true)
+        mobileApplicationKey(nullable: true)
+        mobileApplicationName(nullable:true)
+        mobileEndPointUrl(nullable:true)
 
     }
 
@@ -245,15 +265,18 @@ class CommunicationOrganization implements Serializable {
         if (dayOfWeekFormat != that.dayOfWeekFormat) return false
         if (description != that.description) return false
         if (id != that.id) return false
-        if (isActive != that.isActive) return false
+        if (isAvailable != that.isAvailable) return false
         if (lastModified != that.lastModified) return false
         if (lastModifiedBy != that.lastModifiedBy) return false
+        if (mobileApplicationKey != that.mobileApplicationKey) return false
+        if (mobileApplicationName != that.mobileApplicationName) return false
+        if (mobileEndPointUrl != that.mobileEndPointUrl) return false
         if (name != that.name) return false
         if (parent != that.parent) return false
-        if (!receiveEmailServerProperties.equals(that.receiveEmailServerProperties)) return false
-        if (!replyToMailboxAccountSettings.equals(replyToMailboxAccountSettings)) return false
-        if (!sendEmailServerProperties.equals(sendEmailServerProperties)) return false
-        if (!senderMailboxAccountSettings.equals(senderMailboxAccountSettings)) return false
+        if (receiveEmailServerProperties != that.receiveEmailServerProperties) return false
+        if (replyToMailboxAccountSettings != that.replyToMailboxAccountSettings) return false
+        if (sendEmailServerProperties != that.sendEmailServerProperties) return false
+        if (senderMailboxAccountSettings != that.senderMailboxAccountSettings) return false
         if (timeOfDayFormat != that.timeOfDayFormat) return false
         if (version != that.version) return false
 
@@ -265,7 +288,7 @@ class CommunicationOrganization implements Serializable {
         int result
         result = (id != null ? id.hashCode() : 0)
         result = 31 * result + (name != null ? name.hashCode() : 0)
-        result = 31 * result + (isActive != null ? isActive.hashCode() : 0)
+        result = 31 * result + (isAvailable != null ? isAvailable.hashCode() : 0)
         result = 31 * result + (parent != null ? parent.hashCode() : 0)
         result = 31 * result + (description != null ? description.hashCode() : 0)
         result = 31 * result + (dateFormat != null ? dateFormat.hashCode() : 0)
@@ -275,6 +298,13 @@ class CommunicationOrganization implements Serializable {
         result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
         result = 31 * result + (version != null ? version.hashCode() : 0)
         result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
+        result = 31 * result + (mobileEndPointUrl != null ? mobileEndPointUrl.hashCode() : 0)
+        result = 31 * result + (mobileApplicationName != null ? mobileApplicationName.hashCode() : 0)
+        result = 31 * result + (mobileApplicationKey != null ? mobileApplicationKey.hashCode() : 0)
+        result = 31 * result + (sendEmailServerProperties != null ? sendEmailServerProperties.hashCode() : 0)
+        result = 31 * result + (receiveEmailServerProperties != null ? receiveEmailServerProperties.hashCode() : 0)
+        result = 31 * result + (senderMailboxAccountSettings != null ? senderMailboxAccountSettings.hashCode() : 0)
+        result = 31 * result + (replyToMailboxAccountSettings != null ? replyToMailboxAccountSettings.hashCode() : 0)
         return result
     }
 
@@ -300,10 +330,10 @@ class CommunicationOrganization implements Serializable {
     }
 
 
-    public static List<CommunicationOrganization> fetchActive() {
+    public static List<CommunicationOrganization> fetchAvailable() {
         def query
         CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('CommunicationOrganization.fetchActive').list()
+            query = session.getNamedQuery('CommunicationOrganization.fetchAvailable').list()
         }
         return query
     }
@@ -336,7 +366,7 @@ class CommunicationOrganization implements Serializable {
         return "CommunicationOrganization{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", isActive=" + isActive +
+                ", isAvailable=" + isAvailable +
                 ", parent=" + parent +
                 ", description='" + description + '\'' +
                 ", dateFormat='" + dateFormat + '\'' +
@@ -346,6 +376,9 @@ class CommunicationOrganization implements Serializable {
                 ", lastModified=" + lastModified +
                 ", version=" + version +
                 ", dataOrigin='" + dataOrigin + '\'' +
+                ", mobileEndPointUrl='" + mobileEndPointUrl + '\'' +
+                ", mobileApplicationName='" + mobileApplicationName + '\'' +
+                ", mobileApplicationKey='" + mobileApplicationKey + '\'' +
                 ", sendEmailServerProperties=" + sendEmailServerProperties +
                 ", receiveEmailServerProperties=" + receiveEmailServerProperties +
                 ", senderMailboxAccountSettings=" + senderMailboxAccountSettings +

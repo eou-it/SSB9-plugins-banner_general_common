@@ -206,7 +206,13 @@ class CommunicationSendEmailMethod {
     private void setConnectionProperties( HtmlEmail email ) {
         Properties emailServerProperties = new Properties()
 
-        CommunicationEmailServerProperties sendEmailServerProperties = senderOrganization?.sendEmailServerProperties?.get(0)
+        CommunicationEmailServerProperties sendEmailServerProperties
+
+        if (senderOrganization?.sendEmailServerProperties != null && senderOrganization?.sendEmailServerProperties.size() > 0)
+               sendEmailServerProperties = senderOrganization?.sendEmailServerProperties?.get(0)
+        else {
+            sendEmailServerProperties = CommunicationOrganization.fetchRoot()?.sendEmailServerProperties?.get(0)
+        }
 
         if (sendEmailServerProperties) {
             email.setHostName(sendEmailServerProperties.host);

@@ -35,7 +35,12 @@ class CommunicationOrganizationService extends ServiceBase {
         else if (communicationOrganization.parent == null)
             communicationOrganization.parent = rootOrg.id
 
-        communicationOrganization.isActive = communicationOrganization.isActive ?: false;
+        communicationOrganization.isAvailable = communicationOrganization.isAvailable ?: false;
+
+        /* generate encrypted password if necessary*/
+        if (communicationOrganization.clearTextPassword != null) {
+            communicationOrganization.mobileApplicationKey = encryptMailBoxAccountPassword(communicationOrganization.clearTextPassword)
+        }
 
         if (communicationOrganization.dateFormat != null) {
             try {
@@ -112,6 +117,7 @@ class CommunicationOrganizationService extends ServiceBase {
             }
             communicationOrganization.senderMailboxAccountSettings[0].userName = senderMailbox.userName
             communicationOrganization.senderMailboxAccountSettings[0].clearTextPassword = senderMailbox.clearTextPassword
+            communicationOrganization.senderMailboxAccountSettings[0].encryptedPassword = senderMailbox.encryptedPassword
             communicationOrganization.senderMailboxAccountSettings[0].emailAddress = senderMailbox.emailAddress
             communicationOrganization.senderMailboxAccountSettings[0].emailDisplayName = senderMailbox.emailDisplayName ? senderMailbox.emailDisplayName : null
         }
@@ -124,6 +130,7 @@ class CommunicationOrganizationService extends ServiceBase {
             communicationOrganization.replyToMailboxAccountSettings[0].emailDisplayName = replyToMailbox.emailDisplayName ? replyToMailbox.emailDisplayName : null
             communicationOrganization.replyToMailboxAccountSettings[0].emailAddress = replyToMailbox.emailAddress
             communicationOrganization.replyToMailboxAccountSettings[0].clearTextPassword = replyToMailbox.clearTextPassword
+            communicationOrganization.replyToMailboxAccountSettings[0].encryptedPassword = replyToMailbox.encryptedPassword
             communicationOrganization.replyToMailboxAccountSettings[0].userName = replyToMailbox.userName
         }
 
@@ -143,7 +150,12 @@ class CommunicationOrganizationService extends ServiceBase {
             communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
         }
 
-        communicationOrganization.isActive = communicationOrganization.isActive ?: false;
+        communicationOrganization.isAvailable = communicationOrganization.isAvailable ?: false;
+
+        /* generate encrypted password if necessary*/
+        if (communicationOrganization.clearTextPassword != null) {
+            communicationOrganization.mobileApplicationKey = encryptMailBoxAccountPassword(communicationOrganization.clearTextPassword)
+        }
 
         if (communicationOrganization.dateFormat != null) {
             try {

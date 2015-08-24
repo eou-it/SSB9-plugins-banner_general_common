@@ -56,7 +56,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testCreateValidOrganization() {
         def organization = newValidForCreateOrganization()
-        organization.isActive = true
+        organization.isAvailable = true
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
         def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
         organization.receiveEmailServerProperties = [receiveProperties]
@@ -65,7 +65,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertNotNull organization.receiveEmailServerProperties
         assertNotNull organization.sendEmailServerProperties
         assertNull(organization.parent)
-        assertTrue(organization.isActive)
+        assertTrue(organization.isAvailable)
 
 
     }
@@ -90,9 +90,9 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         //Test if the generated entity now has an id assigned
         assertNotNull organization.id
         assertNull(organization.parent)
-        assertFalse(organization.isActive)
+        assertFalse(organization.isAvailable)
         organization.description = u_valid_description
-        organization.isActive = true
+        organization.isAvailable = true
         organization.name = u_valid_name
 
         organization.save()
@@ -101,7 +101,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertEquals("Updated description", u_valid_description, updatedOrganization.description)
 
         assertEquals("Updated name", u_valid_name, updatedOrganization.name)
-        assertTrue(updatedOrganization.isActive)
+        assertTrue(updatedOrganization.isAvailable)
         // Test update of dependent objects
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
         organization.receiveEmailServerProperties = [receiveProperties]

@@ -67,7 +67,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             long addedListCount = communicationOrganizationService.list().size()
             assertEquals(originalListCount + 1, addedListCount)
             assertNull(organization.parent)
-            assertFalse(organization.isActive)
+            assertFalse(organization.isAvailable)
         }
     }
 
@@ -82,7 +82,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertEquals("test", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
         assertNull(createdOrganization.parent)
-        assertFalse(createdOrganization.isActive)
+        assertFalse(createdOrganization.isAvailable)
 
         CommunicationOrganization foundOrganization = CommunicationOrganization.findByName("test")
         assertEquals(createdOrganization, foundOrganization)
