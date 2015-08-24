@@ -135,10 +135,12 @@ class CommunicationOrganizationService extends ServiceBase {
         }
 
 /* ensure both username and email address are populated*/
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName != null)) {
+        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName != null)
+            && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress == null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName == null)) {
             throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
         }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null)) {
+        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null)
+                  && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress == null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName == null)) {
             throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
         }
 
