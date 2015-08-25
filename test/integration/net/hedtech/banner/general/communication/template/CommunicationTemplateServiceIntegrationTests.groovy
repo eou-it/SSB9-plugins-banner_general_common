@@ -239,18 +239,6 @@ class CommunicationTemplateServiceIntegrationTests extends BaseIntegrationTestCa
 
     }
 
-    @Test
-    void testFetchPublishedActivePublicByFolderId() {
-
-        def emailTemplate = newValidForCreateEmailTemplate( folder1 )
-        // We are testing that we can fetch published templates, so create it as published
-        emailTemplate.published=true
-        emailTemplate.save( failOnError: true, flush: true )
-        assertNotNull( emailTemplate.folder.name )
-        def emailTemplates = communicationTemplateService.fetchPublishedActivePublicByFolderId( folder1.id )
-        assertEquals( 1, emailTemplates.size() )
-    }
-
     private def newValidForCreateFolder(String folderName) {
         def folder = new CommunicationFolder(
                 description: i_valid_folder_description,

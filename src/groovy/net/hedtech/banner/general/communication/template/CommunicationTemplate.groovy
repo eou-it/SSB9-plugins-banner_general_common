@@ -27,13 +27,7 @@ import javax.persistence.*
                 query = """ FROM CommunicationTemplate a
                     WHERE a.folder.name = :folderName
                     AND   upper(a.name) = upper(:templateName)
-                    AND   a.id <> :id"""),
-        @NamedQuery(name = "CommunicationTemplate.fetchPublishedActivePublicByFolderId",
-                query = """ FROM CommunicationTemplate a
-                    WHERE a.folder.id = :folderId
-                    AND a.published = 'Y'
-                    AND SYSDATE between NVL(validFrom,SYSDATE) and NVL(validTo, SYSDATE)
-                    AND personal = 'N'""")
+                    AND   a.id <> :id""")
 ])
 public abstract class CommunicationTemplate implements Serializable {
     /**
@@ -73,13 +67,6 @@ public abstract class CommunicationTemplate implements Serializable {
     @JoinColumn(name = "GCBTMPL_FOLDER_ID", referencedColumnName = "GCRFLDR_SURROGATE_ID")
     @org.hibernate.annotations.ForeignKey(name = "FK1_GCBTMPL_INV_GCRFLDR_KEY")
     CommunicationFolder folder
-
-    /**
-     * Indicates if the template can be used for communications (1=Yes or 0=No). A template can be used for communication if it is active.
-     */
-    @Type(type = "yes_no")
-    @Column(name = "GCBTMPL_ACTIVE")
-    Boolean active = true
 
     /**
      * Indicates if this is a one-off version of the template (1=Yes or 0=No).
@@ -183,17 +170,6 @@ public abstract class CommunicationTemplate implements Serializable {
                     .list()[0]
         }
         return query
-    }
-
-    public static List<CommunicationTemplate> fetchPublishedActivePublicByFolderId(Long id) {
-
-        def templateList
-        CommunicationTemplate.withSession { session ->
-            templateList = session.getNamedQuery('CommunicationTemplate.fetchPublishedActivePublicByFolderId')
-                    .setLong('folderId', id)
-                    .list()
-        }
-        return templateList
     }
 
     public static Boolean existsAnotherNameFolder(Long templateId, String templateName, String folderName) {

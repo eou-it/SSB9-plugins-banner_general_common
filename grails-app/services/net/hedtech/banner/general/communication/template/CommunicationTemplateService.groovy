@@ -70,16 +70,6 @@ class CommunicationTemplateService extends ServiceBase {
             throw new ApplicationException( CommunicationEmailTemplate, "@@r1:idNotValid@@" )
     }
 
-
-    public List<CommunicationTemplate> fetchPublishedActivePublicByFolderId( Long folderId ) {
-
-        def communicationTemplateList = CommunicationEmailTemplate.withSession { session ->
-            org.hibernate.Query query = session.getNamedQuery( 'CommunicationTemplate.fetchPublishedActivePublicByFolderId' )
-                    .setLong( 'folderId', folderId ); query.list()
-        }
-        return communicationTemplateList
-    }
-
     def preDelete( domainModelOrMap ) {
 
         def oldTemplate = CommunicationTemplate.get(domainModelOrMap?.id ?: domainModelOrMap?.domainModel?.id)

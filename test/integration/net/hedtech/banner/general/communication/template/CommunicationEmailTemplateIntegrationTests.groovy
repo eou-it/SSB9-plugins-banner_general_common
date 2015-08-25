@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.template
 
@@ -72,18 +72,6 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     public void tearDown() {
         super.tearDown()
         logout()
-    }
-
-
-    @Test
-    void testDelete() {
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
-        emailTemplate.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull emailTemplate.id
-        def id = emailTemplate.id
-        emailTemplate.delete()
-        assertNull CommunicationEmailTemplate.get( id )
     }
 
 
@@ -185,19 +173,6 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
 
-    }
-
-
-    @Test
-    void testFetchPublishedActivePublicByFolderId() {
-
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
-        emailTemplate.save( failOnError: true, flush: true )
-        println "From: " + emailTemplate.validFrom
-        println "To:" + emailTemplate.validTo
-        assertNotNull( emailTemplate.folder.name )
-        def emailTemplates = CommunicationTemplate.fetchPublishedActivePublicByFolderId( folder.id )
-        assertEquals( 1, emailTemplates.size() )
     }
 
 
