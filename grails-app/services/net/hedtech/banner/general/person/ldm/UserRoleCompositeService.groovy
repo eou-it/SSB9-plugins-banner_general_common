@@ -19,8 +19,8 @@ class UserRoleCompositeService {
  * We are using executeQuery for performance reasons, only returning
  * what we really need, and using our ability to inner join un-related domains in executeQuery.
  */
-    def fetchAllByRole(Map params, boolean count = false) {
-        def results = []
+    def fetchAllByRole(Map params) {
+        def pidms = []
         def countResult = 0
         String sortField
         String order
@@ -32,11 +32,11 @@ class UserRoleCompositeService {
         }
 
         if (params.sort?.trim() == "firstName") {
-            sortField = "a.spriden_first_name, a.spriden_id"
+            sortField = "a.spriden_first_name"
         } else {
-            sortField = "a.spriden_last_name, a.spriden_id"
+            sortField = "a.spriden_last_name"
         }
-        def orderByString = " order by " + sortField + " " + order
+        def orderByString = " order by " + sortField + " " + order + ", a.spriden_id" + " " + order
 
         def offset = params.offset ? params.offset.trim()?.toInteger() : 0
 
@@ -45,11 +45,9 @@ class UserRoleCompositeService {
         switch (params.role.toLowerCase()) {
             case 'faculty':
                 if (institution.studentInstalled) {
-                    def sql
                     try {
                         connection = sessionFactory.getCurrentSession()
-                        if (count) {
-                            def countQuery = """select count(a.spriden_pidm) from spriden a,
+                        def countQuery = """select count(a.spriden_pidm) from spriden a,
                                   svq_sibinst_access b
                                   where a.spriden_pidm = b.sibinst_pidm
                                   and b.stvfcst_active_ind = 'A'
@@ -62,14 +60,12 @@ class UserRoleCompositeService {
                                                         and c.sibinst_schd_ind = 'Y'
                                                         and sysdate < e.stvterm_end_date)
                                   and a.spriden_change_ind is null"""
-                            def querySqlFlatten = countQuery.replace("\n", "").replaceAll(/  */, " ")
-                            def query = connection.createSQLQuery(querySqlFlatten)
-                            def row = query.with {
-                                uniqueResult()
-                            }
-                            countResult = row
-                        } else {
-                            def querySql = """select a.spriden_pidm from spriden a, svq_sibinst_access b
+                        def querySqlFlattenCount = countQuery.replace("\n", "").replaceAll(/  */, " ")
+                        def queryCount = connection.createSQLQuery(querySqlFlattenCount)
+                        countResult = queryCount.with {
+                            uniqueResult()
+                        }
+                        def querySql = """select a.spriden_pidm from spriden a, svq_sibinst_access b
                                   where a.spriden_pidm = b.sibinst_pidm
                                   and b.stvfcst_active_ind = 'A'
                                   and b.sibinst_schd_ind = 'Y'
@@ -82,17 +78,16 @@ class UserRoleCompositeService {
                                                         and sysdate < e.stvterm_end_date)
                                   and a.spriden_change_ind is null
                                   $orderByString"""
-                            def querySqlFlatten = querySql.replace("\n", "").replaceAll(/  */, " ")
-                            def query = connection.createSQLQuery(querySqlFlatten)
-                            def rows = query.with {
-                                setMaxResults(max)
-                                setFirstResult(offset)
-                                list()
-                            }
-                            results = rows.collect {
-                                if (it instanceof BigDecimal) it.toInteger()
-                                else it[0].toInteger()
-                            }
+                        def querySqlFlatten = querySql.replace("\n", "").replaceAll(/  */, " ")
+                        def query = connection.createSQLQuery(querySqlFlatten)
+                        def rows = query.with {
+                            setMaxResults(max)
+                            setFirstResult(offset)
+                            list()
+                        }
+                        pidms = rows.collect {
+                            if (it instanceof BigDecimal) it.toInteger()
+                            else it[0].toInteger()
                         }
                     } catch (SQLException e) {
                         log.error "Person faculty sql exception not present, unable to process faculty roles $e"
@@ -108,37 +103,32 @@ class UserRoleCompositeService {
 
             case 'student':
                 if (institution.studentInstalled) {
-                    def sql
                     try {
                         connection = sessionFactory.getCurrentSession()
-                        if (count) {
-                            def countQuery = """select count(a.spriden_pidm) from spriden a where exists
+                        def countQuery = """select count(a.spriden_pidm) from spriden a where exists
                                    (select 1 from sgbstdn b
                                    where a.spriden_pidm = b.sgbstdn_pidm)
                                    and a.spriden_change_ind is null"""
-                            def querySqlFlatten = countQuery.replace("\n", "").replaceAll(/  */, " ")
-                            def query = connection.createSQLQuery(querySqlFlatten)
-                            def row = query.with {
-                                uniqueResult()
-                            }
-                            countResult = row
-                        } else {
-                            def querySql = """select a.spriden_pidm pidm from spriden a where exists
+                        def querySqlFlattenCount = countQuery.replace("\n", "").replaceAll(/  */, " ")
+                        def queryCount = connection.createSQLQuery(querySqlFlattenCount)
+                        countResult = queryCount.with {
+                            uniqueResult()
+                        }
+                        def querySql = """select a.spriden_pidm pidm from spriden a where exists
                                          (select 1 from sgbstdn b
                                          where a.spriden_pidm = b.sgbstdn_pidm)
                                          and a.spriden_change_ind is null
                                          $orderByString"""
-                            def querySqlFlatten = querySql.replace("\n", "").replaceAll(/  */, " ")
-                            def query = connection.createSQLQuery(querySqlFlatten)
-                            def rows = query.with {
-                                setMaxResults(max)
-                                setFirstResult(offset)
-                                list()
-                            }
-                            results = rows.collect {
-                                if (it instanceof BigDecimal) it.toInteger()
-                                else it[0].toInteger()
-                            }
+                        def querySqlFlatten = querySql.replace("\n", "").replaceAll(/  */, " ")
+                        def query = connection.createSQLQuery(querySqlFlatten)
+                        def rows = query.with {
+                            setMaxResults(max)
+                            setFirstResult(offset)
+                            list()
+                        }
+                        pidms = rows.collect {
+                            if (it instanceof BigDecimal) it.toInteger()
+                            else it[0].toInteger()
                         }
                     } catch (SQLException e) {
                         log.error "Person student sql exception not present, unable to process student roles $e"
@@ -153,8 +143,7 @@ class UserRoleCompositeService {
                 break
         }
 
-        if (count) return countResult
-        else return results
+        return [pidms : pidms, count: countResult]
     }
 
 
@@ -210,9 +199,8 @@ class UserRoleCompositeService {
                 }
 
 
-                if (studentRole) {
+                if (!studentRole) {
                     try {
-
                         connection = sessionFactory.getCurrentSession()
                         def querySql = """select a.spriden_pidm from spriden a
                              where exists (select 1 from sgbstdn b
@@ -225,14 +213,7 @@ class UserRoleCompositeService {
                             setParameterList("pidms", pidms)
                             list()
                         }
-                        rows?.each { it ->
-                            def roles = results.get(it) ?: []
-                            def newRole = new RoleDetail()
-                            newRole.role = 'Student'
-                            roles << newRole
-                            results.put(it, roles)
-                        }
-
+                        results = setStudentRole(rows, results)
                     }
                     catch (SQLException e) {
                         log.error "Person student sql exception not present, unable to process student roles $e"
@@ -244,11 +225,25 @@ class UserRoleCompositeService {
                         log.error "Person student list exception $ae"
                     }
 
+                } else {
+                    results = setStudentRole(pidms, results)
                 }
             }
         }
 
         results
+    }
+
+
+    private def setStudentRole(def pidms, def results) {
+        pidms?.each { it ->
+            def roles = results.get(it) ?: []
+            def newRole = new RoleDetail()
+            newRole.role = 'Student'
+            roles << newRole
+            results.put(it, roles)
+        }
+        return results
     }
 
 }

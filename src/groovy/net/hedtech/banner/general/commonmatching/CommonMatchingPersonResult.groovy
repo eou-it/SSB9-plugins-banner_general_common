@@ -13,7 +13,10 @@ import javax.persistence.*
                 query = """FROM CommonMatchingPersonResult a
                            WHERE a.resultIndicator = 'M'""") ,
         @NamedQuery(name = "CommonMatchingPersonResult.fetchAllResults",
-                query = """FROM CommonMatchingPersonResult a """)])
+                query = """FROM CommonMatchingPersonResult a """),
+        @NamedQuery(name = "CommonMatchingPersonResult.fetchCountMatchResults",
+                query = """SELECT count(*) FROM CommonMatchingPersonResult a
+                           WHERE a.resultIndicator = 'M'""") ])
 class CommonMatchingPersonResult implements Serializable {
 
     /**
@@ -121,19 +124,26 @@ class CommonMatchingPersonResult implements Serializable {
 
     public static List fetchAllMatchResults(def params = [:]) {
 
-        def pidmsres = []
+        def personList = []
 
-        pidmsres = CommonMatchingPersonResult.withSession
+        personList = CommonMatchingPersonResult.withSession
                 { session ->
                     org.hibernate.Query query1 = session.getNamedQuery('CommonMatchingPersonResult.fetchAllMatchResults')
-                    def orderBy
-                    if (params.sort) {
-                        orderBy = " order by a." + params.sort
+                    String sortField
+                    String order
+                    if (params.order) {
+                        order = params.order.trim()
+                    } else {
+                        order = "asc"
                     }
-                    else {
-                        orderBy = " order by a.lastName, a.firstName, a.mi, a.bannerId"
+                    if (params.sort?.trim() == "firstName") {
+                        sortField = "a.firstName"
+                    } else {
+                        sortField = "a.lastName"
                     }
-                    org.hibernate.Query query = session.createQuery(query1.getQueryString() + orderBy)
+                    def orderByString = " order by " + sortField + " " + order + ", a.bannerId" + " " + order
+
+                    org.hibernate.Query query = session.createQuery(query1.getQueryString() + orderByString)
 
                     def max
                     def offset
@@ -150,7 +160,7 @@ class CommonMatchingPersonResult implements Serializable {
                     query.list()
                 }
 
-        return pidmsres
+        return personList
     }
 
     public static List fetchAllResults(def params = [:]) {
@@ -187,6 +197,12 @@ class CommonMatchingPersonResult implements Serializable {
         return pidmsres
     }
 
+    public static def fetchCountMatchResults() {
+        def count = CommonMatchingPersonResult.withSession { session ->
+            session.getNamedQuery('CommonMatchingPersonResult.fetchCountMatchResults').uniqueResult()
+        }
+        return count
+    }
 
 
     @Override

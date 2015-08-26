@@ -335,13 +335,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue emails.size() > 1
         // see that person has all of the integration emails
         def emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
-                personCompositeService.PERSON_EMAIL_TYPE, "Institution")[0]?.value
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_institution)[0]?.value
         assertNotNull emailInstitutionRuleValue
         def emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
-                personCompositeService.PERSON_EMAIL_TYPE, "Personal")[0]?.value
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_personal)[0]?.value
         assertNotNull emailPersonalRuleValue
         def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
-                personCompositeService.PERSON_EMAIL_TYPE, "Work")[0]?.value
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_work)[0]?.value
         assertNotNull emailWorkRuleValue
         assertNotNull emails.find { it.emailType.code == emailWorkRuleValue }
         assertNotNull emails.find { it.emailType.code == emailPersonalRuleValue }
@@ -354,9 +354,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", "application/json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary",]],
-                      emails: [[emailAddress: homeEmail, emailType: emailPersonalRuleValue],
-                               [emailAddress: schoolEmail, emailType: emailInstitutionRuleValue],
-                               [emailAddress: workEmail, emailType: emailWorkRuleValue]]
+                      emails: [[emailAddress: homeEmail, emailType: i_success_emailType_personal],
+                               [emailAddress: schoolEmail, emailType: i_success_emailType_institution],
+                               [emailAddress: workEmail, emailType: i_success_emailType_work]]
         ]
 
         def matched_persons = personCompositeService.list(params)
@@ -391,13 +391,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue emails.size() > 1
         // see that person has all of the integration emails
         def emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
-                personCompositeService.PERSON_EMAIL_TYPE, "Institution")[0]?.value
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_institution)[0]?.value
         assertNotNull emailInstitutionRuleValue
         def emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
-                personCompositeService.PERSON_EMAIL_TYPE, "Personal")[0]?.value
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_personal)[0]?.value
         assertNotNull emailPersonalRuleValue
         def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
-                personCompositeService.PERSON_EMAIL_TYPE, "Work")[0]?.value
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_work)[0]?.value
         assertNotNull emailWorkRuleValue
         assertNotNull emails.find { it.emailType.code == emailWorkRuleValue }
         assertNotNull emails.find { it.emailType.code == emailPersonalRuleValue }
@@ -411,9 +411,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", "application/json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary",]],
-                      emails: [[emailAddress: homeEmail, emailType: emailPersonalRuleValue],
-                               [emailAddress: schoolEmail, emailType: emailInstitutionRuleValue],
-                               [emailAddress: workEmail, emailType: emailWorkRuleValue]]
+                      emails: [[emailAddress: homeEmail, emailType: i_success_emailType_personal],
+                               [emailAddress: schoolEmail, emailType: i_success_emailType_institution],
+                               [emailAddress: workEmail, emailType: i_success_emailType_work]]
         ]
 
         def matched_persons = personCompositeService.list(params)
@@ -761,14 +761,14 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListapiWithRoleStudentAndLargePagination() {
         def params1 = [role: "student"]
-        def resultCount = userRoleCompositeService.fetchAllByRole(params1, true)
-        assertTrue resultCount > 2000
+        Map resultCount = userRoleCompositeService.fetchAllByRole(params1)
+        assertTrue resultCount.count > 500
 
         def params = [role: "student", max: '2000', offset: '100']
 
         def persons = personCompositeService.list(params)
         // verify pagination capped at 500
-        assertEquals 2000, persons.size()
+        assertEquals 500, persons.size()
         persons.each {
             it.roles.role == "Student"
         }
@@ -1147,7 +1147,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         finally {
             sql?.close()
         }
-        assertTrue insertCount > 2000
+        assertTrue insertCount > 500
         def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
         assertEquals insertCount, persextract.size()
 
@@ -1172,21 +1172,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         log.debug "turn logging on "
 
         persons = personCompositeService.list(params)
-        assertEquals 2000, persons.size()
-
-        def testPerson = persons.find { it.names[0].personName.bannerId == "HOSFE2000" }
-        assertNotNull testPerson
-        assertEquals testPerson.person.id, perbio.id
-        assertEquals "MA", testPerson.addresses[0].address.addressType.code
-        assertEquals perAddr[0].id, testPerson.addresses[0].address.id
-        assertEquals "CELL", testPerson.phones[0].phone.telephoneType.code
-        assertEquals perTel[0].id, testPerson.phones[0].phone.id
-        assertEquals "HOME", testPerson.emails[0].email.emailType.code
-        assertEquals perEmail[0].id, testPerson.emails[0].email.id
-        assertEquals perRace.race, testPerson.races[0].raceDecorator.race
-        assertNotNull testPerson.roles[0][0].role in ["faculty", "student"]
-        assertNotNull testPerson.roles[1][0].role in ["faculty", "student"]
-
+        assertEquals 500, persons.size()
     }
 
 

@@ -164,17 +164,9 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
 
         def popselFetched =
                 PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDM", "BANNER", "GRAILS",
-                        [max: '10', offset: '0', sort: 'key'])
+                        [max: '10', offset: '0'])
 
         assertEquals 7, popselFetched.size()
-        assertTrue popselFetched[0].key < popselFetched[1].key
-        assertTrue popselFetched[1].key < popselFetched[2].key
-        assertTrue popselFetched[2].key < popselFetched[3].key
-        assertTrue popselFetched[3].key < popselFetched[4].key
-        assertTrue popselFetched[4].key < popselFetched[5].key
-        assertTrue popselFetched[5].key < popselFetched[6].key
-
-
     }
 
 

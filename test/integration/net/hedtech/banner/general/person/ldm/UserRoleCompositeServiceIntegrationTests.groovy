@@ -34,10 +34,10 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListStudentPersons() {
-        def results = userRoleCompositeService.fetchAllByRole([role: "student", max: '10', offset: '5'], false)
+        def results = userRoleCompositeService.fetchAllByRole([role: "student", max: '10', offset: '5'])
 
-        assertTrue results?.size() > 0
-        results.find { pidm ->
+        assertTrue results?.pidms?.size() > 0
+        results.pidms?.find { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
     }
@@ -79,47 +79,45 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListStudentPersonsCount() {
-        def results = userRoleCompositeService.fetchAllByRole([role: "student"], true)
+        def results = userRoleCompositeService.fetchAllByRole([role: "student"])
 
-        assertTrue results > 0
+        assertTrue results.count > 0
     }
 
 
     @Test
     void testListFacultyPersonsCount() {
-        def results = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
+        def results = userRoleCompositeService.fetchAllByRole([role: "faculty"])
 
-        assertTrue results > 0
+        assertTrue results.count > 0
     }
 
 
     @Test
     void testListFacultyPersonsWithPagination() {
-        def count = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
         def results = userRoleCompositeService.fetchAllByRole([role: "faculty", max: '10', offset: '50'])
         // pagination will bring rows 50-59 ,  make sure we have more than 60 rows
-        assertTrue count > 60
-        assertEquals 10, results?.size()
-        results.each { pidm ->
+        assertTrue results.count > 60
+        assertEquals 10, results.pidms?.size()
+        results.pidms?.each { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
         // paginate beyond number of rows to test we get 0 back
-        def maxPages = Math.round((count / 500) + 1) * 500
+        def maxPages = Math.round((results.count / 500) + 1) * 500
         def results3 = userRoleCompositeService.fetchAllByRole([role: "faculty", max: '500', offset: maxPages.toString()])
 
-        assertEquals 0, results3?.size()
+        assertEquals 0, results3?.pidms?.size()
     }
 
 
     @Test
     void testListFacultyPersonsWithoutPagination() {
-        def count = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
         def results = userRoleCompositeService.fetchAllByRole([role: "faculty"])
         def actual = 0
-        if (count > 500) actual = 500
-        else actual = count.toInteger()
-        assertEquals actual, results?.size()
-        results.each { pidm ->
+        if (results.count > 500) actual = 500
+        else actual = results.count.toInteger()
+        assertEquals actual, results?.pidms?.size()
+        results?.pidms.each { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
     }
@@ -127,42 +125,40 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListStudentPersonsWithPagination() {
-        def count = userRoleCompositeService.fetchAllByRole([role: "student"], true)
-        assertTrue count > 500
+        def results1 = userRoleCompositeService.fetchAllByRole([role: "student"])
+        assertTrue results1.count > 500
         def results = userRoleCompositeService.fetchAllByRole([role: "student", max: '10', offset: '50'])
         // expect to get rows 50-59 back
-        assertEquals 10, results?.size()
-        results.find { pidm ->
+        assertEquals 10, results?.pidms?.size()
+        results.pidms?.find { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
         // expect to get rows 500-999 back
         def results2 = userRoleCompositeService.fetchAllByRole([role: "student", max: '500', offset: '500'])
-        assertTrue count > 1000
-        assertEquals 500, results2?.size()
-        results.each { pidm ->
+        assertTrue results1.count > 1000
+        assertEquals 500, results2?.pidms?.size()
+        results.pidms?.each { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
         // test pgination beyond number of rows we have to test we get 0 back
-        def maxPages = Math.round((count / 500) + 1) * 500
+        def maxPages = Math.round((results1.count / 500) + 1) * 500
         def results3 = userRoleCompositeService.fetchAllByRole([role: "student", max: '500', offset: maxPages.toString()])
 
-        assertEquals 0, results3?.size()
+        assertEquals 0, results3?.pidms?.size()
 
     }
 
 
     @Test
     void testListStudentPersonsWithOutPagination() {
-        def count = userRoleCompositeService.fetchAllByRole([role: "student"], true)
         def results = userRoleCompositeService.fetchAllByRole([role: "student"])
-
         def actual = 0
-        if (count > 500) actual = 500
-        else actual = count.toInteger()
+        if (results.count > 500) actual = 500
+        else actual = results.count.toInteger()
 
         // service forces pagination of 500
-        assertEquals actual, results?.size()
-        results.each { pidm ->
+        assertEquals actual, results?.pidms?.size()
+        results?.pidms?.each { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
     }
@@ -174,10 +170,9 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         institution.studentInstalled = false
         institution.save(flush: true, failOnError: true)
 
-        def count = userRoleCompositeService.fetchAllByRole([role: "faculty"], true)
-        assertEquals 0, count
         def results = userRoleCompositeService.fetchAllByRole([role: "faculty"])
-        assertEquals 0, results.size()
+        assertEquals 0, results.count
+        assertEquals 0, results.pidms?.size()
     }
 
 
@@ -187,10 +182,10 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         institution.studentInstalled = false
         institution.save(flush: true, failOnError: true)
 
-        def count = userRoleCompositeService.fetchAllByRole([role: "student"], true)
-        assertEquals 0, count
         def results = userRoleCompositeService.fetchAllByRole([role: "student"])
-        assertEquals 0, results.size()
+        assertEquals 0, results.count
+        def results1 = userRoleCompositeService.fetchAllByRole([role: "student"])
+        assertEquals 0, results1.pidms?.size()
     }
 
 }

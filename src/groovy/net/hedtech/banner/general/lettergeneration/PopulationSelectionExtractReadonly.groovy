@@ -169,17 +169,20 @@ class PopulationSelectionExtractReadonly implements Serializable {
             pidmsres = PopulationSelectionExtractReadonly.withSession
                     { session ->
                         org.hibernate.Query query1 = session.getNamedQuery('PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy')
-                        def orderBy
-                        if (params.sort) {
-                            orderBy = " order by a." + params.sort
-                            if (params.sort != "bannerId") {
-                                orderBy += " , a.bannerId"
-                            }
+                        String sortField
+                        String order
+                        if (params.order) {
+                            order = params.order.trim()
                         } else {
-                            orderBy = " order by a.lastName, a.firstName, a.mi, a.bannerId"
+                            order = "asc"
                         }
-                        org.hibernate.Query query = session.createQuery(query1.getQueryString() + orderBy)
-
+                        if (params.sort?.trim() == "firstName") {
+                            sortField = "a.firstName"
+                        } else {
+                            sortField = "a.lastName"
+                        }
+                        def orderByString = " order by " + sortField + " " + order + ", a.bannerId" + " " + order
+                        org.hibernate.Query query = session.createQuery(query1.getQueryString() + orderByString)
                         query.setString('application', application).setString('selection', selection)
                                 .setString('creatorId', creatorId).setString('lastModifiedBy', lastModifiedBy)
                         def max
