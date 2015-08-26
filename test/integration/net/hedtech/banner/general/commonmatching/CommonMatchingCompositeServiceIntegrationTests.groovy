@@ -105,8 +105,8 @@ class CommonMatchingCompositeServiceIntegrationTests extends BaseIntegrationTest
         def map = [source: "HEDM_LASTNAME_MATCH", lastName: "Jamison", firstName: "Emily"]
 
         def results = commonMatchingCompositeService.commonMatching(map)
-        assertEquals results.size(), names.size()
-        assertNotNull results.find { it.pidm == person.pidm }
+        assertEquals results.personList?.size(), names.size()
+        assertNotNull results.personList?.find { it.pidm == person.pidm }
 
     }
 
@@ -150,8 +150,8 @@ class CommonMatchingCompositeServiceIntegrationTests extends BaseIntegrationTest
                    sex   : bio.sex ]
 
         def results = commonMatchingCompositeService.commonMatching(map)
-        assertEquals 1, results.size()
-        assertNotNull results.find { it.pidm == person.pidm }
+        assertEquals 1, results.personList.size()
+        assertNotNull results.personList.find { it.pidm == person.pidm }
 
     }
 
@@ -196,7 +196,7 @@ class CommonMatchingCompositeServiceIntegrationTests extends BaseIntegrationTest
                    sex   : "M" ]
 
         def results = commonMatchingCompositeService.commonMatching(map)
-        assertEquals 0, results.size()
+        assertEquals 0, results.personList.size()
 
     }
 
