@@ -28,7 +28,7 @@ class SiteDetailCompositeService {
     private static final String DESCRIPTION ="description"
     private static final String QUERY = """from Campus a"""
     private static final String ENTITY ="a"
-    private static final List<String> VERSIONS = ["v1","v2","v3","v4"]
+    private static final List<String> VERSIONS = ["v1","v4"]
 
 
     def campusService
