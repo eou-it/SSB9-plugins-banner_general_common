@@ -15,7 +15,7 @@ import javax.persistence.*
 @NamedQueries(value = [
     @NamedQuery(name = "DirectDepositAccount.fetchByPidm",
         query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """),
-    @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndApIndicator",
+    @NamedQuery(name = "DirectDepositAccount.fetchActiveApAccountsByPidm",
         query = """ FROM DirectDepositAccount a 
                    WHERE a.pidm = :pidm 
                      AND a.apIndicator = 'A'
@@ -239,12 +239,12 @@ class DirectDepositAccount implements Serializable {
         return dirdAccounts
     }
     
-    public static fetchByPidmAndApIndicator(Integer pidm) {
+    public static fetchActiveApAccountsByPidm(Integer pidm) {
         def dirdAccounts
 
         DirectDepositAccount.withSession { session ->
             dirdAccounts = session.getNamedQuery(
-                    'DirectDepositAccount.fetchByPidmAndApIndicator')
+                    'DirectDepositAccount.fetchActiveApAccountsByPidm')
                     .setInteger('pidm', pidm).list()
         }
         return dirdAccounts

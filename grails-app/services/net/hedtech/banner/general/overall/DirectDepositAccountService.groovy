@@ -35,4 +35,10 @@ class DirectDepositAccountService extends ServiceBase{
         domain.priority = (lowestPriority ? lowestPriority+1 : 1)
     }
 
+    def getActiveApAccounts(pidm) {
+        def activeAccounts = DirectDepositAccount.fetchActiveApAccountsByPidm(pidm)
+
+        return activeAccounts
+    }
+
 }
