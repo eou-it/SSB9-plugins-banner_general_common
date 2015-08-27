@@ -68,7 +68,6 @@ class PersonCompositeService extends LdmService {
     def additionalIDService
     def personFilterCompositeService
     def personIdentificationNameAlternateService
-    def dateConvertHelperService
 
     static final String ldmName = 'persons'
     static final String PROCESS_CODE = "HEDM"
@@ -84,7 +83,6 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
     private static final String LATEST_VERSION = "v3"
-    private static final List<String> VERSIONS = ["v1","v4"]
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -968,7 +966,6 @@ class PersonCompositeService extends LdmService {
     def buildLdmPersonObjects(List<PersonIdentificationNameCurrent> personIdentificationList, Boolean studentRole = false) {
         def persons = [:]
         def pidms = []
-        def timeZone = "v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS))? dateConvertHelperService.getDBTimeZone() : ''
         personIdentificationList.each { personIdentification ->
             pidms << personIdentification.pidm
             persons.put(personIdentification.pidm, null) //Preserve list order.
@@ -993,9 +990,7 @@ class PersonCompositeService extends LdmService {
         }
 
         personBaseList.each { personBase ->
-            def birthDate = "v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)) ? dateConvertHelperService.convertDateIntoUTCFormat(personBase?.birthDate,timeZone) : personBase?.birthDate
-            def deadDate = "v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)) ? dateConvertHelperService.convertDateIntoUTCFormat(personBase?.deadDate,timeZone) : personBase?.deadDate
-            Person currentRecord = new Person(personBase,birthDate,deadDate)
+            Person currentRecord = new Person(personBase)
             currentRecord.maritalStatusDetail = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
             currentRecord.ethnicityDetail = personBase.ethnicity?.code ? ethnicityCompositeService.fetchByEthnicityCode(personBase.ethnicity?.code) : null
             /*  if( personBase.ssn ) {
