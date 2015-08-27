@@ -25,8 +25,7 @@ import javax.persistence.*
                    WHERE a.pidm = :pidm
                      AND a.bankRoutingNum = :bankRoutingNum
                      AND a.bankAccountNum = :bankAccountNum
-                     AND a.accountType = :accountType
-                     AND a.apIndicator = 'A'""")
+                     AND a.accountType = :accountType""")
 ])
 class DirectDepositAccount implements Serializable {
     

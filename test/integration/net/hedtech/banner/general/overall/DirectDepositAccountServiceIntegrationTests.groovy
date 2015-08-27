@@ -11,6 +11,7 @@ import grails.validation.ValidationException
 import groovy.sql.Sql
 import net.hedtech.banner.general.overall.DirectDepositAccountService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import net.hedtech.banner.exceptions.ApplicationException
 
 /**
  *
@@ -39,6 +40,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         // Assert domain values
         assertNotNull directDepositAccount
         assertNotNull directDepositAccount.id
+        assertEquals 3, directDepositAccount.priority
         assertEquals "36948575", directDepositAccount.bankAccountNum
         assertEquals "123478902", directDepositAccount.bankRoutingNum
         assertEquals "C", directDepositAccount.accountType
@@ -55,14 +57,24 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull directDepositAccount
     }
     
-    //TODO test creation of additional AP account
-    /*@Test
-     * test creation of additional active AP account, shouldn't be allowed
-     */
+    @Test
+    void testCreateDuplicateAccount() {
+        try {
+            def directDepositAccount1 = newDirectDepositAccount()
+            directDepositAccount1 = directDepositAccountService.create([domainModel: directDepositAccount1])
+            
+            def directDepositAccount2 = newDirectDepositAccount()
+            directDepositAccount2 = directDepositAccountService.create([domainModel: directDepositAccount2])
+            
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "recordAlreadyExists"
+        }
+    }
     
     private def newDirectDepositAccount() {
         def domain = new DirectDepositAccount(
-            pidm: 36732,
+            pidm: 37859, //49758,
             status: "P",
             documentType: "D",
             priority: 16,
