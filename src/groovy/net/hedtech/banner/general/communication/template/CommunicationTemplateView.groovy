@@ -79,10 +79,25 @@ public class CommunicationTemplateView implements Serializable {
     CommunicationChannel communicationChannel
 
     /**
+     * Indicates if the template is a personal template. Personal templates are available
+     * only for use by the owner and are not available to other users.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "personal")
+    Boolean personal
+
+    /**
      *  The user ID of the person who inserted this record.
      */
     @Column(name = "creator_id")
     String createdBy
+
+    /**
+     * VERSION: Optimistic lock token
+     */
+    @Version
+    @Column(name = "version")
+    Long version
 
 
 //    /******************* Named Queries *******************/
@@ -112,31 +127,31 @@ public class CommunicationTemplateView implements Serializable {
 //        return (query != null)
 //    }
 
-//    /**
-//     * Return list of templates along with count for display on list page
-//     * will return all shared templates and personal templates belonging to the current user
-//     * @param filterData
-//     * @param pagingAndSortParams
-//     * @return
-//     */
-//    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-//
-//        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
-//
-//        def queryCriteria = CommunicationTemplate.createCriteria()
-//        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-//            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
-//            and {
-//                or {
-//                    eq("personal",false)
-//                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
-//                }
-//            }
-//            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
-//        }
-//        return results
-//    }
-//
+    /**
+     * Return list of templates along with count for display on list page
+     * will return all shared templates and personal templates belonging to the current user
+     * @param filterData
+     * @param pagingAndSortParams
+     * @return
+     */
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationTemplateView.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            and {
+                or {
+                    eq("personal",false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                }
+            }
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
+    }
+
 //    /**
 //     * Returns a list of templates to be used when sending messages to a population
 //     * will return all templates that are active, shared and personal templates belonging to the user will be returned

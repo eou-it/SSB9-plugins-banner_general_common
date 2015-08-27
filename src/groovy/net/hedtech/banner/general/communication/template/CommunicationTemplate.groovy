@@ -52,7 +52,7 @@ public abstract class CommunicationTemplate implements Serializable {
     String name
 
     /**
-     * Indicates if the template is a personal template (1=Yes or 0=No). Personal templates are available
+     * Indicates if the template is a personal template. Personal templates are available
      * only for use by the owner and are not available to other users.
      */
     @Type(type = "yes_no")
@@ -183,31 +183,6 @@ public abstract class CommunicationTemplate implements Serializable {
 
         }
         return (query != null)
-    }
-
-    /**
-     * Return list of templates along with count for display on list page
-     * will return all shared templates and personal templates belonging to the current user
-     * @param filterData
-     * @param pagingAndSortParams
-     * @return
-     */
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-
-        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
-
-        def queryCriteria = CommunicationTemplate.createCriteria()
-        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
-            and {
-                or {
-                    eq("personal",false)
-                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
-                }
-            }
-            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
-        }
-        return results
     }
 
     /**
