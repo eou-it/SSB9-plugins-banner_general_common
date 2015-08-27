@@ -164,17 +164,19 @@ class PersonCompositeService extends LdmService {
                         searchResult = userRoleCompositeService.fetchAllByRole(params)
                         def pidms = searchResult.pidms
                         total = searchResult.count?.longValue()
-                        def pidmsObject = []
-                        pidms.each {
-                            pidmsObject << [data: it]
-                        }
-                        Map pidmsMap = [pidms: pidmsObject]
-                        def query = """from PersonIdentificationNameCurrent a
+                        if(pidms?.size() > 0) {
+                            def pidmsObject = []
+                            pidms.each {
+                                pidmsObject << [data: it]
+                            }
+                            Map pidmsMap = [pidms: pidmsObject]
+                            def query = """from PersonIdentificationNameCurrent a
                                        where a.pidm in (:pidms)
                                        order by a.$params.sort $params.order, a.bannerId $params.order
                                     """
-                        DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
-                        personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
+                            DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
+                            personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
+                        }
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
                     }
@@ -556,7 +558,7 @@ class PersonCompositeService extends LdmService {
                                  birthDay : dob?.format("dd"), birthMonth: dob?.format("MM"), birthYear: dob?.format("yyyy"),
                                  sex      : params?.gender, ssn: ssnCredentials?.credentialId,
                                  bannerId : bannerIdCredentials?.credentialId, email: emailAddr?.email,
-                                 emailType: emailAddr?.type, params: params]
+                                 emailType: emailAddr?.type, max: params.max, offset: params.offset, sort: params.sort, order: params.order]
                 def matchList = commonMatchingCompositeService.commonMatching(cm_params)
                 if(matchList.personList) {
                     matchFound = true
