@@ -1,11 +1,10 @@
 package net.hedtech.banner.general.communication.item
 
-import grails.orm.HibernateCriteriaBuilder
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
-import org.hibernate.Criteria
+import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
 import javax.persistence.Column
@@ -24,13 +23,6 @@ import javax.persistence.Version
 class CommunicationErrorItemView implements Serializable {
 
     /**
-     * The rownum selected as Id for the read only view as it does not have a primary/unique key
-     */
-    @Id
-    @Column(name = "id_key")
-    String idKey
-
-    /**
      * Surrogate Id of the corresponding group send record
      */
     @Column(name = "GCBGSND_SURROGATE_ID")
@@ -39,14 +31,9 @@ class CommunicationErrorItemView implements Serializable {
     /**
      * Surrogate Id of the corresponding group send record
      */
-    @Column(name = "GCRGSIM_REFERENCE_ID")
-    String itemReferenceId
-
-    /**
-     * Surrogate Id of the corresponding group send record
-     */
-    @Column(name = "GCBCJOB_REFERENCE_ID")
-    String jobReferenceId
+    @Id
+    @Column(name = "REFERENCE_ID")
+    String referenceId
 
     /**
      * Username of the person who initiated the communication.
@@ -73,10 +60,43 @@ class CommunicationErrorItemView implements Serializable {
     Long pidm
 
     /**
-     * The Banner ID of the recipient
+     * The first name of the recipient
      */
-    @Column(name = "recipient_name")
-    String recipientName
+    @Column(name = "first_name")
+    String firstName
+
+    /**
+     * The last name of the recipient
+     */
+    @Column(name = "last_name")
+    String lastName
+
+    /**
+     * The middle name of the recipient
+     */
+    @Column(name = "middle_name")
+    String middleName
+
+    /**
+     * The surname prefix of the recipient
+     */
+    @Column(name = "surname_prefix")
+    String surnamePrefix
+
+    /**
+     * This field identifies if a person record is confidential
+     *
+     */
+    @Type(type = "yes_no")
+    @Column(name = "confidential_ind")
+    Boolean confidential
+
+    /**
+     * This field indicates if a person is deceased.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "deceased_ind")
+    Boolean deceased
 
     /**
      * The date the communication item was errored out.

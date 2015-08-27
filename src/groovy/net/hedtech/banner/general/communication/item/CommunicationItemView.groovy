@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.item
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
 import javax.persistence.Column
@@ -52,6 +53,45 @@ class CommunicationItemView implements Serializable {
      */
     @Column(name = "pidm")
     Long pidm
+
+    /**
+     * The first name of the recipient
+     */
+    @Column(name = "first_name")
+    String firstName
+
+    /**
+     * The last name of the recipient
+     */
+    @Column(name = "last_name")
+    String lastName
+
+    /**
+     * The middle name of the recipient
+     */
+    @Column(name = "middle_name")
+    String middleName
+
+    /**
+     * The surname prefix of the recipient
+     */
+    @Column(name = "surname_prefix")
+    String surnamePrefix
+
+    /**
+     * This field identifies if a person record is confidential
+     *
+     */
+    @Type(type = "yes_no")
+    @Column(name = "confidential_ind")
+    Boolean confidential
+
+    /**
+     * This field indicates if a person is deceased.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "deceased_ind")
+    Boolean deceased
 
     /**
      * The date the communication item was actually sent.

@@ -92,10 +92,4 @@ class ExceptionFactory {
         ae.friendlyName = errorCode
         return ae
     }
-
-    public static ApplicationException createApplicationException( def entityClassOrName, String msg, String errorCode ) {
-        ApplicationException ae = new ApplicationException( entityClassOrName, new RuntimeException( msg ) )
-        ae.friendlyName = errorCode
-        return ae
-    }
 }
