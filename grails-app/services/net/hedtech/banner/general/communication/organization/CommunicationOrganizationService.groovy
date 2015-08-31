@@ -155,8 +155,10 @@ class CommunicationOrganizationService extends ServiceBase {
         communicationOrganization.isAvailable = communicationOrganization.isAvailable ?: false;
 
         /* generate encrypted password if necessary*/
-        if (communicationOrganization.clearTextPassword != null) {
+        if (communicationOrganization.clearTextPassword != null && communicationOrganization.clearTextPassword != "") {
             communicationOrganization.mobileApplicationKey = encryptMailBoxAccountPassword(communicationOrganization.clearTextPassword)
+        } else if (communicationOrganization.mobileApplicationName == null || communicationOrganization.mobileApplicationName == "") {
+            communicationOrganization.setMobileApplicationKey(null)
         }
 
         if (communicationOrganization.dateFormat != null) {

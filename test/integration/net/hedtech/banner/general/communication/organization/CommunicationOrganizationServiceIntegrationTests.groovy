@@ -102,6 +102,36 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     }
 
+    @Test
+    void testMobileSettings() {
+        CommunicationOrganization organization = new CommunicationOrganization()
+        organization.name = "Root"
+        organization.description = "description"
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("Root", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertNull(createdOrganization.parent)
+        assertFalse(createdOrganization.isAvailable)
+
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        assertEquals(rootorg.id, createdOrganization.id)
+
+        rootorg.setMobileApplicationName("BCM_GO_MOBILE");
+        rootorg.setMobileEndPointUrl("BCM_GO.com")
+        rootorg.setClearTextPassword("password")
+        CommunicationOrganization updatedRoot = communicationOrganizationService.update(rootorg)
+
+        assertEquals("BCM_GO_MOBILE", updatedRoot.getMobileApplicationName())
+        assertEquals("BCM_GO.com", updatedRoot.getMobileEndPointUrl())
+        assertNotNull(updatedRoot.mobileApplicationKey)
+
+        updatedRoot.setMobileApplicationName(null)
+        updatedRoot.setClearTextPassword(null)
+        CommunicationOrganization updatedRoot1 = communicationOrganizationService.update(updatedRoot)
+        assertNull(updatedRoot1.mobileApplicationName)
+        assertNull(updatedRoot1.mobileApplicationKey)
+    }
 
     @Test
     void testCreateMultiple() {
