@@ -211,7 +211,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         // First make sure you can publish it
         communicationEmailTemplateService.publishTemplate( id: emailTemplate.id )
 
-        CommunicationMergedEmailTemplate result = communicationTemplateMergeService.renderPreviewTemplate( emailTemplate )
+        CommunicationMergedEmailTemplate result = communicationTemplateMergeService.renderMergedEmailTemplate( emailTemplate )
 
 
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
