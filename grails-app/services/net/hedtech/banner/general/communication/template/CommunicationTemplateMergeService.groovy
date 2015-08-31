@@ -181,13 +181,24 @@ class CommunicationTemplateMergeService {
  * @param CommunicationEmailTemplate
  * @return CommunicationMergedEmailTemplate
  */
-    CommunicationMergedEmailTemplate renderPreviewTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
-        if (log.isDebugEnabled()) log.debug( "Rendering CommunicationTemplate with preview values only." )
+    CommunicationMergedEmailTemplate renderMergedEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
+        if (log.isDebugEnabled()) log.debug( "Rendering CommunicationEmailTemplate with preview values only." )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList ?: "", renderPreviewValues( communicationEmailTemplate.toList ?: "" ) )
         communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject ?: "", renderPreviewValues( communicationEmailTemplate.subject ?: "" ) )
         communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content ?: "", renderPreviewValues( communicationEmailTemplate.content ?: "" ) )
         communicationMergedEmailTemplate
+    }
+
+    CommunicationMergedMobileNotificationTemplate renderMergedMobileNotificationTemplate( CommunicationMobileNotificationTemplate communicationMobileNotificationTemplate ) {
+        if (log.isDebugEnabled()) log.debug( "Rendering CommunicationMobileNotificationTemplate with preview values only." )
+        CommunicationMergedMobileNotificationTemplate mergedTemplate = new CommunicationMergedMobileNotificationTemplate()
+        mergedTemplate.mobileHeadline = merge( communicationMobileNotificationTemplate.mobileHeadline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.mobileHeadline ?: "" ) )
+        mergedTemplate.headline = merge( communicationMobileNotificationTemplate.headline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.headline ?: "" ) )
+        mergedTemplate.description = merge( communicationMobileNotificationTemplate.description ?: "", renderPreviewValues( communicationMobileNotificationTemplate.description ?: "" ) )
+        mergedTemplate.destinationLink = merge( communicationMobileNotificationTemplate.destinationLink ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLink ?: "" ) )
+        mergedTemplate.destinationLabel = merge( communicationMobileNotificationTemplate.destinationLabel ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLabel ?: "" ) )
+        return mergedTemplate
     }
 
     /**
