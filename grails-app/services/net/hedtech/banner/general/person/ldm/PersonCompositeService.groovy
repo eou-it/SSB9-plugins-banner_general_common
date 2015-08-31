@@ -161,7 +161,9 @@ class PersonCompositeService extends LdmService {
                         if (role == "student") {
                             studentRole = true
                         }
+                        log.debug "fetchAllByRole $params"
                         searchResult = userRoleCompositeService.fetchAllByRole(params)
+                        log.debug "fetchAllByRole returns ${searchResult?.pidms?.size()}"
                         def pidms = searchResult.pidms
                         total = searchResult.count?.longValue()
                         if(pidms?.size() > 0) {
@@ -175,7 +177,9 @@ class PersonCompositeService extends LdmService {
                                        order by a.$params.sort $params.order, a.bannerId $params.order
                                     """
                             DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
+                            log.debug "PersonIdentificationNameCurrent query begins"
                             personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
+                            log.debug "PersonIdentificationNameCurrent returns ${personList?.size()}"
                         }
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
@@ -186,7 +190,9 @@ class PersonCompositeService extends LdmService {
             }
         }
         if (personList?.size() > 0) {
+            log.debug "buildLdmPersonObjects begins"
             resultList = buildLdmPersonObjects(personList, studentRole)
+            log.debug "buildLdmPersonObjects ends"
         }
 
         try {  // Avoid restful-api plugin dependencies.
@@ -559,7 +565,9 @@ class PersonCompositeService extends LdmService {
                                  sex      : params?.gender, ssn: ssnCredentials?.credentialId,
                                  bannerId : bannerIdCredentials?.credentialId, email: emailAddr?.email,
                                  emailType: emailAddr?.type, max: params.max, offset: params.offset, sort: params.sort, order: params.order]
+                log.debug "commonMatching request ${cm_params}"
                 def matchList = commonMatchingCompositeService.commonMatching(cm_params)
+                log.debug "commonMatching returns ${matchList?.personList?.size()}"
                 if(matchList.personList) {
                     matchFound = true
                     matchList.personList?.each {
@@ -1649,12 +1657,13 @@ class PersonCompositeService extends LdmService {
 
         // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
         def domainKeyParts = personFilterCompositeService.splitDomainKey(popSelEntity.title)
+        log.debug "PopulationSelectionExtractReadonly $domainKeyParts.application, $domainKeyParts.selection, $domainKeyParts.creatorId, $domainKeyParts.lastModifiedBy"
         personList = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
                 domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy, sortParams)
+        log.debug "query returned ${personList?.size()} rows"
         def totalCount = PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
                 domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy)
-
-
+        log.debug "total PopulationSelectionExtract records $totalCount"
         return [personList : personList, count: totalCount]
     }
 
