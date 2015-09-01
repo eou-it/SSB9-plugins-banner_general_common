@@ -133,8 +133,8 @@ class CommunicationGroupSendView implements Serializable {
 
         def queryCriteria = CommunicationGroupSendView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("populationName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.populationName))
-            ilike("templateName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.templateName))
+            ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
+            ilike("createdBy", filterData?.params?.createdBy)
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
