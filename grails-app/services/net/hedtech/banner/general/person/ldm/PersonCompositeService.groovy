@@ -82,7 +82,7 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
-    private static final String LATEST_VERSION = "v3"
+    private static final String VERSION_V3 = "v3"
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
@@ -1688,9 +1688,9 @@ class PersonCompositeService extends LdmService {
 
     private String getAcceptVersion() {
         String representationVersion = LdmService.getResponseRepresentationVersion()
-        if (representationVersion == null || representationVersion > LATEST_VERSION) {
+        if (representationVersion == null || representationVersion > VERSION_V3) {
             // Assume latest (current) version
-            representationVersion = LATEST_VERSION
+            representationVersion = VERSION_V3
         }
         return representationVersion
     }
