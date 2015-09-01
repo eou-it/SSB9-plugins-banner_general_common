@@ -10,6 +10,7 @@ import net.hedtech.banner.general.system.AddressType
 import net.hedtech.banner.general.system.CommonMatchingSource
 import net.hedtech.banner.general.system.EmailType
 import net.hedtech.banner.general.system.TelephoneType
+import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 import javax.persistence.*
 
@@ -18,6 +19,11 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "GV_GORCMSC")
+@NamedQueries(value = [
+		@NamedQuery(name = "CommonMatchingSourceRule.fetchBySource",
+				query = """FROM CommonMatchingSourceRule a
+                           WHERE a.commonMatchingSource.code = :source """)])
+@DatabaseModifiesState
 class CommonMatchingSourceRule implements Serializable {
 	
 	/**
@@ -226,4 +232,11 @@ class CommonMatchingSourceRule implements Serializable {
     
     //Read Only fields that should be protected against update
     public static readonlyProperties = [ 'commonMatchingSource' ]
+
+	static def List fetchBySource(String source) {
+		return CommonMatchingSourceRule.withSession { session ->
+			session.getNamedQuery('CommonMatchingSourceRule.fetchBySource')
+					.setString('source', source).list()
+		}
+	}
 }
