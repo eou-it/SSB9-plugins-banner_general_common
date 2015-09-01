@@ -34,7 +34,7 @@ class CommunicationMailboxAccount implements Serializable {
     @Column(name = "GCRMBAC_EMAIL_ADDRESS")
     String emailAddress
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "GCRMBAC_ORGANIZATION_ID")
     CommunicationOrganization organization
 

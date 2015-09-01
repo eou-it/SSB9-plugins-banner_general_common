@@ -91,6 +91,8 @@ class CommunicationOrganizationService extends ServiceBase {
                 communicationOrganization.sendEmailServerProperties[0].securityProtocol = CommunicationEmailServerConnectionSecurity.None
             else
                 communicationOrganization.sendEmailServerProperties[0].securityProtocol = CommunicationEmailServerConnectionSecurity.valueOf(sendEmailServerProperties?.securityProtocol?.name)
+        } else {
+            communicationOrganization?.getSendEmailServerProperties()?.clear()
         }
 
         if (receiveEmailServerProperties) {
@@ -109,6 +111,8 @@ class CommunicationOrganizationService extends ServiceBase {
                 communicationOrganization.receiveEmailServerProperties[0]?.securityProtocol = CommunicationEmailServerConnectionSecurity.None
             else
                 communicationOrganization.receiveEmailServerProperties[0]?.securityProtocol = CommunicationEmailServerConnectionSecurity.valueOf(receiveEmailServerProperties?.securityProtocol?.name)
+        } else {
+            communicationOrganization?.getReceiveEmailServerProperties()?.clear()
         }
 
         if (senderMailbox) {
@@ -120,6 +124,8 @@ class CommunicationOrganizationService extends ServiceBase {
             communicationOrganization.senderMailboxAccountSettings[0].encryptedPassword = senderMailbox.encryptedPassword
             communicationOrganization.senderMailboxAccountSettings[0].emailAddress = senderMailbox.emailAddress
             communicationOrganization.senderMailboxAccountSettings[0].emailDisplayName = senderMailbox.emailDisplayName ? senderMailbox.emailDisplayName : null
+        } else {
+            communicationOrganization?.getSenderMailboxAccountSettings()?.clear()
         }
 
         if (replyToMailbox) {
@@ -132,6 +138,8 @@ class CommunicationOrganizationService extends ServiceBase {
             communicationOrganization.replyToMailboxAccountSettings[0].clearTextPassword = replyToMailbox.clearTextPassword
             communicationOrganization.replyToMailboxAccountSettings[0].encryptedPassword = replyToMailbox.encryptedPassword
             communicationOrganization.replyToMailboxAccountSettings[0].userName = replyToMailbox.userName
+        } else {
+            communicationOrganization?.getReplyToMailboxAccountSettings()?.clear()
         }
 
 /* ensure both username and email address are populated*/
