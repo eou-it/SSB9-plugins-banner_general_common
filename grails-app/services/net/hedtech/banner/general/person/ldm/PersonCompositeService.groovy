@@ -512,7 +512,7 @@ class PersonCompositeService extends LdmService {
     private def searchPerson(Map params, def name) {
         def personList = []
         def count = 0
-        IntegrationConfiguration personMatchRule = IntegrationConfiguration.fetchByProcessCodeAndSettingName(PROCESS_CODE, PERSON_MATCH_RULE)[0]
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.fetchByProcessCodeAndSettingName(PROCESS_CODE, PERSON_MATCH_RULE)
 
         def ssnCredentials = params.credentials.find { credential ->
             credential.credentialType == "Social Security Number"
@@ -954,7 +954,7 @@ class PersonCompositeService extends LdmService {
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def buildPersonCredentials(Map credentialsMap, Map persons, List<PersonIdentificationNameCurrent> personIdentificationList) {
+    def buildPersonCredentials(Map credentialsMap, Map persons, def personList) {
         if(["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
             credentialsMap.imsSourcedIdBaseList.each { sourcedIdBase ->
                 Person person = persons.get(sourcedIdBase.pidm)
