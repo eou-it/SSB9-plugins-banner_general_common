@@ -1399,7 +1399,7 @@ class PersonCompositeService extends LdmService {
         Phonenumber.PhoneNumber parsedResult
         try {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
-            parsedResult = phoneUtil.parse(phoneNumber, getDefaultCountryCode())
+            parsedResult = phoneUtil.parse(phoneNumber, null)
             if (phoneUtil.isValidNumber(parsedResult)) {
                 setValidPhoneNumber(parsedNumber, parsedResult, phoneUtil)
             } else {
@@ -1411,17 +1411,6 @@ class PersonCompositeService extends LdmService {
         }
 
         parsedNumber
-    }
-
-
-    private String getDefaultCountryCode() {
-        List<InstitutionalDescription> institutions = InstitutionalDescription.list()
-        InstitutionalDescription institution = institutions.size() > 0 ? institutions[0] : null
-        Nation nation
-        if (institution?.natnCode) {
-            nation = Nation.findByCode(institution.natnCode)
-        }
-        return nation?.scodIso ?: 'US'
     }
 
 
@@ -1465,7 +1454,7 @@ class PersonCompositeService extends LdmService {
         Phonenumber.PhoneNumber parsedResult
         try {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
-            parsedResult = phoneUtil.parse(phoneNumber, getDefaultCountryCode())
+            parsedResult = phoneUtil.parse(phoneNumber, null)
             if (phoneUtil.isValidNumber(parsedResult)) {
                 log.debug "AfterPhone:" + phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
                 return phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
