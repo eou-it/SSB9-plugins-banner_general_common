@@ -38,6 +38,7 @@ class RoomCompositeService extends LdmService {
 
 
     List<AvailableRoom> list(Map params) {
+        log.debug( "Start of List()" )
         def entities
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         List allowedSortFields = ['number', 'title']
@@ -48,7 +49,9 @@ class RoomCompositeService extends LdmService {
             // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
+            log.debug( "Start of AvailableRoomHelper.fetchSearchAvailableRoom()" )
             def listOfObjectArrays = AvailableRoomHelper.fetchSearchAvailableRoom(filterParams.filterData, filterParams.pagingAndSortParams)
+            log.debug( "End of AvailableRoomHelper.fetchSearchAvailableRoom()" )
             entities = []
             listOfObjectArrays?.each {
                 entities << it[0]
@@ -402,20 +405,25 @@ class RoomCompositeService extends LdmService {
 
 
     private def getAvailableRooms(def listHousingRoomDescriptionReadOnly) {
+        log.debug( "Start of getAvailableRooms()" )
         def availableRooms = []
+        Map roomType = [:]
+        findAllByProcessCodeAndSettingName(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE)?.each { it ->
+            roomType.put( it.value, it.translationValue )
+        }
         listHousingRoomDescriptionReadOnly?.each { HousingRoomDescriptionReadOnly housingRoomDescription ->
-            List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-            String buildingGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid
-            String roomGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId(AvailableRoom.LDM_NAME, housingRoomDescription.id).guid
-            BuildingDetail building = buildingGuid ? new BuildingDetail(buildingGuid) : null
+            log.debug( "Start of Occupancy()" )
+            List occupancies = [new Occupancy(roomType.get( housingRoomDescription.roomType ), housingRoomDescription.capacity)]
+            log.debug( "End of Occupancy()" )
+            BuildingDetail building = housingRoomDescription.buildingGUID ? new BuildingDetail(housingRoomDescription.buildingGUID) : null
             if ("v2".equals(getAcceptVersion())) {
-                String siteGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid
-                SiteDetail site = siteGuid ? new SiteDetail(siteGuid) : null
-                availableRooms << new Room(housingRoomDescription, building, site, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+                SiteDetail site = housingRoomDescription.siteGUID ? new SiteDetail(housingRoomDescription.siteGUID) : null
+                availableRooms << new Room(housingRoomDescription, building, site, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
             } else {
-                availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, roomGuid, new Metadata(housingRoomDescription.dataOrigin))
+                availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
             }
         }
+        log.debug( "End of getAvailableRooms()" )
         return availableRooms
     }
 
