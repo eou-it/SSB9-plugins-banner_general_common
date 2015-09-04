@@ -9,6 +9,7 @@ import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.service.ServiceBase
+import org.apache.commons.lang.NotImplementedException
 
 class CommunicationTemplateService extends ServiceBase {
 
@@ -31,7 +32,6 @@ class CommunicationTemplateService extends ServiceBase {
 
 
     def preUpdate( domainModelOrMap ) {
-
         def template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap)
         template.folder = (template.folder ?: domainModelOrMap.folder)
 
@@ -45,9 +45,8 @@ class CommunicationTemplateService extends ServiceBase {
         stampAndValidate( template )
     }
 
-
     /**
-     * Marks the template as published and there by useable for communications.
+     * Marks the template as published and there by can be used for communications.
      * @param domainModelOrMap
      * @return
      */
@@ -60,14 +59,18 @@ class CommunicationTemplateService extends ServiceBase {
         return template
     }
 
+    /**
+     * Marks the template as published and there by can be used for communications.
+     * @param domainModelOrMap
+     * @return
+     */
     def publishTemplate( map ) {
-
         if (map.id) {
-            def communicationEmailTemplate = CommunicationEmailTemplate.get( map.id )
-            communicationEmailTemplate.published = true
-            update( communicationEmailTemplate )
-        } else
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:idNotValid@@" )
+            def template = get( map.id )
+            return publish( template )
+        } else {
+            throw new ApplicationException( template, "@@r1:idNotValid@@" )
+        }
     }
 
     def preDelete( domainModelOrMap ) {
@@ -78,6 +81,13 @@ class CommunicationTemplateService extends ServiceBase {
         if (oldTemplate == null || !CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
         }
+    }
+
+    /**
+     * Overriden by subclasses to implement special validation when the template is marked published.
+     * @param template a communication template
+     */
+    protected void validatePublished( CommunicationTemplate template ) {
     }
 
     private void stampAndValidate( CommunicationTemplate template ) {
@@ -109,25 +119,8 @@ class CommunicationTemplateService extends ServiceBase {
             if (!template.folder ) {
                 throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
             }
-            if (!template.toList || template.toList.trim().size() == 0 ) {
-                throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
-            }
-            if (!template.subject || template.subject.size() == 0 ) {
-                throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
-            }
 
-            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)
-            if (fieldNameList) {
-                fieldNameList.each { String fieldName ->
-                    CommunicationField field = CommunicationField.fetchByName( fieldName )
-                    if (!field) {
-                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
-                    }
-                    if (field.status == CommunicationFieldStatus.DEVELOPMENT) {
-                        throw new ApplicationException(CommunicationTemplateMergeService, "@@r1:invalidDataField:${fieldName}@@")
-                    }
-                }
-            }
+            validatePublished( template );
         }
     }
 }

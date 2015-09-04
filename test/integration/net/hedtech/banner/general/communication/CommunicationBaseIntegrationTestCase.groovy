@@ -183,7 +183,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                     content: "test content",
             )
             defaultEmailTemplate = communicationEmailTemplateService.create( defaultEmailTemplate )
-            defaultEmailTemplate = communicationEmailTemplateService.publish( defaultEmailTemplate )
+            defaultEmailTemplate = communicationEmailTemplateService.publishTemplate( ["id": defaultEmailTemplate.id] )
         }
     }
 

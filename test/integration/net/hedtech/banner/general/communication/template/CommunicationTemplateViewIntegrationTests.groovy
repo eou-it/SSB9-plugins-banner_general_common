@@ -58,7 +58,7 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
         assertEquals( emailTemplate.createdBy, templateView.createdBy )
         assertEquals( Boolean.FALSE, templateView.active )
 
-        emailTemplate = communicationEmailTemplateService.publish( emailTemplate )
+        emailTemplate = communicationEmailTemplateService.publishTemplate( ["id": emailTemplate.id] )
         assertEquals( Boolean.TRUE, emailTemplate.published )
 
         cleanUpGorm()

@@ -235,12 +235,12 @@ class CommunicationTemplateMergeService {
         List<String> extractedTemplateVariables = extractTemplateVariables( communicationEmailTemplate )
         extractedTemplateVariables
     }
-/**
- * Extracts all the template variables from the currently supported parts of an email template
- * @param communicationEmailTemplate
- * @return
- */
 
+    /**
+     * Extracts all the template variables from the currently supported parts of an email template
+     * @param communicationEmailTemplate
+     * @return
+     */
     List<String> extractTemplateVariables( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled())
             log.debug( "Extracting template variables from CommunicationEmailTemplate ${communicationEmailTemplate.name}." )
@@ -258,12 +258,41 @@ class CommunicationTemplateMergeService {
         templateVariables
     }
 
-/**
- *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
- *  This will throw an application exception if the template string cannot be parsed.
- * @param template String
- * @return set of unique string variables found in the template string
- */
+    /**
+     * Extracts all the template variables from the currently supported parts of an mobile notification template
+     * @param communicationMobileNotificationTemplate the mobile notification template
+     */
+    List<String> extractTemplateVariables( CommunicationMobileNotificationTemplate communicationMobileNotificationTemplate ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "Extracting template variables from CommunicationMobileNotificationTemplate ${communicationMobileNotificationTemplate.name}." )
+        }
+
+        def templateVariables = []
+
+        extractTemplateVariables( communicationMobileNotificationTemplate.mobileHeadline ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationMobileNotificationTemplate.headline ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationMobileNotificationTemplate.description ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationMobileNotificationTemplate.destinationLink ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationMobileNotificationTemplate.destinationLabel ).each {
+        }
+
+        return templateVariables
+    }
+
+    /**
+     *  Extracts all delimited parameter strings. Currently only supports $foo$, not $foo.bar$
+     *  This will throw an application exception if the template string cannot be parsed.
+     * @param template String
+     * @return set of unique string variables found in the template string
+     */
     List<String> extractTemplateVariables( String templateString ) {
         if (log.isDebugEnabled()) log.debug( "Extracting template variables from template string." )
 
