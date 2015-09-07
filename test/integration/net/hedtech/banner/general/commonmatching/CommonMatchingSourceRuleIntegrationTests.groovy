@@ -140,7 +140,6 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
     void testOptimisticLock() {
         def commonMatchingSourceRule = newValidForCreateCommonMatchingSourceRule()
         commonMatchingSourceRule = commonMatchingSourceRule.save(failOnError: true, flush: true)
-        println(' the id is ' + commonMatchingSourceRule.version)
         def sql
         try {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -198,6 +197,17 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
                 ]
     }
 
+    @Test
+    void testFetchBySource(){
+        def sourceCode = CommonMatchingSource.findByCode("HEDM_LASTNAME_MATCH")
+        assertNotNull sourceCode
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertEquals 1, sources.size()
+
+        def rules = CommonMatchingSourceRule.fetchBySource("HEDM_LASTNAME_MATCH")
+        assertEquals 1, rules.size()
+        assertEquals rules[0].id, sources[0].id
+    }
 
     private def newValidForCreateCommonMatchingSourceRule() {
         def commonMatchingSource = new CommonMatchingSource(code: i_success_commonMatchingSource, description: 'test')

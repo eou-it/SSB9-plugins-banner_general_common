@@ -3,35 +3,29 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
-import net.hedtech.banner.general.overall.ldm.LdmService
-import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
-import org.junit.Before
-import org.junit.Test
-import org.junit.After
-
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
+import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.person.PersonBasicPersonBase
-import net.hedtech.banner.general.person.PersonIdentificationName
-import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.Ethnicity
-import net.hedtech.banner.general.system.Legacy
-import net.hedtech.banner.general.system.MaritalStatus
-import net.hedtech.banner.general.system.Nation
-import net.hedtech.banner.general.system.Religion
-import net.hedtech.banner.general.system.State
-import net.hedtech.banner.general.system.UnitOfMeasure
+import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.*
+import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.junit.Ignore
-
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def personCompositeService
     def personBasicPersonBaseService
+    def userRoleCompositeService
+    private static final log = Logger.getLogger(getClass())
 
     //Test data for creating new domain instance
     //Valid test data (For success tests)
@@ -138,6 +132,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
+
     @Test
     void testListQapiWithValidFirstAndLastName() {
         //we will forcefully set the content type so that the tests go through all possible code flows
@@ -161,6 +156,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListQapiWithInValidFirstAndLastName() {
         //we will forcefully set the content type so that the tests go through all possible code flows
@@ -174,6 +170,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull persons
         assertTrue persons.isEmpty()
     }
+
 
     @Test
     void testListQapiWithInValidDateOfBirth() {
@@ -200,6 +197,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListQapiWithInvalidPersonfilter() {
 
@@ -220,6 +218,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'not.found.message'
         }
     }
+
 
     @Test
     void testListQapiWithPersonfilterNull() {
@@ -290,6 +289,444 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
+    void testCMSearchWithMultipleEmails() {
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def emails = PersonEmail.findAllByPidm(person.pidm)
+        assertTrue emails.size() > 1
+        // see that person has all of the integration emails
+        def emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, "Institution")[0]?.value
+        assertNotNull emailInstitutionRuleValue
+        def emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, "Personal")[0]?.value
+        assertNotNull emailPersonalRuleValue
+        def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, "Work")[0]?.value
+        assertNotNull emailWorkRuleValue
+        assertNotNull emails.find { it.emailType.code == emailWorkRuleValue }
+        assertNotNull emails.find { it.emailType.code == emailPersonalRuleValue }
+        assertNotNull emails.find { it.emailType.code == emailInstitutionRuleValue }
+
+        def homeEmail = emails.find { it.emailType.code == emailPersonalRuleValue }.emailAddress
+        def workEmail = emails.find { it.emailType.code == emailWorkRuleValue }.emailAddress
+        def schoolEmail = emails.find { it.emailType.code == emailInstitutionRuleValue }.emailAddress
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary",]],
+                      emails: [[emailAddress: homeEmail, emailType: emailPersonalRuleValue],
+                               [emailAddress: schoolEmail, emailType: emailInstitutionRuleValue],
+                               [emailAddress: workEmail, emailType: emailWorkRuleValue]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertEquals 1, matched_persons.size()
+        assertEquals matched_persons[0].pidm, person.pidm
+    }
+
+
+    @Test
+    void testCMSearchWithMultipleEmailsSomeNotMatching() {
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def emails = PersonEmail.findAllByPidm(person.pidm)
+        assertTrue emails.size() > 1
+        // see that person has all of the integration emails
+        def emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_institution)[0]?.value
+        assertNotNull emailInstitutionRuleValue
+        def emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_personal)[0]?.value
+        assertNotNull emailPersonalRuleValue
+        def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_work)[0]?.value
+        assertNotNull emailWorkRuleValue
+        assertNotNull emails.find { it.emailType.code == emailWorkRuleValue }
+        assertNotNull emails.find { it.emailType.code == emailPersonalRuleValue }
+        assertNotNull emails.find { it.emailType.code == emailInstitutionRuleValue }
+        def homeEmail = emails.find { it.emailType.code == emailPersonalRuleValue }.emailAddress
+        def workEmail = 'work@email.com'
+        def schoolEmail = 'test@email.com'
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary",]],
+                      emails: [[emailAddress: homeEmail, emailType: i_success_emailType_personal],
+                               [emailAddress: schoolEmail, emailType: i_success_emailType_institution],
+                               [emailAddress: workEmail, emailType: i_success_emailType_work]]
+        ]
+
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertEquals 1, matched_persons.size()
+        assertEquals matched_persons[0].pidm, person.pidm
+    }
+
+
+    @Test
+    void testCMSearchWithMultipleEmailsNoneMatching() {
+
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_BIRTH_DATE" }
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SEX" }
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SSN" }
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "GOREMAL_EMAIL_ADDRESS" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def emails = PersonEmail.findAllByPidm(person.pidm)
+        assertTrue emails.size() > 1
+        // see that person has all of the integration emails
+        def emailInstitutionRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_institution)[0]?.value
+        assertNotNull emailInstitutionRuleValue
+        def emailPersonalRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_personal)[0]?.value
+        assertNotNull emailPersonalRuleValue
+        def emailWorkRuleValue = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(personCompositeService.PROCESS_CODE,
+                personCompositeService.PERSON_EMAIL_TYPE, i_success_emailType_work)[0]?.value
+        assertNotNull emailWorkRuleValue
+        assertNotNull emails.find { it.emailType.code == emailWorkRuleValue }
+        assertNotNull emails.find { it.emailType.code == emailPersonalRuleValue }
+        assertNotNull emails.find { it.emailType.code == emailInstitutionRuleValue }
+        // change the email addresses so they dont match
+        def homeEmail = 'home@email.com'
+        def workEmail = 'work@email.com'
+        def schoolEmail = 'test@email.com'
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary",]],
+                      emails: [[emailAddress: homeEmail, emailType: i_success_emailType_personal],
+                               [emailAddress: schoolEmail, emailType: i_success_emailType_institution],
+                               [emailAddress: workEmail, emailType: i_success_emailType_work]]
+        ]
+
+        def matched_persons = personCompositeService.list(params)
+        // assert that no matches come  back
+        assertEquals 0, matched_persons.size()
+    }
+
+
+    @Test
+    void testCMSearchWithBirthDate() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_BIRTH_DATE" }
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def bio = PersonBasicPersonBase.findByPidm(person.pidm)
+        assertNotNull bio
+        assertNotNull bio.birthDate
+        assertEquals '03/17/1986', bio.birthDate.format('MM/dd/yyyy')
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action     : [POST: "list"],
+                      names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      dateOfBirth: bio.birthDate.format('yyyy-MM-dd')
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertEquals 1, matched_persons.size()
+        assertEquals matched_persons[0].pidm, person.pidm
+    }
+
+
+    @Test
+    void testCMSearchWithDifferentBirthDate() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_BIRTH_DATE" }
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def bio = PersonBasicPersonBase.findByPidm(person.pidm)
+        assertNotNull bio
+        assertNotNull bio.birthDate
+        assertEquals '03/17/1986', bio.birthDate.format('MM/dd/yyyy')
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action     : [POST: "list"],
+                      names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      dateOfBirth: '1986-04-16'
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that no matches comes back
+        assertEquals 0, matched_persons.size()
+
+    }
+
+
+    @Test
+    void testCMSearchWithSsn() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SSN" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def bio = PersonBasicPersonBase.findByPidm(person.pidm)
+        assertNotNull bio
+        assertNotNull bio.ssn
+        assertEquals '000008899', bio.ssn
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action     : [POST: "list"],
+                      names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      credentials: [[credentialType: "Social Security Number", credentialId: bio.ssn]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertEquals 1, matched_persons.size()
+        assertEquals matched_persons[0].pidm, person.pidm
+    }
+
+
+    @Test
+    void testCMSearchWithDifferentSsn() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SSN" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def bio = PersonBasicPersonBase.findByPidm(person.pidm)
+        assertNotNull bio
+        assertNotNull bio.ssn
+        assertEquals '000008899', bio.ssn
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action     : [POST: "list"],
+                      names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      credentials: [[credentialType: "Social Security Number", credentialId: "000333444"]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that no match comes back
+        assertEquals 0, matched_persons.size()
+    }
+
+
+    @Test
+    void testCMSearchWithGender() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SSN" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def bio = PersonBasicPersonBase.findByPidm(person.pidm)
+        assertNotNull bio
+        assertEquals "F", bio.sex
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      gender: bio.sex
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertEquals 1, matched_persons.size()
+        assertEquals matched_persons[0].pidm, person.pidm
+    }
+
+
+    @Test
+    void testCMSearchWithDifferentGender() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SSN" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+        def bio = PersonBasicPersonBase.findByPidm(person.pidm)
+        assertNotNull bio
+        assertEquals "F", bio.sex
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      gender: "M"
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that no match comes back
+        assertEquals 0, matched_persons.size()
+    }
+
+
+    @Test
+    void testCMSearchWithBannerId() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_ID" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action     : [POST: "list"],
+                      names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      credentials: [[credentialType: "Banner ID", credentialId: person.bannerId]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertEquals 1, matched_persons.size()
+        assertEquals matched_persons[0].pidm, person.pidm
+    }
+
+
+    @Test
+    void testCMSearchWithDifferentBannerId() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_ID" }
+
+        def person = PersonUtility.getPerson('HOSFE2020')
+        assertNotNull person
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action     : [POST: "list"],
+                      names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
+                      credentials: [[credentialType: "Banner ID", credentialId: "000333444"]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that no match comes back
+        assertEquals 0, matched_persons.size()
+    }
+
+
+    @Test
+    void testCMSearchWithName() {
+        IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
+        assertNotNull personMatchRule?.value
+        personMatchRule.value = 'HEDM_LASTNAME_MATCH'
+        personMatchRule.save(flush: true, failOnError: true)
+
+        def sourceCode = CommonMatchingSource.findByCode(personMatchRule?.value)
+        assertNotNull sourceCode
+
+        def sources = CommonMatchingSourceRule.findAllByCommonMatchingSource(sourceCode)
+        assertTrue sources.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def rules = sql.rows("select gorcmsr_column_name from gorcmsr where  GORCMSr_CMSC_CODE = ?", [sourceCode.code])
+        assertTrue rules.size() > 0
+
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_LAST_NAME" }
+        assertNotNull rules.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_LAST_NAME" }
+
+        // build content for common matching
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/json")
+        Map params = [action: [POST: "list"],
+                      names : [[lastName: "Jamison", firstName: "Emily", nameType: "Primary"]]
+        ]
+        def matched_persons = personCompositeService.list(params)
+        // assert that only one match comes back
+        assertTrue matched_persons.size() > 0
+    }
+
+
+    @Test
     void testListQapiWithValidPersonfilter() {
 
 
@@ -309,6 +746,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testListapiWithRoleFacultyAndPagination() {
         def params = [role: "faculty", max: '10', offset: '5']
@@ -316,6 +754,23 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def persons = personCompositeService.list(params)
         persons.each {
             it.roles.role == "Faculty"
+        }
+    }
+
+
+    @Test
+    void testListapiWithRoleStudentAndLargePagination() {
+        def params1 = [role: "student"]
+        Map resultCount = userRoleCompositeService.fetchAllByRole(params1)
+        assertTrue resultCount.count > 500
+
+        def params = [role: "student", max: '2000', offset: '100']
+
+        def persons = personCompositeService.list(params)
+        // verify pagination capped at 500
+        assertEquals 500, persons.size()
+        persons.each {
+            it.roles.role == "Student"
         }
     }
 
@@ -373,6 +828,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListapiWithPersonfilterAndRole() {
 
@@ -388,11 +844,16 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testListapiWithValidPersonfilter() {
 
+        def popsel = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("GENERAL", 'ALL', 'BANNER', 'GRAILS')
+        assertEquals 2, popsel.size()
+        def pidm1 = popsel[0].pidm
+        def pidm2 = popsel[1].pidm
 
-        def persons = [:]
+        def persons
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
         def params = [:]
 
@@ -400,13 +861,421 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         persons = personCompositeService.list(params)
         assertNotNull persons
+        assertNotNull persons.find { it.person.pidm == pidm1 }
+        assertNotNull persons.find { it.person.pidm == pidm2 }
 
+    }
+
+
+    @Test
+    void testListapiWithValidPersonfilterAndPagination() {
+        // verify our test case has 7 records
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDM')
+        assertEquals 7, popsel.size()
+        assertEquals 7, popsel.findAll { it.creatorId == "BANNER" }?.size()
+        assertEquals 7, popsel.findAll { it.lastModifiedBy == "GRAILS" }?.size()
+
+        // set up params for call
+        def persons = []
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')?.guid
+        assertNotNull guid
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')[0]
+        assertNotNull guid2
+        def params = [personFilter: 'STUDENT-^HEDM-^BANNER-^GRAILS', max: '3', offset: '0']
+
+        persons = personCompositeService.list(params)
+        assertEquals 3, persons.size()
+
+        // no pagination
+        def params2 = [personFilter: 'STUDENT-^HEDM-^BANNER-^GRAILS']
+
+        persons = personCompositeService.list(params2)
+        assertEquals 7, persons.size()
+
+    }
+
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndPagination() {
+        // verify our test case has 7 records
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDM')
+        assertEquals 7, popsel.size()
+        assertEquals 7, popsel.findAll { it.creatorId == "BANNER" }?.size()
+        assertEquals 7, popsel.findAll { it.lastModifiedBy == "GRAILS" }?.size()
+
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+        def params = [personFilter: guid2, max: '3', offset: '0']
+
+        persons = personCompositeService.list(params)
+        assertEquals 3, persons.size()
+
+        // no pagination
+        def params2 = [personFilter: guid2]
+
+        persons = personCompositeService.list(params2)
+        assertEquals 7, persons.size()
+
+    }
+
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndPaginationUniqueLists() {
+        // remove if pop sel exists
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+        }
+        finally {
+            sql?.close()
+        }
+        assertTrue insertCount > 500
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+        def pidmlist = persextract.groupBy { it.pidm }
+        // verify the list of pidms is unique
+        pidmlist.each {
+            assertEquals 1, it.value.size()
+        }
+        // test pagination
+        def persextract250 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS", [max: '250', offset: '0'])
+        def persextract2502 = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS", [max: '250', offset: '250'])
+        assertEquals 250, persextract250.size()
+        assertEquals 250, persextract2502.size()
+        def matchextract = 0
+        def cnt = 0
+        // make sure lists have unique pidms
+        persextract250.each { pers ->
+            persextract2502.find { pers2 ->
+                cnt += 1
+                if (pers2.pidm == pers.pidm) {
+                    matchextract += 1
+                }
+            }
+        }
+        assertEquals 0, matchextract
+        matchextract = 0
+        persextract2502.each { pers ->
+            persextract250.find { pers2 ->
+                cnt += 1
+                if (pers2.pidm == pers.pidm) {
+                    matchextract += 1
+                }
+            }
+        }
+        assertEquals 0, matchextract
+
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+        // get first page
+        def params = [personFilter: guid2, max: '250', offset: '0']
+        persons = personCompositeService.list(params)
+        assertEquals 250, persons.size()
+
+        // get second page
+        params = [personFilter: guid2, max: '250', offset: '250']
+        def persons2 = personCompositeService.list(params)
+        assertEquals 250, persons2.size()
+
+        // make sure persons in list 1 are not in list 2
+        matchextract = 0
+        persons2.each { pers2 ->
+            persons.find { pers ->
+                cnt += 1
+                if (pers2.names[0].personName.pidm == pers.names[0].personName.pidm) {
+                    matchextract += 1
+                }
+            }
+        }
+        assertEquals 0, matchextract
+
+    }
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidLargeListsNoPagination() {
+        // remove if pop sel exists
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+        }
+        finally {
+            sql?.close()
+        }
+        assertTrue insertCount > 500
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertTrue persextract.size() > 500
+
+        // set up params for call
+        def persons = []
+          String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+        // get first page
+        def params = [personFilter: guid2]
+        persons = personCompositeService.list(params)
+        assertEquals 500, persons.size()
+
+    }
+
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndLargePaginationAndDetailedPerson() {
+        // find our person hofse2000 who has all data
+        def perId = PersonUtility.getPerson("HOSFE2000")
+        assertNotNull perId
+        def perbio = PersonBasicPersonBase.findByPidm(perId.pidm)
+        assertNotNull perbio
+        def perAddr = PersonAddress.findAllByPidm(perId.pidm)
+        assertEquals 1, perAddr.size()
+        assertNotNull perAddr[0]
+        assertEquals "MA", perAddr[0].addressType.code
+        def perTel = PersonTelephone.findAllByPidm(perId.pidm)
+        assertEquals 1, perTel.size()
+        assertNotNull perTel[0]
+        assertEquals "CELL", perTel[0].telephoneType.code
+        def perEmail = PersonEmail.findAllByPidm(perId.pidm)
+        assertEquals 1, perEmail.size()
+        assertNotNull perEmail[0]
+        assertEquals "HOME", perEmail[0].emailType.code
+        def perRace = PersonRace.findByPidm(perId.pidm)
+        assertNotNull perRace
+        assertEquals "WHT", perRace.race
+
+        // set up our pop sel
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+
+        }
+        finally {
+            sql?.close()
+        }
+        assertTrue insertCount > 500
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+
+        // find our test person HOSFE2000
+        def cnt = 0
+        def found = 0
+        persextract.each { per ->
+            cnt += 1
+            if (per.bannerId == "HOSFE2000") {
+                found = cnt
+            }
+        }
+        assertTrue found > 1100
+        def offset = found - 1100
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+
+        def params = [personFilter: guid2, max: '2000', offset: offset.toString()]
+        log.debug "turn logging on "
+
+        persons = personCompositeService.list(params)
+        assertEquals 500, persons.size()
+    }
+
+
+    @Test
+    void testListapiWithValidPersonfilterAsGuidAndSinglePersonAndDetailedPerson() {
+        // find our person hofse2000 who has all data
+        def perId = PersonUtility.getPerson("HOSFE2000")
+        assertNotNull perId
+        def perbio = PersonBasicPersonBase.findByPidm(perId.pidm)
+        assertNotNull perbio
+        def perAddr = PersonAddress.findAllByPidm(perId.pidm)
+        assertEquals 1, perAddr.size()
+        assertNotNull perAddr[0]
+        assertEquals "MA", perAddr[0].addressType.code
+        def perTel = PersonTelephone.findAllByPidm(perId.pidm)
+        assertEquals 1, perTel.size()
+        assertNotNull perTel[0]
+        assertEquals "CELL", perTel[0].telephoneType.code
+        def perEmail = PersonEmail.findAllByPidm(perId.pidm)
+        assertEquals 1, perEmail.size()
+        assertNotNull perEmail[0]
+        assertEquals "HOME", perEmail[0].emailType.code
+        def perRace = PersonRace.findByPidm(perId.pidm)
+        assertNotNull perRace
+        assertEquals "WHT", perRace.race
+        // set up our pop sel
+        def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
+        if (popsel.size() > 0) {
+            popsel.each {
+                it.delete(flush: true, failOnError: true)
+            }
+        }
+        // create big list
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def insertCount
+        try {
+            String idSql = """INSERT INTO GLBEXTR
+                  (glbextr_key,
+                   glbextr_application,
+                   glbextr_selection,
+                   glbextr_creator_id,
+                   glbextr_user_id,
+                   glbextr_sys_ind,
+                   glbextr_activity_date)
+                select
+                   to_char(spriden_pidm),
+                   'STUDENT',
+                   'HEDMPERFORM',
+                   'BANNER',
+                   'GRAILS',
+                   'S',
+                   SYSDATE
+                from spriden
+                where spriden_CHANGE_ind is null
+                and spriden_id = 'HOSFE2000'
+                and not exists ( select 'x' from glbextr old
+                  where old.glbextr_key = to_char(spriden_pidm)
+                  and old.glbextr_application = 'STUDENT'
+                  and old.glbextr_selection = 'HEDMPERFORM') """
+            insertCount = sql.executeUpdate(idSql)
+
+        }
+        finally {
+            sql?.close()
+        }
+        assertEquals 1, insertCount
+        def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
+        assertEquals insertCount, persextract.size()
+
+        // find our test person HOSFE2000
+        assertEquals perId.pidm, persextract[0].pidm
+        // set up params for call
+        def persons = []
+
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        assertNotNull guid2
+
+        def params = [personFilter: guid2, max: '2000', offset: 0]
+        log.debug "turn logging on "
+
+        persons = personCompositeService.list(params)
+        assertEquals 1, persons.size()
+
+        def testPerson = persons.find { it.names[0].personName.bannerId == "HOSFE2000" }
+        assertNotNull testPerson
+        assertEquals testPerson.person.id, perbio.id
+        assertEquals "MA", testPerson.addresses[0].address.addressType.code
+        assertEquals perAddr[0].id, testPerson.addresses[0].address.id
+        assertEquals "CELL", testPerson.phones[0].phone.telephoneType.code
+        assertEquals perTel[0].id, testPerson.phones[0].phone.id
+        assertEquals "HOME", testPerson.emails[0].email.emailType.code
+        assertEquals perEmail[0].id, testPerson.emails[0].email.id
+        assertEquals perRace.race, testPerson.races[0].raceDecorator.race
+        assertNotNull testPerson.roles[0][0].role in ["faculty", "student"]
+        assertNotNull testPerson.roles[1][0].role in ["faculty", "student"]
     }
 
     //GET- Person by guid API
     @Test
     void testGetPersonCredentialsByGuid() {
-        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', '50199')?.guid
+        def person = PersonUtility.getPerson("HOSP0001")
+        assertNotNull person
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', person.pidm.toString())?.guid
 
         def persons = personCompositeService.get(guid)
 
@@ -577,6 +1446,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals personIdentificationNameAlternate.changeIndicator, 'N'
     }
 
+
     @Test
     void testUpdatePersonIDChange() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
@@ -593,6 +1463,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchAllByPidm(personBasicPersonBase.pidm).get(0)
         assertEquals personIdentificationNameAlternate.changeIndicator, 'I'
     }
+
 
     @Test
     void testUpdatePersonPersonBasicPersonBase() {
@@ -611,6 +1482,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 'CCCCC', personBasicPersonBase.nameSuffix
         assertEquals 'TTTTT', personBasicPersonBase.ssn
     }
+
 
     @Test
     void testUpdatetestPersonAddressValidUpdate() {
@@ -690,6 +1562,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+
     @Test
     void testUpdatetestPersonPhonesValidUpdate() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
@@ -767,6 +1640,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testUpdatetestPersonRacesValidUpdate() {
 
@@ -798,6 +1672,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals modifiedRacesList[0].guid, races[0].guid
         assertEquals modifiedRacesList[1].guid, races[1].guid
     }
+
 
     @Test
     void testUpdatetestPersonEthnicityValidUpdate() {
@@ -1171,9 +2046,9 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                                             ],
                                             [
                                                     "credentialType": "Elevate ID",
-                                                    "credentialId": "E11111111"
+                                                    "credentialId"  : "E11111111"
                                             ]],
-                      ethnicityDetail  : [guid: ethnicityGuid],
+                      ethnicityDetail    : [guid: ethnicityGuid],
                       maritalStatusDetail: [guid: maritalStatusGuid]
         ]
 
