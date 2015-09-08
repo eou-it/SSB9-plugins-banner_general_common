@@ -158,6 +158,16 @@ public abstract class CommunicationTemplate implements Serializable {
      */
     public abstract CommunicationChannel getCommunicationChannel()
 
+    /**
+     * Calls the visitor method that pertains to type of this object. An email template will call the
+     * visitEmail method on the visitor. Useful when inheritance is not an option or when the code needs
+     * to traverse a collection of objects.
+     *
+     * @param visitor an object implementing the template visitor interface and typically a method object itself
+     * @return
+     */
+    public abstract CommunicationTemplateVisitor accept( CommunicationTemplateVisitor visitor )
+
     /******************* Named Queries *******************/
 
     public static CommunicationTemplate fetchByTemplateNameAndFolderName(String templateName, String folderName) {

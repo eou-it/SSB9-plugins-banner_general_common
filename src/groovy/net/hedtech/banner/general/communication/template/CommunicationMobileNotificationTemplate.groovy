@@ -68,4 +68,9 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     CommunicationChannel getCommunicationChannel() {
         return CommunicationChannel.MOBILE_NOTIFICATION
     }
+
+    @Override
+    final CommunicationTemplateVisitor accept(CommunicationTemplateVisitor visitor) {
+        visitor.visitMobileNotification( this )
+    }
 }

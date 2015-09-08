@@ -1,6 +1,6 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
- ********************************************************************************* */
+ *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
 import groovy.transform.EqualsAndHashCode
@@ -69,5 +69,10 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
     @Override
     CommunicationChannel getCommunicationChannel() {
         return CommunicationChannel.EMAIL
+    }
+
+    @Override
+    final CommunicationTemplateVisitor accept(CommunicationTemplateVisitor visitor) {
+        visitor.visitEmail( this )
     }
 }
