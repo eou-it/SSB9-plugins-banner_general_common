@@ -8,6 +8,7 @@ import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.merge.CommunicationRecipientDataFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
@@ -35,51 +36,49 @@ class CommunicationGroupSendItemProcessorService {
     def asynchronousBannerAuthenticationSpoofer
     private static final int noWaitErrorCode = 54;
 
-
     public void performGroupSendItem(Long groupSendItemId) {
-        log.debug("Performing group send item id = " + groupSendItemId)
-        boolean locked = lockGroupSendItem(groupSendItemId, CommunicationGroupSendItemExecutionState.Ready);
+        log.debug( "Performing group send item id = " + groupSendItemId )
+        boolean locked = lockGroupSendItem( groupSendItemId, CommunicationGroupSendItemExecutionState.Ready );
         if (!locked) {
             // Do nothing
             return;
         }
 
-        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get(groupSendItemId)
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get( groupSendItemId )
         CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
+
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), groupSendItem.mepCode)
+        if (log.isDebugEnabled()) log.debug("Spoofed as ${groupSend.createdBy} for creating recipient data.")
+
         if (!groupSend.getCurrentExecutionState().isTerminal()) {
-            CommunicationRecipientData recipientData = buildRecipientData(groupSend.createdBy, groupSend.template, groupSendItem.referenceId, groupSendItem.recipientPidm, groupSendItem.mepCode,groupSend.organization)
-            recipientData = (CommunicationRecipientData) communicationRecipientDataService.create(recipientData)
+            CommunicationRecipientData recipientData = getRecipientDataFactory().create( groupSendItem )
             log.debug("Created recipient data with referenceId = " + groupSendItem.referenceId + ".")
 
             log.debug("Creating communication job with reference id = " + recipientData.referenceId)
-            CommunicationJob communicationJob = new CommunicationJob(referenceId: recipientData.referenceId)
-            communicationJobService.create(communicationJob)
+            CommunicationJob communicationJob = new CommunicationJob( referenceId: recipientData.referenceId )
+            communicationJobService.create( communicationJob )
 
             log.debug("Updating group send item to mark it complete with reference id = " + recipientData.referenceId)
-
             def groupSendItemParamMap = [
-                    id                   : groupSendItem.id,
-                    version              : groupSendItem.version,
-                    currentExecutionState: CommunicationGroupSendItemExecutionState.Complete,
-                    stopDate             : new Date()
+                id                   : groupSendItem.id,
+                version              : groupSendItem.version,
+                currentExecutionState: CommunicationGroupSendItemExecutionState.Complete,
+                stopDate             : new Date()
             ]
-            communicationGroupSendItemService.update(groupSendItemParamMap)
+            communicationGroupSendItemService.update( groupSendItemParamMap )
         } else {
             def groupSendItemParamMap = [
-                    id                   : groupSendItem.id,
-                    version              : groupSendItem.version,
-                    currentExecutionState: CommunicationGroupSendItemExecutionState.Stopped,
-                    stopDate             : new Date()
+                id                   : groupSendItem.id,
+                version              : groupSendItem.version,
+                currentExecutionState: CommunicationGroupSendItemExecutionState.Stopped,
+                stopDate             : new Date()
             ]
-            communicationGroupSendItemService.update(groupSendItemParamMap)
+            communicationGroupSendItemService.update( groupSendItemParamMap )
         }
-
     }
 
-
     public void failGroupSendItem(Long groupSendItemId, String errorCode, String errorText ) {
-        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get(groupSendItemId)
+        CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) communicationGroupSendItemService.get( groupSendItemId )
         def groupSendItemParamMap = [
                 id                   : groupSendItem.id,
                 version              : groupSendItem.version,
@@ -94,59 +93,6 @@ class CommunicationGroupSendItemProcessorService {
         communicationGroupSendItemService.update(groupSendItemParamMap)
     }
 
-
-    private CommunicationRecipientData buildRecipientData(String senderOracleUserName, CommunicationTemplate template, String referenceId, Long recipientPidm, String mepCode, CommunicationOrganization organization) {
-        log.debug("Creating recipient data with referenceId = " + referenceId + ".")
-
-        CommunicationEmailTemplate emailTemplate
-        if (template instanceof CommunicationEmailTemplate) {
-            emailTemplate = (CommunicationEmailTemplate) template
-        } else {
-            throw new RuntimeException("Template of type ${template?.getClass()?.getSimpleName()} is not supported.")
-        }
-
-        if (log.isDebugEnabled()) log.debug("Spoofed as ${senderOracleUserName} for creating recipient data.")
-
-        // Can this list be cached somewhere for similar processing
-        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.toList?.toString())
-        communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.subject?.toString()).each {
-            fieldNames << it
-        }
-        communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.subject?.toString()).each {
-            fieldNames << it
-        }
-        communicationTemplateMergeService.extractTemplateVariables(emailTemplate?.content?.toString()).each {
-            fieldNames << it
-        }
-        fieldNames = fieldNames.unique()
-
-        def nameToValueMap = [:]
-        fieldNames.each { fieldName ->
-            CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
-            // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
-            // Will come back to this to figure out desired behavior.
-            if (communicationField) {
-
-                String value = calculateFieldForUser(communicationField, senderOracleUserName, recipientPidm, mepCode)
-
-                CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
-                        value: value,
-                        renderAsHtml: communicationField.renderAsHtml
-                )
-                nameToValueMap.put(communicationField.name, communicationFieldValue)
-            }
-        }
-
-        return new CommunicationRecipientData(
-                pidm: recipientPidm,
-                templateId: template.id,
-                referenceId: referenceId,
-                ownerId: senderOracleUserName,
-                fieldValues: nameToValueMap,
-                organization: organization,
-                communicationChannel: template.communicationChannel
-        )
-    }
 
     /**
      * Attempts to create a pessimistic lock on the group send item record.
@@ -180,24 +126,12 @@ class CommunicationGroupSendItemProcessorService {
         }
     }
 
-
-    private String calculateFieldForUser(CommunicationField communicationField, String senderOracleUserName, Long recipientPidm, String mepCode) {
-
-        def origmap
-        try {
-            origmap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(senderOracleUserName, mepCode)
-            if (log.isDebugEnabled()) log.debug("Authenticated as ${senderOracleUserName} for monitoring.")
-            // This method will start a nested transaction (see REQUIRES_NEW annotation) and consequently pick up a new db connection with the current oracle user name
-            return communicationFieldCalculationService.calculateFieldByPidmWithNewTransaction(
-                    communicationField.getRuleContent(),
-                    communicationField.returnsArrayArguments,
-                    communicationField.getFormatString(),
-                    recipientPidm,
-                    mepCode
-            )
-        }
-        finally {
-            asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext(origmap)
-        }
+    private CommunicationRecipientDataFactory getRecipientDataFactory() {
+        return new CommunicationRecipientDataFactory (
+            communicationTemplateMergeService: communicationTemplateMergeService,
+            communicationFieldCalculationService: communicationFieldCalculationService,
+            communicationRecipientDataService: communicationRecipientDataService,
+            asynchronousBannerAuthenticationSpoofer: asynchronousBannerAuthenticationSpoofer
+        )
     }
 }

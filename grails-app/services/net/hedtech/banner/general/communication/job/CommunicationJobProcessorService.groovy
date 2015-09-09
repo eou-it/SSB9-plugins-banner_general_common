@@ -30,6 +30,13 @@ class CommunicationJobProcessorService {
         List<CommunicationRecipientData> recipientDatas = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
         CommunicationRecipientData recipientData = recipientDatas.size() ? recipientDatas[0] : null
         CommunicationEmailTemplate emailTemplate = communicationTemplateService.get( recipientData.templateId ) as CommunicationEmailTemplate
+
+
+
+
+
+
+
         CommunicationMergedEmailTemplate mergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, recipientData )
 
         CommunicationEmailMessage emailMessage = createEmailMessage( mergedEmailTemplate )
