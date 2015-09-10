@@ -57,14 +57,14 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
 
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
         // Can this list be cached somewhere for similar processing on the same template but different user
-        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables(template.toList?.toString())
+        List<String> fieldNames = new ArrayList<String>()
         communicationTemplateMergeService.extractTemplateVariables(template.mobileHeadline?.toString()).each {
             fieldNames << it
         }
         communicationTemplateMergeService.extractTemplateVariables(template.headline?.toString()).each {
             fieldNames << it
         }
-        communicationTemplateMergeService.extractTemplateVariables(template.description?.toString()).each {
+        communicationTemplateMergeService.extractTemplateVariables(template.messageDescription?.toString()).each {
             fieldNames << it
         }
         communicationTemplateMergeService.extractTemplateVariables(template.destinationLink?.toString()).each {

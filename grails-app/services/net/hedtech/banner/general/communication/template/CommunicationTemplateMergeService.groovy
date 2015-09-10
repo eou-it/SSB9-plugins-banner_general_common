@@ -143,7 +143,7 @@ class CommunicationTemplateMergeService {
 
         // create a set of EmailAddress for fromList
 //            if (getFromList() != null && getFromList().trim().length() > 0) {
-//                emailMessage.setSenders( createAddresses( getFromList().trim(), ";" ) );
+//                message.setSenders( createAddresses( getFromList().trim(), ";" ) );
 //            }
 
         // create a set of EmailAddress for toList
@@ -153,12 +153,12 @@ class CommunicationTemplateMergeService {
 
 //        // create a set of EmailAddress for ccList
 //        if (getCcList() != null && getCcList().trim().length() > 0) {
-//            emailMessage.setCcList( createAddresses( getCcList().trim(), ";" ) );
+//            message.setCcList( createAddresses( getCcList().trim(), ";" ) );
 //        }
 //
 //        // create a set of EmailAddress for bccList
 //        if (getBccList() != null && getBccList().trim().length() > 0) {
-//            emailMessage.setBccList( createAddresses( getBccList().trim(), ";" ) );
+//            message.setBccList( createAddresses( getBccList().trim(), ";" ) );
 //        }
 
         emailMessage.setSubjectLine( mergedEmailTemplate.subject );
@@ -200,7 +200,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedMobileNotificationTemplate mergedMessage = new CommunicationMergedMobileNotificationTemplate()
         mergedMessage.mobileHeadline = merge( template.mobileHeadline, recipientData.fieldValues )
         mergedMessage.headline = merge( template.headline, recipientData.fieldValues )
-        mergedMessage.description = merge( template.description, recipientData.fieldValues )
+        mergedMessage.messageDescription = merge( template.messageDescription, recipientData.fieldValues )
         mergedMessage.destinationLink = merge( template.destinationLink, template.destinationLabel )
         mergedMessage.destinationLabel = merge( template.destinationLabel, template.destinationLabel )
         return mergedMessage
@@ -248,7 +248,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedMobileNotificationTemplate mergedTemplate = new CommunicationMergedMobileNotificationTemplate()
         mergedTemplate.mobileHeadline = merge( communicationMobileNotificationTemplate.mobileHeadline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.mobileHeadline ?: "" ) )
         mergedTemplate.headline = merge( communicationMobileNotificationTemplate.headline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.headline ?: "" ) )
-        mergedTemplate.description = merge( communicationMobileNotificationTemplate.description ?: "", renderPreviewValues( communicationMobileNotificationTemplate.description ?: "" ) )
+        mergedTemplate.messageDescription = merge( communicationMobileNotificationTemplate.messageDescription ?: "", renderPreviewValues( communicationMobileNotificationTemplate.messageDescription ?: "" ) )
         mergedTemplate.destinationLink = merge( communicationMobileNotificationTemplate.destinationLink ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLink ?: "" ) )
         mergedTemplate.destinationLabel = merge( communicationMobileNotificationTemplate.destinationLabel ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLabel ?: "" ) )
         return mergedTemplate
@@ -328,7 +328,7 @@ class CommunicationTemplateMergeService {
         extractTemplateVariables( communicationMobileNotificationTemplate.headline ).each {
             templateVariables << it
         }
-        extractTemplateVariables( communicationMobileNotificationTemplate.description ).each {
+        extractTemplateVariables( communicationMobileNotificationTemplate.messageDescription ).each {
             templateVariables << it
         }
         extractTemplateVariables( communicationMobileNotificationTemplate.destinationLink ).each {

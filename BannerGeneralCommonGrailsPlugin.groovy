@@ -33,7 +33,7 @@ class BannerGeneralCommonGrailsPlugin {
     // the other plugins this plugin depends on
 //    def dependsOn = ['springSecurityCore': '1.2']
 
-    def dependsOn = [:]
+    def dependsOn = [ 'rest' : '0.8' ]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"

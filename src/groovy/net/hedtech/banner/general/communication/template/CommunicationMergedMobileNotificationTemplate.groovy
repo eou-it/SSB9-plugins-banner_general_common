@@ -14,7 +14,7 @@ import javax.persistence.Column
 class CommunicationMergedMobileNotificationTemplate implements Serializable {
     String mobileHeadline
     String headline
-    String description
+    String messageDescription
     String destinationLink
     String destinationLabel
 }

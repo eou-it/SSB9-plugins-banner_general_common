@@ -57,6 +57,7 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
     void testUpdate() {
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
                 name: "update test",
+                description: "description",
                 createdBy: 'MIKE',
                 createDate: new Date(),
                 validFrom: new Date(),
@@ -68,7 +69,7 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
 
         template.mobileHeadline = "test mobile headline"
         template.headline = "headline"
-        template.description = "description"
+        template.messageDescription = "message description"
         template.destinationLabel = "destination label"
         template.destinationLink = "http:////127.0.0.1//index.html"
 
@@ -77,8 +78,9 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
         template = CommunicationMobileNotificationTemplate.get( template.id )
         assertEquals( "test mobile headline", template.mobileHeadline )
         assertEquals( "headline", template.headline )
-        assertEquals( "description", template.description )
+        assertEquals( "message description", template.messageDescription )
         assertEquals( "destination label", template.destinationLabel )
+        assertEquals( "description", template.description )
     }
 
     @Test

@@ -24,7 +24,7 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     String headline
 
     @Column(name = "GCBMNTL_DESCRIPTION", nullable = true)
-    String description
+    String messageDescription
 
     @Column(name = "GCBMNTL_DESTINATION_LINK", nullable = true)
     String destinationLink
@@ -54,7 +54,7 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     static constraints = {
         mobileHeadline(nullable: true)
         headline(nullable: true)
-        description(nullable: true)
+        messageDescription(nullable: true)
         destinationLink(nullable: true)
         destinationLabel(nullable: true)
         expirationPolicy(nullable: false)
