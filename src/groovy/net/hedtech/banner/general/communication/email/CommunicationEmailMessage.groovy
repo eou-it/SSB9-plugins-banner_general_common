@@ -4,13 +4,8 @@
 package net.hedtech.banner.general.communication.email;
 
 import groovy.transform.EqualsAndHashCode;
-import groovy.transform.ToString;
-import org.hibernate.annotations.Type;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import groovy.transform.ToString
+import net.hedtech.banner.general.communication.template.CommunicationMessage
 
 /**
  * Represents an Email Message entity with placeholders for attributes of a typical email message.
@@ -18,7 +13,7 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @EqualsAndHashCode
 @ToString
-public class CommunicationEmailMessage implements Cloneable, Serializable {
+public class CommunicationEmailMessage implements Cloneable, CommunicationMessage {
 
     /**
      * Unique identifier for the email message.
@@ -302,7 +297,7 @@ public class CommunicationEmailMessage implements Cloneable, Serializable {
      * @see java.lang.Object#clone()
      */
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         CommunicationEmailMessage newMessage = new CommunicationEmailMessage();
         if (null != senders) {
             newMessage.setSenders( new CommunicationEmailAddress(senders) );

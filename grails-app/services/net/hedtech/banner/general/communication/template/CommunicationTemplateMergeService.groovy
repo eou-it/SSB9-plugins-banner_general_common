@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
@@ -14,6 +15,8 @@ import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
+
+import javax.mail.internet.AddressException
 
 /**
  * To clarify some naming confusion, the term CommunicationTemplate refers to the Communication Manager object
@@ -135,6 +138,38 @@ class CommunicationTemplateMergeService {
         result
     }
 
+    private CommunicationEmailMessage createEmailMessage( CommunicationMergedEmailTemplate mergedEmailTemplate ) throws AddressException {
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+
+        // create a set of EmailAddress for fromList
+//            if (getFromList() != null && getFromList().trim().length() > 0) {
+//                emailMessage.setSenders( createAddresses( getFromList().trim(), ";" ) );
+//            }
+
+        // create a set of EmailAddress for toList
+        if (mergedEmailTemplate.toList && mergedEmailTemplate.toList.trim().length() > 0) {
+            emailMessage.setToList( createAddresses( mergedEmailTemplate.toList.trim(), ";" ) );
+        }
+
+//        // create a set of EmailAddress for ccList
+//        if (getCcList() != null && getCcList().trim().length() > 0) {
+//            emailMessage.setCcList( createAddresses( getCcList().trim(), ";" ) );
+//        }
+//
+//        // create a set of EmailAddress for bccList
+//        if (getBccList() != null && getBccList().trim().length() > 0) {
+//            emailMessage.setBccList( createAddresses( getBccList().trim(), ";" ) );
+//        }
+
+        emailMessage.setSubjectLine( mergedEmailTemplate.subject );
+        emailMessage.setMessageBody( mergedEmailTemplate.content );
+        emailMessage.setMessageBodyContentType( "text/html; charset=UTF-8" );
+        emailMessage.setDateSent( new Date() );
+
+        return emailMessage;
+    }
+
+
 /**
  * Merges each of the email specific template fields with the recipient data previously calculated
  *
@@ -151,6 +186,24 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject, recipientData.fieldValues )
         communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content, recipientData.fieldValues )
         communicationMergedEmailTemplate
+    }
+
+    /**
+     * Merges each of the mobile notification specific template fields with the recipient data previously calculated
+     *
+     * @param template The template containing the tokens
+     * @param data the map of values that will be substituted for each matching token
+     */
+    CommunicationMergedMobileNotificationTemplate mergeTemplate( CommunicationMobileNotificationTemplate template, CommunicationRecipientData recipientData ) {
+        log.debug( "Merging recipient data into a CommunicationMergedMobileNotificationTemplate" )
+
+        CommunicationMergedMobileNotificationTemplate mergedMessage = new CommunicationMergedMobileNotificationTemplate()
+        mergedMessage.mobileHeadline = merge( template.mobileHeadline, recipientData.fieldValues )
+        mergedMessage.headline = merge( template.headline, recipientData.fieldValues )
+        mergedMessage.description = merge( template.description, recipientData.fieldValues )
+        mergedMessage.destinationLink = merge( template.destinationLink, template.destinationLabel )
+        mergedMessage.destinationLabel = merge( template.destinationLabel, template.destinationLabel )
+        return mergedMessage
     }
 
 /**
