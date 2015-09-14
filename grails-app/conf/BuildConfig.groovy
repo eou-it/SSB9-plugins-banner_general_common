@@ -28,21 +28,14 @@ grails.project.dependency.resolution = {
         if (System.properties['PROXY_SERVER_NAME']) {
             mavenRepo "${System.properties['PROXY_SERVER_NAME']}"
         } else {
-            grailsPlugins()
-            grailsHome()
             grailsCentral()
             mavenCentral()
             mavenRepo "http://repository.jboss.org/maven2/"
-            mavenRepo "http://repository.codehaus.org"
+            mavenRepo "https://code.lds.org/nexus/content/groups/main-repo"
         }
     }
 
     plugins {
-        runtime  ":hibernate:3.6.10.10"
-        compile ":tomcat:7.0.52.1"
-        compile ':resources:1.2.7' // If the functional-test plugin is being used
-        compile ":functional-test:2.0.0" // If the functional-test plugin is being used
-        test ':code-coverage:2.0.3-3'
     }
 
     dependencies {
