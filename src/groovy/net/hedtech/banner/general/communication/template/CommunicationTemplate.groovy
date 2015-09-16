@@ -228,4 +228,29 @@ public abstract class CommunicationTemplate implements Serializable {
         }
         return results
     }
+
+    public static findAllForSend(filterData) {
+
+        def currentDate = new Date()
+        def queryCriteria = CommunicationTemplate.createCriteria()
+
+        def results = queryCriteria.list {
+            eq("published",true)
+            and {
+                or {
+                    eq("personal",false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                }
+            }
+            le("validFrom",currentDate)
+            and {
+                or {
+                    isNull("validTo")
+                    ge("validTo",currentDate)
+                }
+            }
+            order( Order.asc("name").ignoreCase())
+        }
+        return results
+    }
 }

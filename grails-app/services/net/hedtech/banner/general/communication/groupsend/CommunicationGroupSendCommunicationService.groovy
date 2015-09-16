@@ -59,6 +59,7 @@ class CommunicationGroupSendCommunicationService {
         groupSend.template = template
         groupSend.population = population
         groupSend.organization = organization
+        groupSend.name = request.getName()
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
 

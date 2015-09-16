@@ -157,4 +157,13 @@ class CommunicationPopulationListView implements Serializable {
         }
         return results
     }
+
+    public static fetchAllByUserId(String userid) {
+
+        def queryCriteria = CommunicationPopulationListView.createCriteria()
+        def results = queryCriteria.list {
+            eq("lastCalculatedBy",userid)
+        }
+        return results
+    }
 }
