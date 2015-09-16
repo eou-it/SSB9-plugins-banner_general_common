@@ -3,8 +3,6 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
 package net.hedtech.banner.general.overall
 
-import java.util.Map;
-
 import javax.persistence.*
  
 /**
@@ -16,14 +14,16 @@ import javax.persistence.*
     @NamedQuery(name = "DirectDepositAccount.fetchByPidm",
         query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """),
     @NamedQuery(name = "DirectDepositAccount.fetchActiveApAccountsByPidm",
-        query = """ FROM DirectDepositAccount a 
+        query = """ FROM DirectDepositAccount a
+               LEFT JOIN a.bankRoutingInfo
                    WHERE a.pidm = :pidm 
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
     @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndAccountInfo",
         query = """ FROM DirectDepositAccount a
+               LEFT JOIN a.bankRoutingInfo b
                    WHERE a.pidm = :pidm
-                     AND a.bankRoutingNum = :bankRoutingNum
+                     AND b.bankRoutingNum = :bankRoutingNum
                      AND a.bankAccountNum = :bankAccountNum
                      AND a.accountType = :accountType""")
 ])
@@ -107,13 +107,7 @@ class DirectDepositAccount implements Serializable {
      */
     @Column(name = "GXRDIRD_BANK_ACCT_NUM")
     String bankAccountNum
-    
-    /**
-     * BANK ROUTING NO: The bank routing number of the recipients bank.
-     */
-    @Column(name = "GXRDIRD_BANK_ROUT_NUM")
-    String bankRoutingNum
-    
+
     /**
      * AMOUNT: The amount of the direct deposit.
      */
@@ -176,7 +170,14 @@ class DirectDepositAccount implements Serializable {
      */
     @Column(name = "GXRDIRD_ADDR_SEQNO_IAT")
     Integer iatAddessSequenceNum
-    
+
+    /**
+     * BANK ROUTING INFO JOIN: The bank routing number and bank name of the recipients bank via join to GXVDIRD.
+     */
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM")
+    private BankRoutingInfo bankRoutingInfo;
+
     public String toString() {
         """DirectDepositAccount [
             id= $id,
@@ -191,7 +192,6 @@ class DirectDepositAccount implements Serializable {
             lastModified= $lastModified,
             lastModifiedBy= $lastModifiedBy,
             bankAccountNum= $bankAccountNum,
-            bankRoutingNum= $bankRoutingNum,
             amount= $amount,
             percent= $percent,
             accountType= $accountType,
@@ -215,7 +215,6 @@ class DirectDepositAccount implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         bankAccountNum(nullable: true, maxSize: 34)
-        bankRoutingNum(nullable: true, maxSize: 11)
         amount(nullable: true, scale: 2)
         percent(nullable: true, scale: 2)
         accountType(nullable: true, maxSize: 1)
