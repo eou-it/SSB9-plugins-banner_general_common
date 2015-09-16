@@ -37,8 +37,9 @@ class CommunicationSendMobileNotificationService {
             organization.clearMobileApplicationKey = communicationOrganizationService.decryptPassword( organization.encryptedMobileApplicationKey )
         }
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
-        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendMobileNotificationMethod( message, organization );
-        sendEmailMethod.execute();
+
+        CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod( message, organization );
+        notificationMethod.execute();
 
         try {
             track( organization, message, recipientData )
