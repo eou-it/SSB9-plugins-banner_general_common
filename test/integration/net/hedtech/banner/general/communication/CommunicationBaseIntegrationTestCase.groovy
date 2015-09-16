@@ -59,7 +59,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
-        String userPassword = communicationOrganizationService.decryptMailBoxAccountPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
+        String userPassword = communicationOrganizationService.decryptPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
     }
 
     @After
@@ -111,7 +111,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
             def cma = new CommunicationMailboxAccount(
                 emailAddress: 'rasul.shishehbor@ellucian.com',
-                encryptedPassword: communicationOrganizationService.encryptMailBoxAccountPassword( "changeit" ),
+                encryptedPassword: communicationOrganizationService.encryptPassword( "changeit" ),
                 userName: 'rshishehbor',
                 organization: defaultOrganization,
                 type: CommunicationMailboxAccountType.Sender

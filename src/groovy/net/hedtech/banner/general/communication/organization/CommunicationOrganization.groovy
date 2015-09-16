@@ -111,13 +111,13 @@ class CommunicationOrganization implements Serializable {
 
 
     @Column(name = "GCRORAN_NOTFN_APPL_KEY")
-    String mobileApplicationKey
+    String encryptedMobileApplicationKey
 
     /**
      * Clear text password
      */
     @Transient
-    String clearTextPassword
+    String clearMobileApplicationKey
 
     /**
      * The send email server configuration properties
@@ -247,7 +247,7 @@ class CommunicationOrganization implements Serializable {
         sendEmailServerProperties(nullable: true)
         replyToMailboxAccountSettings(nullable: true)
         senderMailboxAccountSettings(nullable: true)
-        mobileApplicationKey(nullable: true)
+        encryptedMobileApplicationKey(nullable: true)
         mobileApplicationName(nullable:true)
         mobileEndPointUrl(nullable:true)
 
@@ -268,7 +268,7 @@ class CommunicationOrganization implements Serializable {
         if (isAvailable != that.isAvailable) return false
         if (lastModified != that.lastModified) return false
         if (lastModifiedBy != that.lastModifiedBy) return false
-        if (mobileApplicationKey != that.mobileApplicationKey) return false
+        if (encryptedMobileApplicationKey != that.encryptedMobileApplicationKey) return false
         if (mobileApplicationName != that.mobileApplicationName) return false
         if (mobileEndPointUrl != that.mobileEndPointUrl) return false
         if (name != that.name) return false
@@ -300,7 +300,7 @@ class CommunicationOrganization implements Serializable {
         result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
         result = 31 * result + (mobileEndPointUrl != null ? mobileEndPointUrl.hashCode() : 0)
         result = 31 * result + (mobileApplicationName != null ? mobileApplicationName.hashCode() : 0)
-        result = 31 * result + (mobileApplicationKey != null ? mobileApplicationKey.hashCode() : 0)
+        result = 31 * result + (encryptedMobileApplicationKey != null ? encryptedMobileApplicationKey.hashCode() : 0)
         result = 31 * result + (sendEmailServerProperties != null ? sendEmailServerProperties.hashCode() : 0)
         result = 31 * result + (receiveEmailServerProperties != null ? receiveEmailServerProperties.hashCode() : 0)
         result = 31 * result + (senderMailboxAccountSettings != null ? senderMailboxAccountSettings.hashCode() : 0)
@@ -378,7 +378,7 @@ class CommunicationOrganization implements Serializable {
                 ", dataOrigin='" + dataOrigin + '\'' +
                 ", mobileEndPointUrl='" + mobileEndPointUrl + '\'' +
                 ", mobileApplicationName='" + mobileApplicationName + '\'' +
-                ", mobileApplicationKey='" + mobileApplicationKey + '\'' +
+                ", encryptedMobileApplicationKey='" + encryptedMobileApplicationKey + '\'' +
                 ", sendEmailServerProperties=" + sendEmailServerProperties +
                 ", receiveEmailServerProperties=" + receiveEmailServerProperties +
                 ", senderMailboxAccountSettings=" + senderMailboxAccountSettings +

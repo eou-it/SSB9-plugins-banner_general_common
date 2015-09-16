@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -34,7 +33,7 @@ class CommunicationSendEmailService {
         log.debug( "sending email message" )
 
         if (organization?.theSenderMailboxAccount.encryptedPassword != null) {
-            organization.theSenderMailboxAccount.clearTextPassword = communicationOrganizationService.decryptMailBoxAccountPassword( organization.theSenderMailboxAccount.encryptedPassword )
+            organization.theSenderMailboxAccount.clearTextPassword = communicationOrganizationService.decryptPassword( organization.theSenderMailboxAccount.encryptedPassword )
         }
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, organization );

@@ -13,12 +13,12 @@ import net.hedtech.banner.general.communication.template.CommunicationMessage
 @SuppressWarnings("serial")
 @EqualsAndHashCode
 @ToString
-public class CommunicationEmailMessage implements Cloneable, CommunicationMessage {
+public class CommunicationEmailMessage extends CommunicationMessage {
 
-    /**
-     * Unique identifier for the email message.
-     */
-    private String guid;
+//    /**
+//     * Unique identifier for the email message.
+//     */
+//    private String guid;
 
     /**
      * place holder for RFC 822 "From" header field of an email message.
@@ -50,7 +50,7 @@ public class CommunicationEmailMessage implements Cloneable, CommunicationMessag
      * place holder for the sent date of this email message.
      */
 //    @Type(type = "com.sungardhe.utils.TimestampInDatabaseDateHibernateType")
-    private Date dateSent;
+//    private Date dateSent;
 
     /**
      * place holder for the subject of this email message.
@@ -116,22 +116,22 @@ public class CommunicationEmailMessage implements Cloneable, CommunicationMessag
     }
 
 
-    /**
-     * Returns the date sent attribute's value.
-     * @return Date the sent date value
-     */
-    public Date getDateSent() {
-        return dateSent;
-    }
-
-
-    /**
-     * Set the sent date attribute.
-     * @param dateSent the value to set
-     */
-    public void setDateSent( Date dateSent ) {
-        this.dateSent = dateSent;
-    }
+//    /**
+//     * Returns the date sent attribute's value.
+//     * @return Date the sent date value
+//     */
+//    public Date getDateSent() {
+//        return dateSent;
+//    }
+//
+//
+//    /**
+//     * Set the sent date attribute.
+//     * @param dateSent the value to set
+//     */
+//    public void setDateSent( Date dateSent ) {
+//        this.dateSent = dateSent;
+//    }
 
 
     /**
@@ -242,22 +242,22 @@ public class CommunicationEmailMessage implements Cloneable, CommunicationMessag
     }
 
 
-    /**
-     * Returns the unique identifier for the email message.
-     * @return the guid the unique identifier for the email message
-     */
-    public String getGuid() {
-        return guid;
-    }
-
-
-    /**
-     * Sets the unique identifier for the email message.
-     * @param guid the guid to set
-     */
-    public void setGuid( String guid ) {
-        this.guid = guid;
-    }
+//    /**
+//     * Returns the unique identifier for the email message.
+//     * @return the guid the unique identifier for the email message
+//     */
+//    public String getGuid() {
+//        return guid;
+//    }
+//
+//
+//    /**
+//     * Sets the unique identifier for the email message.
+//     * @param guid the guid to set
+//     */
+//    public void setGuid( String guid ) {
+//        this.guid = guid;
+//    }
 
 
     /**

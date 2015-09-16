@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.template.CommunicationMessage
+import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 
 /**
  * Represents an Mobile Notification Message entity with placeholders for attributes of a typical message
@@ -15,11 +16,15 @@ import net.hedtech.banner.general.communication.template.CommunicationMessage
 @SuppressWarnings("serial")
 @EqualsAndHashCode
 @ToString
-public class CommunicationMobileNotificationMessage implements CommunicationMessage {
-    String guid
+public class CommunicationMobileNotificationMessage extends CommunicationMessage {
     String mobileHeadline
     String headline
-    String description
+    String messageDescription
     String destinationLink
     String destinationLabel
+    CommunicationMobileNotificationExpirationPolicy expirationPolicy
+    Long elapsedTimeSeconds
+    Date expirationDateTime
+    boolean push
+    boolean sticky
 }
