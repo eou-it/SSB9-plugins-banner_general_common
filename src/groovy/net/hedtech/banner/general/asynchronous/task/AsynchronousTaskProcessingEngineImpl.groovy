@@ -548,7 +548,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
             try {
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                 if(cause instanceof ApplicationException) {
-                    jobManager.markFailed(job, cause.getType(), cause );
+                    jobManager.markFailed(job, cause.friendlyName?:cause.getType(), cause );
                 }
                 else
                 {
