@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
+import groovyx.net.http.HTTPBuilder
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.ExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
@@ -17,9 +18,6 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import javax.mail.AuthenticationFailedException
-import javax.mail.MessagingException
-import javax.mail.internet.InternetAddress
 
 /**
  * Performs the details of assembling and sending out an Ellucian Go mobile notification.
@@ -31,80 +29,51 @@ class CommunicationSendMobileNotificationMethod {
     private CommunicationEmailReceipt lastSend;
 
 
+    private boolean isEmpty( String s ) {
+        return !s || s.length() == 0
+    }
+
     public void send(CommunicationMobileNotificationMessage message, CommunicationOrganization senderOrganization) {
-//
-//
-//
-//
-//
-//
-//
-//
-//        CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
-//
-//        def senderAddress = new CommunicationEmailAddress(
-//                mailAddress: senderOrganization.theSenderMailboxAccount.emailAddress,
-//                displayName: senderOrganization.theSenderMailboxAccount.emailDisplayName
-//        )
-//        message.senders = [senderAddress] as Set
-//        minimumFieldsPresent( message, false );
-//
-//        assignReplyToAddress()
-//
-//        //adding smtp 'from' for handling bounce back emails.
-//        emailReceipt.setFrom( senderOrganization.theSenderMailboxAccount.emailAddress );
-//
-//        if (log.isDebugEnabled()) {
-//            log.debug( "Connecting to email server with account username = " + senderOrganization.theSenderMailboxAccount.getUserName() );
-//        }
-////        optOutMessageId = uuidService.fetchOneGuid();
-//
-//        try {
-//            //Add the OptOut Link in to the message being sent
-//            StringBuilder sb = new StringBuilder();
-//            if (message.getMessageBody() != null) {
-//                sb.append( message.getMessageBody() );
-//            }
-////            sb.append(
-////                    EmailAddressUtilities.getOptOutText(
-////                    getCommunicationConfiguration().getEmailService().getOptOutUrl(),
-////                    getCommunicationConfiguration().getEmailService().getOptOutText(),
-////                    this.optOutMessageId )
-////            );
-//
-//
-//            message.setMessageBody( sb.toString() );
-//            email = createMessage( message, true, emailReceipt )
-//            setConnectionProperties( email )
-//            email.getMailSession()?.setDebug(log.isDebugEnabled() || log.isTraceEnabled())
-//
-//            if (log.isDebugEnabled()) {
-//                StringBuilder logMessage = new StringBuilder( "About to send email message:\n" );
-//                logMessage.append( "*** BEGIN MSG ***\n" );
-//                logMessage.append( "From: \n" );
-//                for( InternetAddress address:email.getFromAddress() ) {
-//                    logMessage.append( "    " ).append( address.toString() ).append( "\n" );
-//                }
-//                logMessage.append( "Recipients: \n" );
-//                for( InternetAddress address:email.getToAddresses() ) {
-//                    logMessage.append( "    " ).append( address.toString() ).append( "\n" );
-//                }
-//                logMessage.append( "Reply-To: \n" );
-//                for( InternetAddress address:email.getReplyToAddresses() ) {
-//                    logMessage.append( "    " ).append( address.toString() ).append( "\n" );
-//                }
-//                logMessage.append( "Subject: " ).append( email.getSubject() ).append( "\n" );
-//                logMessage.append( "Body: \n" );
-//                logMessage.append( String.valueOf( email.getMimeMessage()) )
-//                logMessage.append( "\n*** END MSG***" );
-//                log.debug( logMessage.toString() );
-//            }
-//
-//            email.send()
-//            this.lastSend = emailReceipt;
-//        } catch (EmailException e) {
-//            log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
-//            // throw custom system exception here MJB
+        log.trace( "Begin send mobile notification." )
+        assert( message )
+        assert( senderOrganization )
+        if (senderOrganization.encryptedMobileApplicationKey) {
+            assert senderOrganization.clearMobileApplicationKey
+        }
+
+        if (isEmpty( senderOrganization.mobileEndPointUrl )) {
+            throw ExceptionFactory.createFriendlyApplicationException( CommunicationSendMobileNotificationMethod.class,
+                CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.name,
+                "emptyMobileNotificationEndpointUrl",
+                senderOrganization.name
+            )
+        }
+
+        if (isEmpty( senderOrganization.mobileApplicationName )) {
+            throw ExceptionFactory.createApplicationException( CommunicationSendMobileNotificationMethod.class,
+                CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.name,
+                "emptyMobileNotificationApplicationName",
+                senderOrganization.name
+            )
+        }
+
+        if (isEmpty( senderOrganization.encryptedMobileApplicationKey )) {
+            throw ExceptionFactory.createFriendlyApplicationException( CommunicationSendMobileNotificationMethod.class,
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.name,
+                    "emptyMobileNotificationApplicationKey",
+                    senderOrganization.name
+            )
+        }
+
+        try {
+
+        // Ex: 'https://mobiledev1.ellucian.com/'
+        HTTPBuilder httpBuilder = new HTTPBuilder( senderOrganization.mobileEndPointUrl )
+        httpBuilder.auth.basic senderOrganization.mobileApplicationName, senderOrganization.clearMobileApplicationKey
+
+        } catch (Throwable t) {
+            log.error( e );
+            // throw custom system exception here MJB
 //            String fromList = InternetAddress.toString( email.getFromAddress() )
 //            String recipientList = email.getToAddresses().toListString()
 //            String replyToList = email.getReplyToAddresses().toListString()
@@ -118,10 +87,10 @@ class CommunicationSendMobileNotificationMethod {
 //            {
 //                throw ExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
 //            }
-//        } catch (Exception e) {
+        } catch (Exception t) {
 //            log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
 //            throw ExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
-//        }
+        }
     }
 
 //    /**
@@ -291,3 +260,87 @@ class CommunicationSendMobileNotificationMethod {
 //    }
 //
 }
+
+
+/**
+ def save(Notification notificationInstance) {
+ if (notificationInstance == null) {
+ notFound()
+ return
+ }
+
+ if (notificationInstance.hasErrors()) {
+ respond notificationInstance.errors, view:'create'
+ return
+ }
+
+ notificationInstance.save flush:true
+
+ def String csvList = new String(notificationInstance.csvFile)
+
+ def http = new HTTPBuilder( 'https://mobiledev1.ellucian.com/' )
+ http.auth.basic 'StudentSuccess', 'ss-key-value'
+ http.request(POST, JSON) { req ->
+ uri.path = '/banner-mobileserver/api/notification/notifications/'
+ headers.Accept = 'application/json'
+
+ def recipientsList = []
+ def idTypeString = notificationInstance ? "loginId" : "sisId"
+
+ if (notificationInstance.importList) {
+ csvList.eachCsvLine {line ->
+ line.each {
+ def recipient = [idType : idTypeString, id : it]
+ recipientsList << recipient
+ }
+ }
+
+ } else {
+ recipientsList = [
+ [
+ idType : 'all',
+ id : null
+ ]
+ ]
+ }
+
+ def bodyMap = [
+ mobileHeadline : notificationInstance.mobileHeadline,
+ push : notificationInstance.push,
+ sticky : notificationInstance.sticky
+ ]
+
+ bodyMap.put("recipients",recipientsList)
+
+ if (notificationInstance?.headline) bodyMap.put("headline", notificationInstance?.headline)
+ if (notificationInstance?.body) bodyMap.put("description", notificationInstance?.body)
+
+ def expiresDateFormat = new SimpleDateFormat("YYYY-MM-DDhh:mm:ssZ")
+ if (notificationInstance?.expires) bodyMap.put("expires", expiresDateFormat.format(notificationInstance?.expires))
+
+ if (notificationInstance?.destinationLabel) bodyMap.put("destinationLabel", notificationInstance?.destinationLabel)
+ if (notificationInstance?.destination) bodyMap.put("destination", notificationInstance?.destination)
+
+ if (notificationInstance?.uuid) bodyMap.put("uuid", notificationInstance?.uuid)
+
+ //println bodyMap
+ body = bodyMap
+
+ response.success = { resp, reader ->
+ println "Got response: ${resp.statusLine}"
+ println "Content-Type: ${resp.headers.'Content-Type'}"
+ println reader.text
+ println ((reader != null) && (reader.text != null))
+ }
+
+ }
+
+ request.withFormat {
+ form multipartForm {
+ flash.message = message(code: 'default.created.message', args: [message(code: 'notificationInstance.label', default: 'Notification'), notificationInstance.id])
+ redirect notificationInstance
+ }
+ '*' { respond notificationInstance, [status: CREATED] }
+ }
+ }
+**/

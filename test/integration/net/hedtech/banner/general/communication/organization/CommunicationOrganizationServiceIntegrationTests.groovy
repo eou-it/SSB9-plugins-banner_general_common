@@ -119,18 +119,18 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
         rootorg.setMobileApplicationName("BCM_GO_MOBILE");
         rootorg.setMobileEndPointUrl("BCM_GO.com")
-        rootorg.setClearTextPassword("password")
+        rootorg.setClearMobileApplicationKey("password")
         CommunicationOrganization updatedRoot = communicationOrganizationService.update(rootorg)
 
         assertEquals("BCM_GO_MOBILE", updatedRoot.getMobileApplicationName())
         assertEquals("BCM_GO.com", updatedRoot.getMobileEndPointUrl())
-        assertNotNull(updatedRoot.mobileApplicationKey)
+        assertNotNull(updatedRoot.encryptedMobileApplicationKey)
 
         updatedRoot.setMobileApplicationName(null)
-        updatedRoot.setClearTextPassword(null)
+        updatedRoot.setClearMobileApplicationKey(null)
         CommunicationOrganization updatedRoot1 = communicationOrganizationService.update(updatedRoot)
         assertNull(updatedRoot1.mobileApplicationName)
-        assertNull(updatedRoot1.mobileApplicationKey)
+        assertNull(updatedRoot1.encryptedMobileApplicationKey)
     }
 
     @Test
@@ -218,7 +218,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testCreateWithServerSettings() {
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword(clearTextPassword)
+        def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -243,7 +243,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testSetAndResetPassword() {
         def organization = new CommunicationOrganization()
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword(clearTextPassword)
+        def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
         organization.name = "test"
         organization.description = "description"
         def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
@@ -287,8 +287,8 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testPasswordEncryptAndDecrypt() {
 
-        def encryptedPassword = communicationOrganizationService.encryptMailBoxAccountPassword(clearTextPassword)
-        def decryptedPassword = communicationOrganizationService.decryptMailBoxAccountPassword(encryptedPassword)
+        def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
+        def decryptedPassword = communicationOrganizationService.decryptPassword(encryptedPassword)
         assertEquals(clearTextPassword, decryptedPassword)
     }
 

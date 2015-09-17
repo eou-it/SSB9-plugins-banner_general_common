@@ -87,8 +87,32 @@ class ExceptionFactory {
      * @param errorCode the error code
      */
     public static ApplicationException createApplicationException( Class service, Throwable t, String errorCode ) {
-
         ApplicationException ae = new ApplicationException( service, t )
+        ae.friendlyName = errorCode
+        return ae
+    }
+
+    /**
+     * Creates an application exception annotated with a friendly name.
+     * @param service the service which describes the originator of the exception
+     * @param t the throwable that was caught
+     * @param errorCode a string that will be past along with the application exception as a 'friendlyName'
+     */
+    public static ApplicationException createFriendlyApplicationException( Class service, String errorCode, String resourceId ) {
+        ApplicationException ae = ExceptionFactory.createApplicationException( service, resourceId )
+        ae.friendlyName = errorCode
+        return ae
+    }
+
+    /**
+     * Creates an application exception annotated with a friendly name.
+     * @param service the service which describes the originator of the exception
+     * @param errorCode a string that will be past along with the application exception as a 'friendlyName'
+     * @param resourceId the sub key of the string resource
+     * @param parameter0 the first parameterized value which will be passed as the {0} of the string value
+     */
+    public static ApplicationException createFriendlyApplicationException( Class service, String errorCode, String resourceId, String parameter0 ) {
+        ApplicationException ae = ExceptionFactory.createApplicationException( service, resourceId, parameter0 )
         ae.friendlyName = errorCode
         return ae
     }

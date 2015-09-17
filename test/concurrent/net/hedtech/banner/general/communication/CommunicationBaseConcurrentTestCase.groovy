@@ -94,7 +94,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
-        String userPassword = communicationOrganizationService.decryptMailBoxAccountPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
+        String userPassword = communicationOrganizationService.decryptPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
     }
 
     @After
@@ -208,7 +208,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
             def cma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',
-                    encryptedPassword: communicationOrganizationService.encryptMailBoxAccountPassword( "changeit" ),
+                    encryptedPassword: communicationOrganizationService.encryptPassword( "changeit" ),
                     userName: 'rshishehbor',
                     organization: defaultOrganization,
                     type: CommunicationMailboxAccountType.Sender

@@ -23,10 +23,10 @@ class CommunicationOrganizationService extends ServiceBase {
     def preCreate(domainModelOrMap) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
         if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theReplyToMailboxAccount.clearTextPassword)
+            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theReplyToMailboxAccount.clearTextPassword)
         }
         if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
+            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
         }
 
         def rootOrg = CommunicationOrganization.fetchRoot()
@@ -37,9 +37,9 @@ class CommunicationOrganizationService extends ServiceBase {
 
         communicationOrganization.isAvailable = communicationOrganization.isAvailable ?: false;
 
-        /* generate encrypted password if necessary*/
-        if (communicationOrganization.clearTextPassword != null) {
-            communicationOrganization.mobileApplicationKey = encryptMailBoxAccountPassword(communicationOrganization.clearTextPassword)
+        // Generate encrypted password if necessary
+        if (communicationOrganization.clearMobileApplicationKey) {
+            communicationOrganization.encryptedMobileApplicationKey = encryptPassword(communicationOrganization.clearMobileApplicationKey)
         }
 
         if (communicationOrganization.dateFormat != null) {
@@ -154,19 +154,19 @@ class CommunicationOrganizationService extends ServiceBase {
 
         /* generate encrypted password if necessary*/
         if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theReplyToMailboxAccount.clearTextPassword)
+            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theReplyToMailboxAccount.clearTextPassword)
         }
         if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptMailBoxAccountPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
+            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
         }
 
         communicationOrganization.isAvailable = communicationOrganization.isAvailable ?: false;
 
         /* generate encrypted password if necessary*/
-        if (communicationOrganization.clearTextPassword != null && communicationOrganization.clearTextPassword != "") {
-            communicationOrganization.mobileApplicationKey = encryptMailBoxAccountPassword(communicationOrganization.clearTextPassword)
+        if (communicationOrganization.clearMobileApplicationKey && communicationOrganization.clearMobileApplicationKey.length() > 0) {
+            communicationOrganization.encryptedMobileApplicationKey = encryptPassword(communicationOrganization.clearMobileApplicationKey)
         } else if (communicationOrganization.mobileApplicationName == null || communicationOrganization.mobileApplicationName == "") {
-            communicationOrganization.setMobileApplicationKey(null)
+            communicationOrganization.encryptedMobileApplicationKey = null
         }
 
         if (communicationOrganization.dateFormat != null) {
@@ -208,7 +208,7 @@ class CommunicationOrganizationService extends ServiceBase {
     }
 
 
-    def decryptMailBoxAccountPassword(String encryptedPassword) {
+    def decryptPassword(String encryptedPassword) {
         def decryptedPassword
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
         if (encryptionKey == null)
@@ -221,7 +221,7 @@ class CommunicationOrganizationService extends ServiceBase {
     }
 
 
-    def encryptMailBoxAccountPassword(String clearTextPassword) {
+    def encryptPassword(String clearTextPassword) {
         def encryptedPassword
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
         if (encryptionKey == null)

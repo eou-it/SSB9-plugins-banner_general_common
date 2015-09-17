@@ -106,7 +106,7 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
 
         def cma = new CommunicationMailboxAccount(
                 emailAddress: 'bcm-sender@ellucian.com',
-                encryptedPassword: communicationOrganizationService.encryptMailBoxAccountPassword( clearTextPassword ),
+                encryptedPassword: communicationOrganizationService.encryptPassword( clearTextPassword ),
                 clearTextPassword: clearTextPassword,
                 userName: userName,
                 organization: defaultOrganization,
