@@ -4,6 +4,8 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
 package net.hedtech.banner.general.overall
 
 import javax.persistence.*
+
+import net.hedtech.banner.general.crossproduct.BankRoutingInfo
  
 /**
  * Direct Deposit Account Table entity.
@@ -21,9 +23,8 @@ import javax.persistence.*
                      AND a.status != 'I'"""),
     @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndAccountInfo",
         query = """ FROM DirectDepositAccount a
-               LEFT JOIN a.bankRoutingInfo b
                    WHERE a.pidm = :pidm
-                     AND b.bankRoutingNum = :bankRoutingNum
+                     AND a.bankRoutingInfo.bankRoutingNum = :bankRoutingNum
                      AND a.bankAccountNum = :bankAccountNum
                      AND a.accountType = :accountType""")
 ])
