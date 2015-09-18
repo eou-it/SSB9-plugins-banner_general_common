@@ -110,6 +110,20 @@ class DirectDepositAccount implements Serializable {
     String bankAccountNum
 
     /**
+     * BANK ROUTING NO: The bank routing number of the recipients bank.
+     */
+    @Column(name = "GXRDIRD_BANK_ROUT_NUM")
+    String bankRoutingNum
+
+    /**
+     * BANK ROUTING INFO JOIN: The bank routing number and bank name of the recipients bank via join to GXVDIRD.
+     */
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM",referencedColumnName="GXVDIRD_CODE_BANK_ROUT_NUM",
+            insertable =  false, updatable = false)
+    private BankRoutingInfo bankRoutingInfo;
+
+    /**
      * AMOUNT: The amount of the direct deposit.
      */
     @Column(name = "GXRDIRD_AMOUNT")
@@ -171,13 +185,6 @@ class DirectDepositAccount implements Serializable {
      */
     @Column(name = "GXRDIRD_ADDR_SEQNO_IAT")
     Integer iatAddessSequenceNum
-
-    /**
-     * BANK ROUTING INFO JOIN: The bank routing number and bank name of the recipients bank via join to GXVDIRD.
-     */
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM")
-    private BankRoutingInfo bankRoutingInfo;
 
     public String toString() {
         """DirectDepositAccount [
