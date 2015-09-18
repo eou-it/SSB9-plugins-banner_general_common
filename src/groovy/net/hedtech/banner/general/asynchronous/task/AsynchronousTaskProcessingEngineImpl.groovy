@@ -5,6 +5,7 @@ package net.hedtech.banner.general.asynchronous.task
 
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
@@ -548,7 +549,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
             try {
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                 if(cause instanceof ApplicationException) {
-                    jobManager.markFailed(job, cause.friendlyName?:cause.getType(), cause );
+                    jobManager.markFailed(job, cause.friendlyName, cause );
                 }
                 else
                 {

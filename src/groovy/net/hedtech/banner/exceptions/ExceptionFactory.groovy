@@ -87,7 +87,7 @@ class ExceptionFactory {
      * @param errorCode the error code
      */
     public static ApplicationException createApplicationException( Class service, Throwable t, String errorCode ) {
-        ApplicationException ae = new ApplicationException( service, t )
+        ApplicationException ae = new CommunicationApplicationException( service, t )
         ae.friendlyName = errorCode
         return ae
     }
@@ -99,7 +99,7 @@ class ExceptionFactory {
      * @param errorCode a string that will be past along with the application exception as a 'friendlyName'
      */
     public static ApplicationException createFriendlyApplicationException( Class service, String errorCode, String resourceId ) {
-        ApplicationException ae = ExceptionFactory.createApplicationException( service, resourceId )
+        ApplicationException ae = new CommunicationApplicationException( service, "@@r1:${resourceId}@@" )
         ae.friendlyName = errorCode
         return ae
     }
@@ -112,7 +112,7 @@ class ExceptionFactory {
      * @param parameter0 the first parameterized value which will be passed as the {0} of the string value
      */
     public static ApplicationException createFriendlyApplicationException( Class service, String errorCode, String resourceId, String parameter0 ) {
-        ApplicationException ae = ExceptionFactory.createApplicationException( service, resourceId, parameter0 )
+        ApplicationException ae = new CommunicationApplicationException( service, "@@r1:${resourceId}:${parameter0}@@" )
         ae.friendlyName = errorCode
         return ae
     }
