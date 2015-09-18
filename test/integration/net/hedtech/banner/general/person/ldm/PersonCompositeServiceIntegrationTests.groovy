@@ -597,13 +597,14 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def bio = PersonBasicPersonBase.findByPidm(person.pidm)
         assertNotNull bio
         assertEquals "F", bio.sex
+        def gender = "Female"
 
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Content-Type", "application/json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
-                      gender: bio.sex
+                      gender: gender
         ]
         def matched_persons = personCompositeService.list(params)
         // assert that only one match comes back
@@ -638,7 +639,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", "application/json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
-                      gender: "M"
+                      gender: "Male"
         ]
         def matched_persons = personCompositeService.list(params)
         // assert that no match comes back

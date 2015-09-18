@@ -549,6 +549,8 @@ class PersonCompositeService extends LdmService {
             dob = LdmService.convertString2Date(params?.dateOfBirth)
         }
 
+        def personGender = params?.gender == 'Male' ? 'M' : (params?.gender == 'Female' ? 'F' : (params?.gender == 'Unknown' ? 'N' : null))
+
         Boolean matchFound = false
         commonMatchingCompositeService.commonMatchingCleanup()
         [[email: emailInstitution?.emailAddress, type: emailInstitutionRuleValue],
@@ -558,7 +560,7 @@ class PersonCompositeService extends LdmService {
                 def cm_params = [source   : personMatchRule?.value,
                                  lastName : name?.lastName, firstName: name?.firstName, mi: name?.middleName,
                                  birthDay : dob?.format("dd"), birthMonth: dob?.format("MM"), birthYear: dob?.format("yyyy"),
-                                 sex      : params?.gender, ssn: ssnCredentials?.credentialId,
+                                 sex      : personGender, ssn: ssnCredentials?.credentialId,
                                  bannerId : bannerIdCredentials?.credentialId, email: emailAddr?.email,
                                  emailType: emailAddr?.type, max: params.max, offset: params.offset, sort: params.sort, order: params.order]
                 log.debug "commonMatching request ${cm_params}"
