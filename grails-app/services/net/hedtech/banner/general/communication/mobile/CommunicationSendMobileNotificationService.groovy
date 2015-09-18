@@ -3,12 +3,14 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
-import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
-import net.hedtech.banner.general.communication.email.CommunicationSendEmailMethod
-import net.hedtech.banner.general.communication.item.CommunicationEmailItem
+import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.overall.ThirdPartyAccess
+import net.hedtech.banner.general.person.PersonIdentificationName
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -38,8 +40,10 @@ class CommunicationSendMobileNotificationService {
         }
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
 
-        CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod( message, organization );
-        notificationMethod.execute();
+        message.externalUser = fetchExternalLoginIdByPidm( recipientData.pidm )
+
+        CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod();
+        notificationMethod.execute( message, organization )
 
         try {
             track( organization, message, recipientData )
@@ -48,6 +52,19 @@ class CommunicationSendMobileNotificationService {
             throw t;
         } finally {
         }
+    }
+
+
+    /**
+     * Returns the login id that will be submitted to the mobile server.
+     *
+     * @param pidm the pidm of the recipient
+     * @return the third party user name if it exists; null otherwise.
+     */
+    String fetchExternalLoginIdByPidm( Integer pidm ) {
+        assert( pidm )
+        ThirdPartyAccess thirdPartyAccess = ThirdPartyAccess.findByPidm( pidm )
+        return thirdPartyAccess?.externalUser
     }
 
 
@@ -70,6 +87,7 @@ class CommunicationSendMobileNotificationService {
         item.destinationLabel = message.destinationLabel
 
         // mobile notification other properties
+        item.externalUser = message.externalUser
         item.expirationPolicy = message.expirationPolicy
         item.elapsedTimeSeconds = message.elapsedTimeSeconds
         item.expirationDateTime = message.expirationDateTime

@@ -3,11 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
-import com.icegreen.greenmail.util.GreenMailUtil
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
-import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
-import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
-import net.hedtech.banner.general.communication.email.CommunicationSendEmailMethod
 import net.hedtech.banner.general.communication.organization.*
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -17,20 +13,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 
 /**
- * Test sending email using No Security settings
+ * Test sending basic mobile notification.
  */
 class CommunicationSendMobileNotificationMethodIntegrationTests extends CommunicationBaseIntegrationTestCase {
 
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
-    CommunicationOrganization emailTestOrganization
-    def userName = "bcm-sender"
-    def clearTextPassword = "password"
-    def localhost = "127.0.0.1"
-    def receiverAddress = new CommunicationEmailAddress(
-            mailAddress: "bprakash@ellucian.edu",
-            displayName: "bprakash@ellucian.edu"
-    )
+    CommunicationOrganization testOrganization
+
 
     @Before
     public void setUp() {
@@ -40,7 +30,6 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends Communic
         SecurityContextHolder.getContext().setAuthentication(auth)
         super.setUp()
         setUpTestOrganization()
-        mailServer.start()
     }
 
 
@@ -52,65 +41,43 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends Communic
         logout()
     }
 
+
     @Test
     public void testSend() {
+        CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
+        message.mobileHeadline = "Test Send from BCM"
+        message.headline = "Test Send from BCM at " + new Date()
+        message.messageDescription = "CommunicationSendMobileNotificationMethodIntegrationTests.testSend"
+        message.destinationLabel = "Eagles"
+        message.destinationLink = "http://www.philadelphiaeagles.com"
+        message.referenceId = UUID.randomUUID().toString()
 
-//        def EMAIL_SUBJECT = "Test Subject SMTP"
-//        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
-//        //Create email message
-//        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
-//        emailMessage.messageBody = EMAIL_TEXT
-//        emailMessage.subjectLine = EMAIL_SUBJECT
-//        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
-//        emailMessage.toList = [receiverAddress]
-//
-//        //Override the default organization email server settings
-//        emailTestOrganization.sendEmailServerProperties[0].securityProtocol = CommunicationEmailServerConnectionSecurity.None;
-//
-//        //Call the execute method of CommunicationSendEmailMethod
-//        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, emailTestOrganization );
-//        sendEmailMethod.execute()
-//
-//        def receivedMessages = mailServer.getReceivedMessages()
-//        assertEquals(1, receivedMessages.length);
-//        assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT);
-//        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
+        message.externalUser = "cmobile"
+        message.push = true
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        sendMethod.execute( message, testOrganization )
     }
 
 
-    protected void setUpTestOrganization()
-    {
-        emailTestOrganization = new CommunicationOrganization()
-        emailTestOrganization.id = defaultOrganization.id
-        emailTestOrganization.name = defaultOrganization.name
-        emailTestOrganization.parent = defaultOrganization.parent
-        emailTestOrganization.description = defaultOrganization.description
-        emailTestOrganization.dateFormat = defaultOrganization.dateFormat
-        emailTestOrganization.dayOfWeekFormat = defaultOrganization.dayOfWeekFormat
-        emailTestOrganization.timeOfDayFormat = defaultOrganization.timeOfDayFormat
-        emailTestOrganization.lastModifiedBy = defaultOrganization.lastModifiedBy
-        emailTestOrganization.lastModified = defaultOrganization.lastModified
-        emailTestOrganization.version = defaultOrganization.version
-        emailTestOrganization.dataOrigin = defaultOrganization.dataOrigin
+    protected void setUpTestOrganization() {
+        testOrganization = new CommunicationOrganization()
+        testOrganization.id = defaultOrganization.id
+        testOrganization.name = defaultOrganization.name
+        testOrganization.parent = defaultOrganization.parent
+        testOrganization.description = defaultOrganization.description
+        testOrganization.dateFormat = defaultOrganization.dateFormat
+        testOrganization.dayOfWeekFormat = defaultOrganization.dayOfWeekFormat
+        testOrganization.timeOfDayFormat = defaultOrganization.timeOfDayFormat
+        testOrganization.lastModifiedBy = defaultOrganization.lastModifiedBy
+        testOrganization.lastModified = defaultOrganization.lastModified
+        testOrganization.version = defaultOrganization.version
+        testOrganization.dataOrigin = defaultOrganization.dataOrigin
 
-        def cesp = new CommunicationEmailServerProperties(
-                securityProtocol: CommunicationEmailServerConnectionSecurity.None,
-                host: localhost,
-                port: smtp_port,
-                organization: emailTestOrganization,
-                type: CommunicationEmailServerPropertiesType.Send
-        )
-        emailTestOrganization.sendEmailServerProperties = [cesp]
-
-        def cma = new CommunicationMailboxAccount(
-                emailAddress: 'bcm-sender@ellucian.com',
-                encryptedPassword: communicationOrganizationService.encryptPassword( clearTextPassword ),
-                clearTextPassword: clearTextPassword,
-                userName: userName,
-                organization: defaultOrganization,
-                type: CommunicationMailboxAccountType.Sender
-        )
-        emailTestOrganization.senderMailboxAccountSettings = [cma]
+        testOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+        testOrganization.mobileApplicationName = "StudentSuccess"
+        testOrganization.clearMobileApplicationKey = "ss-key-value"
+        testOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
     }
 
 }

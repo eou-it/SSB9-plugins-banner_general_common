@@ -27,4 +27,6 @@ public class CommunicationMobileNotificationMessage extends CommunicationMessage
     Date expirationDateTime
     boolean push
     boolean sticky
+    String referenceId
+    String externalUser
 }
