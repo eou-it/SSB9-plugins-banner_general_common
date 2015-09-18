@@ -95,20 +95,16 @@ class CommunicationSendMobileNotificationMethod {
                     messageMap.put("destination", message.destinationLink)
                 }
 
-                println messageMap
+                log.debug( messageMap )
                 body = messageMap
 
                 response.success = { theResponse, reader ->
-//                    if (log.isDebugEnabled()) {
-//                        log.debug("Got response: ${theResponse.statusLine}")
-//                        log.debug("Content-Type: ${theResponse.headers.'Content-Type'}")
-//                        log.debug(reader.text)
-//                        log.debug(((reader != null) && (reader.text != null)))
-//                    }
-                        println ("Got response: ${theResponse.statusLine}")
-                        println ("Content-Type: ${theResponse.headers.'Content-Type'}")
-                        println (reader.text)
-                    println (((reader != null) && (reader.text != null)))
+                    if (log.isDebugEnabled()) {
+                        log.debug("Got response: ${theResponse.statusLine}")
+                        log.debug("Content-Type: ${theResponse.headers.'Content-Type'}")
+                        log.debug(reader.text)
+                        log.debug(((reader != null) && (reader.text != null)))
+                    }
                 }
             }
         } catch (Throwable t) {

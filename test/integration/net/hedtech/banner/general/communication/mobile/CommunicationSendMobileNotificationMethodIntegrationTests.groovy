@@ -56,7 +56,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends Communic
         message.push = true
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
-        sendMethod.execute( message, testOrganization )
+        //sendMethod.execute( message, testOrganization )
     }
 
 
