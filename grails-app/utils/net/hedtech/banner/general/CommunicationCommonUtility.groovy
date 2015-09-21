@@ -6,6 +6,7 @@ package net.hedtech.banner.general
 import grails.util.Holders
 import org.apache.commons.lang.StringUtils
 import org.apache.log4j.Logger
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
 
 import java.util.regex.Matcher
@@ -192,6 +193,20 @@ class CommunicationCommonUtility {
             log.error("principal lacks authorities - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
             log.error(e)
             throw e
+        }
+    }
+
+
+    public static setLocaleInDatabase(sql) {
+
+        def userlocale = LocaleContextHolder.getLocale().toLanguageTag().toString()
+
+        try {
+            sql.call("""{call g\$_nls_utility.p_set_nls(${userlocale})}""")
+        } catch (Exception e) {
+            //We eat this exception and let it just  default to the default language of the database.
+            //this avoids dependency on general 8.7.5 which had the utility function called above
+            log.debug "There was an exception while setting nls for locale ${userlocale}:" + e.getMessage()
         }
     }
 

@@ -14,6 +14,7 @@ import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.transaction.annotation.Propagation
@@ -118,6 +119,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 Connection conn = (Connection) sessionFactory.getCurrentSession().connection()
                 asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+                CommunicationCommonUtility.setLocaleInDatabase(sql)
                 List<GroovyRowResult> resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
                 resultSet.each { row ->
                     row.each { column ->

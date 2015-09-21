@@ -8,6 +8,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
+import org.springframework.context.i18n.LocaleContextHolder
 
 import java.sql.SQLException
 
@@ -41,6 +42,9 @@ class CommunicationPopulationQueryStatementParseService {
                     throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
             }
 
+            //get the browser locale and set the nls language of the database
+            CommunicationCommonUtility.setLocaleInDatabase(sql)
+
             def stmt = '{call gckextr.p_validate_sql(?,?,?,?,?)}'
             def params = [statement, Sql.VARCHAR, Sql.VARCHAR, Sql.INTEGER, Sql.INTEGER]
             sql.call stmt, params, { status, message, cost, cardinality ->
@@ -65,6 +69,7 @@ class CommunicationPopulationQueryStatementParseService {
             log.debug ae.stackTrace
             //throw ae
         } finally {
+            sql.close()
             return populationQueryParseResult
         }
     }
