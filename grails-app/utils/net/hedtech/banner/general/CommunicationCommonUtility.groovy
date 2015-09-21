@@ -199,7 +199,8 @@ class CommunicationCommonUtility {
 
     public static setLocaleInDatabase(sql) {
 
-        def userlocale = LocaleContextHolder.getLocale().toLanguageTag().toString()
+/*
+        def userlocale = LocaleContextHolder?.getLocale()?.toLanguageTag()?.toString()
 
         try {
             sql.call("""{call g\$_nls_utility.p_set_nls(${userlocale})}""")
@@ -208,6 +209,7 @@ class CommunicationCommonUtility {
             //this avoids dependency on general 8.7.5 which had the utility function called above
             log.debug "There was an exception while setting nls for locale ${userlocale}:" + e.getMessage()
         }
+*/
     }
 
 }
