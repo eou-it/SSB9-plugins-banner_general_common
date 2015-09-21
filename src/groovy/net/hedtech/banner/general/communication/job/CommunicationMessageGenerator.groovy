@@ -6,13 +6,17 @@ package net.hedtech.banner.general.communication.job
 import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationMergedEmailTemplate
+import net.hedtech.banner.general.communication.template.CommunicationMergedMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationMessage
+import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
+import net.hedtech.banner.general.overall.ThirdPartyAccess
 import org.apache.log4j.Logger
 
 import javax.mail.internet.AddressException
@@ -62,7 +66,36 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
 
     @Override
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
-        message = communicationTemplateMergeService.mergeTemplate( template, recipientData )
+        CommunicationMergedMobileNotificationTemplate mergedMobileNotificationTemplate = communicationTemplateMergeService.mergeTemplate( template, recipientData )
+
+        CommunicationMobileNotificationMessage mobileNotificationMessage = new CommunicationMobileNotificationMessage(
+            mobileHeadline: mergedMobileNotificationTemplate.mobileHeadline,
+            headline: mergedMobileNotificationTemplate.headline,
+            messageDescription: mergedMobileNotificationTemplate.messageDescription,
+            destinationLink: mergedMobileNotificationTemplate.destinationLink,
+            destinationLabel: mergedMobileNotificationTemplate.destinationLabel,
+            expirationPolicy: template.expirationPolicy,
+            elapsedTimeSeconds: template.elapsedTimeSeconds,
+            expirationDateTime: template.expirationDateTime,
+            push: template.push,
+            sticky: template.sticky,
+            referenceId: recipientData.referenceId,
+            externalUser: fetchExternalLoginIdByPidm( recipientData.pidm )
+        )
+
+        message = mobileNotificationMessage
+    }
+
+    /**
+     * Returns the login id that will be submitted to the mobile server.
+     *
+     * @param pidm the pidm of the recipient
+     * @return the third party user name if it exists; null otherwise.
+     */
+    static String fetchExternalLoginIdByPidm( Long pidm ) {
+        assert( pidm )
+        ThirdPartyAccess thirdPartyAccess = ThirdPartyAccess.findByPidm( Integer.valueOf( pidm.intValue() ) )
+        return thirdPartyAccess?.externalUser
     }
 
     /**

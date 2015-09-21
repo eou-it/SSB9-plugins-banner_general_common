@@ -43,6 +43,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def communicationFolderService
     def communicationTemplateService
     def communicationEmailTemplateService
+    def communicationMobileNotificationTemplateService
     def communicationOrganizationService
     def communicationGroupSendItemProcessingEngine
     def communicationJobProcessingEngine
@@ -51,6 +52,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def communicationItemService
     def communicationEmailItemService
     def communicationFieldService
+    def CommunicationSendMobileNotificationService
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
@@ -173,6 +175,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")
                 sql.executeUpdate("Delete from GCRCITM")
                 sql.executeUpdate("Delete from GCBCJOB")
@@ -205,6 +208,9 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         List organizations = communicationOrganizationService.list()
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org")
+            defaultOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+            defaultOrganization.mobileApplicationName = "StudentSuccess"
+            defaultOrganization.clearMobileApplicationKey = "ss-key-value"
 
             def cma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',

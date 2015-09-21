@@ -39,32 +39,11 @@ class CommunicationMobileNotificationItem extends CommunicationItem implements S
     @Column(name = "GCRMITM_DESTINATION_LABEL")
     String destinationLabel
 
-    @Column(name = "GCRMITM_EXPIRATION_POLICY", nullable = false)
-    @Enumerated(EnumType.STRING)
-    CommunicationMobileNotificationExpirationPolicy expirationPolicy = CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION
-
-    @Column(name = "GCRMITM_ELAPSED_TIME_SECS")
-    elapsedTimeSeconds
-
-    @Column(name = "GCRMITM_EXPIRATION_DATE_TIME")
-    expirationDateTime
-
-    @Column(name = "GCRMITM_PUSH", nullable = false)
-    push
-
-    @Column(name = "GCRMITM_STICKY", nullable = false)
-    sticky
-
     static constraints = {
         mobileHeadline(nullable: false, maxSize: 160)
         headline(nullable: true, maxSize: 255)
         messageDescription(nullable: true, maxSize: 4000)
         destinationLink(nullable: true, maxSize: 2048)
         destinationLabel(nullable: true, maxSize: 255)
-        expirationPolicy(nullable: false)
-        elapsedTimeSeconds(nullable: true)
-        expirationDateTime(nullable: true)
-        push(nullable: false)
-        sticky(nullable: false)
     }
 }

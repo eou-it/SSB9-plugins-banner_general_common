@@ -9,6 +9,7 @@ import net.hedtech.banner.general.communication.field.CommunicationFieldView
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
+import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -23,9 +24,8 @@ import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
-class CommunicationSendMobileNotificationServiceIntegrationTests extends BaseIntegrationTestCase {
+class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestCase {
 
-    def communicationSendMobileNotificationService
     def selfServiceBannerAuthenticationProvider
 
 
@@ -56,16 +56,16 @@ class CommunicationSendMobileNotificationServiceIntegrationTests extends BaseInt
         assertNotNull( thirdPartyAccess.externalUser )
 
         // tests a valid pidm set up with an external user
-        String externalLoginId = communicationSendMobileNotificationService.fetchExternalLoginIdByPidm( thirdPartyAccess.pidm )
+        String externalLoginId = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( thirdPartyAccess.pidm )
         assertNotNull( externalLoginId )
         assertEquals( thirdPartyAccess.externalUser, externalLoginId )
 
         // tests a valid pidm with no external user set up
-        String externalLoginId2 = communicationSendMobileNotificationService.fetchExternalLoginIdByPidm( 1252 )
+        String externalLoginId2 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( 1252 )
         assertNull( externalLoginId2 )
 
         // tests if pidm does not exist
-        String externalLoginId3 = communicationSendMobileNotificationService.fetchExternalLoginIdByPidm( -1 )
+        String externalLoginId3 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( -1 )
         assertNull( externalLoginId3 )
     }
 

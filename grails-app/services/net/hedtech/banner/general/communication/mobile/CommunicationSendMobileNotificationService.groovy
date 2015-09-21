@@ -19,10 +19,11 @@ import org.apache.commons.logging.LogFactory
  */
 class CommunicationSendMobileNotificationService {
     private Log log = LogFactory.getLog( this.getClass() )
-    def communicationMobileNotificationService
+    def communicationMobileNotificationItemService
     def communicationOrganizationService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
+    def testOverride
 
 
     /**
@@ -33,14 +34,16 @@ class CommunicationSendMobileNotificationService {
      * @param recipientData a recipient data describing details of the target recipient
      */
     public void send( CommunicationOrganization organization, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData ) {
-        log.debug( "sending email message" )
+        log.debug( "sending mobile notification message" )
 
         if (organization?.encryptedMobileApplicationKey) {
             organization.clearMobileApplicationKey = communicationOrganizationService.decryptPassword( organization.encryptedMobileApplicationKey )
         }
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
 
-        message.externalUser = fetchExternalLoginIdByPidm( recipientData.pidm )
+        if (testOverride) {
+            message.externalUser = testOverride.externalUser
+        }
 
         CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod();
         notificationMethod.execute( message, organization )
@@ -52,19 +55,6 @@ class CommunicationSendMobileNotificationService {
             throw t;
         } finally {
         }
-    }
-
-
-    /**
-     * Returns the login id that will be submitted to the mobile server.
-     *
-     * @param pidm the pidm of the recipient
-     * @return the third party user name if it exists; null otherwise.
-     */
-    String fetchExternalLoginIdByPidm( Integer pidm ) {
-        assert( pidm )
-        ThirdPartyAccess thirdPartyAccess = ThirdPartyAccess.findByPidm( pidm )
-        return thirdPartyAccess?.externalUser
     }
 
 
@@ -86,13 +76,7 @@ class CommunicationSendMobileNotificationService {
         item.destinationLink = message.destinationLink
         item.destinationLabel = message.destinationLabel
 
-        // mobile notification other properties
-        item.externalUser = message.externalUser
-        item.expirationPolicy = message.expirationPolicy
-        item.elapsedTimeSeconds = message.elapsedTimeSeconds
-        item.expirationDateTime = message.expirationDateTime
-
-        item = communicationMobileNotificationService.create( item )
+        item = communicationMobileNotificationItemService.create( item )
         log.debug( "recorded mobile notification item sent with item id = ${item.id}." )
     }
 

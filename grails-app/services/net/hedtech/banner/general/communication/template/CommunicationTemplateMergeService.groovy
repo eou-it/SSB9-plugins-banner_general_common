@@ -201,8 +201,8 @@ class CommunicationTemplateMergeService {
         mergedMessage.mobileHeadline = merge( template.mobileHeadline, recipientData.fieldValues )
         mergedMessage.headline = merge( template.headline, recipientData.fieldValues )
         mergedMessage.messageDescription = merge( template.messageDescription, recipientData.fieldValues )
-        mergedMessage.destinationLink = merge( template.destinationLink, template.destinationLabel )
-        mergedMessage.destinationLabel = merge( template.destinationLabel, template.destinationLabel )
+        mergedMessage.destinationLink = merge( template.destinationLink, recipientData.fieldValues )
+        mergedMessage.destinationLabel = merge( template.destinationLabel, recipientData.fieldValues )
         return mergedMessage
     }
 

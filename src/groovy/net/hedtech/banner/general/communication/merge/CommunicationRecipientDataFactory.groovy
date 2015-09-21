@@ -7,6 +7,7 @@ import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
 import org.apache.log4j.Logger
 
@@ -52,7 +53,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        recipientData = createCommunicationRecipientData( fieldNames )
+        recipientData = createCommunicationRecipientData( template, fieldNames )
     }
 
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
@@ -77,7 +78,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
         recipientData = createCommunicationRecipientData( template, fieldNames )
     }
 
-    private CommunicationRecipientData createCommunicationRecipientData( List<String> fieldNames ) {
+    private CommunicationRecipientData createCommunicationRecipientData( CommunicationTemplate template, List<String> fieldNames ) {
         def nameToValueMap = [:]
         fieldNames.each { fieldName ->
             CommunicationField communicationField = CommunicationField.fetchByName(fieldName)

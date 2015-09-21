@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.job
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.email.CommunicationSendEmailService
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
 import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.template.CommunicationMessage
@@ -47,7 +48,6 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
 
     @Override
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
-        //!!! change the message to mobile message, etc - WIP!
-        communicationSendMobileNotificationService.send( recipientData.organization, message as CommunicationEmailMessage, recipientData, recipientData.pidm )
+        communicationSendMobileNotificationService.send( recipientData.organization, message as CommunicationMobileNotificationMessage, recipientData )
     }
 }

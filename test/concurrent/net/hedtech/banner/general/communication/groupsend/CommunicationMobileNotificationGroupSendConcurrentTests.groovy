@@ -2,11 +2,12 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
 import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
@@ -14,17 +15,16 @@ import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
-import javax.mail.internet.MimeMessage
 import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
-import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
-
-class CommunicationGroupSendCommunicationServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
+class CommunicationMobileNotificationGroupSendConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
+    CommunicationMobileNotificationTemplate defaultMobileNotificationTemplate
+
 
     @Before
     public void setUp() {
@@ -36,11 +36,17 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
         communicationGroupSendMonitor.startMonitoring()
         communicationGroupSendItemProcessingEngine.startRunning()
         communicationJobProcessingEngine.startRunning()
+
+        communicationSendMobileNotificationService.testOverride = [ externalUser: "cmobile" ]
+
+        setUpDefaultMobileNotificationTemplate()
     }
 
 
     @After
     public void tearDown() {
+        communicationSendMobileNotificationService.testOverride = null
+
         communicationGroupSendMonitor.shutdown()
         communicationGroupSendItemProcessingEngine.stopRunning()
         communicationJobProcessingEngine.stopRunning()
@@ -52,7 +58,6 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
 
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
-        mailServer.start()
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testPop"))
         assertTrue(populationQuery.valid)
@@ -63,7 +68,7 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 populationId: populationSelectionListId,
-                templateId: defaultEmailTemplate.id,
+                templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString()
         )
@@ -73,8 +78,8 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
 
         assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
 
-        def sendviewdetails = CommunicationGroupSendView.findAll()
-        assertEquals(1, sendviewdetails.size())
+        def sendViewDetails = CommunicationGroupSendView.findAll()
+        assertEquals(1, sendViewDetails.size())
 
         List groupSendItemList = communicationGroupSendItemService.list()
         assertEquals( 5, groupSendItemList.size() )
@@ -95,12 +100,12 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
-        MimeMessage[] messages = mailServer.getReceivedMessages();
-        assertNotNull(messages);
-        assertEquals(5, messages.length);
-
+//        MimeMessage[] messages = mailServer.getReceivedMessages();
+//        assertNotNull(messages);
+//        assertEquals(5, messages.length);
+//
         sleepUntilGroupSendComplete( groupSend, 120 )
-
+//
         // test delete group send
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
@@ -125,7 +130,7 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 populationId: populationSelectionListId,
-                templateId: defaultEmailTemplate.id,
+                templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString()
         )
@@ -238,4 +243,26 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
     }
 
 
+    protected void setUpDefaultMobileNotificationTemplate() {
+        defaultMobileNotificationTemplate = CommunicationMobileNotificationTemplate.findByName( "CommunicationMobileNotificationGroupSendConcurrentTests_template" )
+        if (!defaultMobileNotificationTemplate) {
+            defaultMobileNotificationTemplate = new CommunicationMobileNotificationTemplate (
+                    name: "CommunicationMobileNotificationGroupSendConcurrentTests_template",
+                    personal: false,
+                    oneOff: false,
+                    folder: defaultFolder,
+
+                    mobileHeadline: "test mobile headline",
+                    headline: "test headline",
+                    messageDescription: "test description",
+                    destinationLink: "test.edu",
+                    destinationLabel: "test edu",
+
+                    push: true,
+                    sticky: false
+            )
+            defaultMobileNotificationTemplate = communicationMobileNotificationTemplateService.create( defaultMobileNotificationTemplate )
+            defaultMobileNotificationTemplate = communicationMobileNotificationTemplateService.publish( defaultMobileNotificationTemplate )
+        }
+    }
 }
