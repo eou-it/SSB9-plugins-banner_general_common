@@ -80,7 +80,8 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
             push: template.push,
             sticky: template.sticky,
             referenceId: recipientData.referenceId,
-            externalUser: fetchExternalLoginIdByPidm( recipientData.pidm )
+            externalUser: fetchExternalLoginIdByPidm( recipientData.pidm ),
+            dateSent: new Date()
         )
 
         message = mobileNotificationMessage

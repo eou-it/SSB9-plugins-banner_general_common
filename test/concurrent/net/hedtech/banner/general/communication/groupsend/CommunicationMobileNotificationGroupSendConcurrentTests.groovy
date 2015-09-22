@@ -253,6 +253,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals( "test description", item.messageDescription )
         assertEquals( "http://www.amazon.com", item.destinationLink )
         assertEquals( "Amazon", item.destinationLabel )
+        assertNotNull( item.sentDate )
     }
 
 
