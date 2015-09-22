@@ -51,6 +51,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def communicationJobService
     def communicationItemService
     def communicationEmailItemService
+    def communicationMobileNotificationItemService
     def communicationFieldService
     def CommunicationSendMobileNotificationService
 

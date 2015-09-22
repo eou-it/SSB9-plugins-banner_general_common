@@ -3,6 +3,11 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
+import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
+import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem
+import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItemService
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
@@ -154,6 +159,102 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
     }
+
+    @Test
+    public void testPersonalization() {
+        CommunicationGroupSend groupSend
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                folder: defaultFolder,
+                name: "testPersonalizationQuery",
+                description: "test description",
+                sqlString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
+        )
+        populationQuery = communicationPopulationQueryService.create(populationQuery)
+        assertTrue( populationQuery.valid )
+
+        Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
+        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
+        assertEquals(1, selectionList.getLastCalculatedCount())
+
+        CommunicationField communicationField = new CommunicationField(
+                // Required fields
+                folder: defaultFolder,
+                immutableId: UUID.randomUUID().toString(),
+                name: "name",
+                returnsArrayArguments: false,
+
+                formatString: "\$gobtpac_external_user\$",
+                previewValue: "MB",
+                renderAsHtml: false,
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = 'cbeaver' and :pidm = :pidm"
+        )
+        communicationField = communicationFieldService.create( [domainModel: communicationField] )
+        communicationField = communicationFieldService.publishDataField( [id: communicationField.id] )
+
+        CommunicationMobileNotificationTemplate mobileTemplate = new CommunicationMobileNotificationTemplate (
+                name: "testPersonalization",
+                personal: false,
+                oneOff: false,
+                folder: defaultFolder,
+
+                mobileHeadline: "testPersonalization from BCM",
+                headline: "name = \$name\$",
+                messageDescription: "test description",
+                destinationLink: "http://www.amazon.com",
+                destinationLabel: "Amazon",
+
+                push: true,
+                sticky: false
+        )
+        mobileTemplate = communicationMobileNotificationTemplateService.create( mobileTemplate )
+        mobileTemplate = communicationMobileNotificationTemplateService.publish( mobileTemplate )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                populationId: populationSelectionListId,
+                templateId: mobileTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString()
+        )
+
+        groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        assertEquals( 1, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
+
+        def sendViewDetails = CommunicationGroupSendView.findAll()
+        assertEquals(1, sendViewDetails.size())
+
+        List groupSendItemList = communicationGroupSendItemService.list()
+        assertEquals( 1, groupSendItemList.size() )
+        CommunicationGroupSendItem found = groupSendItemList.get( 0 ) as CommunicationGroupSendItem
+        assertEquals( CommunicationGroupSendItemExecutionState.Ready, found.currentExecutionState)
+
+        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+        assertEquals(1, sendItemViewDetails.size())
+
+        assertEquals( 1, CommunicationGroupSendItem.fetchByReadyExecutionState().size() )
+
+        sleepUntilGroupSendItemsComplete( groupSend, 1, 60 )
+
+        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+        assertEquals( 1, countCompleted )
+
+        sleepUntilCommunicationJobsComplete( 1, 60 )
+        countCompleted = CommunicationJob.fetchCompleted().size()
+        assertEquals( 1, countCompleted )
+
+        List itemList = communicationMobileNotificationItemService.list()
+        assertEquals( 1, itemList.size() )
+        CommunicationMobileNotificationItem item = itemList.get( 0 )
+        assertEquals( "testPersonalization from BCM", item.mobileHeadline )
+        assertEquals( "name = cbeaver", item.headline )
+        assertEquals( "test description", item.messageDescription )
+        assertEquals( "http://www.amazon.com", item.destinationLink )
+        assertEquals( "Amazon", item.destinationLabel )
+    }
+
 
     private int fetchGroupSendCount( Long groupSendId ) {
         def sql

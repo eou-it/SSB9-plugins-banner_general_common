@@ -67,6 +67,7 @@ class CommunicationGroupSendCommunicationService {
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems( groupSend )
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+
         groupSend = communicationGroupSendService.update( groupSend )
         return groupSend
     }
