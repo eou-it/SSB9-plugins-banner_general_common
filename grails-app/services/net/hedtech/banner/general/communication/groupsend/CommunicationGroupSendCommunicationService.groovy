@@ -55,11 +55,17 @@ class CommunicationGroupSendCommunicationService {
             throw ExceptionFactory.createNotFoundException( request.getOrganizationId(), CommunicationOrganization.class )
         }
 
+        String jobName = request.getName();
+        if(jobName.isEmpty())
+        {
+            throw ExceptionFactory.createNotFoundException( CommunicationGroupSendCommunicationService, "@@r1:jobNameInvalid@@" )
+        }
+
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
         groupSend.template = template
         groupSend.population = population
         groupSend.organization = organization
-        groupSend.name = request.getName()
+        groupSend.name = jobName
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
 

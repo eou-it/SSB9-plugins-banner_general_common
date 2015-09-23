@@ -152,37 +152,33 @@ public class CommunicationTemplateView implements Serializable {
         return results
     }
 
-//    /**
-//     * Returns a list of templates to be used when sending messages to a population
-//     * will return all templates that are active, shared and personal templates belonging to the user will be returned
-//     * @param filterData
-//     * @return
-//     */
-//    public static findByFolderForSend(filterData) {
-//
-//        def currentDate = new Date()
-//        def queryCriteria = CommunicationTemplate.createCriteria()
-//
-//        def results = queryCriteria.list {
-//            folder {
-//                eq("name", filterData?.params?.folderName?.toLowerCase(), [ignoreCase: true])
-//            }
-//            eq("published",true)
-//            and {
-//                or {
-//                    eq("personal",false)
-//                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
-//                }
-//            }
-//            le("validFrom",currentDate)
-//            and {
-//                or {
-//                    isNull("validTo")
-//                    ge("validTo",currentDate)
-//                }
-//            }
-//            order( Order.asc("name").ignoreCase())
-//        }
-//        return results
-//    }
+    /**
+     * Returns a list of templates to be used when sending messages to a population
+     * will return all templates that are active, shared and personal templates belonging to the user will be returned
+     * @param filterData
+     * @return
+     */
+    public static findAllForSendByPagination(filterData, pagingAndSortParams) {
+        def currentDate = new Date()
+        def queryCriteria = CommunicationTemplateView.createCriteria()
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            eq("active", true)
+            and {
+                or {
+                    eq("personal", false)
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(), [ignoreCase: true])
+                }
+            }
+            and {
+                or {
+                    ilike("name", searchName)
+                    ilike("folderName", searchName)
+                }
+            }
+            order(Order.asc("name").ignoreCase())
+        }
+        return results
+    }
 }

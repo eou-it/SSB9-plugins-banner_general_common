@@ -158,11 +158,18 @@ class CommunicationPopulationListView implements Serializable {
         return results
     }
 
-    public static fetchAllByUserId(String userid) {
+    public static findAllForSendByPagination(filterData, pagingAndSortParams) {
 
         def queryCriteria = CommunicationPopulationListView.createCriteria()
-        def results = queryCriteria.list {
-            eq("lastCalculatedBy",userid)
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            eq("lastCalculatedBy",CommunicationCommonUtility.getUserOracleUserName().toLowerCase(), [ignoreCase: true])
+            and {
+                or {
+                    ilike("queryName", searchName)
+                    ilike("queryFolder", searchName)
+                }
+            }
         }
         return results
     }
