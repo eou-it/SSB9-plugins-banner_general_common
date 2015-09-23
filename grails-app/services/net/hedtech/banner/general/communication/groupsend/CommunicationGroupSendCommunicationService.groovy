@@ -56,8 +56,7 @@ class CommunicationGroupSendCommunicationService {
         }
 
         String jobName = request.getName();
-        if(jobName.isEmpty())
-        {
+        if(!jobName || jobName.isEmpty()) {
             throw ExceptionFactory.createNotFoundException( CommunicationGroupSendCommunicationService, "@@r1:jobNameInvalid@@" )
         }
 

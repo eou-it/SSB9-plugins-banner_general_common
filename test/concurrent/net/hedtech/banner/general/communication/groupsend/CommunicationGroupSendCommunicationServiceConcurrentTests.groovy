@@ -62,6 +62,7 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
         assertEquals(5, selectionList.getLastCalculatedCount())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
                 populationId: populationSelectionListId,
                 templateId: defaultEmailTemplate.id,
                 organizationId: defaultOrganization.id,
@@ -124,6 +125,7 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
         assertEquals(5, selectionList.getLastCalculatedCount())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testDeleteGroupSend",
                 populationId: populationSelectionListId,
                 templateId: defaultEmailTemplate.id,
                 organizationId: defaultOrganization.id,

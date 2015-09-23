@@ -72,6 +72,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals(5, selectionList.getLastCalculatedCount())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
                 populationId: populationSelectionListId,
                 templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
@@ -134,6 +135,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals(5, selectionList.getLastCalculatedCount())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testDeleteGroupSend",
                 populationId: populationSelectionListId,
                 templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
@@ -212,6 +214,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         mobileTemplate = communicationMobileNotificationTemplateService.publish( mobileTemplate )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testPersonalization",
                 populationId: populationSelectionListId,
                 templateId: mobileTemplate.id,
                 organizationId: defaultOrganization.id,
