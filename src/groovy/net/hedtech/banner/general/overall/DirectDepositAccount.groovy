@@ -18,7 +18,7 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
     @NamedQuery(name = "DirectDepositAccount.fetchActiveApAccountsByPidm",
         query = """ FROM DirectDepositAccount a
                LEFT JOIN a.bankRoutingInfo
-                   WHERE a.pidm = :pidm 
+                   WHERE a.pidm = :pidm
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
     @NamedQuery(name = "DirectDepositAccount.fetchByPidmAndAccountInfo",
@@ -200,6 +200,8 @@ class DirectDepositAccount implements Serializable {
             lastModified= $lastModified,
             lastModifiedBy= $lastModifiedBy,
             bankAccountNum= $bankAccountNum,
+            bankRoutingNum= $bankRoutingNum,
+            bankRoutingInfo= $bankRoutingInfo,
             amount= $amount,
             percent= $percent,
             accountType= $accountType,
@@ -223,6 +225,7 @@ class DirectDepositAccount implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         bankAccountNum(nullable: true, maxSize: 34)
+        bankRoutingNum(nullable: false, maxSize: 11)
         amount(nullable: true, scale: 2)
         percent(nullable: true, scale: 2)
         accountType(nullable: true, maxSize: 1)
