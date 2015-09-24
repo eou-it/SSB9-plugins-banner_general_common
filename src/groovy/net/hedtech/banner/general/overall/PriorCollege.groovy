@@ -17,11 +17,14 @@ import javax.persistence.*
         query = """FROM PriorCollege a
           WHERE a.pidm = :pidm
             AND a.admissionRequest.code = :admissionRequest
-            AND a.id <> :id""")   ,
+            AND a.id <> :id"""),
 @NamedQuery(name = "PriorCollege.fetchByPidmAndAdmr",
         query = """FROM PriorCollege a
           WHERE a.pidm = :pidm
-            AND a.admissionRequest.code = :admissionRequest""")
+            AND a.admissionRequest.code = :admissionRequest"""),
+@NamedQuery(name = "PriorCollege.fetchByPidmList",
+        query = """FROM PriorCollege a
+          WHERE a.pidm IN :pidm""")
 ])
 /**
  * Prior College Table
@@ -212,5 +215,14 @@ class PriorCollege implements Serializable {
         } else {
             return null
         }
+    }
+
+
+    static List<PriorCollege> fetchByPidmList(List pidm) {
+        def priorCollege = PriorCollege.withSession { session ->
+            session.getNamedQuery('PriorCollege.fetchByPidmList').setParameterList('pidm', pidm).list()
+        }
+
+        return priorCollege
     }
 }
