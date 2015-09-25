@@ -3,6 +3,9 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+
 import javax.persistence.*
 
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
@@ -12,12 +15,12 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
  */
 @Entity
 @Table(name = "GXRDIRD")
+@ToString(includeNames = true, ignoreNulls = true)
 @NamedQueries(value = [
     @NamedQuery(name = "DirectDepositAccount.fetchByPidm",
         query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """),
     @NamedQuery(name = "DirectDepositAccount.fetchActiveApAccountsByPidm",
         query = """ FROM DirectDepositAccount a
-               LEFT JOIN a.bankRoutingInfo
                    WHERE a.pidm = :pidm
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
@@ -28,6 +31,7 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
                      AND a.bankAccountNum = :bankAccountNum
                      AND a.accountType = :accountType""")
 ])
+@EqualsAndHashCode(includeFields = true)
 class DirectDepositAccount implements Serializable {
     
     /**
@@ -186,34 +190,6 @@ class DirectDepositAccount implements Serializable {
     @Column(name = "GXRDIRD_ADDR_SEQNO_IAT")
     Integer iatAddessSequenceNum
 
-    public String toString() {
-        """DirectDepositAccount [
-            id= $id,
-            version= $version,
-            dataOrigin= $dataOrigin,
-            pidm= $pidm,
-            status= $status,
-            documentType= $documentType,
-            priority= $priority,
-            apIndicator= $apIndicator,
-            hrIndicator= $hrIndicator,
-            lastModified= $lastModified,
-            lastModifiedBy= $lastModifiedBy,
-            bankAccountNum= $bankAccountNum,
-            bankRoutingNum= $bankRoutingNum,
-            bankRoutingInfo= $bankRoutingInfo,
-            amount= $amount,
-            percent= $percent,
-            accountType= $accountType,
-            addressTypeCode= $addressTypeCode,
-            addressSequenceNum= $addressSequenceNum,
-            intlAchTransactionIndicator= $intlAchTransactionIndicator,
-            isoCode= $isoCode,
-            apAchTransactionTypeCode= $apAchTransactionTypeCode,
-            iatAddressTypeCode= $iatAddressTypeCode,
-            iatAddessSequenceNum= $iatAddessSequenceNum]"""
-    }
-    
     static constraints = {
         dataOrigin(nullable: true, maxSize: 30)
         pidm(nullable: false, min:-99999999, max:99999999)
