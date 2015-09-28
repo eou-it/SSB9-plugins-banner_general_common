@@ -137,6 +137,40 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull activeAccounts
         assertEquals 0, activeAccounts.size()
     }
+    
+    @Test
+    void testRoutingNumberValidation() {
+        def routingNumber
+        try {
+            directDepositAccountService.validateRoutingNumber("103448999");
+            fail("I should have received an error but it passed; @@r1:invalidRoutingNum@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidRoutingNum"
+        }
+    }
+
+    @Test
+    void testRoutingNumberFormatValidation() {
+        try {
+            directDepositAccountService.validateRoutingNumFormat("fail1234abc");
+            fail("I should have received an error but it passed; @@r1:invalidRoutingNumFmt@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidRoutingNumFmt"
+        }
+    }
+    
+    @Test
+    void testAccountNumberFormatValidation() {
+        try {
+            directDepositAccountService.validateAccountNumFormat("1954601TOOLONG74321");
+            fail("I should have received an error but it passed; @@r1:invalidAccountNumFmt@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidAccountNumFmt"
+        }
+    }
 
     private def newDirectDepositAccount() {
         def domain = new DirectDepositAccount(
