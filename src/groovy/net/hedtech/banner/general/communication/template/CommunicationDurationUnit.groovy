@@ -4,10 +4,9 @@
 package net.hedtech.banner.general.communication.template
 
 /**
- * CommunicationMobileNotificationExpirationPolicy describes how the message expiration will be set.
+ * Communication Duration Unit describes how to interpret an expiration duration.
  */
-public enum CommunicationMobileNotificationExpirationPolicy implements Serializable {
-    NO_EXPIRATION,
-    DURATION,
-    DATE_TIME;
+public enum CommunicationDurationUnit implements Serializable {
+    DAY,
+    HOUR
 }

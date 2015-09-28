@@ -36,8 +36,12 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     @Enumerated(EnumType.STRING)
     CommunicationMobileNotificationExpirationPolicy expirationPolicy = CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION
 
-    @Column(name = "GCBMNTL_ELAPSED_TIME_SECS", nullable = true)
-    Long elapsedTimeSeconds
+    @Column(name = "GCBMNTL_DURATION", nullable = true)
+    Long duration
+
+    @Column(name = "GCBMNTL_DURATION_UNIT", nullable = true)
+    @Enumerated(EnumType.STRING)
+    CommunicationDurationUnit durationUnit = CommunicationDurationUnit.DAY
 
     @Column(name = "GCBMNTL_EXPIRATION_DATE_TIME", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
@@ -58,7 +62,8 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
         destinationLink(nullable: true)
         destinationLabel(nullable: true)
         expirationPolicy(nullable: false)
-        elapsedTimeSeconds(nullable: true)
+        duration(nullable: true)
+        durationUnit(nullable: false)
         expirationDateTime(nullable: true)
         push(nullable: false)
         sticky(nullable: false)
