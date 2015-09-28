@@ -125,7 +125,7 @@ class DirectDepositAccount implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM",referencedColumnName="GXVDIRD_CODE_BANK_ROUT_NUM",
             insertable =  false, updatable = false)
-    private BankRoutingInfo bankRoutingInfo;
+    BankRoutingInfo bankRoutingInfo;
 
     /**
      * AMOUNT: The amount of the direct deposit.
