@@ -21,6 +21,7 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
         query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """),
     @NamedQuery(name = "DirectDepositAccount.fetchActiveApAccountsByPidm",
         query = """ FROM DirectDepositAccount a
+               LEFT JOIN a.bankRoutingInfo
                    WHERE a.pidm = :pidm
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
@@ -125,7 +126,7 @@ class DirectDepositAccount implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM",referencedColumnName="GXVDIRD_CODE_BANK_ROUT_NUM",
             insertable =  false, updatable = false)
-    BankRoutingInfo bankRoutingInfo;
+    private BankRoutingInfo bankRoutingInfo;
 
     /**
      * AMOUNT: The amount of the direct deposit.
