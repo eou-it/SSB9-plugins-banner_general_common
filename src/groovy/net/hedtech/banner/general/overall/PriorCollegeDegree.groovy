@@ -29,12 +29,16 @@ import javax.persistence.*
         name = "PriorCollegeDegree.fetchByPidmAndSourceAndBackgroundInstitution",
         query = """  FROM PriorCollegeDegree a
                     WHERE a.pidm = :pidm
-                      AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode""") ,
+                      AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode"""),
 
 @NamedQuery(
         name = "PriorCollegeDegree.fetchByPidm",
         query = """  FROM PriorCollegeDegree a
-                    WHERE a.pidm = :pidm""")
+                    WHERE a.pidm = :pidm"""),
+@NamedQuery(
+        name = "PriorCollegeDegree.fetchByPidmList",
+        query = """  FROM PriorCollegeDegree a
+                    WHERE a.pidm IN :pidm""")
 ])
 
 @Entity
@@ -321,9 +325,19 @@ class PriorCollegeDegree implements Serializable {
         return fetchByPidmAndSourceAndBackgroundInstitution(pidm, sourceAndBackgroundInstitution.code)
     }
 
+
     static List<PriorCollegeDegree> fetchByPidm(Integer pidm) {
         def priorCollegeDegree = PriorCollegeDegree.withSession { session ->
             session.getNamedQuery('PriorCollegeDegree.fetchByPidm').setInteger('pidm', pidm).list()
+        }
+
+        return priorCollegeDegree
+    }
+
+
+    static List<PriorCollegeDegree> fetchByPidmList(List pidm) {
+        def priorCollegeDegree = PriorCollegeDegree.withSession { session ->
+            session.getNamedQuery('PriorCollegeDegree.fetchByPidmList').setParameterList('pidm', pidm).list()
         }
 
         return priorCollegeDegree
