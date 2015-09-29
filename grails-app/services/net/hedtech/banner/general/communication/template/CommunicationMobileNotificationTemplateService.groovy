@@ -28,6 +28,21 @@ class CommunicationMobileNotificationTemplateService extends CommunicationTempla
             throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
         }
 
+        switch(mobileNotificationTemplate.expirationPolicy) {
+            case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
+                if (!mobileNotificationTemplate.expirationDateTime) {
+                    throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+                }
+                break
+            case CommunicationMobileNotificationExpirationPolicy.DURATION:
+                if (!mobileNotificationTemplate.duration) {
+                    throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+                }
+                break
+            default:
+                break
+        }
+
         List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables( mobileNotificationTemplate )
         if (fieldNameList) {
             fieldNameList.each { String fieldName ->
