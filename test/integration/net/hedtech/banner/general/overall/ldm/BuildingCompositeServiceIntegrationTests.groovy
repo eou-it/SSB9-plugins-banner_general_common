@@ -49,7 +49,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCount() {
         assertNotNull i_success_housingLocationBuildingDescription
-        assertEquals HousingLocationBuildingDescription.count(), buildingCompositeService.count()
+        assertEquals HousingLocationBuildingDescription.count(), buildingCompositeService.count(params)
     }
 
     @Test
@@ -226,5 +226,20 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 tempParam=code
         }
     }
+
+    /**
+     * Test data-link for site.id
+     * */
+    @Test
+    public void testDataLinkSiteOnBuilding(){
+        List<BuildingDetail> buildingDetailList = buildingCompositeService.list(params)
+        String siteId = buildingDetailList.get(0).siteDetail.guid
+        params.put('site.id',siteId)
+        buildingDetailList = buildingCompositeService.list(params)
+        for (BuildingDetail detail:buildingDetailList){
+            assertEquals siteId,detail?.siteDetail?.guid
+        }
+    }
+
 
 }
