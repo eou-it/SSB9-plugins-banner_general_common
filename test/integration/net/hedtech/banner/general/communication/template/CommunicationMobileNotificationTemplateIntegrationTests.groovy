@@ -3,6 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.template
 
+import groovy.time.DatumDependentDuration
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -36,11 +37,8 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
         logout()
     }
 
-
     @Test
     void testCreate() {
-        int templateCount = CommunicationMobileNotificationTemplate.findAll().size()
-
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
             name: "create test",
             createdBy: 'MIKE',
@@ -103,6 +101,43 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
         template.delete()
 
         assertEquals( templateCount, CommunicationMobileNotificationTemplate.findAll().size() )
+    }
+
+    @Test
+    void testExpires() {
+        CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
+                name: "testExpires",
+                createdBy: 'MIKE',
+                createDate: new Date(),
+                validFrom: new Date(),
+                validTo: null,
+                folder: defaultFolder,
+                expirationPolicy: CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION
+        )
+        template.save( failOnError: true, flush: true )
+
+        assertEquals( CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION, template.expirationPolicy )
+
+
+        template.expirationPolicy = CommunicationMobileNotificationExpirationPolicy.DURATION
+        template.duration = 7
+        template.durationUnit = CommunicationDurationUnit.DAY
+        template.save( failOnError: true, flush: true )
+
+        assertEquals( CommunicationMobileNotificationExpirationPolicy.DURATION, template.expirationPolicy )
+        assertEquals( 7, template.duration )
+        assertEquals( CommunicationDurationUnit.DAY, template.durationUnit )
+
+        Date today = new Date()
+        DatumDependentDuration period = new DatumDependentDuration(0, 0, 2, 0, 0, 0, 0)
+        Date expirationDate = period + today
+
+        template.expirationPolicy = CommunicationMobileNotificationExpirationPolicy.DATE_TIME
+        template.setExpirationDateTime( expirationDate )
+        template.save( failOnError: true, flush: true )
+
+        assertEquals( CommunicationMobileNotificationExpirationPolicy.DATE_TIME, template.expirationPolicy )
+        assertEquals( expirationDate, template.expirationDateTime )
     }
 
 }
