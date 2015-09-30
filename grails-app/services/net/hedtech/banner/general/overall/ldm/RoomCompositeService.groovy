@@ -34,7 +34,7 @@ class RoomCompositeService extends LdmService {
     private static final String LDM_NAME = 'rooms'
     private static final String PROCESS_CODE = "HEDM"
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
-    private static final String LATEST_VERSION = "v2"
+    private static final List<String> VERSIONS = ["v1", "v2"]
 
 
     List<AvailableRoom> list(Map params) {
@@ -241,7 +241,7 @@ class RoomCompositeService extends LdmService {
             inputData.put('capacity', null)
         }
 
-        if (!"v1".equals(getContentTypeVersion())) {
+        if (!"v1".equals(getContentTypeVersion(VERSIONS))) {
             if (params.containsKey('building')) {
                 String buildingGuid = params.building?.trim()?.toLowerCase()
                 if (buildingGuid) {
@@ -293,7 +293,7 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException("room", new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-        if ("v2".equals(getAcceptVersion())) {
+        if ("v2".equals(getAcceptVersion(VERSIONS))) {
             SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
             return new Room(housingRoomDescription, building, site, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
         } else {
@@ -416,7 +416,7 @@ class RoomCompositeService extends LdmService {
             List occupancies = [new Occupancy(roomType.get( housingRoomDescription.roomType ), housingRoomDescription.capacity)]
             log.debug( "End of Occupancy()" )
             BuildingDetail building = housingRoomDescription.buildingGUID ? new BuildingDetail(housingRoomDescription.buildingGUID) : null
-            if ("v2".equals(getAcceptVersion())) {
+            if ("v2".equals(getAcceptVersion(VERSIONS))) {
                 SiteDetail site = housingRoomDescription.siteGUID ? new SiteDetail(housingRoomDescription.siteGUID) : null
                 availableRooms << new Room(housingRoomDescription, building, site, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
             } else {
@@ -436,26 +436,6 @@ class RoomCompositeService extends LdmService {
             room = get(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, housingRoomDescription.id)?.guid?.toLowerCase())
         }
         return room
-    }
-
-
-    private String getAcceptVersion() {
-        String representationVersion = LdmService.getResponseRepresentationVersion()
-        if (representationVersion == null || representationVersion > LATEST_VERSION) {
-            // Assume latest (current) version
-            representationVersion = LATEST_VERSION
-        }
-        return representationVersion
-    }
-
-
-    private String getContentTypeVersion() {
-        String representationVersion = LdmService.getRequestRepresentationVersion()
-        if (representationVersion == null || representationVersion > LATEST_VERSION) {
-            // Assume latest (current) version
-            representationVersion = LATEST_VERSION
-        }
-        return representationVersion
     }
 
 }

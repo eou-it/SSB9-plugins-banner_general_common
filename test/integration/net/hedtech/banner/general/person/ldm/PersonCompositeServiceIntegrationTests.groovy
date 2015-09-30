@@ -80,7 +80,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_first_name = "Mark"
     def i_success_middle_name = "TR"
     def i_success_last_name = "Mccallon"
-    def i_success_name_type = "Primary"
+    def i_success_primary_name_type = "Primary"
     def i_success_address_type_1 = "Mailing"
     def i_success_address_type_2 = "Home"
     def i_success_city = "Pavo"
@@ -103,6 +103,20 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_alternate_middle_name = "A"
     def i_success_alternate_last_name = "Jorden"
     def i_success_alternate_birth_name_type = "Birth"
+    def i_success_phone_type_work = "Work"
+    def i_success_phone_type_mobile = "Mobile"
+    def i_success_phone_type_home = "Home"
+    def i_success_phone_type_residence = "Residence"
+    def i_success_phone_extension = "2341643"
+    def i_succes_invalid_phone_number_short1 = "12345678"
+    def i_succes_invalid_phone_number_short2 = "+91-234-5678"
+    def i_succes_invalid_phone_number_short3 = "123 456 78"
+    def i_succes_invalid_phone_number_short4 = "+91 234 5678"
+    def i_succes_invalid_phone_number_long1 = "+4412345678901235624351345314654756835651324135234647"
+    def i_succes_invalid_phone_number_long2 = "+01-123-456-7890"
+    def i_succes_invalid_phone_number_long3 = "123 456 7890123"
+    def i_succes_invalid_phone_number_long4 = "+01 123 456 7890"
+
 
 
     @Before
@@ -259,7 +273,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_first_name, o_primary_name_create.firstName
         assertEquals i_success_middle_name, o_primary_name_create.middleName
         assertEquals i_success_last_name, o_primary_name_create.lastName
-        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_primary_name_type, o_primary_name_create.nameType
         assertEquals i_success_namePrefix, o_primary_name_create.title
         assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
         assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
@@ -583,13 +597,14 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def bio = PersonBasicPersonBase.findByPidm(person.pidm)
         assertNotNull bio
         assertEquals "F", bio.sex
+        def gender = "Female"
 
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Content-Type", "application/json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
-                      gender: bio.sex
+                      gender: gender
         ]
         def matched_persons = personCompositeService.list(params)
         // assert that only one match comes back
@@ -624,7 +639,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", "application/json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
-                      gender: "M"
+                      gender: "Male"
         ]
         def matched_persons = personCompositeService.list(params)
         // assert that no match comes back
@@ -1310,7 +1325,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_first_name, o_primary_name_create.firstName
         assertEquals i_success_middle_name, o_primary_name_create.middleName
         assertEquals i_success_last_name, o_primary_name_create.lastName
-        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_primary_name_type, o_primary_name_create.nameType
         assertEquals i_success_namePrefix, o_primary_name_create.title
         assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
         assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
@@ -1344,9 +1359,87 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals o_birth_name_create.nameType, o_birth_name_get.nameType
     }
 
+    //GET Person By Guid API
+    @Test
+    void testGetPersonWithUSEthnicity() {
+        Map content = newPersonWithUSEthnicity()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+
+        def o_success_person_get = personCompositeService.get(o_success_person_create.guid)
+
+        assertNotNull o_success_person_get
+        assertNotNull o_success_person_get.guid
+        assertEquals o_success_person_create.guid, o_success_person_get.guid
+        assertEquals o_success_person_create.ethnicityDetail.guid, o_success_person_get.ethnicityDetail.guid
+    }
+
+    //GET Person By Guid API
+    @Test
+    void testGetPersonWithInvalidPhoneNumber() {
+        Map content = newPersonRequestWithInvalidShortPhoneNumber()
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+
+        def o_success_person_get = personCompositeService.get(o_success_person_create.guid)
+
+        assertNotNull o_success_person_get
+        assertNotNull o_success_person_get.guid
+        assertEquals o_success_person_create.guid, o_success_person_get.guid
+
+        def o_phone_type_mobile_create = o_success_person_create.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_create
+        def o_phone_type_mobile_get = o_success_person_get.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_get
+        assertEquals o_phone_type_mobile_create.phoneType, o_phone_type_mobile_get.phoneType
+        assertEquals o_phone_type_mobile_create.phoneExtension, o_phone_type_mobile_get.phoneExtension
+        assertEquals o_phone_type_mobile_create.phoneNumberDetail, o_phone_type_mobile_get.phoneNumberDetail
+        String phoneNumberMobileGet = (o_phone_type_mobile_get.countryPhone ?: "") + (o_phone_type_mobile_get.phoneArea ?: "") + (o_phone_type_mobile_get.phoneNumber ?: "")
+        assertEquals phoneNumberMobileGet, o_phone_type_mobile_get.phoneNumberDetail
+
+        def o_phone_type_home_create = o_success_person_create.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_create
+        def o_phone_type_home_get = o_success_person_get.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_get
+        assertEquals o_phone_type_home_create.phoneType, o_phone_type_home_get.phoneType
+        assertEquals o_phone_type_home_create.phoneExtension, o_phone_type_home_get.phoneExtension
+        assertEquals o_phone_type_home_create.phoneNumberDetail, o_phone_type_home_get.phoneNumberDetail
+        String phoneNumberHomeGet = (o_phone_type_home_get.countryPhone ?: "") + (o_phone_type_home_get.phoneArea ?: "") + (o_phone_type_home_get.phoneNumber ?: "")
+        assertEquals phoneNumberHomeGet, o_phone_type_home_get.phoneNumberDetail
+
+        def o_phone_type_work_create = o_success_person_create.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_create
+        def o_phone_type_work_get = o_success_person_get.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_get
+        assertEquals o_phone_type_work_create.phoneType, o_phone_type_work_get.phoneType
+        assertEquals o_phone_type_work_create.phoneExtension, o_phone_type_work_get.phoneExtension
+        assertEquals o_phone_type_work_create.phoneNumberDetail, o_phone_type_work_get.phoneNumberDetail
+        String phoneNumberWorkGet = (o_phone_type_work_get.countryPhone ?: "") + (o_phone_type_work_get.phoneArea ?: "") + (o_phone_type_work_get.phoneNumber ?: "")
+        assertEquals phoneNumberWorkGet, o_phone_type_work_get.phoneNumberDetail
+
+        def o_phone_type_residence_create = o_success_person_create.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_create
+        def o_phone_type_residence_get = o_success_person_get.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_get
+        assertEquals o_phone_type_residence_create.phoneType, o_phone_type_residence_get.phoneType
+        assertEquals o_phone_type_residence_create.phoneExtension, o_phone_type_residence_get.phoneExtension
+        assertEquals o_phone_type_residence_create.phoneNumberDetail, o_phone_type_residence_get.phoneNumberDetail
+        String phoneNumberResidenceGet = (o_phone_type_residence_get.countryPhone ?: "") + (o_phone_type_residence_get.phoneArea ?: "") + (o_phone_type_residence_get.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceGet, o_phone_type_residence_get.phoneNumberDetail
+    }
+
     //POST- Person Create API
     @Test
     void testCreatePersonWithStateAndZipIntegrationSettingValue() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         Map content = newPersonWithAddressRequest()
 
         def o_success_person_create = personCompositeService.create(content)
@@ -1404,7 +1497,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_first_name, o_primary_name_create.firstName
         assertEquals i_success_middle_name, o_primary_name_create.middleName
         assertEquals i_success_last_name, o_primary_name_create.lastName
-        assertEquals i_success_name_type, o_primary_name_create.nameType
+        assertEquals i_success_primary_name_type, o_primary_name_create.nameType
         assertEquals i_success_namePrefix, o_primary_name_create.title
         assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
         assertEquals i_success_preferenceFirstName, o_primary_name_create.preferredName
@@ -1415,6 +1508,273 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
     }
 
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithEthnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        Map content = newPersonWithAddressRequest()
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals content.ethnicityDetail.guid, o_success_person_create.ethnicityDetail.guid
+    }
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithUSethnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        Map content = newPersonWithUSEthnicity()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals content.ethnicityDetail.guid, o_success_person_create.ethnicityDetail.guid
+    }
+
+    @Test
+    void testCreatePersonWithInvalidUSethnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        Map content = newPersonWithAddressRequest()
+
+        try {
+            personCompositeService.create(content)
+            fail('This should have failed as US ethnicity GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'not.found.message'
+        }
+    }
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithInvalidShortPhoneNumber() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        Map content = newPersonRequestWithInvalidShortPhoneNumber()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        def o_phone_type_mobile = o_success_person_create.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile
+        assertEquals i_success_phone_type_mobile, o_phone_type_mobile.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_mobile.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short1, o_phone_type_mobile.phoneNumberDetail
+        String phoneNumberMobile = (o_phone_type_mobile.countryPhone ?: "") + (o_phone_type_mobile.phoneArea ?: "") + (o_phone_type_mobile.phoneNumber ?: "")
+        assertEquals phoneNumberMobile, o_phone_type_mobile.phoneNumberDetail
+
+        def o_phone_type_home = o_success_person_create.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home
+        assertEquals i_success_phone_type_home, o_phone_type_home.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_home.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short2, o_phone_type_home.phoneNumberDetail
+        String phoneNumberHome = (o_phone_type_home.countryPhone ?: "") + (o_phone_type_home.phoneArea ?: "") + (o_phone_type_home.phoneNumber ?: "")
+        assertEquals phoneNumberHome, o_phone_type_home.phoneNumberDetail
+
+        def o_phone_type_work = o_success_person_create.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work
+        assertEquals i_success_phone_type_work, o_phone_type_work.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_work.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short3, o_phone_type_work.phoneNumberDetail
+        String phoneNumberWork = (o_phone_type_work.countryPhone ?: "") + (o_phone_type_work.phoneArea ?: "") + (o_phone_type_work.phoneNumber ?: "")
+        assertEquals phoneNumberWork, o_phone_type_work.phoneNumberDetail
+
+
+        def o_phone_type_residence = o_success_person_create.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence
+        assertEquals i_success_phone_type_residence, o_phone_type_residence.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_residence.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short4, o_phone_type_residence.phoneNumberDetail
+        String phoneNumberResidence = (o_phone_type_residence.countryPhone ?: "") + (o_phone_type_residence.phoneArea ?: "") + (o_phone_type_residence.phoneNumber ?: "")
+        assertEquals phoneNumberResidence, o_phone_type_residence.phoneNumberDetail
+    }
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithInvalidLongPhoneNumber() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        Map content = newPersonRequestWithInvalidLongPhoneNumber()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        def o_phone_type_mobile = o_success_person_create.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile
+        assertEquals i_success_phone_type_mobile, o_phone_type_mobile.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_mobile.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile.phoneNumberDetail
+        String phoneNumberMobile = (o_phone_type_mobile.countryPhone ?: "") + (o_phone_type_mobile.phoneArea ?: "") + (o_phone_type_mobile.phoneNumber ?: "")
+        assertEquals phoneNumberMobile, o_phone_type_mobile.phoneNumberDetail
+
+        def o_phone_type_home = o_success_person_create.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home
+        assertEquals i_success_phone_type_home, o_phone_type_home.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_home.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home.phoneNumberDetail
+        String phoneNumberHome = (o_phone_type_home.countryPhone ?: "") + (o_phone_type_home.phoneArea ?: "") + (o_phone_type_home.phoneNumber ?: "")
+        assertEquals phoneNumberHome, o_phone_type_home.phoneNumberDetail
+
+        def o_phone_type_work = o_success_person_create.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work
+        assertEquals i_success_phone_type_work, o_phone_type_work.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_work.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long3, o_phone_type_work.phoneNumberDetail
+        String phoneNumberWork = (o_phone_type_work.countryPhone ?: "") + (o_phone_type_work.phoneArea ?: "") + (o_phone_type_work.phoneNumber ?: "")
+        assertEquals phoneNumberWork, o_phone_type_work.phoneNumberDetail
+
+        def o_phone_type_residence = o_success_person_create.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence
+        assertEquals i_success_phone_type_residence, o_phone_type_residence.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_residence.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence.phoneNumberDetail
+        String phoneNumberResidence = (o_phone_type_residence.countryPhone ?: "") + (o_phone_type_residence.phoneArea ?: "") + (o_phone_type_residence.phoneNumber ?: "")
+        assertEquals phoneNumberResidence, o_phone_type_residence.phoneNumberDetail
+    }
+
+    //PUT- Person Update API
+    @Test
+    void testUpdatePersonWithExisitingInvalidPhoneNumber() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        Map content_create = newPersonRequestWithInvalidShortPhoneNumber()
+
+        def o_success_person_create = personCompositeService.create(content_create)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        def o_phone_type_mobile_create = o_success_person_create.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_create
+        assertEquals i_success_phone_type_mobile, o_phone_type_mobile_create.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_mobile_create.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short1, o_phone_type_mobile_create.phoneNumberDetail
+        String phoneNumberMobileCreate = (o_phone_type_mobile_create.countryPhone ?: "") + (o_phone_type_mobile_create.phoneArea ?: "") + (o_phone_type_mobile_create.phoneNumber ?: "")
+        assertEquals phoneNumberMobileCreate, o_phone_type_mobile_create.phoneNumberDetail
+
+        def o_phone_type_home_create = o_success_person_create.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_create
+        assertEquals i_success_phone_type_home, o_phone_type_home_create.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_home_create.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short2, o_phone_type_home_create.phoneNumberDetail
+        String phoneNumberHomeCreate = (o_phone_type_home_create.countryPhone ?: "") + (o_phone_type_home_create.phoneArea ?: "") + (o_phone_type_home_create.phoneNumber ?: "")
+        assertEquals phoneNumberHomeCreate, o_phone_type_home_create.phoneNumberDetail
+
+        def o_phone_type_work_create = o_success_person_create.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_create
+        assertEquals i_success_phone_type_work, o_phone_type_work_create.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_work_create.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short3, o_phone_type_work_create.phoneNumberDetail
+        String phoneNumberWorkCreate = (o_phone_type_work_create.countryPhone ?: "") + (o_phone_type_work_create.phoneArea ?: "") + (o_phone_type_work_create.phoneNumber ?: "")
+        assertEquals phoneNumberWorkCreate, o_phone_type_work_create.phoneNumberDetail
+
+        def o_phone_type_residence_create = o_success_person_create.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_create
+        assertEquals i_success_phone_type_residence, o_phone_type_residence_create.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_residence_create.phoneExtension
+        assertEquals i_succes_invalid_phone_number_short4, o_phone_type_residence_create.phoneNumberDetail
+        String phoneNumberResidenceCreate = (o_phone_type_residence_create.countryPhone ?: "") + (o_phone_type_residence_create.phoneArea ?: "") + (o_phone_type_residence_create.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceCreate, o_phone_type_residence_create.phoneNumberDetail
+
+        //update the phone number
+        Map content_update = newPersonRequestWithInvalidLongPhoneNumber()
+        content_update.put("id", o_success_person_create.guid)
+
+        def o_success_person_update = personCompositeService.update(content_update)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals  o_success_person_create.guid, o_success_person_update.guid
+
+        def o_phone_type_mobile_update = o_success_person_update.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_update
+        assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile_update.phoneNumberDetail
+        String phoneNumberMobileUpdate = (o_phone_type_mobile_update.countryPhone ?: "") + (o_phone_type_mobile_update.phoneArea ?: "") + (o_phone_type_mobile_update.phoneNumber ?: "")
+        assertEquals phoneNumberMobileUpdate, o_phone_type_mobile_update.phoneNumberDetail
+
+        def o_phone_type_home_update = o_success_person_update.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_update
+        assertEquals i_success_phone_type_home, o_phone_type_home_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_home_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home_update.phoneNumberDetail
+        String phoneNumberHomeUpdate = (o_phone_type_home_update.countryPhone ?: "") + (o_phone_type_home_update.phoneArea ?: "") + (o_phone_type_home_update.phoneNumber ?: "")
+        assertEquals phoneNumberHomeUpdate, o_phone_type_home_update.phoneNumberDetail
+
+        def o_phone_type_work_update = o_success_person_update.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_update
+        assertEquals i_success_phone_type_work, o_phone_type_work_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_work_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long3, o_phone_type_work_update.phoneNumberDetail
+        String phoneNumberWorkUpdate = (o_phone_type_work_update.countryPhone ?: "") + (o_phone_type_work_update.phoneArea ?: "") + (o_phone_type_work_update.phoneNumber ?: "")
+        assertEquals phoneNumberWorkUpdate, o_phone_type_work_update.phoneNumberDetail
+
+        def o_phone_type_residence_update = o_success_person_update.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_update
+        assertEquals i_success_phone_type_residence, o_phone_type_residence_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_residence_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence_update.phoneNumberDetail
+        String phoneNumberResidenceUpdate = (o_phone_type_residence_update.countryPhone ?: "") + (o_phone_type_residence_update.phoneArea ?: "") + (o_phone_type_residence_update.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceUpdate, o_phone_type_residence_update.phoneNumberDetail
+    }
+
+    //PUT- Person Update API
+    @Test
+    void testUpdatePersonWithNewInvalidPhoneNumber() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        Map content_create= newPersonWithAddressRequest()
+        def o_success_person_create = personCompositeService.create(content_create)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+
+        //update the phone number
+        Map content_update = newPersonRequestWithInvalidLongPhoneNumber()
+        content_update.put("id", o_success_person_create.guid)
+
+        def o_success_person_update = personCompositeService.update(content_update)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals  o_success_person_create.guid, o_success_person_update.guid
+
+        def o_phone_type_mobile_update = o_success_person_update.phones.find { it.phoneType == "Mobile" }
+        assertNotNull o_phone_type_mobile_update
+        assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile_update.phoneNumberDetail
+        String phoneNumberMobileUpdate = (o_phone_type_mobile_update.countryPhone ?: "") + (o_phone_type_mobile_update.phoneArea ?: "") + (o_phone_type_mobile_update.phoneNumber ?: "")
+        assertEquals phoneNumberMobileUpdate, o_phone_type_mobile_update.phoneNumberDetail
+
+        def o_phone_type_home_update = o_success_person_update.phones.find { it.phoneType == "Home" }
+        assertNotNull o_phone_type_home_update
+        assertEquals i_success_phone_type_home, o_phone_type_home_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_home_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long2, o_phone_type_home_update.phoneNumberDetail
+        String phoneNumberHomeUpdate = (o_phone_type_home_update.countryPhone ?: "") + (o_phone_type_home_update.phoneArea ?: "") + (o_phone_type_home_update.phoneNumber ?: "")
+        assertEquals phoneNumberHomeUpdate, o_phone_type_home_update.phoneNumberDetail
+
+        def o_phone_type_work_update = o_success_person_update.phones.find { it.phoneType == "Work" }
+        assertNotNull o_phone_type_work_update
+        assertEquals i_success_phone_type_work, o_phone_type_work_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_work_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long3, o_phone_type_work_update.phoneNumberDetail
+
+        def o_phone_type_residence_update = o_success_person_update.phones.find { it.phoneType == "Residence" }
+        assertNotNull o_phone_type_residence_update
+        assertEquals i_success_phone_type_residence, o_phone_type_residence_update.phoneType
+        assertEquals i_success_phone_extension, o_phone_type_residence_update.phoneExtension
+        assertEquals i_succes_invalid_phone_number_long4, o_phone_type_residence_update.phoneNumberDetail
+        String phoneNumberResidenceUpdate = (o_phone_type_residence_update.countryPhone ?: "") + (o_phone_type_residence_update.phoneArea ?: "") + (o_phone_type_residence_update.phoneNumber ?: "")
+        assertEquals phoneNumberResidenceUpdate, o_phone_type_residence_update.phoneNumberDetail
+    }
 
     @Test
     void testUpdatePersonFirstNameAndLastNameChangeWithCreatingPersonBase() {
@@ -1684,7 +2044,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def ethnicity1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', '3')
         Map newEthnicities = getPersonWithNewEthniciiesyRequest(personIdentificationNameCurrent, uniqueIdentifier.guid, ethnicity1)
-
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         // create new Ethnicity through update()
         def ethnicityDetail = personCompositeService.update(newEthnicities).ethnicityDetail
 
@@ -1836,6 +2197,29 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_alternate_middle_name, o_birth_name_update.middleName
         assertEquals i_success_alternate_last_name, o_birth_name_update.lastName
         assertEquals i_success_alternate_birth_name_type, o_birth_name_update.nameType
+    }
+
+    //PUT- person update API
+    @Test
+    void testUpdatePersonWithUSethnicity() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        Map content = newPersonWithUSEthnicity()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals content.ethnicityDetail.guid, o_success_person_create.ethnicityDetail.guid
+
+        String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us', 2)?.guid
+        Map content1 = [id: o_success_person_create.guid, ethnicityDetail: [guid: ethnicityGuid]]
+        def o_success_person_update = personCompositeService.update(content1)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals o_success_person_create.guid, o_success_person_update.guid
+        assertEquals content1.ethnicityDetail.guid, o_success_person_update.ethnicityDetail.guid
     }
 
 
@@ -2038,7 +2422,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('ethnicities', i_success_ethnicity?.code)?.guid
         String maritalStatusGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('marital-status', i_success_maritalStatus?.code)?.guid
 
-        Map params = [names              : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+        Map params = [names              : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_primary_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
                       addresses          : [[addressType: i_success_address_type_1, city: i_success_city, state: i_success_state, streetLine1: i_success_street_line1, zip: i_success_zip, county: "Chester", nation: [code: "CA", value: "Canada"]], [addressType: i_success_address_type_2, city: i_success_city, streetLine1: i_success_street_line1]],
                       credentials        : [[
                                                     credentialType: "Social Security Number",
@@ -2057,7 +2441,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map newPersonWithPreferredEmailRequest() {
-        Map params = [names : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+        Map params = [names : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_primary_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
                       emails: [[guid: i_success_guid_personal, emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_personal], [guid: i_success_guid_institution, emailAddress: i_success_emailAddress_institution, emailType: i_success_emailType_institution], [emailAddress: i_success_emailAddress_personal, emailType: i_success_emailType_preferred]]
         ]
 
@@ -2090,7 +2474,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     private Map newPersonWithAlternateNameHavingBirthNameType() {
-        Map params = [names: [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName], [lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
+        Map params = [names: [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_primary_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName], [lastName: i_success_alternate_last_name, middleName: i_success_alternate_middle_name, firstName: i_success_alternate_first_name, nameType: i_success_alternate_birth_name_type]]
         ]
         return params
     }
@@ -2105,6 +2489,32 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                                  lastName : i_success_alternate_last_name
                          ]]
         ]
+    }
+
+
+    private Map newPersonWithUSEthnicity() {
+        String ethnicityGuid = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us', 1)?.guid
+        Map params = [names          : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_primary_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      ethnicityDetail: [guid: ethnicityGuid]
+        ]
+
+        return params
+    }
+
+
+    private Map newPersonRequestWithInvalidShortPhoneNumber() {
+        Map params = [names : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_primary_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      phones: [[phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_short1, phoneType: i_success_phone_type_mobile], [phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_short2, phoneType: i_success_phone_type_home], [phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_short3, phoneType: i_success_phone_type_work], [phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_short4, phoneType: i_success_phone_type_residence]]
+        ]
+        return params
+    }
+
+
+    private Map newPersonRequestWithInvalidLongPhoneNumber() {
+        Map params = [names : [[lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, nameType: i_success_primary_name_type, namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, preferenceFirstName: i_success_preferenceFirstName]],
+                      phones: [[phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_long1, phoneType: i_success_phone_type_mobile], [phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_long2, phoneType: i_success_phone_type_home], [phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_long3, phoneType: i_success_phone_type_work], [phoneExtension: i_success_phone_extension, phoneNumber: i_succes_invalid_phone_number_long4, phoneType: i_success_phone_type_residence]]
+        ]
+        return params
     }
 
 }
