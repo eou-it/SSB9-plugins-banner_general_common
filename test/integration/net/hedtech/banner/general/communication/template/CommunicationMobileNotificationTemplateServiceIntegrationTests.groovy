@@ -104,6 +104,7 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertTrue template.published
     }
 
+
     @Test
     void testDateTimeExpirationPublish() {
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
@@ -151,13 +152,38 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertTrue template.published
     }
 
-    private void assertCannotPublish( CommunicationTemplate template ) {
+
+    @Test
+    void testStickyPublish() {
+        CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
+                name: "testNoExpirationPublish",
+                validFrom: new Date(),
+                validTo: null,
+                folder: defaultFolder
+        )
+        template = communicationMobileNotificationTemplateService.create( [domainModel: template] )
+        assertNotNull template.id
+        assertFalse template.published
+
+        assertCannotPublish( template )
+        template.mobileHeadline = "a mobile headline"
+        template.sticky = true
+        assertCannotPublish( template, "expirationRequiredForSticky" )
+
+        template.expirationPolicy = CommunicationMobileNotificationExpirationPolicy.DURATION
+        template.duration = 1
+        template = communicationMobileNotificationTemplateService.publish( [domainModel: template] )
+        assertTrue template.published
+    }
+
+
+    private void assertCannotPublish( CommunicationTemplate template, String reason = "template.cannotBePublished" ) {
         Boolean originalPublished = template.published
         try {
             communicationMobileNotificationTemplateService.publish( template )
-            fail( "template.cannotBePublished" )
+            fail( reason )
         } catch (ApplicationException ae ) {
-            assertApplicationException ae, "template.cannotBePublished"
+            assertApplicationException ae, reason
         } finally {
             template.published = originalPublished
         }

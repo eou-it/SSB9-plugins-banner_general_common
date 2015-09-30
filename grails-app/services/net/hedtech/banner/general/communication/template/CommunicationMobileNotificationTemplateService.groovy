@@ -29,9 +29,9 @@ class CommunicationMobileNotificationTemplateService extends CommunicationTempla
         }
 
         switch(mobileNotificationTemplate.expirationPolicy) {
-            case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
-                if (!mobileNotificationTemplate.expirationDateTime) {
-                    throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+            case CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION:
+                if (mobileNotificationTemplate.sticky) {
+                    throw new ApplicationException(CommunicationMobileNotificationTemplate, "@@r1:expirationRequiredForSticky@@" )
                 }
                 break
             case CommunicationMobileNotificationExpirationPolicy.DURATION:
@@ -39,7 +39,10 @@ class CommunicationMobileNotificationTemplateService extends CommunicationTempla
                     throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
                 }
                 break
-            default:
+            case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
+                if (!mobileNotificationTemplate.expirationDateTime) {
+                    throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+                }
                 break
         }
 

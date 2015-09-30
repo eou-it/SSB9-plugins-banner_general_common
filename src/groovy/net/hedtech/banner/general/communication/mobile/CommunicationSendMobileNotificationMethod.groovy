@@ -7,10 +7,12 @@ import groovyx.net.http.HTTPBuilder
 import net.hedtech.banner.exceptions.ExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.POST
+import org.joda.time.format.ISODateTimeFormat
 
 
 /**
@@ -93,6 +95,17 @@ class CommunicationSendMobileNotificationMethod {
                 }
                 if (message.destinationLink) {
                     messageMap.put("destination", message.destinationLink)
+                }
+
+
+
+                switch(message.expirationPolicy) {
+                    case CommunicationMobileNotificationExpirationPolicy.DURATION:
+                        messageMap.put( "expires", String.valueOf( message.duration ) )
+                        break
+                    case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
+                        messageMap.put( "expires", ISODateTimeFormat.dateTime().print( message.expirationDateTime.time ) )
+                        break
                 }
 
                 log.debug( messageMap )
