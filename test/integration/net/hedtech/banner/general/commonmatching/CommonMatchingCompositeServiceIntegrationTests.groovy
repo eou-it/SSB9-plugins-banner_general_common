@@ -105,6 +105,7 @@ class CommonMatchingCompositeServiceIntegrationTests extends BaseIntegrationTest
         def map = [source: "HEDM_LASTNAME_MATCH", lastName: "Jamison", firstName: "Emily"]
 
         def results = commonMatchingCompositeService.commonMatching(map)
+        names = PersonIdentificationNameCurrent.findAllByLastName("Jamison")
         assertEquals results.personList?.size(), names.size()
         assertNotNull results.personList?.find { it.pidm == person.pidm }
 
