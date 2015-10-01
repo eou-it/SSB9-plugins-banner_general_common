@@ -46,8 +46,14 @@ class PersonIdentificationDecorator {
     }
 
 
+    @Override
     public String toString() {
+        return "PersonIdentificationDecorator{" +
+                "personIdentificationName=" + personIdentificationName +
+                ", thirdPartyAccess=" + thirdPartyAccess +
+                ", imsSourcedIdBase=" + imsSourcedIdBase +
+                ", enterpriseId='" + enterpriseId + '\'' +
+                ", guid='" + guid + '\'' +
+                '}';
     }
-
-
 }

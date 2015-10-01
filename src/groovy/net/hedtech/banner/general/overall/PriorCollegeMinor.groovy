@@ -3,7 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.Degree
 import net.hedtech.banner.general.system.MajorMinorConcentration
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution

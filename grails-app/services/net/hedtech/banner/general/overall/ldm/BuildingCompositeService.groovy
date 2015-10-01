@@ -143,7 +143,6 @@ class BuildingCompositeService {
 
     private List<AvailableRoom> getRooms(def building){
         List rooms = []
-        net.hedtech.banner.general.overall.ldm.v1.BuildingDetail buildingDetail
         if (null == building) {
             return null
         }

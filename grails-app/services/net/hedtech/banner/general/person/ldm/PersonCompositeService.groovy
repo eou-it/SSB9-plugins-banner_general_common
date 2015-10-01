@@ -1569,8 +1569,6 @@ class PersonCompositeService extends LdmService {
     }
 
     def validateCredentialsOnUrl(Map param) {
-        boolean isCredentialtype = true
-
         boolean isUrlcredentialTypeError = param.containsKey(CREDENTIAL_TYPE) ? param.containsKey(CREDENTIAL_ID) ? true : false : false
         boolean isUrlcredentialIdError = param.containsKey(CREDENTIAL_ID) ? param.containsKey(CREDENTIAL_TYPE) ? true : false : false
         if (!isUrlcredentialTypeError || !isUrlcredentialIdError) {
