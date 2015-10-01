@@ -226,9 +226,13 @@ class CommunicationOrganizationService extends ServiceBase {
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
         if (encryptionKey == null)
             throw new ApplicationException(CommunicationOrganization, "@@r1:security.keyMissing@@")
-        def sql = new Sql(sessionFactory.getCurrentSession().connection())
-        sql.call("{$Sql.VARCHAR = call gckencr.encrypt_string (${encryptionKey},${clearTextPassword})}") {
-            result -> encryptedPassword = result
+        try {
+            def sql = new Sql(sessionFactory.getCurrentSession().connection())
+            sql.call("{$Sql.VARCHAR = call gckencr.encrypt_string (${encryptionKey},${clearTextPassword})}") {
+                result -> encryptedPassword = result
+            }
+        } catch (Exception e) {
+            throw new net.hedtech.banner.exceptions.ApplicationException(CommunicationOrganization, "@@r1:password.encrypt.error@@")
         }
         encryptedPassword
     }

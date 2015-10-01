@@ -102,6 +102,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     }
 
+
     @Test
     void testMobileSettings() {
         CommunicationOrganization organization = new CommunicationOrganization()
@@ -133,6 +134,63 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertNull(updatedRoot1.encryptedMobileApplicationKey)
     }
 
+
+    @Test
+    void testLargeInvalidPassword() {
+        CommunicationOrganization organization = new CommunicationOrganization()
+        organization.name = "Root"
+        organization.description = "description"
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("Root", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertNull(createdOrganization.parent)
+        assertFalse(createdOrganization.isAvailable)
+
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        assertEquals(rootorg.id, createdOrganization.id)
+
+        rootorg.setMobileApplicationName("BCM_GO_MOBILE");
+        rootorg.setMobileEndPointUrl("BCM_GO.com")
+        //first set password to a large value and test if it errors out
+        def largePassword = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012"
+        rootorg.setClearMobileApplicationKey(largePassword)
+
+        try {
+            CommunicationOrganization updatedRoot = communicationOrganizationService.update(rootorg)
+            fail "Should have failed with large password error"
+        } catch (Exception e) {
+            assertTrue e.getMessage().contains("12899")
+        }
+    }
+
+    @Test
+    void testLargeValidPassword() {
+        CommunicationOrganization organization = new CommunicationOrganization()
+        organization.name = "Root"
+        organization.description = "description"
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("Root", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertNull(createdOrganization.parent)
+        assertFalse(createdOrganization.isAvailable)
+
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        assertEquals(rootorg.id, createdOrganization.id)
+
+        rootorg.setMobileApplicationName("BCM_GO_MOBILE");
+        rootorg.setMobileEndPointUrl("BCM_GO.com")
+        //first set password to a large value and test if it errors out
+        def largePassword = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901"
+        rootorg.setClearMobileApplicationKey(largePassword)
+        CommunicationOrganization updatedRoot = communicationOrganizationService.update(rootorg)
+
+        assertEquals("BCM_GO_MOBILE", updatedRoot.getMobileApplicationName())
+        assertEquals("BCM_GO.com", updatedRoot.getMobileEndPointUrl())
+        assertNotNull(updatedRoot.encryptedMobileApplicationKey)
+    }
+
     @Test
     void testCreateMultiple() {
         CommunicationOrganization organization = new CommunicationOrganization()
@@ -151,7 +209,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         sameNameOrganization.name = "testAnother"
         sameNameOrganization.description = "another organization that shouldnt be created"
         sameNameOrganization = communicationOrganizationService.create(sameNameOrganization)
-        assertEquals(foundOrganization.id,sameNameOrganization.parent );
+        assertEquals(foundOrganization.id, sameNameOrganization.parent);
 
 
         CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
@@ -292,6 +350,15 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertEquals(clearTextPassword, decryptedPassword)
     }
 
+
+    @Test
+    void testMaxPasswordEncryptAndDecrypt() {
+
+        def largepassword = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901"
+        def encryptedPassword = communicationOrganizationService.encryptPassword(largepassword)
+        def decryptedPassword = communicationOrganizationService.decryptPassword(encryptedPassword)
+        assertEquals(largepassword, decryptedPassword)
+    }
 
     private def newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType serverType, organization) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
