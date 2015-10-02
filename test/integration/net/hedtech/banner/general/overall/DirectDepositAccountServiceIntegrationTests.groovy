@@ -42,7 +42,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull directDepositAccount.id
         assertEquals 3, directDepositAccount.priority
         assertEquals "36948575", directDepositAccount.bankAccountNum
-        assertEquals "123478902", directDepositAccount.bankRoutingNum
         assertEquals "C", directDepositAccount.accountType
         assertEquals "I", directDepositAccount.apIndicator
         assertEquals "A", directDepositAccount.hrIndicator
@@ -74,64 +73,64 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     
     @Test
     void testGetActiveApAccountsWhereOneAccountExists() {
-        def activeAccounts = DirectDepositAccount.fetchActiveApAccountsByPidm(38010) // One account
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(38010) // One account
 
         // Assert domain values
         assertNotNull activeAccounts
         assertEquals 1, activeAccounts.size()
 
-        def account = activeAccounts[0]
+        def userAccountInfoSet = activeAccounts[0]
+        def userAccount = userAccountInfoSet[0]
 
-        assertNotNull account.id
-        assertEquals "9876543", account.bankAccountNum
-        assertEquals "234798944", account.bankRoutingNum
-        assertEquals "C", account.accountType
-        assertEquals "A", account.apIndicator
-        assertEquals "I", account.hrIndicator
-        assertNotNull account.version
-        assertNotNull account.lastModifiedBy
-        assertNotNull account.lastModified
+        assertNotNull userAccount.id
+        assertEquals "9876543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
     }
 
     @Test
     void testGetActiveApAccountsWhereMultipleAccountsExist() {
-        def activeAccounts = DirectDepositAccount.fetchActiveApAccountsByPidm(37859) // Multiple accounts
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(37859) // Multiple accounts
 
         // Assert domain values
         assertNotNull activeAccounts
         assertEquals 2, activeAccounts.size()
 
         // First account
-        activeAccounts = activeAccounts.sort{it.id}
-        def account = activeAccounts[0]
+        activeAccounts = activeAccounts.sort{it[0].id}
+        def userAccountInfoSet = activeAccounts[0]
+        def userAccount = userAccountInfoSet[0] // DirectDepositAccount element
 
-        assertNotNull account.id
-        assertEquals "9876543", account.bankAccountNum
-        assertEquals "234798944", account.bankRoutingNum
-        assertEquals "C", account.accountType
-        assertEquals "A", account.apIndicator
-        assertEquals "I", account.hrIndicator
-        assertNotNull account.version
-        assertNotNull account.lastModifiedBy
-        assertNotNull account.lastModified
+        assertNotNull userAccount.id
+        assertEquals "9876543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
 
         // Second account
-        account = activeAccounts[1]
+        userAccountInfoSet = activeAccounts[1]
+        userAccount = userAccountInfoSet[0] // DirectDepositAccount element
 
-        assertNotNull account.id
-        assertEquals "38167543", account.bankAccountNum
-        assertEquals "234798944", account.bankRoutingNum
-        assertEquals "C", account.accountType
-        assertEquals "A", account.apIndicator
-        assertEquals "I", account.hrIndicator
-        assertNotNull account.version
-        assertNotNull account.lastModifiedBy
-        assertNotNull account.lastModified
+        assertNotNull userAccount.id
+        assertEquals "38167543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
     }
 
     @Test
     void testGetActiveApAccountsWhereNoAccountsExist() {
-        def activeAccounts = DirectDepositAccount.fetchActiveApAccountsByPidm(-1) // One account
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(-1) // One account
 
         // Assert domain values
         assertNotNull activeAccounts
@@ -183,7 +182,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 //            lastModified: $lastModified,
 //            lastModifiedBy: $lastModifiedBy,
             bankAccountNum: 36948575,
-            bankRoutingNum: 123478902,
+            bankRoutingNum: 234798944,
             amount: null,
             percent: 11.0,
             accountType: "C",
