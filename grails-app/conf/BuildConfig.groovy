@@ -7,12 +7,7 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 
-grails.plugin.location.'banner-core' = "../banner_core.git"
-grails.plugin.location.'banner-codenarc' = "../banner_codenarc.git"
-grails.plugin.location.'banner-general-validation-common' = "../banner_general_validation_common.git"
 grails.plugin.location.'banner-general-person' = "../banner_general_person.git"
-grails.plugin.location.'banner-seeddata-catalog' = "../banner_seeddata_catalog.git"
-grails.plugin.location.'i18n-core' = "../i18n_core.git"
 
 grails.project.dependency.resolver = "maven" // or ivy
 
