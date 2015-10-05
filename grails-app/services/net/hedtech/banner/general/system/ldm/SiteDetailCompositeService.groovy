@@ -1,15 +1,13 @@
 /** *******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
-import net.hedtech.banner.general.system.Site
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.query.DynamicFinder
@@ -30,6 +28,7 @@ class SiteDetailCompositeService {
     private static final String DESCRIPTION ="description"
     private static final String QUERY = """from Campus a"""
     private static final String ENTITY ="a"
+    private static final List<String> VERSIONS = ["v1","v4"]
 
 
     def campusService
@@ -69,7 +68,7 @@ class SiteDetailCompositeService {
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
 
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List allowedSortFields = ['abbreviation', 'title']
+        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.validateSortField(map.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(map.order)
         map.sort = LdmService.fetchBannerDomainPropertyForLdmField(map.sort)

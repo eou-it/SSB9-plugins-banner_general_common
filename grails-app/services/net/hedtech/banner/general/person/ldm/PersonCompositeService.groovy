@@ -61,6 +61,8 @@ class PersonCompositeService extends LdmService {
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
+    public static final String CREDENTIAL_TYPE = "credentialType"
+    public static final String CREDENTIAL_ID = "credentialId"
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def get(id) {
@@ -87,6 +89,7 @@ class PersonCompositeService extends LdmService {
         log.debug "Request parameters: ${params}"
         def total = 0
         def resultList = [:]
+        def credentialTypeList = ["Banner ID"]
         def allowedSortFields = ["firstName", "lastName"]
         Boolean studentRole = false
         def personList = []
@@ -96,6 +99,13 @@ class PersonCompositeService extends LdmService {
             RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         } else {
             params.put('sort', allowedSortFields[1])
+        }
+
+        //Validating Request URL Based on Credential Type and Credential ID
+        if (params.containsKey(CREDENTIAL_TYPE) || params.containsKey(CREDENTIAL_ID)) {
+            Map map = new HashMap()
+            map.putAll(params)
+            validateCredentialsOnUrl(map)
         }
 
         if (params.order) {
@@ -154,7 +164,42 @@ class PersonCompositeService extends LdmService {
                 searchResult = getPidmsForPersonFilter(selId, params)
                 personList = searchResult.personList
                 total = searchResult.count
-            } else {
+            }  else if (params.containsKey(CREDENTIAL_TYPE) && params.containsKey(CREDENTIAL_ID)) {
+                if (!params.role) {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
+                }
+
+                if (params.credentialId && credentialTypeList.contains(params.credentialType)) {
+                    String credential = params.credentialId
+                    def pidmsMap=[:]
+                    PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
+                    if (null == personIdentificationNameCurrent) {
+                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("not.found.message", []))
+                    }
+                    String role = params.role?.trim()?.toLowerCase()
+                    if (role && role == 'student') {
+                        pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
+                        studentRole=true
+                    } else if (role && role == 'faculty') {
+                       pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
+                       studentRole=false
+                    } else {
+                        pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
+                    }
+
+                    def query = """from PersonIdentificationNameCurrent a
+                                       where a.pidm = (:pidm)
+                                       order by a.$params.sort $params.order, a.bannerId $params.order
+                                    """
+
+                    DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
+                    log.debug "PersonIdentificationNameCurrent query begins"
+
+                    personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
+                } else {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
+                }
+            }else {
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
                     if (role == "faculty" || role == "student") {
@@ -1523,6 +1568,13 @@ class PersonCompositeService extends LdmService {
         getAddressPostalCode(getAddressRegion(activeAddress))
     }
 
+    def validateCredentialsOnUrl(Map param) {
+        boolean isUrlcredentialTypeError = param.containsKey(CREDENTIAL_TYPE) ? param.containsKey(CREDENTIAL_ID) ? true : false : false
+        boolean isUrlcredentialIdError = param.containsKey(CREDENTIAL_ID) ? param.containsKey(CREDENTIAL_TYPE) ? true : false : false
+        if (!isUrlcredentialTypeError || !isUrlcredentialIdError) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
+        }
+    }
 
     def validateAddressRequiredFields(address) {
         if (!address.addressType) {

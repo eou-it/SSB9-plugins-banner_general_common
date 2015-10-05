@@ -35,18 +35,34 @@ class BuildingDetail {
         this.description = housingLocationBuildingDescription.building.description
     }
 
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof BuildingDetail)) return false
 
-    boolean equals( o ) {
-        if (this.is( o )) return true
-        if (getClass() != o.class) return false
         BuildingDetail that = (BuildingDetail) o
-        if (housingLocationBuildingDescription != that.housingLocationBuildingDescription) return false
+
+        if (code != that.code) return false
+        if (description != that.description) return false
         if (guid != that.guid) return false
+        if (housingLocationBuildingDescription != that.housingLocationBuildingDescription) return false
         if (metadata != that.metadata) return false
         if (rooms != that.rooms) return false
+        if (siteDetail != that.siteDetail) return false
+
         return true
     }
 
+    int hashCode() {
+        int result
+        result = (housingLocationBuildingDescription != null ? housingLocationBuildingDescription.hashCode() : 0)
+        result = 31 * result + (guid != null ? guid.hashCode() : 0)
+        result = 31 * result + (siteDetail != null ? siteDetail.hashCode() : 0)
+        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
+        result = 31 * result + (rooms != null ? rooms.hashCode() : 0)
+        result = 31 * result + (code != null ? code.hashCode() : 0)
+        result = 31 * result + (description != null ? description.hashCode() : 0)
+        return result
+    }
 
     String getTitle(){
         housingLocationBuildingDescription?.building?.description
@@ -63,12 +79,16 @@ class BuildingDetail {
     }
 
 
+    @Override
     public String toString() {
-        """BuildingDetail[
-                       housingLocationBuildingDescription=$housingLocationBuildingDescription,
-                       metadata=$metadata,
-                       rooms=$rooms,
-                       guid=$guid]"""
+        return "BuildingDetail{" +
+                "housingLocationBuildingDescription=" + housingLocationBuildingDescription +
+                ", guid='" + guid + '\'' +
+                ", siteDetail=" + siteDetail +
+                ", metadata=" + metadata +
+                ", rooms=" + rooms +
+                ", code='" + code + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
-
 }

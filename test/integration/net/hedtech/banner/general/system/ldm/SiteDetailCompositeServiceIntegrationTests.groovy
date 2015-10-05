@@ -7,6 +7,7 @@ import junit.framework.Assert
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
+import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -16,6 +17,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
     Campus campus
     def siteDetailCompositeService
+    private String invalid_sort_orderErrorMessage = 'RestfulApiValidationUtility.invalidSortField'
 
     @Before
     public void setUp() {
@@ -108,6 +110,88 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         assertEquals campus.code, site.code
         assertEquals campus.description, site.description
         assertEquals campus.dataOrigin, site.metadata.dataOrigin
+    }
+
+    /**
+     * Test to check the SiteDetailCompositeService list method with valid sort and order field and supported version
+     * If No "Accept" header is provided, by default it takes the latest supported version
+     */
+    @Test
+    void testListWithValidSortAndOrderFieldWithSupportedVersion() {
+        def params = [order: 'ASC', sort: 'code']
+        def siteList = siteDetailCompositeService.list(params)
+        assertNotNull siteList
+        assertFalse siteList.isEmpty()
+        assertNotNull siteList.code
+        assertEquals Campus.count(), siteList.size()
+        assertNotNull campus
+        assertTrue siteList.id.contains(campus.id)
+        assertTrue siteList.code.contains(campus.code)
+        assertTrue siteList.description.contains(campus.description)
+        assertTrue siteList.dataOrigin.contains(campus.dataOrigin)
+    }
+
+    /**
+     * Test to check the sort by code on SiteDetailCompositeService
+     * */
+    @Test
+    public void testSortByCode(){
+        params.order='ASC'
+        params.sort='code'
+        List list = siteDetailCompositeService.list(params)
+        assertNotNull list
+        def tempParam=null
+        list.each{
+            site->
+                String code=site.code
+                if(!tempParam){
+                    tempParam=code
+                }
+                assertTrue tempParam.compareTo(code)<0 || tempParam.compareTo(code)==0
+                tempParam=code
+        }
+
+        params.clear()
+        params.order='DESC'
+        params.sort='code'
+        list = siteDetailCompositeService.list(params)
+        assertNotNull list
+        tempParam=null
+        list.each{
+            site->
+                String code=site.code
+                if(!tempParam){
+                    tempParam=code
+                }
+                assertTrue tempParam.compareTo(code)>0 || tempParam.compareTo(code)==0
+                tempParam=code
+        }
+    }
+
+    /**
+     * Test to check the SiteDetailCompositeService list method with invalid sort field
+     */
+    @Test
+    void testListWithInvalidSortField() {
+        try {
+            def map = [sort: 'test']
+            siteDetailCompositeService.list(map)
+            fail()
+        } catch (RestfulApiValidationException e) {
+            assertEquals 400, e.getHttpStatusCode()
+            assertEquals invalid_sort_orderErrorMessage , e.messageCode.toString()
+        }
+    }
+
+    /**
+     * Test to check the SiteDetailCompositeService list method with invalid order field
+     */
+    @Test
+    void testListWithInvalidOrderField() {
+        shouldFail(RestfulApiValidationException) {
+            def map = [order: 'test']
+            siteDetailCompositeService.list(map)
+        }
     }
 
 }

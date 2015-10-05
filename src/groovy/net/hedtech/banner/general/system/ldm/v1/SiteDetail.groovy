@@ -40,22 +40,38 @@ class SiteDetail {
      */
     boolean equals(o) {
         if (this.is(o)) return true
-        if (getClass() != o.class) return false
+        if (!(o instanceof SiteDetail)) return false
 
         SiteDetail that = (SiteDetail) o
-        if (metadata != that.metadata) return false
-        if (guid != that.guid) return false
-        if (campus != that.campus) return false
+
         if (buildings != that.buildings) return false
+        if (campus != that.campus) return false
+        if (guid != that.guid) return false
+        if (metadata != that.metadata) return false
+        if (type != that.type) return false
+
         return true
     }
 
+    int hashCode() {
+        int result
+        result = (campus != null ? campus.hashCode() : 0)
+        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
+        result = 31 * result + (guid != null ? guid.hashCode() : 0)
+        result = 31 * result + (buildings != null ? buildings.hashCode() : 0)
+        result = 31 * result + (type != null ? type.hashCode() : 0)
+        return result
+    }
 
+
+    @Override
     public String toString() {
-        """SiteDetail[
-                    campus=$campus,
-                    guid=$guid,
-                    buildings=$buildings,
-                    metadata=$metadata]"""
+        return "SiteDetail{" +
+                "campus=" + campus +
+                ", metadata=" + metadata +
+                ", guid='" + guid + '\'' +
+                ", buildings=" + buildings +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

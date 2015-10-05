@@ -117,6 +117,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_succes_invalid_phone_number_long3 = "123 456 7890123"
     def i_succes_invalid_phone_number_long4 = "+01 123 456 7890"
 
+    def i_success_credential_type4_filter="Banner ID"
+    def i_failure_credential_type4_filter="BannerId"
+    def i_failure_credential_id4="HOSP00"
+
 
 
     @Before
@@ -2221,6 +2225,97 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals o_success_person_create.guid, o_success_person_update.guid
         assertEquals content1.ethnicityDetail.guid, o_success_person_update.ethnicityDetail.guid
     }
+
+    //Filter on CredentialId and Credential Type
+    @Test
+    public void testCredentialsFilterOnPerson(){
+        def persons = [:]
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","faculty")
+        persons = personCompositeService.list(params);
+        assert persons.size()>0
+        assertEquals 1,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","student")
+        persons = personCompositeService.list(params);
+        assert persons.size()>0
+        assertEquals 1,persons.size()
+
+        persons.clear()
+        params.clear()
+
+
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4)
+        params.put("role","student")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'not.found.message'
+        }
+
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","student")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4);
+        params.put("role","student")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4);
+        params.put("role","faculty")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","faculty")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+    }
+
 
 
     private def createPersonBasicPersonBase() {

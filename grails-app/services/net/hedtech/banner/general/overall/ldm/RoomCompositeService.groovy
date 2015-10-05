@@ -91,8 +91,8 @@ class RoomCompositeService extends LdmService {
     private void validateParams(Map params) {
         validateRequiredFields(params)
         validateBeginAndEndDates(params)
-        validateTimeFormat(params.startTime?.trim(), 'startTime')
-        validateTimeFormat(params.endTime?.trim(), 'endTime')
+        validateTimeFormat(params.startTime?.trim())
+        validateTimeFormat(params.endTime?.trim())
         validateBeginAndEndTimes(params)
         validateRecurrence(params)
         validateOccupancies(params)
@@ -125,7 +125,7 @@ class RoomCompositeService extends LdmService {
     }
 
 
-    private void validateTimeFormat(String timeString, String fieldName) {
+    private void validateTimeFormat(String timeString) {
         String timeFormat = getTimeFormat().toLowerCase().replace('hh', HOUR_FORMAT).replace('mm', MINUTE_FORMAT).replace('ss', SECOND_FORMAT)
         if (timeString && (timeString.length() != getTimeFormat().length() || !(timeString ==~ /$timeFormat/))) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("invalid.timeFormat", []))
