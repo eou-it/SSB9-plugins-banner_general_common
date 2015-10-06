@@ -37,7 +37,7 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     CommunicationMobileNotificationExpirationPolicy expirationPolicy = CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION
 
     @Column(name = "GCBMNTL_DURATION", nullable = true)
-    Long duration
+    Integer duration
 
     @Column(name = "GCBMNTL_DURATION_UNIT", nullable = true)
     @Enumerated(EnumType.STRING)

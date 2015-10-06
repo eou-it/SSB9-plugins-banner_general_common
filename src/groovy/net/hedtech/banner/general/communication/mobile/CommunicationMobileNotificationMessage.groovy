@@ -24,7 +24,7 @@ public class CommunicationMobileNotificationMessage extends CommunicationMessage
     String destinationLink
     String destinationLabel
     CommunicationMobileNotificationExpirationPolicy expirationPolicy
-    Long duration
+    Integer duration
     CommunicationDurationUnit durationUnit
     Date expirationDateTime
     boolean push

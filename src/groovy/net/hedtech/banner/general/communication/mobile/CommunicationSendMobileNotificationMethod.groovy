@@ -3,10 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
+import groovy.time.DatumDependentDuration
 import groovyx.net.http.HTTPBuilder
 import net.hedtech.banner.exceptions.ExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -101,7 +103,12 @@ class CommunicationSendMobileNotificationMethod {
 
                 switch(message.expirationPolicy) {
                     case CommunicationMobileNotificationExpirationPolicy.DURATION:
-                        messageMap.put( "expires", String.valueOf( message.duration ) )
+                        Date today = new Date()
+                        DatumDependentDuration period = (message.durationUnit == CommunicationDurationUnit.HOUR) ?
+                            new DatumDependentDuration(0, 0, 0, message.duration, 0, 0, 0) :
+                            new DatumDependentDuration(0, 0, message.duration, 0, 0, 0, 0)
+                        Date expirationDateTime = period + today
+                        messageMap.put( "expires", ISODateTimeFormat.dateTime().print( expirationDateTime.time ) )
                         break
                     case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
                         messageMap.put( "expires", ISODateTimeFormat.dateTime().print( message.expirationDateTime.time ) )
