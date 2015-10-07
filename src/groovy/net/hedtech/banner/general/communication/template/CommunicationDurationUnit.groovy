@@ -8,5 +8,6 @@ package net.hedtech.banner.general.communication.template
  */
 public enum CommunicationDurationUnit implements Serializable {
     DAY,
-    HOUR
+    HOUR,
+    MINUTE
 }

@@ -22,6 +22,7 @@ import org.joda.time.format.ISODateTimeFormat
  */
 class CommunicationSendMobileNotificationMethod {
     private Log log = LogFactory.getLog(this.getClass())
+    String serverResponse
 
 
     public void execute(CommunicationMobileNotificationMessage message, CommunicationOrganization senderOrganization) {
@@ -31,13 +32,15 @@ class CommunicationSendMobileNotificationMethod {
         assert (message.externalUser)
         assert (message.referenceId)
 
+        serverResponse = null
+
         if (senderOrganization.encryptedMobileApplicationKey) {
             assert senderOrganization.clearMobileApplicationKey
         }
 
         if (isEmpty(senderOrganization.mobileEndPointUrl)) {
             throw ExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.name,
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(),
                     "emptyMobileNotificationEndpointUrl",
                     senderOrganization.name
             )
@@ -45,7 +48,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(senderOrganization.mobileApplicationName)) {
             throw ExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.name,
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
                     "emptyMobileNotificationApplicationName",
                     senderOrganization.name
             )
@@ -53,7 +56,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(senderOrganization.encryptedMobileApplicationKey)) {
             throw ExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.name,
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(),
                     "emptyMobileNotificationApplicationKey",
                     senderOrganization.name
             )
@@ -61,7 +64,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (!message.externalUser || message.externalUser.trim().length() == 0) {
             throw ExceptionFactory.createFriendlyApplicationException( CommunicationSendMobileNotificationService.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name,
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(),
                     "noExternalUser"
             )
         }
@@ -85,28 +88,36 @@ class CommunicationSendMobileNotificationMethod {
                 if (message.headline) {
                     messageMap.put("headline", message?.headline)
                 }
+
                 if (message.messageDescription) {
                     messageMap.put("description", message.messageDescription)
                 }
 
-                //            def expiresDateFormat = new SimpleDateFormat("YYYY-MM-DDhh:mm:ssZ")
-                //            if (notificationInstance?.expires) bodyMap.put("expires", expiresDateFormat.format(notificationInstance?.expires))
-
                 if (message.destinationLabel) {
                     messageMap.put("destinationLabel", message.destinationLabel)
                 }
+
                 if (message.destinationLink) {
                     messageMap.put("destination", message.destinationLink)
                 }
 
-
-
                 switch(message.expirationPolicy) {
                     case CommunicationMobileNotificationExpirationPolicy.DURATION:
                         Date today = new Date()
-                        DatumDependentDuration period = (message.durationUnit == CommunicationDurationUnit.HOUR) ?
-                            new DatumDependentDuration(0, 0, 0, message.duration, 0, 0, 0) :
-                            new DatumDependentDuration(0, 0, message.duration, 0, 0, 0, 0)
+                        DatumDependentDuration period
+                        switch(message.durationUnit) {
+                            case CommunicationDurationUnit.DAY:
+                                period = new DatumDependentDuration(0, 0, message.duration, 0, 0, 0, 0)
+                                break;
+                            case CommunicationDurationUnit.HOUR:
+                                period = new DatumDependentDuration(0, 0, 0, message.duration, 0, 0, 0)
+                                break;
+                            case CommunicationDurationUnit.MINUTE:
+                            default:
+                                period = new DatumDependentDuration(0, 0, 0, 0, message.duration, 0, 0)
+                                break;
+                        }
+
                         Date expirationDateTime = period + today
                         messageMap.put( "expires", ISODateTimeFormat.dateTime().print( expirationDateTime.time ) )
                         break
@@ -119,16 +130,19 @@ class CommunicationSendMobileNotificationMethod {
                 body = messageMap
 
                 response.success = { theResponse, reader ->
-                    if (log.isDebugEnabled()) {
-                        log.debug("Got response: ${theResponse.statusLine}")
-                        log.debug("Content-Type: ${theResponse.headers.'Content-Type'}")
-                        log.debug(reader.text)
-                        log.debug(((reader != null) && (reader.text != null)))
+                    if (reader?.notifications) {
+                        serverResponse = new groovy.json.JsonBuilder( reader.notifications ).toString()
+                        if (log.isDebugEnabled()) {
+                            log.debug( new groovy.json.JsonBuilder( reader.notifications ).toPrettyString() )
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug( "Response is null." )
+                        }
                     }
                 }
             }
         } catch (Throwable t) {
-            t.printStackTrace()
             log.error( 'Error trying to send mobile notification.', t );
             throw ExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }

@@ -24,26 +24,10 @@ import javax.persistence.Table
 @ToString
 class CommunicationMobileNotificationItem extends CommunicationItem implements Serializable {
 
-    @Column(name = "GCRMITM_MOBILE_HEADLINE", nullable = false)
-    String mobileHeadline
-
-    @Column(name = "GCRMITM_HEADLINE")
-    String headline
-
-    @Column(name = "GCRMITM_DESCRIPTION")
-    String messageDescription
-
-    @Column(name = "GCRMITM_DESTINATION_LINK")
-    String destinationLink
-
-    @Column(name = "GCRMITM_DESTINATION_LABEL")
-    String destinationLabel
+    @Column(name = "GCRMITM_RESPONSE", nullable = true)
+    String serverResponse
 
     static constraints = {
-        mobileHeadline(nullable: false, maxSize: 160)
-        headline(nullable: true, maxSize: 255)
-        messageDescription(nullable: true, maxSize: 4000)
-        destinationLink(nullable: true, maxSize: 2048)
-        destinationLabel(nullable: true, maxSize: 255)
+        serverResponse(nullable: true)
     }
 }

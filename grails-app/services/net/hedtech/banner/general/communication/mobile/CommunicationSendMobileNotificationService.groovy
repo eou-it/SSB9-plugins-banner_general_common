@@ -49,7 +49,7 @@ class CommunicationSendMobileNotificationService {
         notificationMethod.execute( message, organization )
 
         try {
-            track( organization, message, recipientData )
+            track( organization, message, recipientData, notificationMethod.serverResponse )
         } catch (Throwable t) {
             log.error( t )
             throw t;
@@ -58,7 +58,7 @@ class CommunicationSendMobileNotificationService {
     }
 
 
-    private void track( CommunicationOrganization organization, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData ) {
+    private void track( CommunicationOrganization organization, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData, String serverResponse ) {
         log.debug( "tracking mobile notification message sent")
         CommunicationMobileNotificationItem item = new CommunicationMobileNotificationItem()
         // standard communication log entries
@@ -69,12 +69,7 @@ class CommunicationSendMobileNotificationService {
         item.setSentDate( message.dateSent )
         item.setTemplateId(recipientData.templateId)
 
-        // mobile notification personalized properties
-        item.mobileHeadline = message.mobileHeadline
-        item.headline = message.headline
-        item.messageDescription = message.messageDescription
-        item.destinationLink = message.destinationLink
-        item.destinationLabel = message.destinationLabel
+        item.serverResponse = serverResponse
 
         item = communicationMobileNotificationItemService.create( item )
         log.debug( "recorded mobile notification item sent with item id = ${item.id}." )
