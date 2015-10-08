@@ -69,6 +69,9 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListWithFilter() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         def params = ['filter[0][value]': 'Classroom', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
         List rooms = roomCompositeService.list(params)
         assertNotNull rooms
@@ -434,12 +437,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testQApiRoomAvailabilityV1_GenericMediaTypes() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/json")
-        request.addHeader("Content-Type", "application/json")
-
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         Map params = getParamsForRoomQueryWithBuildingAndSite()
-
         List<AvailableRoom> availableRooms = roomCompositeService.list(params)
         assertNotNull availableRooms
         assertFalse availableRooms.isEmpty()
@@ -524,6 +525,19 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         params.put('building', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME, ibuilding.code)[0].guid)
         params.put('site', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid)
         return params
+    }
+
+    @Test
+    void testListWithFilterV4Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v4+json")
+        def params = ['filter[0][value]': 'classroom', 'filter[0][field]': 'type', 'filter[0][operator]': 'equals']
+        List rooms = roomCompositeService.list(params)
+        assertNotNull rooms
+        assertFalse rooms.isEmpty()
+        assertNotNull rooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
+        assertNotNull rooms.find {it.roomDetails["type"] = 'classroom' }
     }
 
 }

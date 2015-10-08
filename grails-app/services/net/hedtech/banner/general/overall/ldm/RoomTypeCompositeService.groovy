@@ -3,6 +3,9 @@
  *******************************************************************************/
 
 package net.hedtech.banner.general.overall.ldm
+
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.v4.RoomType
 import org.springframework.transaction.annotation.Propagation
@@ -39,6 +42,9 @@ class RoomTypeCompositeService extends LdmService{
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def get(String guid) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByGuid(guid)
+        if(!globalUniqueIdentifier){
+            throw new ApplicationException("roomtypes", new NotFoundException())
+        }
         IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE,SETTING_ROOM_LAYOUT,globalUniqueIdentifier?.domainKey)
         return new RoomType(globalUniqueIdentifier?.guid,integrationConfiguration?.translationValue,integrationConfiguration?.translationValue)
     }
