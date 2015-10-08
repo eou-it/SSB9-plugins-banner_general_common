@@ -66,7 +66,8 @@ class RoomCompositeService extends LdmService {
                 entities << it[0]
             }
         } else {
-            // GET /api/rooms?filter[0][field]=roomLayoutType&filter[0][operator]=equals&filter[0][value]=Classroom
+            //v1- GET /api/rooms?filter[0][field]=roomLayoutType&filter[0][operator]=equals&filter[0][value]=Classroom
+            //v4- GET /api/rooms?filter[0][field]=type&filter[0][operator]=equals&filter[0][value]=classroom
             Map filterData = prepareParams(params)
             def roomTypes
             String filterType = getFilterType(filterData)

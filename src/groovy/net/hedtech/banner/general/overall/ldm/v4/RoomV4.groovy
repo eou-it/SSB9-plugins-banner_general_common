@@ -6,7 +6,6 @@ package net.hedtech.banner.general.overall.ldm.v4
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v2.Room
-import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 
 /**
