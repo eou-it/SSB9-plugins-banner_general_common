@@ -4,11 +4,8 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.exceptions.ExceptionFactory
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
-
 
 class CommunicationMobileNotificationTemplateService extends CommunicationTemplateService {
 

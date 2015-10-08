@@ -148,9 +148,9 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
     private CommunicationGroupSend createGroupSend() {
         return communicationGroupSendService.create(
                 new CommunicationGroupSend(
-                        organization: organization,
-                        population: population,
-                        template: emailTemplate,
+                        organizationId: organization.id,
+                        populationId: population.id,
+                        templateId: emailTemplate.id,
                         ownerPidm: bannerAuthenticationToken.getPidm()
                 )
         ) as CommunicationGroupSend

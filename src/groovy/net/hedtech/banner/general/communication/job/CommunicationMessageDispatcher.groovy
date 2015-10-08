@@ -8,11 +8,7 @@ import net.hedtech.banner.general.communication.email.CommunicationSendEmailServ
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
 import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.template.CommunicationMessage
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
+import net.hedtech.banner.general.communication.template.*
 import org.apache.log4j.Logger
 
 /**
@@ -43,11 +39,11 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
 
     @Override
     void visitEmail(CommunicationEmailTemplate template) {
-        communicationSendEmailService.sendEmail( recipientData.organization, message as CommunicationEmailMessage, recipientData, recipientData.pidm )
+        communicationSendEmailService.sendEmail( recipientData.organizationId, message as CommunicationEmailMessage, recipientData, recipientData.pidm )
     }
 
     @Override
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
-        communicationSendMobileNotificationService.send( recipientData.organization, message as CommunicationMobileNotificationMessage, recipientData )
+        communicationSendMobileNotificationService.send( recipientData.organizationId, message as CommunicationMobileNotificationMessage, recipientData )
     }
 }

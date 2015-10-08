@@ -5,9 +5,6 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 
@@ -23,15 +20,15 @@ import javax.persistence.*
 @ToString
 @DatabaseModifiesState
 @NamedQueries(value = [
-    @NamedQuery( name = "CommunicationGroupSend.findRunning",
-        query = """ FROM CommunicationGroupSend gs
+        @NamedQuery(name = "CommunicationGroupSend.findRunning",
+                query = """ FROM CommunicationGroupSend gs
                     WHERE gs.currentExecutionState = :new_ or
                           gs.currentExecutionState = :processing_ """
-    ),
-    @NamedQuery( name = "CommunicationGroupSend.fetchCompleted",
-            query = """ FROM CommunicationGroupSend gs
+        ),
+        @NamedQuery(name = "CommunicationGroupSend.fetchCompleted",
+                query = """ FROM CommunicationGroupSend gs
                 WHERE gs.currentExecutionState = :complete_ """
-    )
+        )
 ])
 class CommunicationGroupSend implements Serializable {
 
@@ -77,47 +74,45 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_DATA_ORIGIN")
     String dataOrigin
 
-    @Column(name="GCBGSND_VPDI_CODE" )
+    @Column(name = "GCBGSND_VPDI_CODE")
     String mepCode
 
-    @JoinColumn(name="GCBGSND_ORGANIZATION_ID" )
-    @ManyToOne( fetch = FetchType.EAGER )
-    CommunicationOrganization organization;
+    @Column(name = "GCBGSND_ORGANIZATION_ID")
+    Long organizationId
 
-    @JoinColumn(name="GCBGSND_POPLIST_ID" )
-    @ManyToOne( fetch = FetchType.EAGER )
-    CommunicationPopulationSelectionList population;
+    @Column(name = "GCBGSND_POPLIST_ID")
+    Long populationId;
 
-    @JoinColumn(name="GCBGSND_TEMPLATE_ID" )
-    @ManyToOne( fetch = FetchType.EAGER )
-    CommunicationTemplate template;
+    @Column(name = "GCBGSND_TEMPLATE_ID")
+    Long templateId;
 
-    @Column(name="GCBGSND_STARTED_DATE", nullable = true)
+    @Column(name = "GCBGSND_STARTED_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     Date startedDate;
 
-    @Column(name="GCBGSND_CREATIONDATETIME", nullable = false)
+    @Column(name = "GCBGSND_CREATIONDATETIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
-    @Column(name="gcbgsnd_CURRENT_STATE", nullable = false)
+    @Column(name = "gcbgsnd_CURRENT_STATE", nullable = false)
     @Enumerated(EnumType.STRING)
     CommunicationGroupSendExecutionState currentExecutionState = CommunicationGroupSendExecutionState.New;
 
-    @Column(name="gcbgsnd_STOP_DATE", nullable = true)
+    @Column(name = "gcbgsnd_STOP_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     Date stopDate;
 
-    @Column(name="gcbgsnd_DELETED", nullable = false)
-    @Type(type="yes_no")
+    @Column(name = "gcbgsnd_DELETED", nullable = false)
+    @Type(type = "yes_no")
     boolean deleted = false;
 
     static constraints = {
         mepCode(nullable: true)
-        name(nullable:false)
-        population(nullable: false)
-        organization(nullable: false)
-        createdBy(nullable:false, maxSize: 30)
+        name(nullable: false)
+        populationId(nullable: false)
+        organizationId(nullable: false)
+        templateId(nullable: false)
+        createdBy(nullable: false, maxSize: 30)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
@@ -131,19 +126,20 @@ class CommunicationGroupSend implements Serializable {
     public static List findRunning() {
         def query
         CommunicationGroupSend.withSession { session ->
-            query = session.getNamedQuery( 'CommunicationGroupSend.findRunning' )
-                .setParameter( 'new_', CommunicationGroupSendExecutionState.New )
-                .setParameter( 'processing_', CommunicationGroupSendExecutionState.Processing )
-                .list()
+            query = session.getNamedQuery('CommunicationGroupSend.findRunning')
+                    .setParameter('new_', CommunicationGroupSendExecutionState.New)
+                    .setParameter('processing_', CommunicationGroupSendExecutionState.Processing)
+                    .list()
         }
         return query
     }
 
+
     public static List fetchCompleted() {
         def results
         CommunicationGroupSendItem.withSession { session ->
-            results = session.getNamedQuery( 'CommunicationGroupSend.fetchCompleted' )
-                    .setParameter( 'complete_', CommunicationGroupSendExecutionState.Complete )
+            results = session.getNamedQuery('CommunicationGroupSend.fetchCompleted')
+                    .setParameter('complete_', CommunicationGroupSendExecutionState.Complete)
                     .list()
         }
         return results

@@ -80,7 +80,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     @Test
     void testCreateCommunicationRecipientData() {
         def communicationRecipientData = newCommunicationRecipientData()
-        communicationRecipientData.setOrganization( organization )
+        communicationRecipientData.setOrganizationId( organization.id )
         communicationRecipientData.save(failOnError: true, flush: true)
 
         assertNotNull(communicationRecipientData.id)

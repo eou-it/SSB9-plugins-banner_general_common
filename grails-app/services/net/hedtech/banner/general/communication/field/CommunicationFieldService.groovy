@@ -8,10 +8,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.security.FormContext
 import net.hedtech.banner.service.ServiceBase
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationFieldService extends ServiceBase {
     boolean transactional = true

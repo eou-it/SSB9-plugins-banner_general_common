@@ -1,14 +1,18 @@
 /* ****************************************************************************
 Copyright 2015 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
-package net.hedtech.banner.exceptions
+package net.hedtech.banner.general.communication.exceptions
+
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 
 /**
  * Convenience methods for creating an application exceptions. Largely the factory takes care of stricter
  * type checking in order to take some of the confusion out of exception naming conventions and
  * to alleviate the developer assembling @@r1 in the calling code.
  */
-class ExceptionFactory {
+class CommunicationExceptionFactory {
 
     /**
      * Creates an application exception.

@@ -7,10 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.communication.CommunicationErrorCode
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemExecutionState
 import net.hedtech.banner.service.DatabaseModifiesState
-import org.apache.log4j.Logger
 
 import javax.persistence.*
 

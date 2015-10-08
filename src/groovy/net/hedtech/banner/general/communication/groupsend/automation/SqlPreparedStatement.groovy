@@ -12,12 +12,7 @@
 package net.hedtech.banner.general.communication.groupsend.automation;
 
 //import oracle.jdbc.OraclePreparedStatement;
-
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.*;
+import java.sql.*
 
 /**
  * Decorator for sql prepared statement; will be used to give more informative

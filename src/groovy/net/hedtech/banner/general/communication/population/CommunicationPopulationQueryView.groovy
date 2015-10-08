@@ -6,8 +6,6 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.query.DynamicFinder
-import oracle.net.ns.Communication
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 

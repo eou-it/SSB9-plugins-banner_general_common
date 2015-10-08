@@ -9,12 +9,10 @@
  WHICH IT IS SPECIFICALLY PROVIDED WITHOUT THE WRITTEN PERMISSION OF THE
  SAID COMPANY
  *******************************************************************************/
-package net.hedtech.banner.general.communication.groupsend.automation;
+package net.hedtech.banner.general.communication.groupsend.automation
 
-
-import java.io.*
-import java.text.FieldPosition;
-import java.text.MessageFormat;
+import java.text.FieldPosition
+import java.text.MessageFormat
 import java.text.NumberFormat
 
 /**

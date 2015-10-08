@@ -1,7 +1,9 @@
 /* ****************************************************************************
 Copyright 2015 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
-package net.hedtech.banner.exceptions
+package net.hedtech.banner.general.communication.exceptions
+
+import net.hedtech.banner.exceptions.ApplicationException
 
 class CommunicationApplicationException extends ApplicationException {
 

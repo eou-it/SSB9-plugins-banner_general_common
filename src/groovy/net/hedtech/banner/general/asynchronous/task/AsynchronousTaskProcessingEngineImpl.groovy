@@ -5,7 +5,6 @@ package net.hedtech.banner.general.asynchronous.task
 
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode

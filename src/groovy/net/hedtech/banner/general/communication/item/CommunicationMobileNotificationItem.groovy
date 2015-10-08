@@ -5,12 +5,9 @@ package net.hedtech.banner.general.communication.item
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
 import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
 

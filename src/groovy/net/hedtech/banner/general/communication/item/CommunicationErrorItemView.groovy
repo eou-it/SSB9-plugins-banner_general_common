@@ -7,11 +7,7 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Table
-import javax.persistence.Version
+import javax.persistence.*
 
 /**
  * Communication Error Item View. Denotes a communication that had to be sent to a recipient and an error encountered in the process.

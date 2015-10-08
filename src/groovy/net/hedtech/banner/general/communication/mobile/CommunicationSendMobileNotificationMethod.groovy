@@ -5,17 +5,17 @@ package net.hedtech.banner.general.communication.mobile
 
 import groovy.time.DatumDependentDuration
 import groovyx.net.http.HTTPBuilder
-import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import static groovyx.net.http.ContentType.JSON
-import static groovyx.net.http.Method.POST
 import org.joda.time.format.ISODateTimeFormat
 
+import static groovyx.net.http.ContentType.JSON
+import static groovyx.net.http.Method.POST
 
 /**
  * Performs the details of assembling and sending out an Ellucian Go mobile notification.
@@ -39,7 +39,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (isEmpty(senderOrganization.mobileEndPointUrl)) {
-            throw ExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(),
                     "emptyMobileNotificationEndpointUrl",
                     senderOrganization.name
@@ -47,7 +47,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (isEmpty(senderOrganization.mobileApplicationName)) {
-            throw ExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
                     "emptyMobileNotificationApplicationName",
                     senderOrganization.name
@@ -55,7 +55,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (isEmpty(senderOrganization.encryptedMobileApplicationKey)) {
-            throw ExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(),
                     "emptyMobileNotificationApplicationKey",
                     senderOrganization.name
@@ -63,7 +63,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (!message.externalUser || message.externalUser.trim().length() == 0) {
-            throw ExceptionFactory.createFriendlyApplicationException( CommunicationSendMobileNotificationService.class,
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationSendMobileNotificationService.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(),
                     "noExternalUser"
             )
@@ -144,7 +144,7 @@ class CommunicationSendMobileNotificationMethod {
             }
         } catch (Throwable t) {
             log.error( 'Error trying to send mobile notification.', t );
-            throw ExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }
 

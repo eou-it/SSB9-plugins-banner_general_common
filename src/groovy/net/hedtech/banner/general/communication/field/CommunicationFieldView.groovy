@@ -6,11 +6,7 @@ package net.hedtech.banner.general.communication.field
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Table
-import javax.persistence.Version
+import javax.persistence.*
 
 /**
  * Communication Field View. Denotes a communication field in a field set. entity.

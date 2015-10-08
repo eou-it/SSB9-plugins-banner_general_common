@@ -3,14 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
-import net.hedtech.banner.exceptions.ExceptionFactory
-import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.overall.ThirdPartyAccess
-import net.hedtech.banner.general.person.PersonIdentificationName
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -33,14 +28,15 @@ class CommunicationSendMobileNotificationService {
      * @param message the mobile notification message to send
      * @param recipientData a recipient data describing details of the target recipient
      */
-    public void send( CommunicationOrganization organization, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData ) {
+    public void send( Long organizationId, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData ) {
         log.debug( "sending mobile notification message" )
 
+        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
+
+        CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
         if (organization?.encryptedMobileApplicationKey) {
             organization.clearMobileApplicationKey = communicationOrganizationService.decryptPassword( organization.encryptedMobileApplicationKey )
         }
-        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
-
         if (testOverride) {
             message.externalUser = testOverride.externalUser
         }

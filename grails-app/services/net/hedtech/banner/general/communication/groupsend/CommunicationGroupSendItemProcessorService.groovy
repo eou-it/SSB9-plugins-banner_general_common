@@ -4,18 +4,10 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
-import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientDataFactory
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
-import net.hedtech.banner.security.FormContext
 import org.apache.log4j.Logger
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 
 import java.sql.SQLException
 

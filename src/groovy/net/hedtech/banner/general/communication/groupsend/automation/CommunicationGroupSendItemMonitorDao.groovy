@@ -9,20 +9,20 @@
  WHICH IT IS SPECIFICALLY PROVIDED WITHOUT THE WRITTEN PERMISSION OF THE
  SAID COMPANY
  *******************************************************************************/
-package net.hedtech.banner.general.communication.groupsend.automation;
+package net.hedtech.banner.general.communication.groupsend.automation
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.orm.jpa.JpaTemplate;
-import org.springframework.orm.jpa.support.JpaDaoSupport;
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.springframework.orm.jpa.JpaTemplate
+import org.springframework.orm.jpa.support.JpaDaoSupport
 
-import javax.persistence.EntityManager;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.persistence.EntityManager
+import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+import java.sql.SQLException
 
 /**
  * A database access object for Group Send Item Monitor records.

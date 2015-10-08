@@ -1,17 +1,15 @@
 /*******************************************************************************
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.communication.email;
+package net.hedtech.banner.general.communication.email
 
-import groovy.transform.EqualsAndHashCode;
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.exceptions.ExceptionFactory
-import net.hedtech.banner.general.communication.CommunicationErrorCode;
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import java.io.Serializable;
-import java.util.ArrayList;
+import javax.mail.internet.AddressException
+import javax.mail.internet.InternetAddress
 
 /**
  * Represents an Email Address entity.
@@ -78,7 +76,7 @@ public class CommunicationEmailAddress implements Serializable {
         if (isValidEmailAddress( mailAddress ) == true) {
             this.mailAddress = mailAddress;
         } else {
-            throw ExceptionFactory.createApplicationException(CommunicationEmailAddress.class, new AddressException( "RFC 822 address format violation.", mailAddress ), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationEmailAddress.class, new AddressException( "RFC 822 address format violation.", mailAddress ), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
         }
     }
 

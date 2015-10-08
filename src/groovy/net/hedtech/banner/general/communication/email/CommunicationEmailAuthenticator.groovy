@@ -29,10 +29,9 @@ class CommunicationEmailAuthenticator extends Authenticator {
     public CommunicationEmailAuthenticator() {
     }
 
-    public CommunicationEmailAuthenticator( CommunicationMailboxAccount account ) {
-        this.username = account.userName
-        //TODO: Switch this to using the unencrypt function.
-        this.password = account.getClearTextPassword()
+    public CommunicationEmailAuthenticator( String accountUserName, String accountPassword ) {
+        this.username = accountUserName
+        this.password = accountPassword
     }
 
 

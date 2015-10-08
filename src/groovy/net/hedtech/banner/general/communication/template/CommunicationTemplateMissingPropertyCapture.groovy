@@ -3,11 +3,7 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.exceptions.ApplicationException
 import org.stringtemplate.v4.STErrorListener
 import org.stringtemplate.v4.misc.ErrorType
-import org.stringtemplate.v4.misc.STCompiletimeMessage
 import org.stringtemplate.v4.misc.STMessage
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
-import org.stringtemplate.v4.compiler.GroupParser;
 
 /**
  * Created by mbrzycki on 2/3/15.

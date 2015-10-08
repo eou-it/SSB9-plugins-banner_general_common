@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication.field
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.stringtemplate.v4.STErrorListener
 import org.stringtemplate.v4.misc.ErrorType
 import org.stringtemplate.v4.misc.STMessage

@@ -4,13 +4,9 @@
 package net.hedtech.banner.general.communication.job
 
 import groovy.sql.Sql
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.service.ServiceBase
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import org.springframework.security.core.context.SecurityContextHolder
-
-import java.sql.SQLException
 
 /**
  *  DAO service interface for communication group send item objects.

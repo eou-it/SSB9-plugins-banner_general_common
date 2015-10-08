@@ -23,6 +23,13 @@ import javax.persistence.*
                 query = """ FROM CommunicationTemplate a
                     WHERE a.folder.name = :folderName
                       AND upper(a.name) = upper(:templateName)"""),
+        @NamedQuery(name = "CommunicationTemplate.fetchById",
+                query = """ FROM CommunicationTemplate a
+                    WHERE a.id = :id"""),
+        @NamedQuery(name = "CommunicationTemplate.fetchByIdAndMepCode",
+                query = """ FROM CommunicationTemplate a
+                    WHERE a.id = :id
+                      AND (:mepCode is null or a.mepCode is null or a.mepCode = :mepCode)"""),
         @NamedQuery(name = "CommunicationTemplate.existsAnotherNameFolder",
                 query = """ FROM CommunicationTemplate a
                     WHERE a.folder.name = :folderName
@@ -136,6 +143,11 @@ public abstract class CommunicationTemplate implements Serializable {
     @Column(name = "GCBTMPL_DATA_ORIGIN")
     String dataOrigin
 
+
+    @Column(name="GCBTMPL_VPDI_CODE", insertable = false, updatable = false )
+    String mepCode
+
+
     static constraints = {
         name(nullable: false, maxSize: 250)
         description(nullable: true, maxSize: 2000)
@@ -148,6 +160,7 @@ public abstract class CommunicationTemplate implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+        mepCode(nullable: true)
     }
 
     /**
@@ -178,6 +191,27 @@ public abstract class CommunicationTemplate implements Serializable {
                     .setString('folderName', folderName)
                     .setString('templateName', templateName)
                     .list()[0]
+        }
+        return query
+    }
+
+    public static CommunicationTemplate fetchByIdAndMepCode(Long id, String mepCode) {
+
+        def query
+        if (mepCode != null) {
+            CommunicationTemplate.withSession { session ->
+                query = session.getNamedQuery('CommunicationTemplate.fetchById')
+                        .setLong('id', id)
+                        .list()[0]
+            }
+        }
+        else {
+            CommunicationTemplate.withSession { session ->
+                query = session.getNamedQuery('CommunicationTemplate.fetchByIdAndMepCode')
+                        .setLong('id', id)
+                        .setString('mepCode', mepCode)
+                        .list()[0]
+            }
         }
         return query
     }

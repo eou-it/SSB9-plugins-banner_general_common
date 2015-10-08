@@ -228,9 +228,9 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     private CommunicationGroupSend createGroupSend() {
         return communicationGroupSendService.create(
             new CommunicationGroupSend(
-                organization: organization,
-                population: population,
-                template: emailTemplate,
+                organizationId: organization.id,
+                populationId: population.id,
+                templateId: emailTemplate.id,
                 createdBy: bannerAuthenticationToken.getOracleUserName()
             )
         ) as CommunicationGroupSend

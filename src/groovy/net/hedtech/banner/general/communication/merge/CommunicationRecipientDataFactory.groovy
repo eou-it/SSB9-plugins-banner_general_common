@@ -36,7 +36,10 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
 
         this.groupSendItem = groupSendItem
         recipientData = null
-        groupSendItem.communicationGroupSend.template.accept( this )
+
+        CommunicationTemplate thisTemplate = CommunicationTemplate.fetchByIdAndMepCode(groupSendItem.communicationGroupSend.templateId, groupSendItem.mepCode)
+        thisTemplate.accept(this)
+
         recipientData = communicationRecipientDataService.create( recipientData )
     }
 
@@ -96,13 +99,14 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
 
         new CommunicationRecipientData(
             pidm: groupSendItem.recipientPidm,
-            templateId: groupSendItem.communicationGroupSend.template.id,
+            templateId: template.id,
             referenceId: groupSendItem.referenceId,
             ownerId: groupSendItem.communicationGroupSend.createdBy,
             fieldValues: nameToValueMap,
-            organization: groupSendItem.communicationGroupSend.organization,
-            communicationChannel: groupSendItem.communicationGroupSend.template.communicationChannel
+            organizationId: groupSendItem.communicationGroupSend.organizationId,
+            communicationChannel: template.communicationChannel
         )
+
     }
 
     private String calculateFieldForUser( CommunicationField communicationField ) {

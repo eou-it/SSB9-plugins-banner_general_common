@@ -149,7 +149,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         communicationRecipientData = new CommunicationRecipientData(
                 pidm: i_valid_pidm,
                 templateId: emailTemplate.id,
-                organization: i_valid_Organization,
+                organizationId: i_valid_Organization.id,
                 referenceId: 1,
                 ownerId: getUser(),
                 fieldValues: fieldListByPidm,

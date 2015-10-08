@@ -4,8 +4,6 @@
 
 package net.hedtech.banner.general.communication.item
 
-import grails.gorm.DetachedCriteria
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
 
 class CommunicationEmailItemService extends ServiceBase {

@@ -7,15 +7,7 @@ import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.template.CommunicationMergedEmailTemplate
-import net.hedtech.banner.general.communication.template.CommunicationMergedMobileNotificationTemplate
-import net.hedtech.banner.general.communication.template.CommunicationMessage
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
-import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
+import net.hedtech.banner.general.communication.template.*
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import org.apache.log4j.Logger
 

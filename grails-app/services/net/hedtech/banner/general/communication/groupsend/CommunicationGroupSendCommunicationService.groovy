@@ -4,10 +4,7 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ExceptionFactory
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
@@ -40,30 +37,15 @@ class CommunicationGroupSendCommunicationService {
         if (log.isDebugEnabled()) log.debug( "Method sendAsynchronousGroupCommunication reached." );
         if (!request) throw new IllegalArgumentException( "request may not be null!" )
 
-        CommunicationTemplate template = communicationTemplateService.get( request.getTemplateId() )
-        if (!template) {
-            throw ExceptionFactory.createNotFoundException( request.getTemplateId(), CommunicationTemplate.class )
-        }
-
-        CommunicationPopulationSelectionList population = communicationPopulationSelectionListService.get( request.getPopulationId() )
-        if (!population) {
-            throw ExceptionFactory.createNotFoundException( request.getPopulationId(), CommunicationPopulationSelectionList.class )
-        }
-
-        CommunicationOrganization organization = communicationOrganizationService.get( request.getOrganizationId() )
-        if (!organization) {
-            throw ExceptionFactory.createNotFoundException( request.getOrganizationId(), CommunicationOrganization.class )
-        }
-
         String jobName = request.getName();
         if(!jobName || jobName.isEmpty()) {
-            throw ExceptionFactory.createNotFoundException( CommunicationGroupSendCommunicationService, "@@r1:jobNameInvalid@@" )
+            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCommunicationService, "@@r1:jobNameInvalid@@" )
         }
 
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
-        groupSend.template = template
-        groupSend.population = population
-        groupSend.organization = organization
+        groupSend.templateId = request.getTemplateId()
+        groupSend.populationId = request.getPopulationId()
+        groupSend.organizationId = request.getOrganizationId()
         groupSend.name = jobName
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
@@ -91,11 +73,11 @@ class CommunicationGroupSendCommunicationService {
 
         CommunicationGroupSend groupSend = communicationGroupSendService.get( groupSendId )
         if (!groupSend) {
-            throw ExceptionFactory.createNotFoundException( groupSendId, CommunicationGroupSend.class )
+            throw CommunicationExceptionFactory.createNotFoundException( groupSendId, CommunicationGroupSend.class )
         }
 
         if (groupSend.currentExecutionState.running) {
-            throw ExceptionFactory.createApplicationException( CommunicationGroupSendCommunicationService.class, "cannotDeleteRunningGroupSend" )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCommunicationService.class, "cannotDeleteRunningGroupSend" )
         }
 
         deleteCommunicationJobsByGroupSendId( groupSendId )
@@ -115,7 +97,7 @@ class CommunicationGroupSendCommunicationService {
 
         if (groupSend.currentExecutionState.isTerminal()) {
             log.error( "Group send with id = ${groupSend.id} has already concluded with execution state ${groupSend.currentExecutionState.toString()}." )
-            throw ExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "cannotStopConcludedGroupSend" )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "cannotStopConcludedGroupSend" )
         }
 
         // Note: Scheduled is not enabled for CR1, but this is how we would do the check:
@@ -216,9 +198,9 @@ class CommunicationGroupSendCommunicationService {
                     "GCBCJOB_STATUS in ('PENDING', 'DISPATCHED') and GCBCJOB_REFERENCE_ID in " +
                     "(select GCRGSIM_REFERENCE_ID from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId} and GCRGSIM_CURRENT_STATE = 'Complete')" )
         } catch (SQLException e) {
-            throw ExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
         } catch (Exception e) {
-            throw ExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
         } finally {
             sql?.close()
         }

@@ -5,9 +5,7 @@ package net.hedtech.banner.general.communication.merge
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.item.CommunicationChannel
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 
 import javax.persistence.*
 
@@ -96,9 +94,8 @@ class CommunicationRecipientData {
     @Column(name = "GCBRDAT_DATA_ORIGIN")
     String dataOrigin
 
-    @JoinColumn(name="GCBRDAT_ORGANIZATION_ID" )
-    @ManyToOne( fetch = FetchType.EAGER )
-    CommunicationOrganization organization
+    @Column(name="GCBRDAT_ORGANIZATION_ID" )
+    Long organizationId
 
     static constraints = {
         communicationChannel(nullable: false)

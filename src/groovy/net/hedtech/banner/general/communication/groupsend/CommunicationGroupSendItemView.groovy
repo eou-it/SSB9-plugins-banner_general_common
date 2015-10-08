@@ -7,8 +7,6 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
-import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 

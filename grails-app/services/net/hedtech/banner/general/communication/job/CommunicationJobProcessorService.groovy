@@ -25,7 +25,7 @@ class CommunicationJobProcessorService {
         List<CommunicationRecipientData> recipientDataList = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
         CommunicationRecipientData recipientData = recipientDataList.size() ? recipientDataList[0] : null
 
-        CommunicationTemplate template = communicationTemplateService.get( recipientData.templateId )
+        CommunicationTemplate template = CommunicationTemplate.fetchByIdAndMepCode( recipientData.templateId, recipientData.mepCode )
 
         CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
             communicationTemplateMergeService: communicationTemplateMergeService

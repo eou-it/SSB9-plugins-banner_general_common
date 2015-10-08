@@ -4,11 +4,7 @@
 
 package net.hedtech.banner.general.communication
 
-import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.i18n.DateConverterService
-import net.hedtech.banner.service.ServiceBase
 
 import java.text.SimpleDateFormat
 

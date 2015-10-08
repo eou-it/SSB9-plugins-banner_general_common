@@ -4,12 +4,9 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.exceptions.ExceptionFactory
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.field.CommunicationField
-import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.service.ServiceBase
-import org.apache.commons.lang.NotImplementedException
 
 class CommunicationTemplateService extends ServiceBase {
 
@@ -18,7 +15,7 @@ class CommunicationTemplateService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
         if (!CommunicationCommonUtility.userCanCreate()) {
-            throw ExceptionFactory.createApplicationException( CommunicationTemplate, "operation.not.authorized" )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplate, "operation.not.authorized" )
         }
 
         def template = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap)

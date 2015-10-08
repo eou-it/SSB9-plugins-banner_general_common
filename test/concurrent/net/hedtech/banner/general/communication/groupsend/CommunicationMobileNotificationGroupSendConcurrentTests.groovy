@@ -1,5 +1,6 @@
 package net.hedtech.banner.general.communication.groupsend
 
+import groovy.json.JsonSlurper
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
@@ -251,12 +252,18 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         List itemList = communicationMobileNotificationItemService.list()
         assertEquals( 1, itemList.size() )
         CommunicationMobileNotificationItem item = itemList.get( 0 )
-        assertEquals( "testPersonalization from BCM", item.mobileHeadline )
-        assertEquals( "name = cbeaver", item.headline )
-        assertEquals( "test description", item.messageDescription )
-        assertEquals( "http://www.amazon.com", item.destinationLink )
-        assertEquals( "Amazon", item.destinationLabel )
-        assertNotNull( item.sentDate )
+// the item now has serverResponse to store all the individual values.  The server response
+// is a string formatted as [{"":"","":"",....}].  So strip of the begin and end characters and get the JSON map out
+        def jsonSlurper = new JsonSlurper()
+        def serverResponseMap = jsonSlurper.parseText(item.serverResponse.substring(1, item.serverResponse.length()-1))
+
+        assert serverResponseMap instanceof Map
+        assertEquals( "testPersonalization from BCM", serverResponseMap.mobileHeadline )
+        assertEquals( "name = cbeaver", serverResponseMap.headline )
+        assertEquals( "test description", serverResponseMap.description )
+        assertEquals( "http://www.amazon.com", serverResponseMap.destination )
+        assertEquals( "Amazon", serverResponseMap.destinationLabel )
+        assertNotNull( serverResponseMap.createDate )
     }
 
 

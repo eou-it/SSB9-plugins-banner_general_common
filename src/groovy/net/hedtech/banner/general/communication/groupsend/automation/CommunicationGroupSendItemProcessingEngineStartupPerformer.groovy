@@ -11,8 +11,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend.automation
 
-import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngine;
-import org.springframework.beans.factory.annotation.Required;
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngine
+import org.springframework.beans.factory.annotation.Required
 
 /**
  * Teardown performer for shutting down the notification manager while

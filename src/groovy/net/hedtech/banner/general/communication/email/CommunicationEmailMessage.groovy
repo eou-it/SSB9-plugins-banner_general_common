@@ -1,9 +1,9 @@
 /*******************************************************************************
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.communication.email;
+package net.hedtech.banner.general.communication.email
 
-import groovy.transform.EqualsAndHashCode;
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.template.CommunicationMessage
 

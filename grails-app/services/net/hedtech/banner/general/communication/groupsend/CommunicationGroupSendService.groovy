@@ -4,15 +4,9 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
-import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.exceptions.ExceptionFactory
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
-
-import java.sql.Connection
-import java.sql.SQLException
 
 /**
  * Manages group send instances.
@@ -28,7 +22,7 @@ class CommunicationGroupSendService extends ServiceBase {
             groupSend.setCreationDateTime( new Date() )
         };
         if (groupSend.getName() == null) {
-            groupSend.setName(CommunicationTemplate.get(groupSend.template.id).getName())
+            groupSend.setName(CommunicationTemplate.get(groupSend.templateId).getName())
         }
         groupSend.setDeleted( false );
     }

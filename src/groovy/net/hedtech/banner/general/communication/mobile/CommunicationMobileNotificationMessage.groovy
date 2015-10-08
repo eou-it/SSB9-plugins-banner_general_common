@@ -5,7 +5,6 @@ package net.hedtech.banner.general.communication.mobile
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
 import net.hedtech.banner.general.communication.template.CommunicationMessage
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy

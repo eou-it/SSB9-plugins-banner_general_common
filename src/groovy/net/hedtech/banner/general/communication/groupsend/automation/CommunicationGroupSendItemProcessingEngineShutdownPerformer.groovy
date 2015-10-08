@@ -9,11 +9,10 @@
  WHICH IT IS SPECIFICALLY PROVIDED WITHOUT THE WRITTEN PERMISSION OF THE
  SAID COMPANY
  *******************************************************************************/
-package net.hedtech.banner.general.communication.groupsend.automation;
+package net.hedtech.banner.general.communication.groupsend.automation
 
-import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngine;
-import org.springframework.beans.factory.annotation.Required;
-
+import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngine
+import org.springframework.beans.factory.annotation.Required
 
 /**
  * Teardown performer for shutting down the group send item manager's JobProcessingEngine while

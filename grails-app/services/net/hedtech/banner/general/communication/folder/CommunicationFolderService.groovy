@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.folder
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
 import net.hedtech.banner.service.ServiceBase
 
 /**

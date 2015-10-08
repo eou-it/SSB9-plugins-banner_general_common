@@ -5,12 +5,12 @@ package net.hedtech.banner.general.communication.template
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.item.CommunicationChannel
-import net.hedtech.banner.query.DynamicFinder
-import org.hibernate.criterion.Order
 
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.PrimaryKeyJoinColumn
+import javax.persistence.Table
 
 @Entity
 @Table(name = "GCBEMTL")

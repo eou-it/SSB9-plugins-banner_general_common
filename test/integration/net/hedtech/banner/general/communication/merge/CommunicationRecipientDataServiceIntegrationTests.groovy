@@ -214,7 +214,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                                 referenceId:  UUID.randomUUID().toString(),
                                 ownerId: getUser(),
                                 fieldValues: fieldListByPidm,
-                                organization: this.organization,
+                                organizationId: this.organization.id,
                                 communicationChannel: validTemplate.communicationChannel
                         )
                         communicationRecipientDataService.create( recipient )
@@ -263,7 +263,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 referenceId: UUID.randomUUID().toString(),
                 ownerId: getUser(),
                 fieldValues: ["name": fieldValue],
-                organization: this.organization,
+                organizationId: this.organization.id,
                 communicationChannel: CommunicationChannel.EMAIL
         )
         return communicationRecipientData
