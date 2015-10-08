@@ -43,7 +43,7 @@ class RoomTypeCompositeService extends LdmService{
     def get(String guid) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByGuid(guid)
         if(!globalUniqueIdentifier){
-            throw new ApplicationException("roomtypes", new NotFoundException())
+            throw new ApplicationException("roomtype", new NotFoundException())
         }
         IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE,SETTING_ROOM_LAYOUT,globalUniqueIdentifier?.domainKey)
         return new RoomType(globalUniqueIdentifier?.guid,integrationConfiguration?.translationValue,integrationConfiguration?.translationValue)
