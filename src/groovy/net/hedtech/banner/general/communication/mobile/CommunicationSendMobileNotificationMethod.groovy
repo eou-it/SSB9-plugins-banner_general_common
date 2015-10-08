@@ -122,7 +122,7 @@ class CommunicationSendMobileNotificationMethod {
                         messageMap.put( "expires", ISODateTimeFormat.dateTime().print( expirationDateTime.time ) )
                         break
                     case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
-                        messageMap.put( "expires", ISODateTimeFormat.dateTime().print( message.expirationDateTime.time ) )
+                        messageMap.put( "expires", formatExpiresDate( message.expirationDateTime ) )
                         break
                 }
 
