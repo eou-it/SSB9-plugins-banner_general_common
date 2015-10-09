@@ -3,6 +3,7 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
+import grails.validation.ValidationException
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -89,14 +90,22 @@ class CommunicationTemplateService extends ServiceBase {
 
     private void stampAndValidate( CommunicationTemplate template ) {
         stamp( template )
-        validate( template )
+        validateTemplate( template )
+
+        // This is a work around an issue in ServiceBase where any validation errors get erroneously rethrown
+        // as optimistic lock exceptions. 10/9/2015
+        try {
+            validate( template )
+        } catch( ValidationException e ) {
+            throw new ApplicationException( getDomainClass(), e )
+        }
     }
 
     private void stamp( CommunicationTemplate template ) {
         template.validFrom = template.validFrom ?: new Date()
     }
 
-    private void validate( CommunicationTemplate template ) {
+    private void validateTemplate( CommunicationTemplate template ) {
         if (template.getName() == null || template.getName().size() == 0 ) throw new ApplicationException( CommunicationTemplate, "@@r1:nameCannotBeNull@@" )
 
         if (template.folder == null) throw new ApplicationException( CommunicationTemplate, "@@r1:folderNameCannotBeNull@@" )
