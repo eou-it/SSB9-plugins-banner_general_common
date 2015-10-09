@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingRoomDescription
+import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
@@ -125,6 +126,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testGet() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+
         assertNotNull i_success_housingRoomDescription
         AvailableRoom existingAvailRoom = roomCompositeService.fetchByRoomBuildingAndTerm(i_success_housingRoomDescription.roomNumber, i_success_housingRoomDescription.building, i_success_housingRoomDescription.termEffective)
         assertNotNull existingAvailRoom.guid
@@ -498,6 +503,22 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'not.found.message'
         }
+    }
+
+    @Test
+    void testBuildingataLink(){
+        String buildingId = HousingRoomDescriptionReadOnly.findByRoomType('C')?.buildingGUID
+        params.put('building.id',buildingId)
+        List<AvailableRoom> availableRooms= roomCompositeService.list(params)
+        availableRooms.each{
+            availableRoom->
+            assertEquals availableRoom?.buildingGUID,buildingId
+        }
+
+        params.put('building.id',buildingId.substring(4))
+        availableRooms = roomCompositeService.list(params)
+        assertEquals availableRooms?.size(),0
+
     }
 
 

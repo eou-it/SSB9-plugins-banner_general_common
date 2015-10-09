@@ -76,7 +76,7 @@ class RoomCompositeService extends LdmService {
             } else {
                 roomTypes = getHEDMRoomTypes()
             }
-            entities = fetchAllActiveRoomsByRoomTypes(roomTypes, filterData.pagingAndSortParams)
+            entities = fetchAllActiveRoomsByRoomTypes(roomTypes, params,filterData.pagingAndSortParams)
         }
         return getAvailableRooms(entities)
     }
@@ -95,7 +95,7 @@ class RoomCompositeService extends LdmService {
             } else {
                 roomTypes = getHEDMRoomTypes()
             }
-            return fetchAllActiveRoomsByRoomTypes(roomTypes, null, true)
+            return fetchAllActiveRoomsByRoomTypes(roomTypes,params, null, true)
         }
     }
 
@@ -361,7 +361,7 @@ class RoomCompositeService extends LdmService {
     }
 
 
-    private def fetchAllActiveRoomsByRoomTypes(def roomTypes, def pagingAndSortParams, boolean count = false) {
+    private def fetchAllActiveRoomsByRoomTypes(def roomTypes, def queryParams,def pagingAndSortParams, boolean count = false) {
         log.trace "fetchAllActiveRoomsByRoomTypes:Begin"
         def result
 
@@ -370,6 +370,12 @@ class RoomCompositeService extends LdmService {
 
         params.put("inactiveIndicator", "Y")
         //criteria.add([key: "inactiveIndicator", binding: "roomStatusInactiveIndicator", operator: Operators.NOT_EQUALS_IGNORE_CASE])
+
+        //Adding the criteria for data links for building
+        if(queryParams?.containsKey('building.id')){
+            criteria.add([key: 'buildingId', binding: 'buildingGUID', operator: Operators.EQUALS_IGNORE_CASE])
+            params.put('buildingId',queryParams.get('building.id'))
+        }
 
         // TODO: Not sure why IN operator of DynamicFinder requires list in this format
         def roomTypeObjects = []
