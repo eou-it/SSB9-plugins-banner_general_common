@@ -62,7 +62,7 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
         destinationLink(nullable: true)
         destinationLabel(nullable: true)
         expirationPolicy(nullable: false)
-        duration(nullable: true)
+        duration(nullable: true, min: 0)
         durationUnit(nullable: false)
         expirationDateTime(nullable: true)
         push(nullable: false)

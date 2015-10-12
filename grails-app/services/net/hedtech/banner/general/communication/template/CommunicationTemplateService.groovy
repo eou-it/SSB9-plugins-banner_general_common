@@ -88,7 +88,7 @@ class CommunicationTemplateService extends ServiceBase {
     protected void validatePublished( CommunicationTemplate template ) {
     }
 
-    private void stampAndValidate( CommunicationTemplate template ) {
+    private void stampAndValidate( template ) {
         stamp( template )
         validateTemplate( template )
 
@@ -101,7 +101,7 @@ class CommunicationTemplateService extends ServiceBase {
         }
     }
 
-    private void stamp( CommunicationTemplate template ) {
+    private void stamp( template ) {
         template.validFrom = template.validFrom ?: new Date()
     }
 

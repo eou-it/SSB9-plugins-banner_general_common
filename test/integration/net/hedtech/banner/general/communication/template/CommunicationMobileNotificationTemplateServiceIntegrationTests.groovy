@@ -85,6 +85,40 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertEquals( "Updated description", template.description )
     }
 
+    @Test
+    void testDurationCannotBeNull() {
+        CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
+                name: "testUpdateTemplate",
+                validFrom: new Date(),
+                validTo: null,
+                folder: defaultFolder,
+                expirationPolicy: CommunicationMobileNotificationExpirationPolicy.DURATION,
+                durationUnit: CommunicationDurationUnit.MINUTE
+        )
+
+        template.duration = -1
+        try {
+            template = (CommunicationMobileNotificationTemplate) communicationMobileNotificationTemplateService.create([domainModel: template])
+            fail( "Expected application exception from validate exception on creation." )
+        } catch (ApplicationException ae ) {
+            assertEquals( "ValidationException", ae.wrappedException.getClass().simpleName )
+        }
+
+        template.duration = 1
+        template = (CommunicationMobileNotificationTemplate) communicationMobileNotificationTemplateService.create([domainModel: template])
+        assertNotNull template.id
+
+        template.duration = -1
+        try {
+            template = (CommunicationMobileNotificationTemplate) communicationMobileNotificationTemplateService.update([domainModel: template])
+            fail( "Expected application exception from validate exception on update." )
+        } catch (ApplicationException ae) {
+            assertEquals( "ValidationException", ae.wrappedException.getClass().simpleName )
+        }
+
+        template.duration = 2
+        communicationMobileNotificationTemplateService.update([domainModel: template])
+    }
 
     @Test
     void testNoExpirationPublish() {
