@@ -21,7 +21,6 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
         query = """ FROM DirectDepositAccount a WHERE a.pidm = :pidm """),
     @NamedQuery(name = "DirectDepositAccount.fetchActiveApAccountsByPidm",
         query = """ FROM DirectDepositAccount a
-               LEFT JOIN a.bankRoutingInfo
                    WHERE a.pidm = :pidm
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
@@ -115,18 +114,11 @@ class DirectDepositAccount implements Serializable {
     String bankAccountNum
 
     /**
-     * BANK ROUTING NO: The bank routing number of the recipients bank.
-     */
-    @Column(name = "GXRDIRD_BANK_ROUT_NUM")
-    String bankRoutingNum
-
-    /**
      * BANK ROUTING INFO JOIN: The bank routing number and bank name of the recipients bank via join to GXVDIRD.
      */
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM",referencedColumnName="GXVDIRD_CODE_BANK_ROUT_NUM",
-            insertable =  false, updatable = false)
-    private BankRoutingInfo bankRoutingInfo;
+    @JoinColumn(name="GXRDIRD_BANK_ROUT_NUM",referencedColumnName="GXVDIRD_CODE_BANK_ROUT_NUM")
+    BankRoutingInfo bankRoutingInfo;
 
     /**
      * AMOUNT: The amount of the direct deposit.
@@ -202,7 +194,6 @@ class DirectDepositAccount implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         bankAccountNum(nullable: true, maxSize: 34)
-        bankRoutingNum(nullable: false, maxSize: 11)
         amount(nullable: true, scale: 2)
         percent(nullable: true, scale: 2)
         accountType(nullable: true, maxSize: 1)

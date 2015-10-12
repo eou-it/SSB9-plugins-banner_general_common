@@ -3,12 +3,11 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
 
-import grails.validation.ValidationException
-import groovy.sql.Sql
 import net.hedtech.banner.general.overall.DirectDepositAccountService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
@@ -40,7 +39,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         // Assert domain values
         assertNotNull directDepositAccount
         assertNotNull directDepositAccount.id
-        assertEquals 3, directDepositAccount.priority
+        assertEquals 16, directDepositAccount.priority
         assertEquals "36948575", directDepositAccount.bankAccountNum
         assertEquals "C", directDepositAccount.accountType
         assertEquals "I", directDepositAccount.apIndicator
@@ -55,22 +54,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         directDepositAccount = directDepositAccount.get(id)
         assertNotNull directDepositAccount
     }
-    
-    @Test
-    void testCreateDuplicateAccount() {
-        try {
-            def directDepositAccount1 = newDirectDepositAccount()
-            directDepositAccount1 = directDepositAccountService.create([domainModel: directDepositAccount1])
-            
-            def directDepositAccount2 = newDirectDepositAccount()
-            directDepositAccount2 = directDepositAccountService.create([domainModel: directDepositAccount2])
-            
-        }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "recordAlreadyExists"
-        }
-    }
-    
+
     @Test
     void testGetActiveApAccountsWhereOneAccountExists() {
         def activeAccounts = directDepositAccountService.getActiveApAccounts(38010) // One account
@@ -79,8 +63,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull activeAccounts
         assertEquals 1, activeAccounts.size()
 
-        def userAccountInfoSet = activeAccounts[0]
-        def userAccount = userAccountInfoSet[0]
+        def userAccount = activeAccounts[0]
 
         assertNotNull userAccount.id
         assertEquals "9876543", userAccount.bankAccountNum
@@ -101,9 +84,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertEquals 2, activeAccounts.size()
 
         // First account
-        activeAccounts = activeAccounts.sort{it[0].id}
-        def userAccountInfoSet = activeAccounts[0]
-        def userAccount = userAccountInfoSet[0] // DirectDepositAccount element
+        activeAccounts = activeAccounts.sort{it.id}
+        def userAccount = activeAccounts[0]
 
         assertNotNull userAccount.id
         assertEquals "9876543", userAccount.bankAccountNum
@@ -115,8 +97,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull userAccount.lastModified
 
         // Second account
-        userAccountInfoSet = activeAccounts[1]
-        userAccount = userAccountInfoSet[0] // DirectDepositAccount element
+        userAccount = activeAccounts[1]
 
         assertNotNull userAccount.id
         assertEquals "38167543", userAccount.bankAccountNum
@@ -136,30 +117,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull activeAccounts
         assertEquals 0, activeAccounts.size()
     }
-    
-    @Test
-    void testRoutingNumberValidation() {
-        def routingNumber
-        try {
-            directDepositAccountService.validateRoutingNumber("103448999");
-            fail("I should have received an error but it passed; @@r1:invalidRoutingNum@@ ")
-        }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "invalidRoutingNum"
-        }
-    }
 
-    @Test
-    void testRoutingNumberFormatValidation() {
-        try {
-            directDepositAccountService.validateRoutingNumFormat("fail1234abc");
-            fail("I should have received an error but it passed; @@r1:invalidRoutingNumFmt@@ ")
-        }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "invalidRoutingNumFmt"
-        }
-    }
-    
     @Test
     void testAccountNumberFormatValidation() {
         try {
@@ -172,6 +130,10 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
 
     private def newDirectDepositAccount() {
+        def bankRoutingInfo = new BankRoutingInfo()
+
+        bankRoutingInfo.bankRoutingNum = 234798944
+
         def domain = new DirectDepositAccount(
             pidm: 37859, //49758,
             status: "P",
@@ -182,7 +144,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 //            lastModified: $lastModified,
 //            lastModifiedBy: $lastModifiedBy,
             bankAccountNum: 36948575,
-            bankRoutingNum: 234798944,
+            bankRoutingInfo: bankRoutingInfo,
             amount: null,
             percent: 11.0,
             accountType: "C",
