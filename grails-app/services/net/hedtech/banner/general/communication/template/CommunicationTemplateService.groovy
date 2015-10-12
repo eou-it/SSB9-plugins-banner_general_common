@@ -40,7 +40,7 @@ class CommunicationTemplateService extends ServiceBase {
             throw new ApplicationException(CommunicationTemplate, "@@r1:operation.not.authorized@@")
         }
 
-        stampAndValidate( template )
+        stampAndValidate(template)
     }
 
     /**
@@ -117,7 +117,7 @@ class CommunicationTemplateService extends ServiceBase {
         }
 
         if (template.validTo != null && (template.validTo instanceof Date && template.validTo < template.validFrom)) {
-            throw new ApplicationException( CommunicationEmailTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
+            throw new ApplicationException( CommunicationTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
         }
 
         // TODO: Throw more specific validation messages for generic cannot be published; currently recycled message from communication template merge service.

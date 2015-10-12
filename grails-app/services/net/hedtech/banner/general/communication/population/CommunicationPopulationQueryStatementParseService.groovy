@@ -21,14 +21,16 @@ import java.sql.SQLException
 class CommunicationPopulationQueryStatementParseService {
 
     def sessionFactory
-    def sql
 
 
     def CommunicationPopulationQueryParseResult parse(String statement, Boolean multiSelectColumnAllowed=true) {
-        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def conn = sessionFactory.getCurrentSession().connection()
+        def sql = new Sql(conn)
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
 
         if (statement == null || statement == "") {
+            sql?.close()
+            conn?.close()
             return
         }
 
@@ -53,12 +55,11 @@ class CommunicationPopulationQueryStatementParseService {
                 populationQueryParseResult.cardinality = cardinality
             }
         }
-        catch (SQLException ae) {
+        catch (SQLException sqle) {
             populationQueryParseResult.status = 'N'
-            populationQueryParseResult.message = ae.message
-
-            log.debug "SqlException in parse ${ae}"
-            log.debug ae.stackTrace
+            populationQueryParseResult.message = sqle.message
+            log.debug "SqlException in parse ${sqle}"
+            log.debug sqle.stackTrace
             //throw ae
         }
         catch (Exception ae) {
@@ -66,11 +67,14 @@ class CommunicationPopulationQueryStatementParseService {
             populationQueryParseResult.message = ae.message
             log.debug "Exception in parse ${ae}"
             log.debug ae.stackTrace
-            //throw ae
+            throw ae
         } finally {
-            sql.close()
-            return populationQueryParseResult
+            //close the sql and the connection as it was for just this parse
+            sql?.close()
+            conn?.close()
         }
+
+        return populationQueryParseResult
     }
 
 }
