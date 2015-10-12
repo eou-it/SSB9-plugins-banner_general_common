@@ -78,6 +78,9 @@ class RoomCompositeService extends LdmService {
             }
             entities = fetchAllActiveRoomsByRoomTypes(roomTypes, params,filterData.pagingAndSortParams)
         }
+        if(entities.size()==0 && params.containsKey('building.id')){
+            throw new ApplicationException('rooms.building',new NotFoundException())
+        }
         return getAvailableRooms(entities)
     }
 

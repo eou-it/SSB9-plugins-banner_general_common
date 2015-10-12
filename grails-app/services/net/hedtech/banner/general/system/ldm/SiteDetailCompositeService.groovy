@@ -48,6 +48,9 @@ class SiteDetailCompositeService {
         }
 
         Campus campus = Campus.get(globalUniqueIdentifier.domainId)
+        if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
+            campus.setDescription(campus?.getCode())
+        }
         if (!campus) {
             throw new ApplicationException("site", new NotFoundException())
         }
@@ -83,6 +86,9 @@ class SiteDetailCompositeService {
 
         campuses.each { campus ->
             buildings = buildingCompositeService.fetchByCampusCode(campus.code)
+            if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
+                campus.setDescription(campus?.getCode())
+            }
             sites << new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
          }
 
