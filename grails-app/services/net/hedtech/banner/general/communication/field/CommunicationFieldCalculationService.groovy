@@ -119,7 +119,6 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 Connection conn = (Connection) sessionFactory.getCurrentSession().connection()
                 asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
-                CommunicationCommonUtility.setLocaleInDatabase(sql)
                 List<GroovyRowResult> resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
                 resultSet.each { row ->
                     row.each { column ->
