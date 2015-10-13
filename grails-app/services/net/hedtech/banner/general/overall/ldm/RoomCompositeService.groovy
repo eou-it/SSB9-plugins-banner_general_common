@@ -199,10 +199,11 @@ class RoomCompositeService extends LdmService {
 
 
     private void validateOccupancies(Map params) {
+        String roomLayoutType = ("v4".equals(LdmService.getAcceptVersion(VERSIONS)))? params.roomTypes[0]?.type : params.occupancies[0]?.roomLayoutType
         if (!params.occupancies) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.occupancies", []))
         }
-        if (!params.occupancies[0]?.roomLayoutType) {
+        if (!roomLayoutType) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
         }
         if (!params.occupancies[0]?.maxOccupancy) {
@@ -225,7 +226,7 @@ class RoomCompositeService extends LdmService {
     private Map prepareSearchParams(Map params) {
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
-
+        String filterType = "v4".equals(LdmService.getAcceptVersion(VERSIONS))? params.roomTypes[0]?.type :params.occupancies[0]?.roomLayoutType
         inputData.put('startDate', convertString2Date(params.startDate?.trim()))
         inputData.put('endDate', convertString2Date(params.endDate?.trim()))
 
@@ -239,7 +240,7 @@ class RoomCompositeService extends LdmService {
 
         def roomTypes
         if (params.occupancies) {
-            roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(params.occupancies[0]?.roomLayoutType)]
+            roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterType)]
         } else {
             roomTypes = getHEDMRoomTypes()
         }
