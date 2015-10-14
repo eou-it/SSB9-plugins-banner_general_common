@@ -15,6 +15,7 @@ import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v2.Room
 import net.hedtech.banner.general.overall.ldm.v4.RoomV4
+import net.hedtech.banner.general.overall.ldm.v4.WeekDays
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
@@ -55,6 +56,9 @@ class RoomCompositeService extends LdmService {
         RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
         params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
+            if("v4".equals( LdmService.getAcceptVersion(VERSIONS))){
+                prepareQapiV4Request(params)
+            }
             // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
@@ -199,15 +203,21 @@ class RoomCompositeService extends LdmService {
 
 
     private void validateOccupancies(Map params) {
-        String roomLayoutType = ("v4".equals(LdmService.getAcceptVersion(VERSIONS)))? params.roomTypes[0]?.type : params.occupancies[0]?.roomLayoutType
         if (!params.occupancies) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.occupancies", []))
         }
-        if (!roomLayoutType) {
-            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
-        }
         if (!params.occupancies[0]?.maxOccupancy) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.maxOccupancy", []))
+        }
+        if ("v4".equals(LdmService.getAcceptVersion(VERSIONS))) {
+            if (!params.roomTypes[0]?.type) {
+                throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
+            }
+        }
+        else {
+            if (!params.occupancies[0]?.roomLayoutType) {
+                throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
+            }
         }
         try {
             Integer.valueOf(params.occupancies[0]?.maxOccupancy)
@@ -215,7 +225,6 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("invalid.maxOccupancy", []))
         }
     }
-
 
     private Map prepareParams(Map params) {
         validateSearchCriteria(params)
@@ -226,6 +235,7 @@ class RoomCompositeService extends LdmService {
     private Map prepareSearchParams(Map params) {
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
+        String contentTypeVersion = getContentTypeVersion(VERSIONS)
         String filterType = "v4".equals(LdmService.getAcceptVersion(VERSIONS))? params.roomTypes[0]?.type :params.occupancies[0]?.roomLayoutType
         inputData.put('startDate', convertString2Date(params.startDate?.trim()))
         inputData.put('endDate', convertString2Date(params.endDate?.trim()))
@@ -257,9 +267,9 @@ class RoomCompositeService extends LdmService {
             inputData.put('capacity', null)
         }
 
-        if (!"v1".equals(getContentTypeVersion(VERSIONS))) {
+        if (!"v1".equals(contentTypeVersion)) {
             if (params.containsKey('building')) {
-                String buildingGuid = params.building?.trim()?.toLowerCase()
+                String buildingGuid = "v4".equals(contentTypeVersion)? params.building?.id?.trim()?.toLowerCase() : params.building?.trim()?.toLowerCase()
                 if (buildingGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, buildingGuid)
                     if (globalUniqueIdentifier) {
@@ -272,7 +282,7 @@ class RoomCompositeService extends LdmService {
                 }
             }
             if (params.containsKey('site')) {
-                String siteGuid = params.site?.trim()?.toLowerCase()
+                String siteGuid = "v4".equals(contentTypeVersion)?  params.site?.id?.trim()?.toLowerCase() : params.site?.trim()?.toLowerCase()
                 if (siteGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, siteGuid)
                     if (globalUniqueIdentifier) {
@@ -495,7 +505,43 @@ class RoomCompositeService extends LdmService {
     }
 
     private String getSettingNameForRoom_type(String version){
-        return ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? SETTING_ROOM_LAYOUT_TYPE_V4 :SETTING_ROOM_LAYOUT_TYPE)
+        return ("v4".equals(version)? SETTING_ROOM_LAYOUT_TYPE_V4 :SETTING_ROOM_LAYOUT_TYPE)
+
+    }
+
+    private Map prepareQapiV4Request(Map request) {
+        if (request?.recurrence?.timePeriod) {
+            if (request?.recurrence?.timePeriod?.startOn) {
+                if (request?.recurrence?.timePeriod?.startOn?.contains('T')) {
+                    def datetime = request?.recurrence?.timePeriod?.startOn?.split('T')
+                    request.put("startDate", datetime[0])
+                    if (datetime[1].length() > 8) {
+                        request.put("startTime", datetime[1]?.substring(0, 8))
+                    }
+                }
+            }
+
+            if(request?.recurrence?.timePeriod?.endOn){
+                if(request?.recurrence?.timePeriod?.endOn?.contains('T')){
+                    def datetime = request?.recurrence?.timePeriod?.endOn?.split('T')
+                    request.put("endDate",datetime[0])
+                    if(datetime[1].length()>8){
+                        request.put("endTime",datetime[1].substring(0,8))
+                    }
+                }
+            }
+        }
+        request?.recurrence?.remove("timePeriod")
+
+        if(request?.recurrence?.repeatRule?.daysOfWeek){
+            def weekList=[]
+            request?.recurrence?.repeatRule?.daysOfWeek?.each{
+                weekList.add(WeekDays.("${it}").value)
+            }
+            request.recurrence?.byDay = weekList
+        }
+        request?.recurrence?.remove("repeatRule")
+        return request
     }
 
 }
