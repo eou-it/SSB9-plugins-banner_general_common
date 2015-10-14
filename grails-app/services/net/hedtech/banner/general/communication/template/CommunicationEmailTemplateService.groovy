@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 
@@ -13,10 +14,10 @@ class CommunicationEmailTemplateService extends CommunicationTemplateService {
     @Override
     protected void validatePublished( CommunicationTemplate template ) {
         if (!template.toList || template.toList.trim().size() == 0 ) {
-            throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationEmailTemplate.class, "toFieldRequiredToPublish" )
         }
         if (!template.subject || template.subject.size() == 0 ) {
-            throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationEmailTemplate.class, "subjectFieldRequiredToPublish" )
         }
 
         List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template)

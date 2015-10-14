@@ -132,7 +132,7 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertNotNull template.id
         assertFalse template.published
 
-        assertCannotPublish( template )
+        assertCannotPublish( template, "mobileHeadlineFieldRequiredToPublish" )
         template.mobileHeadline = "a mobile headline"
         template = communicationMobileNotificationTemplateService.publish( [domainModel: template] )
         assertTrue template.published
@@ -152,9 +152,9 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertNotNull template.id
         assertFalse template.published
 
-        assertCannotPublish( template )
+        assertCannotPublish( template, "mobileHeadlineFieldRequiredToPublish" )
         template.mobileHeadline = "a mobile headline"
-        assertCannotPublish( template )
+        assertCannotPublish( template, "expirationDateRequiredToPublish" )
 
         Date today = new Date()
         DatumDependentDuration period = new DatumDependentDuration(0, 0, 2, 0, 0, 0, 0)
@@ -177,9 +177,9 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertNotNull template.id
         assertFalse template.published
 
-        assertCannotPublish( template )
+        assertCannotPublish( template, "mobileHeadlineFieldRequiredToPublish" )
         template.mobileHeadline = "a mobile headline"
-        assertCannotPublish( template )
+        assertCannotPublish( template, "durationRequiredToPublish" )
 
         template.duration = 5
         template = communicationMobileNotificationTemplateService.publish( [domainModel: template] )
@@ -199,7 +199,7 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertNotNull template.id
         assertFalse template.published
 
-        assertCannotPublish( template )
+        assertCannotPublish( template, "mobileHeadlineFieldRequiredToPublish" )
         template.mobileHeadline = "a mobile headline"
         template.sticky = true
         assertCannotPublish( template, "expirationRequiredForSticky" )
@@ -211,7 +211,7 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
     }
 
 
-    private void assertCannotPublish( CommunicationTemplate template, String reason = "template.cannotBePublished" ) {
+    private void assertCannotPublish( CommunicationTemplate template, String reason ) {
         Boolean originalPublished = template.published
         try {
             communicationMobileNotificationTemplateService.publish( template )

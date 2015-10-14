@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 
@@ -14,31 +15,31 @@ class CommunicationMobileNotificationTemplateService extends CommunicationTempla
         CommunicationMobileNotificationTemplate mobileNotificationTemplate = (CommunicationMobileNotificationTemplate) template;
 
         if (isEmpty( mobileNotificationTemplate.mobileHeadline )) {
-            throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationMobileNotificationTemplate.class, "mobileHeadlineFieldRequiredToPublish" )
         }
 
         if (isEmpty( mobileNotificationTemplate.destinationLink ) && !isEmpty( mobileNotificationTemplate.destinationLabel )) {
-            throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationMobileNotificationTemplate.class, "destinationFieldsRequiredToPublish" )
         }
 
         if (!isEmpty( mobileNotificationTemplate.destinationLink ) && isEmpty( mobileNotificationTemplate.destinationLabel )) {
-            throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationMobileNotificationTemplate.class, "destinationFieldsRequiredToPublish" )
         }
 
         switch(mobileNotificationTemplate.expirationPolicy) {
             case CommunicationMobileNotificationExpirationPolicy.NO_EXPIRATION:
                 if (mobileNotificationTemplate.sticky) {
-                    throw new ApplicationException(CommunicationMobileNotificationTemplate, "@@r1:expirationRequiredForSticky@@" )
+                    throw CommunicationExceptionFactory.createApplicationException( CommunicationMobileNotificationTemplate.class, "expirationRequiredForSticky" )
                 }
                 break
             case CommunicationMobileNotificationExpirationPolicy.DURATION:
                 if (!mobileNotificationTemplate.duration) {
-                    throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+                    throw CommunicationExceptionFactory.createApplicationException( CommunicationMobileNotificationTemplate.class, "durationRequiredToPublish" )
                 }
                 break
             case CommunicationMobileNotificationExpirationPolicy.DATE_TIME:
                 if (!mobileNotificationTemplate.expirationDateTime) {
-                    throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+                    throw CommunicationExceptionFactory.createApplicationException( CommunicationMobileNotificationTemplate.class, "expirationDateRequiredToPublish" )
                 }
                 break
         }

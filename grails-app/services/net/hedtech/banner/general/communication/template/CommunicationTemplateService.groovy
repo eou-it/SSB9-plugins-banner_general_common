@@ -120,10 +120,9 @@ class CommunicationTemplateService extends ServiceBase {
             throw new ApplicationException( CommunicationTemplate, "@@r1:validToGreaterThanValidFromDate@@" );
         }
 
-        // TODO: Throw more specific validation messages for generic cannot be published; currently recycled message from communication template merge service.
         if (template.published) {
             if (!template.folder ) {
-                throw new ApplicationException(CommunicationTemplate, "@@r1:template.cannotBePublished@@")
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplate.class, "folderFieldRequiredToPublish" )
             }
 
             validatePublished( template );
