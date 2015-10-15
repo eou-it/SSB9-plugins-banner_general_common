@@ -5,10 +5,12 @@ package net.hedtech.banner.general.system.ldm
 
 import junit.framework.Assert
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -59,7 +61,11 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
      * Testcase for show method
      */
     @Test
-    void testGet() {
+    void testGetUptoV3() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+
         def paginationParams = [max: '20', offset: '0']
         List siteList = siteDetailCompositeService.list(paginationParams)
         assertNotNull siteList
@@ -73,6 +79,24 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         assertEquals siteList[0].metadata, site.metadata
         assertEquals siteList[0].buildings, site.buildings
         assertEquals siteList[0], site
+    }
+
+    /**
+     * Testcase for show method
+     */
+    @Test
+    void testGet() {
+        def paginationParams = [max: '20', offset: '0']
+        List siteList = siteDetailCompositeService.list(paginationParams)
+        assertNotNull siteList
+        assertTrue siteList.size() > 0
+        assertNotNull siteList[0].guid
+        def site = siteDetailCompositeService.get(siteList[0].guid)
+        assertNotNull site.toString()
+        assertEquals siteList[0].code, site.code
+        assertEquals siteList[0].description, site.description
+        assertEquals siteList[0].guid, site.guid
+        assertEquals siteList[0].buildings, site.buildings
     }
 
     /**
