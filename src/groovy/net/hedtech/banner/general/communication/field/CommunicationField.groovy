@@ -207,7 +207,6 @@ class CommunicationField implements Serializable {
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id', 'immutableId']
 
-
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
@@ -245,5 +244,7 @@ class CommunicationField implements Serializable {
         return (query != null)
     }
 
-
+    public boolean isPublished() {
+        return !CommunicationFieldStatus.DEVELOPMENT.equals( this.getStatus() )
+    }
 }

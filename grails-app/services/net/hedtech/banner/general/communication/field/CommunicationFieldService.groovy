@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.field
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
 
@@ -72,6 +73,10 @@ class CommunicationFieldService extends ServiceBase {
         if (CommunicationFieldStatus.set().every { it != communicationField.status }) {
             throw new ApplicationException( CommunicationField, "@@r1:invalidStatus@@" )
         }
+
+        if (communicationField.isPublished()) {
+            validatePublished( communicationField )
+        }
     }
 
 
@@ -127,10 +132,10 @@ class CommunicationFieldService extends ServiceBase {
         if (communicationField.status == null)
             throw new ApplicationException( CommunicationField, "@@r1:statusCannotBeNull@@" )
 
-        if (communicationField.status == CommunicationFieldStatus.PRODUCTION && !(communicationField.name != null && communicationField.folder != null && communicationField.formatString != null)) {
-            throw new ApplicationException( CommunicationFieldService, "@@r1:datafield.cannotUpdatePublished@@" )
+        if (communicationField.isPublished()) {
+            validatePublished( communicationField )
         }
-        }
+    }
 
 
     void validateFormatter( CommunicationField communicationField ) {
@@ -151,32 +156,59 @@ class CommunicationFieldService extends ServiceBase {
 
 
     def publishDataField( map ) {
+        if (!map || !map.id) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "idNotValid" )
+        }
 
-        if (map.id) {
-            def communicationField = CommunicationField.get( map.id )
-            /*
-            Attempt to extract the variables from the format string, which functions as a StringTemplate iteself.
-            If this fails, the template is not parsable, it should throw an exception
-            */
-            communicationFieldCalculationService.extractVariables( communicationField.formatString )
-
-            if (communicationField.status == CommunicationFieldStatus.PRODUCTION)
-                return
-            if (communicationField.name != null && communicationField.folder != null && communicationField.formatString != null) {
-                if (communicationField.ruleContent != null) {
-                    //check for sql injection and if it returns true then throw invalid exception
-                    def parseResult = communicationPopulationQueryStatementParseService.parse( communicationField.ruleContent )
-                    if (parseResult?.status != "Y") {
-                        throw new ApplicationException( CommunicationField, "@@r1:cannotPublishSqlStatementInvalid@@" )
-                    }
-                }
-                communicationField.status = CommunicationFieldStatus.PRODUCTION
-                update( communicationField )
-            } else
-                throw new ApplicationException( CommunicationField, "@@r1:datafield.cannotBePublished@@" )
-        } else
-            throw new ApplicationException( CommunicationField, "@@r1:idNotValid@@" )
+        def theField = CommunicationField.get( map.id )
+        theField.status = CommunicationFieldStatus.PRODUCTION
+        this.update( theField )
     }
+
+
+    private void validatePublished( CommunicationField field ) {
+        assert( field )
+
+        if (isEmpty( field.name )) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "nameRequiredForPublished" )
+        }
+
+        if (!field.folder) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "folderRequiredForPublished" )
+        }
+
+        if (isEmpty( field.formatString )) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "formatRequiredForPublished" )
+        }
+
+        if (!isEmpty( field.ruleContent )) {
+            int whereIndex = field.ruleContent.toLowerCase().indexOf( "where" )
+
+            if (whereIndex < 0) {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "sqlStatementWhereRequiredForPublished" )
+            }
+
+            if (field.ruleContent.indexOf( ":pidm", whereIndex + "where".length() ) < 0) {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "sqlStatementMustReferPidmForPublished" )
+            }
+
+            def parseResult = communicationPopulationQueryStatementParseService.parse( field.ruleContent )
+            if (!parseResult) {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "cannotPublishSqlStatementInvalid" )
+            }
+
+            if (parseResult.status != "Y") {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationField.class, "cannotPublishSqlStatementInvalid" )
+            }
+        }
+
+        /*
+        Attempt to extract the variables from the format string, which functions as a StringTemplate iteself.
+        If this fails, the template is not parsable, it should throw an exception
+        */
+        communicationFieldCalculationService.extractVariables( field.formatString )
+    }
+
 
     def preDelete(domainModelOrMap) {
 
@@ -191,5 +223,10 @@ class CommunicationFieldService extends ServiceBase {
         if (!CommunicationCommonUtility.userCanUpdateDelete(oldfield.lastModifiedBy)) {
             throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
         }
+    }
+
+
+    private boolean isEmpty( String s ) {
+        return (!s || s.trim().size() == 0)
     }
 }

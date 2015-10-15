@@ -232,7 +232,7 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
                 ruleUri: "TTTTTTTTTT",
                 status: CommunicationFieldStatus.DEVELOPMENT,
                 statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
-                ruleContent: "Select max(stvterm_code) from stvterm"
+                ruleContent: "Select max(stvterm_code) from stvterm where :pidm = :pidm"
         )
 
         return communicationField

@@ -14,7 +14,6 @@ import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.transaction.annotation.Propagation
@@ -94,7 +93,9 @@ class CommunicationFieldCalculationService extends ServiceBase {
     public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
         boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
-        sqlParams << ['pidm': pidm]
+        if (sqlStatement?.contains(":pidm")) {
+            sqlParams << ['pidm': pidm]
+        }
         calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
 
@@ -113,13 +114,18 @@ class CommunicationFieldCalculationService extends ServiceBase {
         def attributeMap = [:]
         def Sql sql
         try {
-            if (sqlStatement != null && sqlStatement.size() > 0) {
+            if (sqlStatement && sqlStatement.trim().size() > 0) {
                 // ToDo: decide if the upper bound should be configurable
                 int maxRows = (!returnsArrayArguments) ? 1 : 50
                 Connection conn = (Connection) sessionFactory.getCurrentSession().connection()
                 asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
-                List<GroovyRowResult> resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
+                List<GroovyRowResult> resultSet
+                if (parameters && parameters.size() > 0) {
+                    resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
+                } else {
+                    resultSet = sql.rows( sqlStatement, 0, maxRows )
+                }
                 resultSet.each { row ->
                     row.each { column ->
                         String attributeName = column.getKey().toString().toLowerCase()
@@ -138,6 +144,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
             return merge( formatString ?: "", attributeMap )
         } catch (SQLException e) {
+            // TODO: Can we give more specific error if the error is an invalid column type?
             throw new ApplicationException( CommunicationFieldCalculationService, e.message )
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
