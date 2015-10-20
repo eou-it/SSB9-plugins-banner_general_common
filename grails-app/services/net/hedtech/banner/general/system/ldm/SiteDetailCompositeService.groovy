@@ -1,24 +1,22 @@
 /** *******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm
-
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
-import net.hedtech.banner.general.system.Site
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
-import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.query.QueryBuilder
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
+import org.hibernate.Hibernate
+import org.hibernate.criterion.Projections
+import org.hibernate.type.Type
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-
 /**
  * RESTful APIs for Site LDM (/base/domain/site/v1/site.json-schema)
  */
@@ -28,8 +26,7 @@ class SiteDetailCompositeService {
     public static final String LDM_NAME = "campuses"
     private static final String CODE ="code"
     private static final String DESCRIPTION ="description"
-    private static final String QUERY = """from Campus a"""
-    private static final String ENTITY ="a"
+    private static final List<String> VERSIONS = ["v1","v4"]
 
 
     def campusService
@@ -49,6 +46,9 @@ class SiteDetailCompositeService {
         }
 
         Campus campus = Campus.get(globalUniqueIdentifier.domainId)
+        if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
+            campus.setDescription(campus?.getCode())
+        }
         if (!campus) {
             throw new ApplicationException("site", new NotFoundException())
         }
@@ -65,25 +65,40 @@ class SiteDetailCompositeService {
     def list(Map map) {
         def sites = []
         def buildings = []
-
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-
-        RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List allowedSortFields = ['abbreviation', 'title']
+        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.validateSortField(map.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(map.order)
         map.sort = LdmService.fetchBannerDomainPropertyForLdmField(map.sort)
+        map.order= map.order?map?.order:'ASC'
         def filters = QueryBuilder.createFilters(map)
         def allowedSearchFields = [CODE, DESCRIPTION]
         def allowedOperators = [Operators.EQUALS, Operators.EQUALS_IGNORE_CASE, Operators.CONTAINS, Operators.STARTS_WITH]
         RestfulApiValidationUtility.validateCriteria(filters, allowedSearchFields, allowedOperators)
         RestfulApiValidationUtility.validateSortField(map.sort,allowedSearchFields)
         def filterMap = QueryBuilder.getFilterData(map)
-        DynamicFinder dynamicFinder = new DynamicFinder(Campus.class, QUERY, ENTITY)
-        List<Campus> campuses = dynamicFinder.find([params: filterMap.params, criteria: filterMap.criteria], filterMap.pagingAndSortParams)
+        def criteria = Campus.createCriteria()
+        filterMap?.pagingAndSortParams?.offset = filterMap?.pagingAndSortParams?.offset?filterMap?.pagingAndSortParams?.offset:0
+        def details = criteria.list(max: filterMap?.pagingAndSortParams?.max, offset: filterMap?.pagingAndSortParams?.offset) {
+            projections{
+                property('code')
+                addProjectionToList(Projections.sqlProjection("nvl(STVCAMP_DESC,STVCAMP_CODE) as description", ['description'] as String[], [Hibernate.STRING] as Type[]), 'description')
+            }
+            if(map?.sort){
+                if(map?.sort?.equalsIgnoreCase('description') && ("v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)))){
+                    order('description',map?.order)
+                }else{
+                    order(map?.sort,map?.order)
+                }
+            }
+        }
 
-        campuses.each { campus ->
+        details.each { detail ->
+            Campus campus = Campus.findByCode(detail[0])
             buildings = buildingCompositeService.fetchByCampusCode(campus.code)
+            if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
+                campus.setDescription(campus?.getCode())
+            }
             sites << new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
          }
 
@@ -96,7 +111,7 @@ class SiteDetailCompositeService {
      * @return
      */
     Long count() {
-        return campusService.count()
+        return Campus.count()
     }
 
 

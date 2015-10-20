@@ -3,7 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 import net.hedtech.banner.general.system.*
-import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*

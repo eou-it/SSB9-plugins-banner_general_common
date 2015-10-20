@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.HousingRoomDescription
+import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
@@ -69,6 +70,9 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListWithFilter() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         def params = ['filter[0][value]': 'Classroom', 'filter[0][field]': 'roomLayoutType', 'filter[0][operator]': 'equals']
         List rooms = roomCompositeService.list(params)
         assertNotNull rooms
@@ -122,6 +126,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testGet() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
+
         assertNotNull i_success_housingRoomDescription
         AvailableRoom existingAvailRoom = roomCompositeService.fetchByRoomBuildingAndTerm(i_success_housingRoomDescription.roomNumber, i_success_housingRoomDescription.building, i_success_housingRoomDescription.termEffective)
         assertNotNull existingAvailRoom.guid
@@ -353,8 +361,23 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForMissingOccupancies() {
+    void testListForMissingOccupanciesV2Header() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
         Map params = getParamsForRoomQuery()
+        params.remove('occupancies')
+        try {
+            roomCompositeService.list(params)
+            fail("This should have failed as the occupancies are missing")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "missing.occupancies"
+        }
+    }
+
+    @Test
+    void testListForMissingOccupancies() {
+        Map params = getParamsForRoomQueryHeaderV4()
         params.remove('occupancies')
         try {
             roomCompositeService.list(params)
@@ -366,9 +389,24 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForMissingRoomLayoutType() {
+    void testListForMissingRoomLayoutTypeV2Header() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
         Map params = getParamsForRoomQuery()
         params.occupancies[0]?.remove('roomLayoutType')
+        try {
+            roomCompositeService.list(params)
+            fail("This should have failed as the occupancy roomLayoutType is missing")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "missing.roomLayoutType"
+        }
+    }
+
+    @Test
+    void testListForMissingRoomLayoutType() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.roomTypes[0]?.remove('type')
         try {
             roomCompositeService.list(params)
             fail("This should have failed as the occupancy roomLayoutType is missing")
@@ -392,9 +430,12 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForInvalidMaxOccupancy() {
+    void testListForInvalidMaxOccupancyHeaderV2() {
         Map params = getParamsForRoomQuery()
         params.occupancies[0].maxOccupancy = 'abc'
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
         try {
             roomCompositeService.list(params)
             fail("This should have failed as the occupancy maxOccupancy must be an integer")
@@ -403,6 +444,17 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForInvalidMaxOccupancyHeader() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.occupancies[0].maxOccupancy = 'abc'
+        try {
+            roomCompositeService.list(params)
+            fail("This should have failed as the occupancy maxOccupancy must be an integer")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "invalid.maxOccupancy"
+        }
+    }
 
     @Test
     void testQApiRoomAvailabilityV1ForValidParams() {
@@ -433,22 +485,33 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testQApiRoomAvailabilityV1_GenericMediaTypes() {
+    void testQApiRoomAvailability_GenericMediaTypes_HeaderV2() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/json")
-        request.addHeader("Content-Type", "application/json")
-
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
+        request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
         Map params = getParamsForRoomQueryWithBuildingAndSite()
-
         List<AvailableRoom> availableRooms = roomCompositeService.list(params)
         assertNotNull availableRooms
         assertFalse availableRooms.isEmpty()
         assertTrue availableRooms.size() > 1
     }
 
+    @Test
+    void testQApiRoomAvailability_GenericMediaTypes() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        Map params = getParamsForRoomQueryWithBuildingAndSiteV4()
+        List<AvailableRoom> availableRooms = roomCompositeService.list(params)
+        assertNotNull availableRooms
+        assertFalse availableRooms.isEmpty()
+        assertTrue availableRooms.size() > 1
+        assertNotNull availableRooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
+        assertNotNull availableRooms.find {it.roomDetails["type"] = 'classroom' }
+    }
+
 
     @Test
-    void testListForBuildingAndSiteNULL() {
+    void testListForBuildingAndSiteNULL_HeaderV2() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -463,9 +526,20 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue availableRooms.isEmpty()
     }
 
+    @Test
+    void testListForBuildingAndSiteNULL() {
+        Map params = getParamsForRoomQueryWithBuildingAndSiteV4()
+        params.put('building', null)
+        params.put('site', null)
+
+        List<AvailableRoom> availableRooms = roomCompositeService.list(params)
+        assertNotNull availableRooms
+        assertTrue availableRooms.isEmpty()
+    }
+
 
     @Test
-    void testListForBuildingNotFound() {
+    void testListForBuildingNotFoundHeaderV2() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -481,9 +555,22 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForBuildingNotFound() {
+        Map params = getParamsForRoomQueryWithBuildingAndSiteV4()
+        params.building = ["id": "X"]
+
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as Building GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'not.found.message'
+        }
+    }
+
 
     @Test
-    void testListForSiteNotFound() {
+    void testListForSiteNotFoundHeaderV2() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -496,6 +583,34 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             fail('This should have failed as Site GUID is invalid')
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'not.found.message'
+        }
+    }
+
+    @Test
+    void testListForSiteNotFound() {
+        Map params = getParamsForRoomQueryWithBuildingAndSiteV4()
+        params.site = ["id": "X"]
+
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as Site GUID is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'not.found.message'
+        }
+    }
+
+    @Test
+    void testBuildingataLink(){
+        String buildingId = HousingRoomDescriptionReadOnly.findByRoomType('C')?.buildingGUID
+        params.put('building.id',buildingId)
+        List<AvailableRoom> availableRooms= roomCompositeService.list(params)
+        availableRooms.each{
+            availableRoom->
+            assertEquals availableRoom?.buildingGUID,buildingId
+        }
+        params.put('building.id',buildingId.substring(4))
+        shouldFail(ApplicationException) {
+            roomCompositeService.list(params)
         }
     }
 
@@ -518,12 +633,60 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
     }
 
+    private Map getParamsForRoomQueryHeaderV4() {
+        return [
+                max        : "20",
+                action     : [POST: "list"],
+                occupancies: [[
+                                      "maxOccupancy": 25,
+                                      "type": "seminar"
+                              ]],
+                roomTypes : [[
+                               type : "classroom"
+                             ]],
+                recurrence :[
+                        repeatRule : [
+                                    daysOfWeek: ["sunday","monday","tuesday"]
+                                    ],
+                        timePeriod : [
+                                              startOn : "2015-09-14T13:30:00+00:00",
+                                              endOn   : "2015-11-09T15:30:00+00:00"
+
+                                     ]
+                ]
+
+
+
+
+        ]
+    }
+
 
     private Map getParamsForRoomQueryWithBuildingAndSite() {
         Map params = getParamsForRoomQuery()
         params.put('building', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME, ibuilding.code)[0].guid)
         params.put('site', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid)
         return params
+    }
+
+    private Map getParamsForRoomQueryWithBuildingAndSiteV4() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.building = ["id": GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME, ibuilding.code)[0].guid]
+        params.site = ["id": GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid]
+        return params
+    }
+
+    @Test
+    void testListWithFilterV4Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v4+json")
+        def params = ['filter[0][value]': 'classroom', 'filter[0][field]': 'type', 'filter[0][operator]': 'equals']
+        List rooms = roomCompositeService.list(params)
+        assertNotNull rooms
+        assertFalse rooms.isEmpty()
+        assertNotNull rooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
+        assertNotNull rooms.find {it.roomDetails["type"] = 'classroom' }
     }
 
 }

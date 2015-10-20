@@ -281,6 +281,17 @@ class SqlProcess implements Serializable {
     public static readonlyProperties = ['sequenceNumber', 'entriesForSqlProcess', 'entriesForSql']
 
 
+    public static List fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode(String entriesForSqlProcesssCode, String entriesForSqlCode) {
+        return SqlProcess.withSession { session ->
+            session.getNamedQuery(
+                    'SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode')
+                    .setString('entriesForSqlProcesssCode', entriesForSqlProcesssCode)
+                    .setString('entriesForSqlCode', entriesForSqlCode)
+                    .list()
+        }
+    }
+
+
     static String fetchActiveValidatedPriorityProcessSql( sql, sqlProcess) {
         String [] parsedSql = SqlProcess.withSession {session ->
             session.getNamedQuery(

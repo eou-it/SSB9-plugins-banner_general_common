@@ -1,16 +1,13 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
-
-import grails.util.GrailsNameUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
-import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
 import net.hedtech.banner.general.system.ldm.v1.Metadata
@@ -26,23 +23,22 @@ class BuildingCompositeService {
     public static final String LDM_NAME = 'buildings'
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
-
-
+    private static final List<String> VERSIONS = ["v1", "v2","v3","v4"]
     private HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: 'building.code',
-            title       : 'building.description'
+            title       : 'building.description',
+            code        : 'building.code'
     ]
-
 
     List<BuildingDetail> list( Map params ) {
         List buildings = []
-        List allowedSortFields = ['abbreviation', 'title']
+        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
         RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(params.order)
         params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
+        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions=fetchBuildingDetails(params)
 
-        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list( params ) as List
         housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey( SiteDetailCompositeService.LDM_NAME,housingLocationBuildingDescription?.campus?.code)?.guid )
             List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription?.building)
@@ -51,9 +47,29 @@ class BuildingCompositeService {
         return buildings
     }
 
+    private def fetchBuildingDetails(Map params,boolean count=false) {
+        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions
+        SiteDetail detail = null
+        if(params.get('site.id')){
+            detail = siteDetailCompositeService.get(params.get('site.id'))
+        }
+        if(count){
+            if(params.get('site.id')){
+                return HousingLocationBuildingDescription.fetchAllByCampuses([detail?.code]).size()
+        }
+            return housingLocationBuildingDescriptionService.count()
+        }
+        if (params.get('site.id')) {
+            housingLocationBuildingDescriptions = HousingLocationBuildingDescription.fetchAllByCampuses([detail?.code]) as List
+        } else {
+            housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list(params) as List
+        }
+        housingLocationBuildingDescriptions
+    }
 
-    Long count() {
-        return housingLocationBuildingDescriptionService.count()
+
+    Long count(params) {
+        return fetchBuildingDetails(params,true)
     }
 
 
@@ -127,7 +143,6 @@ class BuildingCompositeService {
 
     private List<AvailableRoom> getRooms(def building){
         List rooms = []
-        net.hedtech.banner.general.overall.ldm.v1.BuildingDetail buildingDetail
         if (null == building) {
             return null
         }

@@ -36,27 +36,42 @@ class AvailableRoom {
         this.metadata = metadata
     }
 
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof AvailableRoom)) return false
 
-    boolean equals( o ) {
-        if (this.is( o )) return true
-        if (getClass() != o.class) return false
-        AvailableRoom room = (AvailableRoom) o
-        if (guid != room.guid) return false
-        if (availableRoomDescription != room.availableRoomDescription) return false
-        if (buildingDetail != room.buildingDetail) return false
-        if (occupancies != room.occupancies) return false
-        if (metadata != room.metadata) return false
+        AvailableRoom that = (AvailableRoom) o
+
+        if (availableRoomDescription != that.availableRoomDescription) return false
+        if (buildingDetail != that.buildingDetail) return false
+        if (guid != that.guid) return false
+        if (metadata != that.metadata) return false
+        if (occupancies != that.occupancies) return false
+        if (type != that.type) return false
+
         return true
     }
 
-
-    public String toString() {
-        """Room[
-                    availableRoomDescription=$availableRoomDescription,
-                    building=$buildingDetail,
-                    occupancies=$occupancies,
-                    metadata=$metadata,
-                    guid=$guid]"""
+    int hashCode() {
+        int result
+        result = (availableRoomDescription != null ? availableRoomDescription.hashCode() : 0)
+        result = 31 * result + (buildingDetail != null ? buildingDetail.hashCode() : 0)
+        result = 31 * result + (occupancies != null ? occupancies.hashCode() : 0)
+        result = 31 * result + (guid != null ? guid.hashCode() : 0)
+        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
+        result = 31 * result + (type != null ? type.hashCode() : 0)
+        return result
     }
 
+    @Override
+    public String toString() {
+        return "AvailableRoom{" +
+                "availableRoomDescription=" + availableRoomDescription +
+                ", buildingDetail=" + buildingDetail +
+                ", occupancies=" + occupancies +
+                ", guid='" + guid + '\'' +
+                ", metadata=" + metadata +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

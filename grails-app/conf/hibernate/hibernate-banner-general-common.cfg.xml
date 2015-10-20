@@ -20,6 +20,11 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingDisplayOption"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourcePriority"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule"/>
+        <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingResult"/>
+        <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingPersonResult"/>
+        <mapping class="net.hedtech.banner.general.lettergeneration.PopulationSelectionBase"/>
+        <mapping class="net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract"/>
+        <mapping class="net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly"/>
         <mapping class="net.hedtech.banner.general.overall.AddressRolePrivileges"/>
         <mapping class="net.hedtech.banner.general.overall.CommonMatchingMatchEntryGlobalTemporary"/>
         <mapping class="net.hedtech.banner.general.overall.DirectoryAddress"/>

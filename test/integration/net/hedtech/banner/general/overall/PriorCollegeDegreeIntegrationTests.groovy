@@ -251,6 +251,18 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    void testFetchByPidmList() {
+        def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
+        priorCollegeDegree.save(failOnError: true, flush: true)
+
+        def priorCollegeDegreeList = PriorCollegeDegree.fetchByPidmList([priorCollegeDegree.pidm])
+
+        assertNotNull priorCollegeDegreeList
+        assertFalse priorCollegeDegreeList.isEmpty()
+        assertTrue priorCollegeDegreeList.contains(priorCollegeDegree)
+    }
+
+
     private def newValidForCreatePriorCollegeDegree() {
         def priorCollege = newValidForCreatePriorCollege()
         priorCollege.save(failOnError: true, flush: true)
