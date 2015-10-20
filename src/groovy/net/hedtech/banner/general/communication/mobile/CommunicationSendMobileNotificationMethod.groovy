@@ -46,7 +46,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (isEmpty(senderOrganization.mobileApplicationName)) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
                     "emptyMobileNotificationApplicationName",
                     senderOrganization.name
@@ -143,6 +143,19 @@ class CommunicationSendMobileNotificationMethod {
             }
         } catch (Throwable t) {
             log.error( 'Error trying to send mobile notification.', t );
+
+            if (t instanceof java.lang.IllegalStateException) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
+            }
+
+            if (t instanceof java.net.UnknownHostException) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_HOST.name())
+            }
+
+            if (t instanceof groovyx.net.http.HttpResponseException) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNAUTHORIZED.name())
+            }
+
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }

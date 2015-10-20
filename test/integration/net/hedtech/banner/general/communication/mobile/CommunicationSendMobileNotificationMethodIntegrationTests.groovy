@@ -4,6 +4,8 @@
 package net.hedtech.banner.general.communication.mobile
 
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
+import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.organization.*
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -58,6 +60,147 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
         //sendMethod.execute( message, testOrganization )
     }
+
+    @Test
+    public void testSendBadEndpoint() {
+        CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
+        message.mobileHeadline = "testSendBadEndpoint"
+        message.referenceId = UUID.randomUUID().toString()
+
+        message.externalUser = "cmobile"
+        message.push = true
+
+        CommunicationOrganization badOrganization = new CommunicationOrganization()
+        badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+        badOrganization.mobileEndPointUrl = ""
+        badOrganization.mobileApplicationName = "StudentSuccess"
+        badOrganization.clearMobileApplicationKey = "ss-key-value"
+        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
+
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(), e.type )
+        }
+
+        badOrganization.mobileEndPointUrl = "bogus"
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(), e.type )
+        }
+
+        badOrganization.mobileEndPointUrl = "https://mobiledev"
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected UNKNOWN_HOST." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.UNKNOWN_HOST.toString(), e.type )
+        }
+    }
+
+
+    @Test
+    public void testSendMissingExternalId() {
+        CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
+        message.mobileHeadline = "testSendMissingExternalId"
+        message.referenceId = UUID.randomUUID().toString()
+
+        message.externalUser = ""
+        message.push = true
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        try {
+            sendMethod.execute( message, testOrganization )
+            fail( "Expected EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(), e.type )
+        }
+    }
+
+
+    @Test
+    public void testSendBadApplicationName() {
+        CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
+        message.mobileHeadline = "testSendBadApplicationName"
+        message.referenceId = UUID.randomUUID().toString()
+
+        message.externalUser = "cmobile"
+        message.push = true
+
+        CommunicationOrganization badOrganization = new CommunicationOrganization()
+        badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+        badOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+        badOrganization.mobileApplicationName = "StudentSuccess"
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+
+        badOrganization.clearMobileApplicationKey = ""
+        badOrganization.encryptedMobileApplicationKey = ""
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(), e.type )
+        }
+
+        badOrganization.clearMobileApplicationKey = ""
+        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( badOrganization.clearMobileApplicationKey )
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(), e.type )
+        }
+
+        badOrganization.clearMobileApplicationKey = "bogus_bogus_bogus"
+        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( badOrganization.clearMobileApplicationKey )
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected UNAUTHORIZED." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.UNAUTHORIZED.toString(), e.type )
+        }
+    }
+
+
+    @Test
+    public void testSendBadApplicationKey() {
+        CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
+        message.mobileHeadline = "testSendBadApplicationKey"
+        message.referenceId = UUID.randomUUID().toString()
+
+        message.externalUser = "cmobile"
+        message.push = true
+
+        CommunicationOrganization badOrganization = new CommunicationOrganization()
+        badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+        badOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+        badOrganization.mobileApplicationName = ""
+        badOrganization.clearMobileApplicationKey = "ss-key-value"
+        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(), e.type )
+        }
+
+        badOrganization.mobileApplicationName = "bogus_bogus_bogus"
+        try {
+            sendMethod.execute( message, badOrganization )
+            fail( "Expected UNAUTHORIZED." )
+        } catch( CommunicationApplicationException e ) {
+            assertEquals( CommunicationErrorCode.UNAUTHORIZED.toString(), e.type )
+        }
+    }
+
 
     @Test
     public void testSendDuration() {
