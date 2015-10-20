@@ -29,7 +29,6 @@ class CommunicationSendMobileNotificationMethod {
         log.trace("Begin send mobile notification.")
         assert (senderOrganization)
         assert (message)
-        assert (message.externalUser)
         assert (message.referenceId)
 
         serverResponse = null
