@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
-import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.organization.*
@@ -97,9 +96,9 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         badOrganization.mobileEndPointUrl = "https://mobiledev"
         try {
             sendMethod.execute( message, badOrganization )
-            fail( "Expected UNKNOWN_HOST." )
+            fail( "Expected UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT." )
         } catch( CommunicationApplicationException e ) {
-            assertEquals( CommunicationErrorCode.UNKNOWN_HOST.toString(), e.type )
+            assertEquals( CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.toString(), e.type )
         }
     }
 
@@ -161,9 +160,9 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( badOrganization.clearMobileApplicationKey )
         try {
             sendMethod.execute( message, badOrganization )
-            fail( "Expected UNAUTHORIZED." )
+            fail( "Expected INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY." )
         } catch( CommunicationApplicationException e ) {
-            assertEquals( CommunicationErrorCode.UNAUTHORIZED.toString(), e.type )
+            assertEquals( CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.toString(), e.type )
         }
     }
 
@@ -195,9 +194,9 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         badOrganization.mobileApplicationName = "bogus_bogus_bogus"
         try {
             sendMethod.execute( message, badOrganization )
-            fail( "Expected UNAUTHORIZED." )
+            fail( "Expected INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY." )
         } catch( CommunicationApplicationException e ) {
-            assertEquals( CommunicationErrorCode.UNAUTHORIZED.toString(), e.type )
+            assertEquals( CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.toString(), e.type )
         }
     }
 
