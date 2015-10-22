@@ -47,7 +47,6 @@ class BuildingDetail {
         if (housingLocationBuildingDescription != that.housingLocationBuildingDescription) return false
         if (metadata != that.metadata) return false
         if (rooms != that.rooms) return false
-        if (siteDetail != that.siteDetail) return false
 
         return true
     }
@@ -56,7 +55,6 @@ class BuildingDetail {
         int result
         result = (housingLocationBuildingDescription != null ? housingLocationBuildingDescription.hashCode() : 0)
         result = 31 * result + (guid != null ? guid.hashCode() : 0)
-        result = 31 * result + (siteDetail != null ? siteDetail.hashCode() : 0)
         result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
         result = 31 * result + (rooms != null ? rooms.hashCode() : 0)
         result = 31 * result + (code != null ? code.hashCode() : 0)

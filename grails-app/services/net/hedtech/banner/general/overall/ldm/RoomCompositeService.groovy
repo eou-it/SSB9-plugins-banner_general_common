@@ -510,32 +510,32 @@ class RoomCompositeService extends LdmService {
     }
 
     private Map prepareQapiV4Request(Map request) {
+        if (!request.recurrence) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.recurrence", []))
+        }
         if (request?.recurrence?.timePeriod) {
-            if (request?.recurrence?.timePeriod?.startOn) {
                 if (request?.recurrence?.timePeriod?.startOn?.contains('T')) {
-                    def datetime = request?.recurrence?.timePeriod?.startOn?.split('T')
+                    def datetime = request.recurrence.timePeriod.startOn.split('T')
                     request.put("startDate", datetime[0])
                     if (datetime[1].length() > 8) {
                         request.put("startTime", datetime[1]?.substring(0, 8))
                     }
-                }
             }
-
-            if(request?.recurrence?.timePeriod?.endOn){
                 if(request?.recurrence?.timePeriod?.endOn?.contains('T')){
-                    def datetime = request?.recurrence?.timePeriod?.endOn?.split('T')
+                    def datetime = request.recurrence.timePeriod.endOn.split('T')
                     request.put("endDate",datetime[0])
                     if(datetime[1].length()>8){
                         request.put("endTime",datetime[1].substring(0,8))
                     }
-                }
-            }
+             }
         }
         request?.recurrence?.remove("timePeriod")
-
+        if (!request?.recurrence?.repeatRule?.daysOfWeek) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.recurrence.byDay", []))
+        }
         if(request?.recurrence?.repeatRule?.daysOfWeek){
             def weekList=[]
-            request?.recurrence?.repeatRule?.daysOfWeek?.each{
+            request.recurrence.repeatRule.daysOfWeek.each{
                 weekList.add(WeekDays.("${it}").value)
             }
             request.recurrence?.byDay = weekList

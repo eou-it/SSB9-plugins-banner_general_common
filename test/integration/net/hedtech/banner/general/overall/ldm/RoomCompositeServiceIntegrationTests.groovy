@@ -69,7 +69,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListWithFilter() {
+    void testListWithFilterV2Header() {
         //we will forcefully set the accept header so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
@@ -125,7 +125,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testGet() {
+    void testGetV2Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -145,7 +146,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForMissingStartDate() {
+    void testListForMissingStartDateV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.remove('startDate')
         try {
@@ -156,9 +160,24 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForMissingStartDate() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.remove('startOn')
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the startDate is missing')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'missing.startDate'
+        }
+    }
+
 
     @Test
-    void testListForMissingEndDate() {
+    void testListForMissingEndDateV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.remove('endDate')
         try {
@@ -169,9 +188,24 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForMissingEndDate() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.remove('endOn')
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the endDate is missing')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'missing.endDate'
+        }
+    }
+
 
     @Test
-    void testListForMissingStartTime() {
+    void testListForMissingStartTimeV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.remove('startTime')
         try {
@@ -182,9 +216,11 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
     @Test
-    void testListForMissingEndTime() {
+    void testListForMissingEndTimeV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.remove('endTime')
         try {
@@ -197,7 +233,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForStartDateLaterThanEndDate() {
+    void testListForStartDateLaterThanEndDateV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-10'
         params.endDate = '2014-09-09'
@@ -209,9 +248,25 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForStartDateLaterThanEndDate() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.startOn = '2014-09-10T13:30:00+00:00'
+        params.recurrence.timePeriod.endOn = '2014-09-09T15:30:00+00:00'
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the startDate is later than endDate')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'startDate.laterThanEndDate'
+        }
+    }
+
 
     @Test
-    void testListForInvalidStartTimeLength() {
+    void testListForInvalidStartTimeLengthV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startTime = '00:11'
         try {
@@ -222,9 +277,11 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
-
     @Test
-    void testListForInvalidStartTime() {
+    void testListForInvalidStartTimeV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startTime = '24:60:60'
         try {
@@ -235,9 +292,24 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForInvalidStartTime() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.startOn = '2015-09-14T24:60:60+00:00'
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the startTime is invalid')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'invalid.timeFormat'
+        }
+    }
+
 
     @Test
-    void testListForInvalidEndTimeLength() {
+    void testListForInvalidEndTimeLengthV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.endTime = '23:59'
         try {
@@ -250,7 +322,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForInvalidEndTime() {
+    void testListForInvalidEndTimeV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.endTime = '24:60:60'
         try {
@@ -263,10 +338,26 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForStartTimeLaterThanEndTime() {
+    void testListForStartTimeLaterThanEndTimeV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startTime = '03:15:00'
         params.endTime = '02:15:00'
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the startTime is later than endTime')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'startTime.laterThanEndTime'
+        }
+    }
+
+    @Test
+    void testListForStartTimeLaterThanEndTime() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.startOn = '2014-09-08T03:15:00+00:00'
+        params.recurrence.timePeriod.endOn = '2014-09-08T02:15:00+00:00'
         try {
             roomCompositeService.list(params)
             fail('This should have failed as the startTime is later than endTime')
@@ -303,7 +394,10 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForInvalidByDaysMoreThanSevenDays() {
+    void testListForInvalidByDaysMoreThanSevenDaysV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.recurrence.byDay = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'Monday']
         try {
@@ -314,9 +408,24 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForInvalidByDaysMoreThanSevenDays() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.repeatRule.daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'monday']
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the recurrence byDay has more than seven items')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'invalid.recurrence.byDay'
+        }
+    }
+
 
     @Test
-    void testListForInvalidByDaysForMismatchWithDate() {
+    void testListForInvalidByDaysForMismatchWithDateV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-08'
         params.endDate = '2014-09-08'
@@ -329,9 +438,26 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForInvalidByDaysForMismatchWithDate() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.startOn = '2014-09-08T13:30:00+00:00'
+        params.recurrence.timePeriod.endOn = '2014-09-08T15:30:00+00:00'
+        params.recurrence?.repeatRule?.daysOfWeek = ['tuesday']
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the recurrence byDay does not match the dates as the startDate/endDate is a Monday')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'invalid.recurrence.byDay'
+        }
+    }
+
 
     @Test
-    void testListForInvalidByDaysForMismatchWithDates() {
+    void testListForInvalidByDaysForMismatchWithDatesV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-08'
         params.endDate = '2014-09-10'
@@ -344,9 +470,26 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testListForInvalidByDaysForMismatchWithDates() {
+        Map params = getParamsForRoomQueryHeaderV4()
+        params.recurrence.timePeriod.startOn = '2014-09-08T13:30:00+00:00'
+        params.recurrence.timePeriod.endOn = '2014-09-10T15:30:00+00:00'
+        params.recurrence.byDay = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+        try {
+            roomCompositeService.list(params)
+            fail('This should have failed as the recurrence byDay does not match the dates')
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, 'invalid.recurrence.byDay'
+        }
+    }
+
 
     @Test
-    void testListForInvalidByDaysForInvalidDay() {
+    void testListForInvalidByDaysForInvalidDayV3Header() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsForRoomQuery()
         params.startDate = '2014-09-08'
         params.endDate = '2014-09-18'
@@ -358,7 +501,6 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'invalid.recurrence.byDay'
         }
     }
-
 
     @Test
     void testListForMissingOccupanciesV2Header() {
@@ -418,7 +560,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListForMissingMaxOccupancy() {
-        Map params = getParamsForRoomQuery()
+        Map params = getParamsForRoomQueryHeaderV4()
         params.occupancies[0].remove('maxOccupancy')
         try {
             roomCompositeService.list(params)
@@ -430,7 +572,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForInvalidMaxOccupancyHeaderV2() {
+    void testListForInvalidMaxOccupancyV2Header() {
         Map params = getParamsForRoomQuery()
         params.occupancies[0].maxOccupancy = 'abc'
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
@@ -485,7 +627,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testQApiRoomAvailability_GenericMediaTypes_HeaderV2() {
+    void testQApiRoomAvailability_GenericMediaTypesV2Header() {
         //we will forcefully set the accept header so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
@@ -498,7 +640,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    void testQApiRoomAvailability_GenericMediaTypes() {
+    void testQApiRoomAvailability() {
         //we will forcefully set the accept header so that the tests go through all possible code flows
         Map params = getParamsForRoomQueryWithBuildingAndSiteV4()
         List<AvailableRoom> availableRooms = roomCompositeService.list(params)
@@ -511,7 +653,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForBuildingAndSiteNULL_HeaderV2() {
+    void testListForBuildingAndSiteNULLHeaderV2() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -539,7 +681,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForBuildingNotFoundHeaderV2() {
+    void testListForBuildingNotFoundV2Header() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -570,7 +712,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testListForSiteNotFoundHeaderV2() {
+    void testListForSiteNotFoundV2Header() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
@@ -615,6 +757,20 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    @Test
+    void testListWithFilter() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v4+json")
+        def params = ['filter[0][value]': 'classroom', 'filter[0][field]': 'type', 'filter[0][operator]': 'equals']
+        List rooms = roomCompositeService.list(params)
+        assertNotNull rooms
+        assertFalse rooms.isEmpty()
+        assertNotNull rooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
+        assertNotNull rooms.find {it.roomDetails["type"] = 'classroom' }
+    }
+
+
     private Map getParamsForRoomQuery() {
         return [
                 max        : "20",
@@ -654,10 +810,6 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
                                      ]
                 ]
-
-
-
-
         ]
     }
 
@@ -675,18 +827,4 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         params.site = ["id": GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid]
         return params
     }
-
-    @Test
-    void testListWithFilterV4Header() {
-        //we will forcefully set the accept header so that the tests go through all possible code flows
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v4+json")
-        def params = ['filter[0][value]': 'classroom', 'filter[0][field]': 'type', 'filter[0][operator]': 'equals']
-        List rooms = roomCompositeService.list(params)
-        assertNotNull rooms
-        assertFalse rooms.isEmpty()
-        assertNotNull rooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
-        assertNotNull rooms.find {it.roomDetails["type"] = 'classroom' }
-    }
-
 }
