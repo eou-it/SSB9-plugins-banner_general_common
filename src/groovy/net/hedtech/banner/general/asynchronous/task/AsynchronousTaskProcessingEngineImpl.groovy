@@ -8,6 +8,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
@@ -547,7 +548,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
             asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
             try {
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
-                if(cause instanceof ApplicationException) {
+                if(cause instanceof CommunicationApplicationException) {
                     jobManager.markFailed(job, cause.friendlyName, cause );
                 }
                 else

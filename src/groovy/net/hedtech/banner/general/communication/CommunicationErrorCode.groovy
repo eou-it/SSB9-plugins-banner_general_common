@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication
 enum CommunicationErrorCode implements Serializable {
 
     INVALID_DATA_FIELD, //Failure evaluating a data field query
+    DATA_FIELD_SQL_ERROR,
 
     /** Email error codes **/
     EMAIL_SERVER_CONNECTION_FAILED, //Failure connecting to the email server

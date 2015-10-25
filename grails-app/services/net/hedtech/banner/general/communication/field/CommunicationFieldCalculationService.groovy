@@ -144,8 +144,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
             return merge( formatString ?: "", attributeMap )
         } catch (SQLException e) {
-            // TODO: Can we give more specific error if the error is an invalid column type?
-            throw new ApplicationException( CommunicationFieldCalculationService, e.message )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationFieldCalculationService.class, e, CommunicationErrorCode.DATA_FIELD_SQL_ERROR.name() )
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
         } finally {

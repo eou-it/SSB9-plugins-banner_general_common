@@ -24,7 +24,7 @@ class CommunicationCommonUtility {
 
     static
     def Pattern sqlpattern = Pattern.compile("\\*|(;)|(\\b(ALTER|CREATE|DATABASE|DELETE|DROP|EXEC(UTE){0,1}|INSERT( +INTO){0,1}|MERGE|UPDATE)\\b)")
-    static def Pattern multipattern = Pattern.compile("SELECT(.*?)FROM");
+    static def Pattern multipattern = Pattern.compile("SELECT(.*?)FROM", Pattern.DOTALL);
     static
     def Pattern scrubPattern = Pattern.compile("[,.;!()/:={}<>\\p{Z}\\|\\\"\\+\\~\\[\\]\\@\\#\\&\\\$\\\\]")
     static def wildcardChar = "%"
