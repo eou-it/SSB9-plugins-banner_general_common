@@ -11,7 +11,7 @@ import net.hedtech.banner.general.communication.template.CommunicationMessage
  * Represents an Email Message entity with placeholders for attributes of a typical email message.
  */
 @SuppressWarnings("serial")
-@EqualsAndHashCode
+@EqualsAndHashCode(includeFields = true)
 @ToString
 public class CommunicationEmailMessage extends CommunicationMessage {
 

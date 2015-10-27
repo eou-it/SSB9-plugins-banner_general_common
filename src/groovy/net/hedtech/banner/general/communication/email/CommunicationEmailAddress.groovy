@@ -15,18 +15,19 @@ import javax.mail.internet.InternetAddress
  * Represents an Email Address entity.
  */
 @SuppressWarnings("serial")
+@EqualsAndHashCode
 @ToString
 public class CommunicationEmailAddress implements Serializable {
 
     /**
      * The actual email address
      */
-    private String mailAddress;
+    String mailAddress;
 
     /**
      * the display name for the email address
      */
-    private String displayName;
+    String displayName;
 
     public CommunicationEmailAddress( ) {
 
@@ -122,23 +123,5 @@ public class CommunicationEmailAddress implements Serializable {
     }
 
 
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof CommunicationEmailAddress)) return false
 
-        CommunicationEmailAddress that = (CommunicationEmailAddress) o
-
-        if (displayName != that.displayName) return false
-        if (mailAddress != that.mailAddress) return false
-
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (mailAddress != null ? mailAddress.hashCode() : 0)
-        result = 31 * result + (displayName != null ? displayName.hashCode() : 0)
-        return result
-    }
 }
