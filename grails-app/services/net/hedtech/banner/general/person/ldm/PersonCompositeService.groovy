@@ -53,11 +53,12 @@ class PersonCompositeService extends LdmService {
     static final String PERSON_EMAIL_TYPE = "PERSON.EMAILS.EMAILTYPE"
     static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
     static final String PERSON_MATCH_RULE = "PERSON.MATCHRULE"
+    static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
-    private static final List<String> VERSIONS = ["v1","v2","v3"]
+    private static final List<String> VERSIONS = ["v1", "v2", "v3"]
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
@@ -166,7 +167,7 @@ class PersonCompositeService extends LdmService {
                         log.debug "fetchAllByRole returns ${searchResult?.pidms?.size()}"
                         def pidms = searchResult.pidms
                         total = searchResult.count?.longValue()
-                        if(pidms?.size() > 0) {
+                        if (pidms?.size() > 0) {
                             def pidmsObject = []
                             pidms.each {
                                 pidmsObject << [data: it]
@@ -251,7 +252,7 @@ class PersonCompositeService extends LdmService {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
                     def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
-                    if (["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+                    if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
                         allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
                     }
                     validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
@@ -300,7 +301,7 @@ class PersonCompositeService extends LdmService {
         def name = new Name(newPersonIdentificationName, newPersonBase)
         name.setNameType("Primary")
         currentRecord.names << name
-        if("v3".equals(getAcceptVersion(VERSIONS))) {
+        if ("v3".equals(getAcceptVersion(VERSIONS))) {
             if (personIdentificationNameAlternate) {
                 def birth = new NameAlternate(personIdentificationNameAlternate)
                 birth.setNameType("Birth")
@@ -383,10 +384,10 @@ class PersonCompositeService extends LdmService {
         PersonIdentificationNameCurrent newPersonIdentificationName
         PersonIdentificationNameCurrent oldPersonIdentificationName = new PersonIdentificationNameCurrent(personIdentification.properties)
         if (namesElementPrimary) {
-            if(namesElementPrimary.containsKey('firstName')) personIdentification.firstName = namesElementPrimary.firstName
-            if(namesElementPrimary.containsKey('lastName')) personIdentification.lastName = namesElementPrimary.lastName
-            if(namesElementPrimary.containsKey('middleName')) personIdentification.middleName = namesElementPrimary.middleName
-            if(namesElementPrimary.containsKey('surnamePrefix')) personIdentification.surnamePrefix = namesElementPrimary.surnamePrefix
+            if (namesElementPrimary.containsKey('firstName')) personIdentification.firstName = namesElementPrimary.firstName
+            if (namesElementPrimary.containsKey('lastName')) personIdentification.lastName = namesElementPrimary.lastName
+            if (namesElementPrimary.containsKey('middleName')) personIdentification.middleName = namesElementPrimary.middleName
+            if (namesElementPrimary.containsKey('surnamePrefix')) personIdentification.surnamePrefix = namesElementPrimary.surnamePrefix
             if (!personIdentification.equals(oldPersonIdentificationName)) {
                 PersonIdentificationNameAlternate.findAllByPidm(oldPersonIdentificationName.pidm).each { oldRecord ->
                     if (oldPersonIdentificationName.firstName == oldRecord.firstName &&
@@ -408,7 +409,7 @@ class PersonCompositeService extends LdmService {
             person?.credentials?.each { it ->
                 if (it instanceof Map) {
                     def allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8]
-                    if (["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+                    if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
                         allowedCredentialTypes = ["Social Security Number", "Social Insurance Number", "Banner ID", Credential.additionalIdMap.ELV8, "Banner Sourced ID", "Banner User Name", "Banner UDC ID"]
                     }
                     validateCredentialType(it.credentialType, allowedCredentialTypes, it.credentialId)
@@ -566,7 +567,7 @@ class PersonCompositeService extends LdmService {
                 log.debug "commonMatching request ${cm_params}"
                 def matchList = commonMatchingCompositeService.commonMatching(cm_params)
                 log.debug "commonMatching returns ${matchList?.personList?.size()}"
-                if(matchList.personList) {
+                if (matchList.personList) {
                     matchFound = true
                     matchList.personList?.each {
                         personList << it
@@ -767,7 +768,7 @@ class PersonCompositeService extends LdmService {
             if (it instanceof Map) {
                 if (!processedEmailTypes.contains { it.emailType.trim() }) {
                     Boolean preferredIndicator = false
-                    if(["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+                    if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
                         if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
                             preferredIndicator = true
                             tempPreferredIndicator = preferredIndicator
@@ -840,7 +841,7 @@ class PersonCompositeService extends LdmService {
                     PersonEmail existingPersonEmail = existingPersonEmails?.find { existingPersonEmail -> existingPersonEmail.emailType.code == rule.value && existingPersonEmail.emailAddress == it.emailAddress }
                     if (existingPersonEmail) {
                         existingPersonEmail.statusIndicator = "A"
-                        if(["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+                        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
                             if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
                                 existingPersonEmail.preferredIndicator = true
                                 tempPreferredIndicator = true
@@ -858,7 +859,7 @@ class PersonCompositeService extends LdmService {
                         existingPersonEmails.remove(existingPersonEmail)
                     } else {
                         Boolean preferredIndicator = false
-                        if(["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+                        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
                             if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
                                 preferredIndicator = true
                                 tempPreferredIndicator = true
@@ -894,14 +895,14 @@ class PersonCompositeService extends LdmService {
         List<PersonRace> personRaceList = PersonRace.fetchByPidmList(pidms)
 
         Map credentialsMap = [:]
-        if(["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
             List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
             List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
             List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
             credentialsMap = [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
         }
 
-        if("v3".equals(getAcceptVersion(VERSIONS))) {
+        if ("v3".equals(getAcceptVersion(VERSIONS))) {
             allEthnicities = ethnicityCompositeService.getUnitedStatesEthnicCodes()
         }
         personBaseList.each { personBase ->
@@ -924,7 +925,7 @@ class PersonCompositeService extends LdmService {
         if ("v3".equals(getAcceptVersion(VERSIONS))) {
             NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
             List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
-            if(personIdentificationNameAlternateList) {
+            if (personIdentificationNameAlternateList) {
                 persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
             }
         }
@@ -957,7 +958,7 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonCredentials(Map credentialsMap, Map persons, def personList) {
-        if(["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
             credentialsMap.imsSourcedIdBaseList.each { sourcedIdBase ->
                 Person person = persons.get(sourcedIdBase.pidm)
                 person.credentials << new Credential("Banner Sourced ID", sourcedIdBase.sourcedId, null, null)
@@ -994,7 +995,7 @@ class PersonCompositeService extends LdmService {
                 def email = new Email(guid, activeEmail)
                 email.emailType = rule?.translationValue
                 currentRecord.emails << email
-                if (activeEmail.preferredIndicator) {
+                if (["v2", "v3"].contains(getAcceptVersion(VERSIONS)) && activeEmail.preferredIndicator) {
                     def preferredEmail = new Email(guid, activeEmail)
                     preferredEmail.emailType = PERSON_EMAIL_TYPE_PREFERRED
                     currentRecord.emails << preferredEmail
@@ -1074,7 +1075,7 @@ class PersonCompositeService extends LdmService {
         }
         userRoleCompositeService.fetchAllRolesByPidmInList(pidms, studentRole).each { role ->
             Person currentRecord = persons.get(role.key.toInteger())
-            currentRecord.roles << role.value
+            currentRecord.roles = role.value
         }
 
         persons
@@ -1142,7 +1143,7 @@ class PersonCompositeService extends LdmService {
 
                 if (person.ethnicityDetail instanceof Map) {
                     createOrUpdatePersonEthnicity(person)
-                    if (["v1","v2"].contains(getAcceptVersion(VERSIONS))) {
+                    if (["v1", "v2"].contains(getAcceptVersion(VERSIONS))) {
                         personBase.ethnicity = person.get('ethnicity')
                     }
                     personBase.ethnic = person.get('ethnic')
@@ -1387,9 +1388,7 @@ class PersonCompositeService extends LdmService {
             existingId = new AdditionalID(pidm: personIdentification.pidm,
                     additionalIdentificationType: idType,
                     additionalId: credential?.credentialId,
-                    dataOrigin: metadata?.dataOrigin
-            )
-        log.error "Existing ID: ${existingId}"
+                    dataOrigin: metadata?.dataOrigin)
         additionalIDService.createOrUpdate(existingId)
     }
 
@@ -1596,17 +1595,19 @@ class PersonCompositeService extends LdmService {
             if (personBase.ssn == null) {
                 personBase.ssn = credentialId
             } else {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("ssn.value.exists.message", []))
+                IntegrationConfiguration personSSN = IntegrationConfiguration.fetchByProcessCodeAndSettingName(PROCESS_CODE, PERSON_UPDATESSN)
+                if (personSSN?.value == 'Y') {
+                    personBase.ssn = credentialId
+                }
             }
         }
-
         return personBase
     }
 
 
     private def getPreferredEmail(List<Map> emailsInRequest) {
         def preferredEmail = null
-        if (["v2","v3"].contains(getAcceptVersion(VERSIONS))) {
+        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
             preferredEmail = emailsInRequest.findAll { it.get("emailType")?.trim() == PERSON_EMAIL_TYPE_PREFERRED }[0]
             if (preferredEmail) {
                 emailsInRequest.removeAll { it.get("emailType").trim() == PERSON_EMAIL_TYPE_PREFERRED }
@@ -1640,7 +1641,7 @@ class PersonCompositeService extends LdmService {
         def totalCount = PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
                 domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy)
         log.debug "total PopulationSelectionExtract records $totalCount"
-        return [personList : personList, count: totalCount]
+        return [personList: personList, count: totalCount]
     }
 
 
@@ -1722,7 +1723,7 @@ class PersonCompositeService extends LdmService {
                 ethnicityDetail = ethnicityCompositeService.fetchByEthnicityCode(personBase.ethnicity.code)
             }
         } else if ("v3".equals(getAcceptVersion(VERSIONS))) {
-            if(!globalUniqueIdentifier) {
+            if (!globalUniqueIdentifier) {
                 allEthnicities = ethnicityCompositeService.getUnitedStatesEthnicCodes()
             }
             String guid
@@ -1737,7 +1738,8 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private boolean isNamesElementBirthIsSameAsExisting(def namesElementBirth, PersonIdentificationNameAlternate existingPersonBirthRecord) {
+    private boolean isNamesElementBirthIsSameAsExisting(
+            def namesElementBirth, PersonIdentificationNameAlternate existingPersonBirthRecord) {
         boolean exists = true
         if (!existingPersonBirthRecord || !(existingPersonBirthRecord?.firstName == namesElementBirth.firstName) || !(existingPersonBirthRecord?.lastName == namesElementBirth.lastName) || !(existingPersonBirthRecord?.middleName == namesElementBirth.middleName)) {
             exists = false
