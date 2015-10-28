@@ -51,7 +51,6 @@ class CommunicationCommonUtility {
         log.debug("The sql after pattern matching - " + sqlToMatch)
 
         //make sure the sql statement only selects one value if requested in the params
-        //TODO Review this. should we test for pidm and commma for the whole sql including union and subqueries or just the first.
 
         if (!multiSelectColumnAllowed) {
             def z = 0
