@@ -9,6 +9,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
+import net.hedtech.banner.general.system.ldm.v4.SiteDetailV4
 import net.hedtech.banner.query.QueryBuilder
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -96,10 +97,8 @@ class SiteDetailCompositeService {
         details.each { detail ->
             Campus campus = Campus.findByCode(detail[0])
             buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-            if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
-                campus.setDescription(campus?.getCode())
-            }
-            sites << new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+            def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4') ? new SiteDetailV4(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+            sites << siteDetail
          }
 
         return sites
@@ -113,7 +112,7 @@ class SiteDetailCompositeService {
     Long count() {
         return Campus.count()
     }
-
+    
 
     SiteDetail fetchByCampusId(Long domainId) {
         if (null == domainId) {
