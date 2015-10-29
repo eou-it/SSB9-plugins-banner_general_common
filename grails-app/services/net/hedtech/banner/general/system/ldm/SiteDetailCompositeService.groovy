@@ -54,7 +54,8 @@ class SiteDetailCompositeService {
             throw new ApplicationException("site", new NotFoundException())
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(guid, campus, buildings, new Metadata(campus.dataOrigin));
+        def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4') ? new SiteDetailV4(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+        return siteDetail
     }
 
     /**
