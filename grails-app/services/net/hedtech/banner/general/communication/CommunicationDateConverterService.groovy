@@ -5,6 +5,7 @@
 package net.hedtech.banner.general.communication
 
 import net.hedtech.banner.i18n.DateConverterService
+import org.springframework.context.i18n.LocaleContextHolder
 
 import java.text.SimpleDateFormat
 
@@ -16,17 +17,26 @@ class CommunicationDateConverterService extends DateConverterService {
 
     public parseGregorianToDefaultCalendar(value, dateformat) {
 
+        def origValue = value
         try {
             if(value instanceof Date) {
-                SimpleDateFormat sdf = new SimpleDateFormat(localizerService(code: dateformat));
+                SimpleDateFormat sdf = new SimpleDateFormat(localizerService(code: dateformat),LocaleContextHolder?.getLocale());
                 value = sdf.format(new Date(value.getTime()));
             }
             String defaultDateFormat = localizerService(code: dateformat)
+            if (getULocaleStringForCalendar('gregorian') != getULocaleTranslationStringForCalendar(localizerService(code: "default.calendar",default:'gregorian'))) {
+                def tempValue = convert(origValue,
+                        getULocaleStringForCalendar('gregorian'),
+                        getULocaleTranslationStringForCalendar(localizerService(code: "default.calendar", default: 'gregorian')),
+                        defaultDateFormat,
+                        defaultDateFormat)
+            } else {
             def tempValue = convert(value,
                     getULocaleStringForCalendar('gregorian'),
                     getULocaleTranslationStringForCalendar(localizerService(code: "default.calendar",default:'gregorian')),
                     defaultDateFormat ,
                     defaultDateFormat)
+            }
 
             //Check if date passed is valid or not.
             def checkValue = convert(tempValue,
