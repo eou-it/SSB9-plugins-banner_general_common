@@ -133,7 +133,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
         CommunicationOrganization badOrganization = new CommunicationOrganization()
         badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = "StudentSuccess"
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
@@ -249,7 +249,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
     protected void setUpTestOrganization() {
         testOrganization = new CommunicationOrganization()
         testOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        testOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+        testOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
         testOrganization.mobileApplicationName = "StudentSuccess"
         testOrganization.clearMobileApplicationKey = "ss-key-value"
         testOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
