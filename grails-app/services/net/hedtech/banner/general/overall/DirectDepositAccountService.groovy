@@ -23,5 +23,11 @@ class DirectDepositAccountService extends ServiceBase{
 
         return activeAccounts
     }
+    
+    def getActiveHrAccounts(pidm) {
+        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
+
+        return activeAccounts
+    }
 
 }

@@ -119,6 +119,71 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
 
     @Test
+    void testGetActiveHrAccountsWhereOneAccountExists() {
+        def pidm = 49548
+        def activeAccounts = directDepositAccountService.getActiveHrAccounts(pidm) // One account
+
+        // Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 1, activeAccounts.size()
+
+        def userAccount = activeAccounts[0]
+
+        assertNotNull userAccount.id
+        assertEquals "1293902", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "I", userAccount.apIndicator
+        assertEquals "A", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
+    }
+
+    @Test
+    void testGetActiveHrAccountsWhereMultipleAccountsExist() {
+        def pidm = 37700;
+        def activeAccounts = directDepositAccountService.getActiveHrAccounts(pidm) // Multiple accounts
+
+        // Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 2, activeAccounts.size()
+
+        // First account
+        activeAccounts = activeAccounts.sort{it.id}
+        def userAccount = activeAccounts[0]
+
+        assertNotNull userAccount.id
+        assertEquals "95003546", userAccount.bankAccountNum
+        assertEquals "S", userAccount.accountType
+        assertEquals "I", userAccount.apIndicator
+        assertEquals "A", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
+
+        // Second account
+        userAccount = activeAccounts[1]
+
+        assertNotNull userAccount.id
+        assertEquals "736900542", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "I", userAccount.apIndicator
+        assertEquals "A", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
+    }
+
+    @Test
+    void testGetActiveHrAccountsWhereNoAccountsExist() {
+        def activeAccounts = directDepositAccountService.getActiveHrAccounts(-1)
+
+        // Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 0, activeAccounts.size()
+    }
+
+    @Test
     void testAccountNumberFormatValidation() {
         try {
             directDepositAccountService.validateAccountNumFormat("1954601TOOLONG74321");
