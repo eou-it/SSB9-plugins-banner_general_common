@@ -178,7 +178,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
         CommunicationOrganization badOrganization = new CommunicationOrganization()
         badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = "https://mobiledev1.ellucian.com/banner-mobileserver/"
+        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = ""
         badOrganization.clearMobileApplicationKey = "ss-key-value"
         badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
