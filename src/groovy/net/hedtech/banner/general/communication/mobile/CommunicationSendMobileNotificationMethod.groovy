@@ -73,7 +73,6 @@ class CommunicationSendMobileNotificationMethod {
             HTTPBuilder httpBuilder = new HTTPBuilder(senderOrganization.mobileEndPointUrl)
             httpBuilder.auth.basic senderOrganization.mobileApplicationName, senderOrganization.clearMobileApplicationKey
             httpBuilder.request(POST, JSON) { request ->
-                uri.path = '/banner-mobileserver/api/notification/notifications/'
                 headers.Accept = 'application/json'
 
                 def messageMap = [
