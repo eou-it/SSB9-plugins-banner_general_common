@@ -10,7 +10,7 @@ import org.springframework.context.i18n.LocaleContextHolder
 import java.text.SimpleDateFormat
 
 /**
- * Service extends the common date converterservice.  This is temporary
+ * Service extends the common date converterservice.
  */
 class CommunicationDateConverterService extends DateConverterService {
 
@@ -18,20 +18,27 @@ class CommunicationDateConverterService extends DateConverterService {
     public parseGregorianToDefaultCalendar(value, dateformat) {
 
         def origValue = value
+        def tempValue
+
         try {
-            if(value instanceof Date) {
-                SimpleDateFormat sdf = new SimpleDateFormat(localizerService(code: dateformat),LocaleContextHolder?.getLocale());
-                value = sdf.format(new Date(value.getTime()));
-            }
+
             String defaultDateFormat = localizerService(code: dateformat)
             if (getULocaleStringForCalendar('gregorian') != getULocaleTranslationStringForCalendar(localizerService(code: "default.calendar",default:'gregorian'))) {
-                def tempValue = convert(origValue,
+                if(value instanceof Date) {
+                    SimpleDateFormat sdfwithoutlocale = new SimpleDateFormat(localizerService(code: dateformat));
+                    value = sdfwithoutlocale.format(new Date(value.getTime()));
+                }
+                tempValue = convert(origValue,
                         getULocaleStringForCalendar('gregorian'),
                         getULocaleTranslationStringForCalendar(localizerService(code: "default.calendar", default: 'gregorian')),
                         defaultDateFormat,
                         defaultDateFormat)
             } else {
-            def tempValue = convert(value,
+                if(value instanceof Date) {
+                    SimpleDateFormat sdf = new SimpleDateFormat(localizerService(code: dateformat),LocaleContextHolder?.getLocale());
+                    value = sdf.format(new Date(value.getTime()));
+                }
+                tempValue = convert(value,
                     getULocaleStringForCalendar('gregorian'),
                     getULocaleTranslationStringForCalendar(localizerService(code: "default.calendar",default:'gregorian')),
                     defaultDateFormat ,
