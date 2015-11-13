@@ -164,6 +164,7 @@ class CommunicationPopulationListView implements Serializable {
         def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             eq("lastCalculatedBy",CommunicationCommonUtility.getUserOracleUserName().toLowerCase(), [ignoreCase: true])
+            gt("lastCalculatedCount",0L)
             and {
                 or {
                     ilike("queryName", searchName)
