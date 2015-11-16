@@ -760,17 +760,20 @@ class PersonCompositeService extends LdmService {
                                    def emailsInRequest, List<PersonEmail> existingPersonEmails) {
         List<PersonEmail> personEmails = []
 
-        // De-activate existing  emails
+        String preferredEmailType
+        String preferredEmailAddress
+        // De-activate existing emails
         existingPersonEmails?.each {
+            if (it.preferredIndicator) {
+                preferredEmailType = it.emailType.code
+                preferredEmailAddress = it.emailAddress
+            }
             it.statusIndicator = "I"
             it.preferredIndicator = false
             personEmailService.update([domainModel: it])
         }
 
-        def preferredEmail = getPreferredEmail(emailsInRequest)
-
-        Boolean preferredEmailSelected = false
-        List<String> processedEmailTypes = []
+        List<String> processedEmailTypes = ["Preferred"]
         PersonEmail personEmail
         emailsInRequest?.each {
             validateEmailRequiredFields(it)
@@ -784,24 +787,15 @@ class PersonCompositeService extends LdmService {
                 if (bannerEmailType) {
                     log.debug "Processing $emailGuid - ${bannerEmailType.code} - $emailAddress ..."
 
-                    Boolean preferredIndicator = false
-                    if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-                        if (preferredEmail && emailAddress == preferredEmail.emailAddress && !preferredEmailSelected) {
-                            preferredIndicator = true
-                            preferredEmailSelected = true
-                        }
-                    }
-
                     PersonEmail existingPersonEmail = existingPersonEmails?.find { existingPersonEmail -> existingPersonEmail.emailType.code == bannerEmailType.code && existingPersonEmail.emailAddress == emailAddress }
                     if (existingPersonEmail) {
                         // Update
                         existingPersonEmail.statusIndicator = "A"
-                        existingPersonEmail.preferredIndicator = preferredIndicator
                         personEmail = personEmailService.update([domainModel: existingPersonEmail])
                         existingPersonEmails.remove(existingPersonEmail)
                     } else {
                         // Create
-                        personEmail = new PersonEmail(pidm: pidm, emailAddress: emailAddress, statusIndicator: "A", emailType: bannerEmailType, dataOrigin: metadata?.dataOrigin, preferredIndicator: preferredIndicator)
+                        personEmail = new PersonEmail(pidm: pidm, emailAddress: emailAddress, statusIndicator: "A", emailType: bannerEmailType, dataOrigin: metadata?.dataOrigin)
                         personEmail = personEmailService.create([domainModel: personEmail])
                     }
 
@@ -817,6 +811,8 @@ class PersonCompositeService extends LdmService {
                 processedEmailTypes << hedmEmailType
             }
         }
+
+        markPreferredEmail(personEmails, preferredEmailType, preferredEmailAddress)
 
         return personEmails
     }
@@ -842,6 +838,31 @@ class PersonCompositeService extends LdmService {
         }
         log.debug "HEDM email type ${hedmEmailType} -> Banner email type ${intConfig.value}"
         return intConfig.value
+    }
+
+
+    private void markPreferredEmail(List<PersonEmail> personEmails, String preferredEmailType, String preferredEmailAddress) {
+        if (personEmails) {
+            PersonEmail personEmail
+            if (preferredEmailType && preferredEmailAddress) {
+                log.debug "Finding match using $preferredEmailType and $preferredEmailAddress ..."
+                personEmail = personEmails.find {
+                    it.emailType.code == preferredEmailType && it.emailAddress == preferredEmailAddress
+                }
+            }
+            if (!personEmail && preferredEmailType) {
+                log.debug "Finding match using $preferredEmailType ..."
+                personEmail = personEmails.find { it.emailType.code == preferredEmailType }
+            }
+            if (!personEmail && preferredEmailAddress) {
+                log.debug "Finding match using $preferredEmailAddress ..."
+                personEmail = personEmails.find { it.emailAddress == preferredEmailAddress }
+            }
+            if (personEmail) {
+                personEmail.preferredIndicator = true
+                personEmail = personEmailService.update([domainModel: personEmail])
+            }
+        }
     }
 
 
@@ -1573,19 +1594,6 @@ class PersonCompositeService extends LdmService {
             }
         }
         return personBase
-    }
-
-
-    private def getPreferredEmail(List<Map> emailsInRequest) {
-        def preferredEmail = null
-        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-            preferredEmail = emailsInRequest.findAll { it.get("emailType")?.trim() == PERSON_EMAIL_TYPE_PREFERRED }[0]
-            if (preferredEmail) {
-                emailsInRequest.removeAll { it.get("emailType").trim() == PERSON_EMAIL_TYPE_PREFERRED }
-            }
-        }
-
-        return preferredEmail
     }
 
 
