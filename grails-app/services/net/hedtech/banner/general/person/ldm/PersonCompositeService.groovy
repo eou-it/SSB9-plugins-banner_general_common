@@ -329,8 +329,8 @@ class PersonCompositeService extends LdmService {
         List<PersonTelephone> phones = createPhones(newPersonIdentificationName.pidm, metadata,
                 person.phones instanceof List ? person.phones : [])
         persons = buildPersonTelephones(phones, persons)
-        def emails = createPersonEmails(newPersonIdentificationName.pidm, metadata,
-                person.emails instanceof List ? person.emails : [])
+        def emails = updatePersonEmails(newPersonIdentificationName.pidm, metadata,
+                person.emails instanceof List ? person.emails : [],[])
         persons = buildPersonEmails(emails, persons)
         def races = createRaces(newPersonIdentificationName.pidm, metadata,
                 person.races instanceof List ? person.races : [])
@@ -498,7 +498,7 @@ class PersonCompositeService extends LdmService {
         }
         //update Emails
         if (person.containsKey('emails') && person.emails instanceof List) {
-            emails = updatePersonEmails(pidmToUpdate, person.metadata, person.emails)
+            emails = updatePersonEmails(pidmToUpdate, person.metadata, person.emails, getPersonEmailsFromDB(pidmToUpdate))
             buildPersonEmails(emails, personMap)
         }
 
@@ -756,70 +756,12 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private def createPersonEmails(def pidm, Map metadata, List<Map> emailsInRequest) {
-        def personEmailsList = []
-        List<String> processedEmailTypes = []
-
-        def preferredEmail = getPreferredEmail(emailsInRequest)
-
-        Boolean tempPreferredIndicator = false
-        emailsInRequest?.each {
-            validateEmailRequiredFields(it)
-            if (it instanceof Map) {
-                if (!processedEmailTypes.contains { it.emailType.trim() }) {
-                    Boolean preferredIndicator = false
-                    if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-                        if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
-                            preferredIndicator = true
-                            tempPreferredIndicator = preferredIndicator
-                        }
-                    }
-                    PersonEmail personEmail = createPersonEmail(it.guid?.trim()?.toLowerCase(), pidm, metadata, it, preferredIndicator)
-                    personEmailsList << personEmail
-                    processedEmailTypes << it.emailType.trim()
-                }
-            }
-        }
-
-        return personEmailsList
-    }
-
-
-    private PersonEmail createPersonEmail(String guid,
-                                          def pidm, Map metadata, def emailInRequest, Boolean preferredIndicator) {
-        PersonEmail personEmail
-
-        IntegrationConfiguration rule = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, emailInRequest.emailType.trim())
-        if (!rule) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_EMAIL_TYPE]))
-        }
-        if (rule.value) {
-            personEmail = new PersonEmail(pidm: pidm, emailAddress: emailInRequest.emailAddress, statusIndicator: "A", emailType: EmailType.findByCode(rule.value), dataOrigin: metadata?.dataOrigin, preferredIndicator: preferredIndicator)
-            personEmail = personEmailService.create([domainModel: personEmail])
-
-            String domainKey = "${personEmail.pidm}${DOMAIN_KEY_DELIMITER}${personEmail.emailType}${DOMAIN_KEY_DELIMITER}${personEmail.emailAddress}"
-            if (guid) {
-                // Overwrite the GUID created by DB insert trigger, with the one provided in the request body
-                updateGuidValue(personEmail.id, guid, PERSON_EMAILS_LDM_NAME)
-            }
-
-            log.debug("GUID: ${guid}   DomainKey: ${domainKey}")
-        }
-
-        return personEmail
-    }
-
-
-    private def updatePersonEmails(def pidm, Map metadata, def emailsInRequest) {
+    private def updatePersonEmails(Integer pidm, Map metadata,
+                                   def emailsInRequest, List<PersonEmail> existingPersonEmails) {
         List<PersonEmail> personEmails = []
-        def bannerEmailTypes = []
-        def rules = IntegrationConfiguration.findAllByProcessCodeAndSettingName(PROCESS_CODE, PERSON_EMAIL_TYPE)
-        rules?.each {
-            bannerEmailTypes << it.value
-        }
 
-        List<PersonEmail> existingPersonEmails = PersonEmail.fetchListByPidmAndEmailTypes(pidm, bannerEmailTypes) ?: []
-        existingPersonEmails.each {
+        // De-activate existing  emails
+        existingPersonEmails?.each {
             it.statusIndicator = "I"
             it.preferredIndicator = false
             personEmailService.update([domainModel: it])
@@ -827,53 +769,79 @@ class PersonCompositeService extends LdmService {
 
         def preferredEmail = getPreferredEmail(emailsInRequest)
 
-        Boolean tempPreferredIndicator = false
+        Boolean preferredEmailSelected = false
         List<String> processedEmailTypes = []
         PersonEmail personEmail
         emailsInRequest?.each {
             validateEmailRequiredFields(it)
-            if (!processedEmailTypes.contains(it.emailType.trim())) {
-                IntegrationConfiguration rule = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, it.emailType.trim())
-                if (!rule) {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_EMAIL_TYPE]))
-                }
-                if (rule.value) {
-                    PersonEmail existingPersonEmail = existingPersonEmails?.find { existingPersonEmail -> existingPersonEmail.emailType.code == rule.value && existingPersonEmail.emailAddress == it.emailAddress }
-                    if (existingPersonEmail) {
-                        existingPersonEmail.statusIndicator = "A"
-                        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-                            if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
-                                existingPersonEmail.preferredIndicator = true
-                                tempPreferredIndicator = true
-                            }
-                        }
-                        personEmail = personEmailService.update([domainModel: existingPersonEmail])
-                        String domainKey = "${existingPersonEmail.pidm}${DOMAIN_KEY_DELIMITER}${existingPersonEmail.emailType}${DOMAIN_KEY_DELIMITER}${existingPersonEmail.emailAddress}"
-                        String guid = it?.guid?.trim()?.toLowerCase()
-                        if (guid) {
-                            // Overwrite the GUID created by DB insert trigger, with the one provided in the request body
-                            updateGuidValue(existingPersonEmail.id, guid, PERSON_EMAILS_LDM_NAME)
-                        }
-                        log.debug("GUID: ${guid}   DomainKey: ${domainKey}")
+            String emailGuid = it?.guid?.trim()?.toLowerCase()
+            String hedmEmailType = it.emailType.trim()
+            String emailAddress = it.emailAddress
+            log.debug "$emailGuid - $hedmEmailType - $emailAddress"
+            if (!processedEmailTypes.contains(hedmEmailType)) {
+                String bannerEmailTypeCode = getBannerEmailTypeFromHedmEmailType(hedmEmailType)
+                EmailType bannerEmailType = EmailType.findByCode(bannerEmailTypeCode)
+                if (bannerEmailType) {
+                    log.debug "Processing $emailGuid - ${bannerEmailType.code} - $emailAddress ..."
 
+                    Boolean preferredIndicator = false
+                    if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
+                        if (preferredEmail && emailAddress == preferredEmail.emailAddress && !preferredEmailSelected) {
+                            preferredIndicator = true
+                            preferredEmailSelected = true
+                        }
+                    }
+
+                    PersonEmail existingPersonEmail = existingPersonEmails?.find { existingPersonEmail -> existingPersonEmail.emailType.code == bannerEmailType.code && existingPersonEmail.emailAddress == emailAddress }
+                    if (existingPersonEmail) {
+                        // Update
+                        existingPersonEmail.statusIndicator = "A"
+                        existingPersonEmail.preferredIndicator = preferredIndicator
+                        personEmail = personEmailService.update([domainModel: existingPersonEmail])
                         existingPersonEmails.remove(existingPersonEmail)
                     } else {
-                        Boolean preferredIndicator = false
-                        if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-                            if (preferredEmail && it.emailAddress == preferredEmail.emailAddress && !tempPreferredIndicator) {
-                                preferredIndicator = true
-                                tempPreferredIndicator = true
-                            }
-                        }
-                        personEmail = createPersonEmail(it.guid?.trim()?.toLowerCase(), pidm, metadata, it, preferredIndicator)
+                        // Create
+                        personEmail = new PersonEmail(pidm: pidm, emailAddress: emailAddress, statusIndicator: "A", emailType: bannerEmailType, dataOrigin: metadata?.dataOrigin, preferredIndicator: preferredIndicator)
+                        personEmail = personEmailService.create([domainModel: personEmail])
                     }
+
+                    if (emailGuid) {
+                        // Overwrite the GUID created by DB insert trigger, with the one provided in the request body
+                        updateGuidValue(personEmail.id, emailGuid, PERSON_EMAILS_LDM_NAME)
+                    }
+                    String domainKey = "${personEmail.pidm}${DOMAIN_KEY_DELIMITER}${personEmail.emailType.code}${DOMAIN_KEY_DELIMITER}${personEmail.emailAddress}"
+                    log.debug("GUID: ${emailGuid}   DomainKey: ${domainKey}")
+
                     personEmails << personEmail
-                    processedEmailTypes << it.emailType.trim()
                 }
+                processedEmailTypes << hedmEmailType
             }
         }
 
         return personEmails
+    }
+
+
+    private def getPersonEmailsFromDB(Integer pidm) {
+        log.debug "Fetching emails of person from Database..."
+        def bannerEmailTypes = []
+        def intConfigs = IntegrationConfiguration.fetchAllByProcessCodeAndSettingName(PROCESS_CODE, PERSON_EMAIL_TYPE)
+        intConfigs?.each {
+            bannerEmailTypes << it.value
+        }
+        log.debug "Banner EmailTypes $bannerEmailTypes configured in GORICCR"
+        return PersonEmail.fetchListByPidmAndEmailTypes(pidm, bannerEmailTypes)
+    }
+
+
+    private String getBannerEmailTypeFromHedmEmailType(String hedmEmailType) {
+        log.debug "Trying to get Banner email type for HEDM email type ${hedmEmailType} ..."
+        IntegrationConfiguration intConfig = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, hedmEmailType)
+        if (!intConfig) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_EMAIL_TYPE]))
+        }
+        log.debug "HEDM email type ${hedmEmailType} -> Banner email type ${intConfig.value}"
+        return intConfig.value
     }
 
 
@@ -1552,6 +1520,9 @@ class PersonCompositeService extends LdmService {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailGuid.invalid", []))
             }
         }*/
+        if (!email instanceof Map) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailType.invalid", null))
+        }
         if (!email.emailType) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("emailType.invalid", []))
         }
