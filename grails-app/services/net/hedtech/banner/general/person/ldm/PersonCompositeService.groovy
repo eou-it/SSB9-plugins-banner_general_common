@@ -773,7 +773,7 @@ class PersonCompositeService extends LdmService {
             personEmailService.update([domainModel: it])
         }
 
-        List<String> processedEmailTypes = ["Preferred"]
+        List<String> processedEmailTypes = [PERSON_EMAIL_TYPE_PREFERRED]
         PersonEmail personEmail
         emailsInRequest?.each {
             validateEmailRequiredFields(it)
@@ -782,8 +782,7 @@ class PersonCompositeService extends LdmService {
             String emailAddress = it.emailAddress
             log.debug "$emailGuid - $hedmEmailType - $emailAddress"
             if (!processedEmailTypes.contains(hedmEmailType)) {
-                String bannerEmailTypeCode = getBannerEmailTypeFromHedmEmailType(hedmEmailType)
-                EmailType bannerEmailType = EmailType.findByCode(bannerEmailTypeCode)
+                EmailType bannerEmailType = getBannerEmailTypeFromHedmEmailType(hedmEmailType)
                 if (bannerEmailType) {
                     log.debug "Processing $emailGuid - ${bannerEmailType.code} - $emailAddress ..."
 
@@ -830,14 +829,18 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private String getBannerEmailTypeFromHedmEmailType(String hedmEmailType) {
+    private EmailType getBannerEmailTypeFromHedmEmailType(String hedmEmailType) {
         log.debug "Trying to get Banner email type for HEDM email type ${hedmEmailType} ..."
         IntegrationConfiguration intConfig = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_EMAIL_TYPE, hedmEmailType)
         if (!intConfig) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_EMAIL_TYPE]))
         }
         log.debug "HEDM email type ${hedmEmailType} -> Banner email type ${intConfig.value}"
-        return intConfig.value
+        EmailType emailType = EmailType.findByCode(intConfig.value)
+        if (!emailType) {
+            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException('goriccr.invalid.value.message', [PERSON_EMAIL_TYPE]))
+        }
+        return emailType
     }
 
 
