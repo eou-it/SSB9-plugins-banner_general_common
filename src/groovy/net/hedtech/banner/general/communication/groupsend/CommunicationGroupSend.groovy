@@ -5,8 +5,10 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
+import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -145,5 +147,18 @@ class CommunicationGroupSend implements Serializable {
         return results
     }
 
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationGroupSend.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
+            ilike("createdBy", filterData?.params?.createdBy)
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
+    }
 }
 

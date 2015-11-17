@@ -24,6 +24,10 @@ import javax.persistence.*
                 query = """ FROM CommunicationGroupSendView a
                             WHERE  a.populationId = :populationId
                             ORDER BY a.creationDateTime desc
+                        """),
+        @NamedQuery(name = "CommunicationGroupSendView.fetchById",
+                query = """ FROM CommunicationGroupSendView a
+                            WHERE  a.id = :groupSendId
                         """)
 ])
 class CommunicationGroupSendView implements Serializable {
@@ -126,6 +130,17 @@ class CommunicationGroupSendView implements Serializable {
         return query
     }
 
+    public static CommunicationGroupSendView fetchById(Long groupSendId) {
+
+        def query =
+                CommunicationGroupSendView.withSession { session ->
+                    session.getNamedQuery('CommunicationGroupSendView.fetchById')
+                            .setLong('groupSendId', groupSendId)
+                            .list()[0]
+
+                }
+        return query
+    }
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
