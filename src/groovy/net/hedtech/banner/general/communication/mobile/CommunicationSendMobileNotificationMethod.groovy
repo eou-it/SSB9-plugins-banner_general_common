@@ -23,21 +23,19 @@ import static groovyx.net.http.Method.POST
 class CommunicationSendMobileNotificationMethod {
     private Log log = LogFactory.getLog(this.getClass())
     String serverResponse
-
+    def communicationOrganizationService
 
     public void execute(CommunicationMobileNotificationMessage message, CommunicationOrganization senderOrganization) {
         log.trace("Begin send mobile notification.")
         assert (senderOrganization)
         assert (message)
         assert (message.referenceId)
+        assert( communicationOrganizationService != null )
 
         serverResponse = null
+        CommunicationOrganization rootOrganization = CommunicationOrganization.fetchRoot()
 
-        if (senderOrganization.encryptedMobileApplicationKey) {
-            assert senderOrganization.clearMobileApplicationKey
-        }
-
-        if (isEmpty(senderOrganization.mobileEndPointUrl)) {
+        if (isEmpty(rootOrganization.mobileEndPointUrl)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(),
                     "emptyMobileNotificationEndpointUrl",
@@ -45,7 +43,25 @@ class CommunicationSendMobileNotificationMethod {
             )
         }
 
-        if (isEmpty(senderOrganization.mobileApplicationName)) {
+        if (!message.externalUser || message.externalUser.trim().length() == 0) {
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationService.class,
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(),
+                    "noExternalUser"
+            )
+        }
+
+        String mobileApplicationName
+        String mobileApplicationKey
+
+        if (senderOrganization?.mobileApplicationName && senderOrganization?.mobileApplicationName.trim().length() > 0) {
+            mobileApplicationName = senderOrganization.mobileApplicationName
+            mobileApplicationKey = communicationOrganizationService.decryptPassword( senderOrganization.encryptedMobileApplicationKey )
+        } else {
+            mobileApplicationName = rootOrganization?.mobileApplicationName
+            mobileApplicationKey = communicationOrganizationService.decryptPassword( rootOrganization.encryptedMobileApplicationKey )
+        }
+
+        if (isEmpty(mobileApplicationName)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
                     "emptyMobileNotificationApplicationName",
@@ -53,7 +69,7 @@ class CommunicationSendMobileNotificationMethod {
             )
         }
 
-        if (isEmpty(senderOrganization.encryptedMobileApplicationKey)) {
+        if (isEmpty(mobileApplicationKey)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(),
                     "emptyMobileNotificationApplicationKey",
@@ -61,17 +77,10 @@ class CommunicationSendMobileNotificationMethod {
             )
         }
 
-        if (!message.externalUser || message.externalUser.trim().length() == 0) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationSendMobileNotificationService.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(),
-                    "noExternalUser"
-            )
-        }
-
         try {
             // Ex: 'https://mobiledev1.ellucian.com/'
-            HTTPBuilder httpBuilder = new HTTPBuilder(senderOrganization.mobileEndPointUrl)
-            httpBuilder.auth.basic senderOrganization.mobileApplicationName, senderOrganization.clearMobileApplicationKey
+            HTTPBuilder httpBuilder = new HTTPBuilder(rootOrganization.mobileEndPointUrl)
+            httpBuilder.auth.basic mobileApplicationName, mobileApplicationKey
             httpBuilder.request(POST, JSON) { request ->
                 headers.Accept = 'application/json'
 

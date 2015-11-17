@@ -33,19 +33,16 @@ class CommunicationSendMobileNotificationService {
 
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
 
-        CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
-        if (organization?.encryptedMobileApplicationKey) {
-            organization.clearMobileApplicationKey = communicationOrganizationService.decryptPassword( organization.encryptedMobileApplicationKey )
-        }
+        CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(organizationId)
         if (testOverride) {
             message.externalUser = testOverride.externalUser
         }
 
-        CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod();
-        notificationMethod.execute( message, organization )
+        CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService );
+        notificationMethod.execute( message, senderOrganization )
 
         try {
-            track( organization, message, recipientData, notificationMethod.serverResponse )
+            track( senderOrganization, message, recipientData, notificationMethod.serverResponse )
         } catch (Throwable t) {
             log.error( t )
             throw t;

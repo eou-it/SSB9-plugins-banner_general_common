@@ -23,7 +23,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
     def communicationOrganizationService
-    CommunicationOrganization testOrganization
+    CommunicationOrganization rootOrganization
 
 
     @Before
@@ -56,8 +56,33 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.externalUser = "cmobile"
         message.push = true
 
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
-        //sendMethod.execute( message, testOrganization )
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
+        sendMethod.execute( message, rootOrganization )
+    }
+
+    @Test
+    public void testSendChildOrganization() {
+        // test that child organization inherits endpoint from root organization
+        CommunicationOrganization childOrganization = new CommunicationOrganization()
+        childOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+
+        CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
+        message.mobileHeadline = "testSendChildOrganization"
+        message.referenceId = UUID.randomUUID().toString()
+        message.externalUser = "cmobile"
+        message.push = true
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
+        sendMethod.execute( message, childOrganization )
+
+        rootOrganization.mobileApplicationName = ""
+        rootOrganization.encryptedMobileApplicationKey = ""
+        rootOrganization = communicationOrganizationService.update( rootOrganization )
+
+        childOrganization.mobileApplicationName = "StudentSuccess"
+        childOrganization.clearMobileApplicationKey = "ss-key-value"
+        childOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( childOrganization.clearMobileApplicationKey )
+        sendMethod.execute( message, childOrganization )
     }
 
     @Test
@@ -65,37 +90,33 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendBadEndpoint"
         message.referenceId = UUID.randomUUID().toString()
-
         message.externalUser = "cmobile"
         message.push = true
 
-        CommunicationOrganization badOrganization = new CommunicationOrganization()
-        badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = ""
-        badOrganization.mobileApplicationName = "StudentSuccess"
-        badOrganization.clearMobileApplicationKey = "ss-key-value"
-        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
+        rootOrganization.mobileEndPointUrl = ""
+        rootOrganization = communicationOrganizationService.update( rootOrganization )
 
-
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
         try {
-            sendMethod.execute( message, badOrganization )
+            sendMethod.execute( message, rootOrganization )
             fail( "Expected EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL." )
         } catch( CommunicationApplicationException e ) {
             assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(), e.type )
         }
 
-        badOrganization.mobileEndPointUrl = "bogus"
+        rootOrganization.mobileEndPointUrl = "bogus"
+        rootOrganization = communicationOrganizationService.update( rootOrganization )
         try {
-            sendMethod.execute( message, badOrganization )
+            sendMethod.execute( message, rootOrganization )
             fail( "Expected INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL." )
         } catch( CommunicationApplicationException e ) {
             assertEquals( CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(), e.type )
         }
 
-        badOrganization.mobileEndPointUrl = "https://mobiledev"
+        rootOrganization.mobileEndPointUrl = "https://mobiledev"
+        rootOrganization = communicationOrganizationService.update( rootOrganization )
         try {
-            sendMethod.execute( message, badOrganization )
+            sendMethod.execute( message, rootOrganization )
             fail( "Expected UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT." )
         } catch( CommunicationApplicationException e ) {
             assertEquals( CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.toString(), e.type )
@@ -112,9 +133,9 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.externalUser = ""
         message.push = true
 
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
         try {
-            sendMethod.execute( message, testOrganization )
+            sendMethod.execute( message, rootOrganization )
             fail( "Expected EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER." )
         } catch( CommunicationApplicationException e ) {
             assertEquals( CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(), e.type )
@@ -136,7 +157,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = "StudentSuccess"
 
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
 
         badOrganization.clearMobileApplicationKey = ""
         badOrganization.encryptedMobileApplicationKey = ""
@@ -181,9 +202,12 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = ""
         badOrganization.clearMobileApplicationKey = "ss-key-value"
-        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
+        badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
 
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
+        rootOrganization.mobileApplicationName = ""
+        rootOrganization = communicationOrganizationService.update( rootOrganization )
+
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
         try {
             sendMethod.execute( message, badOrganization )
             fail( "Expected EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME." )
@@ -216,8 +240,8 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.externalUser = "cmobile"
         message.push = true
 
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
-//        sendMethod.execute( message, testOrganization )
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
+        sendMethod.execute( message, rootOrganization )
     }
 
 
@@ -241,18 +265,19 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.externalUser = "cmobile"
         message.push = true
 
-        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod()
-//        sendMethod.execute( message, testOrganization )
+        CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
+        sendMethod.execute( message, rootOrganization )
     }
 
 
     protected void setUpTestOrganization() {
-        testOrganization = new CommunicationOrganization()
-        testOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        testOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
-        testOrganization.mobileApplicationName = "StudentSuccess"
-        testOrganization.clearMobileApplicationKey = "ss-key-value"
-        testOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( testOrganization.clearMobileApplicationKey )
+        rootOrganization = new CommunicationOrganization()
+        rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+        rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
+        rootOrganization.mobileApplicationName = "StudentSuccess"
+        rootOrganization.clearMobileApplicationKey = "ss-key-value"
+        rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
+        communicationOrganizationService.create( rootOrganization )
     }
 
 }
