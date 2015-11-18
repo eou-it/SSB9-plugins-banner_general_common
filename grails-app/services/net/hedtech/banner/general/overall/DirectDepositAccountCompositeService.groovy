@@ -1,5 +1,6 @@
 package net.hedtech.banner.general.overall
 
+import grails.converters.JSON
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 
@@ -7,6 +8,7 @@ class DirectDepositAccountCompositeService {
 
     def directDepositAccountService
     def bankRoutingInfoService
+    def directDepositPayrollHistoryService
 
     /**
      * @desc This method creates or updates a Direct Deposit account
@@ -41,6 +43,67 @@ class DirectDepositAccountCompositeService {
         account = directDepositAccountService.createOrUpdate( [domainModel: account] )
 
         return account
+    }
+
+    /**
+     * @desc This method retrieves user payroll allocations and calculates the currency
+     *       amount of each allocation based on most recent pay distribution.
+     * @return
+     */
+    def getUserHrAllocations(pidm) {
+        def modelList = []
+        def lastPayDist =  directDepositPayrollHistoryService.getLastPayDistribution(pidm)
+
+        if (lastPayDist) {
+            def total = lastPayDist.totalNet
+            def totalLeft = total
+            def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
+            allocations = []
+
+            // Calculate the amount for each allocation, going in priority order
+            allocations.each {
+                // Populate model
+                def model = [:]
+
+                model.bankRoutingInfo = [:]
+
+                if (it.bankRoutingInfo) {
+                    model.bankRoutingInfo.bankName = it.bankRoutingInfo.bankName
+                    model.bankRoutingInfo.bankRoutingNum = it.bankRoutingInfo.bankRoutingNum
+                }
+
+                model.bankAccountNum = it.bankAccountNum
+                model.accountType = it.accountType
+                model.status = it.status
+                model.priority = it.priority
+                model.amount = it.amount
+                model.percent = it.percent
+
+                // Calculate allocated amount
+                def amt = it.amount
+                def pct = it.percent
+                def calcAmt = 0
+
+                if (amt) {
+                    calcAmt = (amt > totalLeft) ? totalLeft : amt
+                } else if (pct) {
+                    calcAmt = total * pct / 100
+
+                    if (calcAmt > totalLeft) {
+                        calcAmt = totalLeft
+                    }
+                }
+
+                totalLeft -= calcAmt
+
+                model.calculatedAmount = calcAmt
+
+                // Add to list of allocations
+                modelList.push(model)
+            }
+        }
+
+        modelList
     }
 
     private def validateRoutingNumExistsInMap(directDepositAccountMap) {
