@@ -134,12 +134,10 @@ class PersonFilterCompositeService {
             query += """ and  a.selection like  :selection  """
             namedParams.put("selection", (!content.get(sortField).trim().contains("%")) ? "%${content.get(sortField).trim().toUpperCase()}%" : content.get(sortField).trim().toUpperCase())
         }
-
+        query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
         if (count) {
-            query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
             result = PopulationSelectionExtract.executeQuery(query, namedParams)?.size()
         } else {
-            query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
             Integer max = content.max.trim().toInteger()
             Integer offset = content.offset?.trim()?.toInteger() ?: 0
             if (content.sort) {
