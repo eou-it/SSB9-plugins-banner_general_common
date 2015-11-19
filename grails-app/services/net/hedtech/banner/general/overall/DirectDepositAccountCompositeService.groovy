@@ -3,12 +3,16 @@ package net.hedtech.banner.general.overall
 import grails.converters.JSON
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
+import net.hedtech.banner.general.system.InstitutionalDescription
+import org.springframework.web.context.request.RequestContextHolder
 
 class DirectDepositAccountCompositeService {
 
     def directDepositAccountService
     def bankRoutingInfoService
     def directDepositPayrollHistoryService
+    def currencyFormatService
+
 
     /**
      * @desc This method creates or updates a Direct Deposit account
@@ -58,7 +62,6 @@ class DirectDepositAccountCompositeService {
             def total = lastPayDist.totalNet
             def totalLeft = total
             def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
-            allocations = []
 
             // Calculate the amount for each allocation, going in priority order
             allocations.each {
@@ -76,27 +79,37 @@ class DirectDepositAccountCompositeService {
                 model.accountType = it.accountType
                 model.status = it.status
                 model.priority = it.priority
-                model.amount = it.amount
-                model.percent = it.percent
 
-                // Calculate allocated amount
+
+                // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or "Remaining")
                 def amt = it.amount
                 def pct = it.percent
                 def calcAmt = 0
+                def allocationByUser = ""
 
                 if (amt) {
                     calcAmt = (amt > totalLeft) ? totalLeft : amt
+
+                    // Allocation as set by user
+                    allocationByUser = formatCurrency(calcAmt)
                 } else if (pct) {
+                    // Calculate amount based on percent and last pay distribution
                     calcAmt = total * pct / 100
 
                     if (calcAmt > totalLeft) {
                         calcAmt = totalLeft
                     }
+
+                    // Allocation as set by user
+                    // (If it's the last, i.e. lowest priority, allocation and is 100%, then it's
+                    // labeled as "Remaining".)
+                    allocationByUser = (it == allocations.last() && pct > 99.9) ? "Remaining" : pct + "%"
                 }
 
                 totalLeft -= calcAmt
 
-                model.calculatedAmount = calcAmt
+                model.calculatedAmount = formatCurrency(calcAmt)
+                model.allocation = allocationByUser
 
                 // Add to list of allocations
                 modelList.push(model)
@@ -137,5 +150,34 @@ class DirectDepositAccountCompositeService {
         account.priority = (lowestPriority ? lowestPriority+1 : 1)
 
         account
+    }
+
+    /**
+     * Formats a Double or BigDecimal to currency.  This is null safe.
+     */
+    private formatCurrency(amount) {
+        def formattedAmount
+
+        if (amount instanceof BigDecimal
+                || amount instanceof Double) {
+            formattedAmount = currencyFormatService.format(getCurrencyCode(),
+                    (amount instanceof BigDecimal ? amount : BigDecimal.valueOf(amount)))
+        }
+
+        return formattedAmount
+    }
+
+    public static getCurrencyCode() {
+        def currencyCode
+        def session = RequestContextHolder?.currentRequestAttributes()?.request?.session
+
+        if (session?.getAttribute("baseCurrencyCode")) {
+            currencyCode = session.getAttribute("baseCurrencyCode")
+        } else {
+            currencyCode = InstitutionalDescription.fetchByKey()?.baseCurrCode
+            session.setAttribute("baseCurrencyCode", currencyCode)
+        }
+
+        return currencyCode
     }
 }
