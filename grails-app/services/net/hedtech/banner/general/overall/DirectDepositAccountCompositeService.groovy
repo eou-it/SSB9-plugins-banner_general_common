@@ -55,30 +55,32 @@ class DirectDepositAccountCompositeService {
      * @return
      */
     def getUserHrAllocations(pidm) {
-        def modelList = []
+        def model = [:]
         def lastPayDist =  directDepositPayrollHistoryService.getLastPayDistribution(pidm)
+        def totalAmount = 0
 
         if (lastPayDist) {
             def total = lastPayDist.totalNet
             def totalLeft = total
             def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
+            def allocList = []
 
             // Calculate the amount for each allocation, going in priority order
             allocations.each {
                 // Populate model
-                def model = [:]
+                def allocModel = [:]
 
-                model.bankRoutingInfo = [:]
+                allocModel.bankRoutingInfo = [:]
 
                 if (it.bankRoutingInfo) {
-                    model.bankRoutingInfo.bankName = it.bankRoutingInfo.bankName
-                    model.bankRoutingInfo.bankRoutingNum = it.bankRoutingInfo.bankRoutingNum
+                    allocModel.bankRoutingInfo.bankName = it.bankRoutingInfo.bankName
+                    allocModel.bankRoutingInfo.bankRoutingNum = it.bankRoutingInfo.bankRoutingNum
                 }
 
-                model.bankAccountNum = it.bankAccountNum
-                model.accountType = it.accountType
-                model.status = it.status
-                model.priority = it.priority
+                allocModel.bankAccountNum = it.bankAccountNum
+                allocModel.accountType = it.accountType
+                allocModel.status = it.status
+                allocModel.priority = it.priority
 
 
                 // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or "Remaining")
@@ -91,7 +93,7 @@ class DirectDepositAccountCompositeService {
                     calcAmt = (amt > totalLeft) ? totalLeft : amt
 
                     // Allocation as set by user
-                    allocationByUser = formatCurrency(calcAmt)
+                    allocationByUser = formatCurrency(amt)
                 } else if (pct) {
                     // Calculate amount based on percent and last pay distribution
                     calcAmt = total * pct / 100
@@ -103,20 +105,26 @@ class DirectDepositAccountCompositeService {
                     // Allocation as set by user
                     // (If it's the last, i.e. lowest priority, allocation and is 100%, then it's
                     // labeled as "Remaining".)
-                    allocationByUser = (it == allocations.last() && pct > 99.9) ? "Remaining" : pct + "%"
+                    allocationByUser = (it == allocations.last() && pct > 99.9) ? "Remaining" : pct.intValue() + "%"
                 }
 
                 totalLeft -= calcAmt
 
-                model.calculatedAmount = formatCurrency(calcAmt)
-                model.allocation = allocationByUser
+                totalAmount += calcAmt
+
+                allocModel.calculatedAmount = formatCurrency(calcAmt)
+                allocModel.allocation = allocationByUser
 
                 // Add to list of allocations
-                modelList.push(model)
+                allocList.push(allocModel)
             }
+
+            model.allocations = allocList
         }
 
-        modelList
+        model.totalAmount = totalAmount ? formatCurrency(totalAmount) : ""
+
+        model
     }
 
     private def validateRoutingNumExistsInMap(directDepositAccountMap) {
