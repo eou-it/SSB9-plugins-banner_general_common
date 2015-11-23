@@ -241,11 +241,11 @@ class UserRoleCompositeService extends LdmService{
 
     private def setStudentRole(def pidms, def results) {
         pidms?.each { it ->
-            def roles = results.get(it) ?: []
+            def roles = results.get(it.toInteger()) ?: []
             def newRole = new RoleDetail()
             newRole.role = 'Student'
             roles << newRole
-            results.put(it, roles)
+            results.put(it.toInteger(), roles)
         }
         return results
     }

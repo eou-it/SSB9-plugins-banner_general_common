@@ -18,6 +18,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -25,6 +26,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def personCompositeService
     def personBasicPersonBaseService
     def userRoleCompositeService
+
     private static final log = Logger.getLogger(getClass())
 
     //Test data for creating new domain instance
@@ -97,8 +99,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_credential_type3 = "Banner UDC ID"
     def i_success_credential_id4 = "HOSP0001"
     def i_success_credential_type4 = "Banner ID"
-    def i_failed_update_credential_id = "TTTT"
-    def i_failed_update_credential_type = "Social Security Number"
+    def i_update_credential_id = "TTTT"
+    def i_update_credential_type = "Social Security Number"
     def i_success_alternate_first_name = "John"
     def i_success_alternate_middle_name = "A"
     def i_success_alternate_last_name = "Jorden"
@@ -116,6 +118,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_succes_invalid_phone_number_long2 = "+01-123-456-7890"
     def i_succes_invalid_phone_number_long3 = "123 456 7890123"
     def i_succes_invalid_phone_number_long4 = "+01 123 456 7890"
+    static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
+    static final String PROCESS_CODE = "HEDM"
 
     def i_success_credential_type4_filter="Banner ID"
     def i_failure_credential_type4_filter="BannerId"
@@ -1093,7 +1097,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // set up params for call
         def persons = []
-          String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
+        String guid2 = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey('person-filters', 'STUDENT-^HEDMPERFORM-^BANNER-^GRAILS')[0].guid
         assertNotNull guid2
         // get first page
         def params = [personFilter: guid2]
@@ -1285,8 +1289,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "HOME", testPerson.emails[0].email.emailType.code
         assertEquals perEmail[0].id, testPerson.emails[0].email.id
         assertEquals perRace.race, testPerson.races[0].raceDecorator.race
-        assertNotNull testPerson.roles[0][0].role in ["faculty", "student"]
-        assertNotNull testPerson.roles[1][0].role in ["faculty", "student"]
+        def facultyRole = testPerson.roles.find { it.role.equalsIgnoreCase("faculty") }
+        assertNotNull facultyRole
+        def studentRole = testPerson.roles.find { it.role.equalsIgnoreCase("student") }
+        assertNotNull studentRole
     }
 
     //GET- Person by guid API
@@ -1463,7 +1469,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //POST- Person Create API
-    @Test
+    // emailType "Preferred" is ignored in 9.4.0.1 SR.  So ignoring test
+    @Ignore
     void testCreatePersonWithActiveAndPreferredEmail() {
         Map content = newPersonWithPreferredEmailRequest()
 
@@ -1613,7 +1620,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_phone_type_mobile
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile.phoneExtension
-        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile.phoneNumberDetail
+        assertEquals i_succes_invalid_phone_number_long1.substring(0, 22), o_phone_type_mobile.phoneNumberDetail
         String phoneNumberMobile = (o_phone_type_mobile.countryPhone ?: "") + (o_phone_type_mobile.phoneArea ?: "") + (o_phone_type_mobile.phoneNumber ?: "")
         assertEquals phoneNumberMobile, o_phone_type_mobile.phoneNumberDetail
 
@@ -1693,13 +1700,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_update
         assertNotNull o_success_person_update.guid
-        assertEquals  o_success_person_create.guid, o_success_person_update.guid
+        assertEquals o_success_person_create.guid, o_success_person_update.guid
 
         def o_phone_type_mobile_update = o_success_person_update.phones.find { it.phoneType == "Mobile" }
         assertNotNull o_phone_type_mobile_update
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
-        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile_update.phoneNumberDetail
+        assertEquals i_succes_invalid_phone_number_long1.substring(0, 22), o_phone_type_mobile_update.phoneNumberDetail
         String phoneNumberMobileUpdate = (o_phone_type_mobile_update.countryPhone ?: "") + (o_phone_type_mobile_update.phoneArea ?: "") + (o_phone_type_mobile_update.phoneNumber ?: "")
         assertEquals phoneNumberMobileUpdate, o_phone_type_mobile_update.phoneNumberDetail
 
@@ -1733,7 +1740,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testUpdatePersonWithNewInvalidPhoneNumber() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
-        Map content_create= newPersonWithAddressRequest()
+        Map content_create = newPersonWithAddressRequest()
         def o_success_person_create = personCompositeService.create(content_create)
 
         assertNotNull o_success_person_create
@@ -1747,13 +1754,13 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_update
         assertNotNull o_success_person_update.guid
-        assertEquals  o_success_person_create.guid, o_success_person_update.guid
+        assertEquals o_success_person_create.guid, o_success_person_update.guid
 
         def o_phone_type_mobile_update = o_success_person_update.phones.find { it.phoneType == "Mobile" }
         assertNotNull o_phone_type_mobile_update
         assertEquals i_success_phone_type_mobile, o_phone_type_mobile_update.phoneType
         assertEquals i_success_phone_extension, o_phone_type_mobile_update.phoneExtension
-        assertEquals i_succes_invalid_phone_number_long1.substring(0,22), o_phone_type_mobile_update.phoneNumberDetail
+        assertEquals i_succes_invalid_phone_number_long1.substring(0, 22), o_phone_type_mobile_update.phoneNumberDetail
         String phoneNumberMobileUpdate = (o_phone_type_mobile_update.countryPhone ?: "") + (o_phone_type_mobile_update.phoneArea ?: "") + (o_phone_type_mobile_update.phoneNumber ?: "")
         assertEquals phoneNumberMobileUpdate, o_phone_type_mobile_update.phoneNumberDetail
 
@@ -2091,25 +2098,26 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull i_success_guid
         Map params = updatePersonWithPreferredEmailAddress(i_success_guid)
 
+        // emailType "Preferred" is ignored in 9.4.0.1 SR.  So removing it from request
+        params.emails.removeAll { it.emailType.trim() == i_success_emailType_preferred }
+
         //update PersonBasicPersonBase info
         def o_person_update = personCompositeService.update(params)
 
         assertNotNull o_person_update
         assertEquals i_success_guid, o_person_update.guid
-        assertEquals 3, o_person_update.emails?.size()
+        assertEquals 2, o_person_update.emails?.size()
         assertEquals i_success_guid_personal, o_person_update.emails[0].guid
         assertEquals i_success_emailType_personal, o_person_update.emails[0].emailType
         assertEquals i_success_emailAddress_personal, o_person_update.emails[0].emailAddress
-        assertEquals i_success_guid_personal, o_person_update.emails[1].guid
-        assertEquals i_success_emailType_preferred, o_person_update.emails[1].emailType
-        assertEquals i_success_emailAddress_personal, o_person_update.emails[1].emailAddress
-        assertEquals i_success_guid_institution, o_person_update.emails[2].guid
-        assertEquals i_success_emailType_institution, o_person_update.emails[2].emailType
-        assertEquals i_success_emailAddress_institution, o_person_update.emails[2].emailAddress
+        assertEquals i_success_guid_institution, o_person_update.emails[1].guid
+        assertEquals i_success_emailType_institution, o_person_update.emails[1].emailType
+        assertEquals i_success_emailAddress_institution, o_person_update.emails[1].emailAddress
     }
 
     //PUT- person update API
-    @Test
+    // emailType "Preferred" is ignored in 9.4.0.1 SR.  So ignoring test.
+    @Ignore
     void testUpdatePreferredPersonEmailHavingExistingActiveEmailRecord() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
 
@@ -2160,19 +2168,89 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_emailAddress_work, o_person_update2.emails[1].emailAddress
     }
 
+
+    @Test
+    void testUpdatePerson_RetainPreferredFlagByEmailType() {
+        Map content = newPersonWithPreferredEmailRequest()
+        // emailType "Preferred" is ignored in 9.4.0.1 SR.  So removing it from request.
+        content.emails.removeAll { it.emailType.trim() == i_success_emailType_preferred }
+
+        // Create person with 2 emails. One emailType is "Personal" and other emailType is "Institution".
+        def o_success_person_create = personCompositeService.create(content)
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.emails?.size()
+        assertEquals i_success_guid_personal, o_success_person_create.emails[0].guid
+        assertEquals i_success_emailType_personal, o_success_person_create.emails[0].emailType
+        assertEquals i_success_emailAddress_personal, o_success_person_create.emails[0].emailAddress
+        assertEquals i_success_guid_institution, o_success_person_create.emails[1].guid
+        assertEquals i_success_emailType_institution, o_success_person_create.emails[1].emailType
+        assertEquals i_success_emailAddress_institution, o_success_person_create.emails[1].emailAddress
+
+        String personGuid = o_success_person_create.guid
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid("persons", personGuid)
+        Integer pidm = globalUniqueIdentifier.domainKey?.toInteger()
+
+        List<PersonEmail> personEmails = PersonEmail.fetchByPidmAndStatus(pidm, "A")
+
+        // Make emailType "Institution" as preferred
+        PersonEmail instEmail = personEmails.find {
+            it.emailAddress == i_success_emailAddress_institution
+        }
+        instEmail.preferredIndicator = true
+        instEmail.save(flush: true, failOnError: true)
+
+        content = updatePersonWithPreferredEmailAddress(personGuid)
+        // emailType "Preferred" is ignored in 9.4.0.1 SR.  So removing it from request.
+        content.emails.removeAll { it.emailType.trim() == i_success_emailType_preferred }
+
+        // Change "Institution" email address in the request
+        def obj = content.emails.find { it.emailType.trim() == i_success_emailType_institution }
+        obj.guid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        obj.emailAddress = "hoby@test.com"
+
+        // Update person
+        def o_person_update = personCompositeService.update(content)
+
+        assertNotNull o_person_update
+        assertEquals personGuid, o_person_update.guid
+        assertEquals 3, o_person_update.emails?.size()
+        assertEquals i_success_guid_personal, o_person_update.emails[0].guid
+        assertEquals i_success_emailType_personal, o_person_update.emails[0].emailType
+        assertEquals i_success_emailAddress_personal, o_person_update.emails[0].emailAddress
+        assertEquals obj.guid, o_person_update.emails[1].guid
+        assertEquals i_success_emailType_institution, o_person_update.emails[1].emailType
+        assertEquals obj.emailAddress, o_person_update.emails[1].emailAddress
+        assertEquals obj.guid, o_person_update.emails[2].guid
+        assertEquals i_success_emailType_preferred, o_person_update.emails[2].emailType
+        assertEquals obj.emailAddress, o_person_update.emails[2].emailAddress
+    }
+
     //PUT- person update API
     @Test
-    void testUpdateFailedPersonCredentialWithExistingSSN() {
-        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', '50199')?.guid
-        Map params = updatePersonWithModifiedExistingSSN(guid)
+    void testUpdatePersonCredentialWithExistingSSN() {
+        def pidm = PersonUtility.getPerson(i_success_credential_id4)?.pidm
 
-        try {
-            personCompositeService.update(params)
-            fail("This should have failed as the course is missing")
-        } catch (ApplicationException ae) {
-            assertApplicationException ae, 'ssn.value.exists.message'
+        assertNotNull pidm
+        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('persons', pidm)?.guid
+        Map params = updatePersonWithModifiedExistingSSN(guid)
+        def o_success_person_ssn_update = personCompositeService.update(params)
+
+        assertNotNull o_success_person_ssn_update
+        def o_ssn_update = o_success_person_ssn_update.credentials.find {
+            it.credentialType == "Social Security Number" || it.credentialType == "Social Insurance Number"
         }
 
+        assertNotNull o_ssn_update
+        assertEquals i_update_credential_type, o_ssn_update.credentialType
+        IntegrationConfiguration personSSN = IntegrationConfiguration.fetchByProcessCodeAndSettingName(PROCESS_CODE, PERSON_UPDATESSN)
+
+        def ssn = PersonBasicPersonBase.fetchByPidm(pidm).ssn
+        if (personSSN?.value == 'Y' || (personSSN?.value == 'N' && ssn == null)) {
+            assertEquals i_update_credential_id, o_ssn_update.credentialId
+        } else {
+            assertEquals o_ssn_update.credentialId, ssn
+        }
     }
 
     //PUT- person update API
@@ -2555,7 +2633,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map updatePersonWithModifiedExistingSSN(guid) {
         Map params = [id         : guid,
-                      credentials: [[credentialType: i_failed_update_credential_type, credentialId: i_failed_update_credential_id]],
+                      credentials: [[credentialType: i_update_credential_type, credentialId: i_update_credential_id]],
         ]
         return params
     }
