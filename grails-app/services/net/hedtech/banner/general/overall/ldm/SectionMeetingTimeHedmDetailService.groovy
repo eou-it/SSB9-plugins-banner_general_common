@@ -8,8 +8,15 @@ import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
+/**
+ * The service class for SectionMeetingTimeHedmDetail domain
+ * We are overriding all the methods from ServiceBase instead of using
+ * preCreate()/preUpdate()/preDelete() cause the domain does not
+ * support id field, and all these methods depend on domain having id field
+ */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 class SectionMeetingTimeHedmDetailService extends ServiceBase {
+
     public def create( domainModelOrMap, flushImmediately = true ) {
         throwUnsupportedException()
     }
@@ -44,5 +51,11 @@ class SectionMeetingTimeHedmDetailService extends ServiceBase {
 
     private void throwUnsupportedException(){
         throw new ApplicationException(SectionMeetingTimeHedmDetail.class, "unsupported.operation")
+    }
+
+    public List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(List guids){
+        List<SectionMeetingTimeHedmDetail> sectionMeetingTimeHedmDetails = []
+        sectionMeetingTimeHedmDetails = SectionMeetingTimeHedmDetail.fetchAllByGuidInList(guids)
+        return sectionMeetingTimeHedmDetails
     }
 }

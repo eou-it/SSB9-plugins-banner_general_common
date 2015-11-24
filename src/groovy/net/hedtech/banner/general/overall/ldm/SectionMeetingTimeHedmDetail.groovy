@@ -11,6 +11,12 @@ import javax.persistence.*
  * Section Meeting Times model for HEDM search
  * It is a read-only model
  */
+
+@NamedQueries([
+        @NamedQuery(name = "SectionMeetingTimeHedmDetail.fetchAllByGuidInList",
+                query = """FROM SectionMeetingTimeHedmDetail where guid in (:guids)""")
+])
+
 @Entity
 @Table(name = "SVQ_SSRMEET_GORGUID")
 @DatabaseModifiesState
@@ -137,5 +143,18 @@ class SectionMeetingTimeHedmDetail implements Serializable {
         result = 31 * result + (buildingDescription != null ? buildingDescription.hashCode() : 0)
         result = 31 * result + (houseNumber != null ? houseNumber.hashCode() : 0)
         return result
+    }
+
+    static List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(List guids) {
+        List<SectionMeetingTimeHedmDetail> sectionMeetingTimeHedmDetails = []
+
+        if (guids && guids.size() > 0) {
+            SectionMeetingTimeHedmDetail.withSession { session ->
+                sectionMeetingTimeHedmDetails = session.getNamedQuery('SectionMeetingTimeHedmDetail.fetchAllByGuidInList')
+                        .setParameterList('guids', guids).list()
+            }
+        }
+
+        return sectionMeetingTimeHedmDetails
     }
 }
