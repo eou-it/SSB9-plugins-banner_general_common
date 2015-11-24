@@ -352,6 +352,24 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-credentials</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-credentials/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Degree.STVDEGC</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="erpApiConfig" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -375,6 +393,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-subjects"/>
                 <ref bean="ar-email-types"/>
                 <ref bean="ar-location-types"/>
+                <ref bean="ar-academic-credentials"/>
             </list>
         </property>
     </bean>
