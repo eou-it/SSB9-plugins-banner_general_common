@@ -67,21 +67,11 @@ class DirectDepositAccountCompositeService {
 
             // Calculate the amount for each allocation, going in priority order
             allocations.each {
-                // Populate model
-                def allocModel = [:]
-
-                allocModel.bankRoutingInfo = [:]
-
-                if (it.bankRoutingInfo) {
-                    allocModel.bankRoutingInfo.bankName = it.bankRoutingInfo.bankName
-                    allocModel.bankRoutingInfo.bankRoutingNum = it.bankRoutingInfo.bankRoutingNum
+                // Populate model, ignore generic domain fields
+                def alloc = it
+                def allocModel = alloc.class.declaredFields.findAll { !it.synthetic && it.name != 'constraints' && it.name != 'log' }.collectEntries {
+                    [ (it.name):alloc."$it.name" ]
                 }
-
-                allocModel.bankAccountNum = it.bankAccountNum
-                allocModel.accountType = it.accountType
-                allocModel.status = it.status
-                allocModel.priority = it.priority
-
 
                 // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or "Remaining")
                 def amt = it.amount
