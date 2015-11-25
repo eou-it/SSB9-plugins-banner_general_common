@@ -369,6 +369,23 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>phone-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/phone-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.TelephoneType.STVTELE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -394,6 +411,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-email-types"/>
                 <ref bean="ar-location-types"/>
                 <ref bean="ar-academic-credentials"/>
+                <ref bean="ar-phone-types"/>
             </list>
         </property>
     </bean>
