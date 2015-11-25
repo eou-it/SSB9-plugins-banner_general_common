@@ -6,11 +6,14 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.InstitutionalDescription
+import net.hedtech.banner.general.overall.ldm.LdmService
 
 import java.sql.SQLException
 
-class UserRoleCompositeService {
+class UserRoleCompositeService extends LdmService{
     def sessionFactory
+    def dateConvertHelperService
+    private static final List<String> VERSIONS = ["v1","v4"]
 
 /**
  *
@@ -149,6 +152,7 @@ class UserRoleCompositeService {
 
     Map<Integer, List<RoleDetail>> fetchAllRolesByPidmInList(List pidms, Boolean studentRole) {
         def results = [:]
+        def timeZone = "v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS))? dateConvertHelperService.getDBTimeZone() : ''
         def institution = InstitutionalDescription.fetchByKey()
         if (pidms.size()) {
             def connection
@@ -182,8 +186,8 @@ class UserRoleCompositeService {
                         def roles = results.get(faculty[0].toInteger()) ?: []
                         def newRole = new RoleDetail()
                         newRole.role = 'Faculty'
-                        newRole.effectiveStartDate = faculty[1]
-                        newRole.effectiveEndDate = faculty[2]
+                        newRole.effectiveStartDate ="v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)) ? dateConvertHelperService.convertDateIntoUTCFormat(faculty[1],timeZone):faculty[1]
+                        newRole.effectiveEndDate = "v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)) ? dateConvertHelperService.convertDateIntoUTCFormat(faculty[2],timeZone):faculty[2]
                         roles << newRole
                         results.put(faculty[0].toInteger(), roles)
                     }

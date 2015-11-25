@@ -14,6 +14,8 @@ import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v1.Occupancy
 import net.hedtech.banner.general.overall.ldm.v2.Room
+import net.hedtech.banner.general.overall.ldm.v4.RoomV4
+import net.hedtech.banner.general.overall.ldm.v4.WeekDays
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.DayOfWeek
 import net.hedtech.banner.general.system.ldm.SiteDetailCompositeService
@@ -34,7 +36,15 @@ class RoomCompositeService extends LdmService {
     private static final String LDM_NAME = 'rooms'
     private static final String PROCESS_CODE = "HEDM"
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
-    private static final List<String> VERSIONS = ["v1", "v2"]
+    private static final String SETTING_ROOM_LAYOUT_TYPE_V4= "ROOM.ROOMTYPE"
+    private static final List<String> VERSIONS = ["v1", "v2","v4"]
+    private static final String ROOM_LAYOUT_TYPE_SEMINAR = 'seminar'
+    private static final String ROOM_LAYOUT_TYPE_CLASSROOM_V4 = 'classroom'
+    private static final String FILTER_TYPE_ROOM_LAYOUT = 'roomLayoutType'
+    private static final String FILTER_TYPE_TYPE = 'type'
+
+
+    def roomTypeCompositeService
 
 
     List<AvailableRoom> list(Map params) {
@@ -46,6 +56,9 @@ class RoomCompositeService extends LdmService {
         RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
         params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
+            if("v4".equals( LdmService.getAcceptVersion(VERSIONS))){
+                prepareQapiV4Request(params)
+            }
             // POST /qapi/rooms (Search for available rooms)
             validateParams(params)
             Map filterParams = prepareSearchParams(params)
@@ -57,15 +70,20 @@ class RoomCompositeService extends LdmService {
                 entities << it[0]
             }
         } else {
-            // GET /api/rooms?filter[0][field]=roomLayoutType&filter[0][operator]=equals&filter[0][value]=Classroom
+            //v1- GET /api/rooms?filter[0][field]=roomLayoutType&filter[0][operator]=equals&filter[0][value]=Classroom
+            //v4- GET /api/rooms?filter[0][field]=type&filter[0][operator]=equals&filter[0][value]=classroom
             Map filterData = prepareParams(params)
             def roomTypes
-            if (filterData.params.containsKey('roomLayoutType')) {
-                roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterData.params?.roomLayoutType?.trim())]
+            String filterType = getFilterType(filterData)
+            if (filterData.params.containsKey(filterType)) {
+                roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterData.params?.get(filterType)?.trim())]
             } else {
                 roomTypes = getHEDMRoomTypes()
             }
-            entities = fetchAllActiveRoomsByRoomTypes(roomTypes, filterData.pagingAndSortParams)
+            entities = fetchAllActiveRoomsByRoomTypes(roomTypes, params,filterData.pagingAndSortParams)
+        }
+        if(entities.size()==0 && params.containsKey('building.id')){
+            throw new ApplicationException('rooms.building',new NotFoundException())
         }
         return getAvailableRooms(entities)
     }
@@ -78,12 +96,13 @@ class RoomCompositeService extends LdmService {
         } else {
             Map filterData = prepareParams(params)
             def roomTypes
-            if (filterData.params.containsKey('roomLayoutType')) {
-                roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterData.params?.roomLayoutType?.trim())]
+            String filterType = getFilterType(filterData)
+            if (filterData.params.containsKey(filterData)) {
+                roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterData.params?.get(filterType)?.trim())]
             } else {
                 roomTypes = getHEDMRoomTypes()
             }
-            return fetchAllActiveRoomsByRoomTypes(roomTypes, null, true)
+            return fetchAllActiveRoomsByRoomTypes(roomTypes,params, null, true)
         }
     }
 
@@ -91,8 +110,8 @@ class RoomCompositeService extends LdmService {
     private void validateParams(Map params) {
         validateRequiredFields(params)
         validateBeginAndEndDates(params)
-        validateTimeFormat(params.startTime?.trim(), 'startTime')
-        validateTimeFormat(params.endTime?.trim(), 'endTime')
+        validateTimeFormat(params.startTime?.trim())
+        validateTimeFormat(params.endTime?.trim())
         validateBeginAndEndTimes(params)
         validateRecurrence(params)
         validateOccupancies(params)
@@ -125,7 +144,7 @@ class RoomCompositeService extends LdmService {
     }
 
 
-    private void validateTimeFormat(String timeString, String fieldName) {
+    private void validateTimeFormat(String timeString) {
         String timeFormat = getTimeFormat().toLowerCase().replace('hh', HOUR_FORMAT).replace('mm', MINUTE_FORMAT).replace('ss', SECOND_FORMAT)
         if (timeString && (timeString.length() != getTimeFormat().length() || !(timeString ==~ /$timeFormat/))) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("invalid.timeFormat", []))
@@ -187,11 +206,18 @@ class RoomCompositeService extends LdmService {
         if (!params.occupancies) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.occupancies", []))
         }
-        if (!params.occupancies[0]?.roomLayoutType) {
-            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
-        }
         if (!params.occupancies[0]?.maxOccupancy) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.maxOccupancy", []))
+        }
+        if ("v4".equals(LdmService.getAcceptVersion(VERSIONS))) {
+            if (!params.roomTypes[0]?.type) {
+                throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
+            }
+        }
+        else {
+            if (!params.occupancies[0]?.roomLayoutType) {
+                throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
+            }
         }
         try {
             Integer.valueOf(params.occupancies[0]?.maxOccupancy)
@@ -199,7 +225,6 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("invalid.maxOccupancy", []))
         }
     }
-
 
     private Map prepareParams(Map params) {
         validateSearchCriteria(params)
@@ -210,7 +235,8 @@ class RoomCompositeService extends LdmService {
     private Map prepareSearchParams(Map params) {
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
-
+        String contentTypeVersion = getContentTypeVersion(VERSIONS)
+        String filterType = "v4".equals(LdmService.getAcceptVersion(VERSIONS))? params.roomTypes[0]?.type :params.occupancies[0]?.roomLayoutType
         inputData.put('startDate', convertString2Date(params.startDate?.trim()))
         inputData.put('endDate', convertString2Date(params.endDate?.trim()))
 
@@ -224,7 +250,7 @@ class RoomCompositeService extends LdmService {
 
         def roomTypes
         if (params.occupancies) {
-            roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(params.occupancies[0]?.roomLayoutType)]
+            roomTypes = [fetchBannerRoomTypeForLdmRoomLayoutType(filterType)]
         } else {
             roomTypes = getHEDMRoomTypes()
         }
@@ -241,9 +267,9 @@ class RoomCompositeService extends LdmService {
             inputData.put('capacity', null)
         }
 
-        if (!"v1".equals(getContentTypeVersion(VERSIONS))) {
+        if (!"v1".equals(contentTypeVersion)) {
             if (params.containsKey('building')) {
-                String buildingGuid = params.building?.trim()?.toLowerCase()
+                String buildingGuid = "v4".equals(contentTypeVersion)? params.building?.id?.trim()?.toLowerCase() : params.building?.trim()?.toLowerCase()
                 if (buildingGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, buildingGuid)
                     if (globalUniqueIdentifier) {
@@ -256,7 +282,7 @@ class RoomCompositeService extends LdmService {
                 }
             }
             if (params.containsKey('site')) {
-                String siteGuid = params.site?.trim()?.toLowerCase()
+                String siteGuid = "v4".equals(contentTypeVersion)?  params.site?.id?.trim()?.toLowerCase() : params.site?.trim()?.toLowerCase()
                 if (siteGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, siteGuid)
                     if (globalUniqueIdentifier) {
@@ -277,7 +303,7 @@ class RoomCompositeService extends LdmService {
 
     private void validateSearchCriteria(Map params) {
         def filters = QueryBuilder.createFilters(params)
-        def allowedSearchFields = ['roomLayoutType']
+        def allowedSearchFields = ['roomLayoutType','type']
         def allowedOperators = [Operators.EQUALS]
         RestfulApiValidationUtility.validateCriteria(filters, allowedSearchFields, allowedOperators)
     }
@@ -293,11 +319,21 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException("room", new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
-        if ("v2".equals(getAcceptVersion(VERSIONS))) {
-            SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
-            return new Room(housingRoomDescription, building, site, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
-        } else {
-            return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+        switch (LdmService.getAcceptVersion(VERSIONS)){
+            case "v1" :
+                return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+            case "v2" :
+                SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
+                return new Room(housingRoomDescription, building, site, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
+            case "v4" :
+                def roomTypes = [:]
+                findAllByProcessCodeAndSettingName(PROCESS_CODE, getSettingNameForRoom_type(LdmService.getAcceptVersion(VERSIONS)))?.each { it ->
+                    roomTypes.put( it?.value, it?.translationValue )
+                }
+                String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomTypes.get(housingRoomDescription?.roomType)) ? ROOM_LAYOUT_TYPE_SEMINAR : ''
+                occupancies = [new Occupancy(occupanciesType, housingRoomDescription?.capacity)]
+                SiteDetail site = housingRoomDescription?.siteGUID ? new SiteDetail(housingRoomDescription?.siteGUID) : null
+                return new RoomV4(housingRoomDescription, building, site, occupancies, housingRoomDescription?.roomGUID,roomTypeCompositeService.list([:]).get(0))
         }
     }
 
@@ -316,8 +352,10 @@ class RoomCompositeService extends LdmService {
 
     private String fetchBannerRoomTypeForLdmRoomLayoutType(String ldmRoomLayoutType) {
         String roomType = null
+        //fetching the Goricccr setting name for the room layout type
+        String roomTypeSettinName = getSettingNameForRoom_type(LdmService.getAcceptVersion(VERSIONS))
         if (ldmRoomLayoutType) {
-            IntegrationConfiguration integrationConfiguration = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE, ldmRoomLayoutType)
+            IntegrationConfiguration integrationConfiguration = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, roomTypeSettinName, ldmRoomLayoutType)
             roomType = integrationConfiguration?.value
         }
         if (!roomType) {
@@ -337,7 +375,7 @@ class RoomCompositeService extends LdmService {
     }
 
 
-    private def fetchAllActiveRoomsByRoomTypes(def roomTypes, def pagingAndSortParams, boolean count = false) {
+    private def fetchAllActiveRoomsByRoomTypes(def roomTypes, def queryParams,def pagingAndSortParams, boolean count = false) {
         log.trace "fetchAllActiveRoomsByRoomTypes:Begin"
         def result
 
@@ -346,6 +384,12 @@ class RoomCompositeService extends LdmService {
 
         params.put("inactiveIndicator", "Y")
         //criteria.add([key: "inactiveIndicator", binding: "roomStatusInactiveIndicator", operator: Operators.NOT_EQUALS_IGNORE_CASE])
+
+        //Adding the criteria for data links for building
+        if(queryParams?.containsKey('building.id')){
+            criteria.add([key: 'buildingId', binding: 'buildingGUID', operator: Operators.EQUALS_IGNORE_CASE])
+            params.put('buildingId',queryParams.get('building.id'))
+        }
 
         // TODO: Not sure why IN operator of DynamicFinder requires list in this format
         def roomTypeObjects = []
@@ -387,9 +431,10 @@ class RoomCompositeService extends LdmService {
      * @return
      */
     private def getHEDMRoomTypes() {
-        def list = IntegrationConfiguration.findAllByProcessCodeAndSettingName(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE)
+        String roomTypeSettinName = getSettingNameForRoom_type(LdmService.getAcceptVersion(VERSIONS))
+        def list = IntegrationConfiguration.findAllByProcessCodeAndSettingName(PROCESS_CODE, roomTypeSettinName)
         def intConfs = list?.findAll {
-            ["Banquet", "Booth", "Classroom", "Empty", "Theater"].contains(it.translationValue)
+            ["Banquet", "Booth", "Classroom", "Empty", "Theater","classroom"].contains(it.translationValue)
         }
         def map = [:]
         intConfs?.each {
@@ -408,7 +453,8 @@ class RoomCompositeService extends LdmService {
         log.debug( "Start of getAvailableRooms()" )
         def availableRooms = []
         Map roomType = [:]
-        findAllByProcessCodeAndSettingName(PROCESS_CODE, SETTING_ROOM_LAYOUT_TYPE)?.each { it ->
+        String roomTypeSettinName = getSettingNameForRoom_type(LdmService.getAcceptVersion(VERSIONS))
+        findAllByProcessCodeAndSettingName(PROCESS_CODE, roomTypeSettinName)?.each { it ->
             roomType.put( it.value, it.translationValue )
         }
         listHousingRoomDescriptionReadOnly?.each { HousingRoomDescriptionReadOnly housingRoomDescription ->
@@ -416,11 +462,20 @@ class RoomCompositeService extends LdmService {
             List occupancies = [new Occupancy(roomType.get( housingRoomDescription.roomType ), housingRoomDescription.capacity)]
             log.debug( "End of Occupancy()" )
             BuildingDetail building = housingRoomDescription.buildingGUID ? new BuildingDetail(housingRoomDescription.buildingGUID) : null
-            if ("v2".equals(getAcceptVersion(VERSIONS))) {
-                SiteDetail site = housingRoomDescription.siteGUID ? new SiteDetail(housingRoomDescription.siteGUID) : null
-                availableRooms << new Room(housingRoomDescription, building, site, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
-            } else {
-                availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
+            switch (LdmService.getAcceptVersion(VERSIONS)){
+                case "v1" :
+                    availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
+                    break
+                case "v2" :
+                    SiteDetail site = housingRoomDescription.siteGUID ? new SiteDetail(housingRoomDescription.siteGUID) : null
+                    availableRooms << new Room(housingRoomDescription, building, site, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
+                    break
+                case "v4" :
+                    String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomType.get( housingRoomDescription?.roomType )) ? ROOM_LAYOUT_TYPE_SEMINAR : ''
+                    occupancies = [new Occupancy(occupanciesType, housingRoomDescription?.capacity)]
+                    SiteDetail site = housingRoomDescription?.siteGUID ? new SiteDetail(housingRoomDescription?.siteGUID) : null
+                    availableRooms << new RoomV4(housingRoomDescription, building, site, occupancies, housingRoomDescription?.roomGUID,roomTypeCompositeService.list([:]).get(0))
+                    break
             }
         }
         log.debug( "End of getAvailableRooms()" )
@@ -436,6 +491,57 @@ class RoomCompositeService extends LdmService {
             room = get(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, housingRoomDescription.id)?.guid?.toLowerCase())
         }
         return room
+    }
+
+    private String getFilterType(Map filterData){
+        String filterType = null
+        if(filterData.params.containsKey(FILTER_TYPE_ROOM_LAYOUT)){
+            filterType = FILTER_TYPE_ROOM_LAYOUT
+        }
+        else if(filterData.params.containsKey(FILTER_TYPE_TYPE)){
+            filterType = FILTER_TYPE_TYPE
+        }
+        return filterType
+    }
+
+    private String getSettingNameForRoom_type(String version){
+        return ("v4".equals(version)? SETTING_ROOM_LAYOUT_TYPE_V4 :SETTING_ROOM_LAYOUT_TYPE)
+
+    }
+
+    private Map prepareQapiV4Request(Map request) {
+        if (!request.recurrence) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.recurrence", []))
+        }
+        if (request?.recurrence?.timePeriod) {
+                if (request?.recurrence?.timePeriod?.startOn?.contains('T')) {
+                    def datetime = request.recurrence.timePeriod.startOn.split('T')
+                    request.put("startDate", datetime[0])
+                    if (datetime[1].length() > 8) {
+                        request.put("startTime", datetime[1]?.substring(0, 8))
+                    }
+            }
+                if(request?.recurrence?.timePeriod?.endOn?.contains('T')){
+                    def datetime = request.recurrence.timePeriod.endOn.split('T')
+                    request.put("endDate",datetime[0])
+                    if(datetime[1].length()>8){
+                        request.put("endTime",datetime[1].substring(0,8))
+                    }
+             }
+        }
+        request?.recurrence?.remove("timePeriod")
+        if (!request?.recurrence?.repeatRule?.daysOfWeek) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.recurrence.byDay", []))
+        }
+        if(request?.recurrence?.repeatRule?.daysOfWeek){
+            def weekList=[]
+            request.recurrence.repeatRule.daysOfWeek.each{
+                weekList.add(WeekDays.("${it}").value)
+            }
+            request.recurrence?.byDay = weekList
+        }
+        request?.recurrence?.remove("repeatRule")
+        return request
     }
 
 }

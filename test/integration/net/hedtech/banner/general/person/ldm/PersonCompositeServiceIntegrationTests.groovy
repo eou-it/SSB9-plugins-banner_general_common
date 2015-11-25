@@ -18,6 +18,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -119,6 +120,12 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_succes_invalid_phone_number_long4 = "+01 123 456 7890"
     static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
     static final String PROCESS_CODE = "HEDM"
+
+    def i_success_credential_type4_filter="Banner ID"
+    def i_failure_credential_type4_filter="BannerId"
+    def i_failure_credential_id4="HOSP00"
+
+
 
     @Before
     public void setUp() {
@@ -1462,7 +1469,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     //POST- Person Create API
-    @Test
+    // emailType "Preferred" is ignored in 9.4.0.1 SR.  So ignoring test
+    @Ignore
     void testCreatePersonWithActiveAndPreferredEmail() {
         Map content = newPersonWithPreferredEmailRequest()
 
@@ -2090,25 +2098,26 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull i_success_guid
         Map params = updatePersonWithPreferredEmailAddress(i_success_guid)
 
+        // emailType "Preferred" is ignored in 9.4.0.1 SR.  So removing it from request
+        params.emails.removeAll { it.emailType.trim() == i_success_emailType_preferred }
+
         //update PersonBasicPersonBase info
         def o_person_update = personCompositeService.update(params)
 
         assertNotNull o_person_update
         assertEquals i_success_guid, o_person_update.guid
-        assertEquals 3, o_person_update.emails?.size()
+        assertEquals 2, o_person_update.emails?.size()
         assertEquals i_success_guid_personal, o_person_update.emails[0].guid
         assertEquals i_success_emailType_personal, o_person_update.emails[0].emailType
         assertEquals i_success_emailAddress_personal, o_person_update.emails[0].emailAddress
-        assertEquals i_success_guid_personal, o_person_update.emails[1].guid
-        assertEquals i_success_emailType_preferred, o_person_update.emails[1].emailType
-        assertEquals i_success_emailAddress_personal, o_person_update.emails[1].emailAddress
-        assertEquals i_success_guid_institution, o_person_update.emails[2].guid
-        assertEquals i_success_emailType_institution, o_person_update.emails[2].emailType
-        assertEquals i_success_emailAddress_institution, o_person_update.emails[2].emailAddress
+        assertEquals i_success_guid_institution, o_person_update.emails[1].guid
+        assertEquals i_success_emailType_institution, o_person_update.emails[1].emailType
+        assertEquals i_success_emailAddress_institution, o_person_update.emails[1].emailAddress
     }
 
     //PUT- person update API
-    @Test
+    // emailType "Preferred" is ignored in 9.4.0.1 SR.  So ignoring test.
+    @Ignore
     void testUpdatePreferredPersonEmailHavingExistingActiveEmailRecord() {
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
 
@@ -2157,6 +2166,64 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_guid_work, o_person_update2.emails[1].guid
         assertEquals i_success_emailType_preferred, o_person_update2.emails[1].emailType
         assertEquals i_success_emailAddress_work, o_person_update2.emails[1].emailAddress
+    }
+
+
+    @Test
+    void testUpdatePerson_RetainPreferredFlagByEmailType() {
+        Map content = newPersonWithPreferredEmailRequest()
+        // emailType "Preferred" is ignored in 9.4.0.1 SR.  So removing it from request.
+        content.emails.removeAll { it.emailType.trim() == i_success_emailType_preferred }
+
+        // Create person with 2 emails. One emailType is "Personal" and other emailType is "Institution".
+        def o_success_person_create = personCompositeService.create(content)
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 2, o_success_person_create.emails?.size()
+        assertEquals i_success_guid_personal, o_success_person_create.emails[0].guid
+        assertEquals i_success_emailType_personal, o_success_person_create.emails[0].emailType
+        assertEquals i_success_emailAddress_personal, o_success_person_create.emails[0].emailAddress
+        assertEquals i_success_guid_institution, o_success_person_create.emails[1].guid
+        assertEquals i_success_emailType_institution, o_success_person_create.emails[1].emailType
+        assertEquals i_success_emailAddress_institution, o_success_person_create.emails[1].emailAddress
+
+        String personGuid = o_success_person_create.guid
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid("persons", personGuid)
+        Integer pidm = globalUniqueIdentifier.domainKey?.toInteger()
+
+        List<PersonEmail> personEmails = PersonEmail.fetchByPidmAndStatus(pidm, "A")
+
+        // Make emailType "Institution" as preferred
+        PersonEmail instEmail = personEmails.find {
+            it.emailAddress == i_success_emailAddress_institution
+        }
+        instEmail.preferredIndicator = true
+        instEmail.save(flush: true, failOnError: true)
+
+        content = updatePersonWithPreferredEmailAddress(personGuid)
+        // emailType "Preferred" is ignored in 9.4.0.1 SR.  So removing it from request.
+        content.emails.removeAll { it.emailType.trim() == i_success_emailType_preferred }
+
+        // Change "Institution" email address in the request
+        def obj = content.emails.find { it.emailType.trim() == i_success_emailType_institution }
+        obj.guid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        obj.emailAddress = "hoby@test.com"
+
+        // Update person
+        def o_person_update = personCompositeService.update(content)
+
+        assertNotNull o_person_update
+        assertEquals personGuid, o_person_update.guid
+        assertEquals 3, o_person_update.emails?.size()
+        assertEquals i_success_guid_personal, o_person_update.emails[0].guid
+        assertEquals i_success_emailType_personal, o_person_update.emails[0].emailType
+        assertEquals i_success_emailAddress_personal, o_person_update.emails[0].emailAddress
+        assertEquals obj.guid, o_person_update.emails[1].guid
+        assertEquals i_success_emailType_institution, o_person_update.emails[1].emailType
+        assertEquals obj.emailAddress, o_person_update.emails[1].emailAddress
+        assertEquals obj.guid, o_person_update.emails[2].guid
+        assertEquals i_success_emailType_preferred, o_person_update.emails[2].emailType
+        assertEquals obj.emailAddress, o_person_update.emails[2].emailAddress
     }
 
     //PUT- person update API
@@ -2236,6 +2303,97 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals o_success_person_create.guid, o_success_person_update.guid
         assertEquals content1.ethnicityDetail.guid, o_success_person_update.ethnicityDetail.guid
     }
+
+    //Filter on CredentialId and Credential Type
+    @Test
+    public void testCredentialsFilterOnPerson(){
+        def persons = [:]
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","faculty")
+        persons = personCompositeService.list(params);
+        assert persons.size()>0
+        assertEquals 1,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","student")
+        persons = personCompositeService.list(params);
+        assert persons.size()>0
+        assertEquals 1,persons.size()
+
+        persons.clear()
+        params.clear()
+
+
+        params.put("credentialType",i_success_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4)
+        params.put("role","student")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'not.found.message'
+        }
+
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","student")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4);
+        params.put("role","student")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_failure_credential_id4);
+        params.put("role","faculty")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+        persons.clear()
+        params.clear()
+
+        params.put("credentialType",i_failure_credential_type4_filter)
+        params.put("credentialId",i_success_credential_id4);
+        params.put("role","faculty")
+        try{
+            persons = personCompositeService.list(params)
+        }catch(ApplicationException ae){
+            assertApplicationException ae, 'invalid.param'
+        }
+        assertEquals 0,persons.size()
+
+    }
+
 
 
     private def createPersonBasicPersonBase() {

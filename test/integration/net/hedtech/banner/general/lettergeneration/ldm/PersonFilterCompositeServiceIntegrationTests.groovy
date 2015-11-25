@@ -8,8 +8,10 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
 import net.hedtech.banner.general.lettergeneration.ldm.v2.PersonFilter
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
+import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -79,6 +81,19 @@ class PersonFilterCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testListWithSort() {
+        createPopulationSelectionExtract(application, selection1, user, user, key)
+        List personFiltersList = personFilterCompositeService.list([sort: 'code', order: 'desc', 'filter[0][field]': 'code', 'filter[0][operator]': 'contains', 'filter[0][value]': selection1])
+        assertNotNull personFiltersList
+        assertTrue personFiltersList.size() > 0
+        assertTrue personFiltersList[0] instanceof PersonFilter
+        assertEquals selection1, personFiltersList[0].abbreviation
+    }
+
+    @Test
+    void testListWithSortHeader2() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         createPopulationSelectionExtract(application, selection1, user, user, key)
         List personFiltersList = personFilterCompositeService.list([sort: 'abbreviation', order: 'desc', 'filter[0][field]': 'abbreviation', 'filter[0][operator]': 'contains', 'filter[0][value]': selection1])
         assertNotNull personFiltersList
@@ -154,6 +169,25 @@ class PersonFilterCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testGet() {
+        PopulationSelectionExtract populationSelectionExtract = createPopulationSelectionExtract(application, selection, user, user, key)
+        String domain_key = "${populationSelectionExtract.application}-^${populationSelectionExtract.selection}-^${populationSelectionExtract.creatorId}-^${populationSelectionExtract.lastModifiedBy}"
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(LDM_NAME, domain_key)
+        assertNotNull globalUniqueIdentifier
+        assertNotNull globalUniqueIdentifier.guid
+
+        def personFilter = personFilterCompositeService.get(globalUniqueIdentifier.guid)
+        assertNotNull personFilter.toString()
+        assertNotNull personFilter.title
+        assertEquals selection, personFilter.abbreviation
+        assertEquals globalUniqueIdentifier.guid, personFilter.guid
+        assertEquals globalUniqueIdentifier.domainKey, personFilter.title
+    }
+
+    @Test
+    void testGetHeader2() {
+        //we will forcefully set the accept header so that the tests go through all possible code flows
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
         PopulationSelectionExtract populationSelectionExtract = createPopulationSelectionExtract(application, selection, user, user, key)
         String domain_key = "${populationSelectionExtract.application}-^${populationSelectionExtract.selection}-^${populationSelectionExtract.creatorId}-^${populationSelectionExtract.lastModifiedBy}"
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainKey(LDM_NAME, domain_key)
