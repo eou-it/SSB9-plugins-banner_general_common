@@ -34,7 +34,13 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
                    WHERE a.pidm = :pidm
                      AND a.bankRoutingInfo.bankRoutingNum = :bankRoutingNum
                      AND a.bankAccountNum = :bankAccountNum
-                     AND a.accountType = :accountType""")
+                     AND a.accountType = :accountType"""),
+    @NamedQuery(name = "DirectDepositAccount.fetchActiveByAccountNums",
+        query = """ FROM DirectDepositAccount a
+                   WHERE a.pidm = :pidm
+                     AND a.bankRoutingInfo.bankRoutingNum = :bankRoutingNum
+                     AND a.bankAccountNum = :bankAccountNum
+                     AND a.status != 'I'""")
 ])
 @EqualsAndHashCode(includeFields = true)
 class DirectDepositAccount implements Serializable {
@@ -254,6 +260,20 @@ class DirectDepositAccount implements Serializable {
                     .setString('bankRoutingNum', bankRoutingNum)
                     .setString('bankAccountNum', bankAccountNum)
                     .setString('accountType', accountType)
+                    .list()
+        }
+        return dirdAccounts
+    }
+
+    public static fetchActiveByAccountNums(Integer pidm, String bankRoutingNum, String bankAccountNum) {
+        def dirdAccounts
+        
+        DirectDepositAccount.withSession { session ->
+            dirdAccounts = session.getNamedQuery(
+                    'DirectDepositAccount.fetchActiveByAccountNums')
+                    .setInteger('pidm', pidm)
+                    .setString('bankRoutingNum', bankRoutingNum)
+                    .setString('bankAccountNum', bankAccountNum)
                     .list()
         }
         return dirdAccounts
