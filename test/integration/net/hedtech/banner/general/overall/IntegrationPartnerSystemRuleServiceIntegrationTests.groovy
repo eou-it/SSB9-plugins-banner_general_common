@@ -1,15 +1,14 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
-import org.junit.Before
-import org.junit.Test
-import org.junit.After
-
-import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 import net.hedtech.banner.general.system.IntegrationPartner
+import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -65,14 +64,46 @@ class IntegrationPartnerSystemRuleServiceIntegrationTests extends BaseIntegratio
         assertNull "Integration should have been deleted", integrationPartnerSystemRules.get(integrationPartnerSystemRulesUpdate.id)
     }
 
+    @Test
+    void testFetchAllByCodeNullList() {
+        List<String> codes = null
+        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = integrationPartnerSystemRuleService.fetchAllByCode(codes)
+        assertNotNull integrationPartnerSystemRuleList
+        assertEquals 0, integrationPartnerSystemRuleList.size()
+    }
+
+    @Test
+    void testFetchAllByCodeEmptyList() {
+        List<String> codes = []
+        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = integrationPartnerSystemRuleService.fetchAllByCode(codes)
+        assertNotNull integrationPartnerSystemRuleList
+        assertEquals 0, integrationPartnerSystemRuleList.size()
+    }
+
+    @Test
+    void testFetchAllByCodeValidValue() {
+        List<String> codes = ['ELEV8']
+        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = integrationPartnerSystemRuleService.fetchAllByCode(codes)
+        assertNotNull integrationPartnerSystemRuleList
+        assertEquals 1, integrationPartnerSystemRuleList.size()
+        assertEquals 'ELEV8', integrationPartnerSystemRuleList[0].code
+    }
+
+    @Test
+    void testFetchAllByCodeInvalidValue() {
+        List<String> codes = ['invalid-code']
+        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = integrationPartnerSystemRuleService.fetchAllByCode(codes)
+        assertNotNull integrationPartnerSystemRuleList
+        assertEquals 0, integrationPartnerSystemRuleList.size()
+    }
 
     private def newIntegrationPartnerSystemRule() {
         def intp = new IntegrationPartner(code: "TTTTT", description: "TTTTT", lastModified: new Date(),
-                                          lastModifiedBy: "test", dataOrigin: "Banner")
+                lastModifiedBy: "test", dataOrigin: "Banner")
         intp.save(flush: true, failOnError: true)
         def integration = new IntegrationPartnerSystemRule(code: "TTTTT",
-                                                           description: "TTTTT",
-                                                           integrationPartner: intp
+                description: "TTTTT",
+                integrationPartner: intp
         )
         return integration
 

@@ -92,7 +92,7 @@ class InstructionalPlatformCompositeService {
     List<InstructionalPlatform> fetchAllByIntegrationPartnerSystemCode(List<String> codes) {
         List<InstructionalPlatform> instructionalPlatformList = []
         if(codes&&codes.size()>0){
-            List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = IntegrationPartnerSystemRule.fetchAllByCode(codes)
+            List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = integrationPartnerSystemRuleService.fetchAllByCode(codes)
             Map integrationPartnerSystemRuleIdMap = [:]
             integrationPartnerSystemRuleList.each {
                 integrationPartnerSystemRuleIdMap.put(it.id, it)
