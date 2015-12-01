@@ -647,7 +647,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull availableRooms
         assertFalse availableRooms.isEmpty()
         assertTrue availableRooms.size() > 1
-        assertNotNull availableRooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
+        assertNotNull availableRooms.find {it.occupancies[0].roomLayoutType = 'classroom' }
         assertNotNull availableRooms.find {it.roomDetails["type"] = 'classroom' }
     }
 
@@ -766,7 +766,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         List rooms = roomCompositeService.list(params)
         assertNotNull rooms
         assertFalse rooms.isEmpty()
-        assertNotNull rooms.find {it.occupancies[0].roomLayoutType = 'seminar' }
+        assertNotNull rooms.find {it.occupancies[0].roomLayoutType = 'classroom' }
         assertNotNull rooms.find {it.roomDetails["type"] = 'classroom' }
     }
 
@@ -795,7 +795,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 action     : [POST: "list"],
                 occupancies: [[
                                       "maxOccupancy": 25,
-                                      "type": "seminar"
+                                      "type": "classroom"
                               ]],
                 roomTypes : [[
                                type : "classroom"

@@ -38,7 +38,6 @@ class RoomCompositeService extends LdmService {
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
     private static final String SETTING_ROOM_LAYOUT_TYPE_V4= "ROOM.ROOMTYPE"
     private static final List<String> VERSIONS = ["v1", "v2","v4"]
-    private static final String ROOM_LAYOUT_TYPE_SEMINAR = 'seminar'
     private static final String ROOM_LAYOUT_TYPE_CLASSROOM_V4 = 'classroom'
     private static final String FILTER_TYPE_ROOM_LAYOUT = 'roomLayoutType'
     private static final String FILTER_TYPE_TYPE = 'type'
@@ -330,7 +329,7 @@ class RoomCompositeService extends LdmService {
                 findAllByProcessCodeAndSettingName(PROCESS_CODE, getSettingNameForRoom_type(LdmService.getAcceptVersion(VERSIONS)))?.each { it ->
                     roomTypes.put( it?.value, it?.translationValue )
                 }
-                String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomTypes.get(housingRoomDescription?.roomType)) ? ROOM_LAYOUT_TYPE_SEMINAR : ''
+                String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomTypes.get(housingRoomDescription?.roomType)) ? ROOM_LAYOUT_TYPE_CLASSROOM_V4 : ''
                 occupancies = [new Occupancy(occupanciesType, housingRoomDescription?.capacity)]
                 SiteDetail site = housingRoomDescription?.siteGUID ? new SiteDetail(housingRoomDescription?.siteGUID) : null
                 return new RoomV4(housingRoomDescription, building, site, occupancies, housingRoomDescription?.roomGUID,roomTypeCompositeService.list([:]).get(0))
@@ -471,7 +470,7 @@ class RoomCompositeService extends LdmService {
                     availableRooms << new Room(housingRoomDescription, building, site, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
                     break
                 case "v4" :
-                    String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomType.get( housingRoomDescription?.roomType )) ? ROOM_LAYOUT_TYPE_SEMINAR : ''
+                    String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomType.get( housingRoomDescription?.roomType )) ? ROOM_LAYOUT_TYPE_CLASSROOM_V4 : ''
                     occupancies = [new Occupancy(occupanciesType, housingRoomDescription?.capacity)]
                     SiteDetail site = housingRoomDescription?.siteGUID ? new SiteDetail(housingRoomDescription?.siteGUID) : null
                     availableRooms << new RoomV4(housingRoomDescription, building, site, occupancies, housingRoomDescription?.roomGUID,roomTypeCompositeService.list([:]).get(0))
