@@ -10,8 +10,8 @@ package net.hedtech.banner.general
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
 import net.hedtech.banner.service.ServiceBase
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
+import grails.util.Holders
+import grails.util.Holders as SCH
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 import java.sql.CallableStatement
@@ -151,16 +151,16 @@ class GeneralCommonUtility {
     public static List getDirtyProperties( def domainClass, def domainObj ) {
         def content = ServiceBase.extractParams( domainClass, domainObj )
         def domainObject = domainClass?.get( content?.id )
-        domainObject.properties = content
+        use(org.codehaus.groovy.runtime.InvokerHelper) { domainObject.setProperties(content)}
 
         return domainObject?.dirtyPropertyNames
     }
 
 
     public static void commit() {
-        // ServletContextHolder.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.currentSession.getTransaction().commit()
-        // ServletContextHolder.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.currentSession.flush()
-        def sql = new Sql( ServletContextHolder.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.getCurrentSession().connection() )
+        // Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.currentSession.getTransaction().commit()
+        // Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.currentSession.flush()
+        def sql = new Sql( Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.getCurrentSession().connection() )
         try {
             sql.execute "{ call gb_common.p_commit() }"
         } finally {
