@@ -54,6 +54,10 @@ class CommunicationGroupSendView implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
+    @Column(name = "group_send_scheduled_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date scheduledStartDate;
+
     @Column(name = "group_send_end_date")
     @Temporal(TemporalType.TIMESTAMP)
     Date groupSendEndDate;
@@ -117,6 +121,10 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "as_of_date")
     @Temporal(TemporalType.TIMESTAMP)
     Date asOfDate
+
+    @Type(type="yes_no")
+    @Column(name = "recalc_on_send")
+    boolean recalculateOnSend
 
     public static List<CommunicationGroupSendView> fetchByPopulationId(Long populationId) {
 

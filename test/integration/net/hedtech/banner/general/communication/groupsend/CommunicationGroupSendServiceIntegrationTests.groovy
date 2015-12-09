@@ -224,6 +224,14 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         }
     }
 
+    @Test
+    void testCreateGroupSendForScheduling() {
+        CommunicationGroupSend communicationGroupSend = createGroupSendForScheduling()
+        assertNotNull communicationGroupSend.getId()
+        assertEquals( bannerAuthenticationToken.getOracleUserName(), communicationGroupSend.getCreatedBy() )
+        assertEquals("test", communicationGroupSend.getName())
+    }
+
 
     private CommunicationGroupSend createGroupSend() {
         return communicationGroupSendService.create(
@@ -231,9 +239,24 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
                 organizationId: organization.id,
                 populationId: population.id,
                 templateId: emailTemplate.id,
-                createdBy: bannerAuthenticationToken.getOracleUserName()
+                createdBy: bannerAuthenticationToken.getOracleUserName(),
+                recalculateOnSend : new Boolean(false)
             )
         ) as CommunicationGroupSend
     }
 
+    private CommunicationGroupSend createGroupSendForScheduling() {
+        Date scheduledDate = new Date()
+        return communicationGroupSendService.create(
+                new CommunicationGroupSend(
+                        organizationId: organization.id,
+                        populationId: population.id,
+                        templateId: emailTemplate.id,
+                        createdBy: bannerAuthenticationToken.getOracleUserName(),
+                        scheduledStartDate : scheduledDate,
+                        recalculateOnSend : new Boolean(true)
+
+                )
+        ) as CommunicationGroupSend
+    }
 }

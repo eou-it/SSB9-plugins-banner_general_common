@@ -24,6 +24,10 @@ class CommunicationGroupSendService extends ServiceBase {
         if (groupSend.getName() == null) {
             groupSend.setName(CommunicationTemplate.get(groupSend.templateId).getName())
         }
+        if(groupSend.getScheduledStartDate() != null)
+        {
+            //Validation to make sure date is not in the past
+        }
         groupSend.setDeleted( false );
     }
 

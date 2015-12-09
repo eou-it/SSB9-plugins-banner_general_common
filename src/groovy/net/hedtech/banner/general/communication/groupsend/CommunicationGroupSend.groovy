@@ -108,6 +108,14 @@ class CommunicationGroupSend implements Serializable {
     @Type(type = "yes_no")
     boolean deleted = false;
 
+    @Column(name = "GCBGSND_SCHEDULEDDATETIME", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    Date scheduledStartDate
+
+    @Type(type = "yes_no")
+    @Column(name = "GCBGSND_RECALC_ON_SEND")
+    Boolean recalculateOnSend
+
     static constraints = {
         mepCode(nullable: true)
         name(nullable: false)
@@ -122,6 +130,8 @@ class CommunicationGroupSend implements Serializable {
         stopDate(nullable: true)
         creationDateTime(nullable: false)
         currentExecutionState(nullable: false)
+        scheduledStartDate(nullable:true)
+        recalculateOnSend(nullable:false)
     }
 
 

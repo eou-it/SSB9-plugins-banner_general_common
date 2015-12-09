@@ -151,7 +151,8 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
                         organizationId: organization.id,
                         populationId: population.id,
                         templateId: emailTemplate.id,
-                        ownerPidm: bannerAuthenticationToken.getPidm()
+                        ownerPidm: bannerAuthenticationToken.getPidm(),
+                        recalculateOnSend: new Boolean(false)
                 )
         ) as CommunicationGroupSend
     }
