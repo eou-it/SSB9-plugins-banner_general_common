@@ -41,9 +41,11 @@ class RoomCompositeService extends LdmService {
     private static final String ROOM_LAYOUT_TYPE_CLASSROOM_V4 = 'classroom'
     private static final String FILTER_TYPE_ROOM_LAYOUT = 'roomLayoutType'
     private static final String FILTER_TYPE_TYPE = 'type'
+    public static final String BUILDING_ID = 'building.id'
 
 
     def roomTypeCompositeService
+    def globalUniqueIdentifierService
 
 
     List<AvailableRoom> list(Map params) {
@@ -81,8 +83,10 @@ class RoomCompositeService extends LdmService {
             }
             entities = fetchAllActiveRoomsByRoomTypes(roomTypes, params,filterData.pagingAndSortParams)
         }
-        if(entities.size()==0 && params.containsKey('building.id')){
-            throw new ApplicationException('rooms.building',new NotFoundException())
+        if(entities.size()==0 && params.containsKey(BUILDING_ID)){
+            if(!globalUniqueIdentifierService.fetchByLdmNameAndGuid('buildings',params.get(BUILDING_ID))){
+                throw new ApplicationException('rooms.building',new NotFoundException())
+            }
         }
         return getAvailableRooms(entities)
     }
@@ -385,9 +389,9 @@ class RoomCompositeService extends LdmService {
         //criteria.add([key: "inactiveIndicator", binding: "roomStatusInactiveIndicator", operator: Operators.NOT_EQUALS_IGNORE_CASE])
 
         //Adding the criteria for data links for building
-        if(queryParams?.containsKey('building.id')){
+        if(queryParams?.containsKey(BUILDING_ID)){
             criteria.add([key: 'buildingId', binding: 'buildingGUID', operator: Operators.EQUALS_IGNORE_CASE])
-            params.put('buildingId',queryParams.get('building.id'))
+            params.put('buildingId',queryParams.get(BUILDING_ID))
         }
 
         // TODO: Not sure why IN operator of DynamicFinder requires list in this format
