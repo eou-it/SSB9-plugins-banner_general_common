@@ -3,6 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner.general.system.ldm
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.IntegrationConfiguration
@@ -15,8 +16,6 @@ class EmsConfigurationCompositeService {
 
     public static List<String> ROUTING_KEYS = ["HEDM.*.*"]
 
-    def erpApiConfig
-
     /**
      * GET /api/ems/<id>
      *
@@ -27,7 +26,7 @@ class EmsConfigurationCompositeService {
         List<IntegrationConfiguration> settings = IntegrationConfiguration.findAllByProcessCode("EMS-" + id.toUpperCase())
         if (settings.size()) {
             EmsConfiguration configuration = new EmsConfiguration(id)
-            configuration.erpApiConfig = erpApiConfig
+            configuration.erpApiConfig = Holders.applicationContext.getBean("erpApiConfig-" + id.toUpperCase())
             configuration.erpApiConfig.erpname = "Banner"
             settings.each { setting ->
                 switch (setting.settingName) {
@@ -86,6 +85,27 @@ class EmsConfigurationCompositeService {
                         break;
                     case 'EMS.GUID.LIFESPAN':
                         configuration.guidLifespan = setting.translationValue.toInteger()
+                        break;
+                    case 'EMS.IHUB.USE':
+                        // Use Ellucian Integration Hub
+                        break;
+                    case 'EMS.IHUB.APPLICATION.ID':
+                        // ID of the application from the hub admin UI
+                        break;
+                    case 'EMS.IHUB.APPLICATION.API.KEY':
+                        // API Key of the application from the hub admin UI
+                        break;
+                    case 'EMS.IHUB.TOKEN.URL':
+                        // URL for the hub token service
+                        break;
+                    case 'EMS.IHUB.PUBLISH.URL':
+                        // URL for the publish service
+                        break;
+                    case 'EMS.IHUB.MESSAGEQUEUE.URL':
+                        // URL for the hub message queue service
+                        break;
+                    case 'EMS.IHUB.MEDIATYPE':
+                        // the media type for messages getting published and retrieved
                         break;
                     default:
                         break;

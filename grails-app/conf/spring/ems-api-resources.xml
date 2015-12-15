@@ -438,7 +438,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
     </bean>
 
 
-    <bean id="erpApiConfig" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
+    <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
                 <ref bean="ar-acadlevels"/>
