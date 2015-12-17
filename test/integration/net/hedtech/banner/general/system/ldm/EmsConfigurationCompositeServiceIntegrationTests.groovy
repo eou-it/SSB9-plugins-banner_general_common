@@ -3,7 +3,6 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm
 
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.ldm.v1.EmsConfiguration
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -45,9 +44,11 @@ class EmsConfigurationCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetInvalidId() {
         String id = "BANNER-UNKNOWN"
-        shouldFail(ApplicationException) {
+        String msg = shouldFail {
             emsConfigurationCompositeService.get(id)
         }
+        String expectedMsg = "No bean named 'erpApiConfig-$id' is defined"
+        assertEquals expectedMsg, msg
     }
 
 }
