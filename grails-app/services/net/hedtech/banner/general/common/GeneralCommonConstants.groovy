@@ -5,8 +5,8 @@
 package net.hedtech.banner.general.common
 
 /**
- * Util class for General validation module where in  will be
- * This class will holds all common variables used across the banner-general-validation-common plugin.
+ * Util class for General Common module where in  will be
+ * This class will holds all common variables used across the banner-general-common plugin.
  */
 
 class GeneralCommonConstants {
