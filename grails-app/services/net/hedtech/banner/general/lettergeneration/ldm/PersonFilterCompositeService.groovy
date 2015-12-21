@@ -6,7 +6,6 @@ package net.hedtech.banner.general.lettergeneration.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.lettergeneration.ldm.v2.PersonFilter
@@ -27,13 +26,13 @@ class PersonFilterCompositeService {
 
     public static final String LDM_NAME = 'person-filters'
     private static final String DOMAIN_KEY_DELIMITER = '-^'
-    private static final List allowedSortFields = [GeneralCommonConstants.ABBREVIATION,GeneralCommonConstants.CODE]
-    private static final List filtersAllowedWithCriterion = [GeneralCommonConstants.ABBREVIATION,GeneralCommonConstants.CODE]
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V2,GeneralCommonConstants.VERSION_V4]
+    private static final List allowedSortFields = ['abbreviation','code']
+    private static final List filtersAllowedWithCriterion = ['abbreviation','code']
+    private static final List<String> VERSIONS = ["v2","v4"]
 
     private HashMap ldmFieldToBannerDomainPropertyMap = [
-            abbreviation: GeneralCommonConstants.SELECTION,
-            code: GeneralCommonConstants.SELECTION
+            abbreviation: 'selection',
+            code: 'selection'
     ]
 
     /**
@@ -94,7 +93,7 @@ class PersonFilterCompositeService {
         if (guid instanceof GlobalUniqueIdentifier) globalUniqueIdentifier = guid
         else globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException(GeneralCommonConstants.PERSON_FILTER, new NotFoundException())
+            throw new ApplicationException("personFilter", new NotFoundException())
         }
 
         // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
@@ -125,7 +124,7 @@ class PersonFilterCompositeService {
 
         Map namedParams = [:]
 
-        String sortField = GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))?GeneralCommonConstants.CODE:GeneralCommonConstants.ABBREVIATION
+        String sortField = "v4".equals(LdmService.getAcceptVersion(VERSIONS))?"code":"abbreviation"
         if (params.containsKey(sortField)) {
             // filter[index][field]=abbreviation
             retainSingleCriterionForFilter(criteria, sortField)
