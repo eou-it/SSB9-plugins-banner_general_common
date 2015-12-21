@@ -47,6 +47,8 @@ class CommunicationGroupSendCommunicationService {
         groupSend.populationId = request.getPopulationId()
         groupSend.organizationId = request.getOrganizationId()
         groupSend.name = jobName
+        groupSend.scheduledStartDate = request.getScheduledStartDate()
+        groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
 
