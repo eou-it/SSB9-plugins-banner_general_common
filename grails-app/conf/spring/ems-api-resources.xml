@@ -386,7 +386,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-academic-disciplines-major" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-academic-disciplines" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>academic-disciplines</value>
         </constructor-arg>
@@ -399,40 +399,11 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>HEDM.MajorMinorConcentration.STVMAJR.MAJOR</value>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-academic-disciplines-minor" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>academic-disciplines</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/academic-disciplines/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
                 <value>HEDM.MajorMinorConcentration.STVMAJR.MINOR</value>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-academic-disciplines-conc" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>academic-disciplines</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/academic-disciplines/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
                 <value>HEDM.MajorMinorConcentration.STVMAJR.CONCENTRATION</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.UMAJOR</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.UMINOR</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.UCONCENTRATION</value>
             </list>
         </constructor-arg>
     </bean>
@@ -463,9 +434,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-location-types"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-phone-types"/>
-                <ref bean="ar-academic-disciplines-major"/>
-                <ref bean="ar-academic-disciplines-minor"/>
-                <ref bean="ar-academic-disciplines-conc"/>
+                <ref bean="ar-academic-disciplines"/>
             </list>
         </property>
     </bean>
