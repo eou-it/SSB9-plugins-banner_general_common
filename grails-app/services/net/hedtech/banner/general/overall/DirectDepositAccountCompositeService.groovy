@@ -138,7 +138,7 @@ class DirectDepositAccountCompositeService {
     }
 
     private def validateNotDuplicate(account) {
-        if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.accountType)) {
+        if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.apIndicator, account.hrIndicator)) {
             throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
         }
     }

@@ -56,6 +56,35 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals("22334455", account.bankAccountNum)
     }
 
+    @Test
+    void testAddDuplicateAccount() {
+        def account1, account2
+
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+
+        try {
+            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+            fail("I should have received an error but it passed; @@r1:recordAlreadyExists@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "recordAlreadyExists"
+        }
+    }
+    
+    @Test
+    void testAddApAccountToPayroll() {
+        def account1, account2
+
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+        
+        testAccountMap0.hrIndicator = "A"
+        testAccountMap0.apIndicator = "I"
+        account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+
+        assertNotEquals(account1.id, account2.id)
+        assertEquals("A", account2.hrIndicator)
+    }
+
     // TODO: All of the below tests PASSED when they were broken out into their own temporary file
     // which corresponded to a temporary DirectDepositCompositeService class which was located at the app level (as
     // opposed to being in the the banner_general_common plugin) so that it had access to the required payroll
