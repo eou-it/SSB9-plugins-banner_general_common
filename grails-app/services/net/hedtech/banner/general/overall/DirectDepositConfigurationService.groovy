@@ -8,27 +8,57 @@ class DirectDepositConfigurationService extends ServiceBase {
 
     static transactional = true
 
+    static final def SHOW_USER_PRENOTE_STATUS = 'SHOW_USER_PRENOTE_STATUS'
+    static final def MAX_USER_PAYROLL_ALLOCATIONS = 'MAX_USER_PAYROLL_ALLOCATIONS'
+
     /**
      * Direct Deposit app configuration parameters to retrieve
      */
-    private static final directDepositConfigParams = [
-            [paramKey: "SHOW_USER_PRENOTE_STATUS", defaultValue: "Y"],
-            [paramKey: "MAX_USER_PAYROLL_ALLOCATIONS", defaultValue: "99"]
+    def directDepositConfigParams = [
+            [paramKey: SHOW_USER_PRENOTE_STATUS, defaultValue: 'Y'],
+            [paramKey: MAX_USER_PAYROLL_ALLOCATIONS, defaultValue: '99']
     ]
 
-    def getDirectDepositParamsFromWebTailor () {
-        def retParams = []
+    /**
+     * Get all configuration params for the Direct Deposit app from Web Tailor.
+     * @return Map of all Direct Deposit configuration parameter keys and values
+     */
+    def getDirectDepositParams () {
+        def retParams = [:]
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
 
         try {
             directDepositConfigParams.each {
-                retParams.push getParamFromWebTailor(sql, it)
+                def param = getParamFromWebTailor(sql, it)
+                retParams[param.key] = param.value
             }
         } finally {
             sql?.close()
         }
 
-        return retParams;
+        retParams;
+    }
+
+    /**
+     * Get the value for the specified Web Tailor parameter key.
+     * "defaultValue" can optionally be provided to use as a value in
+     * the event the parameter is not configured in Web Tailor.
+     * @param key
+     * @param defaultValue
+     * @return Value for the specified parameter key
+     */
+    def getParam (key, defaultValue = null) {
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def requestedParam = [
+                paramKey: key,
+                defaultValue: defaultValue
+        ]
+
+        try {
+            getParamFromWebTailor(sql, requestedParam).value
+        } finally {
+            sql?.close()
+        }
     }
 
     def getParamFromWebTailor (sql, map) {
@@ -63,8 +93,8 @@ class DirectDepositConfigurationService extends ServiceBase {
             }
         }
 
-        retMap.paramKey = key
-        retMap.paramValue = val
+        retMap.key = key
+        retMap.value = val
 
         retMap
     }

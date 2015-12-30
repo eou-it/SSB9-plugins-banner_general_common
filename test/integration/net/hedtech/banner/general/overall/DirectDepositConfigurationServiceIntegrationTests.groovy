@@ -34,8 +34,71 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
     }
 
 
+    // Test getDirectDepositParams
+    //////////////////////////////
+
+    /*
+     * This single test on getDirectDepositParams() tests its basic functionality.
+     * getDirectDepositParams() calls getParamFromWebTailor(), and more comprehensive
+     * tests are done directly on that down below.
+     */
+
     @Test
-    void testGetWebTailorParameterValuesWithOneKeyAndNoDefaultValue() {
+    void testGetDirectDepositParamsFromWebTailorWithOneKeyAndNoDefaultValue() {
+        def retParams = []
+
+        def testParams = [
+                [paramKey: "SYSTEM_NAME"]
+        ]
+
+        def origParams = directDepositConfigurationService.directDepositConfigParams
+        directDepositConfigurationService.directDepositConfigParams = testParams
+
+        def params = directDepositConfigurationService.getDirectDepositParams()
+
+        directDepositConfigurationService.directDepositConfigParams = origParams
+
+        assertEquals "Banner", params[testParams[0].paramKey]
+    }
+
+
+    // Test getParam()
+    //////////////////
+
+    @Test
+    void testGetParamWithGoodKeyAndNoDefaultValue() {
+        def val = directDepositConfigurationService.getParam('SYSTEM_NAME')
+
+        assertEquals "Banner", val
+    }
+
+    @Test
+    void testGetParamWithGoodKeyAndDefaultValue() {
+        def val = directDepositConfigurationService.getParam('SYSTEM_NAME', 'dummy_default_value')
+
+        assertEquals "Banner", val
+    }
+
+    @Test
+    void testGetParamWithBadKeyAndDefaultValue() {
+        def val = directDepositConfigurationService.getParam('I_DONT_EXIST', 'dummy_default_value')
+
+        assertEquals "dummy_default_value", val
+    }
+
+    @Test(expected = ApplicationException.class)
+    void testGetParamWithBadKeyAndNoDefaultValue() {
+        def val = directDepositConfigurationService.getParam('I_DONT_EXIST')
+
+        // The "expected=..." in the annotation above is the assertion.
+    }
+
+
+    // Test getParamFromWebTailor
+    /////////////////////////////
+
+    @Test
+    void testGetParamFromWebTailorWithOneKeyAndNoDefaultValue() {
         def retParams = []
         def params = [
                 [paramKey: "SYSTEM_NAME"]
@@ -48,7 +111,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertEquals 1, retParams.size()
 
         def item = retParams[0]
-        assertEquals "Banner", item.paramValue
+        assertEquals "Banner", item.value
     }
 
     @Test
@@ -66,14 +129,14 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertEquals 2, retParams.size()
 
         def item = retParams[0]
-        assertEquals "Banner", item.paramValue
+        assertEquals "Banner", item.value
 
         item = retParams[1]
-        assertEquals "WEBUSER", item.paramValue
+        assertEquals "WEBUSER", item.value
     }
 
     @Test
-    void testgetDirectDepositParamsFromWebTailorWithOneKeyAndDefaultValue() {
+    void testGetParamFromWebTailorWithOneKeyAndDefaultValue() {
         def retParams = []
         def params = [
                 [paramKey: "SYSTEM_NAME", defaultValue: "default_val"]
@@ -86,11 +149,11 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertEquals 1, retParams.size()
 
         def item = retParams[0]
-        assertEquals "Banner", item.paramValue
+        assertEquals "Banner", item.value
     }
 
     @Test
-    void testgetDirectDepositParamsFromWebTailorWithTwoKeysAndTwoDefaultValues() {
+    void testGetParamFromWebTailorWithTwoKeysAndTwoDefaultValues() {
         def retParams = []
         def params = [
                 [paramKey: "SYSTEM_NAME", defaultValue: "default_val1"],
@@ -104,14 +167,14 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertEquals 2, retParams.size()
 
         def item = retParams[0]
-        assertEquals "Banner", item.paramValue
+        assertEquals "Banner", item.value
 
         item = retParams[1]
-        assertEquals "WEBUSER", item.paramValue
+        assertEquals "WEBUSER", item.value
     }
 
     @Test
-    void testgetDirectDepositParamsFromWebTailorWithOneBadKeyAndDefaultValue() {
+    void testGetParamFromWebTailorWithOneBadKeyAndDefaultValue() {
         def retParams = []
         def params = [
                 [paramKey: "key_does_not_exist", defaultValue: "default_val"]
@@ -124,11 +187,11 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertEquals 1, retParams.size()
 
         def item = retParams[0]
-        assertEquals "default_val", item.paramValue
+        assertEquals "default_val", item.value
     }
 
     @Test
-    void testgetDirectDepositParamsFromWebTailorWithTwoBadKeysAndDefaultValues() {
+    void testGetParamFromWebTailorWithTwoBadKeysAndDefaultValues() {
         def retParams = []
         def params = [
                 [paramKey: "key_does_not_exist1", defaultValue: "default_val1"],
@@ -142,10 +205,10 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertEquals 2, retParams.size()
 
         def item = retParams[0]
-        assertEquals "default_val1", item.paramValue
+        assertEquals "default_val1", item.value
 
         item = retParams[1]
-        assertEquals "default_val2", item.paramValue
+        assertEquals "default_val2", item.value
     }
 
     @Test(expected = ApplicationException.class)
