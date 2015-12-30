@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.HousingRoomDescription
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.IntegrationConfiguration
@@ -34,13 +35,13 @@ class RoomCompositeService extends LdmService {
     private static final String MINUTE_FORMAT = '[0-5][0-9]'
     private static final String SECOND_FORMAT = '[0-5][0-9]'
     private static final String LDM_NAME = 'rooms'
-    private static final String PROCESS_CODE = "HEDM"
+    private static final String PROCESS_CODE = GeneralCommonConstants.HEDM
     private static final String SETTING_ROOM_LAYOUT_TYPE = "ROOM.OCCUPANCY.ROOMLAYOUTTYPE"
     private static final String SETTING_ROOM_LAYOUT_TYPE_V4= "ROOM.ROOMTYPE"
-    private static final List<String> VERSIONS = ["v1", "v2","v4"]
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1, GeneralCommonConstants.VERSION_V2, GeneralCommonConstants.VERSION_V4]
     private static final String ROOM_LAYOUT_TYPE_CLASSROOM_V4 = 'classroom'
-    private static final String FILTER_TYPE_ROOM_LAYOUT = 'roomLayoutType'
-    private static final String FILTER_TYPE_TYPE = 'type'
+    private static final String FILTER_TYPE_ROOM_LAYOUT = GeneralCommonConstants.ROOM_LAYOUT_TYPE
+    private static final String FILTER_TYPE_TYPE = GeneralCommonConstants.TYPE
     public static final String BUILDING_ID = 'building.id'
 
 
@@ -57,7 +58,7 @@ class RoomCompositeService extends LdmService {
         RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
         params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
-            if("v4".equals( LdmService.getAcceptVersion(VERSIONS))){
+            if(GeneralCommonConstants.VERSION_V4.equals( LdmService.getAcceptVersion(VERSIONS))){
                 prepareQapiV4Request(params)
             }
             // POST /qapi/rooms (Search for available rooms)
@@ -212,7 +213,7 @@ class RoomCompositeService extends LdmService {
         if (!params.occupancies[0]?.maxOccupancy) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.maxOccupancy", []))
         }
-        if ("v4".equals(LdmService.getAcceptVersion(VERSIONS))) {
+        if (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))) {
             if (!params.roomTypes[0]?.type) {
                 throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
             }
@@ -239,12 +240,12 @@ class RoomCompositeService extends LdmService {
         def filterMap = QueryBuilder.getFilterData(params)
         Map inputData = [:]
         String contentTypeVersion = getContentTypeVersion(VERSIONS)
-        String filterType = "v4".equals(LdmService.getAcceptVersion(VERSIONS))? params.roomTypes[0]?.type :params.occupancies[0]?.roomLayoutType
-        inputData.put('startDate', convertString2Date(params.startDate?.trim()))
-        inputData.put('endDate', convertString2Date(params.endDate?.trim()))
+        String filterType = GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))? params.roomTypes[0]?.type :params.occupancies[0]?.roomLayoutType
+        inputData.put(GeneralCommonConstants.START_DATE, convertString2Date(params.startDate?.trim()))
+        inputData.put(GeneralCommonConstants.END_DATE, convertString2Date(params.endDate?.trim()))
 
-        inputData.put('beginTime', getTimeInHHmmFormat(params.startTime?.trim()))
-        inputData.put('endTime', getTimeInHHmmFormat(params.endTime?.trim()))
+        inputData.put(GeneralCommonConstants.BEGIN_TIME, getTimeInHHmmFormat(params.startTime?.trim()))
+        inputData.put(GeneralCommonConstants.END_TIME, getTimeInHHmmFormat(params.endTime?.trim()))
 
         def daysList = params.recurrence.byDay
         DayOfWeek.list().each { DayOfWeek day ->
@@ -270,9 +271,9 @@ class RoomCompositeService extends LdmService {
             inputData.put('capacity', null)
         }
 
-        if (!"v1".equals(contentTypeVersion)) {
+        if (!GeneralCommonConstants.VERSION_V1.equals(contentTypeVersion)) {
             if (params.containsKey('building')) {
-                String buildingGuid = "v4".equals(contentTypeVersion)? params.building?.id?.trim()?.toLowerCase() : params.building?.trim()?.toLowerCase()
+                String buildingGuid = GeneralCommonConstants.VERSION_V4.equals(contentTypeVersion)? params.building?.id?.trim()?.toLowerCase() : params.building?.trim()?.toLowerCase()
                 if (buildingGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, buildingGuid)
                     if (globalUniqueIdentifier) {
@@ -284,17 +285,17 @@ class RoomCompositeService extends LdmService {
                     inputData.put('buildingCode', null)
                 }
             }
-            if (params.containsKey('site')) {
-                String siteGuid = "v4".equals(contentTypeVersion)?  params.site?.id?.trim()?.toLowerCase() : params.site?.trim()?.toLowerCase()
+            if (params.containsKey(GeneralCommonConstants.SITE)) {
+                String siteGuid = GeneralCommonConstants.VERSION_V4.equals(contentTypeVersion)?  params.site?.id?.trim()?.toLowerCase() : params.site?.trim()?.toLowerCase()
                 if (siteGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, siteGuid)
                     if (globalUniqueIdentifier) {
-                        inputData.put('siteCode', globalUniqueIdentifier.domainKey)
+                        inputData.put(GeneralCommonConstants.SITE_CODE, globalUniqueIdentifier.domainKey)
                     } else {
-                        throw new ApplicationException("site", new BusinessLogicValidationException("not.found.message", null))
+                        throw new ApplicationException(GeneralCommonConstants.SITE, new BusinessLogicValidationException("not.found.message", null))
                     }
                 } else {
-                    inputData.put('siteCode', null)
+                    inputData.put(GeneralCommonConstants.SITE_CODE, null)
                 }
             }
         }
@@ -306,7 +307,7 @@ class RoomCompositeService extends LdmService {
 
     private void validateSearchCriteria(Map params) {
         def filters = QueryBuilder.createFilters(params)
-        def allowedSearchFields = ['roomLayoutType','type']
+        def allowedSearchFields = [GeneralCommonConstants.ROOM_LAYOUT_TYPE,GeneralCommonConstants.TYPE]
         def allowedOperators = [Operators.EQUALS]
         RestfulApiValidationUtility.validateCriteria(filters, allowedSearchFields, allowedOperators)
     }
@@ -316,19 +317,19 @@ class RoomCompositeService extends LdmService {
     AvailableRoom get(String guid) {
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(AvailableRoom.LDM_NAME, guid)
         if (!globalUniqueIdentifier)
-            throw new ApplicationException("room", new NotFoundException())
+            throw new ApplicationException(GeneralCommonConstants.ROOM, new NotFoundException())
         HousingRoomDescriptionReadOnly housingRoomDescription = HousingRoomDescriptionReadOnly.get(globalUniqueIdentifier.domainId)
         if (!housingRoomDescription)
-            throw new ApplicationException("room", new NotFoundException())
+            throw new ApplicationException(GeneralCommonConstants.ROOM, new NotFoundException())
         BuildingDetail building = new BuildingDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(BuildingCompositeService.LDM_NAME, housingRoomDescription.buildingCode)?.guid)
         List occupancies = [new Occupancy(fetchLdmRoomLayoutTypeForBannerRoomType(housingRoomDescription.roomType), housingRoomDescription.capacity)]
         switch (LdmService.getAcceptVersion(VERSIONS)){
-            case "v1" :
+            case GeneralCommonConstants.VERSION_V1 :
                 return new AvailableRoom(housingRoomDescription, building, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
-            case "v2" :
+            case GeneralCommonConstants.VERSION_V2 :
                 SiteDetail site = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey(SiteDetailCompositeService.LDM_NAME, housingRoomDescription.campusCode)?.guid)
                 return new Room(housingRoomDescription, building, site, occupancies, globalUniqueIdentifier.guid, new Metadata(housingRoomDescription.dataOrigin))
-            case "v4" :
+            case GeneralCommonConstants.VERSION_V4 :
                 def roomTypes = [:]
                 findAllByProcessCodeAndSettingName(PROCESS_CODE, getSettingNameForRoom_type(LdmService.getAcceptVersion(VERSIONS)))?.each { it ->
                     roomTypes.put( it?.value, it?.translationValue )
@@ -399,10 +400,10 @@ class RoomCompositeService extends LdmService {
         roomTypes.each {
             roomTypeObjects << [data: it]
         }
-        params.put("roomTypes", roomTypeObjects)
+        params.put(GeneralCommonConstants.ROOM_TYPES, roomTypeObjects)
         //criteria.add([key: "roomTypes", binding: "roomType", operator: Operators.IN])
 
-        params.put("endDate", new Date())
+        params.put(GeneralCommonConstants.END_DATE, new Date())
 
         def query = """
                        from HousingRoomDescriptionReadOnly a
@@ -466,14 +467,14 @@ class RoomCompositeService extends LdmService {
             log.debug( "End of Occupancy()" )
             BuildingDetail building = housingRoomDescription.buildingGUID ? new BuildingDetail(housingRoomDescription.buildingGUID) : null
             switch (LdmService.getAcceptVersion(VERSIONS)){
-                case "v1" :
+                case GeneralCommonConstants.VERSION_V1 :
                     availableRooms << new AvailableRoom(housingRoomDescription, building, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
                     break
-                case "v2" :
+                case GeneralCommonConstants.VERSION_V2 :
                     SiteDetail site = housingRoomDescription.siteGUID ? new SiteDetail(housingRoomDescription.siteGUID) : null
                     availableRooms << new Room(housingRoomDescription, building, site, occupancies, housingRoomDescription.roomGUID, new Metadata(housingRoomDescription.dataOrigin))
                     break
-                case "v4" :
+                case GeneralCommonConstants.VERSION_V4 :
                     String occupanciesType = ROOM_LAYOUT_TYPE_CLASSROOM_V4.equals(roomType.get( housingRoomDescription?.roomType )) ? ROOM_LAYOUT_TYPE_CLASSROOM_V4 : ''
                     occupancies = [new Occupancy(occupanciesType, housingRoomDescription?.capacity)]
                     SiteDetail site = housingRoomDescription?.siteGUID ? new SiteDetail(housingRoomDescription?.siteGUID) : null
@@ -508,42 +509,46 @@ class RoomCompositeService extends LdmService {
     }
 
     private String getSettingNameForRoom_type(String version){
-        return ("v4".equals(version)? SETTING_ROOM_LAYOUT_TYPE_V4 :SETTING_ROOM_LAYOUT_TYPE)
+        return (GeneralCommonConstants.VERSION_V4.equals(version)? SETTING_ROOM_LAYOUT_TYPE_V4 :SETTING_ROOM_LAYOUT_TYPE)
 
     }
 
+    /**
+     * Converting the v4 payload coming as a part of request to earlier version.
+     * To reuse all the existing validatio present for v4 version
+     */
     private Map prepareQapiV4Request(Map request) {
         if (!request.recurrence) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.recurrence", []))
         }
-        if (request?.recurrence?.timePeriod) {
-                if (request?.recurrence?.timePeriod?.startOn?.contains('T')) {
-                    def datetime = request.recurrence.timePeriod.startOn.split('T')
-                    request.put("startDate", datetime[0])
-                    if (datetime[1].length() > 8) {
-                        request.put("startTime", datetime[1]?.substring(0, 8))
-                    }
-            }
-                if(request?.recurrence?.timePeriod?.endOn?.contains('T')){
-                    def datetime = request.recurrence.timePeriod.endOn.split('T')
-                    request.put("endDate",datetime[0])
-                    if(datetime[1].length()>8){
-                        request.put("endTime",datetime[1].substring(0,8))
-                    }
-             }
-        }
-        request?.recurrence?.remove("timePeriod")
         if (!request?.recurrence?.repeatRule?.daysOfWeek) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.recurrence.byDay", []))
         }
-        if(request?.recurrence?.repeatRule?.daysOfWeek){
+        if (request?.recurrence?.timePeriod) {
+            if (request.recurrence.timePeriod?.startOn?.contains(GeneralCommonConstants.ALPHA_T)) {
+                def datetime = request.recurrence.timePeriod.startOn.split(GeneralCommonConstants.ALPHA_T)
+                request.put(GeneralCommonConstants.START_DATE, datetime[0])
+                if (datetime[1].length() > 8) {
+                    request.put(GeneralCommonConstants.START_TIME, datetime[1]?.substring(0, 8))
+                }
+            }
+            if(request.recurrence.timePeriod?.endOn?.contains(GeneralCommonConstants.ALPHA_T)){
+                def datetime = request.recurrence.timePeriod.endOn.split(GeneralCommonConstants.ALPHA_T)
+                request.put(GeneralCommonConstants.END_DATE,datetime[0])
+                if(datetime[1].length()>8){
+                    request.put(GeneralCommonConstants.END_TIME,datetime[1].substring(0,8))
+                }
+            }
+        }
+        request.recurrence.remove("timePeriod")
+        if(request.recurrence.repeatRule.daysOfWeek){
             def weekList=[]
             request.recurrence.repeatRule.daysOfWeek.each{
                 weekList.add(WeekDays.("${it}").value)
             }
-            request.recurrence?.byDay = weekList
+            request.recurrence.byDay = weekList
         }
-        request?.recurrence?.remove("repeatRule")
+        request.recurrence.remove("repeatRule")
         return request
     }
 
