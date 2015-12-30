@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.v4.RoomType
 import org.springframework.transaction.annotation.Propagation
@@ -16,9 +17,10 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class RoomTypeCompositeService extends LdmService{
 
-    private static final String ROOM_TYPES_HEDM_NAME='room-types'
-    private static final String SETTING_ROOM_LAYOUT = 'ROOM.ROOMTYPE'
-    private static final String PROCESS_CODE='HEDM'
+
+    private static final String ROOMTYPE = "roomtype"
+
+    def globalUniqueIdentifierService
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     List<RoomType> list(Map params) {
@@ -26,8 +28,11 @@ class RoomTypeCompositeService extends LdmService{
         List<RoomType> roomTypes =[]
         globalUniqueIdentifierDetails.each {
             globalUniqueIdentifierDetail->
-            IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE,SETTING_ROOM_LAYOUT,globalUniqueIdentifierDetail?.domainKey)
-            roomTypes << new RoomType(globalUniqueIdentifierDetail?.guid,integrationConfiguration?.translationValue,integrationConfiguration?.translationValue)
+                IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(GeneralCommonConstants.PROCESS_CODE,GeneralCommonConstants.SETTING_ROOM_LAYOUT,globalUniqueIdentifierDetail?.domainKey)
+                if(!integrationConfiguration){
+                    throw new ApplicationException(ROOMTYPE, new NotFoundException())
+                }
+                roomTypes << new RoomType(globalUniqueIdentifierDetail?.guid,integrationConfiguration?.translationValue,integrationConfiguration?.translationValue)
         }
         return roomTypes
     }
@@ -35,17 +40,22 @@ class RoomTypeCompositeService extends LdmService{
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     Long count() {
-        return GlobalUniqueIdentifier.countByLdmName(ROOM_TYPES_HEDM_NAME)
+        return globalUniqueIdentifierService.fetchCountByLdmName(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME)
     }
 
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def get(String guid) {
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.findByGuid(guid)
+        GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME,guid)
         if(!globalUniqueIdentifier){
-            throw new ApplicationException("roomtype", new NotFoundException())
+            throw new ApplicationException(ROOMTYPE, new NotFoundException())
         }
-        IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE,SETTING_ROOM_LAYOUT,globalUniqueIdentifier?.domainKey)
+        IntegrationConfiguration integrationConfiguration = findAllByProcessCodeAndSettingNameAndValue(GeneralCommonConstants.PROCESS_CODE,GeneralCommonConstants.SETTING_ROOM_LAYOUT,globalUniqueIdentifier?.domainKey)
+
+        if(!integrationConfiguration){
+            throw new ApplicationException(ROOMTYPE, new NotFoundException())
+        }
+
         return new RoomType(globalUniqueIdentifier?.guid,integrationConfiguration?.translationValue,integrationConfiguration?.translationValue)
     }
 
@@ -56,6 +66,6 @@ class RoomTypeCompositeService extends LdmService{
      * @return
      */
     List<GlobalUniqueIdentifier> getRoomTypeDetails() {
-        return GlobalUniqueIdentifier.findAllByLdmName(ROOM_TYPES_HEDM_NAME)
+        return globalUniqueIdentifierService.fetchByLdmName(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME)
     }
 }

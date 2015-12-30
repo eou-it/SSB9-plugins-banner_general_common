@@ -92,7 +92,6 @@ class RoomCompositeService extends LdmService {
         return getAvailableRooms(entities)
     }
 
-
     Long count(Map params) {
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
             Map filterParams = prepareSearchParams(params)
