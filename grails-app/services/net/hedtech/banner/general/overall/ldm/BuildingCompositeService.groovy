@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
@@ -16,65 +17,80 @@ import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
+/**
+ * <p> REST End point for Building Service.</p>
+ */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-class BuildingCompositeService {
+class BuildingCompositeService extends  LdmService{
 
 
     public static final String LDM_NAME = 'buildings'
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
-    private static final List<String> VERSIONS = ["v1", "v2","v3","v4"]
-    private HashMap ldmFieldToBannerDomainPropertyMap = [
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1,GeneralCommonConstants.VERSION_V4]
+    private static final HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: 'building.code',
             title       : 'building.description',
             code        : 'building.code'
     ]
+    private static final String SITE_FILTER_NAME = 'site.id'
 
+    /**
+     * GET /api/buildings
+     * @param params
+     * @return List
+     */
     List<BuildingDetail> list( Map params ) {
         List buildings = []
-        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
+        List allowedSortFields = (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))? [GeneralCommonConstants.CODE, GeneralCommonConstants.TITLE]:[GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.TITLE])
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
         RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(params.order)
         params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
-        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions=fetchBuildingDetails(params)
-
-        housingLocationBuildingDescriptions.each {housingLocationBuildingDescription ->
-            SiteDetail siteDetail = new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainKey( SiteDetailCompositeService.LDM_NAME,housingLocationBuildingDescription?.campus?.code)?.guid )
-            List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription?.building)
-            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, GlobalUniqueIdentifier.findByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
+        fetchBuildingDetails(params).each {housingLocationBuildingDescription ->
+            SiteDetail siteDetail = new SiteDetail(globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(housingLocationBuildingDescription.campus?.code, SiteDetailCompositeService.LDM_NAME)?.guid )
+            List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription.building)
+            buildings << new BuildingDetail( housingLocationBuildingDescription, siteDetail, globalUniqueIdentifierService.fetchByLdmNameAndDomainId( LDM_NAME, housingLocationBuildingDescription.id )?.guid?.toLowerCase(), rooms, new Metadata(housingLocationBuildingDescription.dataOrigin))
         }
         return buildings
     }
+    /**
+     *
+     * @param params
+     * @return
+     */
+    private def fetchBuildingDetails(Map params) {
+        if (params.containsKey(SITE_FILTER_NAME)) {
+            SiteDetail detail = siteDetailCompositeService.get(params.get(SITE_FILTER_NAME))
+            return housingLocationBuildingDescriptionService.fetchAllByCampuses([detail?.code]) as List
+        } else {
+            return housingLocationBuildingDescriptionService.list(params) as List
+        }
 
-    private def fetchBuildingDetails(Map params,boolean count=false) {
-        List<HousingLocationBuildingDescription> housingLocationBuildingDescriptions
-        SiteDetail detail = null
-        if(params.get('site.id')){
-            detail = siteDetailCompositeService.get(params.get('site.id'))
-        }
-        if(count){
-            if(params.get('site.id')){
-                return HousingLocationBuildingDescription.fetchAllByCampuses([detail?.code]).size()
-        }
+    }
+
+    /**
+     * GET /api/buildings
+     * @param params
+     * @return count
+     */
+    Long count(params) {
+        if (params.containsKey(SITE_FILTER_NAME)) {
+            SiteDetail detail = siteDetailCompositeService.get(params.get(SITE_FILTER_NAME))
+            return housingLocationBuildingDescriptionService.countAllByCampuses([detail?.code])
+        } else {
             return housingLocationBuildingDescriptionService.count()
         }
-        if (params.get('site.id')) {
-            housingLocationBuildingDescriptions = HousingLocationBuildingDescription.fetchAllByCampuses([detail?.code]) as List
-        } else {
-            housingLocationBuildingDescriptions = housingLocationBuildingDescriptionService.list(params) as List
-        }
-        housingLocationBuildingDescriptions
+
     }
 
-
-    Long count(params) {
-        return fetchBuildingDetails(params,true)
-    }
-
-
+    /**
+     * GET /api/buildings/<guid>
+     * @param params
+     * @return BuildingDetail
+     */
     BuildingDetail get( String guid ) {
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid( LDM_NAME, guid )
+        GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByLdmNameAndGuid( LDM_NAME, guid )
         if (!globalUniqueIdentifier) {
             throw new ApplicationException("building", new NotFoundException())
         }
