@@ -64,6 +64,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     // make sure these temporarily commented out tests are made to run.  "directDepositCompositeService" will
     // probably have to be renamed to "directDepositAccountCompositeService" or whatever.  Note that seed data was
     // committed to mar2016_dev that is required for the below tests.  JDC 12/3/15
+    // ADDITIONAL NOTE:  When fixing the tests, the calculated amounts will also have to be adjusted
+    // due to story http://jirateams.ellucian.com:8080/browse/DID-323, which was committed 1/5/16. JDC
 //    @Test
 //    /**
 //     * No accounts
