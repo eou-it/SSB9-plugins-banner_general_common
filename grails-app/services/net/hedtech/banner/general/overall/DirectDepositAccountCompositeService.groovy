@@ -60,8 +60,7 @@ class DirectDepositAccountCompositeService {
         def totalAmount = 0
 
         if (lastPayDist) {
-            def total = lastPayDist.totalNet
-            def totalLeft = total
+            def totalLeft = lastPayDist.totalNet //Initially, the total left is the total from last distribution
             def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
             def allocList = []
 
@@ -86,7 +85,7 @@ class DirectDepositAccountCompositeService {
                     allocationByUser = formatCurrency(amt)
                 } else if (pct) {
                     // Calculate amount based on percent and last pay distribution
-                    calcAmt = total * pct / 100
+                    calcAmt = totalLeft * pct / 100
 
                     if (calcAmt > totalLeft) {
                         calcAmt = totalLeft
