@@ -77,7 +77,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 populationId: populationSelectionListId,
                 templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString()
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
         )
 
         groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
@@ -140,7 +141,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 populationId: populationSelectionListId,
                 templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString()
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
         )
 
         groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
@@ -219,7 +221,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 populationId: populationSelectionListId,
                 templateId: mobileTemplate.id,
                 organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString()
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
         )
 
         groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)

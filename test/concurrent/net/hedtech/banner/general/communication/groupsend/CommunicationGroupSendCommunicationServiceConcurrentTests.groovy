@@ -66,7 +66,8 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
                 populationId: populationSelectionListId,
                 templateId: defaultEmailTemplate.id,
                 organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString()
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
         )
 
         groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
@@ -129,7 +130,8 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
                 populationId: populationSelectionListId,
                 templateId: defaultEmailTemplate.id,
                 organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString()
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
         )
 
         groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)

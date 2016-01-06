@@ -246,14 +246,16 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     }
 
     private CommunicationGroupSend createGroupSendForScheduling() {
-        Date scheduledDate = new Date()
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DATE, 1);
+
         return communicationGroupSendService.create(
                 new CommunicationGroupSend(
                         organizationId: organization.id,
                         populationId: population.id,
                         templateId: emailTemplate.id,
                         createdBy: bannerAuthenticationToken.getOracleUserName(),
-                        scheduledStartDate : scheduledDate,
+                        scheduledStartDate : c.getTime(),
                         recalculateOnSend : new Boolean(true)
 
                 )
