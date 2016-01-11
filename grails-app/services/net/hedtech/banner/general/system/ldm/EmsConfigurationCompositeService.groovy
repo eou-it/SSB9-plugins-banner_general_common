@@ -60,6 +60,9 @@ class EmsConfigurationCompositeService {
                     case 'EMS.IHUB.SUBSCRIBE.URL':
                         emsConfigBuilder.ihubSubscribeUrl = setting.translationValue
                         break;
+                    case 'EMS.IHUB.ERROR.URL':
+                        emsConfigBuilder.ihubErrorUrl = setting.translationValue
+                        break;
                     case 'EMS.IHUB.MEDIATYPE':
                         emsConfigBuilder.ihubMediaType = setting.translationValue
                         break;

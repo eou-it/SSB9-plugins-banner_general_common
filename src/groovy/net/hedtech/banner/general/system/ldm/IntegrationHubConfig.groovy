@@ -41,6 +41,11 @@ class IntegrationHubConfig {
     String subscribeUrl
 
     /**
+     * URL for the hub error reporting service
+     */
+    String errorUrl
+
+    /**
      * Media type for messages getting published and retrieved (i.e. application/vnd.hedtech.change-notifications.v2+json)
      */
     String hubMediaType

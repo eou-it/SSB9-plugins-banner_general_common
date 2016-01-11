@@ -29,6 +29,7 @@ class EmsConfigurationBuilder {
     String ihubTokenUrl
     String ihubPublishUrl
     String ihubSubscribeUrl
+    String ihubErrorUrl
     String ihubMediaType
 
     // amqpServerConfig
@@ -96,6 +97,7 @@ class EmsConfigurationBuilder {
         integrationHubConfig.tokenUrl = this.ihubTokenUrl
         integrationHubConfig.publishUrl = this.ihubPublishUrl
         integrationHubConfig.subscribeUrl = this.ihubSubscribeUrl
+        integrationHubConfig.errorUrl = this.ihubErrorUrl
         integrationHubConfig.hubMediaType = this.ihubMediaType
         return integrationHubConfig
     }
