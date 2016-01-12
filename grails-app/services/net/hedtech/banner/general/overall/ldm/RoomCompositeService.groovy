@@ -212,15 +212,13 @@ class RoomCompositeService extends LdmService {
         if (!params.occupancies[0]?.maxOccupancy) {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.maxOccupancy", []))
         }
-        if (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))) {
-            if (!params.roomTypes[0]?.type) {
-                throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
-            }
+        if (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS)) && !params.roomTypes[0]?.type) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
+
         }
-        else {
-            if (!params.occupancies[0]?.roomLayoutType) {
-                throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
-            }
+        else if (!params.occupancies[0]?.roomLayoutType && !GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))) {
+            throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("missing.roomLayoutType", []))
+
         }
         try {
             Integer.valueOf(params.occupancies[0]?.maxOccupancy)
