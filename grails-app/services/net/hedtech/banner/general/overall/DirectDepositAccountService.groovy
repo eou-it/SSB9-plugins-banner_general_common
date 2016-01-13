@@ -46,6 +46,9 @@ class DirectDepositAccountService extends ServiceBase{
         
         for (acct in accounts) {
             if(acct.hrIndicator == 'A' && acct.apIndicator == 'A') {
+                // if account to be deleted is a legacy record set the appropiate indicator
+                // to I instead of deleting it
+                
                 if(acct.apDelete) {
                     acct.apIndicator = 'I'
                     model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
@@ -60,6 +63,9 @@ class DirectDepositAccountService extends ServiceBase{
                 def accts = DirectDepositAccount.fetchActiveByAccountNums(acct.pidm, acct.bankRoutingInfo.bankRoutingNum, acct.bankAccountNum)
                 
                 if( accts.size() == 2) {
+                    // if account is synced make sure to only delete the requested record
+                    // and display the appropiate message
+                    
                     if(acct.hrIndicator == 'A' && acct.apDelete){
                         if(acct.hrIndicator != accts[0].hrIndicator) {
                             model.toBeDeleted.add(accts[0])
