@@ -7,14 +7,9 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 
-grails.plugin.location.'banner-core' = "../banner_core.git"
-grails.plugin.location.'banner-codenarc' = "../banner_codenarc.git"
-grails.plugin.location.'banner-general-validation-common' = "../banner_general_validation_common.git"
 grails.plugin.location.'banner-general-person' = "../banner_general_person.git"
-grails.plugin.location.'banner-seeddata-catalog' = "../banner_seeddata_catalog.git"
-grails.plugin.location.'i18n-core' = "../i18n_core.git"
 
-grails.project.dependency.resolver = "ivy" // or maven
+grails.project.dependency.resolver = "maven" // or ivy
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -28,21 +23,14 @@ grails.project.dependency.resolution = {
         if (System.properties['PROXY_SERVER_NAME']) {
             mavenRepo "${System.properties['PROXY_SERVER_NAME']}"
         } else {
-            grailsPlugins()
-            grailsHome()
             grailsCentral()
             mavenCentral()
             mavenRepo "http://repository.jboss.org/maven2/"
-            mavenRepo "http://repository.codehaus.org"
+            mavenRepo "https://code.lds.org/nexus/content/groups/main-repo"
         }
     }
 
     plugins {
-        runtime  ":hibernate:3.6.10.10"
-        compile ":tomcat:7.0.52.1"
-        compile ':resources:1.2.7' // If the functional-test plugin is being used
-        compile ":functional-test:2.0.0" // If the functional-test plugin is being used
-        test ':code-coverage:2.0.3-3'
     }
 
     dependencies {
