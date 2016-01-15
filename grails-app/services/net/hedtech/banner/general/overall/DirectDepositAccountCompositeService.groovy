@@ -12,7 +12,6 @@ class DirectDepositAccountCompositeService {
 
     def directDepositAccountService
     def bankRoutingInfoService
-    def directDepositPayrollHistoryService
     def currencyFormatService
     def sessionFactory
 
