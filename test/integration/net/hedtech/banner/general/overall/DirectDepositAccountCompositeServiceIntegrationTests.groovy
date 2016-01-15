@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.general.overall.DirectDepositAccountCompositeService
@@ -10,6 +11,16 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import net.hedtech.banner.security.BannerAuthenticationToken
+import net.hedtech.banner.security.BannerAuthenticationToken
+import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  *
@@ -17,6 +28,7 @@ import org.junit.Test
 class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def directDepositAccountCompositeService
+    def selfServiceBannerAuthenticationProvider
 
     def testBankRoutingInfo0 = [
         bankRoutingNum: '234798944'
@@ -34,11 +46,20 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         pidm: 37859,
         status: 'P'
     ]
+
+    BannerAuthenticationToken bannerAuthenticationToken
     
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+
+        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '111111' ) )
+        assertNotNull auth
+        SecurityContextHolder.getContext().setAuthentication( auth )
+        assertTrue( auth instanceof BannerAuthenticationToken )
+        bannerAuthenticationToken = auth as BannerAuthenticationToken
+        assertNotNull bannerAuthenticationToken.getPidm()
     }
 
 
@@ -84,6 +105,17 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         assertNotEquals(account1.id, account2.id)
         assertEquals("A", account2.hrIndicator)
     }
+
+
+    @Test
+    void testGetLastPayDistribution() {
+    //    def pidm = PersonUtility.getPerson("MYE000001").pidm
+
+        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(bannerAuthenticationToken.getPidm())
+
+        assertEquals true, lastPayDist.hasPayrollHist
+    }
+
 
     // TODO: All of the below tests PASSED when they were broken out into their own temporary file
     // which corresponded to a temporary DirectDepositCompositeService class which was located at the app level (as
