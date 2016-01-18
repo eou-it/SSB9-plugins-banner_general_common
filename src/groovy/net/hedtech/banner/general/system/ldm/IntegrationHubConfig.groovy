@@ -11,16 +11,6 @@ package net.hedtech.banner.general.system.ldm
 class IntegrationHubConfig {
 
     /**
-     * ID of the application from the hub admin UI
-     */
-    String applicationID
-
-    /**
-     * Name of the application from the hub admin UI
-     */
-    String applicationName
-
-    /**
      * API Key of the application from the hub admin UI
      */
     String apiKey

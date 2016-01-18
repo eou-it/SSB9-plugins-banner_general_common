@@ -23,8 +23,6 @@ class EmsConfigurationBuilder {
     boolean useIntegrationHub
 
     // integrationHubConfig
-    String ihubApplicationID
-    String ihubApplicationName
     String ihubApiKey
     String ihubTokenUrl
     String ihubPublishUrl
@@ -91,8 +89,6 @@ class EmsConfigurationBuilder {
 
     private IntegrationHubConfig createIntegrationHubConfig() {
         IntegrationHubConfig integrationHubConfig = new IntegrationHubConfig()
-        integrationHubConfig.applicationID = this.ihubApplicationID
-        integrationHubConfig.applicationName = this.ihubApplicationName
         integrationHubConfig.apiKey = this.ihubApiKey
         integrationHubConfig.tokenUrl = this.ihubTokenUrl
         integrationHubConfig.publishUrl = this.ihubPublishUrl

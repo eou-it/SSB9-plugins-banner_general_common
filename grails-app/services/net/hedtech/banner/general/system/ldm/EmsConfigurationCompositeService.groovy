@@ -42,12 +42,6 @@ class EmsConfigurationCompositeService {
                         emsConfigBuilder.useIntegrationHub = setting.translationValue.toUpperCase() == "Y" ? true : false
                         break;
                 // integrationHubConfig
-                    case 'EMS.IHUB.APPLICATION.ID':
-                        emsConfigBuilder.ihubApplicationID = setting.translationValue
-                        break;
-                    case 'EMS.IHUB.APPLICATION.NAME':
-                        emsConfigBuilder.ihubApplicationName = setting.translationValue
-                        break;
                     case 'EMS.IHUB.APPLICATION.API.KEY':
                         emsConfigBuilder.ihubApiKey = setting.translationValue
                         break;
