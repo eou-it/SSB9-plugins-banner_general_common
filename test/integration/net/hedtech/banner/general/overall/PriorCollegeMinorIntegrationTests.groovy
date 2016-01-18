@@ -1,20 +1,16 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
 import grails.validation.ValidationException
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-
 import java.text.SimpleDateFormat
 
 class PriorCollegeMinorIntegrationTests extends BaseIntegrationTestCase {
@@ -63,12 +59,9 @@ class PriorCollegeMinorIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "EDUC", priorCollegeMinor.majorMinorConcentrationMinor.code
 
         priorCollegeMinor.majorMinorConcentrationMinor = MajorMinorConcentration.findByCode("ECNO")
-        try {
+        shouldFail(org.springframework.dao.QueryTimeoutException) {
             priorCollegeMinor.save(flush: true, failOnError: true)
             fail("this should have failed, update not allowed")
-        }
-        catch (org.springframework.orm.hibernate3.HibernateJdbcException ae) {
-//            assertApplicationException ae, "unsupported.operation"
         }
     }
 
