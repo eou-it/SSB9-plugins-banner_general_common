@@ -49,6 +49,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
         assertEquals "EDUC", priorCollegeConcentrationArea.concentration.code
 
         priorCollegeConcentrationArea.concentration = MajorMinorConcentration.findByCode("ECNO")
+        //Changed from org.springframework.orm.hibernate3.HibernateJdbcException due to spring 4.1.5
         shouldFail(org.springframework.dao.QueryTimeoutException) {
             priorCollegeConcentrationArea.save(flush: true, failOnError: true)
             fail("this should have failed, update not allowed")

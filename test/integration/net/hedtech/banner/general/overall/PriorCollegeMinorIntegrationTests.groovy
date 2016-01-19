@@ -59,6 +59,7 @@ class PriorCollegeMinorIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "EDUC", priorCollegeMinor.majorMinorConcentrationMinor.code
 
         priorCollegeMinor.majorMinorConcentrationMinor = MajorMinorConcentration.findByCode("ECNO")
+        //Changed from org.springframework.orm.hibernate3.HibernateJdbcException due to spring 4.1.5
         shouldFail(org.springframework.dao.QueryTimeoutException) {
             priorCollegeMinor.save(flush: true, failOnError: true)
             fail("this should have failed, update not allowed")
