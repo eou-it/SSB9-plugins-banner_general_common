@@ -42,12 +42,23 @@ class CommunicationGroupSendCommunicationService {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCommunicationService, "@@r1:jobNameInvalid@@" )
         }
 
+        Calendar scheduledDate = request.getScheduledStartDate()
+        if(scheduledDate != null)
+        {
+            //Validation to make sure date is not in the past
+            Calendar now = Calendar.getInstance(scheduledDate.getTimeZone())
+            if(now.after(scheduledDate))
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "invalidScheduledDate" )
+        }
+
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
         groupSend.templateId = request.getTemplateId()
         groupSend.populationId = request.getPopulationId()
         groupSend.organizationId = request.getOrganizationId()
         groupSend.name = jobName
-        groupSend.scheduledStartDate = request.getScheduledStartDate()
+        if(scheduledDate != null) {
+            groupSend.scheduledStartDate = scheduledDate.getTime()
+        }
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
