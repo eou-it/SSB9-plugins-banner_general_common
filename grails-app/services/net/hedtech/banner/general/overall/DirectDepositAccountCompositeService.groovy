@@ -21,7 +21,7 @@ class DirectDepositAccountCompositeService {
      * @param map
      * @return
      */
-    def addorUpdateAccount( def map ) {
+    def addorUpdateAccount( def map, setPriority = true ) {
         def account = [:]
 
         directDepositAccountService.validateAccountNumFormat(map.bankAccountNum)
@@ -43,12 +43,37 @@ class DirectDepositAccountCompositeService {
 
         account.bankRoutingInfo = validateBankRoutingInfo(routingNum)
 
-        validateNotDuplicate(account)
-        account = setNextPriority(account)
+        if(setPriority){
+            validateNotDuplicate(account)
+            account = setNextPriority(account)
+        }
+        else {
+            account.priority = map.priority
+        }
 
         account = directDepositAccountService.createOrUpdate( [domainModel: account] )
 
         return account
+    }
+    
+    def reorderAccounts( accounts ) {
+        def result = [];
+        
+        // clear out original records
+        result.add(directDepositAccountService.delete(accounts))
+
+        // insert records in their new order
+        for (acct in accounts) {
+            acct.id = null;
+            result.add(addorUpdateAccount(acct, false))
+        }
+
+        // make sure their account types are correct
+        for (acct in accounts) {
+            directDepositAccountService.syncApAndHrAccounts(acct)
+        }
+
+        result
     }
 
     /**
@@ -150,9 +175,17 @@ class DirectDepositAccountCompositeService {
     }
 
     private def setNextPriority(account) {
-        def lowestPriority = DirectDepositAccount.fetchByPidm(account.pidm)*.priority.max()
-        account.priority = (lowestPriority ? lowestPriority+1 : 1)
-
+        def accts = DirectDepositAccount.fetchByPidm(account.pidm)
+        
+        // AP records are created with a priority of 0
+        if(account.hrIndicator != 'A' && account.apIndicator == 'A' && accts.size() == 0) {
+            account.priority = 0
+        }
+        else {
+            def lowestPriority = accts*.priority.max()
+            account.priority = (lowestPriority ? lowestPriority+1 : 1)
+        }
+        
         account
     }
 
