@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.general.overall.DirectDepositAccountCompositeService
@@ -10,6 +11,16 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import net.hedtech.banner.security.BannerAuthenticationToken
+import net.hedtech.banner.security.BannerAuthenticationToken
+import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  *
@@ -17,6 +28,7 @@ import org.junit.Test
 class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def directDepositAccountCompositeService
+    def selfServiceBannerAuthenticationProvider
 
     def testBankRoutingInfo0 = [
         bankRoutingNum: '234798944'
@@ -34,11 +46,20 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         pidm: 37859,
         status: 'P'
     ]
+
+    BannerAuthenticationToken bannerAuthenticationToken
     
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+
+        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '111111' ) )
+        assertNotNull auth
+        SecurityContextHolder.getContext().setAuthentication( auth )
+        assertTrue( auth instanceof BannerAuthenticationToken )
+        bannerAuthenticationToken = auth as BannerAuthenticationToken
+        assertNotNull bannerAuthenticationToken.getPidm()
     }
 
 
@@ -55,4 +76,175 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
         assertEquals("22334455", account.bankAccountNum)
     }
+
+    @Test
+    void testAddDuplicateAccount() {
+        def account1, account2
+
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+
+        try {
+            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+            fail("I should have received an error but it passed; @@r1:recordAlreadyExists@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "recordAlreadyExists"
+        }
+    }
+    
+    @Test
+    void testAddApAccountToPayroll() {
+        def account1, account2
+
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+        
+        testAccountMap0.hrIndicator = "A"
+        testAccountMap0.apIndicator = "I"
+        account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+
+        assertNotEquals(account1.id, account2.id)
+        assertEquals("A", account2.hrIndicator)
+    }
+
+
+    @Test
+    void testGetLastPayDistribution() {
+    //    def pidm = PersonUtility.getPerson("MYE000001").pidm
+
+        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(bannerAuthenticationToken.getPidm())
+
+        assertEquals true, lastPayDist.hasPayrollHist
+    }
+
+
+    // TODO: All of the below tests PASSED when they were broken out into their own temporary file
+    // which corresponded to a temporary DirectDepositCompositeService class which was located at the app level (as
+    // opposed to being in the the banner_general_common plugin) so that it had access to the required payroll
+    // plugin.  Per story http://jirateams.ellucian.com:8080/browse/DID-303 "Eliminate dependency on payroll plugin"
+    // we plan to move all of that payroll functionality into this plugin.  Whether it happens that way or not,
+    // make sure these temporarily commented out tests are made to run.  "directDepositCompositeService" will
+    // probably have to be renamed to "directDepositAccountCompositeService" or whatever.  Note that seed data was
+    // committed to mar2016_dev that is required for the below tests.  JDC 12/3/15
+    // ADDITIONAL NOTE:  When fixing the tests, the calculated amounts will also have to be adjusted
+    // due to story http://jirateams.ellucian.com:8080/browse/DID-323, which was committed 1/5/16. JDC
+//    @Test
+//    /**
+//     * No accounts
+//     */
+//    void testGetUserHrAllocationsNoAccounts() {
+//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(36732) // No accounts
+//
+//        // Assert domain values
+//        assertNotNull allocationsObj
+//        assertNotNull allocationsObj.allocations
+//        assertEquals 0, allocationsObj.allocations.size()
+//
+//        assertEquals "", allocationsObj.totalAmount
+//    }
+//
+//    @Test
+//    /**
+//     * One account:
+//     *   100% allocated
+//     */
+//    void testGetUserHrAllocationsOneAccount() {
+//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(49548) // One account
+//
+//        // Assert domain values
+//        assertNotNull allocationsObj
+//        assertNotNull allocationsObj.allocations
+//        assertEquals 1, allocationsObj.allocations.size()
+//
+//        def allocation = allocationsObj.allocations[0]
+//
+//        assertNotNull allocation.id
+//        assertEquals "1293902", allocation.bankAccountNum
+//        assertEquals "C", allocation.accountType
+//        assertNull allocation.amount
+//        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+//        assertEquals "\$2,806.23", allocation.calculatedAmount
+//
+//        assertEquals "\$2,806.23", allocationsObj.totalAmount
+//    }
+//
+//    @Test
+//    /**
+//     * Two accounts:
+//     *   Priority 1) $50.00 allocated
+//     *   Priority 2) 100% allocated
+//     */
+//    void testGetUserHrAllocationsTwoAccounts() {
+//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(37700) // Two accounts
+//
+//        // Assert domain values
+//        assertNotNull allocationsObj
+//        assertNotNull allocationsObj.allocations
+//        assertEquals 2, allocationsObj.allocations.size()
+//
+//        def allocation = allocationsObj.allocations[0]
+//
+//        assertNotNull allocation.id
+//        assertEquals "95003546", allocation.bankAccountNum
+//        assertEquals "S", allocation.accountType
+//        assertTrue(49.9 < allocation.amount && allocation.amount < 50.1)
+//        assertNull allocation.percent
+//        assertEquals "\$50.00", allocation.calculatedAmount
+//
+//        allocation = allocationsObj.allocations[1]
+//
+//        assertNotNull allocation.id
+//        assertEquals "736900542", allocation.bankAccountNum
+//        assertEquals "C", allocation.accountType
+//        assertNull allocation.amount
+//        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+//        assertEquals "\$2,007.01", allocation.calculatedAmount
+//
+//        assertEquals "\$2,057.01", allocationsObj.totalAmount
+//    }
+//
+//    @Test
+//    /**
+//     * Three accounts:
+//     *   Priority 1) $77.00 allocated
+//     *   Priority 2) 50% allocated
+//     *   Priority 3) 100% allocated
+//     */
+//    void testGetUserHrAllocationsThreeAccounts() {
+//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(36743) // Two accounts
+//
+//        // Assert domain values
+//        assertNotNull allocationsObj
+//        assertNotNull allocationsObj.allocations
+//        assertEquals 3, allocationsObj.allocations.size()
+//
+//        def allocation = allocationsObj.allocations[0]
+//
+//        assertNotNull allocation.id
+//        assertEquals "736900542", allocation.bankAccountNum
+//        assertEquals "C", allocation.accountType
+//        assertTrue(76.9 < allocation.amount && allocation.amount < 77.1)
+//        assertNull allocation.percent
+//        assertEquals "\$77.00", allocation.calculatedAmount
+//
+//
+//        allocation = allocationsObj.allocations[1]
+//
+//        assertNotNull allocation.id
+//        assertEquals "95003546", allocation.bankAccountNum
+//        assertEquals "S", allocation.accountType
+//        assertNull allocation.amount
+//        assertTrue(49.9 < allocation.percent && allocation.percent < 50.1)
+//        assertEquals "\$1,397.74", allocation.calculatedAmount
+//
+//        allocation = allocationsObj.allocations[2]
+//
+//        assertNotNull allocation.id
+//        assertEquals "67674852", allocation.bankAccountNum
+//        assertEquals "C", allocation.accountType
+//        assertNull allocation.amount
+//        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+//        assertEquals "\$1,320.74", allocation.calculatedAmount
+//
+//        assertEquals "\$2,795.47", allocationsObj.totalAmount
+//    }
 }
