@@ -104,7 +104,7 @@ class DirectDepositAccountCompositeService {
                     [ (it.name):alloc."$it.name" ]
                 }
 
-                // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or "Remaining")
+                // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or $100)
                 def amt = it.amount
                 def pct = it.percent
                 def calcAmt = 0
@@ -125,9 +125,7 @@ class DirectDepositAccountCompositeService {
                     }
 
                     // Allocation as set by user
-                    // (If it's the last, i.e. lowest priority, allocation and is 100%, then it's
-                    // labeled as "Remaining".)
-                    allocationByUser = (it == allocations.last() && pct > 99.9) ? "Remaining" : pct.intValue() + "%"
+                    allocationByUser = pct.intValue() + "%"
                 }
 
                 totalLeft -= calcAmt
