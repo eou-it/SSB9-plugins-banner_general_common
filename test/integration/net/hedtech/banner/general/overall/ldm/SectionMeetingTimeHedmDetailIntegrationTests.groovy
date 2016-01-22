@@ -7,6 +7,7 @@ import net.hedtech.banner.general.overall.SectionMeetingTime
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 
@@ -99,9 +100,13 @@ class SectionMeetingTimeHedmDetailIntegrationTests extends BaseIntegrationTestCa
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId(ldm_name, sectionMeetingTime.id)
         assertNotNull globalUniqueIdentifier
         SectionMeetingTimeHedmDetail sectionMeetingTimeHedmDetail = SectionMeetingTimeHedmDetail.findByGuid(globalUniqueIdentifier.guid)
-        shouldFail(InvalidDataAccessResourceUsageException) {
-            sectionMeetingTimeHedmDetail.delete(failOnError: true, flush: true)
-        }
+        //TODO: since moving to grails 2.5.0 the below exceoption is not being thrown, however by asserting that the row is not getting
+        // deleted we are confirming delete is not effecting read only view
+        //shouldFail(InvalidDataAccessResourceUsageException) {
+        sectionMeetingTimeHedmDetail.delete(failOnError: true, flush: true)
+        SectionMeetingTime sectionMeetingTime1 = SectionMeetingTime.fetchByTermCRNAndCategory(i_success_term_code, i_success_courseReferenceNumber, i_success_category)[0]
+        assertEquals(sectionMeetingTime.id, sectionMeetingTime1.id)
+        //}
     }
 
     @Test

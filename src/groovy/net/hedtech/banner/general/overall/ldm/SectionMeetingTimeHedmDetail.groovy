@@ -148,28 +148,31 @@ class SectionMeetingTimeHedmDetail implements Serializable {
     static List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(List guids) {
         List<SectionMeetingTimeHedmDetail> sectionMeetingTimeHedmDetails = []
         List<SectionMeetingTimeHedmDetail> sectionMeetingTimeHedmDetailsTemp = []
-        List guidsTemp = []
-        def noOfLoops = Math.ceil(guids.size()/1000)
-        int guidsTempLoop
-        int guidsInd=0
 
-        for (int i=0;i<noOfLoops;i++){
-            guidsTemp.clear()
+        if(guids && guids.size() > 0){
+            List guidsTemp = []
+            def noOfLoops = Math.ceil(guids.size()/1000)
+            int guidsTempLoop
+            int guidsInd=0
 
-            guidsTempLoop=0
-            while (guidsTempLoop<=999 && guidsInd<guids.size()){
-                guidsTemp.add(guids.get(guidsInd))
-                guidsInd = guidsInd+1
-                guidsTempLoop=guidsTempLoop+1
+            for (int i=0;i<noOfLoops;i++){
+                guidsTemp.clear()
+
+                guidsTempLoop=0
+                while (guidsTempLoop<=999 && guidsInd<guids.size()){
+                    guidsTemp.add(guids.get(guidsInd))
+                    guidsInd = guidsInd+1
+                    guidsTempLoop=guidsTempLoop+1
+                }
+
+                SectionMeetingTimeHedmDetail.withSession { session ->
+                    sectionMeetingTimeHedmDetailsTemp = session.getNamedQuery('SectionMeetingTimeHedmDetail.fetchAllByGuidInList')
+                            .setParameterList('guids', guidsTemp).list()
+                }
+
+                sectionMeetingTimeHedmDetails.addAll(sectionMeetingTimeHedmDetailsTemp)
+
             }
-
-            SectionMeetingTimeHedmDetail.withSession { session ->
-                sectionMeetingTimeHedmDetailsTemp = session.getNamedQuery('SectionMeetingTimeHedmDetail.fetchAllByGuidInList')
-                        .setParameterList('guids', guidsTemp).list()
-            }
-
-            sectionMeetingTimeHedmDetails.addAll(sectionMeetingTimeHedmDetailsTemp)
-
         }
 
        
