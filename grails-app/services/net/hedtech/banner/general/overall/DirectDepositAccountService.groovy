@@ -17,7 +17,15 @@ class DirectDepositAccountService extends ServiceBase{
             throw new ApplicationException(DirectDepositAccount, "@@r1:invalidAccountNumFmt@@")
         }
     }
-    
+
+    /**
+     * This method enforces a business rule that an account used by a given user for both payroll and AP must use the
+     * same account type (checking or savings) for both payroll and AP.
+     *
+     * This method does not update the account passed in; it only updates the corresponding account, if any,
+     * that is found already existing in the database.
+     * @param account Account to sync
+     */
     def syncApAndHrAccounts( account ) {
         def accts = DirectDepositAccount.fetchActiveByAccountNums(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum)
         
