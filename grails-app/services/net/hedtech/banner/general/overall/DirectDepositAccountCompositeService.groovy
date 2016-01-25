@@ -424,6 +424,8 @@ class DirectDepositAccountCompositeService {
 
         d.setScale(2, BigDecimal.ROUND_HALF_UP)
     }
+
+
     def rePrioritizeAccounts( def map, def newPosition ) {
 
         def accountList = directDepositAccountService.getActiveHrAccounts(map.pidm)
