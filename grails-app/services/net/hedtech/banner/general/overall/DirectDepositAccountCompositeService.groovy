@@ -444,7 +444,7 @@ class DirectDepositAccountCompositeService {
         def itemBeingAdjPosition = accountList.findIndexOf  { iterator ->
             iterator.id == map.id
         }
-        if (newPosition == itemBeingAdjPosition) {
+        if (newPosition == itemBeingAdjPosition+1) {
             reOrderInd = false
         }
 
@@ -523,17 +523,36 @@ class DirectDepositAccountCompositeService {
         adjustedMapList.sort {it.newPosition};
         priorityList.sort{it}
 
+        //remove the records before updating hibernate objects
+        adjustedMapList.each {
+            def pid=it.id
+            def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
+            directDepositAccountService.delete(acct)
+        }
+
+
         int i = 0
         adjustedMapList.each {
             def pid=it.id
             def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
             acct.priority = priorityList[i++]
-
+     //       acct.version=null
+     //       acct.id = null
+     //       directDepositAccountService.create(acct)
             prioritizedList << acct
 
         }
 
-        return prioritizedList.sort {it.priority}
+        prioritizedList.sort {it.priority}
+
+        prioritizedList.each {
+            def item = it as DirectDepositAccount
+            item.version=null
+            item.id = null
+            directDepositAccountService.create(item)
+        }
+
+        return directDepositAccountService.getActiveHrAccounts(map.pidm)
     }
 
 }
