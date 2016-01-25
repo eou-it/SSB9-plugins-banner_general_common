@@ -54,7 +54,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         formContext = ['GUAGMNU']
         super.setUp()
 
-        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '111111' ) )
+        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '123456' ) )
         assertNotNull auth
         SecurityContextHolder.getContext().setAuthentication( auth )
         assertTrue( auth instanceof BannerAuthenticationToken )
@@ -108,13 +108,33 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
 
     @Test
-    void testGetLastPayDistribution() {
+    void testRePrioritizeAccounts() {
     //    def pidm = PersonUtility.getPerson("MYE000001").pidm
 
-        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(bannerAuthenticationToken.getPidm())
+        def item = DirectDepositAccount.findById(635)
+        def itemMap = item.properties
+        itemMap.newPosition = 3
+        def newPosition = 3
+
+        def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
+
+        assertEquals list.size() > 0
+    }
+
+
+    @Test
+    void testGetLastPayDistribution() {
+            def pidm = PersonUtility.getPerson("MYE000009").pidm
+
+        def item = DirectDepositAccount.fetchByPidm(pidm)
+
+
+
+        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
 
         assertEquals true, lastPayDist.hasPayrollHist
     }
+
 
 
     // TODO: All of the below tests PASSED when they were broken out into their own temporary file

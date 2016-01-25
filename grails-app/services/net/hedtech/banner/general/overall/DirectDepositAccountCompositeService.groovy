@@ -60,7 +60,7 @@ class DirectDepositAccountCompositeService {
         def model = [:]
         def lastPayDist
 
-        if (checkIfHrInstalled()) {
+        if (InstitutionalDescription.fetchByKey()?.hrInstalled) {
             lastPayDist=getLastPayDistribution(pidm)
         }
 
@@ -220,7 +220,7 @@ class DirectDepositAccountCompositeService {
     /* Check if there are Direct Deposits in the last pay period for sequence zero*/
     def lastPayDirectDeposit( pidm,year,pictCode,payNo ) {
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
-        def directDeposit
+        def directDeposit = 'N'
 
        def lastPayDDSql =
        """    SELECT 'Y'
@@ -319,7 +319,7 @@ class DirectDepositAccountCompositeService {
 
         try {
             sql.eachRow(lastPayAmtSql, [pidm]) { row ->
-                lastPayAmtRec = row[0]
+                lastPayAmtRec = row.toRowResult()
             }
         } finally {
             sql?.close()
@@ -371,7 +371,10 @@ class DirectDepositAccountCompositeService {
             } else {
 
                 def lastPayAmtRec = lastPayAmount(pidm)
-                model.totalNet = lastPayAmtRec.netAmount
+                if (lastPayAmtRec) {
+                    model.totalNet = lastPayAmtRec.netAmount
+                }
+
             }
         }
         return model
@@ -392,5 +395,116 @@ class DirectDepositAccountCompositeService {
         return isHrInstalled
     }
 
+    def rePrioritizeAccounts( def map, def newPosition ) {
+
+        def accountList = directDepositAccountService.getActiveHrAccounts(map.pidm)
+        accountList.sort {it.priority};
+
+        def reOrderInd = true
+        def priorityList = []
+
+        def adjustedMapList = []
+        def prioritizedList = []
+
+        //make sure new position is not greater than the number of hr accounts.
+     //   def newPositionExceedsInd = false
+        if (newPosition > accountList.size()) {
+            reOrderInd = false
+        }
+
+        def itemBeingAdjPosition = accountList.findIndexOf  { iterator ->
+            iterator.id == map.id
+        }
+        if (newPosition == itemBeingAdjPosition) {
+            reOrderInd = false
+        }
+
+        //if record with "remaining" (param is map) is sent for re prioritizing
+        //then no action will be taken. No records will be updated.
+        def itemBeingAdjusted = accountList.find { p -> p.id == map.id } as DirectDepositAccount
+     //   def remainingInd = false;
+        if (itemBeingAdjusted.percent == 100) {
+            reOrderInd = false
+        }
+
+        //if the new position that is sent, happens to be the position of "Remaining" record, then
+        //change the new position to move back by one position.
+        //for example, if new position and the position of "remaining" record is 6, then the
+        //new position will be 5.
+        //should not adjust the position of "remaining" record.
+        def remainingPosition = accountList.findIndexOf  { iterator ->
+            iterator.percent == 100
+        }
+        remainingPosition = remainingPosition+1
+
+        if (newPosition == remainingPosition) {
+            newPosition=newPosition-1;
+        }
+
+        //ASSUMPTION is the record with remaining is at the end with the highest priority number.
+        //if the original record set has a record with "remaining" or 100%
+        //then, eliminate that record from the list.
+        //record with remaining should not be re prioritized.
+        accountList.remove(accountList.find { p -> p.percent == 100 })
+        accountList.sort {it.priority};
+
+        //finding the position of the record being updated from input param
+        //adding  +1, as index starts from 0.
+        def positionBeingUpdated = accountList.findIndexOf  { iterator ->
+            iterator.id == map.id
+        }
+        positionBeingUpdated = positionBeingUpdated+1
+
+        //if the input param is "remaining" no updates or no reordering will be done.
+        if (reOrderInd) {
+            //assign the new position to the item being adjusted and add it to the list.
+            def adjItem = [:]
+            adjItem.id = itemBeingAdjusted.id
+            adjItem.newPosition = newPosition
+            adjustedMapList << adjItem
+            priorityList << itemBeingAdjusted.priority
+
+            if (newPosition > positionBeingUpdated) {
+                for (int i=newPosition; i>positionBeingUpdated;  i--) {
+                    def adjustedPosition = i - 1
+                    //retrieving the actual priority for the adjusted position.
+                    def adjItem1 = [:]
+                    adjItem1.id = (accountList[adjustedPosition] as DirectDepositAccount).id
+                    adjItem1.newPosition = adjustedPosition
+
+                    adjustedMapList << adjItem1
+                    priorityList << (accountList[adjustedPosition] as DirectDepositAccount).priority
+                }
+            }
+
+            if (newPosition < positionBeingUpdated) {
+                for (int i=newPosition; i<positionBeingUpdated; i++) {
+                    def adjustedPosition = i + 1
+                    def adjItem1 = [:]
+                    adjItem1.id = (accountList[i-1] as DirectDepositAccount).id
+                    adjItem1.newPosition = adjustedPosition
+
+                    adjustedMapList << adjItem1
+                    priorityList << (accountList[i-1] as DirectDepositAccount).priority
+                }
+
+            }
+        }
+
+        adjustedMapList.sort {it.newPosition};
+        priorityList.sort{it}
+
+        int i = 0
+        adjustedMapList.each {
+            def pid=it.id
+            def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
+            acct.priority = priorityList[i++]
+
+            prioritizedList << acct
+
+        }
+
+        return prioritizedList.sort {it.priority}
+    }
 
 }
