@@ -127,6 +127,7 @@ class CommunicationPopulationQuery implements Serializable {
     @Column(name = "GCBQURY_VALID_IND")
     Boolean valid = false
 
+//    List queryVersions // ordered collection
 
     /* ----------------------------------------------------------------------*/
 

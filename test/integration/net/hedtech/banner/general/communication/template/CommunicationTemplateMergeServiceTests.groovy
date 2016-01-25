@@ -226,7 +226,10 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     }
 
-
+    @Test
+    void testRenderPreviewTemplateWithEscapeButNoFields() {
+        fail( 'write the test' )
+    }
 
     private def newValidForCreateFolder( String folderName ) {
         def folder = new CommunicationFolder(

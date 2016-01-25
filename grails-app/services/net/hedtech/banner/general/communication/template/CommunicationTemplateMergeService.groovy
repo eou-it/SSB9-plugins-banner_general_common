@@ -262,26 +262,28 @@ class CommunicationTemplateMergeService {
      */
     String merge( String stringTemplate, Map<String, Object> parameters ) {
         if (log.isDebugEnabled()) log.debug( "Merging parameters into template string." );
-        if (stringTemplate && parameters) {
-            ST st = newST( stringTemplate );
-            parameters.keySet().each { key ->
-                // only add it if we have a value
-                if (parameters[key]) {
-                    st.add( key, parameters[key] )
+
+        if (stringTemplate) {
+            ST st = newST(stringTemplate);
+            if (parameters) {
+                parameters.keySet().each { key ->
+                    // only add it if we have a value
+                    if (parameters[key]) {
+                        st.add(key, parameters[key])
+                    }
                 }
             }
             return st.render()
         } else {
-            // You have nothing to do, so just return the input templateString
-            return stringTemplate
+            return ""
         }
     }
 
-/**
- * Extracts all the template variables from the currently supported parts of an email template
- * @param communicationEmailTemplate id
- * @return
- */
+    /**
+     * Extracts all the template variables from the currently supported parts of an email template
+     * @param communicationEmailTemplate id
+     * @return
+     */
 
     List<String> extractTemplateVariables( Long templateId ) {
         CommunicationEmailTemplate communicationEmailTemplate = CommunicationEmailTemplate.get( templateId )
