@@ -111,14 +111,18 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testRePrioritizeAccounts() {
     //    def pidm = PersonUtility.getPerson("MYE000001").pidm
 
-        def item = DirectDepositAccount.findById(636)
+        def item = DirectDepositAccount.findById(636) as DirectDepositAccount
         def itemMap = item.properties
         itemMap.newPosition = 2
         def newPosition = 2
 
-        def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
+        itemMap.accountType='C'
 
-        assertEquals list.size() > 0
+        item.accountType='C'
+
+        def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
+ 
+        assertEquals true, list.size() > 0
     }
 
 

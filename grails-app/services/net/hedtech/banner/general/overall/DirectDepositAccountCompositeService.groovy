@@ -562,10 +562,10 @@ class DirectDepositAccountCompositeService {
         adjustedMapList.each {
             def pid=it.id
             def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
+            if (acct.id == map.id) {
+                acct = map as DirectDepositAccount
+            }
             acct.priority = priorityList[i++]
-     //       acct.version=null
-     //       acct.id = null
-     //       directDepositAccountService.create(acct)
             prioritizedList << acct
 
         }
