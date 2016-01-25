@@ -60,7 +60,7 @@ class DirectDepositAccountCompositeService {
         def model = [:]
         def lastPayDist
 
-        if (InstitutionalDescription.fetchByKey()?.hrInstalled) {
+        if (checkIfHrInstalled()) {
             lastPayDist=getLastPayDistribution(pidm)
         }
 
@@ -150,9 +150,17 @@ class DirectDepositAccountCompositeService {
     }
 
     private def setNextPriority(account) {
-        def lowestPriority = DirectDepositAccount.fetchByPidm(account.pidm)*.priority.max()
-        account.priority = (lowestPriority ? lowestPriority+1 : 1)
-
+        def accts = DirectDepositAccount.fetchByPidm(account.pidm)
+        
+        // AP records are created with a priority of 0
+        if(account.hrIndicator != 'A' && account.apIndicator == 'A' && accts.size() == 0) {
+            account.priority = 0
+        }
+        else {
+            def lowestPriority = accts*.priority.max()
+            account.priority = (lowestPriority ? lowestPriority+1 : 1)
+        }
+        
         account
     }
 
@@ -395,6 +403,27 @@ class DirectDepositAccountCompositeService {
         return isHrInstalled
     }
 
+    /**
+     * Round to two decimals, using "half up" rounding (1.765 rounds to 1.77).
+     * MORE DETAIL: Round so that 5 reliably rounds up, matching the behavior of the Oracle "round" function when used
+     * with a NUMBER.  Without taking care here, a number like 1069.975 coming in as a Double can get changed during the
+     * rounding process to 1069.97499999999990905052982270717620849609375, which rounds *down* to 1069.97, while we're
+     * expecting 1069.98.  The (convoluted-looking) logic here makes rounding go "half up," as we expect.
+     * We're matching the Oracle rounding behavior because that's what's used in the Banner 8 SSB Direct Deposit
+     * app that this one is replacing, and we want to be consistent.
+     * @param n Number to be rounded
+     * @return The rounded number
+     */
+    private def roundAsCurrency(n) {
+        // This "valueOf" line is key in making it round "half up."  If we simply create a BigDecimal as:
+        //     def d = new BigDecimal(n)
+        // where n is 1069.975, d ends up with a value of 1069.97499999999990905052982270717620849609375,
+        // resulting in a round down to 1069.97, while we expected a round up to 1069.98.  Using "valueOf"
+        // converts it to a clean 1069.975 which then rounds up correctly.
+        def d = BigDecimal.valueOf(n)
+
+        d.setScale(2, BigDecimal.ROUND_HALF_UP)
+    }
     def rePrioritizeAccounts( def map, def newPosition ) {
 
         def accountList = directDepositAccountService.getActiveHrAccounts(map.pidm)
