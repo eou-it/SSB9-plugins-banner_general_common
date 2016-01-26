@@ -557,13 +557,14 @@ class DirectDepositAccountCompositeService {
             directDepositAccountService.delete(acct)
         }
 
-
         int i = 0
         adjustedMapList.each {
             def pid=it.id
             def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
             if (acct.id == map.id) {
-                acct = map as DirectDepositAccount
+                acct.accountType = map.accountType
+                acct.percent = map.percent
+                acct.amount = map.amount != "" ? map.amount as double : null
             }
             acct.priority = priorityList[i++]
             prioritizedList << acct
