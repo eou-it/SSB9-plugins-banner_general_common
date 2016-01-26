@@ -467,18 +467,19 @@ class DirectDepositAccountCompositeService {
             reOrderInd = false
         }
 
+        //if record with "remaining" (param is map) is sent for re prioritizing
+        //then no action will be taken. No records will be updated.
+        def itemBeingAdjusted = map
+        if (itemBeingAdjusted.percent == 100) {
+            newPosition = accountList.size()
+        }
+
+        //if the new position is same as the position of the item being adjusted,
+        //then no reordering will be done.
         def itemBeingAdjPosition = accountList.findIndexOf  { iterator ->
             iterator.id == map.id
         }
         if (newPosition == itemBeingAdjPosition+1) {
-            reOrderInd = false
-        }
-
-        //if record with "remaining" (param is map) is sent for re prioritizing
-        //then no action will be taken. No records will be updated.
-        def itemBeingAdjusted = accountList.find { p -> p.id == map.id } as DirectDepositAccount
-     //   def remainingInd = false;
-        if (itemBeingAdjusted.percent == 100) {
             reOrderInd = false
         }
 
