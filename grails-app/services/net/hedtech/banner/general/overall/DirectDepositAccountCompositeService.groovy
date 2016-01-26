@@ -474,15 +474,6 @@ class DirectDepositAccountCompositeService {
             newPosition = accountList.size()
         }
 
-        //if the new position is same as the position of the item being adjusted,
-        //then no reordering will be done.
-        def itemBeingAdjPosition = accountList.findIndexOf  { iterator ->
-            iterator.id == map.id
-        }
-        if (newPosition == itemBeingAdjPosition+1) {
-            reOrderInd = false
-        }
-
         //if the new position that is sent, happens to be the position of "Remaining" record, then
         //change the new position to move back by one position.
         //for example, if new position and the position of "remaining" record is 6, then the
@@ -495,6 +486,15 @@ class DirectDepositAccountCompositeService {
 
         if (newPosition == remainingPosition) {
             newPosition=newPosition-1;
+        }
+
+        //if the new position is same as the position of the item being adjusted,
+        //then no reordering will be done.
+        def itemBeingAdjPosition = accountList.findIndexOf  { iterator ->
+            iterator.id == map.id
+        }
+        if (newPosition == itemBeingAdjPosition+1) {
+            reOrderInd = false
         }
 
         //ASSUMPTION is the record with remaining is at the end with the highest priority number.
@@ -518,7 +518,8 @@ class DirectDepositAccountCompositeService {
             adjItem.id = itemBeingAdjusted.id
             adjItem.newPosition = newPosition
             adjustedMapList << adjItem
-            priorityList << itemBeingAdjusted.priority
+            def origPriority = (accountList.find { p -> p.id == itemBeingAdjusted.id } as DirectDepositAccount).priority
+            priorityList << origPriority
 
             if (newPosition > positionBeingUpdated) {
                 for (int i=newPosition; i>positionBeingUpdated;  i--) {
@@ -564,8 +565,10 @@ class DirectDepositAccountCompositeService {
             if (acct.id == map.id) {
                 acct.accountType = map.accountType
                 acct.percent = map.percent
-                acct.amount = map.amount != "" ? map.amount as double : null
-            }
+                if (map.amount != null && map.amount != "") {
+                    acct.amount = Double.parseDouble(map.amount)
+                }
+             }
             acct.priority = priorityList[i++]
             prioritizedList << acct
 
