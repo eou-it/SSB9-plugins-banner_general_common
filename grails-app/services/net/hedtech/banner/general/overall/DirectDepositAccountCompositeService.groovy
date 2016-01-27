@@ -564,9 +564,23 @@ class DirectDepositAccountCompositeService {
             def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
             if (acct.id == map.id) {
                 acct.accountType = map.accountType
-                acct.percent = map.percent
+
+                if (map.percent != null && map.percent != "") {
+                    if (map.percent.getClass() == String) {
+                        acct.percent = Double.parseDouble(map.percent)
+                    } else {
+                        acct.percent = map.percent
+                    }
+                    acct.amount = null
+                }
+
                 if (map.amount != null && map.amount != "") {
-                    acct.amount = Double.parseDouble(map.amount)
+                    if (map.amount.getClass() == String) {
+                        acct.amount = Double.parseDouble(map.amount)
+                    } else {
+                        acct.amount = map.amount
+                    }
+                    acct.percent = null
                 }
              }
             acct.priority = priorityList[i++]
