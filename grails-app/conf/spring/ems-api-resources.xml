@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- *****************************************************************************
-Copyright 2015 Ellucian Company L.P. and its affiliates.
+Copyright 2016 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -352,7 +352,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+   <!-- <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>academic-credentials</value>
         </constructor-arg>
@@ -367,7 +367,7 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
                 <value>HEDM.Degree.STVDEGC</value>
             </list>
         </constructor-arg>
-    </bean>
+    </bean>-->
 
     <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
@@ -432,7 +432,6 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-subjects"/>
                 <ref bean="ar-email-types"/>
                 <ref bean="ar-location-types"/>
-                <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-phone-types"/>
                 <ref bean="ar-academic-disciplines"/>
             </list>
