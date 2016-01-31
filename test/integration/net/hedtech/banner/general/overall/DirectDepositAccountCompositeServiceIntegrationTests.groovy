@@ -108,22 +108,52 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
 
     @Test
-    void testRePrioritizeAccounts() {
-    //    def pidm = PersonUtility.getPerson("MYE000001").pidm
+    void testRePrioritizeExistingAccount() {
+        def pidm = PersonUtility.getPerson("MYE000001").pidm
 
-        def item = DirectDepositAccount.findById(634) as DirectDepositAccount
-        def itemMap = item.properties
-        itemMap.newPosition = 2
-        def newPosition = 2
+        def existingItem = DirectDepositAccount.findById(638) as DirectDepositAccount
+        def itemMap = existingItem.properties
+        itemMap.accountType = "C"
 
-        itemMap.accountType='C'
-
-        item.accountType='C'
+        def newPosition = 5
 
         def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
- 
-        assertEquals true, list.size() > 0
+
+        def list1 = list.sort{it.priority}
+
+        assertEquals true, list1.size() > 0
     }
+
+
+    @Test
+    void testRePrioritizeNewAccount() {
+        def pidm = PersonUtility.getPerson("MYE000001").pidm
+
+        def newAccountMap0 = [
+                accountType: 'C',
+                bankAccountNum: '22334455',
+                bankRoutingInfo: testBankRoutingInfo0,
+                documentType: 'D',
+                //   id: 0,
+                percent: 20,
+                apIndicator: 'A',
+                hrIndicator: 'A',
+                intlAchTransactionIndicator: 'N',
+                pidm: 5,
+                status: 'P'
+        ]
+
+        def itemMap = newAccountMap0
+
+        def newPosition = 2
+
+        def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
+
+        def list1 = list.sort{it.priority}
+
+        assertEquals true, list1.size() > 0
+    }
+
 
 
     @Test
