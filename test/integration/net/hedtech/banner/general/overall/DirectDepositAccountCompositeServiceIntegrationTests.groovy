@@ -54,7 +54,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         formContext = ['GUAGMNU']
         super.setUp()
 
-        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '111111' ) )
+        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '123456' ) )
         assertNotNull auth
         SecurityContextHolder.getContext().setAuthentication( auth )
         assertTrue( auth instanceof BannerAuthenticationToken )
@@ -108,13 +108,67 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
 
     @Test
-    void testGetLastPayDistribution() {
-    //    def pidm = PersonUtility.getPerson("MYE000001").pidm
+    void testRePrioritizeExistingAccount() {
+        def pidm = PersonUtility.getPerson("MYE000001").pidm
 
-        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(bannerAuthenticationToken.getPidm())
+        def existingItem = DirectDepositAccount.findById(638) as DirectDepositAccount
+        def itemMap = existingItem.properties
+        itemMap.accountType = "C"
+
+        def newPosition = 5
+
+        def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
+
+        def list1 = list.sort{it.priority}
+
+        assertEquals true, list1.size() > 0
+    }
+
+
+    @Test
+    void testRePrioritizeNewAccount() {
+        def pidm = PersonUtility.getPerson("MYE000001").pidm
+
+        def newAccountMap0 = [
+                accountType: 'C',
+                bankAccountNum: '22334455',
+                bankRoutingInfo: testBankRoutingInfo0,
+                documentType: 'D',
+                //   id: 0,
+                percent: 20,
+                apIndicator: 'A',
+                hrIndicator: 'A',
+                intlAchTransactionIndicator: 'N',
+                pidm: 5,
+                status: 'P'
+        ]
+
+        def itemMap = newAccountMap0
+
+        def newPosition = 2
+
+        def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
+
+        def list1 = list.sort{it.priority}
+
+        assertEquals true, list1.size() > 0
+    }
+
+
+
+    @Test
+    void testGetLastPayDistribution() {
+            def pidm = PersonUtility.getPerson("MYE000009").pidm
+
+        def item = DirectDepositAccount.fetchByPidm(pidm)
+
+
+
+        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
 
         assertEquals true, lastPayDist.hasPayrollHist
     }
+
 
 
     // TODO: All of the below tests PASSED when they were broken out into their own temporary file

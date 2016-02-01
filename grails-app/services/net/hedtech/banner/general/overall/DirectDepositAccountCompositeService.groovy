@@ -217,6 +217,32 @@ class DirectDepositAccountCompositeService {
         return currencyCode
     }
 
+    def getCurrencySymbol() {
+        def zeroAmt = formatCurrency(0.0).toString()
+        def currencySymbol = ""
+
+        if(zeroAmt.charAt(0) == '0'){
+            // curreny symbol should be after digits
+            def i = zeroAmt.size()-1
+
+            while(i > 0 && zeroAmt.charAt(i) != '0'){
+                i--
+            }
+            currencySymbol = zeroAmt.substring(i+1)
+        }
+        else{
+            // currency symbol is before digits
+            def i = 0
+
+            while(i < zeroAmt.size() && zeroAmt.charAt(i) != '0'){
+                i++
+            }
+            currencySymbol = zeroAmt.substring(0, i)
+        }
+
+        currencySymbol
+    }
+
     public def lastPayStub( pidm ) {
        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
   //   def   sql = new Sql(HibernateSessionFactoryUtil.getConnection())
@@ -252,7 +278,7 @@ class DirectDepositAccountCompositeService {
     /* Check if there are Direct Deposits in the last pay period for sequence zero*/
     def lastPayDirectDeposit( pidm,year,pictCode,payNo ) {
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
-        def directDeposit
+        def directDeposit = 'N'
 
        def lastPayDDSql =
        """    SELECT 'Y'
@@ -351,7 +377,7 @@ class DirectDepositAccountCompositeService {
 
         try {
             sql.eachRow(lastPayAmtSql, [pidm]) { row ->
-                lastPayAmtRec = row[0]
+                lastPayAmtRec = row.toRowResult()
             }
         } finally {
             sql?.close()
@@ -403,7 +429,10 @@ class DirectDepositAccountCompositeService {
             } else {
 
                 def lastPayAmtRec = lastPayAmount(pidm)
-                model.totalNet = lastPayAmtRec.netAmount
+                if (lastPayAmtRec) {
+                    model.totalNet = lastPayAmtRec.netAmount
+                }
+
             }
         }
         return model
@@ -445,5 +474,183 @@ class DirectDepositAccountCompositeService {
 
         d.setScale(2, BigDecimal.ROUND_HALF_UP)
     }
+
+
+    def rePrioritizeAccounts( def map, def newPosition ) {
+
+        def reOrderInd = true
+        def priorityList = []
+
+        def adjustedMapList = []
+        def prioritizedList = []
+
+        def newAcct = false
+
+        def itemBeingAdjusted = map
+
+        //checking for mandatory values
+        //  if ()
+
+        def accountList = directDepositAccountService.getActiveHrAccounts(itemBeingAdjusted?.pidm)
+        accountList.sort {it.priority};
+
+
+        if(!itemBeingAdjusted.containsKey("id") || itemBeingAdjusted?.id == null) {
+            itemBeingAdjusted.priority = setNextPriority(itemBeingAdjusted).priority
+            itemBeingAdjusted.id = -1
+            newAcct = true
+
+            def domainObject = new DirectDepositAccount()
+            def routingObject = new BankRoutingInfo()
+            domainObject.properties = itemBeingAdjusted
+            routingObject.properties = itemBeingAdjusted.bankRoutingInfo
+            domainObject.bankRoutingInfo = routingObject
+            domainObject.id = -1
+
+            accountList << domainObject
+        }
+
+        //if the new position that is sent, happens to be the position of "Remaining" record, then
+        //change the new position to move back by one position.
+        //for example, if new position and the position of "remaining" record is 6, then the
+        //new position will be 5.
+        //should not adjust the position of "remaining" record.
+        def remainingPosition = (accountList.findIndexOf  { iterator ->
+            iterator.percent == 100
+        })+1
+        //produce an error, if the item being adjusted is at 100% and also remaining exists already
+        if (remainingPosition > 0) {
+            if (newPosition == remainingPosition || newPosition > remainingPosition) {
+                newPosition=newPosition-1;
+            }
+        }
+
+        //if record with "remaining" (param is map) is sent for re prioritizing
+        //then no action will be taken. No records will be updated.
+        if (itemBeingAdjusted?.percent == 100) {
+            newPosition = accountList.size()
+        }
+
+        //make sure new position is not greater than the number of hr accounts.
+        if (!newAcct) {
+            if (newPosition > accountList.size()) {
+                reOrderInd = false
+            }
+        }
+
+        //if the new position is same as the position of the item being adjusted,
+        //then no reordering will be done.
+        def positionBeingUpdated
+        if (newAcct) {
+            positionBeingUpdated=accountList.size()
+
+        } else {
+            positionBeingUpdated = (accountList.findIndexOf  { iterator ->
+                iterator.id == itemBeingAdjusted?.id
+            })+1
+        }
+
+        if (newPosition == positionBeingUpdated) {
+            reOrderInd = false
+        }
+
+        //ASSUMPTION is the record with remaining is at the end with the highest priority number.
+        //if the original record set has a record with "remaining" or 100%
+        //then, eliminate that record from the list.
+        //record with remaining should not be re prioritized.
+//        accountList.remove(accountList.find { p -> p.percent == 100 })
+        accountList.sort {it.priority};
+
+
+        if (reOrderInd) {
+            //assign the new position to the item being adjusted and add it to the list.
+            def adjItem = [:]
+            adjItem.id = itemBeingAdjusted.id
+            adjItem.newPosition = newPosition
+            adjustedMapList << adjItem
+            priorityList << (accountList.find { p -> p.id == itemBeingAdjusted.id } as DirectDepositAccount).priority
+
+            if (newPosition > positionBeingUpdated) {
+                for (int i=newPosition; i>positionBeingUpdated;  i--) {
+                    def adjustedPosition = i - 1
+                    //retrieving the actual priority for the adjusted position.
+                    def adjItem1 = [:]
+                    adjItem1.id = (accountList[adjustedPosition] as DirectDepositAccount).id
+                    adjItem1.newPosition = adjustedPosition
+
+                    adjustedMapList << adjItem1
+                    priorityList << (accountList[adjustedPosition] as DirectDepositAccount).priority
+                }
+            }
+
+            if (newPosition < positionBeingUpdated) {
+                for (int i=newPosition; i<positionBeingUpdated; i++) {
+                    def adjustedPosition = i + 1
+                    def adjItem1 = [:]
+                    adjItem1.id = (accountList[i-1] as DirectDepositAccount).id
+                    adjItem1.newPosition = adjustedPosition
+
+                    adjustedMapList << adjItem1
+                    priorityList << (accountList[i-1] as DirectDepositAccount).priority
+                }
+
+            }
+        }
+
+        adjustedMapList.sort {it.newPosition};
+        priorityList.sort{it}
+
+        //remove the records before updating hibernate objects
+        adjustedMapList.each {
+            def pid=it.id
+            def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
+            if (pid != -1) {
+                directDepositAccountService.delete(acct)
+            }
+
+        }
+
+        int i = 0
+        adjustedMapList.each {
+            def pid=it.id
+            def acct = accountList.find { p -> p.id == pid }
+            if (acct.id == itemBeingAdjusted.id) {
+                acct.accountType = itemBeingAdjusted.accountType
+
+                if (itemBeingAdjusted.percent != null && itemBeingAdjusted.percent != "") {
+                    if (itemBeingAdjusted.percent.getClass() == String) {
+                        acct.percent = Double.parseDouble(itemBeingAdjusted.percent)
+                    } else {
+                        acct.percent = itemBeingAdjusted.percent
+                    }
+                    acct.amount = null
+                }
+
+                if (itemBeingAdjusted.amount != null && itemBeingAdjusted.amount != "") {
+                    if (itemBeingAdjusted.amount.getClass() == String) {
+                        acct.amount = Double.parseDouble(itemBeingAdjusted.amount)
+                    } else {
+                        acct.amount = itemBeingAdjusted.amount
+                    }
+                    acct.percent = null
+                }
+            }
+            acct.priority = priorityList[i++]
+            prioritizedList << acct
+
+        }
+
+        prioritizedList.sort {it.priority}
+
+        prioritizedList.each {
+            def item = it as DirectDepositAccount
+            item.version=null
+            item.id = null
+            directDepositAccountService.create(item)
+        }
+
+        return directDepositAccountService.getActiveHrAccounts(map.pidm)
+    }
+
 
 }
