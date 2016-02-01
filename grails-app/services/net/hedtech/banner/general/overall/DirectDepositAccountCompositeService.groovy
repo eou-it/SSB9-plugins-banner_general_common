@@ -217,6 +217,32 @@ class DirectDepositAccountCompositeService {
         return currencyCode
     }
 
+    def getCurrencySymbol() {
+        def zeroAmt = formatCurrency(0.0).toString()
+        def currencySymbol = ""
+
+        if(zeroAmt.charAt(0) == '0'){
+            // curreny symbol should be after digits
+            def i = zeroAmt.size()-1
+
+            while(i > 0 && zeroAmt.charAt(i) != '0'){
+                i--
+            }
+            currencySymbol = zeroAmt.substring(i+1)
+        }
+        else{
+            // currency symbol is before digits
+            def i = 0
+
+            while(i < zeroAmt.size() && zeroAmt.charAt(i) != '0'){
+                i++
+            }
+            currencySymbol = zeroAmt.substring(0, i)
+        }
+
+        currencySymbol
+    }
+
     public def lastPayStub( pidm ) {
        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
   //   def   sql = new Sql(HibernateSessionFactoryUtil.getConnection())
