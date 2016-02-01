@@ -40,8 +40,26 @@ class CommunicationPopulationQueryCompositeService {
      *
      * @param id the primary key of the population query
      */
-    public CommunicationPopulationQuery fetchPopulationQuery( Long id ) {
-        return communicationPopulationQueryService.get( id )
+    public CommunicationPopulationQuery fetchPopulationQuery( long id ) {
+        return communicationPopulationQueryService.get( Long.valueOf( id ) )
+    }
+
+
+    /**
+     * Deletes the population query along with any dependent query versions.
+     *
+     * @param queryId the primary key of the population query
+     * @param version the optimistic lock counter
+     */
+    public boolean deletePopulationQuery( long queryId, long version ) {
+        List queryVersions = CommunicationPopulationQueryVersion.findByQueryId( queryId )
+        communicationPopulationQueryVersionService.delete( queryVersions )
+
+        def queryAsMap = [
+            id     : Long.valueOf( queryId ),
+            version: Long.valueOf( version )
+        ]
+        return communicationPopulationQueryService.delete( queryAsMap )
     }
 
 
@@ -110,6 +128,10 @@ class CommunicationPopulationQueryCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQuery.class, "noChangesToPublish" )
         }
 
+        if (!query.sqlString || query.sqlString.trim().length() == 0) {
+            throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
+        }
+
         CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.sqlString )
         if (!parseResult.isValid()) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
@@ -139,14 +161,7 @@ class CommunicationPopulationQueryCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQuery.class, "noPermission" )
         }
 
-        def queryParseResult = communicationPopulationQueryStatementParseService.parse( populationQuerySql, false )
-
-        // if it is a permission issue give a different message than the oracle one to make it clearer
-        if (queryParseResult?.message?.contains("ORA-00942")) {
-            queryParseResult.message = g.message(code: 'communication.populationquery.noPermission')
-        }
-
-        return queryParseResult
+        return communicationPopulationQueryStatementParseService.parse( populationQuerySql, false )
     }
 
     /**
@@ -156,10 +171,6 @@ class CommunicationPopulationQueryCompositeService {
      * @throws ApplicationException if the sqlString is so offensive as to prevent persisting
      */
     private CommunicationPopulationQueryParseResult validateSqlStringForSaving( String sqlString ) {
-        if (!sqlString || sqlString.trim().length() == 0) {
-            throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
-        }
-
         //check for sql injection and if it returns true then throw invalid exception
         if (CommunicationCommonUtility.sqlStatementNotAllowed( sqlString, false )) {
             throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
