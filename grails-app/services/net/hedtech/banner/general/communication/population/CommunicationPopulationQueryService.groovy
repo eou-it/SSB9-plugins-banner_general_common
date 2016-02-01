@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationPopulationQueryService extends ServiceBase {
 
-    def communicationPopulationQueryStatementParseService
     def log = Logger.getLogger(this.getClass())
 
 
@@ -45,15 +44,6 @@ class CommunicationPopulationQueryService extends ServiceBase {
         }
         popQuery.setCreatedBy(creatorId.toUpperCase())
         popQuery.setCreateDate(new Date())
-        popQuery.setValid(false)
-
-        //check for sql injection and if it returns true then throw invalid exception
-        if (CommunicationCommonUtility.sqlStatementNotAllowed(popQuery.sqlString, false)) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
-        } else {
-            def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
-            popQuery.setValid((parseResult?.status == "Y"))
-        }
     }
 
 
@@ -74,40 +64,32 @@ class CommunicationPopulationQueryService extends ServiceBase {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
 
-        if (popQuery.name == null || popQuery.name == "")
+        if (popQuery.name == null || popQuery.name == "") {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nameCannotBeNull@@")
+        }
 
-        if (popQuery.getFolder() == null)
+        if (popQuery.getFolder() == null) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:folderCannotBeNull@@")
-        else
-            validateFolder(popQuery.folder.id)
-
-        if (CommunicationPopulationQuery.existsAnotherNameFolder(popQuery.id, popQuery.name, popQuery.folder.name))
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:not.unique.message@@")
-
-        popQuery.setValid(false)
-
-        //check for sql injection and if it returns true then throw invalid exception
-        if (CommunicationCommonUtility.sqlStatementNotAllowed(popQuery.sqlString, false)) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
         } else {
-            def parseResult = communicationPopulationQueryStatementParseService.parse(popQuery.sqlString)
-            popQuery.setValid((parseResult?.status == "Y"))
+            validateFolder(popQuery.folder.id)
+        }
+
+        if (CommunicationPopulationQuery.existsAnotherNameFolder(popQuery.id, popQuery.name, popQuery.folder.name)) {
+            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:not.unique.message@@")
         }
     }
 
 
     def preDelete(domainModelOrMap) {
-
         if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null))
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
 
-        def oldpopquery = CommunicationPopulationQuery.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
+        CommunicationPopulationQuery oldQuery = CommunicationPopulationQuery.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
 
-        if (oldpopquery.id == null)
+        if (oldQuery.id == null)
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpopquery.createdBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDelete(oldQuery.createdBy)) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
     }

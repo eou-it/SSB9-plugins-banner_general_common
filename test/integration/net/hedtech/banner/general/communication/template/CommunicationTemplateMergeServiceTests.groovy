@@ -228,7 +228,57 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     @Test
     void testRenderPreviewTemplateWithEscapeButNoFields() {
-        fail( 'write the test' )
+        /* create the template */
+        CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
+        /* it doesn't matter what we set them to, as long as they contain personalization fields, we can test that they get rendered */
+        emailTemplate.content = """I want my \\\$2.00!"""
+        emailTemplate.toList = """I want my \\\$2.00!"""
+        emailTemplate.subject = """I want my \\\$2.00!"""
+        emailTemplate.save( failOnError: true, flush: true )
+
+        // Now extract the template variables and calculate their values and save as RecipientData
+        def templateVariables = communicationTemplateMergeService.extractTemplateVariables( emailTemplate )
+
+        String fieldCalculationResult
+
+        CommunicationRecipientData communicationRecipientData
+        def fieldListByPidm = [:]
+        params = [:]
+        params << ['pidm': i_valid_pidm]
+
+
+        templateVariables.each {
+            variableName ->
+                tempfield = CommunicationField.fetchByName( variableName )
+                assertNotNull( tempfield.immutableId )
+                fieldCalculationResult = communicationFieldCalculationService.calculateFieldByMap (
+                        (String) tempfield.ruleContent,
+                        (Boolean) tempfield.returnsArrayArguments,
+                        (String) tempfield.formatString,
+                        (Map) params
+                )
+                fieldListByPidm.put( tempfield.name, new CommunicationFieldValue(
+                        value: fieldCalculationResult,
+                        renderAsHtml: false ) )
+        }
+        communicationRecipientData = new CommunicationRecipientData(
+                pidm: i_valid_pidm,
+                templateId: emailTemplate.id,
+                organizationId: i_valid_Organization.id,
+                referenceId: 1,
+                ownerId: getUser(),
+                fieldValues: fieldListByPidm,
+                communicationChannel: emailTemplate.communicationChannel
+        )
+
+        communicationRecipientDataService.create( communicationRecipientData )
+
+        /* Now merge the recipient data into the template */
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
+        assertNotNull( communicationMergedEmailTemplate )
+        assertEquals( "I want my \$2.00!", communicationMergedEmailTemplate.toList )
+        assertEquals( "I want my \$2.00!", communicationMergedEmailTemplate.subject )
+        assertEquals( "I want my \$2.00!", communicationMergedEmailTemplate.content )
     }
 
     private def newValidForCreateFolder( String folderName ) {

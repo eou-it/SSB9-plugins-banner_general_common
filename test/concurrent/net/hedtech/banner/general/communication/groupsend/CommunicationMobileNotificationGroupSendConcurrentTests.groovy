@@ -65,8 +65,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
         CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testPop"))
-        assertTrue(populationQuery.valid)
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testPop") )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
@@ -129,8 +129,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
     @Test
     public void testDeleteGroupSend() {
         CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testDeleteGroupSend"))
-        assertTrue(populationQuery.valid)
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
@@ -174,8 +174,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 description: "test description",
                 sqlString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
         )
-        populationQuery = communicationPopulationQueryService.create(populationQuery)
-        assertTrue( populationQuery.valid )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)

@@ -51,7 +51,6 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         assertEquals "TTTTTTTTTT", populationQuery.description
         assertEquals "TTTTTTTTTT", populationQuery.name
         assertNull populationQuery.sqlString
-        assertFalse populationQuery.valid
         assertNotNull populationQuery.id
         assertNotNull populationQuery.createDate
         assertNotNull populationQuery.lastModifiedBy
@@ -204,7 +203,7 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
                 name: queryName,
                 createDate: new Date(),
                 createdBy: getUser(),
-                valid: false,
+                changesPending: false,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

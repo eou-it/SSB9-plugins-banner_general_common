@@ -108,7 +108,7 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
                 name: "TTTTTTTTTT",
-                valid: true,
+                changesPending: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

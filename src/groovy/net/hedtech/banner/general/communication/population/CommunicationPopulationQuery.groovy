@@ -125,9 +125,8 @@ class CommunicationPopulationQuery implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "GCBQURY_VALID_IND")
-    Boolean valid = false
+    Boolean changesPending = false
 
-//    List queryVersions // ordered collection
 
     /* ----------------------------------------------------------------------*/
 
@@ -139,7 +138,7 @@ class CommunicationPopulationQuery implements Serializable {
         description(nullable: true, maxSize: 2500)
         name(nullable: false, maxSize: 255)
         sqlString(nullable: true)
-        valid(nullable: false)
+        changesPending(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

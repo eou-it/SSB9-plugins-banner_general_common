@@ -19,7 +19,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     def communicationPopulationExecutionService
     def communicationPopulationQueryStatementParseService
     def communicationPopulationSelectionListService
-    def communicationPopulationQueryService
+    def communicationPopulationQueryCompositeService
     def i_success_sqlStatement = "select 2086 spriden_pidm from dual"
     def i_fail_sqlStatement = "select 2086 spriden_pidm kjlkj from dual"
     def i_fail_multiValueSqlStatement = "select 2086 spriden_pidm, sysdate from dual where select y, m from dual"
@@ -47,7 +47,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     @Test
     void testValidParse() {
         def populationQuery = newValidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
 
         def populationQueryParseResult = communicationPopulationExecutionService.parse(savedPopulationQuery.id)
         assertEquals("Y", populationQueryParseResult.status)
@@ -55,23 +55,28 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         assertNotNull(populationQueryParseResult.cost)
         assertNotNull(populationQueryParseResult.cardinality)
         /* Make sure the populationQuery got flagged as good */
-        def validatedPopulationQuery = communicationPopulationQueryService.get(savedPopulationQuery.id)
-        assertTrue(validatedPopulationQuery.valid)
+        CommunicationPopulationQuery validatedPopulationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery( savedPopulationQuery.id )
+        communicationPopulationQueryCompositeService.publishPopulationQuery( validatedPopulationQuery )
     }
 
 
     @Test
     void testInValidParse() {
         def populationQuery = newInvalidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         def populationQueryParseResult = communicationPopulationExecutionService.parse(savedPopulationQuery.id)
         assertEquals("N", populationQueryParseResult.status)
         assertNotNull(populationQueryParseResult.message)
         assertEquals(0, populationQueryParseResult.cost)
         assertEquals(0, populationQueryParseResult.cardinality)
         /* Make sure the populationQuery got flagged as bad */
-        def validatedPopulationQuery = communicationPopulationQueryService.get(savedPopulationQuery.id)
-        assertFalse(validatedPopulationQuery.valid)
+        def validatedPopulationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery(savedPopulationQuery.id)
+        try {
+            communicationPopulationQueryCompositeService.publishPopulationQuery( validatedPopulationQuery )
+            fail( "Expected application exception with queryInvalidCall")
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:queryInvalidCall@@", e.getMessage() )
+        }
     }
 
 
@@ -101,7 +106,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         def populationQuery = newValidPopulationQuery()
         populationQuery.sqlString = i_fail_multiValueSqlStatement
         shouldFail {
-            def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+            def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         }
         def populationSelectionListId
         shouldFail {
@@ -114,8 +119,9 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
 
     @Test
     void testExecute() {
-        def populationQuery = newValidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        CommunicationPopulationQuery populationQuery = newValidPopulationQuery()
+        CommunicationPopulationQuery savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( savedPopulationQuery )
         def populationSelectionListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
         savedPopulationQuery.refresh()
 
@@ -144,7 +150,9 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     @Test
     void testReExecute() {
         def populationQuery = newValidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        CommunicationPopulationQuery savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+
         communicationPopulationExecutionService.execute(savedPopulationQuery.id)
         /* Now make sure you can execute the same populationQuery multiple times without error */
         communicationPopulationExecutionService.execute(savedPopulationQuery.id)
@@ -156,14 +164,14 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
     @Test
     void testBadSqlExecute() {
         def populationQuery = newInvalidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryService.create([domainModel: populationQuery])
+        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
 
         def populationListId
         shouldFail(ApplicationException) {
             populationListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
         }
         assertNull populationListId
-        populationQuery = communicationPopulationQueryService.get(savedPopulationQuery.id)
+        populationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery(savedPopulationQuery.id)
         populationQuery.refresh()
     }
 
@@ -175,7 +183,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
                 name: "TTTTTTTTTT",
-                valid: true,
+                changesPending: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
@@ -195,7 +203,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
                 name: "TTTTTTTTTT",
-                valid: false,
+                changesPending: false,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

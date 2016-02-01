@@ -95,7 +95,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
                 name: "TTTTTTTTTT",
-                valid: true,
+                changesPending: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

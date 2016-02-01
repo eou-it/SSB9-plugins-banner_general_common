@@ -54,7 +54,6 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
         assertEquals "TTTTTTTTTT", populationQuery.description
         assertEquals "MyTestPop", populationQuery.name
         assertNull populationQuery.sqlString
-        assertTrue populationQuery.valid
 
         def CommunicationPopulationQueryView queryView
         queryView = CommunicationPopulationQueryView.fetchById(populationQuery?.id)
@@ -128,7 +127,7 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
                 createDate: new Date(),
                 createdBy: "TTTTTTTTTT",
                 name: popName,
-                valid: true,
+                changesPending: true,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

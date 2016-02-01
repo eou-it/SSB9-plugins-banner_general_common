@@ -66,7 +66,6 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         assertEquals getUser(), populationQuery.createdBy
         assertEquals "TTTTTTTTTT", populationQuery.description
         assertEquals "TTTTTTTTTT", populationQuery.name
-        assertFalse populationQuery.valid
     }
 
 
@@ -187,7 +186,7 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
                 // Required fields
                 folder: testFolder,
                 name: queryName,
-                valid: false,
+                changesPending: false,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",

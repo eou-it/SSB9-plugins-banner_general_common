@@ -35,12 +35,18 @@ class CommunicationPopulationQueryStatementParseService {
         }
 
         try {
-            //test for sql injec tion and throw exception if found
+            //test for sql injection and throw exception if found
+            // TODO: Remove the if statement by providing seperate methods for communication field and
+            // population query parsing.
             if (CommunicationCommonUtility.sqlStatementNotAllowed(statement,multiSelectColumnAllowed )) {
                 if (multiSelectColumnAllowed)
                     throw new ApplicationException(CommunicationField, "@@r1:sqlStatementInvalidCall@@")
-                else
+                else {
+                    // TODO: Should be refactored to return the parse result with a status of N
+                    // instead of throwing an exception. The localization is different given how the results
+                    // coming back from oracle.
                     throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+                }
             }
 
             //get the browser locale and set the nls language of the database

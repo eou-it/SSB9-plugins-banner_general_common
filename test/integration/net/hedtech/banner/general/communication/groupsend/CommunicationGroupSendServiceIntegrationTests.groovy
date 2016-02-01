@@ -29,7 +29,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     def communicationOrganizationService
     def communicationGroupSendService
     def selfServiceBannerAuthenticationProvider
-    def communicationPopulationQueryService
+    def communicationPopulationQueryCompositeService
     def communicationPopulationExecutionService
     def communicationFolderService
     def communicationGroupSendCommunicationService
@@ -76,7 +76,8 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
                 name: "Test Query",
                 sqlString: "select 2086 spriden_pidm from dual"
         )
-        populationQuery = communicationPopulationQueryService.create(populationQuery) as CommunicationPopulationQuery
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationFolder folder = CommunicationFolder.fetchByName("test folder")
         if (!folder) {

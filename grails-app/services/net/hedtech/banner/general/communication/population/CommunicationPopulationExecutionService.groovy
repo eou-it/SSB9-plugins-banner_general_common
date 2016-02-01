@@ -7,6 +7,8 @@ package net.hedtech.banner.general.communication.population
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import org.apache.commons.collections.functors.ExceptionFactory
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
@@ -53,25 +55,25 @@ class CommunicationPopulationExecutionService {
             if (!populationQueryId) {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nullPopulationQueryId@@")
             }
-            def populationQuery = communicationPopulationQueryService.get(populationQueryId)
+            CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.get(populationQueryId)
             if (!populationQuery) {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
             }
 
-            def parseresult = parse(populationQuery.id)
-            populationQuery.valid = (parseresult?.status == 'Y')
-            populationQuery.save()
-
-            populationQuery = communicationPopulationQueryService.get(populationQueryId)
+            List queryVersions = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
+            if (queryVersions.size() == 0) {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationExecutionService.class, "populationQueryNotPublished" )
+            }
+            CommunicationPopulationQueryVersion queryVersion = queryVersions?.get( 0 )
 
             /* Make sure it's valid */
-            if (!populationQuery?.valid) {
+            if (!queryVersion) {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalid@@")
             }
 
             //make sure the sql statement only selects one value
 
-            Matcher matcher = multipattern.matcher(populationQuery.sqlString.toUpperCase());
+            Matcher matcher = multipattern.matcher(queryVersion.sqlString.toUpperCase());
             while (matcher.find()) {
                 if (matcher.group(1).contains(",")) {
                     throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryHasMultiple@@")

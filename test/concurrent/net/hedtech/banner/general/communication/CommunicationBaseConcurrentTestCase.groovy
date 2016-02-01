@@ -37,7 +37,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def communicationMailboxAccountService
     def communicationGroupSendService
     def communicationGroupSendItemService
-    def communicationPopulationQueryService
+    def communicationPopulationQueryCompositeService
     def communicationPopulationExecutionService
     def communicationPopulationSelectionListService
     def communicationFolderService
@@ -188,6 +188,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBTMPL")
                 sql.executeUpdate("Delete from GCRCFLD")
                 sql.executeUpdate("Delete from GCRSLIS")
+                sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRFLDR")
                 sql.executeUpdate("Delete from GCRORAN")

@@ -9,4 +9,11 @@ class CommunicationPopulationQueryParseResult {
     def message
     def cost
     def cardinality
+
+    /**
+     * Returns true if the status indicates a valid query statement.
+     */
+    public boolean isValid() {
+        return "Y".equals( status )
+    }
 }

@@ -54,8 +54,8 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
         mailServer.start()
         CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testPop"))
-        assertTrue(populationQuery.valid)
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
@@ -118,8 +118,8 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
     @Test
     public void testDeleteGroupSend() {
         CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryService.create(newPopulationQuery("testDeleteGroupSend"))
-        assertTrue(populationQuery.valid)
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)

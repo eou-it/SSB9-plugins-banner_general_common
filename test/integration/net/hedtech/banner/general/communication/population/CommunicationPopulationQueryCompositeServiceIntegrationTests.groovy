@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
@@ -27,9 +27,8 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
     public void setUp() {
         formContext = ['SELFSERVICE']
         super.setUp()
-        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken( getUser(), '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
         testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
@@ -40,159 +39,302 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         logout()
     }
 
-
-    @Test
-    void testList() {
-        def expList = communicationPopulationQueryCompositeService.list( sort: "name", order: "asc" )
-        def originalCount = expList.size()
-        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
-        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-
-        expList = communicationPopulationQueryCompositeService.list( sort: "name", order: "asc" )
-        assertNotNull expList
-        assertTrue originalCount + 1 == expList.size()
-    }
-
-
     @Test
     void testCreatePopulationQuery() {
-        def populationQuery = newPopulationQuery( true, true, "TTTTTTTTTT" )
-        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-
-        // Assert domain values
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+            name: "testCreatePopulationQuery",
+            description: "testCreatePopulationQuery description",
+            folder: testFolder,
+            sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertNotNull populationQuery?.id
         assertEquals testFolder.name, populationQuery.folder.name
         assertEquals getUser(), populationQuery.createdBy
-        assertEquals "TTTTTTTTTT", populationQuery.description
-        assertEquals "TTTTTTTTTT", populationQuery.name
-        assertFalse populationQuery.valid
+        assertEquals "testCreatePopulationQuery", populationQuery.name
+        assertEquals "testCreatePopulationQuery description", populationQuery.description
+        assertEquals "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", populationQuery.sqlString
     }
-
-
-    @Test
-    void testCreateWithMissingFolder() {
-        def populationQuery = newPopulationQuery( true, true, "TTTTTTTTTT" )
-        populationQuery.folder = null
-        def message = shouldFail( ApplicationException ) {
-            communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-        }
-        assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", message
-    }
-
 
     @Test
     void testUpdatePopulationQuery() {
-        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
-        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-        assertNotNull populationQuery
-        def id = populationQuery.id
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+            name: "testUpdatePopulationQuery",
+            description: "testUpdatePopulationQuery description",
+            folder: testFolder,
+            sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertNotNull( populationQuery.id )
+        assertEquals( 0, populationQuery.version )
 
-        // Find the domain
-        populationQuery = populationQuery.get( id )
+        Map queryAsMap = [
+            id: populationQuery.id,
+            name: "testUpdatePopulationQuery2",
+            description: "testUpdatePopulationQuery description2",
+            folder: populationQuery.folder,
+            sqlString: "select pidm from spriden",
+            version: populationQuery.version
+        ]
+        populationQuery = communicationPopulationQueryCompositeService.updatePopulationQuery( queryAsMap )
+        assertNotNull( populationQuery.id )
+        assertTrue( populationQuery.version > 0 )
+        assertEquals "testUpdatePopulationQuery2", populationQuery.name
+        assertEquals "testUpdatePopulationQuery description2", populationQuery.description
+        assertEquals "select pidm from spriden", populationQuery.sqlString
+    }
+
+
+    @Test
+    void testPublishQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testPublishQuery",
+                folder: testFolder,
+                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertTrue( populationQuery.changesPending )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
+        assertEquals( 1, queryVersionList.size() )
+        CommunicationPopulationQueryVersion queryVersion = queryVersionList.get( 0 )
+        assertEquals( "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", queryVersion.sqlString )
+        assertNotNull( queryVersion.getCreateDate() )
+    }
+
+
+    @Test
+    void testValidatePopulationQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testCreatePopulationQuery",
+                description: "testCreatePopulationQuery description",
+                folder: testFolder,
+                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+
         assertNotNull populationQuery?.id
-
-        // Update domain values
-        populationQuery.description = "###"
-        populationQuery = communicationPopulationQueryCompositeService.update( [domainModel: populationQuery] )
-
-        // Find the updated domain
-        populationQuery = populationQuery.get( id )
-
-        // Assert updated domain values
-        assertNotNull populationQuery
-        assertEquals "###", populationQuery.description
+        assertEquals testFolder.name, populationQuery.folder.name
+        assertEquals getUser(), populationQuery.createdBy
+        assertEquals "testCreatePopulationQuery description", populationQuery.description
+        assertEquals "testCreatePopulationQuery", populationQuery.name
     }
 
 
     @Test
-    void testUpdateInvalidStatementPopulationQuery() {
-        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
-        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-        assertNotNull populationQuery
-        def id = populationQuery.id
-
-        // Find the domain
-        populationQuery = populationQuery.get( id )
-        assertNotNull populationQuery?.id
+    void testValidateSqlStatement() {
+        CommunicationPopulationQueryParseResult result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        assertEquals("Y", result.status)
+        assertNull(result.message)
+        assertEquals(0, result.cost)
+        assertEquals(0, result.cardinality)
     }
-
 
     @Test
-    void testUpdateValidStatementPopulationQuery() {
-        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
-        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-        assertNotNull populationQuery
-        def id = populationQuery.id
-
-        // Find the domain
-        populationQuery = populationQuery.get( id )
-        assertNotNull populationQuery?.id
+    void testIncompleteSqlStatement() {
+        CommunicationPopulationQueryParseResult result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                "select bogus"
+        )
+        assertEquals("N", result.status)
+        assertNotNull(result.message)
+        assertEquals(0, result.cost)
+        assertEquals(0, result.cardinality)
     }
-
 
     @Test
-    void testDeletePopulationQuery() {
-
-        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
-
-        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-        assertNotNull populationQuery
-        def id = populationQuery.id
-
-        // Find the domain
-        populationQuery = populationQuery.get( id )
-        assertNotNull populationQuery
-
-
-        def populationQuery1 = newPopulationQuery( false, false, "MMMMMMMMMM" )
-        populationQuery1 = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery1] )
-        assertNotNull populationQuery1
-        def id1 = populationQuery1.id
-
-        // Find the domain
-        populationQuery1 = populationQuery1.get( id )
-        assertNotNull populationQuery1
-
-        // Delete the domain
-        communicationPopulationQueryCompositeService.delete( [domainModel: populationQuery] )
-
-        // Attempt to find the deleted domain
-        populationQuery = populationQuery.get( id )
-        assertNull populationQuery
+    void testColumnDoesNotExist() {
+        CommunicationPopulationQueryParseResult result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                "select pidm from spriden"
+        )
+        assertEquals("N", result.status)
+        assertEquals( "ORA-00904: \"PIDM\": invalid identifier", result.message )
+        assertEquals(0, result.cost)
+        assertEquals(0, result.cardinality)
     }
-
 
     @Test
-    void testDynamicFinder() {
-
-        def populationQuery = newPopulationQuery( false, false, "TestName1" )
-        communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
-        def populationQuery1 = newPopulationQuery( false, false, "TestName2" )
-        communicationPopulationQueryCompositeService.create( [domainModel: populationQuery1] )
-        // Find the domain
-        def List<CommunicationPopulationQuery> populationQueries = populationQuery.findAllByQueryName( "TestName" )
-        assertNotNull populationQueries
-        assertEquals( 2, populationQueries.size() )
+    void testWildcardInSql() {
+        // this is throwing an exception instead of status of N
+        CommunicationPopulationQueryParseResult result
+        try {
+            result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                    "select * from spriden"
+            )
+            fail("Expected application exception for having a wildcard")
+        } catch (ApplicationException e) {
+            // expected
+        }
     }
+
+    @Test
+    void testMultipleColumnsInSql() {
+        // this is throwing an exception instead of status of N
+        CommunicationPopulationQueryParseResult result
+        try {
+            result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                    "select spriden_pidm, spriden_id from spriden"
+            )
+            fail("Expected application exception for having a wildcard")
+        } catch (ApplicationException e) {
+            // expected
+        }
+    }
+
+    @Test
+    void testMultipleStatementsInSql() {
+        // this is throwing an exception instead of status of N
+        CommunicationPopulationQueryParseResult result
+        try {
+            result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                    "select spriden_pidm from spriden; delete from spriden"
+            )
+            fail("Expected application exception for having multiple statements.")
+        } catch (ApplicationException e) {
+            // expected
+        }
+    }
+
+    @Test
+    void testNoPidmInSql() {
+        // this is throwing an exception instead of status of N
+        CommunicationPopulationQueryParseResult result
+        try {
+            result = communicationPopulationQueryCompositeService.validateSqlStatement(
+                    "select spriden_id from spriden"
+            )
+            fail( "Expected application exception for not specifying a pidm." )
+        } catch( ApplicationException e ) {
+            // expected
+        }
+    }
+
+
+
+//    @Test
+//    void testList() {
+//        def expList = communicationPopulationQueryCompositeService.list( sort: "name", order: "asc" )
+//        def originalCount = expList.size()
+//        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+//        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//
+//        expList = communicationPopulationQueryCompositeService.list( sort: "name", order: "asc" )
+//        assertNotNull expList
+//        assertTrue originalCount + 1 == expList.size()
+//    }
+//
+//
+//    @Test
+//    void testCreateWithMissingFolder() {
+//        def populationQuery = newPopulationQuery( true, true, "TTTTTTTTTT" )
+//        populationQuery.folder = null
+//        def message = shouldFail( ApplicationException ) {
+//            communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//        }
+//        assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", message
+//    }
+//
+//
+//    @Test
+//    void testUpdatePopulationQuery() {
+//        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+//        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//        assertNotNull populationQuery
+//        def id = populationQuery.id
+//
+//        // Find the domain
+//        populationQuery = populationQuery.get( id )
+//        assertNotNull populationQuery?.id
+//
+//        // Update domain values
+//        populationQuery.description = "###"
+//        populationQuery = communicationPopulationQueryCompositeService.update( [domainModel: populationQuery] )
+//
+//        // Find the updated domain
+//        populationQuery = populationQuery.get( id )
+//
+//        // Assert updated domain values
+//        assertNotNull populationQuery
+//        assertEquals "###", populationQuery.description
+//    }
+//
+//
+//    @Test
+//    void testUpdateInvalidStatementPopulationQuery() {
+//        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+//        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//        assertNotNull populationQuery
+//        def id = populationQuery.id
+//
+//        // Find the domain
+//        populationQuery = populationQuery.get( id )
+//        assertNotNull populationQuery?.id
+//    }
+//
+//
+//    @Test
+//    void testUpdateValidStatementPopulationQuery() {
+//        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+//        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//        assertNotNull populationQuery
+//        def id = populationQuery.id
+//
+//        // Find the domain
+//        populationQuery = populationQuery.get( id )
+//        assertNotNull populationQuery?.id
+//    }
+//
+//
+//    @Test
+//    void testDeletePopulationQuery() {
+//
+//        def populationQuery = newPopulationQuery( false, false, "TTTTTTTTTT" )
+//
+//        populationQuery = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//        assertNotNull populationQuery
+//        def id = populationQuery.id
+//
+//        // Find the domain
+//        populationQuery = populationQuery.get( id )
+//        assertNotNull populationQuery
+//
+//
+//        def populationQuery1 = newPopulationQuery( false, false, "MMMMMMMMMM" )
+//        populationQuery1 = communicationPopulationQueryCompositeService.create( [domainModel: populationQuery1] )
+//        assertNotNull populationQuery1
+//        def id1 = populationQuery1.id
+//
+//        // Find the domain
+//        populationQuery1 = populationQuery1.get( id )
+//        assertNotNull populationQuery1
+//
+//        // Delete the domain
+//        communicationPopulationQueryCompositeService.delete( [domainModel: populationQuery] )
+//
+//        // Attempt to find the deleted domain
+//        populationQuery = populationQuery.get( id )
+//        assertNull populationQuery
+//    }
+//
+//
+//    @Test
+//    void testDynamicFinder() {
+//
+//        def populationQuery = newPopulationQuery( false, false, "TestName1" )
+//        communicationPopulationQueryCompositeService.create( [domainModel: populationQuery] )
+//        def populationQuery1 = newPopulationQuery( false, false, "TestName2" )
+//        communicationPopulationQueryCompositeService.create( [domainModel: populationQuery1] )
+//        // Find the domain
+//        def List<CommunicationPopulationQuery> populationQueries = populationQuery.findAllByQueryName( "TestName" )
+//        assertNotNull populationQueries
+//        assertEquals( 2, populationQueries.size() )
+//    }
 
 
     private String getUser() {
         return 'BCMADMIN'
     }
 
-
-    private def newPopulationQuery( boolean locked, boolean published, String queryName ) {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: testFolder,
-                name: queryName,
-                valid: false,
-
-                // Nullable fields
-                description: "TTTTTTTTTT",
-                sqlString: ""
-        )
-
-        return populationQuery
-    }
 }

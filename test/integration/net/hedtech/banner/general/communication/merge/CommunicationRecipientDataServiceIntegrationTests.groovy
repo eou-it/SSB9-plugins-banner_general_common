@@ -24,7 +24,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
     def communicationRecipientDataService
     def communicationTemplateMergeService
-    def communicationPopulationQueryService
+    def communicationPopulationQueryCompositeService
     def communicationPopulationExecutionService
     def communicationPopulationSelectionListService
     def communicationFieldCalculationService
@@ -110,7 +110,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         assertNotNull validFolder.id
 
         /* create a population query */
-        validQuery = communicationPopulationQueryService.create( newPopulationQuery( validFolder, "TestQuery" ) )
+        validQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery( validFolder, "TestQuery" ) )
+        validQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( validQuery )
         assertNotNull( validQuery.id )
 
         /* Create communication Field */
@@ -280,7 +281,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 // Required fields
                 folder: testFolder,
                 name: queryName,
-                valid: false,
+                changesPending: false,
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
