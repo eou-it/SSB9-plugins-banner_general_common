@@ -520,8 +520,14 @@ class DirectDepositAccountCompositeService {
         })+1
         //produce an error, if the item being adjusted is at 100% and also remaining exists already
         if (remainingPosition > 0) {
-            if (newPosition == remainingPosition || newPosition > remainingPosition) {
-                newPosition=newPosition-1;
+            if (newAcct) {
+                if (newPosition == remainingPosition || newPosition > remainingPosition) {
+                    newPosition=remainingPosition
+                }
+            } else {
+                if (newPosition == remainingPosition || newPosition > remainingPosition) {
+                    newPosition=newPosition-1
+                }
             }
         }
 
