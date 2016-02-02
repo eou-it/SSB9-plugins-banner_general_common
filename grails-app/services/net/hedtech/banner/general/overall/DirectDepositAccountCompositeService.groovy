@@ -550,7 +550,7 @@ class DirectDepositAccountCompositeService {
             })+1
         }
 
-        if (newPosition == positionBeingUpdated) {
+        if (!newAcct && newPosition == positionBeingUpdated) {
             reOrderInd = false
         }
 
