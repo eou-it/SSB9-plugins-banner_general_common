@@ -5,6 +5,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.general.system.InstitutionalDescription
+import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.web.context.request.RequestContextHolder
 import net.hedtech.banner.general.system.InstitutionalDescription
 
@@ -502,8 +503,12 @@ class DirectDepositAccountCompositeService {
 
             def domainObject = new DirectDepositAccount()
             def routingObject = new BankRoutingInfo()
-            domainObject.properties = itemBeingAdjusted
-            routingObject.properties = itemBeingAdjusted.bankRoutingInfo
+
+            use(InvokerHelper) {
+                domainObject.setProperties(itemBeingAdjusted)
+                routingObject.setProperties(itemBeingAdjusted.bankRoutingInfo)
+            }
+
             domainObject.bankRoutingInfo = routingObject
             domainObject.id = -1
 
