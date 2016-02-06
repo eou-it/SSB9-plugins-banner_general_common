@@ -21,7 +21,10 @@ import javax.persistence.*
 @NamedQueries(value = [
     @NamedQuery(name = "CommunicationPopulationQueryVersion.findByQueryId",
             query = """ FROM CommunicationPopulationQueryVersion queryVersion
-                WHERE queryVersion.query.id = :queryId""")
+                WHERE queryVersion.query.id = :queryId order by queryVersion.createDate DESC"""),
+    @NamedQuery(name = "CommunicationPopulationQueryVersion.fetchById",
+            query = """ FROM CommunicationPopulationQueryVersion queryVersion
+            WHERE queryVersion.id = :id""")
 ])
 class CommunicationPopulationQueryVersion implements Serializable {
 
@@ -88,6 +91,17 @@ class CommunicationPopulationQueryVersion implements Serializable {
         def query
         CommunicationPopulationQueryVersion.withSession { session ->
             query = session.getNamedQuery('CommunicationPopulationQueryVersion.findByQueryId').setLong( 'queryId', queryId ).list()
+        }
+        return query
+    }
+
+    public static CommunicationPopulationQueryVersion fetchById(Long id) {
+
+        def query
+        CommunicationPopulationQueryVersion.withSession { session ->
+            query = session.getNamedQuery('CommunicationPopulationQueryVersion.fetchById')
+                    .setLong('id', id).list()[0]
+
         }
         return query
     }

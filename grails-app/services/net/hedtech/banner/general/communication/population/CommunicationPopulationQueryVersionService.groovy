@@ -42,17 +42,17 @@ class CommunicationPopulationQueryVersionService extends ServiceBase {
         CommunicationPopulationQueryVersion passedIn = getPopulationQueryVersion( domainModelOrMap )
         CommunicationPopulationQueryVersion persisted = CommunicationPopulationQueryVersion.get( passedIn.id )
 
-        if (old.id == null) {
+        if (persisted.id == null) {
             throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:queryDoesNotExist@@")
         }
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete( old.createdBy )) {
+        if (!CommunicationCommonUtility.userCanUpdateDelete( persisted.createdBy )) {
             throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:operation.not.authorized@@")
         }
     }
 
 
-    private CommunicationPopulationQueryVersion getPopulationQueryVersion( Map domainModelOrMap ) {
+    private CommunicationPopulationQueryVersion getPopulationQueryVersion( domainModelOrMap ) {
         (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQueryVersion
     }
 

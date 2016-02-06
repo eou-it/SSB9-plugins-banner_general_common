@@ -103,6 +103,23 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         assertNotNull( queryVersion.getCreateDate() )
     }
 
+    @Test
+    void testDeleteQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testPublishQuery",
+                folder: testFolder,
+                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertTrue( populationQuery.changesPending )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+        communicationPopulationQueryCompositeService.deletePopulationQuery(populationQuery)
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
+        assertEquals(0, queryVersionList.size())
+        CommunicationPopulationQuery populationQuery1 = CommunicationPopulationQuery.fetchById(populationQuery.id)
+        assertNull(populationQuery1)
+    }
 
     @Test
     void testValidatePopulationQuery() {

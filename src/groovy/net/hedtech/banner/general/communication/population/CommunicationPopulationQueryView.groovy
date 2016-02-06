@@ -75,7 +75,7 @@ class CommunicationPopulationQueryView implements Serializable {
      */
     @Type(type = "yes_no")
     @Column(name = "VALID_IND")
-    Boolean valid
+    Boolean changesPending
 
     /**
      * VERSION: Optimistic lock token
@@ -84,6 +84,25 @@ class CommunicationPopulationQueryView implements Serializable {
     @Column(name = "VERSION")
     Long version
 
+    /**
+     * Query version surrogate id.
+     */
+    @Id
+    @Column(name = "VERSION_SURROGATE_ID")
+    Long versionId
+
+    /**
+     * PUBLISHED_DATE: The date the latest query version was published.
+     */
+    @Column(name = "PUBLISHED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date publishedDate
+
+    /**
+     * PUBLISHED_SQL: The sql string of the latest published query version.
+     */
+    @Column(name = "PUBLISHED_SQL")
+    String publishedSql
 
     static constraints = {
         folderName(nullable: false)
@@ -91,11 +110,11 @@ class CommunicationPopulationQueryView implements Serializable {
         createdBy(nullable: false, maxSize: 30)
         description(nullable: true, maxSize: 2000)
         name(nullable: false, maxSize: 30)
-        valid(nullable: false)
+        changesPending(nullable: false)
     }
 
     // Read Only fields that should be protected against update
-    public static readonlyProperties = ['id']
+    public static readonlyProperties = ['id','versionId']
 
 
     public static CommunicationPopulationQueryView fetchById(Long id) {

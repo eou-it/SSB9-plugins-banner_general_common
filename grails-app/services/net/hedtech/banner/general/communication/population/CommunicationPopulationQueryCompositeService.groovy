@@ -44,6 +44,15 @@ class CommunicationPopulationQueryCompositeService {
         return communicationPopulationQueryService.get( Long.valueOf( id ) )
     }
 
+    /**
+     * Deletes the population query along with any dependent query versions.
+     *
+     * @param queryId the primary key of the population query
+     * @param version the optimistic lock counter
+     */
+    public boolean deletePopulationQuery( CommunicationPopulationQuery populationQuery ) {
+        return deletePopulationQuery(populationQuery.id, populationQuery.version)
+    }
 
     /**
      * Deletes the population query along with any dependent query versions.
@@ -52,8 +61,11 @@ class CommunicationPopulationQueryCompositeService {
      * @param version the optimistic lock counter
      */
     public boolean deletePopulationQuery( long queryId, long version ) {
+        log.trace("deletePopulationQuery called")
         List queryVersions = CommunicationPopulationQueryVersion.findByQueryId( queryId )
-        communicationPopulationQueryVersionService.delete( queryVersions )
+        if(queryVersions != null && queryVersions.size() > 0) {
+            communicationPopulationQueryVersionService.delete(queryVersions)
+        }
 
         def queryAsMap = [
             id     : Long.valueOf( queryId ),
