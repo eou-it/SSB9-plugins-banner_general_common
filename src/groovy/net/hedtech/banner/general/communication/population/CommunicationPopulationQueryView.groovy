@@ -87,7 +87,6 @@ class CommunicationPopulationQueryView implements Serializable {
     /**
      * Query version surrogate id.
      */
-    @Id
     @Column(name = "VERSION_SURROGATE_ID")
     Long versionId
 
