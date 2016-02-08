@@ -111,15 +111,46 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testRePrioritizeExistingAccount() {
         def pidm = PersonUtility.getPerson("MYE000001").pidm
 
-        def existingItem = DirectDepositAccount.findById(638) as DirectDepositAccount
-        def itemMap = existingItem.properties
+        //   def existingItem = DirectDepositAccount.findById(1164) as DirectDepositAccount
+
+        def testBankRoutingInfo1 = [
+                bankRoutingNum: '748972234'
+        ]
+
+        def existingItemMap0 = [
+                accountType: 'C',
+                bankAccountNum: '111111',
+                bankRoutingInfo: testBankRoutingInfo1,
+                documentType: 'D',
+                id: 1329,
+                percent: 45,
+                apIndicator: 'A',
+                hrIndicator: 'A',
+                priority: 3,
+                intlAchTransactionIndicator: 'N',
+                pidm: 6,
+                status: 'P'
+        ]
+
+
+        //   def itemMap = existingItem.properties
+        def itemMap = existingItemMap0
         itemMap.accountType = "C"
+        itemMap.percent = 45
 
         def newPosition = 5
 
         def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
 
         def list1 = list.sort{it.priority}
+
+        list1.each {
+            def dd=it as DirectDepositAccount
+            log.debug("account: " + dd.bankAccountNum );
+            log.info("account: " + dd.percent );
+            log.info("account: " + dd.priority );
+        }
+
 
         assertEquals true, list1.size() > 0
     }
@@ -129,29 +160,35 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testRePrioritizeNewAccount() {
         def pidm = PersonUtility.getPerson("MYE000001").pidm
 
+        def testBankRoutingInfo1 = [
+                bankRoutingNum: '748972234'
+        ]
+
         def newAccountMap0 = [
                 accountType: 'C',
-                bankAccountNum: '22334455',
-                bankRoutingInfo: testBankRoutingInfo0,
+                bankAccountNum: '777777',
+                bankRoutingInfo: testBankRoutingInfo1,
                 documentType: 'D',
-                //   id: 0,
-                percent: 20,
+//                id: 1329,
+                percent: 10,
                 apIndicator: 'A',
                 hrIndicator: 'A',
+                priority: 3,
                 intlAchTransactionIndicator: 'N',
-                pidm: 5,
+                pidm: 6,
                 status: 'P'
         ]
 
         def itemMap = newAccountMap0
 
-        def newPosition = 2
+        def newPosition = 3
 
         def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
 
         def list1 = list.sort{it.priority}
 
         assertEquals true, list1.size() > 0
+
     }
 
 
