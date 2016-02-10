@@ -90,51 +90,17 @@ class DirectDepositAccountCompositeService {
             lastPayDist=getLastPayDistribution(pidm)
         }
 
-        def totalAmount = 0
-
         if (lastPayDist) {
-            def totalLeft = lastPayDist.totalNet //Initially, the total left is the total from last distribution
             def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
             def allocList = []
 
-            // Calculate the amount for each allocation, going in priority order
+            // Create model for each allocation
             allocations.each {
-                // Populate model, ignore generic domain fields
+                // Populate model, ignoring generic domain fields
                 def alloc = it
                 def allocModel = alloc.class.declaredFields.findAll { !it.synthetic && it.name != 'constraints' && it.name != 'log' }.collectEntries {
                     [ (it.name):alloc."$it.name" ]
                 }
-
-                // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or $100)
-                def amt = it.amount
-                def pct = it.percent
-                def calcAmt = 0
-                def allocationByUser = ""
-
-                if (amt) {
-                    calcAmt = (amt > totalLeft) ? totalLeft : amt
-
-                    // Allocation as set by user
-                    allocationByUser = formatCurrency(amt)
-                } else if (pct) {
-                    // Calculate amount based on percent and last pay distribution
-                    def unroundedAmt = totalLeft * pct / 100
-                    calcAmt = roundAsCurrency(unroundedAmt)
-
-                    if (calcAmt > totalLeft) {
-                        calcAmt = totalLeft
-                    }
-
-                    // Allocation as set by user
-                    allocationByUser = pct.intValue() + "%"
-                }
-
-                totalLeft -= calcAmt
-
-                totalAmount += calcAmt
-
-                allocModel.calculatedAmount = formatCurrency(calcAmt)
-                allocModel.allocation = allocationByUser
 
                 // Add to list of allocations
                 allocList.push(allocModel)
@@ -142,8 +108,6 @@ class DirectDepositAccountCompositeService {
 
             model.allocations = allocList
         }
-
-        model.totalAmount = totalAmount ? formatCurrency(totalAmount) : ""
 
         model
     }
@@ -453,29 +417,6 @@ class DirectDepositAccountCompositeService {
         }
         return isHrInstalled
     }
-
-    /**
-     * Round to two decimals, using "half up" rounding (1.765 rounds to 1.77).
-     * MORE DETAIL: Round so that 5 reliably rounds up, matching the behavior of the Oracle "round" function when used
-     * with a NUMBER.  Without taking care here, a number like 1069.975 coming in as a Double can get changed during the
-     * rounding process to 1069.97499999999990905052982270717620849609375, which rounds *down* to 1069.97, while we're
-     * expecting 1069.98.  The (convoluted-looking) logic here makes rounding go "half up," as we expect.
-     * We're matching the Oracle rounding behavior because that's what's used in the Banner 8 SSB Direct Deposit
-     * app that this one is replacing, and we want to be consistent.
-     * @param n Number to be rounded
-     * @return The rounded number
-     */
-    private def roundAsCurrency(n) {
-        // This "valueOf" line is key in making it round "half up."  If we simply create a BigDecimal as:
-        //     def d = new BigDecimal(n)
-        // where n is 1069.975, d ends up with a value of 1069.97499999999990905052982270717620849609375,
-        // resulting in a round down to 1069.97, while we expected a round up to 1069.98.  Using "valueOf"
-        // converts it to a clean 1069.975 which then rounds up correctly.
-        def d = BigDecimal.valueOf(n)
-
-        d.setScale(2, BigDecimal.ROUND_HALF_UP)
-    }
-
 
     def moveToLast(def list, def pos) {
         def result
