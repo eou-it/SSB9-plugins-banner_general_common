@@ -549,7 +549,7 @@ class DirectDepositAccountCompositeService {
         }
         //make sure there are no more than one 100 percent record.
         if (accountList.count { it.percent == 100 } > 1) {
-            throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
+            throw new ApplicationException(DirectDepositAccount, "@@r1:oneRemaining@@")
         }
 
         //make sure new position is not greater than the number of hr accounts.

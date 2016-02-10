@@ -122,11 +122,11 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
                 bankAccountNum: '111111',
                 bankRoutingInfo: testBankRoutingInfo1,
                 documentType: 'D',
-                id: 1329,
-                percent: 45,
+                id: 1546,
+                percent: 85,
                 apIndicator: 'A',
                 hrIndicator: 'A',
-                priority: 3,
+                priority: 7,
                 intlAchTransactionIndicator: 'N',
                 pidm: 6,
                 status: 'P'
@@ -136,9 +136,9 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         //   def itemMap = existingItem.properties
         def itemMap = existingItemMap0
         itemMap.accountType = "C"
-        itemMap.percent = 45
+        itemMap.percent = 65
 
-        def newPosition = 5
+        def newPosition = 3
 
         def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
 
@@ -181,7 +181,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
         def itemMap = newAccountMap0
 
-        def newPosition = 3
+        def newPosition = 1
 
         def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
 
