@@ -341,9 +341,7 @@ class DirectDepositAccountCompositeService {
 
 
         try {
-            sql.eachRow(lastPayAmtSql, [pidm]) { row ->
-                lastPayAmtRec = row.toRowResult()
-            }
+            lastPayAmtRec = sql.firstRow(lastPayAmtSql, [pidm])
         } finally {
             sql?.close()
         }
