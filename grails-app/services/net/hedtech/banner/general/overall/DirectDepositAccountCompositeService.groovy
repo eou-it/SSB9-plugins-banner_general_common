@@ -90,24 +90,22 @@ class DirectDepositAccountCompositeService {
             lastPayDist=getLastPayDistribution(pidm)
         }
 
-        if (lastPayDist) {
-            def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
-            def allocList = []
+        def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
+        def allocList = []
 
-            // Create model for each allocation
-            allocations.each {
-                // Populate model, ignoring generic domain fields
-                def alloc = it
-                def allocModel = alloc.class.declaredFields.findAll { !it.synthetic && it.name != 'constraints' && it.name != 'log' }.collectEntries {
-                    [ (it.name):alloc."$it.name" ]
-                }
-
-                // Add to list of allocations
-                allocList.push(allocModel)
+        // Create model for each allocation
+        allocations.each {
+            // Populate model, ignoring generic domain fields
+            def alloc = it
+            def allocModel = alloc.class.declaredFields.findAll { !it.synthetic && it.name != 'constraints' && it.name != 'log' }.collectEntries {
+                [ (it.name):alloc."$it.name" ]
             }
 
-            model.allocations = allocList
+            // Add to list of allocations
+            allocList.push(allocModel)
         }
+
+        model.allocations = allocList
 
         model
     }
