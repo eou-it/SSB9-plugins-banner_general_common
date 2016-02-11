@@ -57,7 +57,13 @@ class DirectDepositAccountService extends ServiceBase{
                 // if account to be deleted is a legacy record set the appropiate indicator
                 // to I instead of deleting it
                 
-                if(acct.apDelete) {
+                def apDelete = acct.apDelete
+
+                // get a fresh version of account in case user has unsaved edits on the one 
+                // submitted for delete
+                acct = DirectDepositAccount.get(acct.id)
+
+                if(apDelete) {
                     acct.apIndicator = 'I'
                     model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
                 }

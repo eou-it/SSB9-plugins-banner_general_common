@@ -8,6 +8,7 @@ import net.hedtech.banner.general.system.InstitutionalDescription
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.web.context.request.RequestContextHolder
 import net.hedtech.banner.general.system.InstitutionalDescription
+import org.codehaus.groovy.runtime.InvokerHelper
 
 class DirectDepositAccountCompositeService {
 
@@ -90,60 +91,22 @@ class DirectDepositAccountCompositeService {
             lastPayDist=getLastPayDistribution(pidm)
         }
 
-        def totalAmount = 0
+        def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
+        def allocList = []
 
-        if (lastPayDist) {
-            def totalLeft = lastPayDist.totalNet //Initially, the total left is the total from last distribution
-            def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
-            def allocList = []
-
-            // Calculate the amount for each allocation, going in priority order
-            allocations.each {
-                // Populate model, ignore generic domain fields
-                def alloc = it
-                def allocModel = alloc.class.declaredFields.findAll { !it.synthetic && it.name != 'constraints' && it.name != 'log' }.collectEntries {
-                    [ (it.name):alloc."$it.name" ]
-                }
-
-                // Calculate allocated amount (i.e. currency) and allocation as set by user (e.g. 50% or $100)
-                def amt = it.amount
-                def pct = it.percent
-                def calcAmt = 0
-                def allocationByUser = ""
-
-                if (amt) {
-                    calcAmt = (amt > totalLeft) ? totalLeft : amt
-
-                    // Allocation as set by user
-                    allocationByUser = formatCurrency(amt)
-                } else if (pct) {
-                    // Calculate amount based on percent and last pay distribution
-                    def unroundedAmt = totalLeft * pct / 100
-                    calcAmt = roundAsCurrency(unroundedAmt)
-
-                    if (calcAmt > totalLeft) {
-                        calcAmt = totalLeft
-                    }
-
-                    // Allocation as set by user
-                    allocationByUser = pct.intValue() + "%"
-                }
-
-                totalLeft -= calcAmt
-
-                totalAmount += calcAmt
-
-                allocModel.calculatedAmount = formatCurrency(calcAmt)
-                allocModel.allocation = allocationByUser
-
-                // Add to list of allocations
-                allocList.push(allocModel)
+        // Create model for each allocation
+        allocations.each {
+            // Populate model, ignoring generic domain fields
+            def alloc = it
+            def allocModel = alloc.class.declaredFields.findAll { !it.synthetic && it.name != 'constraints' && it.name != 'log' }.collectEntries {
+                [ (it.name):alloc."$it.name" ]
             }
 
-            model.allocations = allocList
+            // Add to list of allocations
+            allocList.push(allocModel)
         }
 
-        model.totalAmount = totalAmount ? formatCurrency(totalAmount) : ""
+        model.allocations = allocList
 
         model
     }
@@ -377,9 +340,7 @@ class DirectDepositAccountCompositeService {
 
 
         try {
-            sql.eachRow(lastPayAmtSql, [pidm]) { row ->
-                lastPayAmtRec = row.toRowResult()
-            }
+            lastPayAmtRec = sql.firstRow(lastPayAmtSql, [pidm])
         } finally {
             sql?.close()
         }
@@ -454,30 +415,29 @@ class DirectDepositAccountCompositeService {
         return isHrInstalled
     }
 
-    /**
-     * Round to two decimals, using "half up" rounding (1.765 rounds to 1.77).
-     * MORE DETAIL: Round so that 5 reliably rounds up, matching the behavior of the Oracle "round" function when used
-     * with a NUMBER.  Without taking care here, a number like 1069.975 coming in as a Double can get changed during the
-     * rounding process to 1069.97499999999990905052982270717620849609375, which rounds *down* to 1069.97, while we're
-     * expecting 1069.98.  The (convoluted-looking) logic here makes rounding go "half up," as we expect.
-     * We're matching the Oracle rounding behavior because that's what's used in the Banner 8 SSB Direct Deposit
-     * app that this one is replacing, and we want to be consistent.
-     * @param n Number to be rounded
-     * @return The rounded number
-     */
-    private def roundAsCurrency(n) {
-        // This "valueOf" line is key in making it round "half up."  If we simply create a BigDecimal as:
-        //     def d = new BigDecimal(n)
-        // where n is 1069.975, d ends up with a value of 1069.97499999999990905052982270717620849609375,
-        // resulting in a round down to 1069.97, while we expected a round up to 1069.98.  Using "valueOf"
-        // converts it to a clean 1069.975 which then rounds up correctly.
-        def d = BigDecimal.valueOf(n)
-
-        d.setScale(2, BigDecimal.ROUND_HALF_UP)
+    def moveToLast(def list, def pos) {
+        def result
+        if (pos == 0) {
+            result = list[pos + 1..list.size() - 1, pos]
+        } else if (pos > 0 && pos < list.size() - 1) {
+            result = list[0..pos - 1, pos + 1..list.size() - 1, pos]
+        } else {
+            result = list
+        }
+        return result
     }
 
 
-    def rePrioritizeAccounts( def map, def newPosition ) {
+    Closure moveInList={list, item, newIndex->
+        assert list && item && newIndex!=null
+        int oldIndex=list.indexOf(item)
+        if(oldIndex==-1) return null
+
+        list.remove(item)
+        return list.plus(newIndex,item)
+    }
+
+    def rePrioritizeAccounts(def map, def newPosition) {
 
         def reOrderInd = true
         def priorityList = []
@@ -490,178 +450,166 @@ class DirectDepositAccountCompositeService {
         def itemBeingAdjusted = map
 
         //checking for mandatory values
-        //  if ()
+        validateRoutingNumExistsInMap(itemBeingAdjusted)
+        validateBankRoutingInfo(itemBeingAdjusted.bankRoutingInfo.bankRoutingNum)
+
+
 
         def accountList = directDepositAccountService.getActiveHrAccounts(itemBeingAdjusted?.pidm)
-        accountList.sort {it.priority};
+        accountList.sort { it.priority };
 
+        //convert map to object and add it to the account list. both new or existing.
+        def domainObject = new DirectDepositAccount()
+        def routingObject = new BankRoutingInfo()
 
-        if(!itemBeingAdjusted.containsKey("id") || itemBeingAdjusted?.id == null) {
+        use(InvokerHelper) {
+            domainObject.setProperties(itemBeingAdjusted)
+            routingObject.setProperties(itemBeingAdjusted.bankRoutingInfo)
+        }
+
+        domainObject.bankRoutingInfo = routingObject
+
+        if (!itemBeingAdjusted.containsKey("id") || itemBeingAdjusted?.id == null) {
             itemBeingAdjusted.priority = setNextPriority(itemBeingAdjusted).priority
             itemBeingAdjusted.id = -1
+            validateNotDuplicate(itemBeingAdjusted)
             newAcct = true
-
-            def domainObject = new DirectDepositAccount()
-            def routingObject = new BankRoutingInfo()
-
-            use(InvokerHelper) {
-                domainObject.setProperties(itemBeingAdjusted)
-                routingObject.setProperties(itemBeingAdjusted.bankRoutingInfo)
-            }
-
-            domainObject.bankRoutingInfo = routingObject
             domainObject.id = -1
-
+            domainObject.priority = itemBeingAdjusted.priority
             accountList << domainObject
-        }
-
-        //if the new position that is sent, happens to be the position of "Remaining" record, then
-        //change the new position to move back by one position.
-        //for example, if new position and the position of "remaining" record is 6, then the
-        //new position will be 5.
-        //should not adjust the position of "remaining" record.
-        def remainingPosition = (accountList.findIndexOf  { iterator ->
-            iterator.percent == 100
-        })+1
-        //produce an error, if the item being adjusted is at 100% and also remaining exists already
-        if (remainingPosition > 0) {
-            if (newAcct) {
-                if (newPosition == remainingPosition || newPosition > remainingPosition) {
-                    newPosition=remainingPosition
-                }
-            } else {
-                if (newPosition == remainingPosition || newPosition > remainingPosition) {
-                    newPosition=newPosition-1
-                }
+        } else if (itemBeingAdjusted?.id != null) {
+            def pos = accountList.findIndexOf { iterator ->
+                iterator.id == itemBeingAdjusted.id
             }
+            domainObject.id = itemBeingAdjusted.id
+            domainObject.priority = (accountList[pos] as DirectDepositAccount).priority
+            accountList[pos] = domainObject
         }
-
-        //if record with "remaining" (param is map) is sent for re prioritizing
-        //then no action will be taken. No records will be updated.
-        if (itemBeingAdjusted?.percent == 100) {
-            newPosition = accountList.size()
+        //make sure there are no more than one 100 percent record.
+        if (accountList.count { it.percent == 100 } > 1) {
+            throw new ApplicationException(DirectDepositAccount, "@@r1:oneRemaining@@")
         }
 
         //make sure new position is not greater than the number of hr accounts.
         if (!newAcct) {
             if (newPosition > accountList.size()) {
-                reOrderInd = false
+                throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
             }
         }
 
+        //DETERMINING the remaining position
+        def remainingIndex = accountList.findIndexOf { iterator ->
+            iterator.percent == 100
+        }
+        //if remaining is found
+        def remainingPosition
+        if (remainingIndex > -1) {
+            remainingPosition = remainingIndex+1
+            //remaining should be at the end. otherwise move remaining to Last
+            if (remainingPosition != accountList.size()) {
+                accountList = moveToLast(accountList, remainingIndex)
+
+                remainingIndex = accountList.findIndexOf { iterator ->
+                    iterator.percent == 100
+                }
+                remainingPosition = remainingIndex+1
+            }
+        }
+
+        //DETERMINING the new position for the item that is sent.
+        //If remaining is present, it should be at the end at this point.
+        //for existing account, if remaining is attempted to change its position, should prevent that.
+        if (remainingIndex > -1) {
+            //if remaining is sent, newPosition should be last.
+            //if the new position that is sent, happens to be the position of "Remaining" record, then
+            //change the new position to move back by one position.
+            if (itemBeingAdjusted?.percent == 100) {
+                newPosition = accountList.size()
+            } else if (newPosition == remainingPosition || newPosition > remainingPosition) {
+                newPosition = remainingPosition - 1
+            }
+        }
+
+
+        //DETERMINING the existing position of the account being adjusted.
         //if the new position is same as the position of the item being adjusted,
         //then no reordering will be done.
         def positionBeingUpdated
         if (newAcct) {
-            positionBeingUpdated=accountList.size()
-
-        } else {
-            positionBeingUpdated = (accountList.findIndexOf  { iterator ->
-                iterator.id == itemBeingAdjusted?.id
+            positionBeingUpdated = (accountList.findIndexOf { iterator ->
+                iterator.id == itemBeingAdjusted.id
             })+1
+        } else {
+            positionBeingUpdated = (accountList.findIndexOf { iterator ->
+                iterator.id == itemBeingAdjusted?.id
+            }) + 1
         }
 
-        if (!newAcct && newPosition == positionBeingUpdated) {
-            reOrderInd = false
-        }
-
-        //ASSUMPTION is the record with remaining is at the end with the highest priority number.
-        //if the original record set has a record with "remaining" or 100%
-        //then, eliminate that record from the list.
-        //record with remaining should not be re prioritized.
-//        accountList.remove(accountList.find { p -> p.percent == 100 })
-        accountList.sort {it.priority};
-
-
+        //with all the values figured out, actual reordering happens for the accountList
         if (reOrderInd) {
-            //assign the new position to the item being adjusted and add it to the list.
+            //move the input account to the new position in the list.
             def adjItem = [:]
             adjItem.id = itemBeingAdjusted.id
             adjItem.newPosition = newPosition
             adjustedMapList << adjItem
-            priorityList << (accountList.find { p -> p.id == itemBeingAdjusted.id } as DirectDepositAccount).priority
 
             if (newPosition > positionBeingUpdated) {
-                for (int i=newPosition; i>positionBeingUpdated;  i--) {
+                for (int i = newPosition; i > positionBeingUpdated; i--) {
                     def adjustedPosition = i - 1
-                    //retrieving the actual priority for the adjusted position.
                     def adjItem1 = [:]
                     adjItem1.id = (accountList[adjustedPosition] as DirectDepositAccount).id
                     adjItem1.newPosition = adjustedPosition
-
                     adjustedMapList << adjItem1
-                    priorityList << (accountList[adjustedPosition] as DirectDepositAccount).priority
                 }
             }
 
             if (newPosition < positionBeingUpdated) {
-                for (int i=newPosition; i<positionBeingUpdated; i++) {
+                for (int i = newPosition; i < positionBeingUpdated; i++) {
                     def adjustedPosition = i + 1
                     def adjItem1 = [:]
-                    adjItem1.id = (accountList[i-1] as DirectDepositAccount).id
+                    adjItem1.id = (accountList[i - 1] as DirectDepositAccount).id
                     adjItem1.newPosition = adjustedPosition
-
                     adjustedMapList << adjItem1
-                    priorityList << (accountList[i-1] as DirectDepositAccount).priority
-                }
-
-            }
-        }
-
-        adjustedMapList.sort {it.newPosition};
-        priorityList.sort{it}
-
-        //remove the records before updating hibernate objects
-        adjustedMapList.each {
-            def pid=it.id
-            def acct = accountList.find { p -> p.id == pid } as DirectDepositAccount
-            if (pid != -1) {
-                directDepositAccountService.delete(acct)
-            }
-
-        }
-
-        int i = 0
-        adjustedMapList.each {
-            def pid=it.id
-            def acct = accountList.find { p -> p.id == pid }
-            if (acct.id == itemBeingAdjusted.id) {
-                acct.accountType = itemBeingAdjusted.accountType
-
-                if (itemBeingAdjusted.percent != null && itemBeingAdjusted.percent != "") {
-                    if (itemBeingAdjusted.percent.getClass() == String) {
-                        acct.percent = Double.parseDouble(itemBeingAdjusted.percent)
-                    } else {
-                        acct.percent = itemBeingAdjusted.percent
-                    }
-                    acct.amount = null
-                }
-
-                if (itemBeingAdjusted.amount != null && itemBeingAdjusted.amount != "") {
-                    if (itemBeingAdjusted.amount.getClass() == String) {
-                        acct.amount = Double.parseDouble(itemBeingAdjusted.amount)
-                    } else {
-                        acct.amount = itemBeingAdjusted.amount
-                    }
-                    acct.percent = null
                 }
             }
-            acct.priority = priorityList[i++]
-            prioritizedList << acct
 
+            //move the accounts in the accountList
+            adjustedMapList.sort { it.newPosition };
+            adjustedMapList.each {
+                def acct = accountList.find { p -> p.id == it.id } as DirectDepositAccount
+                accountList=moveInList(accountList,acct,it.newPosition-1)
+            }
+
+            //collect the priority numbers
+            accountList.each {
+                priorityList << it.priority
+            }
+            priorityList.sort { it }
+
+            //remove the records before updating hibernate objects
+            accountList.each {
+                def pid = it.id
+                if (pid != -1) {
+                    directDepositAccountService.delete(it)
+                }
+            }
+
+            //Assign the priority numbers in order all the accounts in the list.
+            int j=0
+            accountList.each {
+                it.priority = priorityList[j++]
+            }
+
+            accountList.sort { it.priority }
+
+            accountList.each {
+                def item = it as DirectDepositAccount
+                item.version = null
+                item.id = null
+                directDepositAccountService.create(item)
+            }
         }
-
-        prioritizedList.sort {it.priority}
-
-        prioritizedList.each {
-            def item = it as DirectDepositAccount
-            item.version=null
-            item.id = null
-            directDepositAccountService.create(item)
-        }
-
         return directDepositAccountService.getActiveHrAccounts(map.pidm)
     }
-
 
 }
