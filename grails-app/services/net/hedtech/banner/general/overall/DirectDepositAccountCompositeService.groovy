@@ -209,7 +209,6 @@ class DirectDepositAccountCompositeService {
 
     public def lastPayStub( pidm ) {
        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
-  //   def   sql = new Sql(HibernateSessionFactoryUtil.getConnection())
         def lastPayStubRec
 
         def lastPaySql =
@@ -230,9 +229,7 @@ class DirectDepositAccountCompositeService {
 
 
         try {
-            sql.eachRow(lastPaySql, [pidm]) { row ->
-                lastPayStubRec = row.toRowResult()
-            }
+            lastPayStubRec = sql.firstRow(lastPaySql, [pidm])
         } finally {
             sql?.close()
         }
@@ -257,9 +254,7 @@ class DirectDepositAccountCompositeService {
 
 
         try {
-            sql.eachRow(lastPayDDSql, [pidm,year,pictCode,payNo]) { row ->
-                directDeposit = row[0]
-            }
+            directDeposit = sql.firstRow(lastPayDDSql, [pidm,year,pictCode,payNo])
         } finally {
             sql?.close()
         }
@@ -581,10 +576,7 @@ class DirectDepositAccountCompositeService {
             }
 
             //collect the priority numbers
-            accountList.each {
-                priorityList << it.priority
-            }
-            priorityList.sort { it }
+            priorityList = (accountList*.priority).sort{it}
 
             //remove the records before updating hibernate objects
             accountList.each {
