@@ -61,6 +61,10 @@ eventTestPhasesStart = { phasesToRun ->
     projectTestRunner.testFeatureDiscovery.testExecutionContext.concurrentTests = [concurrentTestType]
 }
 
+eventTestPhaseStart = { args ->
+    System.properties['grails.test.phase'] = args
+}
+
 concurrentTestPhasePreparation = {
     // called at the start of the phase
     println "*** Starting concurrent tests"

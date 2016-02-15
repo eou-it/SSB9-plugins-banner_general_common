@@ -44,6 +44,7 @@ grails.project.dependency.resolution = {
         compile ":functional-test:2.0.0" // If the functional-test plugin is being used
         test ':code-coverage:2.0.3-3'
         compile ":rest:0.8"
+        compile "org.grails.plugins:quartz:1.0.2"
     }
 
     dependencies {
@@ -54,10 +55,7 @@ grails.project.dependency.resolution = {
         runtime "com.sun.mail:javax.mail:1.5.1"
         compile 'com.icegreen:greenmail:1.3'
         compile 'org.apache.commons:commons-email:1.3.1'
-
-        compile( "org.quartz-scheduler:quartz:2.2.2" ) {
-            excludes 'slf4j-api', 'c3p0'
-        }
+        compile 'org.quartz-scheduler:quartz:2.2.1'
     }
 
 
