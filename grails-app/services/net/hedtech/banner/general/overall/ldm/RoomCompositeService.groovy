@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
@@ -387,7 +387,7 @@ class RoomCompositeService extends LdmService {
         //criteria.add([key: "inactiveIndicator", binding: "roomStatusInactiveIndicator", operator: Operators.NOT_EQUALS_IGNORE_CASE])
 
         //Adding the criteria for data links for building
-        if(queryParams?.containsKey(BUILDING_ID)){
+        if(GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && queryParams?.containsKey(BUILDING_ID)){
             criteria.add([key: 'buildingId', binding: 'buildingGUID', operator: Operators.EQUALS_IGNORE_CASE])
             params.put('buildingId',queryParams.get(BUILDING_ID))
         }

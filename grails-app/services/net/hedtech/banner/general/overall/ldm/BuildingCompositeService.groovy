@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
@@ -60,7 +60,7 @@ class BuildingCompositeService extends  LdmService{
      * @return
      */
     private def fetchBuildingDetails(Map params) {
-        if (params.containsKey(SITE_FILTER_NAME)) {
+        if (GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && params.containsKey(SITE_FILTER_NAME)) {
             SiteDetail detail = siteDetailCompositeService.get(params.get(SITE_FILTER_NAME))
             return housingLocationBuildingDescriptionService.fetchAllByCampuses([detail?.code]) as List
         } else {
@@ -75,7 +75,7 @@ class BuildingCompositeService extends  LdmService{
      * @return count
      */
     Long count(params) {
-        if (params.containsKey(SITE_FILTER_NAME)) {
+        if (GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && params.containsKey(SITE_FILTER_NAME)) {
             SiteDetail detail = siteDetailCompositeService.get(params.get(SITE_FILTER_NAME))
             return housingLocationBuildingDescriptionService.countAllByCampuses([detail?.code])
         } else {
