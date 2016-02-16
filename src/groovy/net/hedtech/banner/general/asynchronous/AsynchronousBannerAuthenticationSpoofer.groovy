@@ -7,7 +7,7 @@ import net.hedtech.banner.security.AuthenticationProviderUtility
 import net.hedtech.banner.security.BannerAuthenticationProvider
 import net.hedtech.banner.security.FormContext
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.commons.ApplicationHolder
+import grails.util.Holders
 import org.springframework.context.ApplicationContext
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.core.Authentication
@@ -117,7 +117,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
 
     private MultiEntityProcessingService getMultiEntityProcessingService() {
         if (!multiEntityProcessingService) {
-            ApplicationContext ctx = (ApplicationContext) ApplicationHolder.getApplication().getMainContext()
+            ApplicationContext ctx = (ApplicationContext) Holders.getGrailsApplication().getMainContext()
             multiEntityProcessingService = (MultiEntityProcessingService) ctx.getBean("multiEntityProcessingService")
         }
         multiEntityProcessingService
