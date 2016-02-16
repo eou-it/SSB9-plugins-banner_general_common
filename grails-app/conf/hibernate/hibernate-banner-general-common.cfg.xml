@@ -17,6 +17,52 @@ there is no concept of an 'entity manager' within this project.
 <hibernate-configuration>
     <session-factory>
         <property name="dialect">org.hibernate.dialect.Oracle10gDialect</property>
+
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQuery"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryVersion"/>
+
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionListEntry"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryView"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationListView"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView"/>
+        <mapping class="net.hedtech.banner.general.communication.folder.CommunicationFolder"/>
+        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganization"/>
+        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganizationView"/>
+        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties"/>
+        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount"/>
+
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationEmailTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplateView"/>
+        <mapping class="net.hedtech.banner.general.communication.job.CommunicationJob"/>
+
+
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionConstant"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionStatement"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationRuleStatementType"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationField"/>
+        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldView"/>
+
+        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
+        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem"/>
+        <mapping class="net.hedtech.banner.general.communication.merge.CommunicationRecipientData"/>
+        <mapping class="net.hedtech.banner.general.communication.merge.CommunicationFieldValue"/>
+        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendView"/>
+        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemView"/>
+
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationItemView"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem"/>
+
+        <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
+        <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItemView"/>
+        <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItem"/>
+
+
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingDisplayOption"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourcePriority"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule"/>
@@ -70,51 +116,6 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
-
-
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQuery"/>
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryVersion"/>
-
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList"/>
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionListEntry"/>
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryView"/>
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationListView"/>
-        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView"/>
-        <mapping class="net.hedtech.banner.general.communication.folder.CommunicationFolder"/>
-        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganization"/>
-        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganizationView"/>
-        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties"/>
-        <mapping class="net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount"/>
-
-        <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplate"/>
-        <mapping class="net.hedtech.banner.general.communication.template.CommunicationEmailTemplate"/>
-        <mapping class="net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate"/>
-        <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplateView"/>
-        <mapping class="net.hedtech.banner.general.communication.job.CommunicationJob"/>
-
-
-        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionConstant"/>
-        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionStatement"/>
-        <mapping class="net.hedtech.banner.general.communication.field.CommunicationRuleStatementType"/>
-        <mapping class="net.hedtech.banner.general.communication.field.CommunicationField"/>
-        <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldView"/>
-
-        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend"/>
-        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem"/>
-        <mapping class="net.hedtech.banner.general.communication.merge.CommunicationRecipientData"/>
-        <mapping class="net.hedtech.banner.general.communication.merge.CommunicationFieldValue"/>
-        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendView"/>
-        <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemView"/>
-
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationItemView"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem"/>
-
-        <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
-        <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItemView"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItem"/>
-
+        <mapping class="net.hedtech.banner.general.overall.ldm.SectionMeetingTimeHedmDetail"/>
     </session-factory>
 </hibernate-configuration>

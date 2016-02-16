@@ -3,7 +3,6 @@
   **********************************************************************************/
 
 import net.hedtech.banner.configuration.ApplicationConfigurationUtils as ConfigFinder
-import grails.plugins.springsecurity.SecurityConfigType
 
 // ******************************************************************************
 //

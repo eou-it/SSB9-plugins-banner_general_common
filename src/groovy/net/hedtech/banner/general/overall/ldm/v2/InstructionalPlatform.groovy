@@ -23,22 +23,34 @@ class InstructionalPlatform {
         this.guid = guid
     }
 
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof InstructionalPlatform)) return false
 
-    boolean equals( o ) {
-        if (this.is( o )) return true
-        if (getClass() != o.class) return false
         InstructionalPlatform that = (InstructionalPlatform) o
+
+        if (guid != that.guid) return false
         if (integrationPartnerSystemRule != that.integrationPartnerSystemRule) return false
         if (metadata != that.metadata) return false
-        if (guid != that.guid) return false
+
         return true
     }
 
+    int hashCode() {
+        int result
+        result = (integrationPartnerSystemRule != null ? integrationPartnerSystemRule.hashCode() : 0)
+        result = 31 * result + (metadata != null ? metadata.hashCode() : 0)
+        result = 31 * result + (guid != null ? guid.hashCode() : 0)
+        return result
+    }
 
+
+    @Override
     public String toString() {
-        """InstructionalPlatform[
-                    integrationPartnerSystemRule=$integrationPartnerSystemRule,
-                    guid=$guid,
-                    metadata=$metadata]"""
+        return "InstructionalPlatform{" +
+                "integrationPartnerSystemRule=" + integrationPartnerSystemRule +
+                ", metadata=" + metadata +
+                ", guid='" + guid + '\'' +
+                '}';
     }
 }

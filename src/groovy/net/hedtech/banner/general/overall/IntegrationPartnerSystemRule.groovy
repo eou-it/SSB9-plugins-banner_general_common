@@ -1,111 +1,98 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.IntegrationPartner
 import net.hedtech.banner.service.DatabaseModifiesState
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.Table
-import javax.persistence.Version
-import javax.persistence.SequenceGenerator
-import javax.persistence.GenerationType
-import javax.persistence.ManyToOne
-import javax.persistence.JoinColumns
-import org.hibernate.annotations.Type
-import javax.persistence.JoinColumn
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
+import javax.persistence.*
 
 /**
  * Integration Partner System Rule Table.
  */
 @Entity
-@Table( name="GV_GORINTG" )
+@Table(name = "GV_GORINTG")
 @NamedQueries(
-        @NamedQuery(name="IntegrationPartnerSystemRule.fetchAllByCode",
-                query="""FROM IntegrationPartnerSystemRule a
+        @NamedQuery(name = "IntegrationPartnerSystemRule.fetchAllByCode",
+                query = """FROM IntegrationPartnerSystemRule a
                         WHERE a.code in (:codes)""")
 )
 @DatabaseModifiesState
 class IntegrationPartnerSystemRule implements Serializable {
 
-	/**
-	 * Surrogate ID for GORINTG
-    */
-  	@Id
-   	@SequenceGenerator(name = "GORINTG_SEQ_GEN", allocationSize = 1, sequenceName = "GORINTG_SURROGATE_ID_SEQUENCE")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GORINTG_SEQ_GEN")
-	@Column(name = "GORINTG_SURROGATE_ID")
- 	Long id
+    /**
+     * Surrogate ID for GORINTG
+     */
+    @Id
+    @SequenceGenerator(name = "GORINTG_SEQ_GEN", allocationSize = 1, sequenceName = "GORINTG_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GORINTG_SEQ_GEN")
+    @Column(name = "GORINTG_SURROGATE_ID")
+    Long id
 
-	/**
-	 * INTEGRATION CODE: User Defined Integration Code that is used with external partner.
-	 */
-	@Column(name="GORINTG_INTEGRATION_CDE", nullable = false, length=5)
-	String code
+    /**
+     * INTEGRATION CODE: User Defined Integration Code that is used with external partner.
+     */
+    @Column(name = "GORINTG_INTEGRATION_CDE", nullable = false, length = 5)
+    String code
 
-	/**
-	 * Description: User Description of the Integration Code.
-	 */
-	@Column(name="GORINTG_DESC", nullable = false, length=30)
-	String description
+    /**
+     * Description: User Description of the Integration Code.
+     */
+    @Column(name = "GORINTG_DESC", nullable = false, length = 30)
+    String description
 
-	/**
-	 * INTEGRATION PARTNER SYSTEM CODE: Code defined on GTVINTP that associates with the User Integration Code.
-	 */
-	//@Column(name="INTEGRATIONPARTNER", nullable = false, length=5)
-   @ManyToOne
-   @JoinColumns([
-   @JoinColumn(name = "GORINTG_INTP_CODE", referencedColumnName = "gtvintp_code")
-   ])
-   IntegrationPartner integrationPartner
+    /**
+     * INTEGRATION PARTNER SYSTEM CODE: Code defined on GTVINTP that associates with the User Integration Code.
+     */
+    //@Column(name="INTEGRATIONPARTNER", nullable = false, length=5)
+    @ManyToOne
+    @JoinColumns([
+            @JoinColumn(name = "GORINTG_INTP_CODE", referencedColumnName = "gtvintp_code")
+    ])
+    IntegrationPartner integrationPartner
 
-	/**
-	 * USER ID: The unique identification of the user.
-	 */
-	@Column(name="GORINTG_USER_ID", length=30)
-	String lastModifiedBy
+    /**
+     * USER ID: The unique identification of the user.
+     */
+    @Column(name = "GORINTG_USER_ID", length = 30)
+    String lastModifiedBy
 
-	/**
-	 * ACTIVITY DATE: The date that the information for the row was inserted or updated in the GORINTG table.
-	 */
-	@Column(name="GORINTG_ACTIVITY_DATE" )
-	@Temporal(TemporalType.TIMESTAMP)
-	Date lastModified
+    /**
+     * ACTIVITY DATE: The date that the information for the row was inserted or updated in the GORINTG table.
+     */
+    @Column(name = "GORINTG_ACTIVITY_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date lastModified
 
-	/**
-	 * DATA ORIGIN: Source system that created or updated the row
-	 */
-	@Column(name="GORINTG_DATA_ORIGIN", length=30)
-	String dataOrigin
+    /**
+     * DATA ORIGIN: Source system that created or updated the row
+     */
+    @Column(name = "GORINTG_DATA_ORIGIN", length = 30)
+    String dataOrigin
 
-	/**
-	 * Version column which is used as a optimistic lock token for GORINTG
-	 */
+    /**
+     * Version column which is used as a optimistic lock token for GORINTG
+     */
     @Version
-	@Column(name="GORINTG_VERSION", nullable = false, length=19)
-	Long version
+    @Column(name = "GORINTG_VERSION", nullable = false, length = 19)
+    Long version
 
 
-    public static fetchAllByCode(List codes){
-        def integrationPartnerSystemRuleList
-        IntegrationPartnerSystemRule.withSession{
-            session ->
-                integrationPartnerSystemRuleList = session.getNamedQuery("IntegrationPartnerSystemRule.fetchAllByCode").setParameterList('codes',codes).list()
+    static List<IntegrationPartnerSystemRule> fetchAllByCode(List codes) {
+        List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = []
+        if (codes && codes.size() > 0) {
+            IntegrationPartnerSystemRule.withSession {
+                session ->
+                    integrationPartnerSystemRuleList = session.getNamedQuery("IntegrationPartnerSystemRule.fetchAllByCode").setParameterList('codes', codes).list()
+            }
         }
         return integrationPartnerSystemRuleList
     }
 
-	public String toString() {
-		"IntegrationPartnerSystemRule[id=$id, code=$code, description=$description, integrationPartner=$integrationPartner, lastModifiedBy=$lastModifiedBy, lastModified=$lastModified, dataOrigin=$dataOrigin, version=$version]"
-	}
+    public String toString() {
+        "IntegrationPartnerSystemRule[id=$id, code=$code, description=$description, integrationPartner=$integrationPartner, lastModifiedBy=$lastModifiedBy, lastModified=$lastModified, dataOrigin=$dataOrigin, version=$version]"
+    }
 
 
     boolean equals(o) {
@@ -144,12 +131,12 @@ class IntegrationPartnerSystemRule implements Serializable {
 
 
     static constraints = {
-		code(nullable:false, maxSize:5)
-		description(nullable:false, maxSize:30)
-		integrationPartner(nullable:false)
-		lastModifiedBy(nullable:true, maxSize:30)
-		lastModified(nullable:true)
-		dataOrigin(nullable:true, maxSize:30)
+        code(nullable: false, maxSize: 5)
+        description(nullable: false, maxSize: 30)
+        integrationPartner(nullable: false)
+        lastModifiedBy(nullable: true, maxSize: 30)
+        lastModified(nullable: true)
+        dataOrigin(nullable: true, maxSize: 30)
     }
 
 }

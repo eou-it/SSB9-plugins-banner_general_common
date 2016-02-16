@@ -75,7 +75,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
         visaInformation.visaNumber = "123456789012UPDATE"
         visaInformation.nationIssue = "2"
         visaInformation.entryIndicator = false
-        visaInformation.numberEntries = ""
+        visaInformation.numberEntries = null
         visaInformation.visaIssuingAuthority = VisaIssuingAuthority.findByCode("CHINAE")
         visaInformation.portOfEntry = PortOfEntry.findByCode("CHI")
 

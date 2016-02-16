@@ -6,10 +6,12 @@ package net.hedtech.banner.general.lettergeneration.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.lettergeneration.ldm.v2.PersonFilter
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
+import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.query.QueryBuilder
 import net.hedtech.banner.query.operators.Operators
@@ -25,9 +27,13 @@ class PersonFilterCompositeService {
 
     public static final String LDM_NAME = 'person-filters'
     private static final String DOMAIN_KEY_DELIMITER = '-^'
+    private static final List allowedSortFields = [GeneralCommonConstants.ABBREVIATION,GeneralCommonConstants.CODE]
+    private static final List filtersAllowedWithCriterion = [GeneralCommonConstants.ABBREVIATION,GeneralCommonConstants.CODE]
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V2,GeneralCommonConstants.VERSION_V4]
 
     private HashMap ldmFieldToBannerDomainPropertyMap = [
-            abbreviation: 'selection'
+            abbreviation: GeneralCommonConstants.SELECTION,
+            code: GeneralCommonConstants.SELECTION
     ]
 
     /**
@@ -40,7 +46,6 @@ class PersonFilterCompositeService {
         List<PersonFilter> personFilters = []
 
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List allowedSortFields = ['abbreviation']
         RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(params.order)
         params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
@@ -89,7 +94,7 @@ class PersonFilterCompositeService {
         if (guid instanceof GlobalUniqueIdentifier) globalUniqueIdentifier = guid
         else globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
-            throw new ApplicationException("personFilter", new NotFoundException())
+            throw new ApplicationException(GeneralCommonConstants.PERSON_FILTER, new NotFoundException())
         }
 
         // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
@@ -104,7 +109,6 @@ class PersonFilterCompositeService {
         def result
 
         def searchFilters = QueryBuilder.createFilters(content)
-        def filtersAllowedWithCriterion = ["abbreviation"]
         def allowedOperators = [Operators.CONTAINS]
         RestfulApiValidationUtility.validateCriteria(searchFilters, filtersAllowedWithCriterion, allowedOperators)
 
@@ -120,21 +124,21 @@ class PersonFilterCompositeService {
         }
 
         Map namedParams = [:]
-        if (params.containsKey("abbreviation")) {
-            // filter[index][field]=abbreviation
-            retainSingleCriterionForFilter(criteria, "abbreviation")
-            query += """ and  a.selection  like  :selection  """
-            namedParams.put("selection", params.abbreviation.toUpperCase())
-        } else if (content.containsKey("abbreviation")) {
-            query += """ and  a.selection like  :selection  """
-            namedParams.put("selection", (!content.abbreviation.trim().contains("%")) ? "%${content.abbreviation.trim().toUpperCase()}%" : content.abbreviation.trim().toUpperCase())
-        }
 
+        String sortField = GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))?GeneralCommonConstants.CODE:GeneralCommonConstants.ABBREVIATION
+        if (params.containsKey(sortField)) {
+            // filter[index][field]=abbreviation
+            retainSingleCriterionForFilter(criteria, sortField)
+            query += """ and  a.selection  like  :selection  """
+            namedParams.put("selection", params.get(sortField).toUpperCase())
+        } else if (content.containsKey(sortField)) {
+            query += """ and  a.selection like  :selection  """
+            namedParams.put("selection", (!content.get(sortField).trim().contains("%")) ? "%${content.get(sortField).trim().toUpperCase()}%" : content.get(sortField).trim().toUpperCase())
+        }
+        query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
         if (count) {
-            query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
             result = PopulationSelectionExtract.executeQuery(query, namedParams)?.size()
         } else {
-            query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
             Integer max = content.max.trim().toInteger()
             Integer offset = content.offset?.trim()?.toInteger() ?: 0
             if (content.sort) {

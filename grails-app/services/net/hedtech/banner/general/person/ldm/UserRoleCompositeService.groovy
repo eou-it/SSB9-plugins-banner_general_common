@@ -4,13 +4,17 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.InstitutionalDescription
+import net.hedtech.banner.general.overall.ldm.LdmService
 
 import java.sql.SQLException
 
-class UserRoleCompositeService {
+class UserRoleCompositeService extends LdmService{
     def sessionFactory
+    def dateConvertHelperService
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1,GeneralCommonConstants.VERSION_V4]
 
 /**
  *
@@ -149,6 +153,8 @@ class UserRoleCompositeService {
 
     Map<Integer, List<RoleDetail>> fetchAllRolesByPidmInList(List pidms, Boolean studentRole) {
         def results = [:]
+        String version = LdmService.getAcceptVersion(VERSIONS)
+        def timeZone = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version)? dateConvertHelperService.getDBTimeZone() : ''
         def institution = InstitutionalDescription.fetchByKey()
         if (pidms.size()) {
             def connection
@@ -182,8 +188,8 @@ class UserRoleCompositeService {
                         def roles = results.get(faculty[0].toInteger()) ?: []
                         def newRole = new RoleDetail()
                         newRole.role = 'Faculty'
-                        newRole.effectiveStartDate = faculty[1]
-                        newRole.effectiveEndDate = faculty[2]
+                        newRole.effectiveStartDate = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version) ? dateConvertHelperService.convertDateIntoUTCFormat(faculty[1],timeZone):faculty[1]
+                        newRole.effectiveEndDate = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version) ? dateConvertHelperService.convertDateIntoUTCFormat(faculty[2],timeZone):faculty[2]
                         roles << newRole
                         results.put(faculty[0].toInteger(), roles)
                     }
@@ -237,11 +243,11 @@ class UserRoleCompositeService {
 
     private def setStudentRole(def pidms, def results) {
         pidms?.each { it ->
-            def roles = results.get(it) ?: []
+            def roles = results.get(it.toInteger()) ?: []
             def newRole = new RoleDetail()
             newRole.role = 'Student'
             roles << newRole
-            results.put(it, roles)
+            results.put(it.toInteger(), roles)
         }
         return results
     }

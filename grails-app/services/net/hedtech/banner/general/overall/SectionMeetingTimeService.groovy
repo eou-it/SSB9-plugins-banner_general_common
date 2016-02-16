@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2015 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
@@ -271,7 +271,7 @@ class SectionMeetingTimeService extends ServiceBase {
         if(term && courseReferenceNumber) {
             try {
                 sql = new Sql( sessionFactory.getCurrentSession().connection() )
-                def result = sql.firstRow( "select ssbsect_ptrm_start_date, ssbsect_ptrm_end_date, ssbsect_learner_regstart_fdate, ssbsect_learner_regstart_tdate from ssbsect where ssbsect_term_code = ? and ssbsect_crn = ?", [term, courseReferenceNumber] )
+                def result = sql.rows( "select ssbsect_ptrm_start_date, ssbsect_ptrm_end_date, ssbsect_learner_regstart_fdate, ssbsect_learner_regstart_tdate from ssbsect where ssbsect_term_code = ? and ssbsect_crn = ?", [term, courseReferenceNumber] )[0]
                 section.partOfTermStartDate = result[0] ? new Date( result[0]?.getTime() ) : null
                 section.partOfTermEndDate = result[1] ? new Date( result[1]?.getTime() ) : null
                 section.learnerRegStartFromDate = result[2] ? new Date( result[2]?.getTime() ) : null
