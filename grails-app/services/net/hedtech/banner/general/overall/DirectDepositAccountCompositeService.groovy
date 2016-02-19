@@ -70,10 +70,10 @@ class DirectDepositAccountCompositeService {
             result.add(addorUpdateAccount(acct, false))
         }
 
-        // make sure their account types are correct
+        /* make sure their account types are correct
         for (acct in accounts) {
             directDepositAccountService.syncApAndHrAccounts(acct)
-        }
+        }*/
 
         result
     }
@@ -132,7 +132,7 @@ class DirectDepositAccountCompositeService {
     }
 
     private def validateNotDuplicate(account) {
-        if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.apIndicator, account.hrIndicator)) {
+        if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.accountType, account.apIndicator, account.hrIndicator)) {
             throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
         }
     }

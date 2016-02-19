@@ -27,7 +27,7 @@ class DirectDepositAccountService extends ServiceBase{
      * @param account Account to sync
      */
     def syncApAndHrAccounts( account ) {
-        def accts = DirectDepositAccount.fetchActiveByAccountNums(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum)
+        def accts = DirectDepositAccount.fetchActiveByAccountData(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum)
         
         if( accts.size() > 2 ) {
             // user should not have three or more accounts with same routing number and account number.
@@ -74,7 +74,7 @@ class DirectDepositAccountService extends ServiceBase{
                 update(acct)
             }
             else {
-                def accts = DirectDepositAccount.fetchActiveByAccountNums(acct.pidm, acct.bankRoutingInfo.bankRoutingNum, acct.bankAccountNum)
+                def accts = DirectDepositAccount.fetchActiveByAccountData(acct.pidm, acct.bankRoutingInfo.bankRoutingNum, acct.bankAccountNum, acct.accountType)
                 
                 if( accts.size() == 2) {
                     // if account is synced make sure to only delete the requested record
