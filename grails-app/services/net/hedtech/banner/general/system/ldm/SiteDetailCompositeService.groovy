@@ -4,11 +4,13 @@
 package net.hedtech.banner.general.system.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.SiteDetail
+import net.hedtech.banner.general.system.ldm.v4.SiteDetailV4
 import net.hedtech.banner.query.QueryBuilder
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -31,6 +33,7 @@ class SiteDetailCompositeService {
 
     def campusService
     def buildingCompositeService
+    def globalUniqueIdentifierService
 
     /**
      * GET /api/sites/<guid>
@@ -40,20 +43,21 @@ class SiteDetailCompositeService {
      */
     @Transactional(readOnly = true)
     SiteDetail get(String guid) {
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
+        GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByLdmNameAndGuid(LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
             throw new ApplicationException("site", new NotFoundException())
         }
 
         Campus campus = Campus.get(globalUniqueIdentifier.domainId)
-        if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
+        if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralCommonConstants.VERSION_V4)){
             campus.setDescription(campus?.getCode())
         }
         if (!campus) {
             throw new ApplicationException("site", new NotFoundException())
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(guid, campus, buildings, new Metadata(campus.dataOrigin));
+        def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralCommonConstants.VERSION_V4) ? new SiteDetailV4(globalUniqueIdentifier.fetchByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+        return siteDetail
     }
 
     /**
@@ -84,11 +88,11 @@ class SiteDetailCompositeService {
                 property('code')
                 addProjectionToList(Projections.sqlProjection("nvl(STVCAMP_DESC,STVCAMP_CODE) as description", ['description'] as String[], [Hibernate.STRING] as Type[]), 'description')
             }
-            if(map?.sort){
-                if(map?.sort?.equalsIgnoreCase('description') && ("v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)))){
-                    order('description',map?.order)
-                }else{
-                    order(map?.sort,map?.order)
+            if(map?.sort) {
+                if (map?.sort?.equalsIgnoreCase('description') && ("v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)))) {
+                    order('description', map?.order)
+                } else {
+                    order(map?.sort, map?.order)
                 }
             }
         }
@@ -96,11 +100,9 @@ class SiteDetailCompositeService {
         details.each { detail ->
             Campus campus = Campus.findByCode(detail[0])
             buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-            if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase('v4')){
-                campus.setDescription(campus?.getCode())
-            }
-            sites << new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
-         }
+            def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralCommonConstants.VERSION_V4) ? new SiteDetailV4(globalUniqueIdentifierService.fetchByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+            sites << siteDetail
+        }
 
         return sites
     }
@@ -111,7 +113,7 @@ class SiteDetailCompositeService {
      * @return
      */
     Long count() {
-        return Campus.count()
+        return campusService.count()
     }
 
 
@@ -124,7 +126,7 @@ class SiteDetailCompositeService {
             return null
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, domainId).guid, campus, buildings, new Metadata(campus.dataOrigin))
+        return new SiteDetail(globalUniqueIdentifierService.fetchByLdmNameAndDomainId(LDM_NAME, domainId).guid, campus, buildings, new Metadata(campus.dataOrigin))
     }
 
 
@@ -137,7 +139,7 @@ class SiteDetailCompositeService {
             return null
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        return new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id)?.guid, campus, buildings, new Metadata(campus.dataOrigin))
+        return new SiteDetail(globalUniqueIdentifierService.fetchByLdmNameAndDomainId(LDM_NAME, campus.id)?.guid, campus, buildings, new Metadata(campus.dataOrigin))
     }
 
 }

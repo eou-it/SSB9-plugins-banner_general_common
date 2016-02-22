@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- *****************************************************************************
-Copyright 2015 Ellucian Company L.P. and its affiliates.
+Copyright 2016 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -318,7 +318,98 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="erpApiConfig" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
+    <bean id="ar-email-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>email-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/email-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.EmailType.GTVEMAL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-location-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>location-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/location-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.AddressType.STVATYP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+   <!-- <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-credentials</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-credentials/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Degree.STVDEGC</value>
+            </list>
+        </constructor-arg>
+    </bean>-->
+
+    <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>phone-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/phone-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.TelephoneType.STVTELE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-academic-disciplines" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-disciplines</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-disciplines/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.MAJOR</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.MINOR</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.CONCENTRATION</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.UMAJOR</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.UMINOR</value>
+                <value>HEDM.MajorMinorConcentration.STVMAJR.UCONCENTRATION</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
                 <ref bean="ar-acadlevels"/>
@@ -339,6 +430,10 @@ Copyright 2015 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
                 <ref bean="ar-subjects"/>
+                <ref bean="ar-email-types"/>
+                <ref bean="ar-location-types"/>
+                <ref bean="ar-phone-types"/>
+                <ref bean="ar-academic-disciplines"/>
             </list>
         </property>
     </bean>

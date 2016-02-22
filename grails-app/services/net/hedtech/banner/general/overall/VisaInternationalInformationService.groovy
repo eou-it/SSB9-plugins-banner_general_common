@@ -1,11 +1,11 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2015 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
-import grails.util.Holders
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 import java.sql.CallableStatement

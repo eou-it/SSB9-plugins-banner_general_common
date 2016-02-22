@@ -160,7 +160,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
      * */
     @Test
     public void testSortByCode(){
-        params.order='ASC'
+        params.order='asc'
         params.sort='code'
         List list = siteDetailCompositeService.list(params)
         assertNotNull list
@@ -176,7 +176,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         }
 
         params.clear()
-        params.order='DESC'
+        params.order='desc'
         params.sort='code'
         list = siteDetailCompositeService.list(params)
         assertNotNull list

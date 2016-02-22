@@ -1,8 +1,8 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2015 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 /** *****************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2015 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 
 package net.hedtech.banner.general
@@ -158,8 +158,6 @@ class GeneralCommonUtility {
 
 
     public static void commit() {
-        // Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.currentSession.getTransaction().commit()
-        // Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.currentSession.flush()
         def sql = new Sql( Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.getCurrentSession().connection() )
         try {
             sql.execute "{ call gb_common.p_commit() }"

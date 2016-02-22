@@ -30,6 +30,9 @@ import javax.persistence.*
                          ORDER BY a.building """ ),
 @NamedQuery(name = "HousingLocationBuildingDescription.fetchAllByCampuses",
             query = """FROM HousingLocationBuildingDescription a
+                        WHERE a.campus.code in (:campusCodes)"""),
+@NamedQuery(name = "HousingLocationBuildingDescription.countAllByCampuses",
+                query = """select count(*) FROM HousingLocationBuildingDescription a
                         WHERE a.campus.code in (:campusCodes)""")
 ])
 @DatabaseModifiesState
@@ -449,4 +452,13 @@ class HousingLocationBuildingDescription implements Serializable {
         }
         return result
     }
+
+    public static def countAllByCampuses(List<String> campusCodes){
+        def result = HousingLocationBuildingDescription.withSession {
+            session ->
+                session.getNamedQuery('HousingLocationBuildingDescription.countAllByCampuses').setParameterList('campusCodes', campusCodes).uniqueResult()
+        }
+        return result
+    }
+
 }

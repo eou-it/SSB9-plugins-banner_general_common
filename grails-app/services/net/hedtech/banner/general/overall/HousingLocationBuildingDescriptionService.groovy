@@ -17,5 +17,24 @@ import net.hedtech.banner.service.ServiceBase
 class HousingLocationBuildingDescriptionService extends ServiceBase{
 
     boolean transactional = true
+
+    /**
+     * fetch By campus Codes
+     * @param campusCodes
+     * @return
+     */
+    public List<HousingLocationBuildingDescription> fetchAllByCampuses(List<String> campusCodes){
+      return  HousingLocationBuildingDescription.fetchAllByCampuses(campusCodes)
+    }
+
+    /**
+     * count By campus Codes
+     * @param campusCodes
+     */
+    public  def countAllByCampuses(List<String> campusCodes){
+       return HousingLocationBuildingDescription.countAllByCampuses(campusCodes)
+    }
+
+
     
 }
