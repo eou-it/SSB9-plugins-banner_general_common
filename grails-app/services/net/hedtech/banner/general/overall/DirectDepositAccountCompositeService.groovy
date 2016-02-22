@@ -254,7 +254,7 @@ class DirectDepositAccountCompositeService {
 
 
         try {
-            directDeposit = sql.firstRow(lastPayDDSql, [pidm,year,pictCode,payNo])
+            directDeposit = sql.firstRow(lastPayDDSql, [pidm,year,pictCode,payNo])[0]
         } finally {
             sql?.close()
         }
