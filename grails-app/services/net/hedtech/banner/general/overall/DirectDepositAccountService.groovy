@@ -76,7 +76,7 @@ class DirectDepositAccountService extends ServiceBase{
             else {
                 def accts = DirectDepositAccount.fetchActiveByAccountData(acct.pidm, acct.bankRoutingInfo.bankRoutingNum, acct.bankAccountNum, acct.accountType)
                 
-                if( accts.size() == 2) {
+                if( false ) {
                     // if account is synced make sure to only delete the requested record
                     // and display the appropiate message
                     
@@ -94,7 +94,7 @@ class DirectDepositAccountService extends ServiceBase{
                         model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
                     }
                 }
-                else { 
+                else {
                     if(acct.apIndicator == 'A' && acct.apDelete) {
                         model.toBeDeleted.add(acct)
                     }
