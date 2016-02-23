@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
@@ -14,7 +14,7 @@ import java.sql.SQLException
 class UserRoleCompositeService extends LdmService{
     def sessionFactory
     def dateConvertHelperService
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1,GeneralCommonConstants.VERSION_V4]
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1]
 
 /**
  *
