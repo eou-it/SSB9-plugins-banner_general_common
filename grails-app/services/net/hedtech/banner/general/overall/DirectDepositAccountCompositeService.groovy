@@ -242,7 +242,7 @@ class DirectDepositAccountCompositeService {
         def directDeposit = 'N'
 
        def lastPayDDSql =
-       """    SELECT 'Y'
+       """    SELECT 'Y' ddInd
                 FROM PHRDOCM x
                WHERE phrdocm_pidm         = ?
                  AND phrdocm_year         = ?
@@ -254,7 +254,7 @@ class DirectDepositAccountCompositeService {
 
 
         try {
-            directDeposit = sql.firstRow(lastPayDDSql, [pidm,year,pictCode,payNo])[0]
+            directDeposit = sql.firstRow(lastPayDDSql, [pidm,year,pictCode,payNo])?.ddInd
         } finally {
             sql?.close()
         }
