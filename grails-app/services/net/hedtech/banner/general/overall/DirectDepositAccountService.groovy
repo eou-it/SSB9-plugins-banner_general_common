@@ -97,9 +97,13 @@ class DirectDepositAccountService extends ServiceBase{
                 else {
                     if(acct.apIndicator == 'A' && acct.apDelete) {
                         model.toBeDeleted.add(acct)
+                        if(accts.size() > 1)
+                            model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
                     }
                     else if(acct.hrIndicator == 'A' && !acct.apDelete) {
                         model.toBeDeleted.add(acct)
+                        if(accts.size() > 1)
+                            model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
                     }
                 }
             }
