@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
@@ -165,27 +165,27 @@ class PersonCompositeService extends LdmService {
                 searchResult = getPidmsForPersonFilter(selId, params)
                 personList = searchResult.personList
                 total = searchResult.count
-            }  else if (params.containsKey(CREDENTIAL_TYPE) && params.containsKey(CREDENTIAL_ID)) {
+            } else if (params.containsKey(CREDENTIAL_TYPE) && params.containsKey(CREDENTIAL_ID)) {
                 if (!params.role) {
                     throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
                 }
 
                 if (params.credentialId && credentialTypeList.contains(params.credentialType)) {
                     String credential = params.credentialId
-                    def pidmsMap=[:]
+                    def pidmsMap = [:]
                     PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
                     if (null == personIdentificationNameCurrent) {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("not.found.message", []))
                     }
                     String role = params.role?.trim()?.toLowerCase()
                     if (role && role == 'student') {
-                        pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
-                        studentRole=true
+                        pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
+                        studentRole = true
                     } else if (role && role == 'faculty') {
-                       pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
-                       studentRole=false
+                        pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
+                        studentRole = false
                     } else {
-                        pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
+                        pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
                     }
 
                     def query = """from PersonIdentificationNameCurrent a
@@ -200,7 +200,7 @@ class PersonCompositeService extends LdmService {
                 } else {
                     throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
                 }
-            }else {
+            } else {
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
                     if (role == "faculty" || role == "student") {
@@ -375,7 +375,7 @@ class PersonCompositeService extends LdmService {
                 person.phones instanceof List ? person.phones : [])
         persons = buildPersonTelephones(phones, persons)
         def emails = updatePersonEmails(newPersonIdentificationName.pidm, metadata,
-                person.emails instanceof List ? person.emails : [],[])
+                person.emails instanceof List ? person.emails : [], [])
         persons = buildPersonEmails(emails, persons)
         def races = createRaces(newPersonIdentificationName.pidm, metadata,
                 person.races instanceof List ? person.races : [])
@@ -1327,52 +1327,54 @@ class PersonCompositeService extends LdmService {
     private updatePhones(def pidm, Map metadata, List<Map> newPhones) {
         def phones = []
         PersonTelephone.fetchActiveTelephoneByPidmInList([pidm]).each { currentPhone ->
-            def thisType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType?.code)?.translationValue
-            def activePhones = newPhones.findAll { it ->
-                it.phoneType == thisType
-            }
-            if (activePhones.size() > 0) {
-                def invalidPhone = false
-                activePhones.each { activePhone ->
-                    if (activePhone.containsKey('phoneExtension')) {
-                        if (activePhone.phoneExtension != currentPhone.phoneExtension) {
-                            log.debug "Phone extension different"
-                            invalidPhone = true
-                        }
-                    }
-                    if (activePhone.containsKey('phoneNumber')) {
-                        def parsedResult = parsePhoneNumber(activePhone.phoneNumber)
-                        if ((parsedResult.phoneNumber ? parsedResult.phoneNumber.toString() : null) != currentPhone.phoneNumber) {
-                            log.debug "Phone number different"
-                            invalidPhone = true
-                        }
-                        if ((parsedResult.phoneArea ? parsedResult.phoneArea.toString() : null) != currentPhone.phoneArea) {
-                            log.debug "Phone area code different"
-                            invalidPhone = true
-                        }
-                        if ((parsedResult.countryPhone ? parsedResult.countryPhone.toString() : null) != currentPhone.countryPhone) {
-                            log.debug "Phone country code different:" + parsedResult.countryPhone + " : " + currentPhone.countryPhone
-                            invalidPhone = true
-                        }
-                    }
-                    if (invalidPhone) {
-                        currentPhone.statusIndicator = 'I'
-                        log.debug "Inactivating phone:" + currentPhone.toString()
-                        personTelephoneService.update(currentPhone)
-                    } else {
-                        def phoneDecorator = new Phone(currentPhone)
-                        phoneDecorator.phoneType = activePhone.phoneType
-                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") + (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
-                        phones << phoneDecorator
-                        newPhones.remove(activePhone)
-                    }
+            if (findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType?.code)) {
+                def activePhones = newPhones.findAll { it ->
+                    fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_PHONE_TYPE, it.telephoneType)?.value == currentPhone.telephoneType.code
                 }
-            } else {
-                currentPhone.statusIndicator = 'I'
-                log.debug "Inactivating phone:" + currentPhone.toString()
-                personTelephoneService.update(currentPhone)
+                if (activePhones.size() > 0) {
+                    def invalidPhone = false
+                    activePhones.each { activePhone ->
+                        if (activePhone.containsKey('phoneExtension')) {
+                            if (activePhone.phoneExtension != currentPhone.phoneExtension) {
+                                log.debug "Phone extension different"
+                                invalidPhone = true
+                            }
+                        }
+                        if (activePhone.containsKey('phoneNumber')) {
+                            def parsedResult = parsePhoneNumber(activePhone.phoneNumber)
+                            if ((parsedResult.phoneNumber ? parsedResult.phoneNumber.toString() : null) != currentPhone.phoneNumber) {
+                                log.debug "Phone number different"
+                                invalidPhone = true
+                            }
+                            if ((parsedResult.phoneArea ? parsedResult.phoneArea.toString() : null) != currentPhone.phoneArea) {
+                                log.debug "Phone area code different"
+                                invalidPhone = true
+                            }
+                            if ((parsedResult.countryPhone ? parsedResult.countryPhone.toString() : null) != currentPhone.countryPhone) {
+                                log.debug "Phone country code different:" + parsedResult.countryPhone + " : " + currentPhone.countryPhone
+                                invalidPhone = true
+                            }
+                        }
+                        if (invalidPhone) {
+                            currentPhone.statusIndicator = 'I'
+                            log.debug "Inactivating phone:" + currentPhone.toString()
+                            personTelephoneService.update(currentPhone)
+                        } else {
+                            def phoneDecorator = new Phone(currentPhone)
+                            phoneDecorator.phoneType = activePhone.phoneType
+                            phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") + (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
+                            phones << phoneDecorator
+                            newPhones.remove(activePhone)
+                        }
+                    }
+                } else {
+                    currentPhone.statusIndicator = 'I'
+                    log.debug "Inactivating phone:" + currentPhone.toString()
+                    personTelephoneService.update(currentPhone)
+                }
             }
         }
+
         createPhones(pidm, metadata, newPhones).each { currentPhone ->
             def phoneDecorator = new Phone(currentPhone)
             phoneDecorator.phoneType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType.code)?.translationValue
