@@ -18,35 +18,6 @@ class DirectDepositAccountService extends ServiceBase{
         }
     }
 
-    /**
-     * This method enforces a business rule that an account used by a given user for both payroll and AP must use the
-     * same account type (checking or savings) for both payroll and AP.
-     *
-     * This method does not update the account passed in; it only updates the corresponding account, if any,
-     * that is found already existing in the database.
-     * @param account Account to sync
-     */
-    def syncApAndHrAccounts( account ) {
-        def accts = DirectDepositAccount.fetchActiveByAccountData(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum)
-        
-        if( accts.size() > 2 ) {
-            // user should not have three or more accounts with same routing number and account number.
-            // if they do, we cannot determine which account has the correct information since they can
-            // change all the accounts at once, so we error out.
-            throw new ApplicationException(DirectDepositAccount, "@@r1:tooManyAccountsFound@@")
-        }
-        else if( accts.size() == 2) {
-            if(account.id == accts[0].id) {
-                accts[1].accountType = account.accountType
-                update(accts[1])
-            }
-            else {
-                accts[0].accountType = account.accountType
-                update(accts[0])
-            }
-        }
-    }
-    
     def setupAccountsForDelete(accounts) {
         def model = [:]
         model.toBeDeleted = []

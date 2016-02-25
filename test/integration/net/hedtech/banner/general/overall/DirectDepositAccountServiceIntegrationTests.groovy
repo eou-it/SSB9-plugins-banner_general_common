@@ -184,52 +184,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
 
     @Test
-    void testSyncApAndHrAccounts() {
-        def directDepositAccount1 = newDirectDepositAccount()
-        directDepositAccount1 = directDepositAccountService.create([domainModel: directDepositAccount1])
-        
-        def directDepositAccount2 = newDirectDepositAccount()
-        directDepositAccount2.apIndicator = "A"
-        directDepositAccount2.hrIndicator = "I"
-        directDepositAccount2.priority = 18
-        directDepositAccount2 = directDepositAccountService.create([domainModel: directDepositAccount2])
-        
-        directDepositAccount1.accountType = "S"
-        
-        directDepositAccountService.syncApAndHrAccounts(directDepositAccount1);
-        
-        directDepositAccount2 = directDepositAccount2.get(directDepositAccount2.id)
-        
-        assertEquals "S", directDepositAccount2.accountType
-    }
-    
-    @Test
-    void testSyncTooManyApAndHrAccounts() {
-        def directDepositAccount1 = newDirectDepositAccount()
-        directDepositAccount1 = directDepositAccountService.create([domainModel: directDepositAccount1])
-        
-        def directDepositAccount2 = newDirectDepositAccount()
-        directDepositAccount2.apIndicator = "A"
-        directDepositAccount2.hrIndicator = "I"
-        directDepositAccount2.priority = 18
-        directDepositAccount2 = directDepositAccountService.create([domainModel: directDepositAccount2])
-        
-        def directDepositAccount3 = newDirectDepositAccount()
-        directDepositAccount3.priority = 19
-        directDepositAccount3 = directDepositAccountService.create([domainModel: directDepositAccount3])
-        
-        directDepositAccount1.accountType = "S"
-        
-        try {
-            directDepositAccountService.syncApAndHrAccounts(directDepositAccount1);
-            fail("I should have received an error but it passed; @@r1:tooManyAccountsFound@@ ")
-        }
-        catch (ApplicationException ae) {
-            assertApplicationException ae, "tooManyAccountsFound"
-        }
-    }
-
-    @Test
     void testAccountNumberFormatValidation() {
         try {
             directDepositAccountService.validateAccountNumFormat("1954601TOOLONG74321");

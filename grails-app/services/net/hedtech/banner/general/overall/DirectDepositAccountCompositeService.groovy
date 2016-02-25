@@ -70,11 +70,6 @@ class DirectDepositAccountCompositeService {
             result.add(addorUpdateAccount(acct, false))
         }
 
-        /* make sure their account types are correct
-        for (acct in accounts) {
-            directDepositAccountService.syncApAndHrAccounts(acct)
-        }*/
-
         result
     }
 
