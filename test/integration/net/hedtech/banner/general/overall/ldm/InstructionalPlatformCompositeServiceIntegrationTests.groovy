@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
@@ -189,6 +189,7 @@ class InstructionalPlatformCompositeServiceIntegrationTests extends BaseIntegrat
     void testListWithValidSortAndOrderFieldWithSupportedVersion() {
         def params = [order: 'ASC', sort: 'code']
         def instructionalPlatformList = instructionalPlatformCompositeService.list(params)
+        assertNotNull instructionalPlatformList.toString()
         assertNotNull instructionalPlatformList
         assertFalse instructionalPlatformList.isEmpty()
         assertNotNull instructionalPlatformList.code
