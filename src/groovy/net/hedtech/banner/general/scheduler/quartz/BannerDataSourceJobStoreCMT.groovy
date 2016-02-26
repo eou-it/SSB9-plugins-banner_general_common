@@ -1,4 +1,4 @@
-package net.hedtech.banner.general.asynchronous.scheduling
+package net.hedtech.banner.general.scheduler.quartz
 
 import grails.util.Holders
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
@@ -99,6 +99,7 @@ public class BannerDataSourceJobStoreCMT extends JobStoreCMT {
 
                     public Connection getConnection() throws SQLException {
                         // Return a transactional Connection, if any.
+                        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
                         return DataSourceUtils.doGetConnection(dataSource);
                     }
                     public void shutdown() {
@@ -121,6 +122,7 @@ public class BannerDataSourceJobStoreCMT extends JobStoreCMT {
 
                     public Connection getConnection() throws SQLException {
                         // Always return a non-transactional Connection.
+                        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
                         return nonTxDataSourceToUse.getConnection();
                     }
                     public void shutdown() {
