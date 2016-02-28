@@ -138,7 +138,8 @@ class CommunicationSendMobileNotificationMethod {
 
                 response.success = { theResponse, reader ->
                     if (reader?.notifications) {
-                        serverResponse = new groovy.json.JsonBuilder( reader.notifications ).toString()
+                        def builder = new groovy.json.JsonBuilder( reader.notifications )
+                        serverResponse = builder.content.toString()
                         if (log.isDebugEnabled()) {
                             log.debug( new groovy.json.JsonBuilder( reader.notifications ).toPrettyString() )
                         }

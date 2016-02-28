@@ -160,7 +160,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             CommunicationOrganization updatedRoot = communicationOrganizationService.update(rootorg)
             fail "Should have failed with large password error"
         } catch (Exception e) {
-            assertTrue e.getMessage().contains("12899")
+            assertTrue e.toString(). contains("12899")
         }
     }
 
@@ -273,7 +273,44 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         }
     }
 
+    @Test
+    void testDeleteWithChildren() {
+        CommunicationOrganization organization = new CommunicationOrganization()
+        organization.name = "test"
+        organization.description = "description"
+        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
+        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
+        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
+        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
+        organization.receiveEmailServerProperties = [receiveProperties]
+        organization.sendEmailServerProperties = [sendProperties]
+        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
+        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
+        CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+        assertNotNull(createdOrganization)
+        assertEquals("test", createdOrganization.name)
+        assertEquals("description", createdOrganization.description)
+        assertEquals(createdOrganization.id, createdOrganization.senderMailboxAccountSettings[0].organization.id)
+        assertEquals(createdOrganization.id, createdOrganization.replyToMailboxAccountSettings[0].organization.id)
 
+        Long id = createdOrganization.getId()
+
+        long count = communicationOrganizationService.list().size()
+
+        //set the flush mode to auto to prevent the write mode error during test
+        //ssessionFactory.currentSession.flushMode = FlushMode.AUTO
+        // Delete the domain
+        communicationOrganizationService.delete(createdOrganization)
+
+        assertEquals(count - 1, communicationOrganizationService.list().size())
+
+        try {
+            assertNull(communicationOrganizationService.get(id))
+            Assert.fail "Expected get by id to fail because does not exist."
+        } catch (ApplicationException e) {
+            assertEquals("NotFoundException", e.getType())
+        }
+    }
     @Test
     void testCreateWithServerSettings() {
         def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
@@ -304,11 +341,12 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
         organization.name = "test"
         organization.description = "description"
+        organization = communicationOrganizationService.create(organization)
         def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
         def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
         organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
         organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
-        def savedOrganization = communicationOrganizationService.create(organization)
+        def savedOrganization = communicationOrganizationService.update(organization)
         /* try to force a fetch */
         def createdOrganization = CommunicationOrganization.findById(savedOrganization.id)
         assertNotNull(createdOrganization)
@@ -317,6 +355,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertEquals("senderMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
         assertEquals("replyToMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
 
+        assertEquals(createdOrganization.id, createdOrganization.replyToMailboxAccountSettings[0].organization.id)
         /* Do an update of senderMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
         createdOrganization.senderMailboxAccountSettings[0].userName = 'AstorPiazolla'
         def updatedOrganization = communicationOrganizationService.update(createdOrganization)

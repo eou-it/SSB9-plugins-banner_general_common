@@ -100,7 +100,7 @@ public class BannerDataSourceJobStoreCMT extends JobStoreCMT {
                     public Connection getConnection() throws SQLException {
                         // Return a transactional Connection, if any.
                         asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
-                        return DataSourceUtils.doGetConnection(dataSource);
+                        return DataSourceUtils.doGetConnection(Holders.grailsApplication.mainContext.getBean('dataSource'));
                     }
                     public void shutdown() {
                         // Do nothing - a Spring-managed DataSource has its own lifecycle.
