@@ -38,10 +38,7 @@ class CommunicationPopulationQueryVersionService extends ServiceBase {
         if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null)) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
         }
-
-        CommunicationPopulationQueryVersion passedIn = getPopulationQueryVersion( domainModelOrMap )
-        CommunicationPopulationQueryVersion persisted = CommunicationPopulationQueryVersion.get( passedIn.id )
-
+        CommunicationPopulationQueryVersion persisted = CommunicationPopulationQueryVersion.get( domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
         if (persisted.id == null) {
             throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:queryDoesNotExist@@")
         }

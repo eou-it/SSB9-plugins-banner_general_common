@@ -74,6 +74,103 @@ class CommunicationPopulationQueryCompositeService {
         return communicationPopulationQueryService.delete( queryAsMap )
     }
 
+    /**
+     * Deletes the population query and/or query version.
+     *
+     * @param populationQuery the population query
+     * @param queryVersion the population query version
+     */
+    public boolean deletePopulationQueryVersion( CommunicationPopulationQuery populationQuery, CommunicationPopulationQueryVersion queryVersion ) {
+        return deletePopulationQueryVersion(populationQuery.id, populationQuery.version, queryVersion?queryVersion.id:0, queryVersion?queryVersion.version:0)
+    }
+
+    /**
+     * Deletes the population query and/or query version.
+     *
+     * @param queryId the primary key of the population query
+     * @param version the optimistic lock counter
+     * @param versionId the primary key of the population query version
+     * @param revisionVersion the optimistic lock counter
+     */
+    public boolean deletePopulationQueryVersion( long queryId, long version, long versionId, long revisionVersion) {
+        log.trace("deletePopulationQueryVersion called")
+        boolean retValue = true
+        CommunicationPopulationQuery parentQuery = CommunicationPopulationQuery.fetchById(queryId)
+        List queryVersions = CommunicationPopulationQueryVersion.findByQueryId(queryId)
+        if(!parentQuery.changesPending)
+        {
+            //Request to delete a published version from query table where other published version exists
+            if (queryVersions != null && queryVersions.size() > 0) {
+                def queryVersionAsMap = [
+                        id     : Long.valueOf(versionId),
+                        version: Long.valueOf(revisionVersion)
+                ]
+                retValue = communicationPopulationQueryVersionService.delete(queryVersionAsMap)
+                if(queryVersions.size() == 1)
+                {
+                    //Delete the parent query as well since all versions got deleted
+                    def queryAsMap = [
+                            id     : Long.valueOf(queryId),
+                            version: Long.valueOf(version)
+                    ]
+                    retValue = communicationPopulationQueryService.delete(queryAsMap)
+                }
+                else
+                {
+                    boolean updateParentQuery = versionId == ((CommunicationPopulationQueryVersion)queryVersions[0]).id
+                    if (updateParentQuery) {
+                        //Update the parent query only if deleting the latest published version
+                        CommunicationPopulationQueryVersion latestPublishedVersion = queryVersions[1]
+                        def queryAsMap = [
+                                id            : Long.valueOf(queryId),
+                                version       : Long.valueOf(version),
+                                changesPending: Boolean.toString(false),
+                                sqlString     : latestPublishedVersion.sqlString
+                        ]
+                        communicationPopulationQueryService.update(queryAsMap)
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (queryVersions != null && queryVersions.size() > 0) {
+                if(queryId == versionId)
+                {
+                    //Request to delete the unpublished version from query table where an older published version exists
+                    CommunicationPopulationQueryVersion latestPublishedVersion = queryVersions[0]
+                    def queryAsMap = [
+                            id             : Long.valueOf(queryId),
+                            version        : Long.valueOf(version),
+                            changesPending : Boolean.toString(false),
+                            sqlString      : latestPublishedVersion.sqlString
+                    ]
+                    communicationPopulationQueryService.update(queryAsMap)
+                    retValue = true
+                }
+                else
+                {
+                    //Request to delete a published version from query table where an unpublished version and other older published version exists
+                    def queryVersionAsMap = [
+                            id     : Long.valueOf(versionId),
+                            version: Long.valueOf(revisionVersion)
+                    ]
+                    retValue = communicationPopulationQueryVersionService.delete(queryVersionAsMap)
+                }
+            }
+            else
+            {
+                //Single unpublished new parent query exists, delete from query table alone
+                def queryAsMap = [
+                        id     : Long.valueOf(queryId),
+                        version: Long.valueOf(version)
+                ]
+                retValue = communicationPopulationQueryService.delete(queryAsMap)
+            }
+        }
+        return retValue
+    }
+
 
     /**
      * Updates an existing population query.

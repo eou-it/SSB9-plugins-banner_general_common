@@ -122,6 +122,69 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
     }
 
     @Test
+    void testDeleteQueryWithCurrentVersion() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testPublishQuery",
+                folder: testFolder,
+                sqlString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertTrue( populationQuery.changesPending )
+        communicationPopulationQueryCompositeService.deletePopulationQuery(populationQuery)
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
+        assertEquals(0, queryVersionList.size())
+        CommunicationPopulationQuery populationQuery1 = CommunicationPopulationQuery.fetchById(populationQuery.id)
+        assertNull(populationQuery1)
+    }
+
+    @Test
+    void testDeleteQueryWithOnePublishedVersion() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testPublishQuery",
+                folder: testFolder,
+                sqlString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertTrue( populationQuery.changesPending )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+        CommunicationPopulationQueryVersion queryVersion = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id ).get(0)
+
+        communicationPopulationQueryCompositeService.deletePopulationQueryVersion(populationQuery, queryVersion)
+
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
+        assertEquals(0, queryVersionList.size())
+        CommunicationPopulationQuery populationQuery1 = CommunicationPopulationQuery.fetchById(populationQuery.id)
+        assertNull(populationQuery1)
+    }
+
+    @Test
+    void testDeleteQueryWithOnePublishedAndCurrentVersion() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testPublishQuery",
+                folder: testFolder,
+                sqlString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertTrue( populationQuery.changesPending )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+
+        Map queryAsMap = [
+                id: populationQuery.id,
+                sqlString: "select spriden_pidm from spriden where rownum < 3 and spriden_change_ind is null",
+                version: populationQuery.version
+        ]
+        populationQuery = communicationPopulationQueryCompositeService.updatePopulationQuery(queryAsMap)
+        communicationPopulationQueryCompositeService.deletePopulationQueryVersion(populationQuery.id, populationQuery.version, populationQuery.id, populationQuery.version)
+
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
+        assertEquals(1, queryVersionList.size())
+        CommunicationPopulationQuery populationQuery1 = CommunicationPopulationQuery.fetchById(populationQuery.id)
+        assertEquals "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null", populationQuery1.sqlString
+    }
+
+    @Test
     void testValidatePopulationQuery() {
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testCreatePopulationQuery",
