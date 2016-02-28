@@ -15,8 +15,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import org.springframework.orm.jpa.JpaTemplate
-import org.springframework.orm.jpa.support.JpaDaoSupport
+
 
 import javax.persistence.EntityManager
 import java.sql.Connection
@@ -30,7 +29,7 @@ import java.sql.SQLException
  *
  * @author Michael Brzycki
  */
-public class CommunicationGroupSendItemMonitorDao extends JpaDaoSupport {
+public class CommunicationGroupSendItemMonitorDao  {
 
     private final Log log = LogFactory.getLog(this.getClass());
 
@@ -39,6 +38,7 @@ public class CommunicationGroupSendItemMonitorDao extends JpaDaoSupport {
     public static final String UPDATE_TIME = "UPDATE_TIME";
     public static final String MONITOR_TABLE = "GCBGSIM"; //"REL_GROUP_SEND_ITEM_MONITOR";
 
+    def sessionFactory
 
     /**
      * Persists a communication job monitor record into the persistent store.
@@ -134,9 +134,8 @@ public class CommunicationGroupSendItemMonitorDao extends JpaDaoSupport {
      * @throws java.sql.SQLException if reported by the database or driver
      */
     private Connection getConnection() throws SQLException {
-        JpaTemplate template = getJpaTemplate();
-        EntityManager em = JpaDaoUtils.extractEntityManager( template );
-        return JpaDaoUtils.getConnection( template, em );
+        def conn = sessionFactory.getCurrentSession().connection()
+        return conn;
     }
 
 

@@ -1,7 +1,3 @@
-import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskProcessingEngineImpl
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendMonitor
-import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
-
 /*******************************************************************************
  Copyright 2011-2014 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** */
@@ -33,7 +29,7 @@ class BannerGeneralCommonGrailsPlugin {
     // the other plugins this plugin depends on
 //    def dependsOn = ['springSecurityCore': '1.2']
 
-    def dependsOn = [ 'rest' : '0.8' ]
+    def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
             "grails-app/views/error.gsp"

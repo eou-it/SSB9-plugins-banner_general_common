@@ -95,7 +95,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
     public setMepContext(conn, String mepCode = null) {
         log.info("setting mep. The mep context value is ${mepCode}")
 
-        if (getMultiEntityProcessingService().isMEP(conn) && mepCode) {
+        if (isMEP(conn) && mepCode) {
                 getMultiEntityProcessingService().setHomeContext(mepCode, conn)
                 getMultiEntityProcessingService().setProcessContext(mepCode, conn)
         }
@@ -103,7 +103,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
 
 
     public setMepProcessContext(conn, mepCode) {
-        if (getMultiEntityProcessingService().isMEP(conn) && (mepCode)) {
+        if (isMEP(conn) && (mepCode)) {
             getMultiEntityProcessingService().setProcessContext(mepCode, conn)
         }
     }
@@ -123,9 +123,27 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
         multiEntityProcessingService
     }
 
+    private isMEP(con = null) {
+
+            def mepEnabled
+            if (!con)
+                con = new Sql(sessionFactory.getCurrentSession().connection())
+            Sql sql = new Sql(con)
+            try {
+                sql.call("{$Sql.VARCHAR = call g\$_vpdi_security.g\$_is_mif_enabled_str()}") { mifEnabled -> mepEnabled = mifEnabled.toLowerCase().toBoolean() }
+            } catch (e) {
+                log.error("ERROR: Could not establish mif context. $e")
+                throw e
+            } finally {
+
+            }
+
+        return mepEnabled
+    }
+
 
     private setMep(conn, user, mepCode = null) {
-        if (getMultiEntityProcessingService().isMEP(conn)) {
+        if (isMEP(conn)) {
             if (mepCode != null) {
                 getMultiEntityProcessingService().setHomeContext(mepCode, conn)
                 getMultiEntityProcessingService().setProcessContext(mepCode, conn)
@@ -172,7 +190,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
                 throw new UsernameNotFoundException("$oracleUserName is not a valid username in gobeacc and can not be used for trusted authentication.")
             }
         } catch (SQLException e) {
-            log.error "TrustedAuthenticationProvider not able to map $authentication.pidm to db user"
+            log.error "TrustedAuthenticationProvider not able to map $oracleUserName to a pidm"
             throw e
         }
         log.trace "TrustedAuthenticationProvider.trustedAuthentication results are $authenticationResults"
