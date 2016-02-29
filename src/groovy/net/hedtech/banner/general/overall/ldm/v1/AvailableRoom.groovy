@@ -4,14 +4,12 @@
 package net.hedtech.banner.general.overall.ldm.v1
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 
 /**
  * LDM decorator for AvailableRoom resource
  */
-@ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode(includeFields = true)
 class AvailableRoom {
 
@@ -38,5 +36,17 @@ class AvailableRoom {
         this.occupancies = occupancies
         this.guid = guid
         this.metadata = metadata
+    }
+
+    @Override
+    public String toString() {
+        return "AvailableRoom{" +
+                "availableRoomDescription=" + availableRoomDescription +
+                ", buildingDetail=" + buildingDetail +
+                ", occupancies=" + occupancies +
+                ", guid='" + guid + '\'' +
+                ", metadata=" + metadata +
+                ", type='" + type + '\'' +
+                '}';
     }
 }
