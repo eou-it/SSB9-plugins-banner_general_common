@@ -18,6 +18,25 @@ class DirectDepositAccountService extends ServiceBase{
         }
     }
 
+    def validateAccountAmounts(acct) {
+        def amt = acct?.amount;
+        def pct = acct?.percent;
+
+        if (amt == null) {
+            if (pct == null) {
+                throw new ApplicationException(DirectDepositAccount, "@@r1:noValueExists@@")
+            }
+        } else if (pct != null) {
+            throw new ApplicationException(DirectDepositAccount, "@@r1:bothAmountAndPercentValuesExist@@")
+        }
+
+        if (amt != null && amt <= 0) {
+            throw new ApplicationException(DirectDepositAccount, "@@r1:invalidAmountValue@@")
+        } else if (pct != null && (pct <= 0 || pct > 100)) {
+            throw new ApplicationException(DirectDepositAccount, "@@r1:invalidPercentValue@@")
+        }
+    }
+
     def setupAccountsForDelete(accounts) {
         def model = [:]
         model.toBeDeleted = []

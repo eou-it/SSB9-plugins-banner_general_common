@@ -194,6 +194,178 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         }
     }
 
+    // TESTS TO VALIDATE ACCOUNT AMOUNTS
+    @Test
+    void testValidateAccountAmountsWithValidAmount() {
+        def acct = [
+                amount: 33,
+                percent: null
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+        } catch (ApplicationException e) {
+            fail("Unexpected exception was thrown: " + e.getMessage())
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithValidPercent() {
+        def acct = [
+                amount: null,
+                percent: 66
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+        } catch (ApplicationException e) {
+            fail("Unexpected exception was thrown: " + e.getMessage())
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWhenBothValuesExist() {
+        def acct = [
+                amount: 1,
+                percent: 1
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:bothAmountAndPercentValuesExist@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "bothAmountAndPercentValuesExist"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWhenBothValuesAreNull() {
+        def acct = [
+                amount: null,
+                percent: null
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:noValueExists@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "noValueExists"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithNoAmountProperty() {
+        def acct = [
+                percent: 10
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+        } catch (ApplicationException e) {
+            fail("Unexpected exception was thrown: " + e.getMessage())
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithNoPercentProperty() {
+        def acct = [
+                amount: 10
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+        } catch (ApplicationException e) {
+            fail("Unexpected exception was thrown: " + e.getMessage())
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithAmountAndZeroPercent() {
+        def acct = [
+                amount: 10,
+                percent: 0
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:bothAmountAndPercentValuesExist@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "bothAmountAndPercentValuesExist"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithNegativeAmount() {
+        def acct = [
+                amount: -10
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:invalidAmountValue@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidAmountValue"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithZeroAmount() {
+        def acct = [
+                amount: 0,
+                percent: null
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:invalidAmountValue@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidAmountValue"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithNegativePercent() {
+        def acct = [
+                percent: -10
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:invalidPercentValue@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidPercentValue"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithZeroPercent() {
+        def acct = [
+                percent: 0
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:invalidPercentValue@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidPercentValue"
+        }
+    }
+
+    @Test
+    void testValidateAccountAmountsWithTooLargePercent() {
+        def acct = [
+                percent: 100.1
+        ]
+
+        try {
+            directDepositAccountService.validateAccountAmounts(acct);
+            fail("I should have received an error but it passed; @@r1:invalidPercentValue@@ ")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidPercentValue"
+        }
+    }
+    // END: TESTS TO VALIDATE ACCOUNT AMOUNTS
+
     private def newDirectDepositAccount() {
         def bankRoutingInfo = new BankRoutingInfo()
 
