@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
+import net.hedtech.banner.general.person.PersonUtility
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -57,7 +58,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveApAccountsWhereOneAccountExists() {
-        def activeAccounts = directDepositAccountService.getActiveApAccounts(38010) // One account
+        def pidm = PersonUtility.getPerson("MYE000001").pidm
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(pidm) // One account
 
         // Assert domain values
         assertNotNull activeAccounts
@@ -186,12 +188,95 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     @Test
     void testAccountNumberFormatValidation() {
         try {
-            directDepositAccountService.validateAccountNumFormat("1954601TOOLONG74321");
+            directDepositAccountService.validateAccountNumFormat("123456789X123456789X123456789X12345");
             fail("I should have received an error but it passed; @@r1:invalidAccountNumFmt@@ ")
         }
         catch (ApplicationException ae) {
             assertApplicationException ae, "invalidAccountNumFmt"
         }
+    }
+
+    @Test
+    void testSetupAccountsForDelete() {
+        def directDepositAccount1 = newDirectDepositAccount()
+        directDepositAccount1 = directDepositAccountService.create([domainModel: directDepositAccount1])
+
+        def directDepositAccountMap1 = [
+                id: directDepositAccount1.id,
+                pidm: 37859, //49758,
+                status: "P",
+                documentType: "D",
+                priority: 16,
+                apIndicator: "I",
+                hrIndicator: "A",
+                bankAccountNum: "36948575",
+                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                amount: null,
+                percent: 11.0,
+                accountType: "C",
+                intlAchTransactionIndicator: "N"
+        ]
+
+        def directDepositAccount2 = newDirectDepositAccount()
+        directDepositAccount2.accountType = "S"
+        directDepositAccount2.priority = 17
+        directDepositAccount2 = directDepositAccountService.create([domainModel: directDepositAccount2])
+
+        def directDepositAccountMap2 = [
+                id: directDepositAccount2.id,
+                pidm: 37859, //49758,
+                status: "P",
+                documentType: "D",
+                priority: 16,
+                apIndicator: "I",
+                hrIndicator: "A",
+                bankAccountNum: "36948575",
+                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                amount: null,
+                percent: 11.0,
+                accountType: "S",
+                intlAchTransactionIndicator: "N"
+        ]
+
+        def list = []
+        list[0] = directDepositAccountMap1
+        list[1] = directDepositAccountMap2
+
+        def result = directDepositAccountService.setupAccountsForDelete(list)
+
+        assert true, result.toBeDeleted.size() == 2
+        assert true, result.messages.size() == 0
+    }
+
+    @Test
+    void testSetupAccountsForDeleteLegacy() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount.apIndicator = 'A'
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        def directDepositAccountMap = [
+            id: directDepositAccount.id,
+            pidm: 37859, //49758,
+            status: "P",
+            documentType: "D",
+            priority: 16,
+            apIndicator: "A",
+            hrIndicator: "A",
+            bankAccountNum: "36948575",
+            bankRoutingInfo: [bankRoutingNum: "234798944"],
+            amount: null,
+            percent: 11.0,
+            accountType: "C",
+            intlAchTransactionIndicator: "N"
+        ]
+
+        def list = []
+        list[0] = directDepositAccountMap
+
+        def result = directDepositAccountService.setupAccountsForDelete(list)
+
+        assert true, result.toBeDeleted.size() == 0
+        assert 'AP', result.messages[0].activeType
     }
 
     // TESTS TO VALIDATE ACCOUNT AMOUNTS
