@@ -73,36 +73,16 @@ class DirectDepositAccountService extends ServiceBase{
             }
             else {
                 def accts = DirectDepositAccount.fetchActiveByAccountData(acct.pidm, acct.bankRoutingInfo.bankRoutingNum, acct.bankAccountNum, acct.accountType)
-                
-                if( false ) {
-                    // if account is synced make sure to only delete the requested record
-                    // and display the appropiate message
-                    
-                    if(acct.hrIndicator == 'A' && acct.apDelete){
-                        if(acct.hrIndicator != accts[0].hrIndicator) {
-                            model.toBeDeleted.add(accts[0])
-                        }
-                        else if(acct.hrIndicator != accts[1].hrIndicator) {
-                            model.toBeDeleted.add(accts[1])
-                        }
+
+                if(acct.apIndicator == 'A' && acct.apDelete) {
+                    model.toBeDeleted.add(acct)
+                    if(accts.size() > 1)
                         model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
-                    }
-                    else if(!acct.apDelete) {
-                        model.toBeDeleted.add(acct);
-                        model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
-                    }
                 }
-                else {
-                    if(acct.apIndicator == 'A' && acct.apDelete) {
-                        model.toBeDeleted.add(acct)
-                        if(accts.size() > 1)
-                            model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
-                    }
-                    else if(acct.hrIndicator == 'A' && !acct.apDelete) {
-                        model.toBeDeleted.add(acct)
-                        if(accts.size() > 1)
-                            model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
-                    }
+                else if(acct.hrIndicator == 'A' && !acct.apDelete) {
+                    model.toBeDeleted.add(acct)
+                    if(accts.size() > 1)
+                        model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
                 }
             }
         }

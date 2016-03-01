@@ -54,12 +54,6 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         formContext = ['GUAGMNU']
         super.setUp()
 
-        def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'MYE000001', '123456' ) )
-        assertNotNull auth
-        SecurityContextHolder.getContext().setAuthentication( auth )
-        assertTrue( auth instanceof BannerAuthenticationToken )
-        bannerAuthenticationToken = auth as BannerAuthenticationToken
-        assertNotNull bannerAuthenticationToken.getPidm()
     }
 
 
@@ -112,6 +106,12 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def pidm = PersonUtility.getPerson("MYE000001").pidm
 
         //   def existingItem = DirectDepositAccount.findById(1164) as DirectDepositAccount
+        def account1
+
+        testAccountMap0.pidm = pidm
+        testAccountMap0.hrIndicator = "A"
+        testAccountMap0.apIndicator = "I"
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
 
         def testBankRoutingInfo1 = [
                 bankRoutingNum: '748972234'
@@ -119,17 +119,16 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
         def existingItemMap0 = [
                 accountType: 'C',
-                bankAccountNum: '111111',
-                bankRoutingInfo: testBankRoutingInfo1,
+                bankAccountNum: '22334455',
+                bankRoutingInfo: testBankRoutingInfo0,
                 documentType: 'D',
-                id: 1546,
-                percent: 85,
-                apIndicator: 'A',
+                id: account1.id,
+                apIndicator: 'I',
                 hrIndicator: 'A',
-                priority: 7,
                 intlAchTransactionIndicator: 'N',
-                pidm: 6,
-                status: 'P'
+                pidm: pidm,
+                status: 'P',
+                priority: account1.priority
         ]
 
 
@@ -138,7 +137,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         itemMap.accountType = "C"
         itemMap.percent = 65
 
-        def newPosition = 3
+        def newPosition = 1
 
         def list = directDepositAccountCompositeService.rePrioritizeAccounts(itemMap, newPosition)
 
