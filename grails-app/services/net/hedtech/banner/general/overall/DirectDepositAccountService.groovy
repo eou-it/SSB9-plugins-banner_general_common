@@ -18,10 +18,16 @@ class DirectDepositAccountService extends ServiceBase{
         }
     }
 
+    /**
+     * Ensure that amount values are valid before saving.
+     * @param acct
+     */
     def validateAccountAmounts(acct) {
         def amt = acct?.amount;
         def pct = acct?.percent;
 
+        // Rule 1: Both amount and percent null is invalid
+        // Rule 2: Both amount and percent not null is invalid
         if (amt == null) {
             if (pct == null) {
                 throw new ApplicationException(DirectDepositAccount, "@@r1:noValueExists@@")
@@ -30,6 +36,8 @@ class DirectDepositAccountService extends ServiceBase{
             throw new ApplicationException(DirectDepositAccount, "@@r1:bothAmountAndPercentValuesExist@@")
         }
 
+        // Rule 3: If amount is present, it must be greater than zero
+        // Rule 4: If percent is present, it must be greater than zero and less than or equal to 100
         if (amt != null && amt <= 0) {
             throw new ApplicationException(DirectDepositAccount, "@@r1:invalidAmountValue@@")
         } else if (pct != null && (pct <= 0 || pct > 100)) {
