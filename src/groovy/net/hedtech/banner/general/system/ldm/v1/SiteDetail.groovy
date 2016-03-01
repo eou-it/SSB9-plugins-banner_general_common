@@ -12,7 +12,7 @@ import net.hedtech.banner.general.system.Campus
 class SiteDetail {
 
     @Delegate
-    private final Campus campus
+    protected final Campus campus
     Metadata metadata
 
 
