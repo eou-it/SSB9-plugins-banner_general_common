@@ -2,12 +2,12 @@
  Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
-
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
@@ -58,10 +58,11 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
-    private static final List<String> VERSIONS = ["v1", "v2", "v3"]
+    private static final List<String> VERSIONS = ["v1","v2", "v3"]
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
+    def credentialTypeList = ["Banner ID"]
     public static final String CREDENTIAL_TYPE = "credentialType"
     public static final String CREDENTIAL_ID = "credentialId"
 
@@ -90,7 +91,6 @@ class PersonCompositeService extends LdmService {
         log.debug "Request parameters: ${params}"
         def total = 0
         def resultList = [:]
-        def credentialTypeList = ["Banner ID"]
         def allowedSortFields = ["firstName", "lastName"]
         Boolean studentRole = false
         def personList = []
@@ -165,42 +165,45 @@ class PersonCompositeService extends LdmService {
                 searchResult = getPidmsForPersonFilter(selId, params)
                 personList = searchResult.personList
                 total = searchResult.count
-            } else if (params.containsKey(CREDENTIAL_TYPE) && params.containsKey(CREDENTIAL_ID)) {
-                if (!params.role) {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
-                }
-
-                if (params.credentialId && credentialTypeList.contains(params.credentialType)) {
-                    String credential = params.credentialId
+            } else if (params.credentialId && credentialTypeList.contains(params.credentialType) && !GeneralCommonConstants.VERSION_V1.equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
+                   String credential = params.credentialId
                     def pidmsMap = [:]
+                    boolean isCorrectRole=false
                     PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
+                    pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
                     if (null == personIdentificationNameCurrent) {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("not.found.message", []))
                     }
                     String role = params.role?.trim()?.toLowerCase()
                     if (role && role == 'student') {
-                        pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
                         studentRole = true
                     } else if (role && role == 'faculty') {
-                        pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
                         studentRole = false
                     } else {
-                        pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
+                        isCorrectRole=true
                     }
-
-                    def query = """from PersonIdentificationNameCurrent a
+                    if (params.role) {
+                        Map personMap = userRoleCompositeService.fetchAllRolesByPidmInList([personIdentificationNameCurrent?.pidm],studentRole)
+                        List<RoleDetail> roles = personMap.get(personIdentificationNameCurrent?.pidm)
+                        for(RoleDetail roleDetail : roles){
+                            if(roleDetail?.role.equalsIgnoreCase(params.role)){
+                                isCorrectRole=true
+                                break
+                            }
+                        }
+                    }
+                    if(isCorrectRole){
+                        def query = """from PersonIdentificationNameCurrent a
                                        where a.pidm = (:pidm)
                                        order by a.$params.sort $params.order, a.bannerId $params.order
                                     """
+                        DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
+                        log.debug "PersonIdentificationNameCurrent query begins"
+                        personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
+                        total = personList.size()
+                    }
 
-                    DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
-                    log.debug "PersonIdentificationNameCurrent query begins"
-
-                    personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
-                } else {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
-                }
-            } else {
+            }  else {
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
                     if (role == "faculty" || role == "student") {
@@ -1562,10 +1565,17 @@ class PersonCompositeService extends LdmService {
     }
 
     def validateCredentialsOnUrl(Map param) {
-        boolean isUrlcredentialTypeError = param.containsKey(CREDENTIAL_TYPE) ? param.containsKey(CREDENTIAL_ID) ? true : false : false
-        boolean isUrlcredentialIdError = param.containsKey(CREDENTIAL_ID) ? param.containsKey(CREDENTIAL_TYPE) ? true : false : false
-        if (!isUrlcredentialTypeError || !isUrlcredentialIdError) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
+        if(!GeneralCommonConstants.VERSION_V1.equalsIgnoreCase(getAcceptVersion(VERSIONS))){
+            if (!param.containsKey(CREDENTIAL_TYPE)){
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.required", []))
+            }
+            if(!param.containsKey(CREDENTIAL_ID)){
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.id.required", []))
+            }
+
+            if(!credentialTypeList.contains(param.credentialType)){
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", []))
+            }
         }
     }
 
