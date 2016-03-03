@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.system.ldm
 
@@ -13,7 +13,7 @@ import net.hedtech.banner.general.system.ldm.v1.*
  */
 class EmsConfigurationBuilder {
 
-    private static List<String> BEP_ROUTING_KEYS = ["HEDM.*.*"]
+    private static List<String> BEP_ROUTING_KEYS = ["HEDM.#"]
     private static List<String> MESSAGE_IN_ROUTING_KEYS = ['#']
 
     private String id
