@@ -12,18 +12,17 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationPopulationVersionService extends ServiceBase {
 
-    def communicationPopulationQueryStatementParseService
     def log = Logger.getLogger(this.getClass())
 
 
     def preCreate(domainModelOrMap) {
-//        if (!CommunicationCommonUtility.userCanCreate()) {
-//            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
-//        }
-//
-//        CommunicationPopulationQueryVersion queryVersion = getPopulationQueryVersion( domainModelOrMap )
-//        queryVersion.createdBy = getCurrentUserBannerId()
-//        queryVersion.createDate = new Date()
+        if (!CommunicationCommonUtility.userCanCreate()) {
+            throw new ApplicationException(CommunicationPopulationVersion, "@@r1:operation.not.authorized@@")
+        }
+
+        CommunicationPopulationVersion populationVersion = getPopulationVersion( domainModelOrMap )
+        populationVersion.createdBy = getCurrentUserBannerId()
+        populationVersion.createDate = new Date()
     }
 
 
@@ -47,7 +46,7 @@ class CommunicationPopulationVersionService extends ServiceBase {
     }
 
 
-    private CommunicationPopulationQueryVersion getPopulationVersion( domainModelOrMap ) {
+    private CommunicationPopulationVersion getPopulationVersion( domainModelOrMap ) {
         (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationVersion
     }
 
