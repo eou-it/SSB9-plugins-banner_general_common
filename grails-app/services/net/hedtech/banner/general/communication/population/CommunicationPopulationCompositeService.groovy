@@ -15,6 +15,7 @@ class CommunicationPopulationCompositeService {
 
     CommunicationPopulationService communicationPopulationService
     CommunicationPopulationVersionService communicationPopulationVersionService
+    CommunicationPopulationQueryAssociationService communicationPopulationQueryAssociationService
     def log = Logger.getLogger(this.getClass())
 
 
@@ -23,10 +24,15 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulation( CommunicationPopulation population ) {
+    public CommunicationPopulation createPopulation( CommunicationPopulation population, CommunicationPopulationQueryAssociation populationQueryAssociation ) {
         log.trace( "createPopulation called" )
         assert( population.id == null )
-        return (CommunicationPopulation) communicationPopulationService.create( population )
+
+        boolean retValue = false
+        retValue = (CommunicationPopulation) communicationPopulationService.create( population )
+        retValue = (CommunicationPopulationQueryAssociation) communicationPopulationQueryAssociationService.create( populationQueryAssociation )
+
+        return retValue
     }
 
 

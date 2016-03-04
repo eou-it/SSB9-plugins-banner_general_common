@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
@@ -27,22 +28,15 @@ class CommunicationPopulationVersionService extends ServiceBase {
 
 
     def preUpdate(domainModelOrMap) {
-        throw new UnsupportedOperationException()
-    }
+        CommunicationPopulationVersion populationVersion = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQuery
 
+        if (populationVersion.id == null)
+            throw new ApplicationException(CommunicationPopulationVersion, "@@r1:populationVersionDoesNotExist@@")
 
-    def preDelete(domainModelOrMap) {
-//        if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null)) {
-//            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
-//        }
-//        CommunicationPopulationQueryVersion persisted = CommunicationPopulationQueryVersion.get( domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
-//        if (persisted.id == null) {
-//            throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:queryDoesNotExist@@")
-//        }
-//
-//        if (!CommunicationCommonUtility.userCanUpdateDelete( persisted.createdBy )) {
-//            throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:operation.not.authorized@@")
-//        }
+        def oldPopulationVersion = CommunicationPopulationVersion.get(populationVersion.id)
+
+        if (oldPopulationVersion.id == null)
+            throw new ApplicationException(CommunicationPopulationVersion, "@@r1:populationVersionDoesNotExist@@")
     }
 
 

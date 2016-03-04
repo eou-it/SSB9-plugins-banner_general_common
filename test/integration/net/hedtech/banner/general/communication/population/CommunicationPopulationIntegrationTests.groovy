@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
 import groovy.sql.Sql

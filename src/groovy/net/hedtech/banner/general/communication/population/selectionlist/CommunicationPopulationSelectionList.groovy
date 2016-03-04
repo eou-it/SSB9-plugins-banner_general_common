@@ -7,7 +7,7 @@ import groovy.transform.ToString
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryExecutionStatus
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 
 /**
  * BannerPopulation Selection List definitions entity.

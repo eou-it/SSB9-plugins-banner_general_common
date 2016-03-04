@@ -135,7 +135,6 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         assertNull population
     }
 
-
     @Test
     void testDynamicFinder() {
 

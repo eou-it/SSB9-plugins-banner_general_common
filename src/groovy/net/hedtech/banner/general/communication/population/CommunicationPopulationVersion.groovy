@@ -67,11 +67,11 @@ class CommunicationPopulationVersion implements Serializable {
     String calculatedBy
 
     /**
-     * Selection List status: SCHEDULED, PENDING_EXECUTION, ERROR, AVAILABLE
+     * Population Calculation status: SCHEDULED, PENDING_EXECUTION, ERROR, AVAILABLE
      */
     @Column(name = "GCRPOPV_STATUS")
     @Enumerated(EnumType.STRING)
-    CommunicationPopulationQueryExecutionStatus status
+    CommunicationPopulationCalculationStatus status
 
     /**
      * VERSION: Optimistic lock token

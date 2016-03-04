@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.testing.BaseIntegrationTestCase
