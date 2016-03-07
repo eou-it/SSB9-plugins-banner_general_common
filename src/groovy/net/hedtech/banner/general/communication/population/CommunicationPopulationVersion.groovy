@@ -74,6 +74,12 @@ class CommunicationPopulationVersion implements Serializable {
     CommunicationPopulationCalculationStatus status
 
     /**
+     * JOB ID : UUID of the quartz job for the population version calculation
+     */
+    @Column(name = "GCRPOPV_QZJB_ID")
+    String jobId
+
+    /**
      * VERSION: Optimistic lock token
      */
     @Version
