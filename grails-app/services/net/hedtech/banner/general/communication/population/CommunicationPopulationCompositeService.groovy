@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
 
 /**
@@ -16,6 +17,7 @@ class CommunicationPopulationCompositeService {
     CommunicationPopulationService communicationPopulationService
     CommunicationPopulationVersionService communicationPopulationVersionService
     CommunicationPopulationQueryAssociationService communicationPopulationQueryAssociationService
+    SchedulerJobService schedulerJobService
     def log = Logger.getLogger(this.getClass())
 
 
@@ -98,6 +100,11 @@ class CommunicationPopulationCompositeService {
         boolean retValue = true
         CommunicationPopulation parentPopulation = CommunicationPopulation.fetchById(populationId)
         List populationVersions = CommunicationPopulationVersion.findByPopulationId(populationId)
+
+        // TODO: Delete any pop version job associations with this version
+        // communicationPopulationVersionJobAssociationService.delete any job with populationVersionJobAssociation
+
+
 //        if(!parentPopulation.changesPending)
 //        {
 //            //Request to delete a published version from query table where other published version exists
@@ -234,26 +241,16 @@ class CommunicationPopulationCompositeService {
             )
         }
 
-//        if (!population.changesPending) {
-//            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQuery.class, "noChangesToPublish" )
-//        }
-
-//        if (!population.sqlString || population.sqlString.trim().length() == 0) {
-//            throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
-//        }
-
-//        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( population.sqlString )
-//        if (!parseResult.isValid()) {
-//            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
-//        }
-
-//        population.changesPending = false
-        population = communicationPopulationService.update( population )
-
         CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
         populationVersion.population = population
-//        populationVersion.sqlString = population.sqlString
+        populationVersion.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
+        String jobId = UUID.randomUUID().toString()
+        //populationVersion.jobId = jobId
         communicationPopulationVersionService.create( [ domainModel: populationVersion ] )
+
+        // TODO: schedule quartz job call method to call sql proc that generates pidms
+//        schedulerJobService.
+
         return population
     }
 

@@ -46,6 +46,63 @@ class SchedulerJobService {
         quartzScheduler.scheduleJob( jobDetail, trigger )
     }
 
+    /**
+     * Schedules calling a service method using the quartz scheduler.
+     *
+     * @param groupId a group name (e.g., communication)
+     * @param jobId a job identifier; a uuid is one way to go
+     * @param runTime the date to wait until starting the task
+     * @param bannerUser a banner id to proxy as before invoking the method
+     * @param service the name of the service to call
+     * @param method the method of the service to invoke
+     * @param args an optional map to pass to to the service method
+     */
+    public void invokeLaterServiceMethod( String jobId, String bannerUser, String service, String method, String[] args ) {
+        assert jobId
+        assert bannerUser
+        assert service
+        assert method
+
+        String groupId = service + "." + method
+        JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity( jobId, groupId ).build();
+        jobDetail.getJobDataMap().put( "bannerUser", bannerUser )
+        jobDetail.getJobDataMap().put( "service", service )
+        jobDetail.getJobDataMap().put( "method", method )
+        if (args) {
+            for( int i; i<args.length; i++) {
+                jobDetail.getJobDataMap().put( "args{i}", args[i] )
+            }
+        }
+        Trigger trigger = newTrigger().withIdentity( jobId, groupId ).startAt( evenMinuteDate( runTime ) ).build()
+        quartzScheduler.scheduleJob( jobDetail, trigger )
+    }
+
+
+
+    /**
+     * Schedules calling a service method using the quartz scheduler.
+     *
+     * @param groupId a group name (e.g., communication)
+     * @param jobId a job identifier; a uuid is one way to go
+     * @param runTime the date to wait until starting the task
+     * @param bannerUser a banner id to proxy as before invoking the method
+     * @param service the name of the service to call
+     * @param method the method of the service to invoke
+     * @param args an optional map to pass to to the service method
+     */
+//    public void scheduleServiceMethod( String groupId, String jobId, Date runTime, String bannerUser, String service, String method, String[] args ) {
+//        JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity( jobId, groupId ).build();
+//        jobDetail.getJobDataMap().put( "bannerUser", bannerUser )
+//        jobDetail.getJobDataMap().put( "service", service )
+//        jobDetail.getJobDataMap().put( "method", method )
+//        if (args) {
+//            for( int i; i<args.length; i++) {
+//                jobDetail.getJobDataMap().put( "args{i}", args[i] )
+//            }
+//        }
+//        Trigger trigger = newTrigger().withIdentity( jobId, groupId ).startAt( evenMinuteDate( runTime ) ).build()
+//        quartzScheduler.scheduleJob( jobDetail, trigger )
+//    }
 
     /**
      * Simple method that logs the current server date time provided for test purposes.
