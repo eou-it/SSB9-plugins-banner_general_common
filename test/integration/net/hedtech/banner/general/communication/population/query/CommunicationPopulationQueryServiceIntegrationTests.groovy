@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -22,7 +23,6 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     def selfServiceBannerAuthenticationProvider
     def communicationPopulationQueryService
-    def communicationPopulationService
 
     def CommunicationFolder testFolder
 
@@ -196,16 +196,5 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         )
 
         return populationQuery
-    }
-
-    private def newPopulation(String populationName) {
-        def population = new CommunicationPopulation(
-                // Required fields
-                folder: testFolder,
-                name: populationName,
-                // Nullable fields
-                description: "Population Description",
-        )
-        return population
     }
 }

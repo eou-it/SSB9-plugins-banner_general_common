@@ -29,12 +29,13 @@ class CommunicationPopulationCompositeService {
     public CommunicationPopulation createPopulation( CommunicationPopulation population, CommunicationPopulationQueryAssociation populationQueryAssociation ) {
         log.trace( "createPopulation called" )
         assert( population.id == null )
+        assert(populationQueryAssociation.id == null)
 
-        boolean retValue = false
-        retValue = (CommunicationPopulation) communicationPopulationService.create( population )
-        retValue = (CommunicationPopulationQueryAssociation) communicationPopulationQueryAssociationService.create( populationQueryAssociation )
+        CommunicationPopulation population1 = (CommunicationPopulation) communicationPopulationService.create( population )
+        populationQueryAssociation.population = population1
+        CommunicationPopulationQueryAssociation popQryAssociation = (CommunicationPopulationQueryAssociation) communicationPopulationQueryAssociationService.create( populationQueryAssociation )
 
-        return retValue
+        return popQryAssociation
     }
 
 
