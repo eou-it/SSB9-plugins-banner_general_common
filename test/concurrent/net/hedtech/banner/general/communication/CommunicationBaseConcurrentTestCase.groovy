@@ -11,6 +11,8 @@ import net.hedtech.banner.general.communication.organization.CommunicationEmailS
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryCompositeService
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import com.icegreen.greenmail.util.*
 import groovy.sql.Sql
@@ -37,7 +39,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def communicationMailboxAccountService
     def communicationGroupSendService
     def communicationGroupSendItemService
-    def communicationPopulationQueryCompositeService
+    CommunicationPopulationQueryCompositeService communicationPopulationQueryCompositeService
+    CommunicationPopulationCompositeService communicationPopulationCompositeService
     def communicationPopulationExecutionService
     def communicationPopulationSelectionListService
     def communicationFolderService
@@ -187,6 +190,11 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBTMPL")
                 sql.executeUpdate("Delete from GCRCFLD")
+                sql.executeUpdate("Delete from GCRLENT")
+                sql.executeUpdate("Delete from GCRPVID")
+                sql.executeUpdate("Delete from GCRPOPV")
+                sql.executeUpdate("Delete from GCRPQID")
+                sql.executeUpdate("Delete from GCBPOPL")
                 sql.executeUpdate("Delete from GCRSLIS")
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")

@@ -15,6 +15,8 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -25,6 +27,11 @@ import javax.persistence.Version
 @EqualsAndHashCode
 @ToString
 @Table(name = "GCRPQID")
+@NamedQueries(value = [
+    @NamedQuery(name = "CommunicationPopulationQueryAssociation.findAllByPopulation",
+            query = """ FROM CommunicationPopulationQueryAssociation a
+                WHERE a.population = :population""")
+])
 class CommunicationPopulationQueryAssociation implements Serializable {
 
     /**
@@ -89,8 +96,18 @@ class CommunicationPopulationQueryAssociation implements Serializable {
     static constraints = {
         population(nullable: false)
         populationQuery(nullable: false)
+        populationQueryVersion(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+    }
+
+
+    public static List findAllByPopulation( CommunicationPopulation population ) {
+        def list
+        CommunicationPopulationQueryAssociation.withSession { session ->
+            list = session.getNamedQuery( 'CommunicationPopulationQueryAssociation.findAllByPopulation' ).setParameter( 'population', population ).list()
+        }
+        return list
     }
 }

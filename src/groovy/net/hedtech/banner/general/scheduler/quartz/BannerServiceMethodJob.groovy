@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.scheduler.quartz
 
 import grails.util.Holders
@@ -19,35 +22,49 @@ class BannerServiceMethodJob implements Job {
 
 
     public BannerServiceMethodJob() {
-        println "BannerServiceMethodJob.BannerServiceMethodJob"
     }
 
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        println "BannerServiceMethodJob.execute"
+        if (log.isDebugEnabled()) {
+            log.debug( "Executing BannerServiceMethodJob with context ${context}." )
+        }
         try{
             String service = context.getJobDetail().getJobDataMap().getString( "service" )
             String method = context.getJobDetail().getJobDataMap().getString( "method" )
-            def arguments = context.getJobDetail().getJobDataMap().get( "arguments" )
             def serviceReference = Holders.applicationContext.getBean(service)
-            context.result = serviceReference.invokeMethod( method, makeArguments())
-        }catch(JobExecutionException e){
+
+            Map parameters = [:]
+            for( Object key:context.getJobDetail().getJobDataMap().keySet() ) {
+                Object value = context.getJobDetail().getJobDataMap().get( key )
+                parameters.put( key, value )
+            }
+
+            String bannerUser = context.getJobDetail().getJobDataMap().getString( "bannerUser" )
+            String mepCode = context.getJobDetail().getJobDataMap().getString( "mepCode" )
+            context.result = invokeServiceMethod( serviceReference, method, parameters, bannerUser, mepCode )
+        } catch(JobExecutionException e){
             throw e
-        }
-        catch(e){
+        } catch(e){
             throw new JobExecutionException(e)
         }
     }
 
 
-    private Object[] makeArguments( def arguments ){
-        if(!arguments) return new Object[0]
-        if(arguments.class.isArray()) return arguments
-        if(arguments instanceof Collection) return arguments.toArray()
-        //its a single argument then
-        def o = new Object[1]
-        o[0]=arguments
-        return o
+    private Object invokeServiceMethod( def serviceReference, String method, Map parameters, String oracleUserName, String mepCode ) {
+        def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
+        def originalMap = null
+        try {
+            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( oracleUserName, mepCode )
+            // This method will start a nested transaction (see REQUIRES_NEW annotation) and
+            // consequently pick up a new db connection with the current oracle user name.
+            return serviceReference.invokeMethod( method, parameters )
+        } finally {
+            if (originalMap) {
+                asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext( originalMap )
+            }
+        }
     }
+
 
 }

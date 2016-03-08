@@ -5,13 +5,12 @@ package net.hedtech.banner.general.communication.population
 
 public enum CommunicationPopulationCalculationStatus {
 
-    SCHEDULED,
     PENDING_EXECUTION,
     ERROR,
     AVAILABLE;
 
     public Set<CommunicationPopulationCalculationStatus> set() {
-        return EnumSet.range( CommunicationPopulationCalculationStatus.SCHEDULED, CommunicationPopulationCalculationStatus.AVAILABLE );
+        return EnumSet.range( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, CommunicationPopulationCalculationStatus.AVAILABLE );
     }
 
 }
