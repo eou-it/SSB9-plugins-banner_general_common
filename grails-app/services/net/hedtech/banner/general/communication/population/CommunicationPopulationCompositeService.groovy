@@ -12,7 +12,6 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersionService
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
-import org.apache.commons.collections.functors.ExceptionFactory
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Propagation
@@ -78,10 +77,10 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQueryVersion( Long populationQueryId, String name, String description ) {
+    public CommunicationPopulation createPopulationFromQueryVersion( Long queryVersionId, String name, String description ) {
         log.trace( "createPopulationFromQuery called" )
-        CommunicationPopulationQuery communicationPopulationQuery = CommunicationPopulationQuery.fetchById( populationQueryId )
-        return createPopulationFromQueryVersion( communicationPopulationQuery, name, description )
+        CommunicationPopulationQueryVersion queryVersion = CommunicationPopulationQueryVersion.fetchById( queryVersionId )
+        return createPopulationFromQueryVersion( queryVersion, name, description )
     }
 
 
