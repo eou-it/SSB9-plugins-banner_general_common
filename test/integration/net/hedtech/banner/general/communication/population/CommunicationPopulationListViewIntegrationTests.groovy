@@ -41,7 +41,6 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         assertNotNull folder.id
         globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
         globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
-        globalTestPopulationSelectionList.populationQueryId = globalTestPopulationQuery.id
         globalTestPopulationSelectionList.save(failOnError: true, flush: true)
         assertNotNull(globalTestPopulationSelectionList.id)
 
@@ -66,17 +65,8 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         assertEquals 9199999999999999999, populationSelectionListEntry.pidm
         assertEquals globalTestPopulationSelectionList, populationSelectionListEntry.populationSelectionList
 
-        def allView = CommunicationPopulationListView.findByNameWithPagingAndSortParams([params: ["queryName":'%', "lastCalculatedBy":globalTestPopulationSelectionList.lastCalculatedBy]], [sortColumn: "queryName", sortDirection: "asc", max: 20, offset: 0])
-        assertNotNull allView
-        assertTrue allView.size() >= 1
-        assertTrue allView.getTotalCount() >= 1
-
-        def listView = CommunicationPopulationListView.fetchAllByQueryIdUserId(globalTestPopulationSelectionList.populationQueryId, globalTestPopulationSelectionList.lastCalculatedBy)
+        def listView = CommunicationPopulationSelectionList.fetchById(populationSelectionListEntry.populationSelectionList.id)
         assertNotNull(listView)
-
-        def listView1 = CommunicationPopulationListView.fetchAllByQueryId(globalTestPopulationSelectionList.populationQueryId)
-        assertNotNull(listView1)
-        assertTrue listView1.size() >= 1
 
     }
 
@@ -115,8 +105,6 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
                 // Required fields
                 // Nullable fields
                 name: popname,
-                lastCalculatedBy: "TTTTTTTTTT",
-                lastCalculatedTime: new Date(),
                 status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
         )
 

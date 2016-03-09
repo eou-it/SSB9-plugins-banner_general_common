@@ -16,7 +16,7 @@ import javax.persistence.*
 @Entity
 @EqualsAndHashCode
 @ToString
-@Table(name = "GVQ_GCRSLIS")
+@Table(name = "GVQ_GCBPOPL")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationListView.fetchAllByQueryId",
                 query = """ FROM CommunicationPopulationListView a
@@ -25,89 +25,119 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationListView.fetchAllByQueryIdUserId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.populationQueryId = :populationQueryId
+                    AND    upper(a.lastCalculatedBy) = upper(:userid) """),
+        @NamedQuery(name = "CommunicationPopulationListView.fetchAllByPopulationIdUserId",
+                query = """ FROM CommunicationPopulationListView a
+                    WHERE  a.id = :populationId
                     AND    upper(a.lastCalculatedBy) = upper(:userid) """)
 ])
 class CommunicationPopulationListView implements Serializable {
-
     /**
      * Generated unique numeric identifier for this entity.
      */
     @Id
-    @Column(name = "GCRSLIS_SURROGATE_ID")
+    @Column(name = "POPULATION_ID")
     Long id
-
-    @Column(name = "GCRSLIS_NAME")
-    String name
 
     /**
      * VERSION: Optimistic lock token.
      */
     @Version
-    @Column(name = "GCRSLIS_VERSION")
+    @Column(name = "GCBPOPL_VERSION")
     Long version
 
-    /**
-     *
-     */
-    @Column(name = "GCRSLIS_QUERY_ID")
-    Long populationQueryId
+    @Column(name = "POPULATION_NAME")
+    String name
 
-    /**
-     * ID of user who created the Selection List
-     */
-    @Column(name = "GCRSLIS_LAST_CALC_BY")
-    String lastCalculatedBy
+    @Column(name = "POPULATION_DESCRIPTION")
+    String description
+
+    @Column(name = "POPULATION_FOLDER_NAME")
+    String populationFolderName
+
+    @Column(name = "POPULATION_VERSION_ID")
+    Long populationVersionId
 
     /**
      * Record creation date
      */
-    @Column(name = "GCRSLIS_LAST_CALC_TIME")
+    @Column(name = "CALCULATED_TIME")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastCalculatedTime
 
     /**
+     * ID of user who created the Selection List
+     */
+    @Column(name = "CALCULATED_BY")
+    String lastCalculatedBy
+
+    /**
      * Last calculated count
      */
-    @Column(name = "GCRSLIS_LAST_CALC_COUNT")
+    @Column(name = "CALCULATED_COUNT")
     Long lastCalculatedCount
 
     /**
      * This field is the status of the calculation.
      */
-    @Column(name = "GCRSLIS_STATUS")
+    @Column(name = "CALCULATION_STATUS")
     String calculationStatus
 
     /**
-     * This field defines the nameof the query
+     *
      */
-    @Column(name = "GCBQURY_NAME")
+    @Column(name = "POPULATION_SELECTION_LIST_ID")
+    Long populationSelectionListId
+
+    /**
+     *
+     */
+    @Column(name = "QUERY_ID")
+    Long populationQueryId
+
+    /**
+     * This field defines the name of the query
+     */
+    @Column(name = "QUERY_NAME")
     String queryName
 
     /**
      * This field defines the application
      */
-    @Column(name = "GCBQURY_FOLDER_NAME")
+    @Column(name = "QUERY_FOLDER_NAME")
     String queryFolder
 
     /**
      * This field defines the description of the query
      */
-    @Column(name = "GCBQURY_DESCRIPTION")
+    @Column(name = "QUERY_DESCRIPTION")
     String queryDescription
 
     /**
      * This field defines the creator of the query
      */
-    @Column(name = "GCBQURY_CREATOR_ID")
+    @Column(name = "QUERY_CREATOR_ID")
     String queryCreator
 
     /**
      * the last time the query itself was updated
      */
-    @Column(name = "GCBQURY_ACTIVITY_DATE")
+    @Column(name = "QUERY_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date queryLastUpdated
 
+    /**
+     *
+     */
+    @Column(name = "QUERY_VERSION_ID")
+    Long populationQueryVersionId
+
+    /**
+     * This field defines the name of the query version
+     */
+    @Column(name = "QUERY_VERSION_NAME")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date queryVersionName
 
     static constraints = {
         name(nullable: false)
@@ -144,6 +174,17 @@ class CommunicationPopulationListView implements Serializable {
         return populationListView
     }
 
+    public static CommunicationPopulationListView fetchAllByPopulationIdUserId(Long populationId, String userid) {
+
+        def CommunicationPopulationListView populationListView
+        populationListView = CommunicationPopulationListView.withSession { session ->
+            session.getNamedQuery('CommunicationPopulationListView.fetchAllByPopulationIdUserId')
+                    .setLong('populationId', populationId)
+                    .setString('userid', userid)
+                    .list()[0]
+        }
+        return populationListView
+    }
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 

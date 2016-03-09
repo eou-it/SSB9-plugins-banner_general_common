@@ -5,8 +5,8 @@ package net.hedtech.banner.general.communication.population.selectionlist
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -49,7 +49,6 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         // Assert domain values
         assertNotNull(populationSelectionList.name)
         assertNotNull populationSelectionList?.id
-        assertEquals globalTestPopulationQuery.id, populationSelectionList.populationQueryId
         assertEquals CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION, populationSelectionList.status
     }
 
@@ -104,22 +103,6 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
 
     @Test
-    void testNullValidationFailure() {
-        // Instantiate an empty domain
-        def populationSelectionList = new CommunicationPopulationSelectionList()
-
-        // Assert for domain validation
-        assertFalse "PopulationSelectionList should have failed null value validation", populationSelectionList.validate()
-
-        // Assert for specific field validation
-        assertErrorsFor populationSelectionList, 'nullable',
-                [
-                        'populationQueryId',
-                ]
-    }
-
-
-    @Test
     void testMaxSizeValidationFailure() {
         def populationSelectionList = newPopulationSelectionList()
 
@@ -164,7 +147,6 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         def populationSelectionList = new CommunicationPopulationSelectionList(
                 // Required fields
                 name: globalTestPopulationQuery.name,
-                populationQueryId: globalTestPopulationQuery.id,
 
                 // Nullable fields
                 executedsql: "",

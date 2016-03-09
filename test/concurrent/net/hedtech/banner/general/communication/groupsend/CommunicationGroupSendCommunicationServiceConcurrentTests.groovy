@@ -6,6 +6,7 @@ import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -21,6 +22,8 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
+
+import static org.junit.Assert.assertNull
 
 class CommunicationGroupSendCommunicationServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
@@ -59,7 +62,10 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
-        assertEquals(5, selectionList.getLastCalculatedCount())
+        assertNotNull(selectionList)
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        assertNotNull(selectionListEntryList)
+        assertEquals(5, selectionListEntryList.size())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
@@ -123,7 +129,10 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
-        assertEquals(5, selectionList.getLastCalculatedCount())
+        assertNotNull(selectionList)
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        assertNotNull(selectionListEntryList)
+        assertEquals(5, selectionListEntryList.size())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
