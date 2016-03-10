@@ -78,10 +78,10 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQueryVersion( Long populationQueryId, String name, String description ) {
-        log.trace( "createPopulationFromQuery called" )
-        CommunicationPopulationQuery communicationPopulationQuery = CommunicationPopulationQuery.fetchById( populationQueryId )
-        return createPopulationFromQueryVersion( communicationPopulationQuery, name, description )
+    public CommunicationPopulation createPopulationFromQueryVersion( Long populationQueryVersionId, String name, String description ) {
+        log.trace( "createPopulationFromQueryVersion called" )
+        CommunicationPopulationQueryVersion communicationPopulationQueryVersion = CommunicationPopulationQueryVersion.fetchById(populationQueryVersionId)
+        return createPopulationFromQueryVersion( communicationPopulationQueryVersion, name, description )
     }
 
 
@@ -91,7 +91,7 @@ class CommunicationPopulationCompositeService {
      * @param population the population to persist
      */
     public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description ) {
-        log.trace( "createPopulationFromQuery called" )
+        log.trace( "createPopulationFromQueryVersion called" )
 
         CommunicationPopulation population = new CommunicationPopulation()
         population.name = name
