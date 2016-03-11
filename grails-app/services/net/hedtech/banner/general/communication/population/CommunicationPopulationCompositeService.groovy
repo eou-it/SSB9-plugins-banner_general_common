@@ -361,7 +361,6 @@ class CommunicationPopulationCompositeService {
         communicationPopulationVersionQueryAssociationService.create( populationVersionQueryAssociation )
         assert populationVersionQueryAssociation.id
 
-        // TODO: schedule quartz job call method to call sql proc that generates pidms
         Map parameters = [:]
         parameters.put( "populationVersionId", populationVersion.id )
         SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod(

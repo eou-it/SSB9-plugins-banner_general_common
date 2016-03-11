@@ -32,7 +32,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     def communicationPopulationQueryCompositeService
     def communicationPopulationExecutionService
     def communicationFolderService
-    def communicationGroupSendCommunicationService
+    def communicationGroupSendCompositeService
     def communicationTemplateService
     def communicationEmailTemplateService
 
@@ -169,13 +169,13 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals( 3, runningList.size() )
 
         assertTrue( groupSendB.currentExecutionState.isRunning() )
-        groupSendB = communicationGroupSendCommunicationService.stopGroupSend( groupSendB.id )
+        groupSendB = communicationGroupSendCompositeService.stopGroupSend( groupSendB.id )
         assertTrue( groupSendB.currentExecutionState.isTerminal() )
 
         runningList = communicationGroupSendService.findRunning()
         assertEquals( 2, runningList.size() )
 
-        groupSendC = communicationGroupSendCommunicationService.completeGroupSend( groupSendC.id )
+        groupSendC = communicationGroupSendCompositeService.completeGroupSend( groupSendC.id )
         assertTrue( groupSendC.currentExecutionState.isTerminal() )
 
         runningList = communicationGroupSendService.findRunning()
@@ -191,7 +191,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals( 1, runningList.size() )
 
         assertTrue( groupSend.currentExecutionState.isRunning() )
-        groupSend = communicationGroupSendCommunicationService.stopGroupSend( groupSend.id )
+        groupSend = communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
         assertTrue( groupSend.currentExecutionState.isTerminal() )
 
@@ -199,7 +199,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         assertEquals( 0, runningList.size() )
 
         try{
-            communicationGroupSendCommunicationService.stopGroupSend( groupSend.id )
+            communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
             fail( "Shouldn't be able to stop a group send that has already concluded." )
         } catch( ApplicationException e ) {
             assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
@@ -211,14 +211,14 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         def groupSend = createGroupSend()
 
         assertTrue(groupSend.currentExecutionState.isRunning())
-        groupSend = communicationGroupSendCommunicationService.completeGroupSend(groupSend.id)
+        groupSend = communicationGroupSendCompositeService.completeGroupSend(groupSend.id)
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
 
         List runningList = communicationGroupSendService.findRunning()
         assertEquals(0, runningList.size())
 
         try {
-            communicationGroupSendCommunicationService.stopGroupSend(groupSend.id)
+            communicationGroupSendCompositeService.stopGroupSend(groupSend.id)
             fail("Shouldn't be able to stop a group send that has already concluded.")
         } catch (ApplicationException e) {
             assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )

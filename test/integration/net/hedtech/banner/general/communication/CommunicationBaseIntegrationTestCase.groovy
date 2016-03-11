@@ -20,7 +20,7 @@ import com.icegreen.greenmail.util.*
 class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     def communicationGroupSendMonitor
-    def communicationGroupSendCommunicationService
+    def communicationGroupSendCompositeService
     def communicationMailboxAccountService
     def communicationGroupSendService
     def communicationGroupSendItemService
@@ -170,18 +170,18 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
 
     protected void setUpDefaultFolder() {
-        defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCommunicationServiceTests" )
+        defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCompositeServiceTests" )
         if (!defaultFolder) {
-            defaultFolder = new CommunicationFolder( name: "CommunicationGroupSendCommunicationServiceTests", description: "integration test" )
+            defaultFolder = new CommunicationFolder( name: "CommunicationGroupSendCompositeServiceTests", description: "integration test" )
             defaultFolder = communicationFolderService.create( defaultFolder )
         }
     }
 
     protected void setUpDefaultEmailTemplate() {
-        defaultEmailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCommunicationServiceTests_template" )
+        defaultEmailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCompositeServiceTests_template" )
         if (!defaultEmailTemplate) {
             defaultEmailTemplate = new CommunicationEmailTemplate (
-                    name: "CommunicationGroupSendCommunicationServiceTests_template",
+                    name: "CommunicationGroupSendCompositeServiceTests_template",
                     personal: false,
                     oneOff: false,
                     folder: defaultFolder,

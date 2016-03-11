@@ -25,7 +25,7 @@ import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestC
 
 import static org.junit.Assert.assertNull
 
-class CommunicationGroupSendCommunicationServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
+class CommunicationGroupSendCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
 
@@ -76,7 +76,7 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
                 recalculateOnSend: false
         )
 
-        groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
         assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
@@ -114,7 +114,7 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
         assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
         assertEquals( 5, CommunicationJob.findAll().size() )
         assertEquals( 5, CommunicationRecipientData.findAll().size() )
-        communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
         assertEquals( 0, CommunicationJob.findAll().size() )
@@ -143,21 +143,21 @@ class CommunicationGroupSendCommunicationServiceConcurrentTests extends Communic
                 recalculateOnSend: false
         )
 
-        groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
 
         try {
-            communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+            communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         } catch (ApplicationException e) {
             assertEquals( "@@r1:cannotDeleteRunningGroupSend@@", e.getWrappedException().getMessage() )
         }
 
-        groupSend = communicationGroupSendCommunicationService.completeGroupSend( groupSend.id )
+        groupSend = communicationGroupSendCompositeService.completeGroupSend( groupSend.id )
 
-        communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
 
         assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )

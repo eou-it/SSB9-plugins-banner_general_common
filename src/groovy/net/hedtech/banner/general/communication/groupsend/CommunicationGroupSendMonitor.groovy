@@ -17,7 +17,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
     private CommunicationGroupSendMonitorThread monitorThread
     private CommunicationGroupSendService communicationGroupSendService
     private CommunicationGroupSendItemService communicationGroupSendItemService
-    private CommunicationGroupSendCommunicationService communicationGroupSendCommunicationService
+    private CommunicationGroupSendCompositeService communicationGroupSendCompositeService
     private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
     public int monitorIntervalInSeconds = 10
 
@@ -41,8 +41,8 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 
 
     @Required
-    public void setCommunicationGroupSendCommunicationService(CommunicationGroupSendCommunicationService communicationGroupSendCommunicationService) {
-        this.communicationGroupSendCommunicationService = communicationGroupSendCommunicationService
+    public void setCommunicationGroupSendCompositeService(CommunicationGroupSendCompositeService communicationGroupSendCompositeService) {
+        this.communicationGroupSendCompositeService = communicationGroupSendCompositeService
     }
 
 
@@ -95,7 +95,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                 if (groupSend.currentExecutionState.equals(CommunicationGroupSendExecutionState.Processing)) {
                     int runningCount = communicationGroupSendItemService.fetchRunningGroupSendItemCount(groupSend.id)
                     if (runningCount == 0) {
-                        communicationGroupSendCommunicationService.completeGroupSend( groupSend.id )
+                        communicationGroupSendCompositeService.completeGroupSend( groupSend.id )
                     }
                 }
             }
