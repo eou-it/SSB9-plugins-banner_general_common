@@ -90,7 +90,7 @@ class CommunicationPopulationCompositeService {
      * @param population the population to persist
      */
     public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description ) {
-        log.trace( "createPopulationFromQuery called" )
+        log.trace( "createPopulationFromQueryVersion called" )
 
         CommunicationPopulation population = new CommunicationPopulation()
         population.name = name
