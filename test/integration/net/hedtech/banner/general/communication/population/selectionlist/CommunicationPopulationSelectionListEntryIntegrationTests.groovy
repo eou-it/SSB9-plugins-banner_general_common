@@ -33,7 +33,6 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
 
         globalTestPopulationQuery = newPopulationQuery().save()
         globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
-        globalTestPopulationSelectionList.populationQueryId = globalTestPopulationQuery.id
         globalTestPopulationSelectionList.save()
         assertNotNull(globalTestPopulationSelectionList.id)
     }

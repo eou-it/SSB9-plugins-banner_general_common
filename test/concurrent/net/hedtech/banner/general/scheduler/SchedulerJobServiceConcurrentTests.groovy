@@ -51,22 +51,57 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
 
     @Test
-    public void testScheduleTestJob() {
-        String groupName = "testGroup"
-        String jobName = "testScheduleTestJob-" + UUID.randomUUID().toString()
+    public void testScheduleServiceMethod() {
+        String jobId = "testScheduleTestJob-" + UUID.randomUUID().toString()
 
         Calendar calendar = Calendar.getInstance() // gets a calendar using the default time zone and locale.
         calendar.add(Calendar.SECOND, 5)
         Date requestedRunTime = calendar.getTime()
+        String mepCode = null
 
-        schedulerJobService.scheduleServiceMethod( groupName, jobName, requestedRunTime, 'BCMADMIN', "schedulerJobService", "logDateTime", new String[0] )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleServiceMethod( requestedRunTime, jobId, 'BCMADMIN', mepCode, "schedulerJobService", "logDateTime" )
 
-        JobKey jobKey = new JobKey( jobName, groupName )
+        JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
 
         JobDetail jobDetail = quartzScheduler.getJobDetail( jobKey ) // JobDetailImpl
         assertNotNull( jobDetail )
 
-        TriggerKey triggerKey = new TriggerKey( jobName, groupName )
+        TriggerKey triggerKey = new TriggerKey( receipt.jobId, receipt.groupId )
+        Trigger trigger = quartzScheduler.getTrigger( triggerKey ) // SimpleTriggerImpl
+        assertNotNull( trigger )
+
+        int retries = 10
+        while (retries > 0) {
+            retries--;
+            TimeUnit.SECONDS.sleep( 5 );
+
+            jobDetail = quartzScheduler.getJobDetail( jobKey )
+
+            if (!jobDetail) {
+                break;
+            }
+        }
+
+        assertNull( jobDetail )
+        trigger = quartzScheduler.getTrigger( triggerKey )
+        assertNull( trigger )
+    }
+
+
+    @Test
+    public void testScheduleNowServiceMethod() {
+        String jobId = "testScheduleTestJob-" + UUID.randomUUID().toString()
+
+        String mepCode = null
+
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod( jobId, 'BCMADMIN', mepCode, "schedulerJobService", "logDateTime" )
+
+        JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
+
+        JobDetail jobDetail = quartzScheduler.getJobDetail( jobKey ) // JobDetailImpl
+        assertNotNull( jobDetail )
+
+        TriggerKey triggerKey = new TriggerKey( receipt.jobId, receipt.groupId )
         Trigger trigger = quartzScheduler.getTrigger( triggerKey ) // SimpleTriggerImpl
         assertNotNull( trigger )
 

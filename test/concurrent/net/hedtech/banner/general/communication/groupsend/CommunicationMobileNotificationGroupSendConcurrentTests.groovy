@@ -13,6 +13,7 @@ import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -70,7 +71,10 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
-        assertEquals(5, selectionList.getLastCalculatedCount())
+        assertNotNull(selectionList)
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        assertNotNull(selectionListEntryList)
+        assertEquals(5, selectionListEntryList.size())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
@@ -81,7 +85,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 recalculateOnSend: false
         )
 
-        groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
         assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
@@ -119,7 +123,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
         assertEquals( 5, CommunicationJob.findAll().size() )
         assertEquals( 5, CommunicationRecipientData.findAll().size() )
-        communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
         assertEquals( 0, CommunicationJob.findAll().size() )
@@ -134,7 +138,11 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
-        assertEquals(5, selectionList.getLastCalculatedCount())
+        assertNotNull(selectionList)
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        assertNotNull(selectionListEntryList)
+        assertEquals(5, selectionListEntryList.size())
+
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
@@ -145,21 +153,21 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 recalculateOnSend: false
         )
 
-        groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
 
         try {
-            communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+            communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         } catch (ApplicationException e) {
             assertEquals( "@@r1:cannotDeleteRunningGroupSend@@", e.getWrappedException().getMessage() )
         }
 
-        groupSend = communicationGroupSendCommunicationService.completeGroupSend( groupSend.id )
+        groupSend = communicationGroupSendCompositeService.completeGroupSend( groupSend.id )
 
-        communicationGroupSendCommunicationService.deleteGroupSend( groupSend.id )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
 
         assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
@@ -179,7 +187,10 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
-        assertEquals(1, selectionList.getLastCalculatedCount())
+        assertNotNull(selectionList)
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        assertNotNull(selectionListEntryList)
+        assertEquals(1, selectionListEntryList.size())
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -225,7 +236,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 recalculateOnSend: false
         )
 
-        groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
         assertEquals( 1, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )

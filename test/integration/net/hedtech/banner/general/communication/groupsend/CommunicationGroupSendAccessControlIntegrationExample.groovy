@@ -74,7 +74,7 @@ class CommunicationGroupSendAccessControlIntegrationExample {
 //                    referenceId: UUID.randomUUID().toString()
 //            )
 //
-//            groupSend = communicationGroupSendCommunicationService.sendAsynchronousGroupCommunication(request)
+//            groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
 //            assertNotNull(groupSend)
 //            tx.commit()
 //        }

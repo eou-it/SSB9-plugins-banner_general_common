@@ -19,9 +19,9 @@ import javax.persistence.*
 @ToString
 @Table(name = "GVQ_GCRLENT")
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationPopulationProfileView.findAllByPopulationId",
+        @NamedQuery(name = "CommunicationPopulationProfileView.findAllBySelectionListId",
                 query = """ FROM CommunicationPopulationProfileView a
-                    WHERE  a.populationId = :populationId
+                    WHERE  a.selectionListId = :selectionListId
                     """)
 ])
 class CommunicationPopulationProfileView implements Serializable {
@@ -43,14 +43,8 @@ class CommunicationPopulationProfileView implements Serializable {
     /**
      *
      */
-    @Column(name = "QUERY_ID")
-    Long populationQueryId
-
-    /**
-     *
-     */
     @Column(name = "SLIS_ID")
-    Long populationId
+    Long selectionListId
 
     /**
      * Internal identification number of the person.
@@ -105,20 +99,19 @@ class CommunicationPopulationProfileView implements Serializable {
 
 
     static constraints = {
-        populationQueryId(nullable: false)
     }
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
 
-    public static List<CommunicationPopulationProfileView> findAllByPopulationId(Long populationId) {
+    public static List<CommunicationPopulationProfileView> findAllBySelectionListId(Long selectionListId) {
 
         def CommunicationPopulationProfileView[] populationProfileViews
 
         populationProfileViews = CommunicationPopulationProfileView.withSession { session ->
-            session.getNamedQuery('CommunicationPopulationProfileView.findAllByPopulationId')
-                    .setLong('populationId', populationId)
+            session.getNamedQuery('CommunicationPopulationProfileView.findAllBySelectionListId')
+                    .setLong('selectionListId', selectionListId)
                     .list()
         }
         return populationProfileViews
@@ -131,7 +124,7 @@ class CommunicationPopulationProfileView implements Serializable {
 
         def queryCriteria = CommunicationPopulationProfileView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-             eq ("populationId", filterData?.params?.populationId)
+             eq ("selectionListId", filterData?.params?.selectionListId)
              or {
                  ilike("lastName", searchName)
                  ilike("firstName", searchName)

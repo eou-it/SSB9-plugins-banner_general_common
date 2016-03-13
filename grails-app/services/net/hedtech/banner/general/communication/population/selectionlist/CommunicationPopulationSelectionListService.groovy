@@ -45,14 +45,4 @@ class CommunicationPopulationSelectionListService extends ServiceBase {
 //        throw new ApplicationException(PopulationSelectionList, "@@r1:unsupported.operation@@")
 
     }
-
-
-    public static CommunicationPopulationSelectionList fetchByNameAndId(Long populationQueryId, String userId) {
-
-        def populationQuerySelectionLists = CommunicationPopulationSelectionList.withSession { session ->
-            org.hibernate.Query query = session.getNamedQuery('CommunicationPopulationSelectionList.fetchByNameAndId')
-                    .setLong('populationQueryId', populationQueryId).setString('userId', userId); query.list()
-        }
-        return populationQuerySelectionLists.getAt(0)
-    }
 }

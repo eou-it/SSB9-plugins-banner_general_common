@@ -5,7 +5,17 @@ package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryService
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersionService
+import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
+import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * A service for driving interaction with Communication population objects and their
@@ -13,26 +23,91 @@ import org.apache.log4j.Logger
  */
 class CommunicationPopulationCompositeService {
 
+    CommunicationPopulationQueryService communicationPopulationQueryService
+    CommunicationPopulationQueryVersionService communicationPopulationQueryVersionService
+    CommunicationPopulationVersionQueryAssociationService communicationPopulationVersionQueryAssociationService
     CommunicationPopulationService communicationPopulationService
     CommunicationPopulationVersionService communicationPopulationVersionService
     CommunicationPopulationQueryAssociationService communicationPopulationQueryAssociationService
+    CommunicationPopulationExecutionService communicationPopulationExecutionService
+    SchedulerJobService schedulerJobService
     def log = Logger.getLogger(this.getClass())
 
 
     /**
-     * Creates a new population.
+     * Creates a new population which is associated with the latest published query.
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulation( CommunicationPopulation population, CommunicationPopulationQueryAssociation populationQueryAssociation ) {
-        log.trace( "createPopulation called" )
-        assert( population.id == null )
+    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description ) {
+        log.trace( "createPopulationFromQuery called" )
+        CommunicationPopulationQuery communicationPopulationQuery = CommunicationPopulationQuery.fetchById( populationQueryId )
+        return createPopulationFromQuery( communicationPopulationQuery, name, description )
+    }
 
-        boolean retValue = false
-        retValue = (CommunicationPopulation) communicationPopulationService.create( population )
-        retValue = (CommunicationPopulationQueryAssociation) communicationPopulationQueryAssociationService.create( populationQueryAssociation )
 
-        return retValue
+    /**
+     * Creates a new population which is associated with the latest published query.
+     *
+     * @param population the population to persist
+     */
+    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description ) {
+        log.trace( "createPopulationFromQuery called" )
+
+        CommunicationPopulation population = new CommunicationPopulation()
+        population.name = name
+        population.description = description
+        population.folder = populationQuery.folder
+        population = communicationPopulationService.create( population )
+
+        CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
+        populationQueryAssociation.populationQuery = populationQuery
+        populationQueryAssociation.population = population
+        populationQueryAssociation = communicationPopulationQueryAssociationService.create( populationQueryAssociation )
+
+        String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        calculatePopulationForUser( population, oracleUserName )
+
+        return population
+    }
+
+
+    /**
+     * Creates a new population which is associated with a specific published query.
+     *
+     * @param population the population to persist
+     */
+    public CommunicationPopulation createPopulationFromQueryVersion( Long queryVersionId, String name, String description ) {
+        log.trace( "createPopulationFromQuery called" )
+        CommunicationPopulationQueryVersion queryVersion = CommunicationPopulationQueryVersion.fetchById( queryVersionId )
+        return createPopulationFromQueryVersion( queryVersion, name, description )
+    }
+
+
+    /**
+     * Creates a new population which is associated with a specific published query.
+     *
+     * @param population the population to persist
+     */
+    public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description ) {
+        log.trace( "createPopulationFromQueryVersion called" )
+
+        CommunicationPopulation population = new CommunicationPopulation()
+        population.name = name
+        population.description = description
+        population.folder = populationQueryVersion.query.folder
+        population = communicationPopulationService.create( population )
+
+        CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
+        populationQueryAssociation.populationQuery = populationQueryVersion.query
+        populationQueryAssociation.populationQueryVersion = populationQueryVersion
+        populationQueryAssociation.population = population
+        populationQueryAssociation = communicationPopulationQueryAssociationService.create( populationQueryAssociation )
+
+        String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        calculatePopulationForUser( population, oracleUserName )
+
+        return population
     }
 
 
@@ -45,6 +120,7 @@ class CommunicationPopulationCompositeService {
         return communicationPopulationService.get( Long.valueOf( id ) )
     }
 
+
     /**
      * Deletes the population along with any dependent population versions.
      *
@@ -54,6 +130,7 @@ class CommunicationPopulationCompositeService {
     public boolean deletePopulation( CommunicationPopulation population ) {
         return deletePopulation(population.id, population.version)
     }
+
 
     /**
      * Deletes the population version along with any dependent population versions.
@@ -75,6 +152,7 @@ class CommunicationPopulationCompositeService {
         return communicationPopulationService.delete( populationAsMap )
     }
 
+
     /**
      * Deletes the population population and/or population version.
      *
@@ -84,6 +162,7 @@ class CommunicationPopulationCompositeService {
     public boolean deletePopulationVersion( CommunicationPopulation population, CommunicationPopulationVersion populationVersion ) {
         return deletePopulationVersion(population.id, population.version, populationVersion?populationVersion.id:0, populationVersion?populationVersion.version:0)
     }
+
 
     /**
      * Deletes the population and/or population version.
@@ -98,6 +177,9 @@ class CommunicationPopulationCompositeService {
         boolean retValue = true
         CommunicationPopulation parentPopulation = CommunicationPopulation.fetchById(populationId)
         List populationVersions = CommunicationPopulationVersion.findByPopulationId(populationId)
+
+        // TODO: Delete any pop version job associations with this version
+
 //        if(!parentPopulation.changesPending)
 //        {
 //            //Request to delete a published version from query table where other published version exists
@@ -208,8 +290,22 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population
      */
-    public CommunicationPopulation calculatePopulation( CommunicationPopulation population ) {
-        return calculatePopulation( population.id, population.version )
+    public CommunicationPopulation calculatePopulationForUser( Long id, Long version ) {
+        CommunicationPopulation population = CommunicationPopulation.fetchById( id )
+        if (!population) {
+            throw new ApplicationException(
+                    "CommunicationPopulation",
+                    population.id,
+                    new NotFoundException(id: population.id, entityClassName: CommunicationPopulation.class.simpleName)
+            )
+        }
+
+        if (population.version != version) {
+            // TODO: throw optimistic lock exception
+        }
+
+        String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName();
+        return calculatePopulationForUser( population.id, population.version, oracleUserName )
     }
 
 
@@ -220,41 +316,83 @@ class CommunicationPopulationCompositeService {
      * @param id the primary key of the population query
      * @param version the optimistic lock counter
      */
-    public CommunicationPopulation calculatePopulation( Long id, Long version ) {
+    public CommunicationPopulation calculatePopulationForUser( CommunicationPopulation population, String oracleName ) {
         log.trace( "publishPopulation called" )
-        assert( id != null )
-        assert( version != null ) // optimistic lock counter
+        assert( population.id )
+        assert( oracleName )
 
-        CommunicationPopulation population = CommunicationPopulation.fetchById( id )
-        if (!population) {
-            throw new ApplicationException(
-                    "CommunicationPopulation",
-                    population.id,
-                    new NotFoundException(id: population.id, entityClassName: CommunicationPopulation.class.simpleName)
-            )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, oracleName )
+        if (populationVersion) {
+            if (populationVersion.status.equals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION ) ) {
+                // if we decide to support this capability in the future, we should unschedule the quartz job
+                throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotRecalculatePopulationPendingExecution" )
+            } else {
+                communicationPopulationVersionService.delete( populationVersion )
+            }
         }
 
-//        if (!population.changesPending) {
-//            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQuery.class, "noChangesToPublish" )
-//        }
-
-//        if (!population.sqlString || population.sqlString.trim().length() == 0) {
-//            throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
-//        }
-
-//        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( population.sqlString )
-//        if (!parseResult.isValid()) {
-//            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
-//        }
-
-//        population.changesPending = false
-        population = communicationPopulationService.update( population )
-
-        CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
+        populationVersion = new CommunicationPopulationVersion()
         populationVersion.population = population
-//        populationVersion.sqlString = population.sqlString
-        communicationPopulationVersionService.create( [ domainModel: populationVersion ] )
+        populationVersion.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
+        populationVersion.jobId = UUID.randomUUID().toString()
+        populationVersion.calculatedBy = oracleName
+        populationVersion = communicationPopulationVersionService.create( [ domainModel: populationVersion ] )
+        assert populationVersion.id
+
+        List queryAssociationList = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
+        if (!queryAssociationList || queryAssociationList.size() == 0) {
+            throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotFindAssociatedQueryForPopulation" )
+        }
+        CommunicationPopulationQueryAssociation populationQueryAssociation = queryAssociationList.get( 0 )
+
+        // peek at the query association, if the query version is explicitly set, use it, otherwise choose the latest published query version
+        // for the given population query associated with this population
+        CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = new CommunicationPopulationVersionQueryAssociation()
+        populationVersionQueryAssociation.populationVersion = populationVersion
+        if (populationQueryAssociation.populationQueryVersion) {
+            populationVersionQueryAssociation.populationQueryVersion = populationQueryAssociation.populationQueryVersion
+        } else {
+            List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQueryAssociation.populationQuery.id )
+            if (!queryVersionList || queryVersionList.size() == 0) {
+                throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotFindPublishedQueryVersion" )
+            }
+            populationVersionQueryAssociation.populationQueryVersion = (CommunicationPopulationQueryVersion) queryVersionList.get( 0 )
+        }
+        communicationPopulationVersionQueryAssociationService.create( populationVersionQueryAssociation )
+        assert populationVersionQueryAssociation.id
+
+        Map parameters = [:]
+        parameters.put( "populationVersionId", populationVersion.id )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod(
+            populationVersion.jobId,
+            oracleName,
+            populationVersion.mepCode,
+            "communicationPopulationCompositeService",
+            "calculatePendingPopulationVersion",
+            parameters
+        )
         return population
+    }
+
+    /**
+     * This method is meant to be called from a quartz service to complete
+     * the calculation request of a population version.
+     * @param parameters a set of parameters passed from the original request through the quartz job detail data map
+     */
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
+    public void calculatePendingPopulationVersion( Map parameters ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "calculatePendingPopulationVersion with " + parameters )
+        }
+
+        Long populationVersionId = parameters.get( "populationVersionId" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.fetchById( populationVersionId )
+        if (!populationVersion) {
+            log.error( "Could not fetch communication population version with id ${populationVersionId}." )
+        }
+//        communicationPopulationExecutionService.execute( populationVersionId )
+
+
     }
 
 

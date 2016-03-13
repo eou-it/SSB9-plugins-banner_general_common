@@ -102,7 +102,9 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
     static constraints = {
         populationVersion(nullable: false)
         populationQueryVersion(nullable: false)
-        selectionList(nullable: false)
+        selectionList(nullable: true)
+        errorCode(nullable: true)
+        errorText(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

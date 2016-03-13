@@ -18,6 +18,9 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationVersion.findByPopulationId",
                 query = """ FROM CommunicationPopulationVersion populationVersion
                 WHERE populationVersion.population.id = :populationId order by populationVersion.createDate DESC"""),
+        @NamedQuery(name = "CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy",
+                query = """ FROM CommunicationPopulationVersion populationVersion
+                WHERE populationVersion.population.id = :populationId and upper( populationVersion.createdBy ) = upper( :userId ) order by populationVersion.createDate DESC"""),
         @NamedQuery(name = "CommunicationPopulationVersion.fetchById",
                 query = """ FROM CommunicationPopulationVersion populationVersion
                 WHERE populationVersion.id = :id""")
@@ -74,6 +77,12 @@ class CommunicationPopulationVersion implements Serializable {
     CommunicationPopulationCalculationStatus status
 
     /**
+     * JOB ID : UUID of the quartz job for the population version calculation
+     */
+    @Column(name = "GCRPOPV_QZJB_ID")
+    String jobId
+
+    /**
      * VERSION: Optimistic lock token
      */
     @Version
@@ -100,15 +109,20 @@ class CommunicationPopulationVersion implements Serializable {
     @Column(name = "GCRPOPV_DATA_ORIGIN")
     String dataOrigin
 
+    @Column(name = "GCRPOPV_VPDI_CODE")
+    String mepCode
+
     static constraints = {
         population(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
+        calculatedCount(nullable: true)
         calculatedBy(nullable: false)
         status(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+        mepCode(nullable: true)
     }
 
 
@@ -123,6 +137,15 @@ class CommunicationPopulationVersion implements Serializable {
             population = session.getNamedQuery('CommunicationPopulationVersion.findByPopulationId').setLong( 'populationId', populationId ).list()
         }
         return population
+    }
+
+    public static CommunicationPopulationVersion findLatestByPopulationIdAndCreatedBy( Long populationId, String userId ) {
+        CommunicationPopulationVersion populationVersion
+        CommunicationPopulationVersion.withSession { session ->
+            populationVersion = session.getNamedQuery('CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy').
+                setLong( 'populationId', populationId ).setString( 'userId', userId ).list()[0]
+        }
+        return populationVersion
     }
 
     public static CommunicationPopulationVersion fetchById(Long id) {

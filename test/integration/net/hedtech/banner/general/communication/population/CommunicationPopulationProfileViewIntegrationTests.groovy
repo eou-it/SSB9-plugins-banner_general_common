@@ -36,7 +36,6 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
         newPerson()
         globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
         globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
-        globalTestPopulationSelectionList.populationQueryId = globalTestPopulationQuery.id
         globalTestPopulationSelectionList = globalTestPopulationSelectionList.save(failOnError: true, flush: true)
         assertNotNull(globalTestPopulationSelectionList.id)
     }
@@ -60,11 +59,11 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
         assertEquals globalPidm, populationSelectionListEntry?.pidm
         assertEquals globalTestPopulationSelectionList, populationSelectionListEntry.populationSelectionList
 
-        def listView = CommunicationPopulationProfileView.findAllByPopulationId(globalTestPopulationSelectionList.id)
+        def listView = CommunicationPopulationProfileView.findAllBySelectionListId(globalTestPopulationSelectionList.id)
         assertNotNull(listView)
         assertTrue listView.size() >= 1
 
-        def results = CommunicationPopulationProfileView.findByNameWithPagingAndSortParams([params: [populationId: globalTestPopulationSelectionList.id, "name":"%"]],[sortColumn: "lastName", sortDirection: "asc", max: 20, offset: 0])
+        def results = CommunicationPopulationProfileView.findByNameWithPagingAndSortParams([params: [selectionListId: globalTestPopulationSelectionList.id, "name":"%"]],[sortColumn: "lastName", sortDirection: "asc", max: 20, offset: 0])
         def querycount = results.getTotalCount()
         assertTrue querycount > 0
 

@@ -2,12 +2,13 @@
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.selectionlist
+
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 
 /**
  * BannerPopulation Selection List definitions entity.
@@ -20,10 +21,9 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationSelectionList.fetch",
                 query = """ FROM CommunicationPopulationSelectionList a"""),
-        @NamedQuery(name = "CommunicationPopulationSelectionList.fetchByNameAndId",
+        @NamedQuery(name = "CommunicationPopulationSelectionList.fetchById",
                 query = """ FROM CommunicationPopulationSelectionList a
-                      where a.populationQueryId = :populationQueryId
-                      and a.lastModifiedBy = upper( :userId ) """)
+                    WHERE a.id = :id""")
 ])
 class CommunicationPopulationSelectionList implements Serializable {
 
@@ -40,16 +40,9 @@ class CommunicationPopulationSelectionList implements Serializable {
     String name
 
     /**
-     *
-     */
-    @Column(name = "GCRSLIS_QUERY_ID")
-    Long populationQueryId
-
-    /**
      * Selection List status: SCHEDULED, PENDING_EXECUTION, ERROR, AVAILABLE
      */
     @Column(name = "GCRSLIS_STATUS")
-    @Enumerated(EnumType.STRING)
     CommunicationPopulationQueryExecutionStatus status
 
     /**
@@ -78,50 +71,24 @@ class CommunicationPopulationSelectionList implements Serializable {
     @Column(name = "GCRSLIS_DATA_ORIGIN")
     String dataOrigin
 
-    /**
-     * LAST_CALC_COUUNT: The count of persons calculated by the populationQuery
-     */
-    @Column(name = "GCRSLIS_LAST_CALC_COUNT")
-    Long lastCalculatedCount
-
-    /**
-     * LAST_CALC_BY: ID of the user who last calculated the populationQuery.
-     */
-    @Column(name = "GCRSLIS_LAST_CALC_BY")
-    String lastCalculatedBy
-
-    /**
-     * LAST_CALC_TIME: Timestamp of when the populationQuery was last calculated.
-     */
-    @Column(name = "GCRSLIS_LAST_CALC_TIME")
-    @Temporal(TemporalType.TIMESTAMP)
-    Date lastCalculatedTime
-
-
     static constraints = {
         name(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        populationQueryId(nullable: false)
-        status(nullable: false)
-        lastCalculatedCount(nullable: true)
-        lastCalculatedBy(nullable: true, maxSize: 30)
-        lastCalculatedTime(nullable: true)
+        status(nullable: true)
     }
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
+    public static CommunicationPopulationSelectionList fetchById(Long id) {
+        def populationSelectionList
+        CommunicationPopulationSelectionList.withSession { session ->
+            populationSelectionList = session.getNamedQuery('CommunicationPopulationSelectionList.fetchById')
+                    .setLong('id', id).list()[0]
 
-    public static CommunicationPopulationSelectionList fetchByNameAndId(Long populationQueryId, String userId) {
-
-        def populationSelectionLists = CommunicationPopulationSelectionList.withSession { session ->
-            org.hibernate.Query query = session.getNamedQuery('CommunicationPopulationSelectionList.fetchByNameAndId')
-                    .setLong('populationQueryId', populationQueryId).setString('userId', userId)
-            ; query.list()
         }
-        return populationSelectionLists.getAt(0)
+        return populationSelectionList
     }
-
 }

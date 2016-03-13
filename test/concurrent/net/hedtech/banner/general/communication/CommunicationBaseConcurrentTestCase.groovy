@@ -11,6 +11,8 @@ import net.hedtech.banner.general.communication.organization.CommunicationEmailS
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryCompositeService
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import com.icegreen.greenmail.util.*
 import groovy.sql.Sql
@@ -33,11 +35,12 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
 
     def communicationGroupSendMonitor
-    def communicationGroupSendCommunicationService
+    def communicationGroupSendCompositeService
     def communicationMailboxAccountService
     def communicationGroupSendService
     def communicationGroupSendItemService
-    def communicationPopulationQueryCompositeService
+    CommunicationPopulationQueryCompositeService communicationPopulationQueryCompositeService
+    CommunicationPopulationCompositeService communicationPopulationCompositeService
     def communicationPopulationExecutionService
     def communicationPopulationSelectionListService
     def communicationFolderService
@@ -187,6 +190,11 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBTMPL")
                 sql.executeUpdate("Delete from GCRCFLD")
+                sql.executeUpdate("Delete from GCRLENT")
+                sql.executeUpdate("Delete from GCRPVID")
+                sql.executeUpdate("Delete from GCRPOPV")
+                sql.executeUpdate("Delete from GCRPQID")
+                sql.executeUpdate("Delete from GCBPOPL")
                 sql.executeUpdate("Delete from GCRSLIS")
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
@@ -268,18 +276,18 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
 
     protected void setUpDefaultFolder() {
-        defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCommunicationServiceTests" )
+        defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCompositeServiceTests" )
         if (!defaultFolder) {
-            defaultFolder = new CommunicationFolder( name: "CommunicationGroupSendCommunicationServiceTests", description: "integration test" )
+            defaultFolder = new CommunicationFolder( name: "CommunicationGroupSendCompositeServiceTests", description: "integration test" )
             defaultFolder = communicationFolderService.create( defaultFolder )
         }
     }
 
     protected void setUpDefaultEmailTemplate() {
-        defaultEmailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCommunicationServiceTests_template" )
+        defaultEmailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCompositeServiceTests_template" )
         if (!defaultEmailTemplate) {
             defaultEmailTemplate = new CommunicationEmailTemplate (
-                    name: "CommunicationGroupSendCommunicationServiceTests_template",
+                    name: "CommunicationGroupSendCompositeServiceTests_template",
                     personal: false,
                     oneOff: false,
                     folder: defaultFolder,

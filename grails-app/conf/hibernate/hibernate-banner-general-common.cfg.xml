@@ -22,6 +22,9 @@ there is no concept of an 'entity manager' within this project.
 
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulation"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationVersion"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation"/>
+
         <mapping class="net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList"/>
         <mapping class="net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry"/>
         <mapping class="net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryView"/>
@@ -58,9 +61,11 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem"/>
 
+        <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
         <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItemView"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationErrorItem"/>
+
 
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingDisplayOption"/>
         <mapping class="net.hedtech.banner.general.commonmatching.CommonMatchingSourcePriority"/>

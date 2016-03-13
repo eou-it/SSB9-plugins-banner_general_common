@@ -5,28 +5,38 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
+import net.hedtech.banner.general.communication.template.CommunicationTemplateService
+import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
+import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Connection
 import java.sql.SQLException
 
 /**
- * GroupSendCommunicationService is responsible for initiating and processing group send communications.
+ * Communication Group Send Composite Service is responsible for initiating and processing group send communications.
+ * Controllers and other client code should generally work through this service for interacting with group send
+ * behavior and objects.
  */
 @Transactional
-class CommunicationGroupSendCommunicationService {
+class CommunicationGroupSendCompositeService {
 
     def log = Logger.getLogger( this.getClass() )
-    def communicationGroupSendService
-    def communicationTemplateService
-    def communicationPopulationSelectionListService
-    def communicationOrganizationService
+    CommunicationGroupSendService communicationGroupSendService
+    CommunicationTemplateService communicationTemplateService
+    CommunicationPopulationSelectionListService communicationPopulationSelectionListService
+    CommunicationOrganizationService communicationOrganizationService
+    CommunicationPopulationCompositeService communicationPopulationCompositeService
+    SchedulerJobService schedulerJobService
     def sessionFactory
     def dataSource
-//    def asynchronousActionSchedulingService
 
 
     /**
@@ -39,16 +49,7 @@ class CommunicationGroupSendCommunicationService {
 
         String jobName = request.getName();
         if(!jobName || jobName.isEmpty()) {
-            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCommunicationService, "@@r1:jobNameInvalid@@" )
-        }
-
-        Calendar scheduledDate = request.getScheduledStartDate()
-        if(scheduledDate != null)
-        {
-            //Validation to make sure date is not in the past
-            Calendar now = Calendar.getInstance(scheduledDate.getTimeZone())
-            if(now.after(scheduledDate))
-                throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "invalidScheduledDate" )
+            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:jobNameInvalid@@" )
         }
 
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
@@ -56,22 +57,66 @@ class CommunicationGroupSendCommunicationService {
         groupSend.populationId = request.getPopulationId()
         groupSend.organizationId = request.getOrganizationId()
         groupSend.name = jobName
-        if(scheduledDate != null) {
-            groupSend.scheduledStartDate = scheduledDate.getTime()
-        }
+        groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
 
-        // We'll created the group send items synchronously for now until we have support for scheduling.
-        // The individual group send items will still be processed asynchronously via the framework.
-        createGroupSendItems( groupSend )
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        String mepCode = groupSend.mepCode
 
-        groupSend = communicationGroupSendService.update( groupSend )
+        Map parameters = [:]
+        parameters.put( "groupSendId", groupSend.id )
+
+        groupSend = calculatePopulationForGroupSend( parameters )
+
+//        if (request.scheduledStartDate) {
+//            Date now = new Date( System.currentTimeMillis() )
+//            if (now.after( request.scheduledStartDate )) {
+//                throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "invalidScheduledDate" )
+//            }
+//            schedulerJobService.scheduleServiceMethod( request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", parameters )
+//        } else {
+//            schedulerJobService.scheduleNowServiceMethod( request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
+//        }
+
         return groupSend
     }
 
+    /**
+     * This method is called by the scheduler to regenerate a population list specifically for the group send
+     * and change the state of the group send to next state.
+     */
+    public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
+        Long groupSendId = parameters.get( "groupSendId" ) as Long
+        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
+
+        // TODO: Calculate the population associated with this group send.
+
+        // TODO: Decide whether to store a reference for the next piece of work to be done or can we use reference id from original reference
+        String scheduledJobId = UUID.randomUUID().toString()
+        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        String mepCode = groupSend.mepCode
+//        schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
+        groupSend = generateGroupSendItems( parameters )
+        return groupSend
+    }
+
+    /**
+     * This method is called by the scheduler to create the group send items and move the state of
+     * the group send to processing.
+     */
+    public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
+        Long groupSendId = parameters.get( "groupSendId" ) as Long
+        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
+
+        // We'll created the group send items synchronously for now until we have support for scheduling.
+        // The individual group send items will still be processed asynchronously via the framework.
+        createGroupSendItems(groupSend)
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend = communicationGroupSendService.update(groupSend)
+        return groupSend
+    }
 
     /**
      * Deletes a group send and it's dependent objects. The group send must not bre running otherwise an
@@ -84,13 +129,13 @@ class CommunicationGroupSendCommunicationService {
             log.debug( "deleteGroupSend for id = ${groupSendId}." )
         }
 
-        CommunicationGroupSend groupSend = communicationGroupSendService.get( groupSendId )
+        CommunicationGroupSend groupSend = (CommunicationGroupSend) communicationGroupSendService.get( groupSendId )
         if (!groupSend) {
             throw CommunicationExceptionFactory.createNotFoundException( groupSendId, CommunicationGroupSend.class )
         }
 
         if (groupSend.currentExecutionState.running) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCommunicationService.class, "cannotDeleteRunningGroupSend" )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "cannotDeleteRunningGroupSend" )
         }
 
         deleteCommunicationJobsByGroupSendId( groupSendId )

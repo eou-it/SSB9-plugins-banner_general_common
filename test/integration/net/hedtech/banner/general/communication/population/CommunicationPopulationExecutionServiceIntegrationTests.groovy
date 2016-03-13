@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.population
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -130,18 +131,13 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(savedPopulationQuery.id)
         calculatedPopulationQuery.refresh()
 
-
-        def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, 'BCMADMIN')
-        if (populationQuerySelectionList == null)
-             populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId(calculatedPopulationQuery.id, 'GRAILS_USER')
+        def populationQuerySelectionList = CommunicationPopulationSelectionList.fetchById(populationSelectionListId)
         assertNotNull populationQuerySelectionList
         assertEquals(populationSelectionListId, populationQuerySelectionList.id)
         assertEquals("TTTTTTTTTT", populationQuerySelectionList.name)
 
         /* Test that the new count values are populated in the selectionList */
-        assertTrue(populationQuerySelectionList.lastCalculatedCount > 0)
         assertNotNull(populationQuerySelectionList.lastModifiedBy)
-        assertNotNull(populationQuerySelectionList.lastCalculatedTime)
         /* make sure it created list entries */
         def populationQuerySelectionListEntry = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationQuerySelectionList.id)
         assertNotNull populationQuerySelectionListEntry

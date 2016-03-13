@@ -10,8 +10,13 @@ import net.hedtech.banner.general.communication.field.CommunicationRuleStatement
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationListView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -33,6 +38,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationOrganizationService
     def communicationTemplateService
     def communicationEmailTemplateService
+    def communicationPopulationCompositeService
 
     def CommunicationFolder validFolder
     def CommunicationEmailTemplate emailTemplate
@@ -156,35 +162,34 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     void testCreateCommunicationRecipientDataFromTemplate() {
 
         //execute the query to get a population
-        def populationSelectionListId = communicationPopulationExecutionService.execute( validQuery.id )
-        validQuery.refresh()
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery(validQuery.id, "TEST NAME", "TEST DESC")
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy(population.id, getUser())
+        def populationSelectionListId =
+                communicationPopulationExecutionService.execute( validQuery.id )
+                validQuery.refresh()
 
-        def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById( validQuery.id )
+        def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(validQuery.id)
         calculatedPopulationQuery.refresh()
 
-        def populationQuerySelectionList = communicationPopulationSelectionListService.fetchByNameAndId( calculatedPopulationQuery.id, getUser() )
-        assertNotNull populationQuerySelectionList
-        assertEquals( populationSelectionListId, populationQuerySelectionList.id )
-
         //get all the people in the population
-        def personlist = CommunicationPopulationProfileView.findAllByPopulationId( populationQuerySelectionList.id )
-        assertNotNull( personlist )
+        def personlist = CommunicationPopulationProfileView.findAllBySelectionListId(populationSelectionListId)
+        assertNotNull(personlist)
         assertTrue personlist.size() >= 1
 
         // Now set up the data fields
         CommunicationField tempField
-        def testCommunicationField = newCommunicationField( validFolder, "firstname", "\$firstname\$",
-                "George", "Select spriden_first_name firstname from spriden where spriden_pidm = :pidm and spriden_change_ind is null" )
-        tempField = communicationFieldService.create( [domainModel: testCommunicationField] )
+        def testCommunicationField = newCommunicationField(validFolder, "firstname", "\$firstname\$",
+                "George", "Select spriden_first_name firstname from spriden where spriden_pidm = :pidm and spriden_change_ind is null")
+        tempField = communicationFieldService.create([domainModel: testCommunicationField])
         assertNotNull tempField.immutableId
 
-        testCommunicationField = newCommunicationField( validFolder, "lastname", "\$lastname\$",
-                "George", "Select spriden_last_name lastname from spriden where spriden_pidm = :pidm and spriden_change_ind is null" )
-        tempField = communicationFieldService.create( [domainModel: testCommunicationField] )
+        testCommunicationField = newCommunicationField(validFolder, "lastname", "\$lastname\$",
+                "George", "Select spriden_last_name lastname from spriden where spriden_pidm = :pidm and spriden_change_ind is null")
+        tempField = communicationFieldService.create([domainModel: testCommunicationField])
         assertNotNull tempField.immutableId
 
         // get all the fields from the template
-        def fieldList = communicationTemplateMergeService.extractTemplateVariables( validTemplate.content.toString() )
+        def fieldList = communicationTemplateMergeService.extractTemplateVariables(validTemplate.content.toString())
 
         def resultSet
 
@@ -198,31 +203,31 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 def fieldListByPidm = [:]
                 fieldList.each {
                     fieldName ->
-                        CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
+                        CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
                         if (communicationField) {
                             resultSet = communicationFieldCalculationService.calculateFieldByMap(
-                                (String) communicationField.ruleContent,
-                                (Boolean) communicationField.returnsArrayArguments,
-                                (String) communicationField.formatString,
-                                (Map) params
+                                    (String) communicationField.ruleContent,
+                                    (Boolean) communicationField.returnsArrayArguments,
+                                    (String) communicationField.formatString,
+                                    (Map) params
                             )
-                            fieldListByPidm.put( communicationField.name, newFieldValue( resultSet ) )
+                            fieldListByPidm.put(communicationField.name, newFieldValue(resultSet))
                         }
 
                         CommunicationRecipientData recipient = new CommunicationRecipientData(
                                 pidm: person.pidm,
                                 templateId: validTemplate.id,
-                                referenceId:  UUID.randomUUID().toString(),
+                                referenceId: UUID.randomUUID().toString(),
                                 ownerId: getUser(),
                                 fieldValues: fieldListByPidm,
                                 organizationId: this.organization.id,
                                 communicationChannel: validTemplate.communicationChannel
                         )
-                        communicationRecipientDataService.create( recipient )
+                        communicationRecipientDataService.create(recipient)
                 }
 
-                def recipientDataList = CommunicationRecipientData.fetchByTemplateId( validTemplate.id )
-                assertNotNull( recipientDataList )
+                def recipientDataList = CommunicationRecipientData.fetchByTemplateId(validTemplate.id)
+                assertNotNull(recipientDataList)
         }
 
     }

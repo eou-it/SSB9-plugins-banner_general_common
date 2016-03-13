@@ -13,6 +13,6 @@ class CommunicationGroupSendRequest implements Serializable {
     Long templateId
     Long organizationId
     String referenceId
-    Calendar scheduledStartDate
+    Date scheduledStartDate
     Boolean recalculateOnSend
 }
