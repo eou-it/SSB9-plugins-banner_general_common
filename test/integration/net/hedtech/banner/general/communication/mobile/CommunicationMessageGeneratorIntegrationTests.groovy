@@ -3,19 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.mobile
 
-import net.hedtech.banner.general.communication.field.CommunicationField
-import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
-import net.hedtech.banner.general.communication.field.CommunicationFieldView
-import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
-import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
-import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After

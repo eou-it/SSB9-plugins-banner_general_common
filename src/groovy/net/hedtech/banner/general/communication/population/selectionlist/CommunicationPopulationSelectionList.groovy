@@ -1,13 +1,13 @@
 /*******************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.communication.population
-
+package net.hedtech.banner.general.communication.population.selectionlist
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 
 /**
  * BannerPopulation Selection List definitions entity.

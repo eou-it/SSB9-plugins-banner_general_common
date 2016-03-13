@@ -9,8 +9,8 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.security.BannerAuthenticationToken
 import net.hedtech.banner.testing.BaseIntegrationTestCase

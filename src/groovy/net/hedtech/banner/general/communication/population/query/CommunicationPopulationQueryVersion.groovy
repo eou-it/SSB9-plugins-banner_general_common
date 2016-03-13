@@ -1,12 +1,10 @@
 /*******************************************************************************
  Copyright 2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.communication.population
+package net.hedtech.banner.general.communication.population.query
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import org.hibernate.annotations.Type
 
 import javax.persistence.*
 

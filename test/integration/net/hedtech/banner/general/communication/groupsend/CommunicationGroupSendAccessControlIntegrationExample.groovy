@@ -1,23 +1,4 @@
 package net.hedtech.banner.general.communication.groupsend
-
-import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
-import net.hedtech.banner.general.communication.field.CommunicationField
-import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionList
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
-import net.hedtech.banner.security.FormContext
-import org.apache.commons.logging.LogFactory
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
-
-import java.util.concurrent.TimeUnit
-
-import static junit.framework.Assert.assertTrue
-
 /**
  * CommunicationGroupSendAccessControlIntegrationTests tests proxying of user with insufficient privileges when enabled.
  */

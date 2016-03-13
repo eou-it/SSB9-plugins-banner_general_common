@@ -2,12 +2,14 @@
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
-package net.hedtech.banner.general.communication.population
+package net.hedtech.banner.general.communication.population.query
 
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryParseResult
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 
 import java.sql.SQLException
 

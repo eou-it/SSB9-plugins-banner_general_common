@@ -6,6 +6,8 @@ package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
