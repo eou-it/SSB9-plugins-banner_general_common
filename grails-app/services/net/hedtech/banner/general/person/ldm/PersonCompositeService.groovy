@@ -171,9 +171,6 @@ class PersonCompositeService extends LdmService {
                     boolean isCorrectRole=false
                     PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
                     pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
-                    if (null == personIdentificationNameCurrent) {
-                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("not.found.message", []))
-                    }
                     String role = params.role?.trim()?.toLowerCase()
                     if (role && role == 'student') {
                         studentRole = true
