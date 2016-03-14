@@ -179,7 +179,7 @@ class PersonCompositeService extends LdmService {
                     } else {
                         isCorrectRole=true
                     }
-                    if (params.role) {
+                    if (params.role && personIdentificationNameCurrent) {
                         Map personMap = userRoleCompositeService.fetchAllRolesByPidmInList([personIdentificationNameCurrent?.pidm],studentRole)
                         List<RoleDetail> roles = personMap.get(personIdentificationNameCurrent?.pidm)
                         for(RoleDetail roleDetail : roles){
