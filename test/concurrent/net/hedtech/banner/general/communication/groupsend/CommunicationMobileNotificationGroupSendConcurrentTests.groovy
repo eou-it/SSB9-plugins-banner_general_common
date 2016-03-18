@@ -11,6 +11,8 @@ import net.hedtech.banner.general.communication.item.CommunicationMobileNotifica
 import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItemService
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
@@ -69,9 +71,10 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testPop") )
         populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
-        Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
-        assertNotNull(selectionList)
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "" )
+        assertNotNull(population.id)
+//        communicationPopulationCompositeService.
+
         def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
@@ -184,6 +187,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+
 
         Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)

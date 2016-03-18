@@ -5,11 +5,13 @@
 package net.hedtech.banner.general.communication.groupsend
 
 /**
- * CommunicationJobItemExecutionState describes the state of executing communication job item.
+ * CommunicationGroupSendExecutionState describes the state of executing communication job item.
  */
 enum CommunicationGroupSendExecutionState implements Serializable {
 
     New (false),
+    Scheduled (false),
+    Calculating (false),
     Processing (false),
     Complete (true),
     Stopped (true),

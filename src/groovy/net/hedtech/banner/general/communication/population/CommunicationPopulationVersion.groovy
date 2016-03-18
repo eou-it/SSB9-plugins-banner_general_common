@@ -123,6 +123,7 @@ class CommunicationPopulationVersion implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable: true)
+        jobId(nullable: true)
     }
 
 

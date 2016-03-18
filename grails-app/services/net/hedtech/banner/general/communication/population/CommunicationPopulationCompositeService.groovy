@@ -317,7 +317,7 @@ class CommunicationPopulationCompositeService {
      * @param version the optimistic lock counter
      */
     public CommunicationPopulation calculatePopulationForUser( CommunicationPopulation population, String oracleName ) {
-        log.trace( "publishPopulation called" )
+        log.trace( "calculatePopulationForUser called" )
         assert( population.id )
         assert( oracleName )
 
@@ -331,48 +331,25 @@ class CommunicationPopulationCompositeService {
             }
         }
 
-        populationVersion = new CommunicationPopulationVersion()
-        populationVersion.population = population
-        populationVersion.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
-        populationVersion.jobId = UUID.randomUUID().toString()
-        populationVersion.calculatedBy = oracleName
-        populationVersion = communicationPopulationVersionService.create( [ domainModel: populationVersion ] )
-        assert populationVersion.id
+        populationVersion = createPopulationVersion( population, oracleName, UUID.randomUUID().toString() )
 
-        List queryAssociationList = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
-        if (!queryAssociationList || queryAssociationList.size() == 0) {
-            throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotFindAssociatedQueryForPopulation" )
-        }
-        CommunicationPopulationQueryAssociation populationQueryAssociation = queryAssociationList.get( 0 )
-
-        // peek at the query association, if the query version is explicitly set, use it, otherwise choose the latest published query version
-        // for the given population query associated with this population
-        CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = new CommunicationPopulationVersionQueryAssociation()
-        populationVersionQueryAssociation.populationVersion = populationVersion
-        if (populationQueryAssociation.populationQueryVersion) {
-            populationVersionQueryAssociation.populationQueryVersion = populationQueryAssociation.populationQueryVersion
-        } else {
-            List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQueryAssociation.populationQuery.id )
-            if (!queryVersionList || queryVersionList.size() == 0) {
-                throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotFindPublishedQueryVersion" )
-            }
-            populationVersionQueryAssociation.populationQueryVersion = (CommunicationPopulationQueryVersion) queryVersionList.get( 0 )
-        }
-        communicationPopulationVersionQueryAssociationService.create( populationVersionQueryAssociation )
-        assert populationVersionQueryAssociation.id
-
-        Map parameters = [:]
-        parameters.put( "populationVersionId", populationVersion.id )
         SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod(
             populationVersion.jobId,
             oracleName,
             populationVersion.mepCode,
             "communicationPopulationCompositeService",
             "calculatePendingPopulationVersion",
-            parameters
+            [ "populationVersionId" : populationVersion.id ]
         )
         return population
     }
+
+
+    public CommunicationPopulation calculatePopulationForGroupSend( CommunicationPopulation population, String oracleName ) {
+        CommunicationPopulationVersion populationVersion = createPopulationVersion( population, oracleName )
+        calculatePendingPopulationVersion( [ "populationVersionId" : populationVersion.id ] )
+    }
+
 
     /**
      * This method is meant to be called from a quartz service to complete
@@ -435,4 +412,43 @@ class CommunicationPopulationCompositeService {
     }
 
 
+    private CommunicationPopulationQueryAssociation fetchPopulationQueryAssociation(CommunicationPopulation population) {
+        List queryAssociationList = CommunicationPopulationQueryAssociation.findAllByPopulation(population)
+        if (!queryAssociationList || queryAssociationList.size() == 0) {
+            throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotFindAssociatedQueryForPopulation")
+        }
+        CommunicationPopulationQueryAssociation populationQueryAssociation = queryAssociationList.get(0)
+        populationQueryAssociation
+    }
+
+
+    private CommunicationPopulationVersion createPopulationVersion(CommunicationPopulation population, String calculatedByOracleName, String jobId = null) {
+        CommunicationPopulationVersion populationVersion
+        populationVersion = new CommunicationPopulationVersion()
+        populationVersion.population = population
+        populationVersion.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
+        populationVersion.jobId = jobId
+        populationVersion.calculatedBy = calculatedByOracleName
+        populationVersion = communicationPopulationVersionService.create([domainModel: populationVersion])
+        assert populationVersion.id
+
+        CommunicationPopulationQueryAssociation populationQueryAssociation = fetchPopulationQueryAssociation(population)
+
+        // peek at the query association, if the query version is explicitly set, use it, otherwise choose the latest published query version
+        // for the given population query associated with this population
+        CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = new CommunicationPopulationVersionQueryAssociation()
+        populationVersionQueryAssociation.populationVersion = populationVersion
+        if (populationQueryAssociation.populationQueryVersion) {
+            populationVersionQueryAssociation.populationQueryVersion = populationQueryAssociation.populationQueryVersion
+        } else {
+            List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId(populationQueryAssociation.populationQuery.id)
+            if (!queryVersionList || queryVersionList.size() == 0) {
+                throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotFindPublishedQueryVersion")
+            }
+            populationVersionQueryAssociation.populationQueryVersion = (CommunicationPopulationQueryVersion) queryVersionList.get(0)
+        }
+        populationVersionQueryAssociation = communicationPopulationVersionQueryAssociationService.create(populationVersionQueryAssociation)
+        assert populationVersionQueryAssociation.id
+        return populationVersion
+    }
 }

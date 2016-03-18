@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
+import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
@@ -59,28 +60,64 @@ class CommunicationGroupSendCompositeService {
         groupSend.name = jobName
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.New
         groupSend = communicationGroupSendService.create( groupSend )
 
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
         String mepCode = groupSend.mepCode
 
-        Map parameters = [:]
-        parameters.put( "groupSendId", groupSend.id )
-
-        groupSend = calculatePopulationForGroupSend( parameters )
-
-//        if (request.scheduledStartDate) {
-//            Date now = new Date( System.currentTimeMillis() )
-//            if (now.after( request.scheduledStartDate )) {
-//                throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "invalidScheduledDate" )
-//            }
-//            schedulerJobService.scheduleServiceMethod( request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", parameters )
-//        } else {
-//            schedulerJobService.scheduleNowServiceMethod( request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
-//        }
+        if (request.scheduledStartDate) {
+            groupSend = scheduleGroupSend(request, bannerUser, mepCode, groupSend)
+        } else {
+            groupSend = queueProcessGroupSend( groupSend )
+        }
 
         return groupSend
+    }
+
+
+    public CommunicationGroupSend startGroupSend( Map parameters ) {
+        Long groupSendId = parameters.get( "groupSendId" ) as Long
+        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
+
+        String scheduledJobId = UUID.randomUUID().toString()
+        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+
+        if (groupSend.recalculateOnSend) {
+            schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+            groupSend = communicationGroupSendService.update(groupSend)
+        } else {
+            queueProcessGroupSend( groupSend, scheduledJobId )
+        }
+        return groupSend
+    }
+
+
+    private CommunicationGroupSend queueProcessGroupSend( CommunicationGroupSend groupSend, String scheduledJobId = UUID.randomUUID().toString() ) {
+//        schedulerJobService.scheduleNowServiceMethod(
+//            scheduledJobId,
+//            SecurityContextHolder.context.authentication.principal.getOracleUserName(),
+//            groupSend.mepCode,
+//            "communicationGroupSendCompositeService",
+//            "generateGroupSendItems",
+//            ["groupSendId": groupSend.id]
+//        )
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend = communicationGroupSendService.update(groupSend)
+        calculatePopulationForGroupSend( ["groupSendId": groupSend.id] )
+        return groupSend
+    }
+
+
+    private CommunicationGroupSend scheduleGroupSend(CommunicationGroupSendRequest request, String bannerUser, String mepCode, CommunicationGroupSend groupSend) {
+        Date now = new Date(System.currentTimeMillis())
+        if (now.after(request.scheduledStartDate)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidScheduledDate")
+        }
+        schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
+        groupSend = communicationGroupSendService.update(groupSend)
+        groupSend
     }
 
     /**
@@ -90,13 +127,13 @@ class CommunicationGroupSendCompositeService {
     public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
-
-        // TODO: Calculate the population associated with this group send.
+        CommunicationPopulation population = CommunicationPopulation.fetchById( groupSend.getPopulationId() )
+        if (!population) {
+            assert population // throw error
+        }
+        communicationPopulationCompositeService.calculatePopulationForGroupSend( population, groupSend.createdBy ) // double check this is the correct user
 
         // TODO: Decide whether to store a reference for the next piece of work to be done or can we use reference id from original reference
-        String scheduledJobId = UUID.randomUUID().toString()
-        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-        String mepCode = groupSend.mepCode
 //        schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
         groupSend = generateGroupSendItems( parameters )
         return groupSend
