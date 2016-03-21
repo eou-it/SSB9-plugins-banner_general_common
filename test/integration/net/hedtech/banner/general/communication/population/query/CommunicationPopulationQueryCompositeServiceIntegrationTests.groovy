@@ -233,7 +233,8 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
                 "select pidm from spriden"
         )
         assertEquals("N", result.status)
-        assertEquals( "ORA-00904: \"PIDM\": invalid identifier", result.message )
+//        assertEquals( "ORA-00904: \"PIDM\": invalid identifier", result.message )
+        assertEquals( "Error p_validate_sql executing query: select pidm from spriden: -904: \n", result.message )
         assertEquals(0, result.cost)
         assertEquals(0, result.cardinality)
     }
