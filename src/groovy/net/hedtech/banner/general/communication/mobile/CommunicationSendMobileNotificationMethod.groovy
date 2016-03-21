@@ -157,7 +157,7 @@ class CommunicationSendMobileNotificationMethod {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
             }
 
-            if ((t instanceof java.net.UnknownHostException) || (t instanceof org.apache.http.conn.HttpHostConnectException)) {
+            if ((t instanceof java.net.UnknownHostException) || (t instanceof org.apache.http.conn.HttpHostConnectException) || (t instanceof javax.net.ssl.SSLPeerUnverifiedException)) {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
             }
 

@@ -21,6 +21,7 @@ import java.util.regex.Pattern
 class CommunicationPopulationExecutionService {
 
     def communicationPopulationQueryService
+    def communicationPopulationQueryVersionService
     def communicationPopulationQueryStatementParseService
     def sessionFactory
     def sql
@@ -41,12 +42,73 @@ class CommunicationPopulationExecutionService {
         return populationQueryParseResult
     }
 
+
+    /**
+     *
+     * @param queryVersionId
+     * @returns the population selection list id
+     */
+    def execute(Long queryVersionId) {
+
+        try {
+            //throw exception if the banner security for query execution is not setup for this user
+            if (!CommunicationCommonUtility.userCanExecuteQuery()) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+            }
+
+            if (!queryVersionId) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:nullPopulationQueryId@@")
+            }
+            CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryVersionService.get(queryVersionId)
+            if (!queryVersion) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
+            }
+
+            def resultMap = [:]
+
+            def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+            def sessionFactory = ctx.sessionFactory
+            def session = sessionFactory.currentSession
+            def sql = new Sql(session.connection())
+
+            def stmt = "{call gckextr.p_execute_pop_queryVersion(?,?,?,?,?)}"
+            def params = [queryVersionId, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
+
+            sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
+                resultMap.put("selectionListId" , selectionListId)
+                resultMap.put("calculatedCount", calculatedCount)
+                resultMap.put("calculatedBy", calculatedBy)
+                resultMap.put("errorString", errorString)
+            }
+
+            resultMap
+        }
+        catch (SQLException ae) {
+            log.debug "SqlException in gckextr.p_create_popsel ${ae}"
+            log.debug ae.stackTrace
+            throw ae
+        }
+        catch (Exception ae) {
+            log.debug "Exception in gckextr.p_create_popsel ${ae}"
+            log.debug ae.stackTrace
+            throw ae
+        }
+        finally {
+            try {
+                if (sql) sql.close()
+            }
+            catch (SQLException af) {
+                // ignore
+            }
+        }
+    }
+
     /**
      *
      * @param populationQueryId
      * @returns the population selection list id
      */
-    def execute(Long populationQueryId) {
+    def executeQuery(Long populationQueryId) {
 
         try {
             //throw exception if the banner security for query execution is not setup for this user
@@ -82,24 +144,24 @@ class CommunicationPopulationExecutionService {
                 }
             }
 
-            CommunicationPopulationSelectionList populationSelectionList = new CommunicationPopulationSelectionList()
-
-
-
-            def populationSelectionListId = null
+            def resultMap = [:]
 
             def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
 
-            def stmt = "{call gckextr.p_execute_pop_query(?,?)}"
-            def params = [populationQueryId, Sql.INTEGER]
+            def stmt = "{call gckextr.p_execute_pop_query(?,?,?,?,?)}"
+            def params = [populationQueryId, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
 
-            sql.call stmt, params, { pk ->
-                populationSelectionListId = pk
+            sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
+                resultMap.put("selectionListId" , selectionListId)
+                resultMap.put("calculatedCount", calculatedCount)
+                resultMap.put("calculatedBy", calculatedBy)
+                resultMap.put("errorString", errorString)
             }
-            populationSelectionListId
+
+            resultMap.selectionListId
         }
         catch (SQLException ae) {
             log.debug "SqlException in gckextr.p_create_popsel ${ae}"

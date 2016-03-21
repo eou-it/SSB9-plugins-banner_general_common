@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.population
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.security.BannerUser
@@ -125,21 +126,42 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         CommunicationPopulationQuery populationQuery = newValidPopulationQuery()
         CommunicationPopulationQuery savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( savedPopulationQuery )
-        def populationSelectionListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        //execute the sql of the query itself
+        def querySelectionListId = communicationPopulationExecutionService.executeQuery(savedPopulationQuery.id)
         savedPopulationQuery.refresh()
+
+        //get the versions from the query
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( savedPopulationQuery.id )
+        assertEquals( 1, queryVersionList.size() )
+        CommunicationPopulationQueryVersion queryVersion = queryVersionList.get( 0 )
+        //execute the sql of the version
+        def returnMap = communicationPopulationExecutionService.execute(queryVersion.id)
+
 
         def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(savedPopulationQuery.id)
         calculatedPopulationQuery.refresh()
 
-        def populationQuerySelectionList = CommunicationPopulationSelectionList.fetchById(populationSelectionListId)
+        def populationQuerySelectionList = CommunicationPopulationSelectionList.fetchById(querySelectionListId)
         assertNotNull populationQuerySelectionList
-        assertEquals(populationSelectionListId, populationQuerySelectionList.id)
-        assertEquals("TTTTTTTTTT", populationQuerySelectionList.name)
+        assertEquals(querySelectionListId, populationQuerySelectionList.id)
 
         /* Test that the new count values are populated in the selectionList */
         assertNotNull(populationQuerySelectionList.lastModifiedBy)
         /* make sure it created list entries */
         def populationQuerySelectionListEntry = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationQuerySelectionList.id)
+        assertNotNull populationQuerySelectionListEntry
+
+        def calculatedPopulationQueryVersion = CommunicationPopulationQueryVersion.fetchById(queryVersion.id)
+        calculatedPopulationQueryVersion.refresh()
+
+        def queryVersionSelectionList = CommunicationPopulationSelectionList.fetchById(returnMap.selectionListId)
+        assertNotNull queryVersionSelectionList
+        assertEquals(returnMap.selectionListId, queryVersionSelectionList.id)
+
+        /* Test that the new count values are populated in the selectionList */
+        assertNotNull(queryVersionSelectionList.lastModifiedBy)
+        /* make sure it created list entries */
+        def queryVersionSelectionListEntry = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationQuerySelectionList.id)
         assertNotNull populationQuerySelectionListEntry
 
     }
@@ -151,11 +173,16 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
         CommunicationPopulationQuery savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
-        communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        //get the versions from the query
+        List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( savedPopulationQuery.id )
+        assertEquals( 1, queryVersionList.size() )
+        CommunicationPopulationQueryVersion queryVersion = queryVersionList.get( 0 )
+
+        communicationPopulationExecutionService.execute(queryVersion.id)
         /* Now make sure you can execute the same populationQuery multiple times without error */
-        communicationPopulationExecutionService.execute(savedPopulationQuery.id)
-        communicationPopulationExecutionService.execute(savedPopulationQuery.id)
-        communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+        communicationPopulationExecutionService.execute(queryVersion.id)
+        communicationPopulationExecutionService.execute(queryVersion.id)
+        communicationPopulationExecutionService.execute(queryVersion.id)
     }
 
 
@@ -166,7 +193,7 @@ class CommunicationPopulationExecutionServiceIntegrationTests extends BaseIntegr
 
         def populationListId
         shouldFail(ApplicationException) {
-            populationListId = communicationPopulationExecutionService.execute(savedPopulationQuery.id)
+            populationListId = communicationPopulationExecutionService.executeQuery(savedPopulationQuery.id)
         }
         assertNull populationListId
         populationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery(savedPopulationQuery.id)
