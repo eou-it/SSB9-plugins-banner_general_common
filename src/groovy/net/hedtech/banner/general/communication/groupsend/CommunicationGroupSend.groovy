@@ -85,6 +85,9 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_POPLIST_ID")
     Long populationId;
 
+    @Column(name = "GCBGSND_POPVERSION_ID")
+    Long populationVersionId;
+
     @Column(name = "GCBGSND_TEMPLATE_ID")
     Long templateId;
 
@@ -120,6 +123,7 @@ class CommunicationGroupSend implements Serializable {
         mepCode(nullable: true)
         name(nullable: false)
         populationId(nullable: false)
+        populationVersionId(nullable: true)
         organizationId(nullable: false)
         templateId(nullable: false)
         createdBy(nullable: false, maxSize: 30)
