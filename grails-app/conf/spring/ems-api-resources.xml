@@ -352,7 +352,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-   <!-- <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+   <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>academic-credentials</value>
         </constructor-arg>
@@ -367,7 +367,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>HEDM.Degree.STVDEGC</value>
             </list>
         </constructor-arg>
-    </bean>-->
+    </bean>
 
     <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
@@ -408,6 +408,23 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-section-crosslist" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>section-crosslists</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>5</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/section-crosslists/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.SectionCrossListEnrollmentInformationBase.SSBXLST</value>
+                <value>HEDM.SectionCrossListSection.SSRXLST</value>
+            </list>
+        </constructor-arg>
+    </bean>
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -434,6 +451,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-location-types"/>
                 <ref bean="ar-phone-types"/>
                 <ref bean="ar-academic-disciplines"/>
+                <ref bean="ar-section-crosslist"/>
+                <ref bean="ar-academic-credentials"/>
             </list>
         </property>
     </bean>
