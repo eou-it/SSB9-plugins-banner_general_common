@@ -25,7 +25,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     def communicationGroupSendService
     def communicationGroupSendItemService
     def communicationPopulationQueryService
-    def communicationPopulationExecutionService
+    def communicationPopulationQueryExecutionService
     def communicationPopulationSelectionListService
     def communicationFolderService
     def communicationTemplateService

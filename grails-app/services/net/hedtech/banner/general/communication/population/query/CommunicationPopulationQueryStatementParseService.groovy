@@ -8,8 +8,6 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryParseResult
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 
 import java.sql.SQLException
 

@@ -31,7 +31,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     def communicationGroupSendService
     def selfServiceBannerAuthenticationProvider
     def communicationPopulationQueryCompositeService
-    def communicationPopulationExecutionService
+    def communicationPopulationQueryExecutionService
     def communicationFolderService
     def communicationGroupSendCompositeService
     def communicationTemplateService
@@ -106,7 +106,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         communicationEmailTemplateService.create(emailTemplate) as CommunicationEmailTemplate
         assertNotNull emailTemplate.getId()
 
-        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationQueryExecutionService.execute(populationQuery.id)
         selectionList = CommunicationPopulationSelectionList.get( queryExecutionResult.selectionListId )
         assertNotNull selectionList.getId()
     }

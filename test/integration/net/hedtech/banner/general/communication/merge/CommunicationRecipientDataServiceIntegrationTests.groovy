@@ -11,14 +11,11 @@ import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
-import net.hedtech.banner.general.communication.population.CommunicationPopulationListView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -32,7 +29,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationRecipientDataService
     def communicationTemplateMergeService
     def communicationPopulationQueryCompositeService
-    def communicationPopulationExecutionService
+    def communicationPopulationQueryExecutionService
     def communicationPopulationSelectionListService
     def communicationFieldCalculationService
     def communicationFieldService
@@ -170,7 +167,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         assertEquals( 1, publishedQueryVersionList.size() )
         CommunicationPopulationQueryVersion publishedQueryVersion = publishedQueryVersionList.get( 0 )
 
-        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute( publishedQueryVersion.id )
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationQueryExecutionService.execute( publishedQueryVersion.id )
         validQuery.refresh()
 
         def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(validQuery.id)

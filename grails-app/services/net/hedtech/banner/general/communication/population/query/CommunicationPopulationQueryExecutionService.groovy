@@ -1,17 +1,13 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
-package net.hedtech.banner.general.communication.population
+package net.hedtech.banner.general.communication.population.query
 
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
@@ -19,7 +15,7 @@ import java.sql.SQLException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class CommunicationPopulationExecutionService {
+class CommunicationPopulationQueryExecutionService {
 
     def communicationPopulationQueryService
     def communicationPopulationQueryVersionService
@@ -127,7 +123,7 @@ class CommunicationPopulationExecutionService {
 
             List queryVersions = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
             if (queryVersions.size() == 0) {
-                throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationExecutionService.class, "populationQueryNotPublished" )
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQueryExecutionService.class, "populationQueryNotPublished" )
             }
             CommunicationPopulationQueryVersion queryVersion = queryVersions?.get( 0 )
 

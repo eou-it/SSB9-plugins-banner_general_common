@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersionService
@@ -29,7 +30,7 @@ class CommunicationPopulationCompositeService {
     CommunicationPopulationService communicationPopulationService
     CommunicationPopulationVersionService communicationPopulationVersionService
     CommunicationPopulationQueryAssociationService communicationPopulationQueryAssociationService
-    CommunicationPopulationExecutionService communicationPopulationExecutionService
+    CommunicationPopulationQueryExecutionService communicationPopulationQueryExecutionService
     SchedulerJobService schedulerJobService
     def log = Logger.getLogger(this.getClass())
 

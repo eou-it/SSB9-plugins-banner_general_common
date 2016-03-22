@@ -2,7 +2,7 @@
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
-package net.hedtech.banner.general.communication.population
+package net.hedtech.banner.general.communication.population.query
 
 class CommunicationPopulationQueryParseResult {
     def status
