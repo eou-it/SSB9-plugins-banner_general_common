@@ -106,8 +106,8 @@ class CommunicationPopulationProfileView implements Serializable {
 
 
     public static List<CommunicationPopulationProfileView> findAllBySelectionListId(Long selectionListId) {
-
-        def CommunicationPopulationProfileView[] populationProfileViews
+        assert( selectionListId != null )
+        def populationProfileViews
 
         populationProfileViews = CommunicationPopulationProfileView.withSession { session ->
             session.getNamedQuery('CommunicationPopulationProfileView.findAllBySelectionListId')

@@ -5,6 +5,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
@@ -60,8 +61,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
-        Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
+        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult.selectionListId )
         assertNotNull(selectionList)
         def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
         assertNotNull(selectionListEntryList)
@@ -127,8 +128,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
         populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
-        Long populationSelectionListId = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get(populationSelectionListId)
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
+        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult.selectionListId )
         assertNotNull(selectionList)
         def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
         assertNotNull(selectionListEntryList)

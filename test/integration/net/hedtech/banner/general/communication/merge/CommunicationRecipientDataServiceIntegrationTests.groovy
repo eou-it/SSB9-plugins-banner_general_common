@@ -16,6 +16,8 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -164,17 +166,20 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         //execute the query to get a population
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery(validQuery.id, "TEST NAME", "TEST DESC")
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy(population.id, getUser())
-        def populationSelectionListId =
-                communicationPopulationExecutionService.execute( validQuery.id )
-                validQuery.refresh()
+        List publishedQueryVersionList = CommunicationPopulationQueryVersion.findByQueryId( validQuery.id )
+        assertEquals( 1, publishedQueryVersionList.size() )
+        CommunicationPopulationQueryVersion publishedQueryVersion = publishedQueryVersionList.get( 0 )
+
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute( publishedQueryVersion.id )
+        validQuery.refresh()
 
         def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(validQuery.id)
         calculatedPopulationQuery.refresh()
 
         //get all the people in the population
-        def personlist = CommunicationPopulationProfileView.findAllBySelectionListId(populationSelectionListId)
-        assertNotNull(personlist)
-        assertTrue personlist.size() >= 1
+        def selectionList = CommunicationPopulationProfileView.findAllBySelectionListId( queryExecutionResult.selectionListId )
+        assertNotNull(selectionList)
+        assertTrue selectionList.size() >= 1
 
         // Now set up the data fields
         CommunicationField tempField
@@ -196,7 +201,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         //for each person in the population, calculate all the fields in the template and create the recipient data
         //the field is stored in the template by name, so get the immutable id from the name. Pass this immutable id along with the
         //pidm from popualation to the field calculation service
-        personlist.each {
+        selectionList.each {
             person ->
                 params = [:]
                 params << ['pidm': person.pidm]

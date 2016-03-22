@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.CommunicationManagementTestingSu
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.security.BannerAuthenticationToken
@@ -40,7 +41,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
     BannerAuthenticationToken bannerAuthenticationToken
     CommunicationPopulationQuery populationQuery
     CommunicationEmailTemplate emailTemplate
-    CommunicationPopulationSelectionList population
+    CommunicationPopulationSelectionList selectionList
 
     public void cleanUp() {
         def sql = null
@@ -105,9 +106,9 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         communicationEmailTemplateService.create(emailTemplate) as CommunicationEmailTemplate
         assertNotNull emailTemplate.getId()
 
-        def populationId = communicationPopulationExecutionService.execute(populationQuery.id)
-        population = CommunicationPopulationSelectionList.get(populationId)
-        assertNotNull population.getId()
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
+        selectionList = CommunicationPopulationSelectionList.get( queryExecutionResult.selectionListId )
+        assertNotNull selectionList.getId()
     }
 
 
@@ -238,7 +239,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         return communicationGroupSendService.create(
             new CommunicationGroupSend(
                 organizationId: organization.id,
-                populationId: population.id,
+                populationId: selectionList.id,
                 templateId: emailTemplate.id,
                 createdBy: bannerAuthenticationToken.getOracleUserName(),
                 recalculateOnSend : new Boolean(false)
@@ -253,7 +254,7 @@ class CommunicationGroupSendServiceIntegrationTests extends BaseIntegrationTestC
         return communicationGroupSendService.create(
                 new CommunicationGroupSend(
                         organizationId: organization.id,
-                        populationId: population.id,
+                        populationId: selectionList.id,
                         templateId: emailTemplate.id,
                         createdBy: bannerAuthenticationToken.getOracleUserName(),
                         scheduledStartDate : c.getTime(),

@@ -9,6 +9,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
@@ -49,7 +50,7 @@ class CommunicationPopulationExecutionService {
      * @returns the population selection list id
      */
     def execute(Long queryVersionId) {
-
+        assert queryVersionId != null
         try {
             //throw exception if the banner security for query execution is not setup for this user
             if (!CommunicationCommonUtility.userCanExecuteQuery()) {
@@ -64,8 +65,6 @@ class CommunicationPopulationExecutionService {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
             }
 
-            def resultMap = [:]
-
             def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
@@ -74,14 +73,16 @@ class CommunicationPopulationExecutionService {
             def stmt = "{call gckextr.p_execute_pop_queryVersion(?,?,?,?,?)}"
             def params = [queryVersionId, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
 
+            CommunicationPopulationQueryExecutionResult result
             sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
-                resultMap.put("selectionListId" , selectionListId)
-                resultMap.put("calculatedCount", calculatedCount)
-                resultMap.put("calculatedBy", calculatedBy)
-                resultMap.put("errorString", errorString)
+                result = new CommunicationPopulationQueryExecutionResult( [
+                    selectionListId: selectionListId as Long,
+                    calculatedCount: calculatedCount as Long,
+                    calculatedBy: calculatedBy as String,
+                    errorString: errorString as String
+                ] )
             }
-
-            resultMap
+            return result
         }
         catch (SQLException ae) {
             log.debug "SqlException in gckextr.p_create_popsel ${ae}"
