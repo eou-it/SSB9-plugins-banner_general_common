@@ -19,6 +19,7 @@ there is no concept of an 'entity manager' within this project.
         <property name="dialect">org.hibernate.dialect.Oracle10gDialect</property>
         <mapping class="net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery"/>
         <mapping class="net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion"/>
+        <mapping class="net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryView"/>
 
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulation"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationVersion"/>
@@ -27,7 +28,6 @@ there is no concept of an 'entity manager' within this project.
 
         <mapping class="net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList"/>
         <mapping class="net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry"/>
-        <mapping class="net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryView"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationListView"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView"/>
         <mapping class="net.hedtech.banner.general.communication.folder.CommunicationFolder"/>

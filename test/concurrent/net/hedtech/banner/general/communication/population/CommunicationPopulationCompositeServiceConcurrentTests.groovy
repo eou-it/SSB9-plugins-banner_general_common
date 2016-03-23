@@ -7,6 +7,7 @@ import net.hedtech.banner.general.communication.groupsend.*
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -64,7 +65,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
     @Test
     public void testCreatePopulationFromQuery() {
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery( "testQuery" ) )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
 
         CommunicationPopulation communicationPopulation = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )

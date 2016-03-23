@@ -4,8 +4,13 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
@@ -59,18 +64,35 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         mailServer.start()
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
 
-        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult.selectionListId )
-        assertNotNull(selectionList)
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertNotNull( populationVersion )
+        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        assertEquals( 1, queryAssociations.size() )
+        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
+        queryAssociation.refresh()
+        assertNotNull( queryAssociation.selectionList )
+
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
-                populationId: populationSelectionListId,
+                populationId: population.id,
                 templateId: defaultEmailTemplate.id,
                 organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString(),
@@ -126,7 +148,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     public void testDeleteGroupSend() {
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult.selectionListId )
@@ -189,6 +211,21 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         return result.rowcount
     }
 
+
+    private void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 10 ) {
+        boolean result = false
+        for (int i=0; i<maxAttempts; i++ ) {
+            result = booleanClosure.call( arguments )
+            if (result) {
+                break
+            } else {
+                TimeUnit.SECONDS.sleep( pauseBetweenAttemptsInSeconds )
+            }
+        }
+        assertTrue( result )
+    }
+
+
     private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
         final int interval = 2;                 // test every second
         int count = maxSleepTime / interval;    // calculate max loop count
@@ -250,6 +287,5 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         return populationQuery
     }
-
 
 }

@@ -116,7 +116,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
         /* create a population query */
         validQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery( validFolder, "TestQuery" ) )
-        validQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( validQuery )
+        CommunicationPopulationQueryVersion validQueryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( validQuery )
+        validQuery = validQueryVersion.query
         assertNotNull( validQuery.id )
 
         /* Create communication Field */

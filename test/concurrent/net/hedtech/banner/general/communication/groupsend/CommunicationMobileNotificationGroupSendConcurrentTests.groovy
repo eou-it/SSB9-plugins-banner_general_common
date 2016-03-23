@@ -15,6 +15,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
@@ -70,7 +71,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testPop") )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "" )
         assertNotNull(population.id)
@@ -138,7 +139,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
     public void testDeleteGroupSend() {
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
         CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult )
@@ -187,7 +188,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 sqlString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
 
         CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)

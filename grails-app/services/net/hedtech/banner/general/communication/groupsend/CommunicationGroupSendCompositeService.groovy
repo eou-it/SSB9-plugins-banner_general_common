@@ -8,6 +8,7 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
@@ -68,7 +69,7 @@ class CommunicationGroupSendCompositeService {
         if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend(request, bannerUser, mepCode, groupSend)
         } else {
-            groupSend = queueProcessGroupSend( groupSend )
+            groupSend = queueProcessGroupSend( groupSend, bannerUser )
         }
 
         return groupSend
@@ -93,18 +94,30 @@ class CommunicationGroupSendCompositeService {
     }
 
 
-    private CommunicationGroupSend queueProcessGroupSend( CommunicationGroupSend groupSend, String scheduledJobId = UUID.randomUUID().toString() ) {
-//        schedulerJobService.scheduleNowServiceMethod(
-//            scheduledJobId,
-//            SecurityContextHolder.context.authentication.principal.getOracleUserName(),
-//            groupSend.mepCode,
-//            "communicationGroupSendCompositeService",
-//            "generateGroupSendItems",
-//            ["groupSendId": groupSend.id]
-//        )
+    private CommunicationGroupSend queueProcessGroupSend( CommunicationGroupSend groupSend, String bannerUser, String scheduledJobId = UUID.randomUUID().toString() ) {
+        if (!groupSend.populationVersionId) {
+            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
+            if (populationVersion) {
+                groupSend.populationVersionId = populationVersion.id
+            } else {
+                // TODO: create exception in messages.properties and confirm if we would rather calculate on the fly for this scenario.
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "populationNotCalculatedForUser" )
+            }
+        }
+
+        assert( groupSend.populationVersionId )
+
+        schedulerJobService.scheduleNowServiceMethod(
+            scheduledJobId,
+            bannerUser,
+            groupSend.mepCode,
+            "communicationGroupSendCompositeService",
+            "generateGroupSendItems",
+            ["groupSendId": groupSend.id]
+        )
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
         groupSend = communicationGroupSendService.update(groupSend)
-        calculatePopulationForGroupSend( ["groupSendId": groupSend.id] )
+//        calculatePopulationForGroupSend( ["groupSendId": groupSend.id] )
         return groupSend
     }
 

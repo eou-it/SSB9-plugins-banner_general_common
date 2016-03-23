@@ -45,7 +45,7 @@ class CommunicationPopulationQueryExecutionService {
      * @param queryVersionId
      * @returns the population selection list id
      */
-    def execute(Long queryVersionId) {
+    CommunicationPopulationQueryExecutionResult execute(Long queryVersionId) {
         assert queryVersionId != null
         try {
             //throw exception if the banner security for query execution is not setup for this user
@@ -105,7 +105,7 @@ class CommunicationPopulationQueryExecutionService {
      * @param populationQueryId
      * @returns the population selection list id
      */
-    def executeQuery(Long populationQueryId) {
+    CommunicationPopulationQueryExecutionResult executeQuery(Long populationQueryId) {
 
         try {
             //throw exception if the banner security for query execution is not setup for this user
@@ -141,8 +141,6 @@ class CommunicationPopulationQueryExecutionService {
                 }
             }
 
-            def resultMap = [:]
-
             def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
@@ -151,14 +149,16 @@ class CommunicationPopulationQueryExecutionService {
             def stmt = "{call gckextr.p_execute_pop_query(?,?,?,?,?)}"
             def params = [populationQueryId, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
 
+            CommunicationPopulationQueryExecutionResult result
             sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
-                resultMap.put("selectionListId" , selectionListId)
-                resultMap.put("calculatedCount", calculatedCount)
-                resultMap.put("calculatedBy", calculatedBy)
-                resultMap.put("errorString", errorString)
+                result = new CommunicationPopulationQueryExecutionResult( [
+                        selectionListId: selectionListId as Long,
+                        calculatedCount: calculatedCount as Long,
+                        calculatedBy: calculatedBy as String,
+                        errorString: errorString as String
+                ] )
             }
-
-            resultMap.selectionListId
+            return result
         }
         catch (SQLException ae) {
             log.debug "SqlException in gckextr.p_create_popsel ${ae}"

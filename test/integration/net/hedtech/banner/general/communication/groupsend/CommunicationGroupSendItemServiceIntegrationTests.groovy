@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.security.BannerAuthenticationToken
@@ -78,7 +79,7 @@ class CommunicationGroupSendItemServiceIntegrationTests extends BaseIntegrationT
                 sqlString: "select 2086 spriden_pidm from dual"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationFolder folder = CommunicationFolder.fetchByName( "test folder" )
         if (!folder) {

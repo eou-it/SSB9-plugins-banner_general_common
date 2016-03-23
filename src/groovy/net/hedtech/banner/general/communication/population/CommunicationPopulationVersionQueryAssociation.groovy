@@ -8,14 +8,19 @@ import groovy.transform.ToString
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -26,6 +31,11 @@ import javax.persistence.Version
 @EqualsAndHashCode
 @ToString
 @Table(name = "GCRPVID")
+@NamedQueries(value = [
+    @NamedQuery(name = "CommunicationPopulationVersionQueryAssociation.findByPopulationVersion",
+            query = """ FROM CommunicationPopulationVersionQueryAssociation a
+            WHERE a.populationVersion = :populationVersion""")
+])
 class CommunicationPopulationVersionQueryAssociation implements Serializable {
 
     /**
@@ -64,8 +74,9 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
     /**
      * The error code if calculation results in an error
      */
+    @Enumerated(EnumType.STRING)
     @Column(name = "GCRPVID_ERROR_CODE")
-    String errorCode
+    CommunicationErrorCode errorCode
 
     /**
      * The error text or stacktrace if calculation results in an error
@@ -108,5 +119,13 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+    }
+
+    public static List findByPopulationVersion( CommunicationPopulationVersion populationVersion ) {
+        def list
+        CommunicationPopulationVersionQueryAssociation.withSession { session ->
+            list = session.getNamedQuery( 'CommunicationPopulationVersionQueryAssociation.findByPopulationVersion' ).setParameter( 'populationVersion', populationVersion ).list()
+        }
+        return list
     }
 }

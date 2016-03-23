@@ -206,8 +206,9 @@ class CommunicationPopulationQueryCompositeService {
      * into a query version table. The query needs to valid for this operation to be legal.
      *
      * @param populationQuery the population query
+     * @return the query version produced by publishing the query
      */
-    public CommunicationPopulationQuery publishPopulationQuery( CommunicationPopulationQuery populationQuery ) {
+    public CommunicationPopulationQueryVersion publishPopulationQuery( CommunicationPopulationQuery populationQuery ) {
         return publishPopulationQuery( populationQuery.id, populationQuery.version )
     }
 
@@ -218,8 +219,9 @@ class CommunicationPopulationQueryCompositeService {
      *
      * @param id the primary key of the population query
      * @param version the optimistic lock counter
+     * @return the query version produced by publishing the query
      */
-    public CommunicationPopulationQuery publishPopulationQuery( Long id, Long version ) {
+    public CommunicationPopulationQueryVersion publishPopulationQuery( Long id, Long version ) {
         log.trace( "publishPopulationQuery called" )
         assert( id != null )
         assert( version != null ) // optimistic lock counter
@@ -252,8 +254,8 @@ class CommunicationPopulationQueryCompositeService {
         CommunicationPopulationQueryVersion queryVersion = new CommunicationPopulationQueryVersion()
         queryVersion.query = query
         queryVersion.sqlString = query.sqlString
-        communicationPopulationQueryVersionService.create( [ domainModel: queryVersion ] )
-        return query
+        queryVersion = communicationPopulationQueryVersionService.create( [ domainModel: queryVersion ] )
+        return queryVersion
     }
 
 

@@ -125,25 +125,19 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
     void testExecute() {
         CommunicationPopulationQuery populationQuery = newValidPopulationQuery()
         CommunicationPopulationQuery savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-        savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( savedPopulationQuery )
-        //execute the sql of the query itself
-        def querySelectionListId = communicationPopulationQueryExecutionService.executeQuery(savedPopulationQuery.id)
+        savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( savedPopulationQuery ).query
         savedPopulationQuery.refresh()
 
         //get the versions from the query
         List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( savedPopulationQuery.id )
         assertEquals( 1, queryVersionList.size() )
         CommunicationPopulationQueryVersion queryVersion = queryVersionList.get( 0 )
+
         //execute the sql of the version
-        def returnMap = communicationPopulationQueryExecutionService.execute(queryVersion.id)
-
-
-        def calculatedPopulationQuery = CommunicationPopulationQuery.fetchById(savedPopulationQuery.id)
-        calculatedPopulationQuery.refresh()
-
-        def populationQuerySelectionList = CommunicationPopulationSelectionList.fetchById(querySelectionListId)
+        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationQueryExecutionService.execute(queryVersion.id)
+        def populationQuerySelectionList = CommunicationPopulationSelectionList.fetchById(queryExecutionResult.selectionListId)
         assertNotNull populationQuerySelectionList
-        assertEquals(querySelectionListId, populationQuerySelectionList.id)
+        assertEquals(queryExecutionResult.selectionListId, populationQuerySelectionList.id)
 
         /* Test that the new count values are populated in the selectionList */
         assertNotNull(populationQuerySelectionList.lastModifiedBy)
@@ -154,9 +148,9 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
         def calculatedPopulationQueryVersion = CommunicationPopulationQueryVersion.fetchById(queryVersion.id)
         calculatedPopulationQueryVersion.refresh()
 
-        def queryVersionSelectionList = CommunicationPopulationSelectionList.fetchById(returnMap.selectionListId)
+        def queryVersionSelectionList = CommunicationPopulationSelectionList.fetchById(queryExecutionResult.selectionListId)
         assertNotNull queryVersionSelectionList
-        assertEquals(returnMap.selectionListId, queryVersionSelectionList.id)
+        assertEquals(queryExecutionResult.selectionListId, queryVersionSelectionList.id)
 
         /* Test that the new count values are populated in the selectionList */
         assertNotNull(queryVersionSelectionList.lastModifiedBy)
@@ -171,7 +165,7 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
     void testReExecute() {
         def populationQuery = newValidPopulationQuery()
         CommunicationPopulationQuery savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-        savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        savedPopulationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery ).query
 
         //get the versions from the query
         List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( savedPopulationQuery.id )

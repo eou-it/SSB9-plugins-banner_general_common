@@ -94,13 +94,14 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
         List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
         assertEquals( 1, queryVersionList.size() )
-        CommunicationPopulationQueryVersion queryVersion = queryVersionList.get( 0 )
-        assertEquals( "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", queryVersion.sqlString )
-        assertNotNull( queryVersion.getCreateDate() )
+        CommunicationPopulationQueryVersion fetchedQueryVersion = queryVersionList.get( 0 )
+        assertEquals( queryVersion.id,fetchedQueryVersion.id )
+        assertEquals( "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", fetchedQueryVersion.sqlString )
+        assertNotNull( fetchedQueryVersion.getCreateDate() )
     }
 
     @Test
@@ -112,7 +113,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery ).query
         assertFalse( populationQuery.changesPending )
         communicationPopulationQueryCompositeService.deletePopulationQuery(populationQuery)
         List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
@@ -146,7 +147,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery ).query
         assertFalse( populationQuery.changesPending )
         CommunicationPopulationQueryVersion queryVersion = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id ).get(0)
 
@@ -167,7 +168,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
-        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery ).query
         assertFalse( populationQuery.changesPending )
 
         Map queryAsMap = [

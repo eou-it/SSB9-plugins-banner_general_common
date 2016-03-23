@@ -5,12 +5,15 @@ package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersionService
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
@@ -40,7 +43,7 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description ) {
+    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description = "" ) {
         log.trace( "createPopulationFromQuery called" )
         CommunicationPopulationQuery communicationPopulationQuery = CommunicationPopulationQuery.fetchById( populationQueryId )
         return createPopulationFromQuery( communicationPopulationQuery, name, description )
@@ -52,7 +55,7 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description ) {
+    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description = "" ) {
         log.trace( "createPopulationFromQuery called" )
 
         CommunicationPopulation population = new CommunicationPopulation()
@@ -65,10 +68,7 @@ class CommunicationPopulationCompositeService {
         populationQueryAssociation.populationQuery = populationQuery
         populationQueryAssociation.population = population
         populationQueryAssociation = communicationPopulationQueryAssociationService.create( populationQueryAssociation )
-
-        String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-        calculatePopulationForUser( population, oracleUserName )
-
+        calculatePopulationForUser( population )
         return population
     }
 
@@ -105,8 +105,7 @@ class CommunicationPopulationCompositeService {
         populationQueryAssociation.population = population
         populationQueryAssociation = communicationPopulationQueryAssociationService.create( populationQueryAssociation )
 
-        String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-        calculatePopulationForUser( population, oracleUserName )
+        calculatePopulationForUser( population )
 
         return population
     }
@@ -291,7 +290,7 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population
      */
-    public CommunicationPopulation calculatePopulationForUser( Long id, Long version ) {
+    public CommunicationPopulationVersion calculatePopulationForUser( Long id, Long version, String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName() ) {
         CommunicationPopulation population = CommunicationPopulation.fetchById( id )
         if (!population) {
             throw new ApplicationException(
@@ -305,7 +304,6 @@ class CommunicationPopulationCompositeService {
             // TODO: throw optimistic lock exception
         }
 
-        String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName();
         return calculatePopulationForUser( population.id, population.version, oracleUserName )
     }
 
@@ -317,7 +315,7 @@ class CommunicationPopulationCompositeService {
      * @param id the primary key of the population query
      * @param version the optimistic lock counter
      */
-    public CommunicationPopulation calculatePopulationForUser( CommunicationPopulation population, String oracleName ) {
+    public CommunicationPopulationVersion calculatePopulationForUser( CommunicationPopulation population, String oracleName = SecurityContextHolder.context.authentication.principal.getOracleUserName() ) {
         log.trace( "calculatePopulationForUser called" )
         assert( population.id )
         assert( oracleName )
@@ -342,11 +340,11 @@ class CommunicationPopulationCompositeService {
             "calculatePendingPopulationVersion",
             [ "populationVersionId" : populationVersion.id ]
         )
-        return population
+        return populationVersion
     }
 
 
-    public CommunicationPopulation calculatePopulationForGroupSend( CommunicationPopulation population, String oracleName ) {
+    public CommunicationPopulationVersion calculatePopulationForGroupSend( CommunicationPopulation population, String oracleName ) {
         CommunicationPopulationVersion populationVersion = createPopulationVersion( population, oracleName )
         calculatePendingPopulationVersion( [ "populationVersionId" : populationVersion.id ] )
     }
@@ -357,8 +355,8 @@ class CommunicationPopulationCompositeService {
      * the calculation request of a population version.
      * @param parameters a set of parameters passed from the original request through the quartz job detail data map
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public void calculatePendingPopulationVersion( Map parameters ) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
+    public CommunicationPopulationVersion calculatePendingPopulationVersion( Map parameters ) {
         if (log.isDebugEnabled()) {
             log.debug( "calculatePendingPopulationVersion with " + parameters )
         }
@@ -368,9 +366,43 @@ class CommunicationPopulationCompositeService {
         if (!populationVersion) {
             log.error( "Could not fetch communication population version with id ${populationVersionId}." )
         }
-//        communicationPopulationExecutionService.execute( populationVersionId )
 
+        boolean errorFound = false
+        long totalCount = 0
+        List queryVersionAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        queryVersionAssociations.each {
+            CommunicationPopulationVersionQueryAssociation queryAssociation = (CommunicationPopulationVersionQueryAssociation) it
+            CommunicationPopulationQueryExecutionResult result
+            try {
+                result = communicationPopulationQueryExecutionService.execute( queryAssociation.populationQueryVersion.id )
+                if (result.selectionListId) {
+                    queryAssociation.selectionList = CommunicationPopulationSelectionList.fetchById( result.selectionListId )
+                    totalCount += result.calculatedCount
+                } else {
+                    errorFound = true
+                    queryAssociation.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+                    queryAssociation.errorText = result.errorString
+                }
+            } catch( Throwable t ) {
+                errorFound = true
+                queryAssociation.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+                queryAssociation.errorText = t.message
+            }
+            try {
+                boolean valid = queryAssociation.validate()
+                queryAssociation.save( flush: true )
+//                communicationPopulationVersionQueryAssociationService.update( queryAssociation )
+            } catch (Throwable t) {
+                t.printStackTrace()
+            }
+        }
 
+        populationVersion.calculatedCount = totalCount
+        populationVersion.status = errorFound ? CommunicationPopulationCalculationStatus.ERROR : CommunicationPopulationCalculationStatus.AVAILABLE
+        boolean valid = populationVersion.validate()
+        populationVersion.save( flush: true )
+//        populationVersion = communicationPopulationVersionService.update( populationVersion )
+        return populationVersion
     }
 
 

@@ -5,6 +5,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.configuration.ConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendCompositeService
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
@@ -35,7 +36,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
 
     def communicationGroupSendMonitor
-    def communicationGroupSendCompositeService
+    CommunicationGroupSendCompositeService communicationGroupSendCompositeService
     def communicationMailboxAccountService
     def communicationGroupSendService
     def communicationGroupSendItemService
