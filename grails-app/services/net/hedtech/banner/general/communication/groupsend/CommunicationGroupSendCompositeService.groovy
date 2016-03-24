@@ -17,6 +17,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Connection
@@ -75,7 +76,7 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationGroupSend startGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
@@ -137,6 +138,7 @@ class CommunicationGroupSendCompositeService {
      * This method is called by the scheduler to regenerate a population list specifically for the group send
      * and change the state of the group send to next state.
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
@@ -156,6 +158,7 @@ class CommunicationGroupSendCompositeService {
      * This method is called by the scheduler to create the group send items and move the state of
      * the group send to processing.
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
@@ -328,20 +331,22 @@ class CommunicationGroupSendCompositeService {
                 state:CommunicationGroupSendItemExecutionState.Ready.toString(),
                 group_send_key:groupSend.id
             ],
-            """ INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
-                                ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date, gcrgsim_started_date)
-               SELECT gcbgsnd_surrogate_id
-                     ,gcrlent_pidm
-                     ,SYSDATE
-                     , :state
-                     , SYS_GUID()
-                     ,gcbgsnd_user_id
-                     ,SYSDATE
-                     ,SYSDATE
-                 FROM gcrslis, gcrlent, gcbgsnd
-                WHERE     gcbgsnd_poplist_id = gcrslis_surrogate_id
-                      AND gcrlent_slis_id = gcrslis_surrogate_id
-                      AND gcbgsnd_surrogate_id = :group_send_key
+            """
+            INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
+                                            ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date, gcrgsim_started_date)
+                           SELECT gcbgsnd_surrogate_id
+                                 ,gcrlent_pidm
+                                 ,SYSDATE
+                                 , :state
+                                 , SYS_GUID()
+                                 ,gcbgsnd_user_id
+                                 ,SYSDATE
+                                 ,SYSDATE
+                             FROM gcrslis, gcrlent, gcbgsnd, gcrpvid
+                            WHERE gcbgsnd_popversion_id = gcrpvid_popv_id
+                                and gcrslis_surrogate_id = gcrpvid_slis_id
+                                  AND gcrlent_slis_id = gcrslis_surrogate_id
+                                  AND gcbgsnd_surrogate_id = :group_send_key
             """ )
 
             if (log.isDebugEnabled()) log.debug( "Created " + sql.updateCount + " group send item records for group send with id = " + groupSend.id )

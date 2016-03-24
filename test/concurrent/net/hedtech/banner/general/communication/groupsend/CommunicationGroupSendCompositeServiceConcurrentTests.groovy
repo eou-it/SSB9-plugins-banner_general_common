@@ -102,20 +102,19 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
-        assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
+        def checkExpectedGroupSendItemsCreated = {
+            CommunicationGroupSend each = CommunicationGroupSend.get( it )
+            return communicationGroupSendItemService.fetchByGroupSend( each ).size() == 5
+        }
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
-        def sendviewdetails = CommunicationGroupSendView.findAll()
-        assertEquals(1, sendviewdetails.size())
+        // Confirm group send view returns the correct results
+        def sendViewDetails = CommunicationGroupSendView.findAll()
+        assertEquals(1, sendViewDetails.size())
 
-        List groupSendItemList = communicationGroupSendItemService.list()
-        assertEquals( 5, groupSendItemList.size() )
-        CommunicationGroupSendItem found = groupSendItemList.get( 0 ) as CommunicationGroupSendItem
-        assertEquals( CommunicationGroupSendItemExecutionState.Ready, found.currentExecutionState)
-
+        // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
         assertEquals(5, sendItemViewDetails.size())
-
-        assertEquals( 5, CommunicationGroupSendItem.fetchByReadyExecutionState().size() )
 
         sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
 
