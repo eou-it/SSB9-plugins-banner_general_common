@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.system.ldm
 
@@ -39,5 +39,15 @@ class IntegrationHubConfig {
      * Media type for messages getting published and retrieved (i.e. application/vnd.hedtech.change-notifications.v2+json)
      */
     String hubMediaType
+
+    /**
+     * if Banner environment is MEP enabled
+     */
+    boolean isMepEnvironment
+
+    /**
+     * Different combinations of vpdiCode - apiKey in Banner MEP environment
+     */
+    def mepApiKeyMappings = []
 
 }
