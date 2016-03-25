@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
@@ -78,7 +79,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
         assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
-
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -145,146 +145,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testDeleteGroupSend() {
-        CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
-        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
-
-        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult.selectionListId )
-        assertNotNull(selectionList)
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
-        assertNotNull(selectionListEntryList)
-        assertEquals(5, selectionListEntryList.size())
-
-        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
-                name: "testDeleteGroupSend",
-                populationId: populationSelectionListId,
-                templateId: defaultEmailTemplate.id,
-                organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString(),
-                recalculateOnSend: false
-        )
-
-        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
-        assertNotNull(groupSend)
-
-        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
-        assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
-
-        try {
-            communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
-        } catch (ApplicationException e) {
-            assertEquals( "@@r1:cannotDeleteRunningGroupSend@@", e.getWrappedException().getMessage() )
-        }
-
-        groupSend = communicationGroupSendCompositeService.completeGroupSend( groupSend.id )
-
-        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
-
-        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
-        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+        testDeleteGroupSend( defaultEmailTemplate )
     }
 
-    private int fetchGroupSendCount( Long groupSendId ) {
-        def sql
-        def result
-        try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
-            result = sql.firstRow( "select count(*) as rowcount from GCBGSND where GCBGSND_SURROGATE_ID = ${groupSendId}" )
-        } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
-        }
-        return result.rowcount
-    }
-
-    private int fetchGroupSendItemCount( Long groupSendId ) {
-        def sql
-        def result
-        try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
-            result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
-            println( result.rowcount )
-        } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
-        }
-        return result.rowcount
-    }
-
-
-    private void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 10 ) {
-        boolean result = false
-        for (int i=0; i<maxAttempts; i++ ) {
-            result = booleanClosure.call( arguments )
-            if (result) {
-                break
-            } else {
-                TimeUnit.SECONDS.sleep( pauseBetweenAttemptsInSeconds )
-            }
-        }
-        assertTrue( result )
-    }
-
-
-    private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
-        final int interval = 2;                 // test every second
-        int count = maxSleepTime / interval;    // calculate max loop count
-        while (count > 0) {
-            count--;
-            TimeUnit.SECONDS.sleep( interval );
-
-            int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
-
-            if ( countCompleted >= totalNumJobs) {
-                break;
-            }
-        }
-    }
-
-    private void sleepUntilCommunicationJobsComplete( long totalNumJobs, int maxSleepTime ) {
-        final int interval = 2;                 // test every second
-        int count = maxSleepTime / interval;    // calculate max loop count
-        while (count > 0) {
-            count--;
-            TimeUnit.SECONDS.sleep( interval );
-
-            int countCompleted = CommunicationJob.fetchCompleted().size()
-
-            if ( countCompleted >= totalNumJobs) {
-                break;
-            }
-        }
-    }
-
-    private void sleepUntilGroupSendComplete( CommunicationGroupSend groupSend, int maxSleepTime ) {
-        final int interval = 2;                 // test every second
-        int count = maxSleepTime / interval;    // calculate max loop count
-        while (count > 0) {
-            count--;
-            TimeUnit.SECONDS.sleep( interval );
-
-            sessionFactory.currentSession.flush()
-            sessionFactory.currentSession.clear()
-
-            groupSend = CommunicationGroupSend.get( groupSend.id )
-
-            if ( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) ) {
-                break;
-            }
-        }
-
-        assertEquals( CommunicationGroupSendExecutionState.Complete, groupSend.getCurrentExecutionState() )
-    }
-
-    private def newPopulationQuery( String queryName ) {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: defaultFolder,
-                name: queryName,
-                description: "test description",
-                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
-        )
-
-        return populationQuery
-    }
 
 }

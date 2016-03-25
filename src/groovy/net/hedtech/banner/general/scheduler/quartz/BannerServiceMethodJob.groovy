@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.scheduler.quartz
 
 import grails.util.Holders
+import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.quartz.Job
@@ -32,7 +33,6 @@ class BannerServiceMethodJob implements Job {
         try{
             String service = context.getJobDetail().getJobDataMap().getString( "service" )
             String method = context.getJobDetail().getJobDataMap().getString( "method" )
-            def serviceReference = Holders.applicationContext.getBean(service)
 
             Map parameters = [:]
             for( Object key:context.getJobDetail().getJobDataMap().keySet() ) {
@@ -42,23 +42,24 @@ class BannerServiceMethodJob implements Job {
 
             String bannerUser = context.getJobDetail().getJobDataMap().getString( "bannerUser" )
             String mepCode = context.getJobDetail().getJobDataMap().getString( "mepCode" )
-            context.result = invokeServiceMethod( serviceReference, method, parameters, bannerUser, mepCode )
+            context.result = invokeServiceMethod( service, method, parameters, bannerUser, mepCode )
         } catch(JobExecutionException e){
+            log.error( e )
             throw e
         } catch(e){
+            log.error( e )
             throw new JobExecutionException(e)
         }
     }
 
 
-    private Object invokeServiceMethod( def serviceReference, String method, Map parameters, String oracleUserName, String mepCode ) {
+    private Object invokeServiceMethod( String serviceName, String method, Map parameters, String oracleUserName, String mepCode ) {
         def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
         def originalMap = null
         try {
             originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( oracleUserName, mepCode )
-            // This method will start a nested transaction (see REQUIRES_NEW annotation) and
-            // consequently pick up a new db connection with the current oracle user name.
-            return serviceReference.invokeMethod( method, parameters )
+            SchedulerJobService schedulerJobService = Holders.applicationContext.getBean( "schedulerJobService" )
+            schedulerJobService.invokeServiceMethodInNewTransaction( serviceName, method, parameters )
         } finally {
             if (originalMap) {
                 asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext( originalMap )

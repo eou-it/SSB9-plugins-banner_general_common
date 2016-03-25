@@ -76,7 +76,7 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
+
     public CommunicationGroupSend startGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
@@ -138,7 +138,6 @@ class CommunicationGroupSendCompositeService {
      * This method is called by the scheduler to regenerate a population list specifically for the group send
      * and change the state of the group send to next state.
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
@@ -158,7 +157,6 @@ class CommunicationGroupSendCompositeService {
      * This method is called by the scheduler to create the group send items and move the state of
      * the group send to processing.
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )

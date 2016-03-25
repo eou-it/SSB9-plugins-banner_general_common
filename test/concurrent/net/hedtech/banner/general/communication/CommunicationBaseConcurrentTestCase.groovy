@@ -5,18 +5,29 @@ import groovy.sql.Sql
 import net.hedtech.banner.configuration.ConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendCompositeService
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendRequest
+import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryCompositeService
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import com.icegreen.greenmail.util.*
 import groovy.sql.Sql
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.junit.After
@@ -26,6 +37,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken as UPAT
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+
+import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.*
 
@@ -174,6 +187,21 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
     }
 
+
+    public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 10 ) {
+        boolean result = false
+        for (int i=0; i<maxAttempts; i++ ) {
+            result = booleanClosure.call( arguments )
+            if (result) {
+                break
+            } else {
+                TimeUnit.SECONDS.sleep( pauseBetweenAttemptsInSeconds )
+            }
+        }
+        assertTrue( result )
+    }
+
+
     protected void deleteAll() {
         def sql
         try {
@@ -208,11 +236,6 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sql?.close()
         }
     }
-
-/*
-
-
-     */
 
 
     protected void setUpDefaultOrganization() {
@@ -274,6 +297,47 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 //        return CommunicationMailboxAccount
 //    }
 //
+
+
+    protected void testDeleteGroupSend( CommunicationTemplate template ) {
+        CommunicationGroupSend groupSend
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeleteGroupSend Population" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testDeleteGroupSend",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication( request )
+        assertNotNull(groupSend)
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+
+        try {
+            communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotDeleteRunningGroupSend@@", e.getWrappedException().getMessage() )
+        }
+
+        sleepUntilGroupSendComplete( groupSend, 120 )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+    }
 
 
     protected void setUpDefaultFolder() {
@@ -527,6 +591,100 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     protected void assertNoErrorsUponValidation( domainObj ) {
         validate( domainObj )
     }
+
+
+    protected int fetchGroupSendCount( Long groupSendId ) {
+        def sql
+        def result
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            result = sql.firstRow( "select count(*) as rowcount from GCBGSND where GCBGSND_SURROGATE_ID = ${groupSendId}" )
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+        return result.rowcount
+    }
+
+
+    protected int fetchGroupSendItemCount( Long groupSendId ) {
+        def sql
+        def result
+        try {
+            sql = new Sql(sessionFactory.getCurrentSession().connection())
+            result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
+            println( result.rowcount )
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
+        return result.rowcount
+    }
+
+
+    protected void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
+        final int interval = 2;                 // test every second
+        int count = maxSleepTime / interval;    // calculate max loop count
+        while (count > 0) {
+            count--;
+            TimeUnit.SECONDS.sleep( interval );
+
+            int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+
+            if ( countCompleted >= totalNumJobs) {
+                break;
+            }
+        }
+    }
+
+
+    protected void sleepUntilCommunicationJobsComplete( long totalNumJobs, int maxSleepTime ) {
+        final int interval = 2;                 // test every second
+        int count = maxSleepTime / interval;    // calculate max loop count
+        while (count > 0) {
+            count--;
+            TimeUnit.SECONDS.sleep( interval );
+
+            int countCompleted = CommunicationJob.fetchCompleted().size()
+
+            if ( countCompleted >= totalNumJobs) {
+                break;
+            }
+        }
+    }
+
+
+    protected void sleepUntilGroupSendComplete( CommunicationGroupSend groupSend, int maxSleepTime ) {
+        final int interval = 2;                 // test every second
+        int count = maxSleepTime / interval;    // calculate max loop count
+        while (count > 0) {
+            count--;
+            TimeUnit.SECONDS.sleep( interval );
+
+            sessionFactory.currentSession.flush()
+            sessionFactory.currentSession.clear()
+
+            groupSend = CommunicationGroupSend.get( groupSend.id )
+
+            if ( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) ) {
+                break;
+            }
+        }
+
+        assertEquals( CommunicationGroupSendExecutionState.Complete, groupSend.getCurrentExecutionState() )
+    }
+
+
+    protected def newPopulationQuery( String queryName ) {
+        def populationQuery = new CommunicationPopulationQuery(
+                // Required fields
+                folder: defaultFolder,
+                name: queryName,
+                description: "test description",
+                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+
+        return populationQuery
+    }
+
 
     protected void assertLength(int length, def array) {
         assertEquals(length, array?.size());

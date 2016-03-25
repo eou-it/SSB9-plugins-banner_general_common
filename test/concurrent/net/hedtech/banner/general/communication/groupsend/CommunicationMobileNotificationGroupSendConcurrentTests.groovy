@@ -12,7 +12,10 @@ import net.hedtech.banner.general.communication.item.CommunicationMobileNotifica
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
@@ -67,23 +70,39 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         logout()
     }
 
+
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
         CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testPop") )
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "" )
-        assertNotNull(population.id)
-//        communicationPopulationCompositeService.
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertNotNull( populationVersion )
+        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        assertEquals( 1, queryAssociations.size() )
+        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
+        queryAssociation.refresh()
+        assertNotNull( queryAssociation.selectionList )
+
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
-                populationId: populationSelectionListId,
+                populationId: population.id,
                 templateId: defaultMobileNotificationTemplate.id,
                 organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString(),
@@ -93,36 +112,31 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
-        assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
+        def checkExpectedGroupSendItemsCreated = {
+            CommunicationGroupSend each = CommunicationGroupSend.get( it )
+            return communicationGroupSendItemService.fetchByGroupSend( each ).size() == 5
+        }
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
+        // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendView.findAll()
         assertEquals(1, sendViewDetails.size())
 
-        List groupSendItemList = communicationGroupSendItemService.list()
-        assertEquals( 5, groupSendItemList.size() )
-        CommunicationGroupSendItem found = groupSendItemList.get( 0 ) as CommunicationGroupSendItem
-        assertEquals( CommunicationGroupSendItemExecutionState.Ready, found.currentExecutionState)
-
+        // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
         assertEquals(5, sendItemViewDetails.size())
-
-        assertEquals( 5, CommunicationGroupSendItem.fetchByReadyExecutionState().size() )
 
         sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 60 )
+        sleepUntilCommunicationJobsComplete( 5, 120 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
-//        MimeMessage[] messages = mailServer.getReceivedMessages();
-//        assertNotNull(messages);
-//        assertEquals(5, messages.length);
-//
         sleepUntilGroupSendComplete( groupSend, 120 )
-//
+
         // test delete group send
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
@@ -135,48 +149,12 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
+
     @Test
     public void testDeleteGroupSend() {
-        CommunicationGroupSend groupSend
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeleteGroupSend") )
-        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
-
-        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult )
-        assertNotNull(selectionList)
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
-        assertNotNull(selectionListEntryList)
-        assertEquals(5, selectionListEntryList.size())
-
-
-        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
-                name: "testDeleteGroupSend",
-                populationId: populationSelectionListId,
-                templateId: defaultMobileNotificationTemplate.id,
-                organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString(),
-                recalculateOnSend: false
-        )
-
-        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
-        assertNotNull(groupSend)
-
-        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
-        assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
-
-        try {
-            communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
-        } catch (ApplicationException e) {
-            assertEquals( "@@r1:cannotDeleteRunningGroupSend@@", e.getWrappedException().getMessage() )
-        }
-
-        groupSend = communicationGroupSendCompositeService.completeGroupSend( groupSend.id )
-
-        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
-
-        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
-        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+        testDeleteGroupSend( defaultMobileNotificationTemplate )
     }
+
 
     @Test
     public void testPersonalization() {
@@ -190,13 +168,15 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPersonalization population" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
 
-        CommunicationPopulationQueryExecutionResult queryExecutionResult = communicationPopulationExecutionService.execute(populationQuery.id)
-        CommunicationPopulationSelectionList selectionList = communicationPopulationSelectionListService.get( queryExecutionResult.selectionListId )
-        assertNotNull(selectionList)
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(selectionList.id)
-        assertNotNull(selectionListEntryList)
-        assertEquals(1, selectionListEntryList.size())
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -235,7 +215,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testPersonalization",
-                populationId: populationSelectionListId,
+                populationId: population.id,
                 templateId: mobileTemplate.id,
                 organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString(),
@@ -245,29 +225,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
-        assertEquals( 1, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
-
-        def sendViewDetails = CommunicationGroupSendView.findAll()
-        assertEquals(1, sendViewDetails.size())
-
-        List groupSendItemList = communicationGroupSendItemService.list()
-        assertEquals( 1, groupSendItemList.size() )
-        CommunicationGroupSendItem found = groupSendItemList.get( 0 ) as CommunicationGroupSendItem
-        assertEquals( CommunicationGroupSendItemExecutionState.Ready, found.currentExecutionState)
-
-        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
-        assertEquals(1, sendItemViewDetails.size())
-
-        assertEquals( 1, CommunicationGroupSendItem.fetchByReadyExecutionState().size() )
-
-        sleepUntilGroupSendItemsComplete( groupSend, 1, 60 )
-
-        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
-        assertEquals( 1, countCompleted )
-
-        sleepUntilCommunicationJobsComplete( 1, 60 )
-        countCompleted = CommunicationJob.fetchCompleted().size()
-        assertEquals( 1, countCompleted )
+        sleepUntilGroupSendComplete( groupSend, 120 )
 
         List itemList = communicationMobileNotificationItemService.list()
         assertEquals( 1, itemList.size() )
@@ -284,94 +242,6 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertEquals( "http://www.amazon.com", serverResponseMap.destination )
         assertEquals( "Amazon", serverResponseMap.destinationLabel )
         assertNotNull( serverResponseMap.createDate )
-    }
-
-
-    private int fetchGroupSendCount( Long groupSendId ) {
-        def sql
-        def result
-        try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
-            result = sql.firstRow( "select count(*) as rowcount from GCBGSND where GCBGSND_SURROGATE_ID = ${groupSendId}" )
-        } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
-        }
-        return result.rowcount
-    }
-
-    private int fetchGroupSendItemCount( Long groupSendId ) {
-        def sql
-        def result
-        try {
-            sql = new Sql(sessionFactory.getCurrentSession().connection())
-            result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
-            println( result.rowcount )
-        } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
-        }
-        return result.rowcount
-    }
-
-    private void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
-        final int interval = 2;                 // test every second
-        int count = maxSleepTime / interval;    // calculate max loop count
-        while (count > 0) {
-            count--;
-            TimeUnit.SECONDS.sleep( interval );
-
-            int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
-
-            if ( countCompleted >= totalNumJobs) {
-                break;
-            }
-        }
-    }
-
-    private void sleepUntilCommunicationJobsComplete( long totalNumJobs, int maxSleepTime ) {
-        final int interval = 2;                 // test every second
-        int count = maxSleepTime / interval;    // calculate max loop count
-        while (count > 0) {
-            count--;
-            TimeUnit.SECONDS.sleep( interval );
-
-            int countCompleted = CommunicationJob.fetchCompleted().size()
-
-            if ( countCompleted >= totalNumJobs) {
-                break;
-            }
-        }
-    }
-
-    private void sleepUntilGroupSendComplete( CommunicationGroupSend groupSend, int maxSleepTime ) {
-        final int interval = 2;                 // test every second
-        int count = maxSleepTime / interval;    // calculate max loop count
-        while (count > 0) {
-            count--;
-            TimeUnit.SECONDS.sleep( interval );
-
-            sessionFactory.currentSession.flush()
-            sessionFactory.currentSession.clear()
-
-            groupSend = CommunicationGroupSend.get( groupSend.id )
-
-            if ( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) ) {
-                break;
-            }
-        }
-
-        assertEquals( CommunicationGroupSendExecutionState.Complete, groupSend.getCurrentExecutionState() )
-    }
-
-    private def newPopulationQuery( String queryName ) {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: defaultFolder,
-                name: queryName,
-                description: "test description",
-                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
-        )
-
-        return populationQuery
     }
 
 

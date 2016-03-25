@@ -355,7 +355,6 @@ class CommunicationPopulationCompositeService {
      * the calculation request of a population version.
      * @param parameters a set of parameters passed from the original request through the quartz job detail data map
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationPopulationVersion calculatePendingPopulationVersion( Map parameters ) {
         if (log.isDebugEnabled()) {
             log.debug( "calculatePendingPopulationVersion with " + parameters )
@@ -365,6 +364,9 @@ class CommunicationPopulationCompositeService {
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.fetchById( populationVersionId )
         if (!populationVersion) {
             log.error( "Could not fetch communication population version with id ${populationVersionId}." )
+        }
+        if (!populationVersion.getStatus().equals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION )) {
+            throw CommunicationExceptionFactory.createApplicationException( this.class, "populationCalculationInvalidState" )
         }
 
         boolean errorFound = false
@@ -389,9 +391,7 @@ class CommunicationPopulationCompositeService {
                 queryAssociation.errorText = t.message
             }
             try {
-                boolean valid = queryAssociation.validate()
-                queryAssociation.save( flush: true )
-//                communicationPopulationVersionQueryAssociationService.update( queryAssociation )
+                communicationPopulationVersionQueryAssociationService.update( queryAssociation )
             } catch (Throwable t) {
                 t.printStackTrace()
             }
@@ -399,9 +399,7 @@ class CommunicationPopulationCompositeService {
 
         populationVersion.calculatedCount = totalCount
         populationVersion.status = errorFound ? CommunicationPopulationCalculationStatus.ERROR : CommunicationPopulationCalculationStatus.AVAILABLE
-        boolean valid = populationVersion.validate()
-        populationVersion.save( flush: true )
-//        populationVersion = communicationPopulationVersionService.update( populationVersion )
+        populationVersion = communicationPopulationVersionService.update( populationVersion )
         return populationVersion
     }
 

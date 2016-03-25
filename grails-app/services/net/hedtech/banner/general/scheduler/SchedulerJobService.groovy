@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.scheduler
 
 import grails.transaction.Transactional
+import grails.util.Holders
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
@@ -14,6 +15,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 import org.quartz.Trigger
 import org.quartz.impl.StdScheduler
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Service for scheduling a quartz job that runs in the background. This service relies on
@@ -68,6 +70,13 @@ class SchedulerJobService {
         quartzScheduler.scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
+    }
+
+
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
+    public Object invokeServiceMethodInNewTransaction( String serviceName, String method, Map parameters ) {
+        def serviceReference = Holders.applicationContext.getBean( serviceName )
+        return serviceReference.invokeMethod( method, parameters )
     }
 
 

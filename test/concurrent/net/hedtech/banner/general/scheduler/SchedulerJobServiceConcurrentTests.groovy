@@ -70,7 +70,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         Trigger trigger = quartzScheduler.getTrigger( triggerKey ) // SimpleTriggerImpl
         assertNotNull( trigger )
 
-        int retries = 10
+        int retries = 20
         while (retries > 0) {
             retries--;
             TimeUnit.SECONDS.sleep( 5 );

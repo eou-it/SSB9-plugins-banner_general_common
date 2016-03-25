@@ -28,7 +28,7 @@ class CommunicationPopulationVersionService extends ServiceBase {
 
 
     def preUpdate(domainModelOrMap) {
-        CommunicationPopulationVersion populationVersion = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationQuery
+        CommunicationPopulationVersion populationVersion = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationVersion
 
         if (populationVersion.id == null)
             throw new ApplicationException(CommunicationPopulationVersion, "@@r1:populationVersionDoesNotExist@@")
