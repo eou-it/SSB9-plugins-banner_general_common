@@ -133,9 +133,31 @@ class EmsConfigurationBuilder {
                     case 'EMS.IHUB.MEDIATYPE':
                         emsConfiguration.integrationHubConfig.hubMediaType = setting.translationValue
                         break;
+                    case 'EMS.IHUB.MEP.ENABLED':
+                        emsConfiguration.integrationHubConfig.isMepEnvironment = setting.translationValue.toUpperCase() == "Y" ? true : false
+                        break;
+                    case 'EMS.IHUB.MEP.APIKEYS':
+                        def vpdiKeyComb = [:]
+                        vpdiKeyComb.put("vpdiCode", setting.value)
+                        vpdiKeyComb.put("apiKey", setting.translationValue)
+                        emsConfiguration.integrationHubConfig.mepApiKeyMappings << vpdiKeyComb
+                        break;
                     default:
                         break;
                 }
+            }
+        }
+
+        if (id == ETHOS_INTEGRATION) {
+            if (emsConfiguration.integrationHubConfig.isMepEnvironment) {
+                // If 'isMepEnvironment' is true, 'mepApiKeyMappings' will be used by the adapter
+                emsConfiguration.integrationHubConfig.apiKey = null
+            } else {
+                // If 'isMepEnvironment' is false, 'apiKey' will be used by the adapter
+                emsConfiguration.integrationHubConfig.mepApiKeyMappings = null
+            }
+            if (emsConfiguration.useIntegrationHub == false) {
+                emsConfiguration.integrationHubConfig = null
             }
         }
     }
