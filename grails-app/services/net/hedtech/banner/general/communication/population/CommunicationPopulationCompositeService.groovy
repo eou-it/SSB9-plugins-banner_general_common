@@ -14,6 +14,9 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersionService
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntryService
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
@@ -34,6 +37,9 @@ class CommunicationPopulationCompositeService {
     CommunicationPopulationVersionService communicationPopulationVersionService
     CommunicationPopulationQueryAssociationService communicationPopulationQueryAssociationService
     CommunicationPopulationQueryExecutionService communicationPopulationQueryExecutionService
+    CommunicationPopulationSelectionListEntryService communicationPopulationSelectionListEntryService
+    CommunicationPopulationSelectionListService communicationPopulationSelectionListService
+
     SchedulerJobService schedulerJobService
     def log = Logger.getLogger(this.getClass())
 
@@ -93,18 +99,19 @@ class CommunicationPopulationCompositeService {
     public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description ) {
         log.trace( "createPopulationFromQueryVersion called" )
 
-        CommunicationPopulation population = new CommunicationPopulation()
-        population.name = name
-        population.description = description
-        population.folder = populationQueryVersion.query.folder
-        population = communicationPopulationService.create( population )
-
-        CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
-        populationQueryAssociation.populationQuery = populationQueryVersion.query
-        populationQueryAssociation.populationQueryVersion = populationQueryVersion
-        populationQueryAssociation.population = population
-        populationQueryAssociation = communicationPopulationQueryAssociationService.create( populationQueryAssociation )
-
+        CommunicationPopulation population = CommunicationPopulation.fetchByPopulationNameAndFolderName(name, populationQueryVersion.query.folder.name)
+        if(population) {
+            CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
+            populationQueryAssociation.populationQuery = populationQueryVersion.query
+            populationQueryAssociation.populationQueryVersion = populationQueryVersion
+            populationQueryAssociation.population = population
+            populationQueryAssociation = communicationPopulationQueryAssociationService.create(populationQueryAssociation)
+        }
+        else
+        {
+            log.error( "Could not fetch communication population for name ${name}." )
+            throw CommunicationExceptionFactory.createApplicationException( this.class, "populationNotFoundToRecalculate" )
+        }
         calculatePopulationForUser( population )
 
         return population
@@ -140,11 +147,28 @@ class CommunicationPopulationCompositeService {
      */
     public boolean deletePopulation( long populationId, long version ) {
         log.trace("deletePopulation called")
-        List populationVersions = CommunicationPopulationVersion.findByPopulationId( populationId )
+        CommunicationPopulation population = CommunicationPopulation.fetchById(populationId)
+        List populationVersions = CommunicationPopulationVersion.findByPopulationId( population.id )
         if(populationVersions != null && populationVersions.size() > 0) {
+            for(CommunicationPopulationVersion populationVersion : populationVersions) {
+
+                CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
+                //Delete the CommunicationPopulationVersionQueryAssociation
+                communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociation)
+                //Delete the CommunicationPopulationSelectionList
+                communicationPopulationSelectionListService.delete(populationVersionQueryAssociation.selectionList)
+                //Delete the CommunicationPopulationSelectionListEntry
+                List<CommunicationPopulationSelectionListEntry> selectionListEntries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationVersionQueryAssociation.selectionList.id)
+                communicationPopulationSelectionListEntryService.delete(selectionListEntries)
+            }
+            //Delete the CommunicationPopulationVersion
             communicationPopulationVersionService.delete(populationVersions)
         }
 
+        //Delete the CommunicationPopulationQueryAssociation
+        List<CommunicationPopulationQueryAssociation> populationQueryAssociations = CommunicationPopulationQueryAssociation.findAllByPopulation(population)
+        communicationPopulationQueryAssociationService.delete(populationQueryAssociations)
+        //Delete the CommunicationPopulation
         def populationAsMap = [
             id     : Long.valueOf( populationId ),
             version: Long.valueOf( version )
@@ -326,6 +350,15 @@ class CommunicationPopulationCompositeService {
                 // if we decide to support this capability in the future, we should unschedule the quartz job
                 throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotRecalculatePopulationPendingExecution" )
             } else {
+                CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
+                //Delete the CommunicationPopulationVersionQueryAssociation
+                communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociation)
+                //Delete the CommunicationPopulationSelectionListEntry
+                List<CommunicationPopulationSelectionListEntry> selectionListEntries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationVersionQueryAssociation.selectionList.id)
+                communicationPopulationSelectionListEntryService.delete(selectionListEntries)
+                //Delete the CommunicationPopulationSelectionList
+                communicationPopulationSelectionListService.delete(populationVersionQueryAssociation.selectionList)
+                //Delete the CommunicationPopulationVersion
                 communicationPopulationVersionService.delete( populationVersion )
             }
         }

@@ -144,6 +144,121 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     }
 
     @Test
+    void testFindRunning() {
+
+        CommunicationGroupSendRequest request = createGroupSendRequest()
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        CommunicationGroupSend groupSendB = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        CommunicationGroupSend groupSendC = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+
+        List runningList = communicationGroupSendService.findRunning()
+        assertEquals( 3, runningList.size() )
+
+        assertTrue( groupSendB.currentExecutionState.isRunning() )
+        groupSendB = communicationGroupSendCompositeService.stopGroupSend( groupSendB.id )
+        assertTrue( groupSendB.currentExecutionState.isTerminal() )
+
+        runningList = communicationGroupSendService.findRunning()
+        assertEquals( 2, runningList.size() )
+
+        groupSendC = communicationGroupSendCompositeService.completeGroupSend( groupSendC.id )
+        assertTrue( groupSendC.currentExecutionState.isTerminal() )
+
+        runningList = communicationGroupSendService.findRunning()
+        assertEquals( 1, runningList.size() )
+    }
+
+    @Test
+    void testStopStoppedGroupSend() {
+        CommunicationGroupSendRequest request = createGroupSendRequest()
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        List runningList = communicationGroupSendService.findRunning()
+        assertEquals( 1, runningList.size() )
+
+        assertTrue( groupSend.currentExecutionState.isRunning() )
+        groupSend = communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
+        assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
+        assertTrue( groupSend.currentExecutionState.isTerminal() )
+
+        runningList = communicationGroupSendService.findRunning()
+        assertEquals( 0, runningList.size() )
+
+        try{
+            communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
+            fail( "Shouldn't be able to stop a group send that has already concluded." )
+        } catch( ApplicationException e ) {
+            assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
+        }
+    }
+
+    @Test
+    void testStopCompletedGroupSend() {
+        CommunicationGroupSendRequest request = createGroupSendRequest()
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        assertTrue(groupSend.currentExecutionState.isRunning())
+        groupSend = communicationGroupSendCompositeService.completeGroupSend(groupSend.id)
+        assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
+
+        List runningList = communicationGroupSendService.findRunning()
+        assertEquals(0, runningList.size())
+
+        try {
+            communicationGroupSendCompositeService.stopGroupSend(groupSend.id)
+            fail("Shouldn't be able to stop a group send that has already concluded.")
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotStopConcludedGroupSend@@", e.getWrappedException().getMessage() )
+        }
+    }
+
+    private CommunicationGroupSendRequest createGroupSendRequest()
+    {
+        mailServer.start()
+
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertNotNull( populationVersion )
+        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        assertEquals( 1, queryAssociations.size() )
+        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
+        queryAssociation.refresh()
+        assertNotNull( queryAssociation.selectionList )
+
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
+        assertNotNull(selectionListEntryList)
+        assertEquals(5, selectionListEntryList.size())
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        return request
+    }
+
+    @Test
     public void testDeleteGroupSend() {
         testDeleteGroupSend( defaultEmailTemplate )
     }
