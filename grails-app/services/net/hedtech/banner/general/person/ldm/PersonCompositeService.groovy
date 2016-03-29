@@ -362,11 +362,7 @@ class PersonCompositeService extends LdmService {
                     null,
                     null)
         }
-        if (person.addresses instanceof List) {
-            person.addresses.collect { address ->
-                getStateAndZip(address)
-            }
-        }
+
         persons.put(newPersonIdentificationName.pidm, currentRecord)
         def addresses = createAddresses(newPersonIdentificationName.pidm, metadata,
                 person.addresses instanceof List ? person.addresses : [])
@@ -715,10 +711,20 @@ class PersonCompositeService extends LdmService {
                                 log.error "Nation not found for code: ${activeAddress?.nation?.code}"
                                 throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
                             }
+                            InstitutionalDescription institutionalDescription = InstitutionalDescription.fetchByKey()
+                            if (institutionalDescription?.natnCode == activeAddress.nation.code) {
+                                getStateAndZip(activeAddress, false)
+                            } else{
+                                getStateAndZip(activeAddress, true)
+                            }
                         } else {
                             activeAddress.put('nation', null)
+                            getStateAndZip(activeAddress, false)
                         }
+                    } else {
+                        getStateAndZip(activeAddress, false)
                     }
+
                     if (activeAddress.containsKey('county')) {
                         if (activeAddress.county) {
                             County country = County.findByDescription(activeAddress.county)
@@ -1210,9 +1216,6 @@ class PersonCompositeService extends LdmService {
 
     private updateAddresses(def pidm, Map metadata, List<Map> newAddresses) {
         def addresses = []
-        newAddresses.collect { activeAddress ->
-            getStateAndZip(activeAddress)
-        }
         List<PersonAddress> currentAddresses = PersonAddress.fetchActiveAddressesByPidm(['pidm': pidm]).get('list')
         currentAddresses.each { currentAddress ->
             if (findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_ADDRESS_TYPE, currentAddress.addressType.code)) {
@@ -1223,21 +1226,18 @@ class PersonCompositeService extends LdmService {
                 log.debug "NewAddresses:" + newAddresses.toString()
                 log.debug "ActiveAddresses:" + activeAddresses.toString()
                 log.debug "CurrentAddress:" + currentAddress.toString()
-                def invalidAddress = false
+                def changeToInactiveStatus = false
                 if (activeAddresses.size() > 0) {
                     activeAddresses.each { activeAddress ->
                         switch (activeAddress?.addressType) {
                             default:
-
-                                if (activeAddress.state.code != currentAddress.state.code) {
+                                if (activeAddress.state != currentAddress.state?.code) {
                                     log.debug "State different"
-                                    invalidAddress = true
+                                    changeToInactiveStatus = true
                                 }
-
-
                                 if (activeAddress.zip != currentAddress.zip) {
                                     log.debug "Zip different"
-                                    invalidAddress = true
+                                    changeToInactiveStatus = true
                                     break;
                                 }
                                 if (activeAddress?.nation?.containsKey('code')) {
@@ -1251,7 +1251,7 @@ class PersonCompositeService extends LdmService {
                                     }
                                     if (nation?.code != currentAddress.nation?.code) {
                                         log.debug "Nation different:" + nation.code + " : " + currentAddress.nation?.code
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
@@ -1266,34 +1266,34 @@ class PersonCompositeService extends LdmService {
                                     }
                                     if (county?.code != currentAddress.county?.code) {
                                         log.debug "County different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 if (activeAddress.containsKey('streetLine1')) {
                                     if (activeAddress.streetLine1 != currentAddress.streetLine1) {
                                         log.debug "Street1 different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 if (activeAddress.containsKey('streetLine2')) {
                                     if (activeAddress.streetLine2 != currentAddress.streetLine2) {
                                         log.debug "Street2 different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 if (activeAddress.containsKey('streetLine3')) {
                                     if (activeAddress.streetLine3 != currentAddress.streetLine3) {
                                         log.debug "Street3 different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 break;
                         }
-                        if (invalidAddress) {
+                        if (changeToInactiveStatus) {
                             currentAddress.statusIndicator = 'I'
                             log.debug "Inactivating address:" + currentAddress.toString()
                             personAddressService.update(currentAddress)
@@ -1374,7 +1374,6 @@ class PersonCompositeService extends LdmService {
                 }
             }
         }
-
         createPhones(pidm, metadata, newPhones).each { currentPhone ->
             def phoneDecorator = new Phone(currentPhone)
             phoneDecorator.phoneType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType.code)?.translationValue
@@ -1507,9 +1506,13 @@ class PersonCompositeService extends LdmService {
         }
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    private def getStateAndZip(activeAddress, isInternational) {
+        getAddressPostalCode(getAddressRegion(activeAddress, isInternational), isInternational)
+    }
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private def getAddressRegion(activeAddress) {
+    private def getAddressRegion(activeAddress, isInternational) {
         State state
         if (activeAddress.state) {
             state = State.findByCode(activeAddress?.state)
@@ -1517,48 +1520,52 @@ class PersonCompositeService extends LdmService {
                 log.error "State not found for code: ${activeAddress.state}"
                 throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
             }
-            activeAddress.put('state', state)
         } else {
-            IntegrationConfiguration intConf
-            intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_REGION)
-            if (!intConf) {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_REGION]))
+            if (isInternational) {
+                state = null
+            } else {
+                IntegrationConfiguration intConf
+                intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_REGION)
+                state = State.findByCode(intConf?.value)
+                if (!state) {
+                    throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_REGION]))
+                }
             }
-            state = State.findByCode(intConf?.value)
-            if (!state) {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_REGION]))
-            }
-            activeAddress.put('state', state)
         }
+        activeAddress.put('state', state)
 
         return activeAddress
     }
 
-
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private def getAddressPostalCode(activeAddress) {
+    private def getAddressPostalCode(activeAddress, isInternational) {
+        String zip
         if (activeAddress.zip) {
-            activeAddress.put('zip', activeAddress.zip)
+            zip = activeAddress.zip
         } else {
-            IntegrationConfiguration intConf
-            intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_POSTAL_CODE)
-            if (!intConf) {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_POSTAL_CODE]))
+            if (isInternational) {
+                zip = null
+            } else {
+                IntegrationConfiguration intConf
+                intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_POSTAL_CODE)
+                if (intConf.value == "UPDATE_ME") {
+                    throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_POSTAL_CODE]))
+                }
+                zip = intConf.value
             }
-
-            if (intConf.value == "UPDATE_ME") {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_POSTAL_CODE]))
-            }
-            activeAddress.put('zip', intConf.value)
         }
+        activeAddress.put('zip', zip)
 
         return activeAddress
     }
 
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private def getStateAndZip(activeAddress) {
-        getAddressPostalCode(getAddressRegion(activeAddress))
+    private IntegrationConfiguration getIntegrationConfiguration(processCode, settingName) {
+        IntegrationConfiguration intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(processCode, settingName)
+        if (!intConf) {
+            throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.not.found.message", [settingName]))
+        }
+        return intConf
     }
 
     def validateCredentialsOnUrl(Map param) {
