@@ -180,6 +180,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 1, runningList.size() )
 
         assertTrue( groupSend.currentExecutionState.isRunning() )
+        sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
         groupSend = communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
         assertTrue( groupSend.currentExecutionState.isTerminal() )
@@ -202,6 +203,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertNotNull(groupSend)
 
         assertTrue(groupSend.currentExecutionState.isRunning())
+        sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
         groupSend = communicationGroupSendCompositeService.completeGroupSend(groupSend.id)
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
 

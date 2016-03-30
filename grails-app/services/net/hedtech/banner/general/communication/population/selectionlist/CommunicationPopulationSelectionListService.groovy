@@ -34,10 +34,6 @@ class CommunicationPopulationSelectionListService extends ServiceBase {
 
         if (oldpop.id == null)
             throw new ApplicationException(CommunicationPopulationSelectionList, "@@r1:queryDoesNotExist@@")
-
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpop.lastCalculatedBy)) {
-            throw new ApplicationException(CommunicationPopulationSelectionList, "@@r1:operation.not.authorized@@")
-        }
     }
 
 

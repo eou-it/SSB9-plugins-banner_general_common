@@ -55,6 +55,8 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:jobNameInvalid@@" )
         }
 
+        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
         groupSend.templateId = request.getTemplateId()
         groupSend.populationId = request.getPopulationId()
@@ -62,11 +64,16 @@ class CommunicationGroupSendCompositeService {
         groupSend.name = jobName
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
+
+        if(!groupSend.recalculateOnSend)
+        {
+            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
+            groupSend.populationVersionId = populationVersion.id
+
+        }
         groupSend = communicationGroupSendService.create( groupSend )
 
-        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
         String mepCode = groupSend.mepCode
-
         if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend(request, bannerUser, mepCode, groupSend)
         } else {
@@ -145,8 +152,14 @@ class CommunicationGroupSendCompositeService {
         if (!population) {
             assert population // throw error
         }
-        communicationPopulationCompositeService.calculatePopulationForGroupSend( population, groupSend.createdBy ) // double check this is the correct user
+        if(!groupSend.populationVersionId) {
+            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+            groupSend = communicationGroupSendService.update(groupSend)
 
+            //Calculate the population version
+            communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
+            // double check this is the correct user
+        }
         // TODO: Decide whether to store a reference for the next piece of work to be done or can we use reference id from original reference
 //        schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
         groupSend = generateGroupSendItems( parameters )

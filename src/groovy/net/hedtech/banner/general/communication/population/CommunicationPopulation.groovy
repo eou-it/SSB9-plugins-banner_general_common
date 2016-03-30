@@ -125,6 +125,7 @@ class CommunicationPopulation implements Serializable {
 
     static constraints = {
         name(nullable: false)
+        description(nullable:true)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         lastModified(nullable: true)
