@@ -48,7 +48,11 @@ class EmsConfigurationCompositeServiceIntegrationTests extends BaseIntegrationTe
         EmsConfiguration emsConfiguration = emsConfigurationCompositeService.get(id)
         assertNotNull emsConfiguration
         assertEquals id, emsConfiguration.id
-        assertNotNull emsConfiguration.integrationHubConfig
+        if (emsConfiguration.useIntegrationHub) {
+            assertNotNull emsConfiguration.integrationHubConfig
+        } else {
+            assertNull emsConfiguration.integrationHubConfig
+        }
         assertNull emsConfiguration.hasProperty("messageInConfig")
     }
 
