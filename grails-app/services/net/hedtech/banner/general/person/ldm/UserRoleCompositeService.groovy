@@ -1,10 +1,11 @@
 /*******************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.general.overall.ldm.LdmService
@@ -14,7 +15,7 @@ import java.sql.SQLException
 class UserRoleCompositeService extends LdmService{
     def sessionFactory
     def dateConvertHelperService
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1,GeneralCommonConstants.VERSION_V4]
+
 
 /**
  *
@@ -153,8 +154,8 @@ class UserRoleCompositeService extends LdmService{
 
     Map<Integer, List<RoleDetail>> fetchAllRolesByPidmInList(List pidms, Boolean studentRole) {
         def results = [:]
-        String version = LdmService.getAcceptVersion(VERSIONS)
-        def timeZone = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version)? dateConvertHelperService.getDBTimeZone() : ''
+        String version = LdmService.getAcceptVersion(GeneralValidationCommonConstants.VERSIONS_V1)
+        def timeZone = GeneralValidationCommonConstants.VERSION_V4.equalsIgnoreCase(version)? dateConvertHelperService.getDBTimeZone() : ''
         def institution = InstitutionalDescription.fetchByKey()
         if (pidms.size()) {
             def connection
