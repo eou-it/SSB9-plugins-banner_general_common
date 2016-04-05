@@ -229,37 +229,5 @@ public abstract class CommunicationTemplate implements Serializable {
         return (query != null)
     }
 
-    /**
-     * Returns a list of templates to be used when sending messages to a population
-     * will return all templates that are active, shared and personal templates belonging to the user will be returned
-     * @param filterData
-     * @return
-     */
-    public static findByFolderForSend(filterData) {
 
-        def currentDate = new Date()
-        def queryCriteria = CommunicationTemplate.createCriteria()
-
-        def results = queryCriteria.list {
-            folder {
-                eq("name", filterData?.params?.folderName?.toLowerCase(), [ignoreCase: true])
-            }
-            eq("published",true)
-            and {
-                or {
-                    eq("personal",false)
-                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
-                }
-            }
-            le("validFrom",currentDate)
-            and {
-                or {
-                    isNull("validTo")
-                    ge("validTo",currentDate)
-                }
-            }
-            order( Order.asc("name").ignoreCase())
-        }
-        return results
-    }
 }
