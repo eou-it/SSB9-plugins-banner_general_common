@@ -47,9 +47,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         populationSelectionList.save(failOnError: true, flush: true)
 
         // Assert domain values
-        assertNotNull(populationSelectionList.name)
         assertNotNull populationSelectionList?.id
-        assertEquals CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION, populationSelectionList.status
     }
 
 
@@ -67,7 +65,6 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         assertNotNull populationSelectionList
 
         // Update domain values
-        populationSelectionList.status = CommunicationPopulationQueryExecutionStatus.AVAILABLE //<<< Update the value
         populationSelectionList.save(failOnError: true, flush: true)
 
         // Find the updated domain
@@ -75,7 +72,6 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
         // Assert updated domain values
         assertNotNull populationSelectionList?.id
-        assertEquals(CommunicationPopulationQueryExecutionStatus.AVAILABLE, populationSelectionList.status)
         //<<< Assert updated value
     }
 
@@ -146,11 +142,8 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
     private def newPopulationSelectionList() {
         def populationSelectionList = new CommunicationPopulationSelectionList(
                 // Required fields
-                name: globalTestPopulationQuery.name,
-
                 // Nullable fields
-                executedsql: "",
-                status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
+                executedsql: ""
         )
 
         return populationSelectionList

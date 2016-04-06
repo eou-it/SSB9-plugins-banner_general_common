@@ -30,7 +30,7 @@ class CommunicationPopulationQueryCompositeService {
         assert( query.id == null )
 
         query.changesPending = true;
-        validateSqlStringForSaving( query.sqlString )
+        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.sqlString )
         return (CommunicationPopulationQuery) communicationPopulationQueryService.create( query )
     }
 
@@ -195,7 +195,7 @@ class CommunicationPopulationQueryCompositeService {
             queryAsMap.changesPending = true;
         }
 
-        validateSqlStringForSaving( (String) queryAsMap.sqlString )
+        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( (String) queryAsMap.sqlString )
 
         return (CommunicationPopulationQuery) communicationPopulationQueryService.update( queryAsMap )
     }

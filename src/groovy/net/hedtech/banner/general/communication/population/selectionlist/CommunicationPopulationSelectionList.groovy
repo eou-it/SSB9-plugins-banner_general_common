@@ -36,15 +36,6 @@ class CommunicationPopulationSelectionList implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRSLIS_SEQ_GEN")
     Long id
 
-    @Column(name = "GCRSLIS_NAME")
-    String name
-
-    /**
-     * Selection List status: SCHEDULED, PENDING_EXECUTION, ERROR, AVAILABLE
-     */
-    @Column(name = "GCRSLIS_STATUS")
-    CommunicationPopulationQueryExecutionStatus status
-
     /**
      * VERSION: Optimistic lock token.
      */
@@ -72,11 +63,9 @@ class CommunicationPopulationSelectionList implements Serializable {
     String dataOrigin
 
     static constraints = {
-        name(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        status(nullable: true)
     }
 
     // Read Only fields that should be protected against update
