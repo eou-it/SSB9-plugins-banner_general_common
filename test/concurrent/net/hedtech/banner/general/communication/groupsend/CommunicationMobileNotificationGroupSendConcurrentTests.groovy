@@ -131,11 +131,11 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 180 )
+        sleepUntilCommunicationJobsComplete( 5, 5 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilGroupSendComplete( groupSend, 120 )
+        sleepUntilGroupSendComplete( groupSend, 3 * 60 )
 
         // test delete group send
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
@@ -227,9 +227,12 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         sleepUntilGroupSendComplete( groupSend, 120 )
 
-        List itemList = communicationMobileNotificationItemService.list()
-        assertEquals( 1, itemList.size() )
-        CommunicationMobileNotificationItem item = itemList.get( 0 )
+        def mobileItemCreated = {
+            return communicationMobileNotificationItemService.list().size() == it
+        }
+        assertTrueWithRetry( mobileItemCreated, 1, 30, 10 )
+
+        CommunicationMobileNotificationItem item = communicationMobileNotificationItemService.list().get( 0 )
 // the item now has serverResponse to store all the individual values.  The server response
 // is a string formatted as [{"":"","":"",....}].  So strip of the begin and end characters and get the JSON map out
         def jsonSlurper = new JsonSlurper()

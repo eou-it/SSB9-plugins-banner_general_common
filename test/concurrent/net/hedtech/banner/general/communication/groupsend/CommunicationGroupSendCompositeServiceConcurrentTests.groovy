@@ -121,7 +121,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 180 )
+        sleepUntilCommunicationJobsComplete( 5, 5 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
@@ -129,7 +129,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertNotNull(messages);
         assertEquals(5, messages.length);
 
-        sleepUntilGroupSendComplete( groupSend, 120 )
+        sleepUntilGroupSendComplete( groupSend, 3 * 60 )
 
         // test delete group send
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
