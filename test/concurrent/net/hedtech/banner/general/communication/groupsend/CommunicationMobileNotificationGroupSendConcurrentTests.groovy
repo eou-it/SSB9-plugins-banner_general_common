@@ -131,7 +131,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 5 * 60 )
+        sleepUntilCommunicationJobsComplete( 5, 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
