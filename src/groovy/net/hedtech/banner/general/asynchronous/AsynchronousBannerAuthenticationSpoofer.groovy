@@ -6,11 +6,13 @@ import net.hedtech.banner.mep.MultiEntityProcessingService
 import net.hedtech.banner.security.AuthenticationProviderUtility
 import net.hedtech.banner.security.BannerAuthenticationProvider
 import net.hedtech.banner.security.FormContext
+import net.hedtech.banner.security.SelfServiceBannerAuthenticationProvider
 import org.apache.log4j.Logger
 import grails.util.Holders
 import org.springframework.context.ApplicationContext
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
@@ -83,7 +85,7 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
 
             // Next, we'll verify the authenticationResults (and throw appropriate exceptions for expired pin, disabled account, etc.)
             AuthenticationProviderUtility.verifyAuthenticationResults(this, authentication, authenticationResults)
-            authenticationResults['authorities'] = BannerAuthenticationProvider.determineAuthorities(authenticationResults, db)
+            authenticationResults['authorities']        = (Collection<GrantedAuthority>) SelfServiceBannerAuthenticationProvider.determineAuthorities( authenticationResults, db )
             authenticationResults['fullName'] = getFullName(authenticationResults.name.toUpperCase(), dataSource) as String
             return AuthenticationProviderUtility.newAuthenticationToken(this, authenticationResults)
         } finally {

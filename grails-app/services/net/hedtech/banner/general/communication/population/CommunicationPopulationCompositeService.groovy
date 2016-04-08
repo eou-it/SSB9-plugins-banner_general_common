@@ -379,8 +379,8 @@ class CommunicationPopulationCompositeService {
 
 
     public CommunicationPopulationVersion calculatePopulationForGroupSend( CommunicationPopulation population, String oracleName ) {
-        CommunicationPopulationVersion populationVersion = createPopulationVersion( population, oracleName )
-        calculatePendingPopulationVersion( [ "populationVersionId" : populationVersion.id ] )
+        CommunicationPopulationVersion populationVersion = createPopulationVersion(population, oracleName)
+        calculatePendingPopulationVersion(["populationVersionId": populationVersion.id])
     }
 
 
@@ -494,7 +494,7 @@ class CommunicationPopulationCompositeService {
         populationVersion.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
         populationVersion.jobId = jobId
         populationVersion.calculatedBy = calculatedByOracleName
-        populationVersion = communicationPopulationVersionService.create([domainModel: populationVersion])
+        populationVersion = communicationPopulationVersionService.create(populationVersion)
         assert populationVersion.id
 
         CommunicationPopulationQueryAssociation populationQueryAssociation = fetchPopulationQueryAssociation(population)

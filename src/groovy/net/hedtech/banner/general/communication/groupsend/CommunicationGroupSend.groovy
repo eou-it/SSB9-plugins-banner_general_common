@@ -119,6 +119,10 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_RECALC_ON_SEND")
     Boolean recalculateOnSend
 
+    @Lob
+    @Column(name = "GCBGSND_ERROR_TEXT")
+    String errorText
+
     static constraints = {
         mepCode(nullable: true)
         name(nullable: false)
@@ -136,6 +140,7 @@ class CommunicationGroupSend implements Serializable {
         currentExecutionState(nullable: false)
         scheduledStartDate(nullable:true)
         recalculateOnSend(nullable:false)
+        errorText(nullable:true)
     }
 
 

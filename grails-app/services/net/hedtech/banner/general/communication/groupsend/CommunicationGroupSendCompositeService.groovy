@@ -125,7 +125,6 @@ class CommunicationGroupSendCompositeService {
         )
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
         groupSend = communicationGroupSendService.update(groupSend)
-//        calculatePopulationForGroupSend( ["groupSendId": groupSend.id] )
         return groupSend
     }
 
@@ -135,7 +134,13 @@ class CommunicationGroupSendCompositeService {
         if (now.after(request.scheduledStartDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidScheduledDate")
         }
-        schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+        if(request.recalculateOnSend) {
+            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+        }
+        else
+        {
+            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
+        }
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
         groupSend = communicationGroupSendService.update(groupSend)
         groupSend
@@ -152,17 +157,26 @@ class CommunicationGroupSendCompositeService {
         if (!population) {
             assert population // throw error
         }
-        if(!groupSend.populationVersionId) {
-            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
-            groupSend = communicationGroupSendService.update(groupSend)
+        try {
+            if (!groupSend.populationVersionId) {
+                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
 
-            //Calculate the population version
-            communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
-            // double check this is the correct user
-        }
-        // TODO: Decide whether to store a reference for the next piece of work to be done or can we use reference id from original reference
+                //Calculate the population version
+                CommunicationPopulationVersion populationVersion = communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
+                groupSend.populationVersionId = populationVersion.id
+                groupSend = communicationGroupSendService.update(groupSend)
+                // double check this is the correct user
+            }
+            // TODO: Decide whether to store a reference for the next piece of work to be done or can we use reference id from original reference
 //        schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
-        groupSend = generateGroupSendItems( parameters )
+            groupSend = generateGroupSendItems(parameters)
+        }catch(Throwable t)
+        {
+            log.error(t.getMessage())
+            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
+            groupSend.errorText = t.getMessage()
+            groupSend = communicationGroupSendService.update(groupSend)
+        }
         return groupSend
     }
 

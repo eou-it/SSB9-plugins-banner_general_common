@@ -126,6 +126,8 @@ class CommunicationPopulationVersion implements Serializable {
         jobId(nullable: true)
     }
 
+    // Read Only fields that should be protected against update
+    public static readonlyProperties = ['id']
 
     /**
      * Returns a list of population versions by the parent population id.
