@@ -1329,7 +1329,7 @@ class PersonCompositeService extends LdmService {
         PersonTelephone.fetchActiveTelephoneByPidmInList([pidm]).each { currentPhone ->
             if (findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType?.code)) {
                 def activePhones = newPhones.findAll { it ->
-                    fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_PHONE_TYPE, it.telephoneType)?.value == currentPhone.telephoneType.code
+                    fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_PHONE_TYPE, it.phoneType)?.value == currentPhone.telephoneType.code
                 }
                 if (activePhones.size() > 0) {
                     def invalidPhone = false
