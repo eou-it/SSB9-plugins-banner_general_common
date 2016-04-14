@@ -86,6 +86,10 @@ class CommunicationGroupSendCompositeService {
 
     public CommunicationGroupSend startGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
+        assert( groupSendId )
+        if (log.isDebugEnabled()) {
+            log.debug( "Calling startGroupSend for groupSendId = ${groupSendId}.")
+        }
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
 
         String scheduledJobId = UUID.randomUUID().toString()
@@ -152,6 +156,11 @@ class CommunicationGroupSendCompositeService {
      */
     public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
+        assert( groupSendId )
+        if (log.isDebugEnabled()) {
+            log.debug( "Calling calculatePopulationForGroupSend for groupSendId = ${groupSendId}.")
+        }
+
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
         CommunicationPopulation population = CommunicationPopulation.fetchById( groupSend.getPopulationId() )
         if (!population) {
@@ -186,6 +195,10 @@ class CommunicationGroupSendCompositeService {
      */
     public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
+        assert( groupSendId )
+        if (log.isDebugEnabled()) {
+            log.debug( "Calling generateGroupSendItems for groupSendId = ${groupSendId}.")
+        }
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
 
         // We'll created the group send items synchronously for now until we have support for scheduling.
