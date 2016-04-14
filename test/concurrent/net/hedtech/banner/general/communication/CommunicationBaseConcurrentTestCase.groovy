@@ -115,6 +115,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
         String userPassword = communicationOrganizationService.decryptPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
+        mailServer.start()
     }
 
     @After

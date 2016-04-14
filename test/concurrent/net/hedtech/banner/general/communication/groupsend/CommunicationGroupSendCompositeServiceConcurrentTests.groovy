@@ -62,7 +62,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
-        mailServer.start()
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -220,9 +219,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testScheduledPopulationGroupSend() {
-
-        mailServer.start()
-
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
@@ -308,9 +304,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testScheduledRecalculatePopulationGroupSend() {
-
-        mailServer.start()
-
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
@@ -394,10 +387,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
-    private CommunicationGroupSendRequest createGroupSendRequest()
-    {
-        mailServer.start()
-
+    private CommunicationGroupSendRequest createGroupSendRequest() {
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
