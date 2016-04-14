@@ -621,32 +621,32 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     }
 
 
-    protected void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, long totalNumJobs, int maxSleepTime ) {
+    protected void sleepUntilGroupSendItemsComplete( CommunicationGroupSend groupSend, int maxSleepTime ) {
         final int interval = 2;                 // test every second
         int count = maxSleepTime / interval;    // calculate max loop count
         while (count > 0) {
             count--;
             TimeUnit.SECONDS.sleep( interval );
 
-            int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+            int readyCount = CommunicationGroupSendItem.fetchByReadyExecutionStateAndGroupSend( groupSend ).size()
 
-            if ( countCompleted >= totalNumJobs) {
+            if (readyCount == 0) {
                 break;
             }
         }
     }
 
 
-    protected void sleepUntilCommunicationJobsComplete( long totalNumJobs, int maxSleepTime ) {
+    protected void sleepUntilCommunicationJobsComplete( int maxSleepTime ) {
         final int interval = 2;                 // test every second
         int count = maxSleepTime / interval;    // calculate max loop count
         while (count > 0) {
             count--;
             TimeUnit.SECONDS.sleep( interval );
 
-            int countCompleted = CommunicationJob.fetchCompleted().size()
+            int countPending = CommunicationJob.fetchPending().size()
 
-            if ( countCompleted >= totalNumJobs) {
+            if (countPending == 0) {
                 break;
             }
         }

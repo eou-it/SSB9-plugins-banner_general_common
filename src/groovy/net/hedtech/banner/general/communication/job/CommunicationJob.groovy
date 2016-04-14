@@ -25,10 +25,10 @@ import javax.persistence.*
                     WHERE job.status = :status_
                     ORDER BY job.id ASC """
     ),
-    @NamedQuery( name = "CommunicationJob.fetchCompleted",
-        query = """ FROM CommunicationJob job
-                    WHERE job.status = :status_
-                    ORDER BY job.id ASC """
+    @NamedQuery( name = "CommunicationJob.fetchByStatusAndReferenceId",
+            query = """ FROM CommunicationJob job
+        WHERE job.status = :status_
+        ORDER BY job.id ASC """
     )
 ])
 class CommunicationJob implements AsynchronousTask {
@@ -119,25 +119,25 @@ class CommunicationJob implements AsynchronousTask {
         this.status = status
     }
 
-    public static List fetchPending( Integer max ) {
+    public static List fetchPending( Integer max = Integer.MAX_VALUE ) {
         def results
         CommunicationJob.withSession { session ->
-            results = session.getNamedQuery( 'CommunicationJob.fetchPending' )
-                .setParameter( 'status_', CommunicationJobStatus.PENDING )
-                .setFirstResult( 0 )
-                .setMaxResults( max )
-                .list()
+            results = session.getNamedQuery( 'CommunicationJob.fetchByStatusAndReferenceId' )
+                    .setParameter( 'status_', CommunicationJobStatus.PENDING )
+                    .setFirstResult( 0 )
+                    .setMaxResults( max )
+                    .list()
         }
         return results
     }
 
-    public static List fetchCompleted( Integer max = Integer.MAX_VALUE ) {
+    public static List fetchCompleted() {
         def results
         CommunicationJob.withSession { session ->
-            results = session.getNamedQuery( 'CommunicationJob.fetchCompleted' )
+            results = session.getNamedQuery( 'CommunicationJob.fetchByStatusAndReferenceId' )
                 .setParameter( 'status_', CommunicationJobStatus.COMPLETED )
                 .setFirstResult( 0 )
-                .setMaxResults( max )
+                .setMaxResults( Integer.MAX_VALUE )
                 .list()
         }
         return results

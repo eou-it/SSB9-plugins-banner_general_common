@@ -126,12 +126,12 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
         assertEquals(5, sendItemViewDetails.size())
 
-        sleepUntilGroupSendItemsComplete( groupSend, 5, 60 )
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 10 * 60 )
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 

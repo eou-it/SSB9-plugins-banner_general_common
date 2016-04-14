@@ -115,12 +115,12 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
         assertEquals(5, sendItemViewDetails.size())
 
-        sleepUntilGroupSendItemsComplete( groupSend, 5, 60 )
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 10 * 60 )
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
@@ -179,7 +179,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 1, runningList.size() )
 
         assertTrue( groupSend.currentExecutionState.isRunning() )
-        sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
+        sleepUntilGroupSendItemsComplete( groupSend, 30 )
         groupSend = communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
         assertTrue( groupSend.currentExecutionState.isTerminal() )
@@ -202,7 +202,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertNotNull(groupSend)
 
         assertTrue(groupSend.currentExecutionState.isRunning())
-        sleepUntilGroupSendItemsComplete( groupSend, 5, 30 )
+        sleepUntilGroupSendItemsComplete( groupSend, 30 )
         groupSend = communicationGroupSendCompositeService.completeGroupSend(groupSend.id)
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
 
@@ -275,12 +275,12 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
         assertEquals(5, sendItemViewDetails.size())
 
-        sleepUntilGroupSendItemsComplete( groupSend, 5, 60 )
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 10 * 60 )
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
@@ -360,12 +360,12 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
         assertEquals(5, sendItemViewDetails.size())
 
-        sleepUntilGroupSendItemsComplete( groupSend, 5, 60 )
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
 
         int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
         assertEquals( 5, countCompleted )
 
-        sleepUntilCommunicationJobsComplete( 5, 10 * 60 )
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
