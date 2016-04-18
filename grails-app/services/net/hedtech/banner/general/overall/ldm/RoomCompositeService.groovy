@@ -270,7 +270,7 @@ class RoomCompositeService extends LdmService {
 
         if (!GeneralCommonConstants.VERSION_V1.equals(contentTypeVersion)) {
             if (params.containsKey('building')) {
-                String buildingGuid = GeneralCommonConstants.VERSION_V4.equals(contentTypeVersion)? params.building?.id?.trim()?.toLowerCase() : params.building?.trim()?.toLowerCase()
+                String buildingGuid = GeneralCommonConstants.VERSION_V4.equals(contentTypeVersion)? params.building?.id?.trim()?.toLowerCase() : params.building?.guid?.trim()?.toLowerCase()
                 if (buildingGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(BuildingCompositeService.LDM_NAME, buildingGuid)
                     if (globalUniqueIdentifier) {
@@ -283,7 +283,7 @@ class RoomCompositeService extends LdmService {
                 }
             }
             if (params.containsKey(GeneralCommonConstants.SITE)) {
-                String siteGuid = GeneralCommonConstants.VERSION_V4.equals(contentTypeVersion)?  params.site?.id?.trim()?.toLowerCase() : params.site?.trim()?.toLowerCase()
+                String siteGuid = GeneralCommonConstants.VERSION_V4.equals(contentTypeVersion)?  params.site?.id?.trim()?.toLowerCase() : params.site?.guid?.trim()?.toLowerCase()
                 if (siteGuid) {
                     GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(SiteDetailCompositeService.LDM_NAME, siteGuid)
                     if (globalUniqueIdentifier) {
