@@ -123,6 +123,12 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_ERROR_TEXT")
     String errorText
 
+    /**
+     * JOB ID : UUID of the quartz job for the group send scheduling
+     */
+    @Column(name = "GCBGSND_JOB_ID")
+    String jobId
+
     static constraints = {
         mepCode(nullable: true)
         name(nullable: false)
@@ -141,6 +147,7 @@ class CommunicationGroupSend implements Serializable {
         scheduledStartDate(nullable:true)
         recalculateOnSend(nullable:false)
         errorText(nullable:true)
+        jobId(nullable:true)
     }
 
 

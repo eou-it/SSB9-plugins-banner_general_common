@@ -64,6 +64,7 @@ class CommunicationGroupSendCompositeService {
         groupSend.name = jobName
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
+        groupSend.jobId = request.referenceId
 
         if(!groupSend.recalculateOnSend)
         {
@@ -229,8 +230,17 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "cannotDeleteRunningGroupSend" )
         }
 
-        deleteCommunicationJobsByGroupSendId( groupSendId )
-        deleteRecipientDataByGroupSendId( groupSendId )
+        //if group send is scheduled
+        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+        if(groupSend.currentExecutionState == CommunicationGroupSendExecutionState.Scheduled) {
+            def result = schedulerJobService.deleteScheduledJob(groupSend.jobId, "communicationGroupSendCompositeService", "generateGroupSendItems")
+        }
+        else {
+            //if Group send is not scheduled then remove job and recipient data
+            deleteCommunicationJobsByGroupSendId(groupSendId)
+            deleteRecipientDataByGroupSendId(groupSendId)
+        }
+
         communicationGroupSendService.delete( groupSendId )
     }
 

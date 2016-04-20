@@ -7,6 +7,7 @@ import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.quartz.JobDetail
+import org.quartz.JobKey
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate;
@@ -79,6 +80,16 @@ class SchedulerJobService {
         return serviceReference.invokeMethod( method, parameters )
     }
 
+    public boolean deleteScheduledJob(String jobId, String service, String method) {
+        String groupId = service + "." + method
+        JobKey jobKey = new JobKey(jobId, groupId)
+        boolean result
+        try {
+            result = quartzScheduler.deleteJob(jobKey)
+        } catch(Throwable t) {
+            log.error(t.getMessage())
+        }
+    }
 
     /**
      * Simple method that logs the current server date time provided for test purposes.

@@ -5,8 +5,10 @@ package net.hedtech.banner.general.communication.interaction
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import org.hibernate.annotations.Type
+import org.hibernate.criterion.Order
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -154,5 +156,17 @@ class CommunicationInteractionType implements Serializable {
 
         }
         return (interactionType != null)
+    }
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationInteractionType.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
     }
 }
