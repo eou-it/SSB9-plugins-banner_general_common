@@ -38,9 +38,9 @@ grails.project.dependency.resolution = {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
         // runtime 'mysql:mysql-connector-java:5.1.5'
         compile 'org.antlr:ST4:4.0.8'
-        compile "javax.mail:javax.mail-api:1.5.1"
-        runtime "com.sun.mail:javax.mail:1.5.1"
-        compile 'com.icegreen:greenmail:1.3'
+        compile "javax.mail:javax.mail-api:1.5.5"
+        runtime "com.sun.mail:javax.mail:1.5.5"
+        compile 'com.icegreen:greenmail:1.5.0'
         compile 'org.apache.commons:commons-email:1.3.1'
         compile 'org.quartz-scheduler:quartz:2.2.1'
     }

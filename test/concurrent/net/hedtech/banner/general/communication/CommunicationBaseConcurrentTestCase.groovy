@@ -75,7 +75,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
-    protected GreenMail mailServer
+    protected static GreenMail mailServer
     protected static final int smtp_port = 4025
 
 //    def transactional = false         // this turns off 'Grails' test framework management of transactions
@@ -90,7 +90,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def sessionFactory                  // injected via spring
     def nativeJdbcExtractor             // injected via spring
     def messageSource                   // injected via spring
-    def codecLookup                     // injected via spring
+    def codecLookup                     // injected via spring2
     private validationTagLibInstance    // assigned lazily - see getValidationTagLib method
 
     def controller = null               // assigned by subclasses, e.g., within the setUp()
@@ -109,19 +109,21 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         setUpDefaultFolder()
         setUpDefaultEmailTemplate()
 
-        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
-        mailServer = new GreenMail( smtpServerSetup)
+        if (!mailServer) {
+            ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
+            mailServer = new GreenMail( smtpServerSetup )
+            mailServer.start()
+        } else {
+            mailServer.purgeEmailFromAllMailboxes()
+        }
 
         CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
         defaultOrganization.theReceiveEmailServerProperties
         String userPassword = communicationOrganizationService.decryptPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
-        mailServer.start()
     }
 
     @After
     public void tearDown() {
-        if (mailServer) mailServer.stop()
-
         deleteAll()
         defaultTearDown()
     }
