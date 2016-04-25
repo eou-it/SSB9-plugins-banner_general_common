@@ -687,7 +687,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
 
         Map params = getParamsForRoomQueryWithBuildingAndSite()
-        params.put('building', 'xyz')
+        params.put('building', [guid:'xyz'])
 
         try {
             roomCompositeService.list(params)
@@ -718,7 +718,7 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", CONTENT_TYPE_ROOM_AVAILABILITY_V2)
 
         Map params = getParamsForRoomQueryWithBuildingAndSite()
-        params.put('site', 'xyz')
+        params.put('site', [guid:'xyz'])
 
         try {
             roomCompositeService.list(params)
@@ -816,8 +816,8 @@ class RoomCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map getParamsForRoomQueryWithBuildingAndSite() {
         Map params = getParamsForRoomQuery()
-        params.put('building', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME, ibuilding.code)[0].guid)
-        params.put('site', GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid)
+        params.building = ["guid": GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(BuildingCompositeService.LDM_NAME, ibuilding.code)[0].guid]
+        params.site = ["guid": GlobalUniqueIdentifier.fetchByLdmNameAndDomainKeys(SiteDetailCompositeService.LDM_NAME, icampus.code)[0].guid]
         return params
     }
 
