@@ -52,6 +52,16 @@ class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegratio
     }
 
     @Test
+    void testCreateEmptyNameCommunicationInteractionType() {
+        def newInteractionType = newCommunicationInteractionType()
+        newInteractionType.name = "   "
+        def message = shouldFail( ApplicationException ) {
+            communicationInteractionTypeService.create( [domainModel: newInteractionType] )
+        }
+        assertEquals "Incorrect failure message returned", "@@r1:nameCannotBeNull@@", message
+    }
+
+    @Test
     void testUpdateCommunicationInteractionType() {
         def newInteractionType = newCommunicationInteractionType()
         newInteractionType = communicationInteractionTypeService.create( [domainModel: newInteractionType] )

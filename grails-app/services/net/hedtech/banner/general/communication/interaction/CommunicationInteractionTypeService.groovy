@@ -26,7 +26,7 @@ class CommunicationInteractionTypeService extends ServiceBase {
         CommunicationInteractionType interactionType = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationInteractionType
         interactionType.folder = (interactionType.folder ?: domainModelOrMap.folder)
 
-        if (interactionType.getName() == null || interactionType.getName() == "")
+        if (interactionType.getName() == null || interactionType.getName().trim() == "")
             throw new ApplicationException(CommunicationInteractionType, "@@r1:nameCannotBeNull@@")
 
         if (interactionType.getFolder() == null)
@@ -62,7 +62,7 @@ class CommunicationInteractionTypeService extends ServiceBase {
             throw new ApplicationException(CommunicationInteractionType, "@@r1:operation.not.authorized@@")
         }
 
-        if (interactionType.name == null || interactionType.name == "") {
+        if (interactionType.name == null || interactionType.name.trim() == "") {
             throw new ApplicationException(CommunicationInteractionType, "@@r1:nameCannotBeNull@@")
         }
 
