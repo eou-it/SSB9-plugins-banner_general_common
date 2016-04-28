@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
@@ -119,6 +120,13 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_RECALC_ON_SEND")
     Boolean recalculateOnSend
 
+    /**
+     * Error Code: The error code for the error scenario that failed the Communication Job
+     */
+    @Column(name = "GCBGSND_ERROR_CODE")
+    @Enumerated(EnumType.STRING)
+    CommunicationErrorCode errorCode
+
     @Lob
     @Column(name = "GCBGSND_ERROR_TEXT")
     String errorText
@@ -147,6 +155,7 @@ class CommunicationGroupSend implements Serializable {
         scheduledStartDate(nullable:true)
         recalculateOnSend(nullable:false)
         errorText(nullable:true)
+        errorCode(nullable:true)
         jobId(nullable:true)
     }
 

@@ -4,6 +4,9 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.sql.Sql
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
@@ -11,13 +14,11 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
-import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Connection
@@ -66,8 +67,7 @@ class CommunicationGroupSendCompositeService {
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.jobId = request.referenceId
 
-        if(!groupSend.recalculateOnSend)
-        {
+        if(!groupSend.recalculateOnSend) {
             CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
             groupSend.populationVersionId = populationVersion.id
 
@@ -78,135 +78,9 @@ class CommunicationGroupSendCompositeService {
         if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend(request, bannerUser, mepCode, groupSend)
         } else {
-            groupSend = queueProcessGroupSend( groupSend, bannerUser )
+            groupSend = scheduleGroupSendImmediately( groupSend, bannerUser )
         }
 
-        return groupSend
-    }
-
-
-    public CommunicationGroupSend startGroupSend( Map parameters ) {
-        Long groupSendId = parameters.get( "groupSendId" ) as Long
-        assert( groupSendId )
-        if (log.isDebugEnabled()) {
-            log.debug( "Calling startGroupSend for groupSendId = ${groupSendId}.")
-        }
-        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
-
-        String scheduledJobId = UUID.randomUUID().toString()
-        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-
-        if (groupSend.recalculateOnSend) {
-            schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
-            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
-            groupSend = communicationGroupSendService.update(groupSend)
-        } else {
-            queueProcessGroupSend( groupSend, scheduledJobId )
-        }
-        return groupSend
-    }
-
-
-    private CommunicationGroupSend queueProcessGroupSend( CommunicationGroupSend groupSend, String bannerUser, String scheduledJobId = UUID.randomUUID().toString() ) {
-        if (!groupSend.populationVersionId) {
-            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
-            if (populationVersion) {
-                groupSend.populationVersionId = populationVersion.id
-            } else {
-                // TODO: create exception in messages.properties and confirm if we would rather calculate on the fly for this scenario.
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "populationNotCalculatedForUser" )
-            }
-        }
-
-        assert( groupSend.populationVersionId )
-
-        schedulerJobService.scheduleNowServiceMethod(
-            scheduledJobId,
-            bannerUser,
-            groupSend.mepCode,
-            "communicationGroupSendCompositeService",
-            "generateGroupSendItems",
-            ["groupSendId": groupSend.id]
-        )
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
-        groupSend = communicationGroupSendService.update(groupSend)
-        return groupSend
-    }
-
-
-    private CommunicationGroupSend scheduleGroupSend(CommunicationGroupSendRequest request, String bannerUser, String mepCode, CommunicationGroupSend groupSend) {
-        Date now = new Date(System.currentTimeMillis())
-        if (now.after(request.scheduledStartDate)) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidScheduledDate")
-        }
-        if(request.recalculateOnSend) {
-            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
-        }
-        else
-        {
-            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
-        }
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
-        groupSend = communicationGroupSendService.update(groupSend)
-        groupSend
-    }
-
-    /**
-     * This method is called by the scheduler to regenerate a population list specifically for the group send
-     * and change the state of the group send to next state.
-     */
-    public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
-        Long groupSendId = parameters.get( "groupSendId" ) as Long
-        assert( groupSendId )
-        if (log.isDebugEnabled()) {
-            log.debug( "Calling calculatePopulationForGroupSend for groupSendId = ${groupSendId}.")
-        }
-
-        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
-        CommunicationPopulation population = CommunicationPopulation.fetchById( groupSend.getPopulationId() )
-        if (!population) {
-            assert population // throw error
-        }
-        try {
-            if (!groupSend.populationVersionId) {
-                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
-
-                //Calculate the population version
-                CommunicationPopulationVersion populationVersion = communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
-                groupSend.populationVersionId = populationVersion.id
-                groupSend = communicationGroupSendService.update(groupSend)
-                // double check this is the correct user
-            }
-            // TODO: Decide whether to store a reference for the next piece of work to be done or can we use reference id from original reference
-//        schedulerJobService.scheduleNowServiceMethod( scheduledJobId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", parameters )
-            groupSend = generateGroupSendItems(parameters)
-        }catch(Throwable t)
-        {
-            log.error(t.getMessage())
-            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
-            groupSend.errorText = t.getMessage()
-            groupSend = communicationGroupSendService.update(groupSend)
-        }
-        return groupSend
-    }
-
-    /**
-     * This method is called by the scheduler to create the group send items and move the state of
-     * the group send to processing.
-     */
-    public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
-        Long groupSendId = parameters.get( "groupSendId" ) as Long
-        assert( groupSendId )
-        if (log.isDebugEnabled()) {
-            log.debug( "Calling generateGroupSendItems for groupSendId = ${groupSendId}.")
-        }
-        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
-
-        // We'll created the group send items synchronously for now until we have support for scheduling.
-        // The individual group send items will still be processed asynchronously via the framework.
-        createGroupSendItems(groupSend)
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
-        groupSend = communicationGroupSendService.update(groupSend)
         return groupSend
     }
 
@@ -291,6 +165,133 @@ class CommunicationGroupSendCompositeService {
         aGroupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
         aGroupSend.stopDate = new Date()
         return saveGroupSend( aGroupSend )
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Scheduling service callback job methods
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * This method is called by the scheduler to regenerate a population list specifically for the group send
+     * and change the state of the group send to next state.
+     */
+    public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
+        Long groupSendId = parameters.get( "groupSendId" ) as Long
+        assert( groupSendId )
+        if (log.isDebugEnabled()) {
+            log.debug( "Calling calculatePopulationForGroupSend for groupSendId = ${groupSendId}.")
+        }
+
+        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
+        if (!groupSend) {
+            throw new ApplicationException("groupSend", new NotFoundException())
+        }
+
+        try {
+            CommunicationPopulation population = CommunicationPopulation.fetchById( groupSend.getPopulationId() )
+            if (!population) {
+                throw new ApplicationException("population", new NotFoundException())
+            }
+
+            if (!groupSend.populationVersionId) {
+                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+
+                //Calculate the population version
+                CommunicationPopulationVersion populationVersion = communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
+                groupSend.populationVersionId = populationVersion.id
+                groupSend = communicationGroupSendService.update(groupSend)
+                // double check this is the correct user
+            }
+            groupSend = generateGroupSendItemsImpl( groupSend )
+        } catch(Throwable t) {
+            log.error(t.getMessage())
+            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
+            groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+            groupSend.errorText = t.getMessage()
+            groupSend = communicationGroupSendService.update(groupSend)
+        }
+        return groupSend
+    }
+
+    /**
+     * This method is called by the scheduler to create the group send items and move the state of
+     * the group send to processing.
+     */
+    public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
+        Long groupSendId = parameters.get( "groupSendId" ) as Long
+        assert( groupSendId )
+
+        if (log.isDebugEnabled()) {
+            log.debug( "Calling generateGroupSendItems for groupSendId = ${groupSendId}.")
+        }
+        CommunicationGroupSend groupSend = CommunicationGroupSend.get(groupSendId)
+        if (!groupSend) {
+            throw new ApplicationException("groupSend", new NotFoundException())
+        }
+
+        try {
+            groupSend = generateGroupSendItemsImpl( groupSend )
+        } catch(Throwable t) {
+            log.error(t.getMessage())
+            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
+            groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+            groupSend.errorText = t.getMessage()
+            groupSend = communicationGroupSendService.update(groupSend)
+        }
+        return groupSend
+    }
+
+    private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser, String scheduledJobId = UUID.randomUUID().toString() ) {
+        if (!groupSend.populationVersionId) {
+            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
+            if (populationVersion) {
+                groupSend.populationVersionId = populationVersion.id
+            } else {
+                // TODO: create exception in messages.properties and confirm if we would rather calculate on the fly for this scenario.
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "populationNotCalculatedForUser" )
+            }
+        }
+
+        assert( groupSend.populationVersionId )
+
+        schedulerJobService.scheduleNowServiceMethod(
+                scheduledJobId,
+                bannerUser,
+                groupSend.mepCode,
+                "communicationGroupSendCompositeService",
+                "generateGroupSendItems",
+                ["groupSendId": groupSend.id]
+        )
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend = communicationGroupSendService.update(groupSend)
+        return groupSend
+    }
+
+
+    private CommunicationGroupSend scheduleGroupSend(CommunicationGroupSendRequest request, String bannerUser, String mepCode, CommunicationGroupSend groupSend) {
+        Date now = new Date(System.currentTimeMillis())
+        if (now.after(request.scheduledStartDate)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidScheduledDate")
+        }
+        if(request.recalculateOnSend) {
+            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+        }
+        else
+        {
+            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
+        }
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
+        groupSend = communicationGroupSendService.update(groupSend)
+        groupSend
+    }
+
+    private CommunicationGroupSend generateGroupSendItemsImpl( CommunicationGroupSend groupSend ) {
+        // We'll created the group send items synchronously for now until we have support for scheduling.
+        // The individual group send items will still be processed asynchronously via the framework.
+        createGroupSendItems(groupSend)
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend = communicationGroupSendService.update(groupSend)
+        groupSend
     }
 
     private CommunicationGroupSend saveGroupSend( CommunicationGroupSend groupSend ) {
