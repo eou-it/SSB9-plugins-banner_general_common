@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
@@ -42,6 +43,7 @@ class PersonCompositeService extends LdmService {
     def personFilterCompositeService
     def personIdentificationNameAlternateService
     def commonMatchingCompositeService
+    PersonV6CompositeService personCompositeServiceV6
 
     static final String ldmName = 'persons'
     static final String PROCESS_CODE = "HEDM"
@@ -58,7 +60,7 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
     private static final String PERSON_FILTER_LDM_NAME = "person-filters"
-    private static final List<String> VERSIONS = ["v1", "v2", "v3"]
+    private static final List<String> VERSIONS = ["v1", "v2", "v3",GeneralValidationCommonConstants.VERSION_V6]
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
@@ -237,7 +239,13 @@ class PersonCompositeService extends LdmService {
         }
         if (personList?.size() > 0) {
             log.debug "buildLdmPersonObjects begins"
-            resultList = buildLdmPersonObjects(personList, studentRole)
+            if ("v6".equals(getAcceptVersion(VERSIONS))) {
+                personCompositeServiceV6 = new PersonV6CompositeService()
+                resultList = personCompositeServiceV6.list(params, personList, studentRole)
+            } else{
+                resultList = buildLdmPersonObjects(personList, studentRole)
+            }
+
             log.debug "buildLdmPersonObjects ends"
         }
 
