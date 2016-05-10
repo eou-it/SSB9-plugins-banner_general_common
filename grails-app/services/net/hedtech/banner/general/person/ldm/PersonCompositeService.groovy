@@ -993,10 +993,7 @@ class PersonCompositeService extends LdmService {
 
         Map credentialsMap = [:]
         if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-            List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
-            List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
-            List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
-            credentialsMap = [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
+            credentialsMap = getPersonCredentialDetails(pidms)
         }
 
         if ("v3".equals(getAcceptVersion(VERSIONS))) {
@@ -1035,6 +1032,14 @@ class PersonCompositeService extends LdmService {
         persons = buildPersonRoles(persons, studentRole, pidms)
 
         persons // Map of person objects with pidm as index.
+    }
+
+
+    private Map getPersonCredentialDetails(List pidms) {
+        List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
+        List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
+        List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
     }
 
 

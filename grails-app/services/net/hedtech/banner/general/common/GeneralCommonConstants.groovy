@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.common
@@ -49,5 +49,9 @@ class GeneralCommonConstants {
 
     public static final String DESCRPTION='description'
     public static final String TITLE='title'
+
+    static final String PERSONS_LDM_NAME = 'persons'
+    static final String QUERY_PARAM_LDM_NAME = 'ldmName'
+    static final String PERSONS_GUID_NAME = 'guid'
 
 }
