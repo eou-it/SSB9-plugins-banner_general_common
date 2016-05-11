@@ -1036,9 +1036,11 @@ class PersonCompositeService extends LdmService {
 
 
     private Map getPersonCredentialDetails(List pidms) {
+        log.trace "PersonCompositeService.getPersonCredentialDetails:Begin"
         List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
         List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
         List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+        log.trace "PersonCompositeService.getPersonCredentialDetails:End"
         return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
     }
 

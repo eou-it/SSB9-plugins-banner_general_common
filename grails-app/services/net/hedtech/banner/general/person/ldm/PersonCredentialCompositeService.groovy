@@ -8,7 +8,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.ldm.v1.Person
-import net.hedtech.banner.general.overall.ldm.v5.PersonCredentialDecorator
+import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialDecorator
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 import net.hedtech.banner.general.overall.ldm.LdmService
@@ -26,6 +26,7 @@ class PersonCredentialCompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     def get(id) {
+        log.debug "getById:Begin:$id"
         def persons = [:]
         def personDetail = fetchPersons(["guid": id])
         if (!personDetail) {
@@ -34,6 +35,7 @@ class PersonCredentialCompositeService extends LdmService {
         Integer pidm = personDetail.getAt(0)
         Map personCredentialsMap = personCompositeService.getPersonCredentialDetails([pidm])
         def resultList = buildPersonCredentials(persons, personCredentialsMap, [personDetail])
+        log.debug "getById:End:$resultList"
         return resultList.get(pidm)
     }
 
@@ -67,7 +69,7 @@ class PersonCredentialCompositeService extends LdmService {
         catch (ClassNotFoundException e) {
             resultList = resultList.values()
         }
-
+        log.debug "list:End:${resultList.size()}"
         return resultList
     }
 
@@ -76,6 +78,7 @@ class PersonCredentialCompositeService extends LdmService {
      * @param params
      */
     def static fetchPersons(Map params, boolean count = false) {
+        log.debug "buildPersonCredentials: Begin: $params"
         def result
         String hql
         if (count) {
@@ -99,12 +102,15 @@ class PersonCredentialCompositeService extends LdmService {
                     result = query.setMaxResults(params?.max as Integer).setFirstResult((params?.offset ?: '0') as Integer).list()
                 }
             }
+
+            log.trace "buildPersonCredentials: End"
             return result
         }
     }
 
 
     private buildPersonCredentials(def persons, Map credentialsMap, def personDetailsList) {
+        log.trace "buildPersonCredentials: Begin"
         personDetailsList?.each { it ->
             Person person = new Person(null)
             person.guid = it?.getAt(2)
@@ -126,7 +132,7 @@ class PersonCredentialCompositeService extends LdmService {
             Person person = persons.get(pidmAndUDCIdMapping.pidm)
             person.credentials << new PersonCredentialDecorator("bannerUdcId", pidmAndUDCIdMapping.udcId)
         }
-
+        log.trace "buildPersonCredentials: End"
         return persons
     }
 

@@ -41,34 +41,32 @@ class PersonCredentialCompositeServiceIntegrationTests extends BaseIntegrationTe
     }
 
     @Test
-    void testList_PersonsCredentials_v5() {
+    void testList_PersonsCredentials_v6() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v5+json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
         def personsCredentials = personCredentialCompositeService.list([max: '500', offset: '0'])
         assertTrue personsCredentials.size() > 0
     }
 
     @Test
-    void testGet_PersonCredentials_v5() {
+    void testGet_PersonCredentials_v6() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v5+json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
         String guid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(person?.pidm?.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
         assertNotNull guid
         def personCredentials = personCredentialCompositeService.get(guid)
         assertNotNull personCredentials
-        def personRecord = personCredentials.get(person?.pidm)
-        assertNotNull personRecord
-        assertEquals guid, personRecord.guid
-        assertEquals person.bannerId, personRecord.credentials.find { it.type == "bannerId" }.value
-        assertEquals bannerSourcedId, personRecord.credentials.find { it.type == "bannerSourcedId" }.value
-        assertEquals bannerUserName, personRecord.credentials.find { it.type == "bannerUserName" }.value
-        assertEquals bannerUdcId, personRecord.credentials.find { it.type == "bannerUdcId" }.value
+        assertEquals guid, personCredentials.guid
+        assertEquals person.bannerId, personCredentials.credentials.find { it.type == "bannerId" }.value
+        assertEquals bannerSourcedId, personCredentials.credentials.find { it.type == "bannerSourcedId" }.value
+        assertEquals bannerUserName, personCredentials.credentials.find { it.type == "bannerUserName" }.value
+        assertEquals bannerUdcId, personCredentials.credentials.find { it.type == "bannerUdcId" }.value
     }
 
     @Test
-    void testGet_InvalidPersonCredentials_v5() {
+    void testGet_InvalidPersonCredentials_v6() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v5+json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
         String guid = 'xxxxx'
         try {
             personCredentialCompositeService.get(guid)
