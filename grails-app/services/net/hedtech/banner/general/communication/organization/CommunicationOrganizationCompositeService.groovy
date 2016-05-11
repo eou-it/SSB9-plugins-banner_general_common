@@ -34,6 +34,16 @@ class CommunicationOrganizationCompositeService {
         CommunicationOrganization oldOrganization = CommunicationOrganization.fetchById( newOrganization.id )
         createDependentMailboxAccountAndEmailServerProperties( newOrganization, oldOrganization )
         removeDependentMailboxAccountsAndEmailServerProperties( oldOrganization )
+
+        // Default the mobile application key to its previous value if mobile settings present during an
+        // update but no clear password passed in.
+        if ((newOrganization.mobileApplicationName || newOrganization.mobileEndPointUrl) &&
+            newOrganization.clearMobileApplicationKey &&
+            oldOrganization?.encryptedMobileApplicationKey) {
+
+            newOrganization.encryptedMobileApplicationKey  = oldOrganization.encryptedMobileApplicationKey
+        }
+
         communicationOrganizationService.update( newOrganization )
 
         return newOrganization;
