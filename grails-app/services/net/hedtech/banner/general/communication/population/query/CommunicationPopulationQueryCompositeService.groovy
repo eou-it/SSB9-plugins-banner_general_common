@@ -68,8 +68,8 @@ class CommunicationPopulationQueryCompositeService {
         }
 
         def queryAsMap = [
-            id     : Long.valueOf( queryId ),
-            version: Long.valueOf( version )
+                id     : Long.valueOf( queryId ),
+                version: Long.valueOf( version )
         ]
         return communicationPopulationQueryService.delete( queryAsMap )
     }
@@ -124,7 +124,7 @@ class CommunicationPopulationQueryCompositeService {
                         def queryAsMap = [
                                 id            : Long.valueOf(queryId),
                                 version       : Long.valueOf(version),
-                                changesPending: Boolean.toString(false),
+                                changesPending: false,
                                 sqlString     : latestPublishedVersion.sqlString
                         ]
                         communicationPopulationQueryService.update(queryAsMap)
@@ -142,7 +142,7 @@ class CommunicationPopulationQueryCompositeService {
                     def queryAsMap = [
                             id             : Long.valueOf(queryId),
                             version        : Long.valueOf(version),
-                            changesPending : Boolean.toString(false),
+                            changesPending : false,
                             sqlString      : latestPublishedVersion.sqlString
                     ]
                     communicationPopulationQueryService.update(queryAsMap)
@@ -185,9 +185,9 @@ class CommunicationPopulationQueryCompositeService {
         CommunicationPopulationQuery query = CommunicationPopulationQuery.fetchById( queryAsMap.id )
         if (!query) {
             throw new ApplicationException(
-                "CommunicationPopulationQuery",
-                queryAsMap.id,
-                new NotFoundException(id: queryAsMap.id, entityClassName: CommunicationPopulationQuery.class.simpleName)
+                    "CommunicationPopulationQuery",
+                    queryAsMap.id,
+                    new NotFoundException(id: queryAsMap.id, entityClassName: CommunicationPopulationQuery.class.simpleName)
             )
         }
 
