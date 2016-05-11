@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 import javax.persistence.*
 
@@ -11,8 +12,8 @@ import javax.persistence.*
  * Email server protocol properties. Defines the connection information for the email server. entity.
  */
 @Entity
-
 @EqualsAndHashCode
+@ToString
 @Table(name = "GCBSPRP")
 // @NamedQueries(value = [
 // @NamedQuery(name = "CommunicationEmailServerProperties.fetchByxxxxx",
@@ -40,10 +41,6 @@ class CommunicationEmailServerProperties implements Serializable {
      */
     @Column(name = "GCBSPRP_HOST")
     String host
-
-    @ManyToOne
-    @JoinColumn(name = "GCBSPRP_ORGANIZATION_ID")
-    CommunicationOrganization organization
 
     /**
      * PORT: The port number on the host
@@ -92,28 +89,9 @@ class CommunicationEmailServerProperties implements Serializable {
         host( nullable: false, maxSize: 2000 )
         port( nullable: false )
         type( nullable: false )
-        organization( nullable: false )
     }
 
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
-    /*
-     Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
-     */
-    @Override
-    public String toString() {
-        return "CommunicationEmailServerProperties{" +
-                "id=" + id +
-                ", type=" + type +
-                ", host='" + host + '\'' +
-                ", organization=" + organization.id +
-                ", port=" + port +
-                ", securityProtocol=" + securityProtocol +
-                ", version=" + version +
-                ", lastModified=" + lastModified +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                '}';
-    }
 }

@@ -22,6 +22,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
+    def communicationOrganizationCompositeService
     def communicationOrganizationService
     CommunicationOrganization rootOrganization
 
@@ -277,7 +278,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         rootOrganization.mobileApplicationName = "StudentSuccess"
         rootOrganization.clearMobileApplicationKey = "ss-key-value"
         rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
-        communicationOrganizationService.create( rootOrganization )
+        communicationOrganizationCompositeService.createOrganization( rootOrganization )
     }
 
 }

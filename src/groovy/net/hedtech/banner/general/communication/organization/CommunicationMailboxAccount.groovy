@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.organization
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 import javax.persistence.*
 
@@ -12,11 +13,8 @@ import javax.persistence.*
  */
 @Entity
 @EqualsAndHashCode
+@ToString
 @Table(name = "GCRMBAC")
-@NamedQueries(value = [
-        @NamedQuery(name = "CommunicationMailboxAccount.fetchByOrganizationId",
-                query = """ FROM CommunicationMailboxAccount a WHERE organization.id = :organizationId """)
-])
 class CommunicationMailboxAccount implements Serializable {
 
     /**
@@ -33,10 +31,6 @@ class CommunicationMailboxAccount implements Serializable {
      */
     @Column(name = "GCRMBAC_EMAIL_ADDRESS")
     String emailAddress
-
-    @ManyToOne
-    @JoinColumn(name = "GCRMBAC_ORGANIZATION_ID")
-    CommunicationOrganization organization
 
     /**
      * Clear text password
@@ -90,13 +84,11 @@ class CommunicationMailboxAccount implements Serializable {
     String lastModifiedBy
 
 
- /**
-
+    /**
      * DATA ORIGIN: Source system that created or updated the data.
      */
     @Column(name = "GCRMBAC_DATA_ORIGIN")
     String dataOrigin
-
 
 
     static constraints = {
@@ -104,7 +96,6 @@ class CommunicationMailboxAccount implements Serializable {
         lastModifiedBy( nullable: true, maxSize: 30 )
         dataOrigin( nullable: true, maxSize: 30 )
         emailAddress( nullable: false, maxSize: 1020 )
-        organization( nullable: false, maxSize: 1020 )
         encryptedPassword( nullable: false )
         type( nullable: false, maxSize: 200 )
         userName( nullable: false, maxSize: 1020 )
@@ -116,32 +107,4 @@ class CommunicationMailboxAccount implements Serializable {
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
-    public static List<CommunicationMailboxAccount> fetchByOrganizationId( Long organizationId ) {
-        def mailboxAccountList
-        CommunicationMailboxAccount.withSession { session ->
-            mailboxAccountList = session.getNamedQuery( 'CommunicationMailboxAccount.fetchByOrganizationId' ).setLong( 'organizationId', organizationId ).list()
-        }
-        return mailboxAccountList
-    }
-
-    /*
-    Cannot use the @ToString annotation because it include an Organization reference and causes an infinite loop
-    */
-    @Override
-    public String toString() {
-        return "CommunicationMailboxAccount{" +
-                "id=" + id +
-                ", emailAddress='" + emailAddress + '\'' +
-                ", organization=" + organization.id +
-                ", clearTextPassword='" + clearTextPassword + '\'' +
-                ", encryptedPassword='" + encryptedPassword + '\'' +
-                ", type=" + type +
-                ", emailDisplayName='" + emailDisplayName + '\'' +
-                ", userName='" + userName + '\'' +
-                ", version=" + version +
-                ", lastModified=" + lastModified +
-                ", lastModifiedBy='" + lastModifiedBy + '\'' +
-                ", dataOrigin='" + dataOrigin + '\'' +
-                '}';
-    }
 }

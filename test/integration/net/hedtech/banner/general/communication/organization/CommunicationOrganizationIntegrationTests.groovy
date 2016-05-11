@@ -57,10 +57,10 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     void testCreateValidOrganization() {
         def organization = newValidForCreateOrganization()
         organization.isAvailable = true
-        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
-        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
-        organization.receiveEmailServerProperties = [receiveProperties]
-        organization.sendEmailServerProperties = [sendProperties]
+        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
+        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send )
+        organization.receiveEmailServerProperties = receiveProperties
+        organization.sendEmailServerProperties = sendProperties
         organization.save(failOnError: true, flush: true)
         assertNotNull organization.receiveEmailServerProperties
         assertNotNull organization.sendEmailServerProperties
@@ -103,10 +103,10 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
         assertEquals("Updated name", u_valid_name, updatedOrganization.name)
         assertTrue(updatedOrganization.isAvailable)
         // Test update of dependent objects
-        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
-        organization.receiveEmailServerProperties = [receiveProperties]
+        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
+        organization.receiveEmailServerProperties = receiveProperties
         organization.save()
-        assertEquals 1234L, organization.receiveEmailServerProperties[0].port
+        assertEquals 1234L, organization.receiveEmailServerProperties.port
 
     }
 
@@ -114,21 +114,21 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testPassword() {
         def organization = newValidForCreateOrganization()
-        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
-        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
-        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
-        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
-        organization.receiveEmailServerProperties = [receiveProperties]
-        organization.sendEmailServerProperties = [sendProperties]
-        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
-        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
+        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
+        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send )
+        def senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender )
+        def replyToMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.ReplyTo )
+        organization.receiveEmailServerProperties = receiveProperties
+        organization.sendEmailServerProperties = sendProperties
+        organization.senderMailboxAccount = senderMailboxAccount
+        organization.replyToMailboxAccount = replyToMailboxAccount
         organization.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull organization.id
         assertNotNull organization.receiveEmailServerProperties.id
         assertNotNull organization.sendEmailServerProperties.id
-        assertNotNull organization.senderMailboxAccountSettings.encryptedPassword
-        assertNotNull organization.replyToMailboxAccountSettings.encryptedPassword
+        assertNotNull organization.senderMailboxAccount.encryptedPassword
+        assertNotNull organization.replyToMailboxAccount.encryptedPassword
     }
 
 
@@ -150,13 +150,11 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testFetchMailBoxAccountByOrganizationId() {
         def organization = newValidForCreateOrganization()
-        def senderMailBoxProperties = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
-        organization.senderMailboxAccountSettings = [senderMailBoxProperties]
-        def replyToMailBoxProperties = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
-        organization.replyToMailboxAccountSettings = [replyToMailBoxProperties]
+        organization.senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender )
+        organization.replyToMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.ReplyTo )
         organization.save(failOnError: true, flush: true)
 
-        def mailboxAccountList = CommunicationMailboxAccount.fetchByOrganizationId(organization.id)
+        def mailboxAccountList = CommunicationMailboxAccount.findAll()
         assertEquals(2, mailboxAccountList.size())
     }
 
@@ -164,22 +162,20 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testList() {
         def organization = newValidForCreateOrganization()
-        def senderMailBoxProperties = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
-        organization.senderMailboxAccountSettings = [senderMailBoxProperties]
+        organization.senderMailboxAccount = newCommunicationMailBox( CommunicationMailboxAccountType.Sender )
         organization.save(failOnError: true, flush: true)
         def organizationList = CommunicationOrganization.list()
-        assertNotNull(organizationList[0]?.senderMailboxAccountSettings[0])
-        assertNull(organizationList[0]?.replyToMailboxAccountSettings)
+        assertNotNull( organizationList[0].senderMailboxAccount )
+        assertNull( organizationList[0].replyToMailboxAccount )
 
         /* Now add another */
-        def replyToMailBoxProperties = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
-        organization.replyToMailboxAccountSettings = [replyToMailBoxProperties]
+        organization.replyToMailboxAccount = newCommunicationMailBox( CommunicationMailboxAccountType.ReplyTo )
         organization.save(failOnError: true, flush: true)
 
         organizationList = CommunicationOrganization.list()
         assertNotNull(organization)
-        assertNotNull(organizationList[0]?.replyToMailboxAccountSettings[0])
-        assertNotNull(organizationList[0]?.senderMailboxAccountSettings[0])
+        assertNotNull(organizationList[0]?.replyToMailboxAccount)
+        assertNotNull(organizationList[0]?.senderMailboxAccount)
     }
 
 
@@ -192,31 +188,31 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-    private def newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType serverType, organization) {
+    private def newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType serverType) {
         def communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
                 host: "TTTTTTTTTT",
                 port: 1234,
-                organization: organization,
                 type: serverType
         )
+        communicationEmailServerProperties.save()
         return communicationEmailServerProperties
     }
 
 
     private
-    def newCommunicationMailBoxProperties(CommunicationMailboxAccountType communicationMailboxAccountType, organization) {
+    def newCommunicationMailBox(CommunicationMailboxAccountType communicationMailboxAccountType) {
 
 
-        def CommunicationMailboxAccount = new CommunicationMailboxAccount(
+        def communicationMailboxAccount = new CommunicationMailboxAccount(
                 encryptedPassword: "supersecretpassword",
-                organization: organization,
                 type: communicationMailboxAccountType,
                 emailAddress: "Registrar@BannerUniversity.edu",
                 userName: "bannerRegUser" + communicationMailboxAccountType,
                 emailDisplayName: "The Office of The Registrar"
         )
-        return CommunicationMailboxAccount
+        communicationMailboxAccount.save()
+        return communicationMailboxAccount
     }
 
 }

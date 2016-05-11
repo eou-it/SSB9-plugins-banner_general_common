@@ -19,15 +19,8 @@ import java.text.SimpleDateFormat
 class CommunicationOrganizationService extends ServiceBase {
     def log = Logger.getLogger(this.getClass())
 
-
     def preCreate(domainModelOrMap) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theReplyToMailboxAccount.clearTextPassword)
-        }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
-        }
 
         def rootOrg = CommunicationOrganization.fetchRoot()
         if (rootOrg == null)
@@ -66,100 +59,8 @@ class CommunicationOrganizationService extends ServiceBase {
 
     }
 
-
     def preUpdate(domainModelOrMap) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization
-
-        def senderMailbox = domainModelOrMap?.senderMailboxAccountSettings ? domainModelOrMap?.senderMailboxAccountSettings[0] : null
-        def replyToMailbox = domainModelOrMap?.replyToMailboxAccountSettings ? domainModelOrMap?.replyToMailboxAccountSettings[0] : null
-        def sendEmailServerProperties = domainModelOrMap?.sendEmailServerProperties ? domainModelOrMap?.sendEmailServerProperties[0] : null
-        def receiveEmailServerProperties = domainModelOrMap?.receiveEmailServerProperties ? domainModelOrMap?.receiveEmailServerProperties[0] : null
-
-        if (sendEmailServerProperties) {
-            if (communicationOrganization.sendEmailServerProperties?.getAt(0) == null) {
-                communicationOrganization.sendEmailServerProperties?.add(new CommunicationEmailServerProperties())
-            }
-            communicationOrganization.sendEmailServerProperties[0].host = sendEmailServerProperties.host ? sendEmailServerProperties.host : null
-            if (sendEmailServerProperties.port == null || sendEmailServerProperties.port == "") {
-                communicationOrganization.sendEmailServerProperties[0].port = 0
-            } else {
-                communicationOrganization.sendEmailServerProperties[0].port = (sendEmailServerProperties.port instanceof String ? Integer.parseInt(sendEmailServerProperties.port) : sendEmailServerProperties.port)
-            }
-            if (sendEmailServerProperties?.securityProtocol instanceof String)
-                communicationOrganization.sendEmailServerProperties[0].securityProtocol = sendEmailServerProperties?.securityProtocol
-            else if (sendEmailServerProperties?.securityProtocol == null)
-                communicationOrganization.sendEmailServerProperties[0].securityProtocol = CommunicationEmailServerConnectionSecurity.None
-            else
-                communicationOrganization.sendEmailServerProperties[0].securityProtocol = CommunicationEmailServerConnectionSecurity.valueOf(sendEmailServerProperties?.securityProtocol?.name)
-        } else {
-            communicationOrganization?.getSendEmailServerProperties()?.clear()
-        }
-
-        if (receiveEmailServerProperties) {
-            if (communicationOrganization.receiveEmailServerProperties?.getAt(0) == null) {
-                communicationOrganization.receiveEmailServerProperties?.add(new CommunicationEmailServerProperties())
-            }
-            communicationOrganization.receiveEmailServerProperties[0].host = receiveEmailServerProperties.host ? receiveEmailServerProperties.host : null
-            if (receiveEmailServerProperties.port == null || receiveEmailServerProperties.port == "") {
-                communicationOrganization.receiveEmailServerProperties[0].port = 0
-            } else {
-                communicationOrganization.receiveEmailServerProperties[0].port = (receiveEmailServerProperties.port instanceof String ? Integer.parseInt(receiveEmailServerProperties.port) : receiveEmailServerProperties.port)
-            }
-            if (receiveEmailServerProperties?.securityProtocol instanceof String)
-                communicationOrganization.receiveEmailServerProperties[0]?.securityProtocol = receiveEmailServerProperties?.securityProtocol
-            else if (receiveEmailServerProperties?.securityProtocol == null)
-                communicationOrganization.receiveEmailServerProperties[0]?.securityProtocol = CommunicationEmailServerConnectionSecurity.None
-            else
-                communicationOrganization.receiveEmailServerProperties[0]?.securityProtocol = CommunicationEmailServerConnectionSecurity.valueOf(receiveEmailServerProperties?.securityProtocol?.name)
-        } else {
-            communicationOrganization?.getReceiveEmailServerProperties()?.clear()
-        }
-
-        if (senderMailbox) {
-            if (communicationOrganization.senderMailboxAccountSettings?.getAt(0) == null) {
-                communicationOrganization.senderMailboxAccountSettings?.add(new CommunicationMailboxAccount())
-            }
-            communicationOrganization.senderMailboxAccountSettings[0].userName = senderMailbox.userName
-            communicationOrganization.senderMailboxAccountSettings[0].clearTextPassword = senderMailbox.clearTextPassword
-            communicationOrganization.senderMailboxAccountSettings[0].encryptedPassword = senderMailbox.encryptedPassword
-            communicationOrganization.senderMailboxAccountSettings[0].emailAddress = senderMailbox.emailAddress
-            communicationOrganization.senderMailboxAccountSettings[0].emailDisplayName = senderMailbox.emailDisplayName ? senderMailbox.emailDisplayName : null
-        } else {
-            communicationOrganization?.getSenderMailboxAccountSettings()?.clear()
-        }
-
-        if (replyToMailbox) {
-            if (communicationOrganization.replyToMailboxAccountSettings?.getAt(0) == null) {
-                communicationOrganization.replyToMailboxAccountSettings.add(new CommunicationMailboxAccount())
-            }
-
-            communicationOrganization.replyToMailboxAccountSettings[0].emailDisplayName = replyToMailbox.emailDisplayName ? replyToMailbox.emailDisplayName : null
-            communicationOrganization.replyToMailboxAccountSettings[0].emailAddress = replyToMailbox.emailAddress
-            communicationOrganization.replyToMailboxAccountSettings[0].clearTextPassword = replyToMailbox.clearTextPassword
-            communicationOrganization.replyToMailboxAccountSettings[0].encryptedPassword = replyToMailbox.encryptedPassword
-            communicationOrganization.replyToMailboxAccountSettings[0].userName = replyToMailbox.userName
-        } else {
-            communicationOrganization?.getReplyToMailboxAccountSettings()?.clear()
-        }
-
-/* ensure both username and email address are populated*/
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName != null)
-            && !(communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.emailAddress == null && communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.userName == null)) {
-            throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
-        }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0) && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress != null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName != null)
-                  && !(communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.emailAddress == null && communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.userName == null)) {
-            throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
-        }
-
-        /* generate encrypted password if necessary*/
-        if (communicationOrganization?.replyToMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.replyToMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theReplyToMailboxAccount.clearTextPassword)
-        }
-        if (communicationOrganization?.senderMailboxAccountSettings?.getAt(0)?.clearTextPassword) {
-            communicationOrganization?.senderMailboxAccountSettings[0].encryptedPassword = encryptPassword(communicationOrganization.theSenderMailboxAccount.clearTextPassword)
-        }
-
         communicationOrganization.isAvailable = communicationOrganization.isAvailable ?: false;
 
         /* generate encrypted password if necessary*/
@@ -193,7 +94,6 @@ class CommunicationOrganizationService extends ServiceBase {
 
     }
 
-
     def private validateDateFormat(String dateformat) {
         /* The simpledateformat is very lenient in creating a new instance.  Doesnt error out for many invalid formats.
         Here we try to catch most of the very apparent ones by comparing the formatted date with the original format.
@@ -207,7 +107,6 @@ class CommunicationOrganizationService extends ServiceBase {
         convertedDate
     }
 
-
     def decryptPassword(String encryptedPassword) {
         def decryptedPassword
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
@@ -219,7 +118,6 @@ class CommunicationOrganizationService extends ServiceBase {
         }
         decryptedPassword
     }
-
 
     def encryptPassword(String clearTextPassword) {
         def encryptedPassword

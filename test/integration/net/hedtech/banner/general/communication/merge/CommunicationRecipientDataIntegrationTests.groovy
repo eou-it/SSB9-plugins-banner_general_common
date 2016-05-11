@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.merge
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -20,7 +21,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     def CommunicationFolder folder
     def CommunicationEmailTemplate emailTemplate
     def CommunicationFieldValue fieldValue1
-    def CommunicationOrganizationService communicationOrganizationService
+    def CommunicationOrganizationCompositeService communicationOrganizationCompositeService
 
     // template
     def i_valid_emailTemplate_name = """Valid Name"""
@@ -62,11 +63,11 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
 
         fieldValue1 = newFieldValue("FieldValue1")
         organization = new CommunicationOrganization(name: "Test Org")
-        def orgList = communicationOrganizationService.list()
+        def orgList = communicationOrganizationCompositeService.listOrganizations()
         if (orgList.size() > 0) {
             organization = orgList[0]
         } else {
-            organization = communicationOrganizationService.create(organization) as CommunicationOrganization
+            organization = communicationOrganizationCompositeService.createOrganization(organization) as CommunicationOrganization
         }
     }
 

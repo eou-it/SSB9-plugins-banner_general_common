@@ -35,9 +35,6 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         formContext = ['GUAGMNU']
         super.setUp()
         cleanUp()
-        organization = newValidForCreateOrganization()
-        organization.save(failOnError: true, flush: true)
-        assertNotNull organization.id
     }
 
 
@@ -51,9 +48,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     void testCreateCommunicationEmailServerProperties() {
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
-        receiveProperties.organization = organization
         receiveProperties.save(failOnError: true, flush: true)
-        sendProperties.organization = organization
         sendProperties.save(failOnError: true, flush: true)
 
         // Assert domain values
@@ -75,7 +70,6 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     @Test
     void testUpdateCommunicationEmailServerProperties() {
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
-        communicationEmailServerProperties.organization = organization
         communicationEmailServerProperties.save(failOnError: true, flush: true)
 
         // Assert domain values
@@ -191,17 +185,9 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                 host: "TTTTTTTTTT",
                 port: 1234,
-                organization: organization,
                 type: serverType
         )
         return communicationEmailServerProperties
     }
 
-
-    private def newValidForCreateOrganization() {
-        def organization = new CommunicationOrganization(
-                description: "Organization one",
-                name: "This is a description of Organization one"
-        )
-    }
 }

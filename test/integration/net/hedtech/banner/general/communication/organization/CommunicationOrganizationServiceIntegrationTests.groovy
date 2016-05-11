@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder
  */
 class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTestCase {
     def communicationOrganizationService
+    def communicationMailboxAccountService
     def selfServiceBannerAuthenticationProvider
     def clearTextPassword = "SuperSecretPassword"
 
@@ -160,7 +161,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
             CommunicationOrganization updatedRoot = communicationOrganizationService.update(rootorg)
             fail "Should have failed with large password error"
         } catch (Exception e) {
-            assertTrue e.toString(). contains("12899")
+            assertTrue e.toString().contains("12899")
         }
     }
 
@@ -278,20 +279,18 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
-        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
-        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
-        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
-        organization.receiveEmailServerProperties = [receiveProperties]
-        organization.sendEmailServerProperties = [sendProperties]
-        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
-        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
+        def receiveProperties = newCommunicationEmailServer(CommunicationEmailServerPropertiesType.Receive)
+        def sendProperties = newCommunicationEmailServer(CommunicationEmailServerPropertiesType.Send)
+        def senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender)
+        def replyToMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.ReplyTo)
+        organization.receiveEmailServerProperties = receiveProperties
+        organization.sendEmailServerProperties = sendProperties
+        organization.senderMailboxAccount = senderMailboxAccount
+        organization.replyToMailboxAccount = replyToMailboxAccount
         CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
         assertNotNull(createdOrganization)
         assertEquals("test", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertEquals(createdOrganization.id, createdOrganization.senderMailboxAccountSettings[0].organization.id)
-        assertEquals(createdOrganization.id, createdOrganization.replyToMailboxAccountSettings[0].organization.id)
 
         Long id = createdOrganization.getId()
 
@@ -317,66 +316,64 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive, organization)
-        def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send, organization)
-        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
-        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
-        organization.receiveEmailServerProperties = [receiveProperties]
-        organization.sendEmailServerProperties = [sendProperties]
-        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
-        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
         CommunicationOrganization createdOrganization = communicationOrganizationService.create(organization)
+
+        createdOrganization.receiveEmailServerProperties = newCommunicationEmailServer(CommunicationEmailServerPropertiesType.Receive)
+        createdOrganization.sendEmailServerProperties = newCommunicationEmailServer(CommunicationEmailServerPropertiesType.Send)
+        createdOrganization.senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender)
+        createdOrganization.replyToMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.ReplyTo)
+        createdOrganization = communicationOrganizationService.update(createdOrganization)
+
         assertNotNull(createdOrganization)
         assertEquals("test", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertEquals(encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
-        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
+        assertEquals(encryptedPassword, createdOrganization.senderMailboxAccount.encryptedPassword)
+        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccount.encryptedPassword)
 
     }
 
 
     @Test
     void testSetAndResetPassword() {
-        def organization = new CommunicationOrganization()
-        def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
+        CommunicationOrganization organization = new CommunicationOrganization()
+        def encryptedPassword = communicationMailboxAccountService.encryptPassword(clearTextPassword)
         organization.name = "test"
         organization.description = "description"
         organization = communicationOrganizationService.create(organization)
-        def senderMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.Sender, organization)
-        def replyToMailboxAccountSettings = newCommunicationMailBoxProperties(CommunicationMailboxAccountType.ReplyTo, organization)
-        organization.senderMailboxAccountSettings = [senderMailboxAccountSettings]
-        organization.replyToMailboxAccountSettings = [replyToMailboxAccountSettings]
-        def savedOrganization = communicationOrganizationService.update(organization)
+        CommunicationMailboxAccount senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender)
+        CommunicationMailboxAccount replyToMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.ReplyTo)
+        organization.senderMailboxAccount = senderMailboxAccount
+        organization.replyToMailboxAccount = replyToMailboxAccount
+        CommunicationOrganization savedOrganization = communicationOrganizationService.update(organization)
         /* try to force a fetch */
-        def createdOrganization = CommunicationOrganization.findById(savedOrganization.id)
+        CommunicationOrganization createdOrganization = CommunicationOrganization.findById(savedOrganization.id)
         assertNotNull(createdOrganization)
         assertEquals("test", createdOrganization.name)
         assertEquals("description", createdOrganization.description)
-        assertEquals("senderMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
-        assertEquals("replyToMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
+        assertEquals("senderMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.senderMailboxAccount.encryptedPassword)
+        assertEquals("replyToMailboxAccount encryptedPassword password is not correct", encryptedPassword, createdOrganization.replyToMailboxAccount.encryptedPassword)
 
-        assertEquals(createdOrganization.id, createdOrganization.replyToMailboxAccountSettings[0].organization.id)
         /* Do an update of senderMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
-        createdOrganization.senderMailboxAccountSettings[0].userName = 'AstorPiazolla'
+        createdOrganization.senderMailboxAccount.userName = 'AstorPiazolla'
         def updatedOrganization = communicationOrganizationService.update(createdOrganization)
         assertNotNull(updatedOrganization.id)
-        assertEquals(encryptedPassword, createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
+        assertEquals(encryptedPassword, createdOrganization.senderMailboxAccount.encryptedPassword)
         /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
-        createdOrganization.senderMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
+        createdOrganization.senderMailboxAccount.clearTextPassword = "Unobtanium"
         updatedOrganization = communicationOrganizationService.update(createdOrganization)
         assertNotNull(updatedOrganization.id)
-        assertTrue("New encrypted password was not generated", encryptedPassword != createdOrganization.senderMailboxAccountSettings[0].encryptedPassword)
+        assertEquals( encryptedPassword, createdOrganization.senderMailboxAccount.encryptedPassword )
 
         /* Do an update of replyToMailboxAccount, with clearTextPassword null, the encrypted password should remain the same */
-        createdOrganization.replyToMailboxAccountSettings[0].userName = 'DjangoRienhart'
+        createdOrganization.replyToMailboxAccount.userName = 'DjangoRienhart'
         updatedOrganization = communicationOrganizationService.update(createdOrganization)
         assertNotNull(updatedOrganization.id)
-        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
+        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccount.encryptedPassword)
         /* Do an update and set the clearTextPassword to something new, the encrypted password should change */
-        createdOrganization.replyToMailboxAccountSettings[0].clearTextPassword = "Unobtanium"
+        createdOrganization.replyToMailboxAccount.clearTextPassword = "Unobtanium"
         updatedOrganization = communicationOrganizationService.update(createdOrganization)
         assertNotNull(updatedOrganization.id)
-        assertTrue("New encrypted password was not generated", encryptedPassword != createdOrganization.replyToMailboxAccountSettings[0].encryptedPassword)
+        assertEquals(encryptedPassword, createdOrganization.replyToMailboxAccount.encryptedPassword)
 
     }
 
@@ -399,28 +396,28 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
         assertEquals(largepassword, decryptedPassword)
     }
 
-    private def newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType serverType, organization) {
-        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
+    private def newCommunicationEmailServer(CommunicationEmailServerPropertiesType serverType) {
+        CommunicationEmailServerProperties communicationEmailServerProperties = new CommunicationEmailServerProperties(
                 // Required fields
                 host: "TTTTTTTTTT",
                 port: 1234,
-                organization: organization,
                 type: serverType
         )
+        communicationEmailServerProperties.save( flush: true )
         return communicationEmailServerProperties
     }
 
 
-    private
-    def newCommunicationMailBoxProperties(CommunicationMailboxAccountType communicationMailboxAccountType, organization) {
-        def communicationMailboxAccount = new CommunicationMailboxAccount(
+    private def newCommunicationMailBox(CommunicationMailboxAccountType communicationMailboxAccountType) {
+        CommunicationMailboxAccount communicationMailboxAccount = new CommunicationMailboxAccount(
                 clearTextPassword: clearTextPassword,
-                organization: organization,
+                encryptedPassword: communicationMailboxAccountService.encryptPassword( clearTextPassword ),
                 type: communicationMailboxAccountType,
                 emailAddress: "Registrar@BannerUniversity.edu",
                 userName: "bannerRegUser" + communicationMailboxAccountType,
                 emailDisplayName: "The Office of The Registrar"
         )
+        communicationMailboxAccount.save( flush: true )
         return communicationMailboxAccount
     }
 

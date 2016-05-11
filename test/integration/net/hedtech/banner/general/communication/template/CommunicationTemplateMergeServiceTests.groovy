@@ -31,7 +31,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def communicationFieldService
     def communicationFieldCalculationService
     def communicationRecipientDataService
-    def communicationOrganizationService
+    def communicationOrganizationCompositeService
     def communicationTemplateService
     def communicationEmailTemplateService
     def selfServiceBannerAuthenticationProvider
@@ -341,7 +341,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        communicationOrganizationService.create( organization )
+        communicationOrganizationCompositeService.createOrganization( organization )
     }
 
 

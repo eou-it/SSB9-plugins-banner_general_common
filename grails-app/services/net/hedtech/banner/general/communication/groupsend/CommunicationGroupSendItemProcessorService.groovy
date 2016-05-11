@@ -23,7 +23,6 @@ class CommunicationGroupSendItemProcessorService {
     def communicationFieldCalculationService
     def communicationJobService
     def communicationRecipientDataService
-    def communicationOrganizationService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
     private static final int noWaitErrorCode = 54;

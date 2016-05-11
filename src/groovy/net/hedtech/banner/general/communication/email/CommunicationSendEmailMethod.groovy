@@ -40,8 +40,8 @@ class CommunicationSendEmailMethod {
         CommunicationEmailReceipt emailReceipt = new CommunicationEmailReceipt();
 
         def senderAddress = new CommunicationEmailAddress(
-                mailAddress: senderOrganization.theSenderMailboxAccount.emailAddress,
-                displayName: senderOrganization.theSenderMailboxAccount.emailDisplayName
+                mailAddress: senderOrganization.senderMailboxAccount.emailAddress,
+                displayName: senderOrganization.senderMailboxAccount.emailDisplayName
         )
         emailMessage.senders = [senderAddress] as Set
         minimumFieldsPresent( emailMessage, false );
@@ -49,10 +49,10 @@ class CommunicationSendEmailMethod {
         assignReplyToAddress()
 
         //adding smtp 'from' for handling bounce back emails.
-        emailReceipt.setFrom( senderOrganization.theSenderMailboxAccount.emailAddress );
+        emailReceipt.setFrom( senderOrganization.senderMailboxAccount.emailAddress );
 
         if (log.isDebugEnabled()) {
-            log.debug( "Connecting to email server with account username = " + senderOrganization.theSenderMailboxAccount.getUserName() );
+            log.debug( "Connecting to email server with account username = " + senderOrganization.senderMailboxAccount.getUserName() );
         }
 //        optOutMessageId = uuidService.fetchOneGuid();
 
@@ -126,16 +126,12 @@ class CommunicationSendEmailMethod {
      * The mime message will later be constructed from the email message object.
      */
     private void assignReplyToAddress() {
-        if (senderOrganization?.replyToMailboxAccountSettings) {
-            List<CommunicationMailboxAccount> replyToList = senderOrganization?.replyToMailboxAccountSettings
-            if (replyToList.size() > 0) {
-                CommunicationMailboxAccount replyToMailboxAccount = replyToList.get(0)
-                def replyToAddress = new CommunicationEmailAddress(
-                        mailAddress: replyToMailboxAccount.emailAddress,
-                        displayName: replyToMailboxAccount.emailDisplayName
-                )
-                emailMessage.replyTo = [replyToAddress] as Set
-            }
+        if (senderOrganization?.replyToMailboxAccount) {
+            def replyToAddress = new CommunicationEmailAddress(
+                mailAddress: senderOrganization.replyToMailboxAccount.emailAddress,
+                displayName: senderOrganization.replyToMailboxAccount.emailDisplayName
+            )
+            emailMessage.replyTo = [replyToAddress] as Set
         }
     }
 
@@ -209,10 +205,10 @@ class CommunicationSendEmailMethod {
 
         CommunicationEmailServerProperties sendEmailServerProperties
 
-        if (senderOrganization?.sendEmailServerProperties != null && senderOrganization?.sendEmailServerProperties.size() > 0)
-               sendEmailServerProperties = senderOrganization?.sendEmailServerProperties?.get(0)
+        if (senderOrganization?.sendEmailServerProperties != null)
+               sendEmailServerProperties = senderOrganization?.sendEmailServerProperties
         else {
-            sendEmailServerProperties = CommunicationOrganization.fetchRoot()?.sendEmailServerProperties?.get(0)
+            sendEmailServerProperties = CommunicationOrganization.fetchRoot()?.sendEmailServerProperties
         }
 
         if (sendEmailServerProperties) {
@@ -226,12 +222,12 @@ class CommunicationSendEmailMethod {
                 email.setSmtpPort(sendEmailServerProperties.port);
                 email.setStartTLSEnabled(true);
             } else {
-                throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.theSendEmailServerProperties.securityProtocol}." )
+                throw new RuntimeException( "Unsupported email server connection security. Security Protocol = ${senderOrganization.sendEmailServerProperties.securityProtocol}." )
             }
         }
 
         log.debug "Mail server properties:" + emailServerProperties.toString()
-        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.theSenderMailboxAccount.userName, senderOrganization.theSenderMailboxAccount.clearTextPassword );
+        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.senderMailboxAccount.userName, senderOrganization.senderMailboxAccount.clearTextPassword );
         email.setAuthenticator(auth);
     }
 

@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -15,7 +16,7 @@ import org.apache.commons.logging.LogFactory
 class CommunicationSendEmailService {
     private Log log = LogFactory.getLog(this.getClass())
     def communicationEmailItemService
-    def communicationOrganizationService
+    CommunicationMailboxAccountService communicationMailboxAccountService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
 
@@ -34,8 +35,8 @@ class CommunicationSendEmailService {
 
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode)
         CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
-        if (organization?.theSenderMailboxAccount.encryptedPassword != null) {
-            organization.theSenderMailboxAccount.clearTextPassword = communicationOrganizationService.decryptPassword( organization.theSenderMailboxAccount.encryptedPassword )
+        if (organization?.senderMailboxAccount.encryptedPassword != null) {
+            organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
         }
 
 
@@ -58,9 +59,9 @@ class CommunicationSendEmailService {
         emailItem.setOrganizationId(organization.id)
         emailItem.setReferenceId(recipientData.getReferenceId())
         emailItem.setToList(emailMessage.getToList().mailAddress.join(", "))
-        emailItem.setFromList(organization?.theSenderMailboxAccount?.emailAddress)
-        emailItem.setSender(organization?.theSenderMailboxAccount?.emailDisplayName ?: organization?.theSenderMailboxAccount?.emailAddress)
-        emailItem.setReplyTo(organization?.theReplyToMailboxAccount?.emailAddress)
+        emailItem.setFromList(organization?.senderMailboxAccount?.emailAddress)
+        emailItem.setSender(organization?.senderMailboxAccount?.emailDisplayName ?: organization?.senderMailboxAccount?.emailAddress)
+        emailItem.setReplyTo(organization?.replyToMailboxAccount?.emailAddress)
         emailItem.setSubject(emailMessage.getSubjectLine())
         emailItem.setTemplateId(recipientData.templateId)
         emailItem.setContent(emailMessage.messageBody)

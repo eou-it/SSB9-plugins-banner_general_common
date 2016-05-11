@@ -61,7 +61,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     def communicationTemplateService
     def communicationEmailTemplateService
     def communicationMobileNotificationTemplateService
-    def communicationOrganizationService
+    def communicationOrganizationCompositeService
     def communicationGroupSendItemProcessingEngine
     def communicationJobProcessingEngine
     def communicationRecipientDataService
@@ -117,9 +117,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             mailServer.purgeEmailFromAllMailboxes()
         }
 
-        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
-        defaultOrganization.theReceiveEmailServerProperties
-        String userPassword = communicationOrganizationService.decryptPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
+        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.sendEmailServerProperties
+        String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
     }
 
     @After
@@ -162,18 +161,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
 
         loginIfNecessary()
-
-//        if (useTransactions) {
-//            sessionFactory.currentSession.with {
-//                connection().rollback()                 // needed to protect from other tests
-//                clear()                                 // needed to protect from other tests
-//                disconnect()                            // needed to release the old database connection
-//                reconnect( dataSource.getConnection() ) // get a new connection that has unlocked the needed roles
-//            }
-//            transactionManager.getTransaction().setRollbackOnly()                 // and make sure we don't commit to the database
-//        }
     }
-
 
     /**
      * Clears the hibernate session, but does not logout the user. If your test
@@ -182,14 +170,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     @After
     public void defaultTearDown() {
         FormContext.clear()
-
-//        if (useTransactions) {
-//            sessionFactory.currentSession.connection().rollback()
-//            sessionFactory.currentSession.close()
-//        }
-
     }
-
 
     public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 10 ) {
         boolean result = false
@@ -203,7 +184,6 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
         assertTrue( result )
     }
-
 
     protected void deleteAll() {
         def sql
@@ -240,9 +220,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
     }
 
-
     protected void setUpDefaultOrganization() {
-        List organizations = communicationOrganizationService.list()
+        List organizations = communicationOrganizationCompositeService.listOrganizations()
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org")
             defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
@@ -251,56 +230,27 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
             def cma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',
-                    encryptedPassword: communicationOrganizationService.encryptPassword( "changeit" ),
+                    encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
                     userName: 'rshishehbor',
-                    organization: defaultOrganization,
                     type: CommunicationMailboxAccountType.Sender
             )
-            defaultOrganization.senderMailboxAccountSettings = [cma]
+            defaultOrganization.senderMailboxAccount = cma
 
             def cesp = new CommunicationEmailServerProperties(
                     securityProtocol: CommunicationEmailServerConnectionSecurity.None,
                     host: "127.0.0.1",
                     port: smtp_port,
-                    organization: defaultOrganization,
                     type: CommunicationEmailServerPropertiesType.Send
             )
-            defaultOrganization.sendEmailServerProperties = [cesp]
-            defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
+            defaultOrganization.sendEmailServerProperties = cesp
+            defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }
+
+        assertNotNull( defaultOrganization.senderMailboxAccount )
+        assertNotNull( defaultOrganization.sendEmailServerProperties)
     }
-
-
-//    private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
-//        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
-//                // Required fields
-//                securityProtocol: "TTTTTTTTTT",
-//                host: "TTTTTTTTTT",
-//                port: 1234,
-//                organization: organization,
-//                type: serverType
-//        )
-//        return communicationEmailServerProperties
-//    }
-//
-//
-//    private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
-//
-//
-//        def CommunicationMailboxAccount = new CommunicationMailboxAccount(
-//                encryptedPassword: "supersecretpassword",
-//                organization: organization,
-//                type: communicationMailboxAccountType,
-//                emailAddress: "Registrar@BannerUniversity.edu",
-//                userName: "bannerRegUser" + communicationMailboxAccountType,
-//                emailDisplayName: "The Office of The Registrar"
-//        )
-//        return CommunicationMailboxAccount
-//    }
-//
-
 
     protected void testDeleteGroupSend( CommunicationTemplate template ) {
         CommunicationGroupSend groupSend

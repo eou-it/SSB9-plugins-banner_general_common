@@ -4,8 +4,10 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesService
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
@@ -21,7 +23,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     def communicationGroupSendMonitor
     def communicationGroupSendCompositeService
-    def communicationMailboxAccountService
+    CommunicationMailboxAccountService communicationMailboxAccountService
+    CommunicationEmailServerPropertiesService communicationEmailServerPropertiesService
     def communicationGroupSendService
     def communicationGroupSendItemService
     def communicationPopulationQueryService
@@ -30,7 +33,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     def communicationFolderService
     def communicationTemplateService
     def communicationEmailTemplateService
-    def communicationOrganizationService
+    def communicationOrganizationCompositeService
     def communicationGroupSendItemProcessingEngine
     def communicationJobProcessingEngine
     def communicationRecipientDataService
@@ -57,9 +60,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
         mailServer = new GreenMail( smtpServerSetup)
 
-        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.theSendEmailServerProperties
-        defaultOrganization.theReceiveEmailServerProperties
-        String userPassword = communicationOrganizationService.decryptPassword( defaultOrganization.theSenderMailboxAccount.encryptedPassword )
+        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.sendEmailServerProperties
+        String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
     }
 
     @After
@@ -89,17 +91,17 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCBTMPL")
                 sql.executeUpdate("Delete from GCRCFLD")
                 sql.executeUpdate("Delete from GCRLENT")
-                sql.executeUpdate("Delete from GCRSLIS")
                 sql.executeUpdate("Delete from GCRPVID")
+                sql.executeUpdate("Delete from GCRSLIS")
                 sql.executeUpdate("Delete from GCRPQID")
                 sql.executeUpdate("Delete from GCRPOPV")
                 sql.executeUpdate("Delete from GCBPOPL")
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRFLDR")
+                sql.executeUpdate("Delete from GCRORAN")
                 sql.executeUpdate("Delete from GCBSPRP")
                 sql.executeUpdate("Delete from GCRMBAC")
-                sql.executeUpdate("Delete from GCRORAN")
                 tx.commit()
             }
         } finally {
@@ -114,18 +116,18 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
 
     protected void setUpDefaultOrganization() {
-        List organizations = communicationOrganizationService.list()
+        List organizations = communicationOrganizationCompositeService.listOrganizations()
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org")
 
             def cma = new CommunicationMailboxAccount(
                 emailAddress: 'rasul.shishehbor@ellucian.com',
-                encryptedPassword: communicationOrganizationService.encryptPassword( "changeit" ),
+                encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
                 userName: 'rshishehbor',
                 organization: defaultOrganization,
                 type: CommunicationMailboxAccountType.Sender
             )
-            defaultOrganization.senderMailboxAccountSettings = [cma]
+            defaultOrganization.senderMailboxAccount = cma
 
             def cesp = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
@@ -134,42 +136,12 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 organization: defaultOrganization,
                 type: CommunicationEmailServerPropertiesType.Send
             )
-            defaultOrganization.sendEmailServerProperties = [cesp]
-            defaultOrganization = communicationOrganizationService.create(defaultOrganization) as CommunicationOrganization
+            defaultOrganization.sendEmailServerProperties = cesp
+            defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
         } else {
             defaultOrganization = organizations.get(0) as CommunicationOrganization
         }
     }
-
-
-//    private def newCommunicationEmailServerProperties( CommunicationEmailServerPropertiesType serverType, organization ) {
-//        def communicationEmailServerProperties = new CommunicationEmailServerProperties(
-//                // Required fields
-//                securityProtocol: "TTTTTTTTTT",
-//                host: "TTTTTTTTTT",
-//                port: 1234,
-//                organization: organization,
-//                type: serverType
-//        )
-//        return communicationEmailServerProperties
-//    }
-//
-//
-//    private def newCommunicationMailBoxProperties( CommunicationMailboxAccountType communicationMailboxAccountType, organization ) {
-//
-//
-//        def CommunicationMailboxAccount = new CommunicationMailboxAccount(
-//                encryptedPassword: "supersecretpassword",
-//                organization: organization,
-//                type: communicationMailboxAccountType,
-//                emailAddress: "Registrar@BannerUniversity.edu",
-//                userName: "bannerRegUser" + communicationMailboxAccountType,
-//                emailDisplayName: "The Office of The Registrar"
-//        )
-//        return CommunicationMailboxAccount
-//    }
-//
-
 
     protected void setUpDefaultFolder() {
         defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCompositeServiceTests" )

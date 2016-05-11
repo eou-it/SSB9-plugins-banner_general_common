@@ -34,7 +34,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationFieldCalculationService
     def communicationFieldService
     def selfServiceBannerAuthenticationProvider
-    def communicationOrganizationService
+    def communicationOrganizationCompositeService
     def communicationTemplateService
     def communicationEmailTemplateService
     def communicationPopulationCompositeService
@@ -141,11 +141,11 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
         /* Create an organization */
         organization = new CommunicationOrganization( name: "Test Org" )
-        def orgList = communicationOrganizationService.list()
+        def orgList = communicationOrganizationCompositeService.listOrganizations()
         if (orgList.size() > 0) {
             organization = orgList[0]
         } else {
-            organization = communicationOrganizationService.create(organization) as CommunicationOrganization
+            organization = communicationOrganizationCompositeService.createOrganization(organization)
         }
 
     }
@@ -406,7 +406,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
-        communicationOrganizationService.create( organization )
+        communicationOrganizationCompositeService.createOrganization( organization )
     }
 
 }

@@ -67,7 +67,7 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
         emailMessage.toList = [receiverAddress]
 
         //Override the default organization email server settings
-        emailTestOrganization.sendEmailServerProperties[0].securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         //Call the execute method of CommunicationSendEmailMethod
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod( emailMessage, emailTestOrganization );
@@ -102,17 +102,17 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
                 organization: emailTestOrganization,
                 type: CommunicationEmailServerPropertiesType.Send
         )
-        emailTestOrganization.sendEmailServerProperties = [cesp]
+        emailTestOrganization.sendEmailServerProperties = cesp
 
         def cma = new CommunicationMailboxAccount(
                 emailAddress: 'bcm-sender@ellucian.com',
-                encryptedPassword: communicationOrganizationService.encryptPassword( clearTextPassword ),
+                encryptedPassword: communicationMailboxAccountService.encryptPassword( clearTextPassword ),
                 clearTextPassword: clearTextPassword,
                 userName: userName,
                 organization: defaultOrganization,
                 type: CommunicationMailboxAccountType.Sender
         )
-        emailTestOrganization.senderMailboxAccountSettings = [cma]
+        emailTestOrganization.senderMailboxAccount = cma
     }
 
 }
