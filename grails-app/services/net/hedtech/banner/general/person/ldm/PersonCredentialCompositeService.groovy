@@ -68,7 +68,7 @@ class PersonCredentialCompositeService extends LdmService {
      * fetch person details
      * @param params
      */
-    def static fetchPersons(Map params, boolean count = false) {
+    private def fetchPersons(Map params, boolean count = false) {
         log.debug "buildPersonCredentials: Begin: $params"
         def result
         String hql
