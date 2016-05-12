@@ -49,6 +49,14 @@ class PersonCredentialCompositeServiceIntegrationTests extends BaseIntegrationTe
     }
 
     @Test
+    void testCount_PersonsCredentials_v6() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
+        def personsCredentialsCount = personCredentialCompositeService.count([max: '500', offset: '0'])
+        assertTrue personsCredentialsCount > 0
+    }
+
+    @Test
     void testGet_PersonCredentials_v6() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
