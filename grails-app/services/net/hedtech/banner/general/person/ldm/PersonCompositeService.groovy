@@ -44,6 +44,7 @@ class PersonCompositeService extends LdmService {
     def personIdentificationNameAlternateService
     def commonMatchingCompositeService
     PersonV6CompositeService personCompositeServiceV6
+    PersonCredentialCompositeService personCredentialCompositeService
 
     static final String ldmName = 'persons'
     static final String PROCESS_CODE = "HEDM"
@@ -993,7 +994,7 @@ class PersonCompositeService extends LdmService {
 
         Map credentialsMap = [:]
         if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-            credentialsMap = getPersonCredentialDetails(pidms)
+            credentialsMap = personCredentialCompositeService.getPersonCredentialDetails(pidms)
         }
 
         if ("v3".equals(getAcceptVersion(VERSIONS))) {
@@ -1032,16 +1033,6 @@ class PersonCompositeService extends LdmService {
         persons = buildPersonRoles(persons, studentRole, pidms)
 
         persons // Map of person objects with pidm as index.
-    }
-
-
-    private Map getPersonCredentialDetails(List pidms) {
-        log.trace "PersonCompositeService.getPersonCredentialDetails:Begin"
-        List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
-        List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
-        List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
-        log.trace "PersonCompositeService.getPersonCredentialDetails:End"
-        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
     }
 
 

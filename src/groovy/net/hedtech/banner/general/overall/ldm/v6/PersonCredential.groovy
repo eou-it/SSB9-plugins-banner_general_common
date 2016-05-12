@@ -3,18 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall.ldm.v6
 
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
-
-@EqualsAndHashCode(includeFields = true)
-@ToString(includeNames = true, includeFields = true)
-class PersonCredentialDecorator {
+class PersonCredential {
     String type
     String value
 
-    PersonCredentialDecorator(String type, String value) {
+    def PersonCredential(String type, String value) {
         this.type = type
         this.value = value
     }
-
 }

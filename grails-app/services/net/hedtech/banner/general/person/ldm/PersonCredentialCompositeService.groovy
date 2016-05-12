@@ -6,17 +6,18 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.overall.ImsSourcedIdBase
+import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
+import net.hedtech.banner.general.overall.ThirdPartyAccess
+import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.person.ldm.v1.Person
-import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialDecorator
+import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 import net.hedtech.banner.general.overall.ldm.LdmService
 
 @Transactional
 class PersonCredentialCompositeService extends LdmService {
-
-    def personCompositeService
 
     /**
      * GET /api/persons-credentials
@@ -33,10 +34,9 @@ class PersonCredentialCompositeService extends LdmService {
             throw new ApplicationException("Person", new NotFoundException())
         }
         Integer pidm = personDetail.getAt(0)
-        Map personCredentialsMap = personCompositeService.getPersonCredentialDetails([pidm])
-        def resultList = buildPersonCredentials(persons, personCredentialsMap, [personDetail])
-        log.debug "getById:End:$resultList"
-        return resultList.get(pidm)
+        Map personCredentialsMap = getPersonCredentialDetails([pidm])
+        log.trace "getById:End"
+        return buildDecorators(persons, personCredentialsMap, [personDetail])?.getAt(0)
     }
 
     /**
@@ -48,29 +48,20 @@ class PersonCredentialCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def list(Map params) {
         log.debug "list:Begin:$params"
-        def resultList = [:]
-        def total = 0
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        def personDetailsList = fetchPersons(params)
-        def persons = [:]
+        List<Objects[]> personDetailsList = fetchPersons(params)
+        def decorators = [:]
         List pidms = []
         personDetailsList?.each {
             pidms << it.getAt(0)
         }
-        Map personCredentialsMap = personCompositeService.getPersonCredentialDetails(pidms)
+        Map personCredentialsMap = getPersonCredentialDetails(pidms)
 
-        resultList = buildPersonCredentials(persons, personCredentialsMap, personDetailsList)
+        return buildDecorators(decorators, personCredentialsMap, personDetailsList)
+    }
 
-        total = fetchPersons(params, true)
-
-        try {
-            resultList = this.class.classLoader.loadClass('net.hedtech.restfulapi.PagedResultArrayList').newInstance(resultList?.values() ?: [], total)
-        }
-        catch (ClassNotFoundException e) {
-            resultList = resultList.values()
-        }
-        log.debug "list:End:${resultList.size()}"
-        return resultList
+    def count(Map params) {
+        return fetchPersons(params, true)
     }
 
     /**
@@ -109,31 +100,41 @@ class PersonCredentialCompositeService extends LdmService {
     }
 
 
-    private buildPersonCredentials(def persons, Map credentialsMap, def personDetailsList) {
+    private Map getPersonCredentialDetails(List pidms) {
+        log.trace "getPersonCredentialDetails:Begin"
+        List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
+        List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
+        List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+        log.trace "getPersonCredentialDetails:End"
+        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
+    }
+
+
+    private def buildDecorators(def decorators, Map credentialsMap, def personDetailsList) {
         log.trace "buildPersonCredentials: Begin"
         personDetailsList?.each { it ->
-            Person person = new Person(null)
-            person.guid = it?.getAt(2)
-            person.credentials << new PersonCredentialDecorator("bannerId", it?.getAt(1))
-            persons.put(it?.getAt(0), person)
+            PersonCredentialsDecorator persCredentialsDecorator = new PersonCredentialsDecorator(it?.getAt(2))
+            persCredentialsDecorator.credentials << new PersonCredential("bannerId", it?.getAt(1))
+            decorators.put(it?.getAt(0), persCredentialsDecorator)
         }
 
         credentialsMap.imsSourcedIdBaseList.each { sourcedIdBase ->
-            Person person = persons.get(sourcedIdBase.pidm)
-            person.credentials << new PersonCredentialDecorator("bannerSourcedId", sourcedIdBase.sourcedId)
+            PersonCredentialsDecorator persCredentialsDecorator = decorators.get(sourcedIdBase.pidm)
+            persCredentialsDecorator.credentials << new PersonCredential("bannerSourcedId", sourcedIdBase.sourcedId)
         }
         credentialsMap.thirdPartyAccessList.each { thirdPartyAccess ->
             if (thirdPartyAccess.externalUser) {
-                Person person = persons.get(thirdPartyAccess.pidm)
-                person.credentials << new PersonCredentialDecorator("bannerUserName", thirdPartyAccess.externalUser)
+                PersonCredentialsDecorator persCredentialsDecorator = decorators.get(thirdPartyAccess.pidm)
+                persCredentialsDecorator.credentials << new PersonCredential("bannerUserName", thirdPartyAccess.externalUser)
             }
         }
         credentialsMap.pidmAndUDCIdMappingList.each { pidmAndUDCIdMapping ->
-            Person person = persons.get(pidmAndUDCIdMapping.pidm)
-            person.credentials << new PersonCredentialDecorator("bannerUdcId", pidmAndUDCIdMapping.udcId)
+            PersonCredentialsDecorator persCredentialsDecorator = decorators.get(pidmAndUDCIdMapping.pidm)
+            persCredentialsDecorator.credentials << new PersonCredential("bannerUdcId", pidmAndUDCIdMapping.udcId)
         }
+
         log.trace "buildPersonCredentials: End"
-        return persons
+        return decorators.values()
     }
 
 }
