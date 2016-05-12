@@ -43,7 +43,7 @@ class PersonCompositeService extends LdmService {
     def personFilterCompositeService
     def personIdentificationNameAlternateService
     def commonMatchingCompositeService
-    PersonV6CompositeService personCompositeServiceV6
+    PersonV6CompositeService personV6CompositeService
     PersonCredentialCompositeService personCredentialCompositeService
 
     static final String ldmName = 'persons'
@@ -241,8 +241,7 @@ class PersonCompositeService extends LdmService {
         if (personList?.size() > 0) {
             log.debug "buildLdmPersonObjects begins"
             if ("v6".equals(getAcceptVersion(VERSIONS))) {
-                personCompositeServiceV6 = new PersonV6CompositeService()
-                resultList = personCompositeServiceV6.list(params, personList, studentRole)
+                resultList = personV6CompositeService.list(params, personList, studentRole)
             } else{
                 resultList = buildLdmPersonObjects(personList, studentRole)
             }

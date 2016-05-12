@@ -12,6 +12,7 @@ class PersonV6CompositeService extends LdmService {
 
     Map list(Map params, List personList, Boolean studentRole){
         BasePersonBuilder personBuilderV6 = new PersonBuliderV6()
+        personBuilderV6.globalUniqueIdentifierService = globalUniqueIdentifierService
         return personBuilderV6.build(personList, studentRole)
     }
 }

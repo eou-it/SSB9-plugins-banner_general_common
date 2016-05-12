@@ -3,13 +3,15 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
-import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
+import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.system.ldm.v6.Person
 
 
 public abstract class BasePersonBuilder {
 
     static final String ldmName = 'persons'
+
+    GlobalUniqueIdentifierService globalUniqueIdentifierService
 
     public BasePersonBuilder(){
         super()
@@ -18,7 +20,7 @@ public abstract class BasePersonBuilder {
     public abstract Map build(List personList, Boolean studentRole)
 
     Map buildPersonGuids(List domainIds, Map persons) {
-        GlobalUniqueIdentifier.findAllByLdmNameAndDomainIdInList(ldmName, domainIds).each { guid ->
+        globalUniqueIdentifierService.fetchByLdmNameAndDomainId(ldmName, domainIds[0]).each { guid ->
             Person currentRecord = persons.get(guid.domainKey.toInteger())
             currentRecord.guid = guid.guid
             persons.put(guid.domainKey.toInteger(), currentRecord)
