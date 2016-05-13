@@ -49,6 +49,9 @@ class CommunicationManualInteractionService extends ServiceBase {
             def config = Holders.config
             creatorId = config?.bannerSsbDataSource?.username
         }
+
+        manualInteraction.setCreatedBy(creatorId.toUpperCase())
+        manualInteraction.setCreateDate(new Date())
     }
 
 
