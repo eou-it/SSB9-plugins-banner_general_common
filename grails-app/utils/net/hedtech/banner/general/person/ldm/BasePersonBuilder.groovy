@@ -20,7 +20,7 @@ public abstract class BasePersonBuilder {
     public abstract Map build(List personList, Boolean studentRole)
 
     Map buildPersonGuids(List domainIds, Map persons) {
-        globalUniqueIdentifierService.fetchByLdmNameAndDomainId(ldmName, domainIds[0]).each { guid ->
+        globalUniqueIdentifierService.fetchByLdmNameAndDomainIds(ldmName, domainIds).each { guid ->
             Person currentRecord = persons.get(guid.domainKey.toInteger())
             currentRecord.guid = guid.guid
             persons.put(guid.domainKey.toInteger(), currentRecord)
