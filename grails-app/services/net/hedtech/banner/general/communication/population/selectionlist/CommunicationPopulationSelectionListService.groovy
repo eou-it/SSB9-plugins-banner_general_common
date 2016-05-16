@@ -4,8 +4,6 @@
 package net.hedtech.banner.general.communication.population.selectionlist
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.service.ServiceBase
 
 // NOTE:

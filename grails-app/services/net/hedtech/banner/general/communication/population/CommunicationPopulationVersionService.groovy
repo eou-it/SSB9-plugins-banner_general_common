@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.population
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
@@ -17,7 +16,7 @@ class CommunicationPopulationVersionService extends ServiceBase {
 
 
     def preCreate(domainModelOrMap) {
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanCreatePopulation()) {
             throw new ApplicationException(CommunicationPopulationVersion, "@@r1:operation.not.authorized@@")
         }
 

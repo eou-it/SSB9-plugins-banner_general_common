@@ -150,7 +150,7 @@ class CommunicationCommonUtility {
     }
 
 
-    public static userCanCreate() {
+    public static userCanAuthorContent() {
         try {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAuthor)
@@ -165,12 +165,40 @@ class CommunicationCommonUtility {
     }
 
 
-    public static userCanUpdateDelete(String createdBy) {
+    public static userCanCreatePopulation() {
+        try {
+            def usermap = getCommunicationUserRoleMap()
+            return usermap.isUser && usermap.canExecuteQuery
+        } catch (Exception e) {
+            log.error("principal lacks authorities - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
+            log.error(e)
+            throw e
+        }
+    }
+
+
+    public static userCanUpdateDeleteContent(String createdBy) {
         try {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAdmin)
                 return true;
             else if (usermap.isAuthor && (usermap.userId).equals(createdBy))
+                return true;
+            return false;
+        } catch (Exception e) {
+            log.error("principal lacks authorities - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
+            log.error(e)
+            throw e
+        }
+    }
+
+
+    public static userCanUpdateDeletePopulation(String createdBy) {
+        try {
+            def usermap = getCommunicationUserRoleMap()
+            if (usermap.isAdmin)
+                return true;
+            else if (usermap.isUser && (usermap.userId).equals(createdBy))
                 return true;
             return false;
         } catch (Exception e) {

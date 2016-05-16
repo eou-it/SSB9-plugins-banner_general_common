@@ -19,7 +19,7 @@ class CommunicationFieldService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
 
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
         }
 
@@ -92,7 +92,7 @@ class CommunicationFieldService extends ServiceBase {
             throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldfield.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldfield.lastModifiedBy)) {
             throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
         }
 
@@ -220,7 +220,7 @@ class CommunicationFieldService extends ServiceBase {
         if (oldfield.id == null)
             throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldfield.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldfield.lastModifiedBy)) {
             throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
         }
     }

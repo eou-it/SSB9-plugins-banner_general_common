@@ -127,8 +127,9 @@ class CommunicationPopulationQuery implements Serializable {
     @Column(name = "GCBQURY_VALID_IND")
     Boolean changesPending = false
 
-
-    /* ----------------------------------------------------------------------*/
+    @Column(name = "GCBQURY_TYPE")
+    @Enumerated(EnumType.STRING)
+    CommunicationPopulationQueryType type = CommunicationPopulationQueryType.SQL_STATEMENT
 
 
     static constraints = {
@@ -142,7 +143,7 @@ class CommunicationPopulationQuery implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-
+        type(nullable: false)
     }
 
 

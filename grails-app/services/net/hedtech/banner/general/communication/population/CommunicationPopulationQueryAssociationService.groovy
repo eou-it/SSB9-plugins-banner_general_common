@@ -13,7 +13,7 @@ class CommunicationPopulationQueryAssociationService extends ServiceBase {
     def log = Logger.getLogger(this.getClass())
 
     def preCreate(domainModelOrMap) {
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationPopulationQueryAssociation, "@@r1:operation.not.authorized@@")
         }
     }

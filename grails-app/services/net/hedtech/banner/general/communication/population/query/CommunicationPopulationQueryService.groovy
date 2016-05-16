@@ -8,7 +8,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
@@ -20,7 +19,7 @@ class CommunicationPopulationQueryService extends ServiceBase {
 
     def preCreate(domainModelOrMap) {
 
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
 
@@ -61,7 +60,7 @@ class CommunicationPopulationQueryService extends ServiceBase {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpopquery.createdBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldpopquery.createdBy)) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
 
@@ -90,7 +89,7 @@ class CommunicationPopulationQueryService extends ServiceBase {
         if (oldQuery.id == null)
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldQuery.createdBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldQuery.createdBy)) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
     }

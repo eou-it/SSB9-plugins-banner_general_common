@@ -15,7 +15,7 @@ class CommunicationTemplateService extends ServiceBase {
     def communicationFieldService
 
     def preCreate( domainModelOrMap ) {
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplate, "operation.not.authorized" )
         }
 
@@ -36,7 +36,7 @@ class CommunicationTemplateService extends ServiceBase {
         def oldTemplate = CommunicationTemplate.get(template?.id)
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldTemplate?.createdBy)) {
             throw new ApplicationException(CommunicationTemplate, "@@r1:operation.not.authorized@@")
         }
 
@@ -76,7 +76,7 @@ class CommunicationTemplateService extends ServiceBase {
         def oldTemplate = CommunicationTemplate.get(domainModelOrMap?.id ?: domainModelOrMap?.domainModel?.id)
 
         //check if user is authorized. user should be admin or author
-        if (oldTemplate == null || !CommunicationCommonUtility.userCanUpdateDelete(oldTemplate?.createdBy)) {
+        if (oldTemplate == null || !CommunicationCommonUtility.userCanUpdateDeleteContent(oldTemplate?.createdBy)) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
         }
     }

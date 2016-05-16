@@ -19,7 +19,7 @@ class CommunicationInteractionTypeService extends ServiceBase {
 
     def preCreate(domainModelOrMap) {
 
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationInteractionType, "@@r1:operation.not.authorized@@")
         }
 
@@ -58,7 +58,7 @@ class CommunicationInteractionTypeService extends ServiceBase {
             throw new ApplicationException(CommunicationInteractionType, "@@r1:interactionTypeDoesNotExist@@")
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldInteractionType.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldInteractionType.lastModifiedBy)) {
             throw new ApplicationException(CommunicationInteractionType, "@@r1:operation.not.authorized@@")
         }
 
@@ -86,7 +86,7 @@ class CommunicationInteractionTypeService extends ServiceBase {
         if (oldInteractionType.id == null)
             throw new ApplicationException(CommunicationInteractionType, "@@r1:interactionTypeDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldInteractionType.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldInteractionType.lastModifiedBy)) {
             throw new ApplicationException(CommunicationInteractionType, "@@r1:operation.not.authorized@@")
         }
     }

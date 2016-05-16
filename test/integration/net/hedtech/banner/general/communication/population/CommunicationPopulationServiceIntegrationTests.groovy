@@ -56,7 +56,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
 
     @Test
-    void testCreatePopulation() {
+    void testCreatePopulationWithBcmAdmin() {
         def population = newPopulation("TEST" )
         population = communicationPopulationService.create( [domainModel: population] )
 
@@ -68,6 +68,38 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         assertEquals "TEST", population.name
     }
 
+
+    @Test
+    void testCreatePopulationWithBcmUser() {
+        logout()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMUSER', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
+        def population = newPopulation("TEST" )
+        population = communicationPopulationService.create( [domainModel: population] )
+
+        // Assert domain values
+        assertNotNull population?.id
+        assertEquals testFolder.name, population.folder.name
+        assertEquals 'BCMUSER', population.createdBy
+        assertEquals "Population Description", population.description
+        assertEquals "TEST", population.name
+    }
+
+
+    @Test
+    void testCreatePopulationWithGrailsUser() {
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('grails_user', 'u_pick_it'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
+        def population = newPopulation("TEST" )
+        try {
+            population = communicationPopulationService.create( [domainModel: population] )
+            fail( 'expected failure' )
+        } catch (ApplicationException e) {
+            assertTrue(e.getMessage().toString().contains("operation.not.authorized"))
+        }
+    }
 
     @Test
     void testCreateWithMissingFolder() {

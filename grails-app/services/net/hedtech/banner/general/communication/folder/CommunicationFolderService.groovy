@@ -15,7 +15,7 @@ import net.hedtech.banner.service.ServiceBase
 class CommunicationFolderService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationFolder, "@@r1:operation.not.authorized@@")
         }
 
@@ -43,7 +43,7 @@ class CommunicationFolderService extends ServiceBase {
             throw new ApplicationException(CommunicationFolder, "@@r1:folderDoesNotExist@@")
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldfolder.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldfolder.lastModifiedBy)) {
             throw new ApplicationException(CommunicationFolder, "@@r1:operation.not.authorized@@")
         }
 
@@ -64,7 +64,7 @@ class CommunicationFolderService extends ServiceBase {
         if (oldfolder.id == null)
             throw new ApplicationException(CommunicationFolder, "@@r1:folderDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldfolder.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldfolder.lastModifiedBy)) {
             throw new ApplicationException(CommunicationFolder, "@@r1:operation.not.authorized@@")
         }
     }

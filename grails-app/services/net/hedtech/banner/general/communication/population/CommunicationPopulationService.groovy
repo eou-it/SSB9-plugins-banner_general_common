@@ -19,7 +19,7 @@ class CommunicationPopulationService extends ServiceBase {
 
     def preCreate(domainModelOrMap) {
 
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanCreatePopulation()) {
             throw new ApplicationException(CommunicationPopulation, "@@r1:operation.not.authorized@@")
         }
 
@@ -60,7 +60,7 @@ class CommunicationPopulationService extends ServiceBase {
             throw new ApplicationException(CommunicationPopulation, "@@r1:populationDoesNotExist@@")
 
         //check if user is authorized. user should be admin or author
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpopulation.createdBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeletePopulation(oldpopulation.createdBy)) {
             throw new ApplicationException(CommunicationPopulation, "@@r1:operation.not.authorized@@")
         }
 
@@ -88,7 +88,7 @@ class CommunicationPopulationService extends ServiceBase {
         if (oldpopulation.id == null)
             throw new ApplicationException(CommunicationPopulation, "@@r1:populationDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete(oldpopulation.createdBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeletePopulation(oldpopulation.createdBy)) {
             throw new ApplicationException(CommunicationPopulation, "@@r1:operation.not.authorized@@")
         }
     }

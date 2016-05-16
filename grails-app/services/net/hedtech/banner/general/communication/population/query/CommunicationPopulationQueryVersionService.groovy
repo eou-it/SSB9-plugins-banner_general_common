@@ -6,8 +6,6 @@ package net.hedtech.banner.general.communication.population.query
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
@@ -19,7 +17,7 @@ class CommunicationPopulationQueryVersionService extends ServiceBase {
 
 
     def preCreate(domainModelOrMap) {
-        if (!CommunicationCommonUtility.userCanCreate()) {
+        if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
         }
 
@@ -43,7 +41,7 @@ class CommunicationPopulationQueryVersionService extends ServiceBase {
             throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:queryDoesNotExist@@")
         }
 
-        if (!CommunicationCommonUtility.userCanUpdateDelete( persisted.createdBy )) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent( persisted.createdBy )) {
             throw new ApplicationException(CommunicationPopulationQueryVersion, "@@r1:operation.not.authorized@@")
         }
     }

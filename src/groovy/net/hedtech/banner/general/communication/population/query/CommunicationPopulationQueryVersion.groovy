@@ -69,8 +69,13 @@ class CommunicationPopulationQueryVersion implements Serializable {
     @Column(name = "GCRQRYV_QUERY_STRING")
     String sqlString
 
+    @Column(name = "GCRQRYV_TYPE")
+    @Enumerated(EnumType.STRING)
+    CommunicationPopulationQueryType type = CommunicationPopulationQueryType.SQL_STATEMENT
+
     static constraints = {
         query(nullable: false)
+        type(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         sqlString(nullable: false)
