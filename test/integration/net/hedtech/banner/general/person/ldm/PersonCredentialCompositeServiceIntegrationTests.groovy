@@ -10,6 +10,8 @@ import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
@@ -22,6 +24,7 @@ class PersonCredentialCompositeServiceIntegrationTests extends BaseIntegrationTe
     def personCredentialCompositeService
 
     def person
+    String guid
     String bannerSourcedId
     String bannerUserName
     String bannerUdcId
@@ -35,6 +38,7 @@ class PersonCredentialCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     private void initializeDataReferences() {
         person = PersonUtility.getPerson("HOSP0001")
+        guid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(person?.pidm?.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
         bannerSourcedId = ImsSourcedIdBase.findByPidm(person?.pidm)?.sourcedId
         bannerUserName = ThirdPartyAccess.findByPidm(person?.pidm)?.externalUser
         bannerUdcId = PidmAndUDCIdMapping.findByPidm(person?.pidm)?.udcId
@@ -42,39 +46,48 @@ class PersonCredentialCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testList_PersonsCredentials_v6() {
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
         def personsCredentials = personCredentialCompositeService.list([max: '500', offset: '0'])
+        assertTrue personsCredentials.size() <= 500
         assertTrue personsCredentials.size() > 0
-    }
-
-    @Test
-    void testCount_PersonsCredentials_v6() {
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
-        def personsCredentialsCount = personCredentialCompositeService.count([max: '500', offset: '0'])
-        assertTrue personsCredentialsCount > 0
+        assertTrue personsCredentials.size() <= personCredentialCompositeService.count([max: '500', offset: '0'])
+        PersonCredentialsDecorator decorator = personsCredentials[0]
+        assertNotNull decorator
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralCommonConstants.PERSONS_LDM_NAME, decorator.guid)
+        assertNotNull globalUniqueIdentifier
+        assertNotNull globalUniqueIdentifier.domainKey
+        Integer pidm = globalUniqueIdentifier.domainKey.toInteger()
+        String bannerId = PersonIdentificationNameCurrent.fetchByPidm(pidm)?.bannerId
+        assertEquals bannerId, decorator.credentials.find { it.type == "bannerId" }.value
+        String bannerSourcedId = ImsSourcedIdBase.findByPidm(pidm)?.sourcedId
+        if (bannerSourcedId) {
+            assertEquals bannerSourcedId, decorator.credentials.find { it.type == "bannerSourcedId" }.value
+        }
+        String bannerUserName = ThirdPartyAccess.findByPidm(pidm)?.externalUser
+        if (bannerUserName) {
+            assertEquals bannerUserName, decorator.credentials.find { it.type == "bannerUserName" }.value
+        }
+        String bannerUdcId = PidmAndUDCIdMapping.findByPidm(pidm)?.udcId
+        if (bannerUdcId) {
+            assertEquals bannerUdcId, decorator.credentials.find { it.type == "bannerUdcId" }.value
+        }
     }
 
     @Test
     void testGet_PersonCredentials_v6() {
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
-        String guid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(person?.pidm?.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
-        assertNotNull guid
-        def personCredentials = personCredentialCompositeService.get(guid)
-        assertNotNull personCredentials
-        assertEquals guid, personCredentials.guid
-        assertEquals person.bannerId, personCredentials.credentials.find { it.type == "bannerId" }.value
-        assertEquals bannerSourcedId, personCredentials.credentials.find { it.type == "bannerSourcedId" }.value
-        assertEquals bannerUserName, personCredentials.credentials.find { it.type == "bannerUserName" }.value
-        assertEquals bannerUdcId, personCredentials.credentials.find { it.type == "bannerUdcId" }.value
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+        PersonCredentialsDecorator decorator = personCredentialCompositeService.get(guid)
+        assertNotNull decorator
+        assertEquals guid, decorator.guid
+        assertEquals person.bannerId, decorator.credentials.find { it.type == "bannerId" }.value
+        assertEquals bannerSourcedId, decorator.credentials.find { it.type == "bannerSourcedId" }.value
+        assertEquals bannerUserName, decorator.credentials.find { it.type == "bannerUserName" }.value
+        assertEquals bannerUdcId, decorator.credentials.find { it.type == "bannerUdcId" }.value
     }
 
     @Test
     void testGet_InvalidPersonCredentials_v6() {
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
         String guid = 'xxxxx'
         try {
             personCredentialCompositeService.get(guid)
@@ -82,6 +95,11 @@ class PersonCredentialCompositeServiceIntegrationTests extends BaseIntegrationTe
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'NotFoundException'
         }
+    }
+
+    private void setAcceptHeader(String mediaType) {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", mediaType)
     }
 
 
