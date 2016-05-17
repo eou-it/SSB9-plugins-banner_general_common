@@ -9,10 +9,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
-import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
-import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
@@ -69,8 +66,17 @@ class PersonCompositeService extends LdmService {
     public static final String CREDENTIAL_TYPE = "credentialType"
     public static final String CREDENTIAL_ID = "credentialId"
 
+    /**
+     * GET /api/persons/<guid>
+     *
+     * @param id GUID
+     * @return
+     */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def get(id) {
+    def get(String id) {
+        if (needToCallPersonV6CompositeService()) {
+            return personV6CompositeService.get(id)
+        }
         PersonIdentificationNameCurrent personIdentificationNameCurrent = getPersonIdentificationNameCurrentByGUID(id)
         def resultList = buildLdmPersonObjects([personIdentificationNameCurrent])
         resultList.get(personIdentificationNameCurrent.pidm)
@@ -90,11 +96,11 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def list(params) {
-        log.trace "list:Begin"
-        log.debug "Request parameters: ${params}"
-        if(getResponseRepresentationVersion() >= "v6") {
+        if (needToCallPersonV6CompositeService(params)) {
             return personV6CompositeService.list(params)
         }
+        log.trace "list:Begin"
+        log.debug "Request parameters: ${params}"
         def total = 0
         def resultList = [:]
         def allowedSortFields = ["firstName", "lastName"]
@@ -256,6 +262,30 @@ class PersonCompositeService extends LdmService {
 
         log.trace "list:End"
         resultList
+    }
+
+    /**
+     * GET /api/persons
+     * Note: PersonCompositeService does not require count method as its list method returns PagedResultArrayList.
+     * This is only required for PersonV6CompositeService.
+     *
+     * The count method must return the total number of instances of the resource.
+     * It is used in conjunction with the list method when returning a list of resources.
+     * RestfulApiController will make call to "count" only if the "list" execution happens without any exception.
+     *
+     * @param params Request parameters
+     * @return
+     */
+    @Transactional(readOnly = true)
+    def count(Map params) {
+        log.trace "count:Begin"
+        log.debug "Request parameters: ${params}"
+        int total = 0
+
+        total = personV6CompositeService.count(params)
+
+        log.trace "count:End: $total"
+        return total
     }
 
 
@@ -1791,5 +1821,19 @@ class PersonCompositeService extends LdmService {
         return exists
     }
 
+
+    private boolean needToCallPersonV6CompositeService(Map params = null) {
+        boolean needToCall = false
+        String mediaTypeVersion
+        if (RestfulApiValidationUtility.isQApiRequest(params)) {
+            mediaTypeVersion = getRequestRepresentationVersion()
+        } else {
+            mediaTypeVersion = getResponseRepresentationVersion()
+        }
+        if (mediaTypeVersion == null || mediaTypeVersion >= "v6") {
+            needToCall = true
+        }
+        return needToCall
+    }
 
 }
