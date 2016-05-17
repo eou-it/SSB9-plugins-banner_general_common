@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class PersonV6CompositeService extends LdmService {
 
+    static final String LDM_NAME = 'persons'
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
 
