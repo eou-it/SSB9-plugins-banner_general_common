@@ -1,23 +1,21 @@
 /*********************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-package net.hedtech.banner.general.system.ldm.v1
+package net.hedtech.banner.general.system.ldm
 
-import net.hedtech.banner.general.system.ldm.IntegrationHubConfig
+import net.hedtech.banner.general.system.ldm.v1.AmqpServerConfig
+import net.hedtech.banner.general.system.ldm.v1.ErpApiConfig
+import net.hedtech.banner.general.system.ldm.v1.ErpEventConfig
 
-class EmsConfiguration {
+abstract class EmsConfiguration {
 
     String id
     String description
     String logLevel
     Integer guidLifespan
-    boolean useIntegrationHub
 
-    IntegrationHubConfig integrationHubConfig
     AmqpServerConfig amqpServerConfig
     ErpEventConfig erpEventConfig
-    MessageConfig messageInConfig
-    MessageConfig messageOutConfig
     ErpApiConfig erpApiConfig
 
 }

@@ -24,4 +24,8 @@ class SiteDetailV4 extends SiteDetail{
         return super.getDescription()
     }
 
+    def getDetail(){
+        return ['id':getGuid()]
+    }
+
 }

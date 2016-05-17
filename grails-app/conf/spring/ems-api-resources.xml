@@ -352,7 +352,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-   <!-- <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-academic-credentials" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>academic-credentials</value>
         </constructor-arg>
@@ -367,7 +367,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>HEDM.Degree.STVDEGC</value>
             </list>
         </constructor-arg>
-    </bean>-->
+    </bean>
 
     <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
@@ -408,6 +408,40 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-section-crosslist" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>section-crosslists</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>5</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/section-crosslists/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.SectionCrossListEnrollmentInformationBase.SSBXLST</value>
+                <value>HEDM.SectionCrossListSection.SSRXLST</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-enrollmentstatus" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>enrollment-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/enrollment-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.EnrollmentStatuses.STVCACT</value>
+            </list>
+        </constructor-arg>
+    </bean>
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -434,6 +468,41 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-location-types"/>
                 <ref bean="ar-phone-types"/>
                 <ref bean="ar-academic-disciplines"/>
+                <ref bean="ar-section-crosslist"/>
+                <ref bean="ar-academic-credentials"/>
+                <ref bean="ar-enrollmentstatus"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="erpApiConfig-ETHOS-INTEGRATION" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
+        <property name="resourceMap">
+            <list>
+                <ref bean="ar-acadlevels"/>
+                <ref bean="ar-acadperiods"/>
+                <ref bean="ar-buildings"/>
+                <ref bean="ar-courses"/>
+                <ref bean="ar-gradeschemes"/>
+                <ref bean="ar-instmethods"/>
+                <ref bean="ar-instplatforms"/>
+                <ref bean="ar-maritalstatuses"/>
+                <ref bean="ar-organizations"/>
+                <ref bean="ar-persons"/>
+                <ref bean="ar-personfilters"/>
+                <ref bean="ar-races"/>
+                <ref bean="ar-restritypes"/>
+                <ref bean="ar-rooms"/>
+                <ref bean="ar-sections"/>
+                <ref bean="ar-secregistrations"/>
+                <ref bean="ar-sites"/>
+                <ref bean="ar-subjects"/>
+                <ref bean="ar-email-types"/>
+                <ref bean="ar-location-types"/>
+                <ref bean="ar-phone-types"/>
+                <ref bean="ar-academic-disciplines"/>
+                <ref bean="ar-section-crosslist"/>
+                <ref bean="ar-academic-credentials"/>
+                <ref bean="ar-enrollmentstatus"/>
             </list>
         </property>
     </bean>

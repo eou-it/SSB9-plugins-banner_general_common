@@ -69,10 +69,15 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
         assertEquals 7, pidmList.size()
         assertTrue pidmList instanceof List
-        def cnt
-        Map returnList
-        returnList = userRoleCompositeService.fetchAllRolesByPidmInList(pidmList, false)
-
+        Map returnList = userRoleCompositeService.fetchAllRolesByPidmInList(pidmList, false)
+        returnList.each{ entry ->
+            entry.value.effectiveEndDate.each{
+             assertTrue   it.format("yyyy-MM-dd").matches("\\d{4}\\-\\d{2}\\-\\d{2}")
+            }
+            entry.value.effectiveStartDate.each{
+              assertTrue   it.format("yyyy-MM-dd").matches("\\d{4}\\-\\d{2}\\-\\d{2}")
+            }
+        }
         assertEquals 7, returnList.size()
     }
 

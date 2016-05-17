@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
@@ -8,6 +8,7 @@ import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.restfulapi.RestfulApiValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
 import org.junit.Test
 
@@ -94,7 +95,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         List<BuildingDetail> buildings = buildingCompositeService.list( paginationParams )
         assertNotNull buildings
         assertFalse buildings.isEmpty()
-
+        assertNotNull buildings.toString()
         assertNotNull buildings[0].guid
         BuildingDetail building = buildingCompositeService.get( buildings[0].guid )
         assertNotNull building
@@ -166,6 +167,21 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals buildings[0], building
     }
 
+    @Test
+    void testListWithValidSortAndOrderFieldWithSupportedVersionHeaderV3() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        def params = [max: '20', offset: '0']
+        List<BuildingDetail> buildings = buildingCompositeService.list(params)
+        assertNotNull buildings
+        assertNotNull buildings[0].guid
+        BuildingDetail building = buildingCompositeService.get( buildings[0].guid )
+        assertNotNull building
+        assertEquals buildings[0], building
+        assertEquals buildings[0].code, building.code
+        assertEquals buildings[0].metadata,building.metadata
+        assertEquals buildings[0].guid, building.guid
+    }
 
     /**
      * Test to check the BuildingCompositeService list method with invalid order field
@@ -241,5 +257,20 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testFetchByBuildingCodeHeaderV1() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")
+        BuildingDetail building = buildingCompositeService.fetchByBuildingCode( i_success_housingLocationBuildingDescription.building.code )
+        assertNotNull building.toString()
+        assertNotNull building
+        assertNotNull building.guid
+        assertNotNull building.title
+        assertNotNull building.abbreviation
+        assertEquals i_success_housingLocationBuildingDescription.id, building.id
+        assertEquals i_success_housingLocationBuildingDescription.building.code, building.abbreviation
+        assertEquals i_success_housingLocationBuildingDescription.building.description, building.title
+        assertEquals i_success_housingLocationBuildingDescription.building.dataOrigin, building.metadata.dataOrigin
+    }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.overall.ldm
@@ -34,6 +34,7 @@ class RoomTypeCompositeServiceIntegrationTests extends BaseIntegrationTestCase{
     public void testRoomType(){
         String guid = roomTypeCompositeService.list(params)?.get(0)?.id
         RoomType type = roomTypeCompositeService.get(guid)
+        assertNotNull type.toString()
         assertNotNull type
         assertEquals guid,type?.id
         assertEquals type?.title,"classroom"

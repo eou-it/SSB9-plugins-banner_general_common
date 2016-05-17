@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
@@ -13,8 +13,7 @@ import java.sql.SQLException
 
 class UserRoleCompositeService extends LdmService{
     def sessionFactory
-    def dateConvertHelperService
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1,GeneralCommonConstants.VERSION_V4]
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1]
 
 /**
  *
@@ -154,7 +153,6 @@ class UserRoleCompositeService extends LdmService{
     Map<Integer, List<RoleDetail>> fetchAllRolesByPidmInList(List pidms, Boolean studentRole) {
         def results = [:]
         String version = LdmService.getAcceptVersion(VERSIONS)
-        def timeZone = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version)? dateConvertHelperService.getDBTimeZone() : ''
         def institution = InstitutionalDescription.fetchByKey()
         if (pidms.size()) {
             def connection
@@ -188,8 +186,8 @@ class UserRoleCompositeService extends LdmService{
                         def roles = results.get(faculty[0].toInteger()) ?: []
                         def newRole = new RoleDetail()
                         newRole.role = 'Faculty'
-                        newRole.effectiveStartDate = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version) ? dateConvertHelperService.convertDateIntoUTCFormat(faculty[1],timeZone):faculty[1]
-                        newRole.effectiveEndDate = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version) ? dateConvertHelperService.convertDateIntoUTCFormat(faculty[2],timeZone):faculty[2]
+                        newRole.effectiveStartDate = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version) ? DateConvertHelperService.convertDateIntoUTCFormat(faculty[1]):faculty[1]
+                        newRole.effectiveEndDate = GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(version) ? DateConvertHelperService.convertDateIntoUTCFormat(faculty[2]):faculty[2]
                         roles << newRole
                         results.put(faculty[0].toInteger(), roles)
                     }
