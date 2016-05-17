@@ -92,6 +92,9 @@ class PersonCompositeService extends LdmService {
     def list(params) {
         log.trace "list:Begin"
         log.debug "Request parameters: ${params}"
+        if(getResponseRepresentationVersion() >= "v6") {
+            return personV6CompositeService.list(params)
+        }
         def total = 0
         def resultList = [:]
         def allowedSortFields = ["firstName", "lastName"]
@@ -240,12 +243,7 @@ class PersonCompositeService extends LdmService {
         }
         if (personList?.size() > 0) {
             log.debug "buildLdmPersonObjects begins"
-            if ("v6".equals(getAcceptVersion(VERSIONS))) {
-                resultList = personV6CompositeService.list(params, personList, studentRole)
-            } else{
-                resultList = buildLdmPersonObjects(personList, studentRole)
-            }
-
+            resultList = buildLdmPersonObjects(personList, studentRole)
             log.debug "buildLdmPersonObjects ends"
         }
 

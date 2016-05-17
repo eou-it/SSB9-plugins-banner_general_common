@@ -47,6 +47,7 @@ class UserRoleCompositeService extends LdmService{
         def connection
         switch (params.role.toLowerCase()) {
             case 'faculty':
+            case 'instructor':
                 if (institution.studentInstalled) {
                     try {
                         connection = sessionFactory.getCurrentSession()

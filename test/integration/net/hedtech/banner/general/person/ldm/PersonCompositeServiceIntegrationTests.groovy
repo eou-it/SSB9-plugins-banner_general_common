@@ -772,6 +772,23 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
+    void testListPersonValidV6() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: "instructor"]
+        def o_success_persons = personCompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+    }
+
+    private void setAcceptHeader(String mediaType) {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", mediaType)
+    }
+
+
+    @Test
     void testListapiWithRoleFacultyAndPagination() {
         def params = [role: "faculty", max: '10', offset: '5']
 
