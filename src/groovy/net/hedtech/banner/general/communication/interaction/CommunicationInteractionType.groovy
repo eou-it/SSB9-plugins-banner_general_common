@@ -44,7 +44,10 @@ import javax.persistence.Version
                 query = """ FROM CommunicationInteractionType a
                     WHERE a.folder.name = :folderName
                     AND   upper(a.name) = upper(:interactionTypeName)
-                    AND   a.id <> :id""")
+                    AND   a.id <> :id"""),
+        @NamedQuery(name = "CommunicationInteractionType.fetchAvailable",
+                query = """ FROM CommunicationInteractionType a
+                    WHERE a.isAvailable = true""")
 ])
 class CommunicationInteractionType implements Serializable {
 
@@ -129,7 +132,7 @@ class CommunicationInteractionType implements Serializable {
         return interactionType
     }
 
-    public static List findAll() {
+    public static List<CommunicationInteractionType> findAll() {
 
         def interactionTypes = []
         CommunicationInteractionType.withSession { session ->
@@ -168,5 +171,13 @@ class CommunicationInteractionType implements Serializable {
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
+    }
+
+    public static List<CommunicationInteractionType> fetchAvailable() {
+        def query
+        CommunicationInteractionType.withSession { session ->
+            query = session.getNamedQuery('CommunicationInteractionType.fetchAvailable').list()
+        }
+        return query
     }
 }
