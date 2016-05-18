@@ -3,7 +3,6 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm
 
-import net.hedtech.banner.general.system.ldm.v1.EmsConfiguration
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -33,11 +32,28 @@ class EmsConfigurationCompositeServiceIntegrationTests extends BaseIntegrationTe
 
 
     @Test
-    void testGet() {
+    void testGet_ElevateConfiguration() {
         String id = "BANNER-ELEVATE"
         EmsConfiguration emsConfiguration = emsConfigurationCompositeService.get(id)
         assertNotNull emsConfiguration
         assertEquals id, emsConfiguration.id
+        assertNotNull emsConfiguration.messageInConfig
+        assertNull emsConfiguration.hasProperty("integrationHubConfig")
+    }
+
+
+    @Test
+    void testGet_EthosConfiguration() {
+        String id = "ETHOS-INTEGRATION"
+        EmsConfiguration emsConfiguration = emsConfigurationCompositeService.get(id)
+        assertNotNull emsConfiguration
+        assertEquals id, emsConfiguration.id
+        if (emsConfiguration.useIntegrationHub) {
+            assertNotNull emsConfiguration.integrationHubConfig
+        } else {
+            assertNull emsConfiguration.integrationHubConfig
+        }
+        assertNull emsConfiguration.hasProperty("messageInConfig")
     }
 
 

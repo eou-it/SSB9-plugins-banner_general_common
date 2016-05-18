@@ -123,7 +123,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def i_success_credential_type4_filter="Banner ID"
     def i_failure_credential_type4_filter="BannerId"
-    def i_failure_credential_id4="HOSP00"
+    def i_success_credential_filter="ADVAF0021"
+    def i_failure_credential_filter="HOSP00"
 
 
 
@@ -2309,7 +2310,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     public void testCredentialsFilterOnPerson(){
         def persons = [:]
         params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
+        params.put("credentialId",i_success_credential_filter);
         params.put("role","faculty")
         persons = personCompositeService.list(params);
         assert persons.size()>0
@@ -2319,7 +2320,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         params.clear()
 
         params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
+        params.put("credentialId",i_success_credential_filter);
         params.put("role","student")
         persons = personCompositeService.list(params);
         assert persons.size()>0
@@ -2330,7 +2331,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
         params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4)
+        params.put("credentialId",i_failure_credential_filter)
         params.put("role","student")
         try{
             persons = personCompositeService.list(params)
@@ -2349,7 +2350,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         try{
             persons = personCompositeService.list(params)
         }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
+            assertApplicationException ae, 'creadential.type.invalid'
         }
         assertEquals 0,persons.size()
 
@@ -2357,41 +2358,38 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         params.clear()
 
         params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4);
+        params.put("credentialId",i_failure_credential_filter);
         params.put("role","student")
         try{
             persons = personCompositeService.list(params)
         }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
+            assertApplicationException ae, 'creadential.type.invalid'
         }
         assertEquals 0,persons.size()
 
         persons.clear()
         params.clear()
 
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_id4);
+        params.put("credentialId",i_failure_credential_filter);
         params.put("role","faculty")
         try{
             persons = personCompositeService.list(params)
         }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
+            assertApplicationException ae, 'creadential.type.required'
         }
         assertEquals 0,persons.size()
 
         persons.clear()
         params.clear()
 
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
+        params.put("credentialType",i_success_credential_type4_filter)
         params.put("role","faculty")
         try{
             persons = personCompositeService.list(params)
         }catch(ApplicationException ae){
-            assertApplicationException ae, 'invalid.param'
+            assertApplicationException ae, 'creadential.id.required'
         }
         assertEquals 0,persons.size()
-
     }
 
 

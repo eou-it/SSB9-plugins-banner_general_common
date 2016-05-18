@@ -1,13 +1,12 @@
 /*******************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
-import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.google.i18n.phonenumbers.Phonenumber
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
@@ -54,6 +53,7 @@ class PersonCompositeService extends LdmService {
     static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
     static final String PERSON_MATCH_RULE = "PERSON.MATCHRULE"
     static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
+    static final String PERSON_PHONES_COUNTRY_DEFAULT = "PERSON.PHONES.COUNTRY.DEFAULT"
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
@@ -62,6 +62,7 @@ class PersonCompositeService extends LdmService {
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
+    def credentialTypeList = ["Banner ID"]
     public static final String CREDENTIAL_TYPE = "credentialType"
     public static final String CREDENTIAL_ID = "credentialId"
 
@@ -90,7 +91,6 @@ class PersonCompositeService extends LdmService {
         log.debug "Request parameters: ${params}"
         def total = 0
         def resultList = [:]
-        def credentialTypeList = ["Banner ID"]
         def allowedSortFields = ["firstName", "lastName"]
         Boolean studentRole = false
         def personList = []
@@ -165,42 +165,42 @@ class PersonCompositeService extends LdmService {
                 searchResult = getPidmsForPersonFilter(selId, params)
                 personList = searchResult.personList
                 total = searchResult.count
-            }  else if (params.containsKey(CREDENTIAL_TYPE) && params.containsKey(CREDENTIAL_ID)) {
-                if (!params.role) {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", []))
+            } else if (params.credentialId && credentialTypeList.contains(params.credentialType) && !GeneralCommonConstants.VERSION_V1.equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
+                String credential = params.credentialId
+                def pidmsMap = [:]
+                boolean isCorrectRole = false
+                PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
+                pidmsMap.put('pidm', personIdentificationNameCurrent?.pidm)
+                String role = params.role?.trim()?.toLowerCase()
+                if (role && role == 'student') {
+                    studentRole = true
+                } else if (role && role == 'faculty') {
+                    studentRole = false
+                } else {
+                    isCorrectRole = true
                 }
-
-                if (params.credentialId && credentialTypeList.contains(params.credentialType)) {
-                    String credential = params.credentialId
-                    def pidmsMap=[:]
-                    PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential)
-                    if (null == personIdentificationNameCurrent) {
-                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("not.found.message", []))
+                if (params.role && personIdentificationNameCurrent) {
+                    Map personMap = userRoleCompositeService.fetchAllRolesByPidmInList([personIdentificationNameCurrent?.pidm], studentRole)
+                    List<RoleDetail> roles = personMap.get(personIdentificationNameCurrent?.pidm)
+                    for (RoleDetail roleDetail : roles) {
+                        if (roleDetail?.role.equalsIgnoreCase(params.role)) {
+                            isCorrectRole = true
+                            break
+                        }
                     }
-                    String role = params.role?.trim()?.toLowerCase()
-                    if (role && role == 'student') {
-                        pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
-                        studentRole=true
-                    } else if (role && role == 'faculty') {
-                       pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
-                       studentRole=false
-                    } else {
-                        pidmsMap.put('pidm',personIdentificationNameCurrent?.pidm)
-                    }
-
+                }
+                if (isCorrectRole) {
                     def query = """from PersonIdentificationNameCurrent a
                                        where a.pidm = (:pidm)
                                        order by a.$params.sort $params.order, a.bannerId $params.order
                                     """
-
                     DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
                     log.debug "PersonIdentificationNameCurrent query begins"
-
                     personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
-                } else {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
+                    total = personList.size()
                 }
-            }else {
+
+            } else {
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
                     if (role == "faculty" || role == "student") {
@@ -362,20 +362,16 @@ class PersonCompositeService extends LdmService {
                     null,
                     null)
         }
-        if (person.addresses instanceof List) {
-            person.addresses.collect { address ->
-                getStateAndZip(address)
-            }
-        }
+
         persons.put(newPersonIdentificationName.pidm, currentRecord)
         def addresses = createAddresses(newPersonIdentificationName.pidm, metadata,
                 person.addresses instanceof List ? person.addresses : [])
         persons = buildPersonAddresses(addresses, persons)
-        List<PersonTelephone> phones = createPhones(newPersonIdentificationName.pidm, metadata,
-                person.phones instanceof List ? person.phones : [])
+        List<PersonTelephone> phones = updatePhones(newPersonIdentificationName.pidm, metadata,
+                person.phones instanceof List ? person.phones : [], null)
         persons = buildPersonTelephones(phones, persons)
         def emails = updatePersonEmails(newPersonIdentificationName.pidm, metadata,
-                person.emails instanceof List ? person.emails : [],[])
+                person.emails instanceof List ? person.emails : [], [])
         persons = buildPersonEmails(emails, persons)
         def races = createRaces(newPersonIdentificationName.pidm, metadata,
                 person.races instanceof List ? person.races : [])
@@ -520,11 +516,7 @@ class PersonCompositeService extends LdmService {
         if (person.containsKey('addresses') && person.addresses instanceof List)
             addresses = updateAddresses(pidmToUpdate, person.metadata, person.addresses)
 
-        //update Telephones
         def phones = []
-        if (person.containsKey('phones') && person.phones instanceof List) {
-            phones = updatePhones(pidmToUpdate, person.metadata, person.phones)
-        }
 
         def emails = []
 
@@ -532,19 +524,29 @@ class PersonCompositeService extends LdmService {
         def races = []
         if (person.containsKey('races') && person.races instanceof List)
             races = updateRaces(pidmToUpdate, person.metadata, person.races)
+
         //Build decorator to return LDM response.
         def personDecorator = new Person(newPersonBase, personGuid, credentials, addresses, phones, emails, names, maritalStatusDetail, ethnicityDetail, races, [])
         Map personMap = [:]
         personMap.put(pidmToUpdate, personDecorator)
         if (addresses.size() == 0)
             personMap = buildPersonAddresses(PersonAddress.fetchActiveAddressesByPidmInList([pidmToUpdate]), personMap)
-        if (phones.size() == 0) {
-            personMap = buildPersonTelephones(PersonTelephone.fetchActiveTelephoneByPidmInList([pidmToUpdate]), personMap)
+
+        //update Telephones
+        if (person.containsKey('phones') && person.phones instanceof List) {
+            ArrayList<PersonTelephone> existingPersonTelephones = getPersonTelephonesFromDB(pidmToUpdate)
+            List<PersonTelephone> lstPersonTelephone = updatePhones(pidmToUpdate, person.metadata, person.phones, existingPersonTelephones)
+            personMap = buildPersonTelephones(lstPersonTelephone, personMap)
+        } else {
+            personMap = buildPersonTelephones(getPersonTelephonesFromDB(pidmToUpdate), personMap)
         }
+
         //update Emails
         if (person.containsKey('emails') && person.emails instanceof List) {
             emails = updatePersonEmails(pidmToUpdate, person.metadata, person.emails, getPersonEmailsFromDB(pidmToUpdate))
             buildPersonEmails(emails, personMap)
+        } else {
+            buildPersonEmails(getPersonEmailsFromDB(pidmToUpdate), personMap)
         }
 
         if (races.size() == 0)
@@ -552,6 +554,19 @@ class PersonCompositeService extends LdmService {
         def additionalIdTypes = Credential.additionalIdMap.keySet().asList()
         personMap = buildPersonAdditionalIds(AdditionalID.fetchByPidmInListAndAdditionalIdentificationTypeInList([pidmToUpdate], additionalIdTypes), personMap)
         personDecorator = buildPersonRoles(personMap).get(pidmToUpdate)
+    }
+
+
+    private ArrayList<PersonTelephone> getPersonTelephonesFromDB(Integer pidmToUpdate) {
+        List<IntegrationConfiguration> intConfs = findAllByProcessCodeAndSettingName(PROCESS_CODE, PERSON_PHONE_TYPE)
+        def banTypeToHEDMTypeMap = [:]
+        intConfs?.each {
+            banTypeToHEDMTypeMap.put(it.value, it.translationValue)
+        }
+        List<PersonTelephone> existingPersonTelephones = PersonTelephone.fetchActiveTelephoneByPidmInList([pidmToUpdate]).findAll {
+            banTypeToHEDMTypeMap.containsKey(it.telephoneType.code)
+        }
+        existingPersonTelephones
     }
 
 
@@ -715,10 +730,20 @@ class PersonCompositeService extends LdmService {
                                 log.error "Nation not found for code: ${activeAddress?.nation?.code}"
                                 throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
                             }
+                            InstitutionalDescription institutionalDescription = InstitutionalDescription.fetchByKey()
+                            if (institutionalDescription?.natnCode == activeAddress.nation.code) {
+                                getStateAndZip(activeAddress, false)
+                            } else {
+                                getStateAndZip(activeAddress, true)
+                            }
                         } else {
                             activeAddress.put('nation', null)
+                            getStateAndZip(activeAddress, false)
                         }
+                    } else {
+                        getStateAndZip(activeAddress, false)
                     }
+
                     if (activeAddress.containsKey('county')) {
                         if (activeAddress.county) {
                             County country = County.findByDescription(activeAddress.county)
@@ -773,31 +798,58 @@ class PersonCompositeService extends LdmService {
         races
     }
 
-
-    List<PersonTelephone> createPhones(def pidm, Map metadata, List<Map> newPhones) {
-        List<PersonTelephone> phones = []
-        newPhones?.each { activePhone ->
-            if (activePhone instanceof Map) {
-                IntegrationConfiguration rule = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_PHONE_TYPE, activePhone.phoneType)
-                if (!rule) {
-                    log.error "Rule not found for phone:" + activePhone.toString()
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_PHONE_TYPE]))
-                }
-                if (rule?.translationValue == activePhone.phoneType &&
-                        !phones.contains { activePhone.phoneType == rule?.value }) {
-                    activePhone.put('telephoneType', TelephoneType.findByCode(rule?.value))
-                    activePhone.put('pidm', pidm)
-                    activePhone.put('dataOrigin', metadata?.dataOrigin)
-                    validatePhoneRequiredFields(activePhone)
-                    Map phoneNumber = parsePhoneNumber(activePhone.phoneNumber)
-                    phoneNumber.keySet().each { key ->
-                        activePhone.put(key, phoneNumber.get(key))
-                    }
-                    phones << personTelephoneService.create(activePhone)
-                }
-            }
+    private PersonTelephone parseAndCreatePersonTelephone(Integer pidm, Map metadata, TelephoneType telephoneType, Map requestPhone) {
+        validatePhoneRequiredFields(requestPhone)
+        def parts = PhoneNumberUtility.parsePhoneNumber(requestPhone.phoneNumber, getDefault2CharISOCountryCode())
+        if (parts.size() == 0) {
+            // Parsing is not succesful so we go with split
+            parts = splitPhoneNumber(requestPhone.phoneNumber)
         }
-        phones
+        def personTelephoneMap = [:]
+        personTelephoneMap.put('telephoneType', telephoneType)
+        personTelephoneMap.put('pidm', pidm)
+        personTelephoneMap.put('dataOrigin', metadata?.dataOrigin)
+        personTelephoneMap.put("countryPhone", parts["countryPhone"])
+        personTelephoneMap.put("phoneArea", parts["phoneArea"])
+        personTelephoneMap.put("phoneNumber", parts["phoneNumber"])
+        personTelephoneMap.put("phoneExtension", requestPhone.phoneExtension)
+        return createPersonTelephone(personTelephoneMap)
+    }
+
+    private String getDefault2CharISOCountryCode() {
+        IntegrationConfiguration intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_PHONES_COUNTRY_DEFAULT)
+        if (intConf.value.length() > 2) {
+            throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_PHONES_COUNTRY_DEFAULT]))
+        }
+        return intConf.value
+    }
+
+
+    private TelephoneType getBannerTypeForHEDMPhoneType(String hedmPhoneType) {
+        // GORICCR default
+        TelephoneType telephoneType
+        IntegrationConfiguration intConf = fetchAllByProcessCodeAndSettingNameAndTranslationValue(PROCESS_CODE, PERSON_PHONE_TYPE, hedmPhoneType)
+        if (!intConf) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.not.found.message', [PERSON_PHONE_TYPE]))
+        }
+        telephoneType = TelephoneType.findByCode(intConf?.value)
+        if (!telephoneType) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.invalid.value.message', [PERSON_PHONE_TYPE]))
+        }
+        return telephoneType
+    }
+
+
+    private PersonTelephone createPersonTelephone(personTelephoneMap) {
+        return new PersonTelephone(
+                pidm: personTelephoneMap.pidm,
+                phoneArea: personTelephoneMap.phoneArea,
+                phoneNumber: personTelephoneMap.phoneNumber,
+                phoneExtension: personTelephoneMap.phoneExtension,
+                countryPhone: personTelephoneMap.countryPhone,
+                telephoneType: personTelephoneMap.telephoneType,
+                dataOrigin: personTelephoneMap.dataOrigin
+        )
     }
 
 
@@ -1046,17 +1098,17 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def buildPersonTelephones(List<PersonTelephone> personTelephoneList, Map persons) {
-        personTelephoneList.each { activePhone ->
-            Person currentRecord = persons.get(activePhone.pidm)
-            IntegrationConfiguration rule = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, activePhone?.telephoneType.code)
-            if (rule?.value == activePhone?.telephoneType?.code &&
-                    !(currentRecord.phones.contains { it.phoneType == rule?.translationValue })) {
-                def phone = new Phone(activePhone)
+        personTelephoneList.each { entity ->
+            Person personDecorator = persons.get(entity.pidm)
+            IntegrationConfiguration rule = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, entity?.telephoneType.code)
+            if (rule?.value == entity?.telephoneType?.code &&
+                    !(personDecorator.phones.contains { it.phoneType == rule?.translationValue })) {
+                Phone phone = new Phone(entity)
                 phone.phoneType = rule?.translationValue
-                phone.phoneNumberDetail = formatPhoneNumber((phone.countryPhone ?: "") + (phone.phoneArea ?: "") + (phone.phoneNumber ?: ""))
-                currentRecord.phones << phone
+                phone.phoneNumberDetail = (phone.countryPhone ?: "") + (phone.phoneArea ?: "") + (phone.phoneNumber ?: "")
+                personDecorator.phones << phone
             }
-            persons.put(activePhone.pidm, currentRecord)
+            persons.put(entity.pidm, personDecorator)
         }
         persons
     }
@@ -1210,9 +1262,6 @@ class PersonCompositeService extends LdmService {
 
     private updateAddresses(def pidm, Map metadata, List<Map> newAddresses) {
         def addresses = []
-        newAddresses.collect { activeAddress ->
-            getStateAndZip(activeAddress)
-        }
         List<PersonAddress> currentAddresses = PersonAddress.fetchActiveAddressesByPidm(['pidm': pidm]).get('list')
         currentAddresses.each { currentAddress ->
             if (findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_ADDRESS_TYPE, currentAddress.addressType.code)) {
@@ -1223,21 +1272,18 @@ class PersonCompositeService extends LdmService {
                 log.debug "NewAddresses:" + newAddresses.toString()
                 log.debug "ActiveAddresses:" + activeAddresses.toString()
                 log.debug "CurrentAddress:" + currentAddress.toString()
-                def invalidAddress = false
+                def changeToInactiveStatus = false
                 if (activeAddresses.size() > 0) {
                     activeAddresses.each { activeAddress ->
                         switch (activeAddress?.addressType) {
                             default:
-
-                                if (activeAddress.state.code != currentAddress.state.code) {
+                                if (activeAddress.state != currentAddress.state?.code) {
                                     log.debug "State different"
-                                    invalidAddress = true
+                                    changeToInactiveStatus = true
                                 }
-
-
                                 if (activeAddress.zip != currentAddress.zip) {
                                     log.debug "Zip different"
-                                    invalidAddress = true
+                                    changeToInactiveStatus = true
                                     break;
                                 }
                                 if (activeAddress?.nation?.containsKey('code')) {
@@ -1251,7 +1297,7 @@ class PersonCompositeService extends LdmService {
                                     }
                                     if (nation?.code != currentAddress.nation?.code) {
                                         log.debug "Nation different:" + nation.code + " : " + currentAddress.nation?.code
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
@@ -1266,34 +1312,34 @@ class PersonCompositeService extends LdmService {
                                     }
                                     if (county?.code != currentAddress.county?.code) {
                                         log.debug "County different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 if (activeAddress.containsKey('streetLine1')) {
                                     if (activeAddress.streetLine1 != currentAddress.streetLine1) {
                                         log.debug "Street1 different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 if (activeAddress.containsKey('streetLine2')) {
                                     if (activeAddress.streetLine2 != currentAddress.streetLine2) {
                                         log.debug "Street2 different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 if (activeAddress.containsKey('streetLine3')) {
                                     if (activeAddress.streetLine3 != currentAddress.streetLine3) {
                                         log.debug "Street3 different"
-                                        invalidAddress = true
+                                        changeToInactiveStatus = true
                                         break;
                                     }
                                 }
                                 break;
                         }
-                        if (invalidAddress) {
+                        if (changeToInactiveStatus) {
                             currentAddress.statusIndicator = 'I'
                             log.debug "Inactivating address:" + currentAddress.toString()
                             personAddressService.update(currentAddress)
@@ -1324,62 +1370,69 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private updatePhones(def pidm, Map metadata, List<Map> newPhones) {
-        def phones = []
-        PersonTelephone.fetchActiveTelephoneByPidmInList([pidm]).each { currentPhone ->
-            def thisType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType?.code)?.translationValue
-            def activePhones = newPhones.findAll { it ->
-                it.phoneType == thisType
-            }
-            if (activePhones.size() > 0) {
-                def invalidPhone = false
-                activePhones.each { activePhone ->
-                    if (activePhone.containsKey('phoneExtension')) {
-                        if (activePhone.phoneExtension != currentPhone.phoneExtension) {
-                            log.debug "Phone extension different"
-                            invalidPhone = true
-                        }
-                    }
-                    if (activePhone.containsKey('phoneNumber')) {
-                        def parsedResult = parsePhoneNumber(activePhone.phoneNumber)
-                        if ((parsedResult.phoneNumber ? parsedResult.phoneNumber.toString() : null) != currentPhone.phoneNumber) {
-                            log.debug "Phone number different"
-                            invalidPhone = true
-                        }
-                        if ((parsedResult.phoneArea ? parsedResult.phoneArea.toString() : null) != currentPhone.phoneArea) {
-                            log.debug "Phone area code different"
-                            invalidPhone = true
-                        }
-                        if ((parsedResult.countryPhone ? parsedResult.countryPhone.toString() : null) != currentPhone.countryPhone) {
-                            log.debug "Phone country code different:" + parsedResult.countryPhone + " : " + currentPhone.countryPhone
-                            invalidPhone = true
-                        }
-                    }
-                    if (invalidPhone) {
-                        currentPhone.statusIndicator = 'I'
-                        log.debug "Inactivating phone:" + currentPhone.toString()
-                        personTelephoneService.update(currentPhone)
-                    } else {
-                        def phoneDecorator = new Phone(currentPhone)
-                        phoneDecorator.phoneType = activePhone.phoneType
-                        phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") + (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
-                        phones << phoneDecorator
-                        newPhones.remove(activePhone)
-                    }
+    private
+    def updatePhones(Integer pidm, Map metadata, List<Map> newPhones, List<PersonTelephone> existingPersonTelephones) {
+        List<PersonTelephone> lstPersonTelephone = []
+        List<String> processedPhoneTypes = []
+        PersonTelephone personTelephone
+        newPhones?.each { requestPhone ->
+            String hedmPhoneType = requestPhone.phoneType.trim()
+            String requestPhoneNumber = requestPhone.phoneNumber
+            log.debug "$hedmPhoneType - $requestPhoneNumber"
+            if (!processedPhoneTypes.contains(hedmPhoneType)) {
+                TelephoneType telephoneType = getBannerTypeForHEDMPhoneType(hedmPhoneType)
+                log.debug "Processing ${telephoneType.code} - $requestPhoneNumber ..."
+                PersonTelephone existingPersonTelephone = getExistingPersonTelephone(requestPhone, telephoneType, existingPersonTelephones)
+                if (existingPersonTelephone) {
+                    // Update
+                    personTelephone = existingPersonTelephone
+                    existingPersonTelephones.remove(existingPersonTelephone)
+                } else {
+                    // Create
+                    personTelephone = parseAndCreatePersonTelephone(pidm, metadata, telephoneType, requestPhone)
+                    personTelephone = personTelephoneService.create(personTelephone)
                 }
-            } else {
-                currentPhone.statusIndicator = 'I'
-                log.debug "Inactivating phone:" + currentPhone.toString()
-                personTelephoneService.update(currentPhone)
+                lstPersonTelephone << personTelephone
+                processedPhoneTypes << hedmPhoneType
             }
         }
-        createPhones(pidm, metadata, newPhones).each { currentPhone ->
-            def phoneDecorator = new Phone(currentPhone)
-            phoneDecorator.phoneType = findAllByProcessCodeAndSettingNameAndValue(PROCESS_CODE, PERSON_PHONE_TYPE, currentPhone.telephoneType.code)?.translationValue
-            phoneDecorator.phoneNumberDetail = formatPhoneNumber((currentPhone.countryPhone ?: "") + (currentPhone.phoneArea ?: "") + (currentPhone.phoneNumber ?: ""))
-            phones << phoneDecorator
+
+        // Inactive DB records
+        existingPersonTelephones?.each { entity ->
+            entity.statusIndicator = 'I'
+            log.debug "Inactivating phone:" + entity.toString()
+            personTelephoneService.update(entity)
         }
-        phones
+
+        return lstPersonTelephone
+    }
+
+
+    private PersonTelephone getExistingPersonTelephone(
+            def requestPhone, TelephoneType telephoneType, List<PersonTelephone> existingPersonTelephones) {
+        PersonTelephone existingPersonTelephone
+        List<PersonTelephone> existingPersonTelephonesByType = existingPersonTelephones?.findAll {
+            it.telephoneType.code == telephoneType.code
+        }
+        existingPersonTelephonesByType.each { entity ->
+            boolean sameAsExisting = true
+            if (requestPhone.containsKey('phoneNumber')) {
+                sameAsExisting = PhoneNumberUtility.comparePhoneNumber(requestPhone.phoneNumber, entity.countryPhone, entity.phoneArea, entity.phoneNumber)
+            }
+            if (sameAsExisting && requestPhone.containsKey('phoneExtension')) {
+                String reqPhoneExtn = requestPhone.phoneExtension ? requestPhone.phoneExtension.trim() : ""
+                String dbPhoneExtn = entity.phoneExtension ? entity.phoneExtension.trim() : ""
+                if (reqPhoneExtn != dbPhoneExtn) {
+                    log.debug "Phone extension different"
+                    sameAsExisting = false
+                }
+            }
+            if (sameAsExisting) {
+                existingPersonTelephone = entity
+                return existingPersonTelephone
+            }
+        }
+        return existingPersonTelephone
     }
 
 
@@ -1429,85 +1482,30 @@ class PersonCompositeService extends LdmService {
         additionalIDService.createOrUpdate(existingId)
     }
 
-
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    Map parsePhoneNumber(String phoneNumber) {
-        Map parsedNumber = [:]
-
-        Phonenumber.PhoneNumber parsedResult
-        try {
-            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
-            parsedResult = phoneUtil.parse(phoneNumber, null)
-            if (phoneUtil.isValidNumber(parsedResult)) {
-                setValidPhoneNumber(parsedNumber, parsedResult, phoneUtil)
-            } else {
-                setInvalidPhoneNumber(parsedNumber, phoneNumber)
-            }
-        }
-        catch (Exception e) {
-            setInvalidPhoneNumber(parsedNumber, phoneNumber)
-        }
-
-        parsedNumber
-    }
-
-
-    private Map setValidPhoneNumber(Map phoneNumberParts, Phonenumber.PhoneNumber parsedResult, PhoneNumberUtil phoneUtil) {
-        String nationalNumber = parsedResult.getNationalNumber()
-        def nationalDestinationCodeLength = phoneUtil.getLengthOfNationalDestinationCode(parsedResult);
-        if (nationalDestinationCodeLength > 0) {
-            phoneNumberParts.put('phoneArea', nationalNumber[0..(nationalDestinationCodeLength - 1)])
-            phoneNumberParts.put('phoneNumber', nationalNumber[nationalDestinationCodeLength..-1])
+    private def splitPhoneNumber(String requestPhoneNumber) {
+        def parts = [:]
+        if (requestPhoneNumber.length() <= 12) {
+            parts.put('phoneNumber', requestPhoneNumber)
         } else {
-            phoneNumberParts.put('phoneNumber', nationalNumber)
-        }
-        phoneNumberParts.put('countryPhone', parsedResult.getCountryCode())
-
-        if (parsedResult.getExtension()) {
-            phoneNumberParts.put('phoneExtension', parsedResult.getExtension())
-        }
-
-        phoneNumberParts
-    }
-
-
-    private Map setInvalidPhoneNumber(Map phoneNumberParts, String phoneNumber) {
-        if (phoneNumber.length() <= 12) {
-            phoneNumberParts.put('phoneNumber', phoneNumber)
-        } else {
-            phoneNumberParts.put('countryPhone', phoneNumber.substring(0, 4))
-            phoneNumberParts.put('phoneArea', phoneNumber.substring(4, 10))
-            String number = phoneNumber.substring(10, phoneNumber.length())
+            parts.put('countryPhone', requestPhoneNumber.substring(0, 4))
+            parts.put('phoneArea', requestPhoneNumber.substring(4, 10))
+            String number = requestPhoneNumber.substring(10, requestPhoneNumber.length())
             if (number.length() > 12) {
                 number = number.substring(0, 12)
             }
-            phoneNumberParts.put('phoneNumber', number)
+            parts.put('phoneNumber', number)
         }
 
-        phoneNumberParts
+        parts
     }
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    String formatPhoneNumber(String phoneNumber) {
-        Phonenumber.PhoneNumber parsedResult
-        try {
-            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance()
-            parsedResult = phoneUtil.parse(phoneNumber, null)
-            if (phoneUtil.isValidNumber(parsedResult)) {
-                log.debug "AfterPhone:" + phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
-                return phoneUtil.format(parsedResult, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL)
-            } else {
-                return phoneNumber
-            }
-        }
-        catch (Exception e) {
-            return phoneNumber
-        }
+    private def getStateAndZip(activeAddress, isInternational) {
+        getAddressPostalCode(getAddressRegion(activeAddress, isInternational), isInternational)
     }
 
-
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private def getAddressRegion(activeAddress) {
+    private def getAddressRegion(activeAddress, isInternational) {
         State state
         if (activeAddress.state) {
             state = State.findByCode(activeAddress?.state)
@@ -1515,55 +1513,66 @@ class PersonCompositeService extends LdmService {
                 log.error "State not found for code: ${activeAddress.state}"
                 throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
             }
-            activeAddress.put('state', state)
         } else {
-            IntegrationConfiguration intConf
-            intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_REGION)
-            if (!intConf) {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_REGION]))
+            if (isInternational) {
+                state = null
+            } else {
+                IntegrationConfiguration intConf
+                intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_REGION)
+                state = State.findByCode(intConf?.value)
+                if (!state) {
+                    throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_REGION]))
+                }
             }
-            state = State.findByCode(intConf?.value)
-            if (!state) {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_REGION]))
-            }
-            activeAddress.put('state', state)
         }
+        activeAddress.put('state', state)
 
         return activeAddress
     }
 
-
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private def getAddressPostalCode(activeAddress) {
+    private def getAddressPostalCode(activeAddress, isInternational) {
+        String zip
         if (activeAddress.zip) {
-            activeAddress.put('zip', activeAddress.zip)
+            zip = activeAddress.zip
         } else {
-            IntegrationConfiguration intConf
-            intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(PROCESS_CODE, PERSON_POSTAL_CODE)
-            if (!intConf) {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.not.found.message", [PERSON_POSTAL_CODE]))
+            if (isInternational) {
+                zip = null
+            } else {
+                IntegrationConfiguration intConf
+                intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_POSTAL_CODE)
+                if (intConf.value == "UPDATE_ME") {
+                    throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_POSTAL_CODE]))
+                }
+                zip = intConf.value
             }
-
-            if (intConf.value == "UPDATE_ME") {
-                throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_POSTAL_CODE]))
-            }
-            activeAddress.put('zip', intConf.value)
         }
+        activeAddress.put('zip', zip)
 
         return activeAddress
     }
 
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private def getStateAndZip(activeAddress) {
-        getAddressPostalCode(getAddressRegion(activeAddress))
+    private IntegrationConfiguration getIntegrationConfiguration(processCode, settingName) {
+        IntegrationConfiguration intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(processCode, settingName)
+        if (!intConf) {
+            throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.not.found.message", [settingName]))
+        }
+        return intConf
     }
 
     def validateCredentialsOnUrl(Map param) {
-        boolean isUrlcredentialTypeError = param.containsKey(CREDENTIAL_TYPE) ? param.containsKey(CREDENTIAL_ID) ? true : false : false
-        boolean isUrlcredentialIdError = param.containsKey(CREDENTIAL_ID) ? param.containsKey(CREDENTIAL_TYPE) ? true : false : false
-        if (!isUrlcredentialTypeError || !isUrlcredentialIdError) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("invalid.param", []))
+        if (!GeneralCommonConstants.VERSION_V1.equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
+            if (!param.containsKey(CREDENTIAL_TYPE)) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.required", []))
+            }
+            if (!param.containsKey(CREDENTIAL_ID)) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.id.required", []))
+            }
+
+            if (!credentialTypeList.contains(param.credentialType)) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", []))
+            }
         }
     }
 
@@ -1580,11 +1589,8 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    def validatePhoneRequiredFields(phone) {
-        if (!phone.telephoneType) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("phoneType.invalid", []))
-        }
-        if (!phone.phoneNumber) {
+    def validatePhoneRequiredFields(requestPhone) {
+        if (!requestPhone.phoneNumber) {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("phoneNumber.invalid", []))
         }
     }

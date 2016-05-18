@@ -1,5 +1,5 @@
 /** *******************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.system.ldm
 
@@ -72,6 +72,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         assertTrue siteList.size() > 0
         assertNotNull siteList[0].guid
         def site = siteDetailCompositeService.get(siteList[0].guid)
+        assertNotNull site
         assertNotNull site.toString()
         assertEquals siteList[0].code, site.code
         assertEquals siteList[0].description, site.description
@@ -89,9 +90,11 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         def paginationParams = [max: '20', offset: '0']
         List siteList = siteDetailCompositeService.list(paginationParams)
         assertNotNull siteList
+        assertNotNull siteList.toString()
         assertTrue siteList.size() > 0
         assertNotNull siteList[0].guid
         def site = siteDetailCompositeService.get(siteList[0].guid)
+        assertNotNull site
         assertNotNull site.toString()
         assertEquals siteList[0].code, site.code
         assertEquals siteList[0].description, site.description
@@ -130,6 +133,8 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     void testFetchFetchByCampusCode() {
         SiteDetail site = siteDetailCompositeService.fetchByCampusCode(campus.code)
         assertNotNull site
+        assertNotNull site.toString()
+        assertNotNull site
         assertEquals campus.id, site.id
         assertEquals campus.code, site.code
         assertEquals campus.description, site.description
@@ -146,6 +151,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         def siteList = siteDetailCompositeService.list(params)
         assertNotNull siteList
         assertFalse siteList.isEmpty()
+        assertNotNull siteList.toString()
         assertNotNull siteList.code
         assertEquals Campus.count(), siteList.size()
         assertNotNull campus
@@ -216,6 +222,21 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
             def map = [order: 'test']
             siteDetailCompositeService.list(map)
         }
+    }
+
+    /**
+     * Testcase for GET when description comes as null and it get mapped to code
+     */
+    @Test
+    void testGetSiteDetailWithNullDescription() {
+        def params = [max: '5']
+        List siteList = siteDetailCompositeService.list(params)
+        assertNotNull siteList
+        assertNotNull siteList.toString()
+        assertNotNull siteList
+        def site = siteDetailCompositeService.get(siteList[0].guid)
+        site.description = null
+        assertEquals site.description, site.code
     }
 
 }
