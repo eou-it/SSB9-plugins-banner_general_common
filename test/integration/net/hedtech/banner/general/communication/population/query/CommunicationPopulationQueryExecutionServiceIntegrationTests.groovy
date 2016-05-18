@@ -206,7 +206,7 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                lastCalculatedBy: "TTTTTTTTTT",
+                calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
                 sqlString: i_success_sqlStatement
         )
@@ -226,7 +226,7 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                lastCalculatedBy: "TTTTTTTTTT",
+                calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
                 sqlString: i_fail_sqlStatement
         )

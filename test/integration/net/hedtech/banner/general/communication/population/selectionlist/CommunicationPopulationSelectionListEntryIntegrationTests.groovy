@@ -161,7 +161,7 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                lastCalculatedBy: "TTTTTTTTTT",
+                calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
                 sqlString: "",
                 syntaxErrors: "TTTTTTTTTT",

@@ -3,8 +3,10 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
@@ -21,8 +23,6 @@ import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * A service for driving interaction with Communication population objects and their
@@ -339,7 +339,7 @@ class CommunicationPopulationCompositeService {
      * @param id the primary key of the population query
      * @param version the optimistic lock counter
      */
-    public CommunicationPopulationVersion calculatePopulationForUser( CommunicationPopulation population, String oracleName = SecurityContextHolder.context.authentication.principal.getOracleUserName() ) {
+    public CommunicationPopulationVersion calculatePopulationForUser( CommunicationPopulation population, String oracleName = getCurrentUserBannerId() ) {
         log.trace( "calculatePopulationForUser called" )
         assert( population.id )
         assert( oracleName )
@@ -350,7 +350,8 @@ class CommunicationPopulationCompositeService {
                 // if we decide to support this capability in the future, we should unschedule the quartz job
                 throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotRecalculatePopulationPendingExecution" )
             } else {
-                //TODO Check for not able to delete population version when a job using this population version is processing
+                //TODO: (1) Check for not able to delete population version when a job using this population version is processing
+
                 List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
                 //Delete the CommunicationPopulationVersionQueryAssociation
                 communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociations)
@@ -379,7 +380,7 @@ class CommunicationPopulationCompositeService {
 
 
     public CommunicationPopulationVersion calculatePopulationForGroupSend( CommunicationPopulation population, String oracleName ) {
-        CommunicationPopulationVersion populationVersion = createPopulationVersion(population, oracleName)
+        CommunicationPopulationVersion populationVersion = createPopulationVersion(population, AsynchronousBannerAuthenticationSpoofer.monitorOracleUserName)
         calculatePendingPopulationVersion(["populationVersionId": populationVersion.id])
     }
 
@@ -487,13 +488,14 @@ class CommunicationPopulationCompositeService {
     }
 
 
-    private CommunicationPopulationVersion createPopulationVersion(CommunicationPopulation population, String calculatedByOracleName, String jobId = null) {
+    private CommunicationPopulationVersion createPopulationVersion(CommunicationPopulation population, String createdByOracleName, String jobId = null) {
         CommunicationPopulationVersion populationVersion
         populationVersion = new CommunicationPopulationVersion()
         populationVersion.population = population
         populationVersion.status = CommunicationPopulationCalculationStatus.PENDING_EXECUTION
         populationVersion.jobId = jobId
-        populationVersion.calculatedBy = calculatedByOracleName
+        populationVersion.createdBy = createdByOracleName
+        populationVersion.calculatedBy = getCurrentUserBannerId()
         populationVersion = communicationPopulationVersionService.create(populationVersion)
         assert populationVersion.id
 
@@ -515,5 +517,17 @@ class CommunicationPopulationCompositeService {
         populationVersionQueryAssociation = communicationPopulationVersionQueryAssociationService.create(populationVersionQueryAssociation)
         assert populationVersionQueryAssociation.id
         return populationVersion
+    }
+
+    /**
+     * Returns the banner id of the current session in uppercase.
+     */
+    private String getCurrentUserBannerId() {
+        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
+        if (creatorId == null) {
+            def config = Holders.config
+            creatorId = config?.bannerSsbDataSource?.username
+        }
+        return creatorId.toUpperCase()
     }
 }

@@ -25,11 +25,11 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationListView.fetchAllByQueryIdUserId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.populationQueryId = :populationQueryId
-                    AND    upper(a.lastCalculatedBy) = upper(:userid) """),
+                    AND    upper(a.createdBy) = upper(:userid) """),
         @NamedQuery(name = "CommunicationPopulationListView.fetchAllByPopulationIdUserId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.id = :populationId
-                    AND    upper(a.lastCalculatedBy) = upper(:userid) """)
+                    AND    upper(a.createdBy) = upper(:userid) """)
 ])
 class CommunicationPopulationListView implements Serializable {
     /**
@@ -69,7 +69,13 @@ class CommunicationPopulationListView implements Serializable {
      * ID of user who created the Selection List
      */
     @Column(name = "CALCULATED_BY")
-    String lastCalculatedBy
+    String calculatedBy
+
+    /**
+     * ID of user who created the Selection List
+     */
+    @Column(name = "CREATOR_ID")
+    String createdBy
 
     /**
      * Last calculated count
@@ -142,7 +148,7 @@ class CommunicationPopulationListView implements Serializable {
     static constraints = {
         name(nullable: false)
         populationQueryId(nullable: false)
-        lastCalculatedBy(nullable: true, maxSize: 30)
+        calculatedBy(nullable: true, maxSize: 30)
         lastCalculatedTime(nullable: true)
     }
 
@@ -193,7 +199,7 @@ class CommunicationPopulationListView implements Serializable {
         def queryCriteria = CommunicationPopulationListView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             ilike("queryName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.queryName))
-            ilike("lastCalculatedBy", filterData?.params?.lastCalculatedBy)
+            ilike("createdBy", filterData?.params?.createdBy)
             order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
         }
         return results
@@ -204,7 +210,7 @@ class CommunicationPopulationListView implements Serializable {
         def queryCriteria = CommunicationPopulationListView.createCriteria()
         def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            eq("lastCalculatedBy",CommunicationCommonUtility.getUserOracleUserName().toLowerCase(), [ignoreCase: true])
+            eq("createdBy",CommunicationCommonUtility.getUserOracleUserName().toLowerCase(), [ignoreCase: true])
             gt("lastCalculatedCount",0L)
             and {
                 or {

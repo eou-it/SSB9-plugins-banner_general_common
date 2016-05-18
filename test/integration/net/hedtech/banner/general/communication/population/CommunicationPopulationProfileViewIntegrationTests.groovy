@@ -127,7 +127,7 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
                 // Required fields
                 // Nullable fields
                 name: popname,
-                lastCalculatedBy: "TTTTTTTTTT",
+                calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
                 status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
         )
