@@ -10,7 +10,7 @@ import net.hedtech.banner.general.system.Campus
  * Decorator for Site LDM (/base/domain/site/v1/site.json-schema)
  *
  */
-@EqualsAndHashCode(includeFields = true)
+@EqualsAndHashCode(includeFields = true, excludes = 'metadata,campus,buildings')
 class SiteDetail {
 
     @Delegate
