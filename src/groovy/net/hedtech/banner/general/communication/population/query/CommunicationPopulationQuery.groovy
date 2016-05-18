@@ -131,6 +131,17 @@ class CommunicationPopulationQuery implements Serializable {
     @Enumerated(EnumType.STRING)
     CommunicationPopulationQueryType type = CommunicationPopulationQueryType.SQL_STATEMENT
 
+    @Column(name = "GCBQURY_APPLICATION_TERM")
+    String applicationTerm
+
+    @Column(name = "GCBQURY_SELECTION_TERM")
+    String selectionTerm
+
+    @Column(name = "GCBQURY_CREATOR_ID_TERM")
+    String creatorIdTerm
+
+    @Column(name = "GCBQURY_USER_ID_TERM")
+    String userIdTerm
 
     static constraints = {
         folder(nullable: false)
@@ -144,6 +155,10 @@ class CommunicationPopulationQuery implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         type(nullable: false)
+        applicationTerm(nullable: true, maxSize: 30)
+        selectionTerm(nullable: true, maxSize: 30)
+        creatorIdTerm(nullable: true, maxSize: 30)
+        userIdTerm(nullable: true, maxSize: 30)
     }
 
 

@@ -22,8 +22,8 @@ import java.sql.SQLException
  * An authentication provider for batch threads that authorize a user using behind a batch job thread.
  */
 public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationProvider {
-    private static
-    final Logger log = Logger.getLogger("net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider")
+    private static final Logger log = Logger.getLogger("net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider")
+    public static final monitorOracleUserName = 'COMMMGR'
 
     def dataSource  // injected by Spring
     MultiEntityProcessingService multiEntityProcessingService
@@ -39,7 +39,6 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
 
         if (!SecurityContextHolder.getContext().getAuthentication()) {
             FormContext.set(['CMQUERYEXECUTE'])
-            String monitorOracleUserName = 'COMMMGR'
             Authentication auth
             try {
                 auth = authenticate(monitorOracleUserName)
