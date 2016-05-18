@@ -53,5 +53,6 @@ class GeneralCommonConstants {
     static final String PERSONS_LDM_NAME = 'persons'
     static final String QUERY_PARAM_LDM_NAME = 'ldmName'
     static final String PERSONS_GUID_NAME = 'guid'
+    static final String NON_PERSONS_LDM_NAME = 'non-persons'
 
 }

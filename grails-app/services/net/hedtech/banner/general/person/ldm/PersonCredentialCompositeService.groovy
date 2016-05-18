@@ -27,9 +27,9 @@ class PersonCredentialCompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     def get(id) {
-        log.debug "getById:Begin:$id"
+        log.trace "getById:Begin:$id"
         def persons = [:]
-        def personDetail = fetchPersons(["guid": id])
+        Object[] personDetail = fetchPersons(["guid": id])
         if (!personDetail) {
             throw new ApplicationException("Person", new NotFoundException())
         }
@@ -47,9 +47,9 @@ class PersonCredentialCompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     def list(Map params) {
-        log.debug "list:Begin:$params"
+        log.trace "list:Begin:$params"
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List<Objects[]> personDetailsList = fetchPersons(params)
+        List<Object[]> personDetailsList = fetchPersons(params)
         def decorators = [:]
         List pidms = []
         personDetailsList?.each {
@@ -69,7 +69,7 @@ class PersonCredentialCompositeService extends LdmService {
      * @param params
      */
     private def fetchPersons(Map params, boolean count = false) {
-        log.debug "buildPersonCredentials: Begin: $params"
+        log.trace "buildPersonCredentials: Begin: $params"
         def result
         String hql
         if (count) {
@@ -81,16 +81,20 @@ class PersonCredentialCompositeService extends LdmService {
         if (params?.containsKey("guid")) {
             hql += ''' and b.guid = :guid '''
         }
+        log.debug "$hql"
         PersonIdentificationNameCurrent.withSession { session ->
             def query = session.createQuery(hql).
                     setString(GeneralCommonConstants.QUERY_PARAM_LDM_NAME, GeneralCommonConstants.PERSONS_LDM_NAME)
             if (params?.containsKey("guid")) {
                 result = query.setString(GeneralCommonConstants.PERSONS_GUID_NAME, params.guid).uniqueResult()
+                log.debug "query returned $result"
             } else {
                 if (count) {
                     result = query.uniqueResult()
+                    log.debug "query returned $result"
                 } else {
                     result = query.setMaxResults(params?.max as Integer).setFirstResult((params?.offset ?: '0') as Integer).list()
+                    log.debug "query returned ${result.size()} rows"
                 }
             }
 
