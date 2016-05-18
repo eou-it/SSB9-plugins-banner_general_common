@@ -10,6 +10,8 @@ class PersonV6 {
 
     String guid
     def privacyStatus = [:]
-    def names = []
+    List<NameV6> names = []
+    CitizenshipStatusV6 citizenshipStatus
+    VisaStatusV6 visaStatus
 
 }

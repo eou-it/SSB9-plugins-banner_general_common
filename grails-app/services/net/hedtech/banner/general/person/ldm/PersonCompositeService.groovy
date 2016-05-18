@@ -278,14 +278,8 @@ class PersonCompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     def count(Map params) {
-        log.trace "count:Begin"
-        log.debug "Request parameters: ${params}"
-        int total = 0
-
-        total = personV6CompositeService.count(params)
-
-        log.trace "count:End: $total"
-        return total
+        log.trace "count: Begin: Request parameters: ${params}"
+        return personV6CompositeService.count(params)
     }
 
 

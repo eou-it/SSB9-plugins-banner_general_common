@@ -51,7 +51,7 @@ class PersonV6CompositeService extends LdmService {
         }
 
         List<Integer> pidms
-        int totalCount = 0
+        def totalCount = 0
 
         if (params.role) {
             String role = params.role?.trim()?.toLowerCase()
@@ -74,7 +74,7 @@ class PersonV6CompositeService extends LdmService {
         def pidmToGuidMap = fetchPersonGuids(personCurrentEntities)
         def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
 
-        return createDecorators(personCurrentEntities, pidmToGuidMap, pidmToPersonBaseMap)
+        return createV6Decorators(personCurrentEntities, pidmToGuidMap, pidmToPersonBaseMap)
     }
 
     /**
@@ -164,34 +164,40 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private List<PersonV6> createDecorators(List<PersonIdentificationNameCurrent> entities,
-                                            def pidmToGuidMap, def pidmToPersonBaseMap) {
+    private List<PersonV6> createV6Decorators(List<PersonIdentificationNameCurrent> entities,
+                                              def pidmToGuidMap, def pidmToPersonBaseMap) {
         List<PersonV6> decorators = []
         if (entities) {
-            PersonV6 decorator
-            PersonBasicPersonBase personBase
-            NameV6 nameV6
             entities?.each {
-                decorator = new PersonV6()
-                // GUID
-                decorator.guid = pidmToGuidMap.get(it.pidm)
+                decorators.add(createV6Decorator(it, pidmToGuidMap.get(it.pidm), pidmToPersonBaseMap.get(it.pidm)))
+            }
+        }
+        return decorators
+    }
+
+
+    private PersonV6 createV6Decorator(PersonIdentificationNameCurrent personCurrent, String guid, PersonBasicPersonBase personBase) {
+        PersonV6 decorator
+        if (personCurrent) {
+            decorator = new PersonV6()
+            // GUID
+            decorator.guid = guid
+            if (personBase) {
                 // Privacy Status
-                personBase = pidmToPersonBaseMap.get(it.pidm)
                 if (personBase.confidIndicator == "Y") {
                     decorator.privacyStatus = ["privacyCategory": "restricted"]
                 } else {
                     decorator.privacyStatus = ["privacyCategory": "unrestricted"]
                 }
-                // Names
-                nameV6 = new NameV6()
-                nameV6.type = ["category": "personal"]
-                nameV6.firstName = it.firstName
-                nameV6.lastName = it.lastName
-                decorator.names << nameV6
-                decorators.add(decorator)
             }
+            // Names
+            NameV6 nameV6 = new NameV6()
+            nameV6.type = ["category": "personal"]
+            nameV6.firstName = personCurrent.firstName
+            nameV6.lastName = personCurrent.lastName
+            decorator.names << nameV6
         }
-        return decorators
+        return decorator
     }
 
 
