@@ -51,7 +51,7 @@ class PersonV6CompositeService extends LdmService {
         }
 
         List<Integer> pidms
-        def totalCount = 0
+        int totalCount = 0
 
         if (params.role) {
             String role = params.role?.trim()?.toLowerCase()
