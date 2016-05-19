@@ -5,11 +5,13 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
+import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.v6.NameV6
 import net.hedtech.banner.general.system.ldm.v6.PersonV6
 import net.hedtech.banner.query.DynamicFinder
@@ -17,14 +19,17 @@ import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
+/**
+ * RESTful APIs for Ellucian Ethos Data Model "persons" V6.
+ */
 @Transactional
 class PersonV6CompositeService extends LdmService {
 
-    static final String LDM_NAME = 'persons'
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
 
     UserRoleCompositeService userRoleCompositeService
+    CitizenshipStatusCompositeService citizenshipStatusCompositeService
 
     /**
      * GET /api/persons
@@ -71,10 +76,8 @@ class PersonV6CompositeService extends LdmService {
         injectPropertyIntoParams(params, "count", totalCount)
 
         List<PersonIdentificationNameCurrent> personCurrentEntities = fetchPersonCurrentByPIDMs(pidms, params.sort, params.order)
-        def pidmToGuidMap = fetchPersonGuids(personCurrentEntities)
-        def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
 
-        return createV6Decorators(personCurrentEntities, pidmToGuidMap, pidmToPersonBaseMap)
+        return createV6Decorators(personCurrentEntities)
     }
 
     /**
@@ -97,7 +100,8 @@ class PersonV6CompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     def get(String guid) {
-
+        PersonIdentificationNameCurrent personIdentificationNameCurrent = getPersonIdentificationNameCurrentByGUID(guid)
+        return createV6Decorators([personIdentificationNameCurrent])[0]
     }
 
     /**
@@ -116,6 +120,17 @@ class PersonV6CompositeService extends LdmService {
      */
     def update(Map content) {
 
+    }
+
+
+    PersonIdentificationNameCurrent getPersonIdentificationNameCurrentByGUID(String guid) {
+        GlobalUniqueIdentifier entity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(GeneralCommonConstants.PERSONS_LDM_NAME, guid)
+        if (!entity) {
+            throw new ApplicationException("Person", new NotFoundException())
+        }
+        PersonIdentificationNameCurrent personIdentificationNameCurrent =
+                PersonIdentificationNameCurrent.fetchByPidm(entity.domainKey?.toInteger())
+        return personIdentificationNameCurrent
     }
 
 
@@ -141,12 +156,9 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private def fetchPersonGuids(List<PersonIdentificationNameCurrent> personCurrentEntities) {
+    private def fetchPersonGuids(List<Long> personSurrogateIds) {
         def pidmToGuidMap = [:]
-        List<Long> surrogateIds = personCurrentEntities?.collect {
-            it.id
-        }
-        List<GlobalUniqueIdentifier> globalUniqueIdentifiers = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(GeneralCommonConstants.PERSONS_LDM_NAME, surrogateIds)
+        List<GlobalUniqueIdentifier> globalUniqueIdentifiers = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(GeneralCommonConstants.PERSONS_LDM_NAME, personSurrogateIds)
         globalUniqueIdentifiers?.each {
             pidmToGuidMap.put(it.domainKey.toInteger(), it.guid)
         }
@@ -164,30 +176,64 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private List<PersonV6> createV6Decorators(List<PersonIdentificationNameCurrent> entities,
-                                              def pidmToGuidMap, def pidmToPersonBaseMap) {
+    private List<PersonV6> createV6Decorators(List<PersonIdentificationNameCurrent> entities) {
+        List<Long> personSurrogateIds = entities?.collect {
+            it.id
+        }
+        List<Integer> pidms = entities?.collect {
+            it.pidm
+        }
+
+        // Get GUIDs for persons
+        def pidmToGuidMap = fetchPersonGuids(personSurrogateIds)
+        // Get SPBPERS records for persons
+        def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
+        // Get GUIDs for CitizenTypes
+        List<String> citizenTypeCodes = pidmToPersonBaseMap?.values()?.collect {
+            it.citizenType?.code
+        }
+        log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
+        Map<String, String> ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
+        log.debug "Got ${ctCodeToGuidMap?.size()} GUIDs for given CitizenType codes"
+
         List<PersonV6> decorators = []
         if (entities) {
+            def otherParams
             entities?.each {
-                decorators.add(createV6Decorator(it, pidmToGuidMap.get(it.pidm), pidmToPersonBaseMap.get(it.pidm)))
+                otherParams = [:]
+                otherParams << ["personGuid": pidmToGuidMap.get(it.pidm)]
+                PersonBasicPersonBase personBase = pidmToPersonBaseMap.get(it.pidm)
+                if (personBase) {
+                    otherParams << ["personBase": personBase]
+                    if (personBase.citizenType) {
+                        otherParams << ["citizenTypeGuid": ctCodeToGuidMap.get(personBase.citizenType.code)]
+                    }
+                }
+                decorators.add(createV6Decorator(it, otherParams))
             }
         }
         return decorators
     }
 
 
-    private PersonV6 createV6Decorator(PersonIdentificationNameCurrent personCurrent, String guid, PersonBasicPersonBase personBase) {
+    private PersonV6 createV6Decorator(PersonIdentificationNameCurrent personCurrent, def otherParams) {
         PersonV6 decorator
         if (personCurrent) {
             decorator = new PersonV6()
             // GUID
-            decorator.guid = guid
+            decorator.guid = otherParams["personGuid"]
+            PersonBasicPersonBase personBase = otherParams["personBase"]
             if (personBase) {
-                // Privacy Status
+                // privacyStatus
                 if (personBase.confidIndicator == "Y") {
-                    decorator.privacyStatus = ["privacyCategory": "restricted"]
+                    decorator.privacyStatus << ["privacyCategory": "restricted"]
                 } else {
-                    decorator.privacyStatus = ["privacyCategory": "unrestricted"]
+                    decorator.privacyStatus << ["privacyCategory": "unrestricted"]
+                }
+                // citizenshipStatus
+                if (personBase.citizenType) {
+                    decorator.citizenshipStatus.category = citizenshipStatusCompositeService.getCitizenshipStatusCategory(personBase.citizenType.citizenIndicator)
+                    decorator.citizenshipStatus.detail << ["id": otherParams["citizenTypeGuid"]]
                 }
             }
             // Names
