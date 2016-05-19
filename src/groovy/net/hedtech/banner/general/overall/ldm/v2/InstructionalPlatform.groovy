@@ -10,7 +10,7 @@ import net.hedtech.banner.general.system.ldm.v1.Metadata
 /**
  * Decorator for Instructional Platforms HeDM
  */
-@EqualsAndHashCode(includeFields = true)
+//@EqualsAndHashCode(includeFields = true)
 class InstructionalPlatform {
 
     @Delegate
@@ -23,6 +23,27 @@ class InstructionalPlatform {
         this.integrationPartnerSystemRule = integrationPartnerSystemRule
         this.metadata = metadata
         this.guid = guid
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof InstructionalPlatform)) return false
+
+        InstructionalPlatform that = (InstructionalPlatform) o
+
+        if (guid != that.guid) return false
+        if (integrationPartnerSystemRule != that.integrationPartnerSystemRule) return false
+        if (metadata != that.metadata) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = integrationPartnerSystemRule.hashCode()
+        result = 31 * result + metadata.hashCode()
+        result = 31 * result + guid.hashCode()
+        return result
     }
 
     @Override
