@@ -192,9 +192,11 @@ class PersonV6CompositeService extends LdmService {
         List<String> citizenTypeCodes = pidmToPersonBaseMap?.values()?.collect {
             it.citizenType?.code
         }
-        log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
-        Map<String, String> ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
-        log.debug "Got ${ctCodeToGuidMap?.size()} GUIDs for given CitizenType codes"
+        if (citizenTypeCodes) {
+            log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
+            Map<String, String> ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
+            log.debug "Got ${ctCodeToGuidMap?.size()} GUIDs for given CitizenType codes"
+        }
 
         List<PersonV6> decorators = []
         if (entities) {
@@ -234,6 +236,8 @@ class PersonV6CompositeService extends LdmService {
                 if (personBase.citizenType) {
                     decorator.citizenshipStatus.category = citizenshipStatusCompositeService.getCitizenshipStatusCategory(personBase.citizenType.citizenIndicator)
                     decorator.citizenshipStatus.detail << ["id": otherParams["citizenTypeGuid"]]
+                } else {
+                    decorator.citizenshipStatus = [:]
                 }
             }
             // Names
