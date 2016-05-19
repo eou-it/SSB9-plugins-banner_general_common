@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -144,6 +144,33 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
         catch (ApplicationException ae) {
             assertApplicationException ae, "readonlyFieldsCannotBeModified"
         }
+    }
+
+    @Test
+    void testFetchAllByPidmInList() {
+        List<String> pidms = VisaInformation.findAll(max: 10).pidm
+        List<VisaInformation> visaInformationList = visaInformationService.fetchAllByPidmInList([pidms.first(), pidms.last()])
+        visaInformationList.each {
+            assertTrue("pidm should had been between: ${pidms.first()} & ${pidms.last()}, but is ${it.pidm}",
+                    (pidms.first().equals(it.pidm) || pidms.last().equals(it.pidm)))
+        }
+
+    }
+
+    @Test
+    void testFetchAllByPidmInListNullList() {
+        List<VisaInformation> visaInformationList = visaInformationService.fetchAllByPidmInList(null)
+        assertNotNull visaInformationList
+        assertEquals(0, visaInformationList.size())
+
+    }
+
+    @Test
+    void testFetchAllByPidmInListEmptyList() {
+        List<VisaInformation> visaInformationList = visaInformationService.fetchAllByPidmInList([])
+        assertNotNull visaInformationList
+        assertEquals(0, visaInformationList.size())
+
     }
 
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -256,6 +256,33 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate - 1).size()
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate + 1).size()
 	}
+
+    @Test
+    void testFetchAllByPidmInList() {
+        List<String> pidms = VisaInformation.findAll(max: 10).pidm
+        List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList([pidms.first(), pidms.last()])
+        visaInformationList.each {
+            assertTrue("pidm should had been between: ${pidms.first()} & ${pidms.last()}, but is ${it.pidm}",
+                    (pidms.first().equals(it.pidm) || pidms.last().equals(it.pidm)))
+        }
+
+    }
+
+    @Test
+    void testFetchAllByPidmInListNullList() {
+        List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList(null)
+        assertNotNull visaInformationList
+        assertEquals(0, visaInformationList.size())
+
+    }
+
+    @Test
+    void testFetchAllByPidmInListEmptyList() {
+        List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList([])
+        assertNotNull visaInformationList
+        assertEquals(0, visaInformationList.size())
+
+    }
 
 
     private def newValidForCreateVisaInformation() {
