@@ -262,7 +262,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
         List<String> pidms = VisaInformation.findAll(max: 10).pidm
         List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList([pidms.first(), pidms.last()])
         visaInformationList.each {
-            assertTrue("pidm should had been between: ${pidms.first()} & ${pidms.last()}, but is ${it.pidm}",
+            assertTrue("pidm should be: ${pidms.first()} or ${pidms.last()}, but is ${it.pidm}",
                     (pidms.first().equals(it.pidm) || pidms.last().equals(it.pidm)))
         }
 
