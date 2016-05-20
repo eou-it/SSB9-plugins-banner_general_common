@@ -4,10 +4,12 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
+import net.hedtech.banner.general.system.ldm.v6.PersonV6
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
@@ -71,19 +73,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertFalse o_success_persons.isEmpty()
         assertNotNull o_success_persons[0].guid
 
-        GlobalUniqueIdentifier globalUniqueIdentifier =
-                globalUniqueIdentifierService.fetchByLdmNameAndGuid(PersonV6CompositeService.LDM_NAME,o_success_persons[0].guid)
-        List pidms = [globalUniqueIdentifier.domainKey]
-        Map returnList
-        returnList = userRoleCompositeService.fetchAllRolesByPidmInList(pidms, true)
-        assertNotNull returnList
-        assertTrue returnList.size() > 0
-        List<RoleDetail> personRoleDetails = returnList.get(Integer.valueOf(pidms[0]))
-        List personRoles = []
-        personRoleDetails.each { roles ->
-            personRoles.add(roles.role)
-        }
-
+        List personRoles = getPersonRoles(o_success_persons[0])
         assertTrue personRoles.contains('Faculty')
     }
 
@@ -99,19 +89,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertFalse o_success_persons.isEmpty()
         assertNotNull o_success_persons[0].guid
 
-        GlobalUniqueIdentifier globalUniqueIdentifier =
-                globalUniqueIdentifierService.fetchByLdmNameAndGuid(PersonV6CompositeService.LDM_NAME,o_success_persons[0].guid)
-        List pidms = [globalUniqueIdentifier.domainKey]
-        Map returnList
-        returnList = userRoleCompositeService.fetchAllRolesByPidmInList(pidms, true)
-        assertNotNull returnList
-        assertTrue returnList.size() > 0
-        List<RoleDetail> personRoleDetails = returnList.get(Integer.valueOf(pidms[0]))
-        List personRoles = []
-        personRoleDetails.each { roles ->
-            personRoles.add(roles.role)
-        }
-
+        List personRoles = getPersonRoles(o_success_persons[0])
         assertTrue personRoles.contains('Student')
     }
 
@@ -147,6 +125,64 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             it.roles.role == "Student"
         }
         */
+    }
+
+
+    @Test
+    void testGetValid(){
+        def params = [role: "student", max: '5']
+
+        def persons = personV6CompositeService.list(params)
+        assertNotNull persons
+        assertEquals params.max, persons.size().toString()
+
+        def person = personV6CompositeService.get(persons[0].guid)
+        assertNotNull person
+        assertEquals persons[0].guid, person.guid
+    }
+
+
+    @Test
+    void testListSortByFirstNameASC() {
+        def params = [role: "student", sort: "firstName", order: "ASC"]
+
+        def persons = personV6CompositeService.list(params)
+        assertNotNull persons
+        assertListIsSortedOnField(persons, params.sort, params.order)
+    }
+
+
+    private void assertListIsSortedOnField(def list, String field, String sortOrder = "ASC") {
+        def prevListItemVal
+        list.each {
+            String curListItemVal = it['names'][0].getAt(field)
+            if (!prevListItemVal) {
+                prevListItemVal = curListItemVal
+            }
+            if (sortOrder == "ASC") {
+                assertTrue prevListItemVal.compareTo(curListItemVal) < 0 || prevListItemVal.compareTo(curListItemVal) == 0
+            } else {
+                assertTrue prevListItemVal.compareTo(curListItemVal) > 0 || prevListItemVal.compareTo(curListItemVal) == 0
+            }
+            prevListItemVal = curListItemVal
+        }
+    }
+
+
+    private List getPersonRoles(PersonV6 o_success_person) {
+        GlobalUniqueIdentifier globalUniqueIdentifier =
+                globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralCommonConstants.PERSONS_LDM_NAME, o_success_person.guid)
+        List pidms = [globalUniqueIdentifier.domainKey]
+        Map returnList
+        returnList = userRoleCompositeService.fetchAllRolesByPidmInList(pidms, true)
+        assertNotNull returnList
+        assertTrue returnList.size() > 0
+        List<RoleDetail> personRoleDetails = returnList.get(Integer.valueOf(pidms[0]))
+        List personRoles = []
+        personRoleDetails.each { roles ->
+            personRoles.add(roles.role)
+        }
+        personRoles
     }
 
 
