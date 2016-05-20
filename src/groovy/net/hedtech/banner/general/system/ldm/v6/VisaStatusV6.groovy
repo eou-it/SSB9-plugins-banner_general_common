@@ -10,7 +10,7 @@ package net.hedtech.banner.general.system.ldm.v6
 class VisaStatusV6 {
 
     String category
-    def detail = [:]
+    def detail
     String status
     String startOn
     String endOn

@@ -9,7 +9,7 @@ package net.hedtech.banner.general.system.ldm.v6
  */
 class NameV6 {
 
-    def type = [:]
+    def type
     String fullName
     String firstName
     String lastName

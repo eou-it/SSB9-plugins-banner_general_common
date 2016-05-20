@@ -9,9 +9,9 @@ package net.hedtech.banner.general.system.ldm.v6
 class PersonV6 {
 
     String guid
-    def privacyStatus = [:]
-    List<NameV6> names = []
-    CitizenshipStatusV6 citizenshipStatus = [:]
+    def privacyStatus
+    List<NameV6> names
+    CitizenshipStatusV6 citizenshipStatus
     VisaStatusV6 visaStatus
 
 }

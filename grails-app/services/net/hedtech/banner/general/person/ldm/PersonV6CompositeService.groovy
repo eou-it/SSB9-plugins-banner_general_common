@@ -7,11 +7,13 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.NameV6
 import net.hedtech.banner.general.system.ldm.v6.PersonV6
 import net.hedtech.banner.query.DynamicFinder
@@ -30,6 +32,7 @@ class PersonV6CompositeService extends LdmService {
 
     UserRoleCompositeService userRoleCompositeService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
+    VisaInformationService visaInformationService
 
     /**
      * GET /api/persons
@@ -192,9 +195,10 @@ class PersonV6CompositeService extends LdmService {
         List<String> citizenTypeCodes = pidmToPersonBaseMap?.values()?.collect {
             it.citizenType?.code
         }
+        Map<String, String> ctCodeToGuidMap = [:]
         if (citizenTypeCodes) {
             log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
-            Map<String, String> ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
+            ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
             log.debug "Got ${ctCodeToGuidMap?.size()} GUIDs for given CitizenType codes"
         }
 
@@ -228,19 +232,19 @@ class PersonV6CompositeService extends LdmService {
             if (personBase) {
                 // privacyStatus
                 if (personBase.confidIndicator == "Y") {
-                    decorator.privacyStatus << ["privacyCategory": "restricted"]
+                    decorator.privacyStatus = ["privacyCategory": "restricted"]
                 } else {
-                    decorator.privacyStatus << ["privacyCategory": "unrestricted"]
+                    decorator.privacyStatus = ["privacyCategory": "unrestricted"]
                 }
                 // citizenshipStatus
                 if (personBase.citizenType) {
+                    decorator.citizenshipStatus = new CitizenshipStatusV6()
                     decorator.citizenshipStatus.category = citizenshipStatusCompositeService.getCitizenshipStatusCategory(personBase.citizenType.citizenIndicator)
-                    decorator.citizenshipStatus.detail << ["id": otherParams["citizenTypeGuid"]]
-                } else {
-                    decorator.citizenshipStatus = [:]
+                    decorator.citizenshipStatus.detail = ["id": otherParams["citizenTypeGuid"]]
                 }
             }
             // Names
+            decorator.names = []
             NameV6 nameV6 = new NameV6()
             nameV6.type = ["category": "personal"]
             nameV6.firstName = personCurrent.firstName

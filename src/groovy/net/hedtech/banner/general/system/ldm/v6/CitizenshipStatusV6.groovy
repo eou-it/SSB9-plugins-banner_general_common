@@ -10,6 +10,6 @@ package net.hedtech.banner.general.system.ldm.v6
 class CitizenshipStatusV6 {
 
     String category
-    def detail = [:]
+    def detail
 
 }
