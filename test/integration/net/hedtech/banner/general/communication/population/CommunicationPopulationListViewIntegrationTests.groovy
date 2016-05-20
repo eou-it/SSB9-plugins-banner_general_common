@@ -93,7 +93,7 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                sqlString: "",
+                queryString: "",
         )
 
         return populationQuery

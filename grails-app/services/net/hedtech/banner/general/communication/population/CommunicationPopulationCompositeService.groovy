@@ -232,7 +232,7 @@ class CommunicationPopulationCompositeService {
 //                                id            : Long.valueOf(populationId),
 //                                version       : Long.valueOf(version),
 //                                changesPending: Boolean.toString(false),
-//                                sqlString     : latestPublishedVersion.sqlString
+//                                queryString     : latestPublishedVersion.queryString
 //                        ]
 //                        communicationPopulationQueryService.update(queryAsMap)
 //                    }
@@ -250,7 +250,7 @@ class CommunicationPopulationCompositeService {
 //                            id             : Long.valueOf(populationId),
 //                            version        : Long.valueOf(version),
 //                            changesPending : Boolean.toString(false),
-//                            sqlString      : latestPublishedVersion.sqlString
+//                            queryString      : latestPublishedVersion.queryString
 //                    ]
 //                    communicationPopulationQueryService.update(queryAsMap)
 //                    retValue = true
@@ -298,11 +298,11 @@ class CommunicationPopulationCompositeService {
             )
         }
 
-//        if (!equals( query.sqlString, (String) queryAsMap.sqlString )) {
+//        if (!equals( query.queryString, (String) queryAsMap.queryString )) {
 //            queryAsMap.changesPending = true;
 //        }
 
-//        validateSqlStringForSaving( (String) queryAsMap.sqlString )
+//        validateSqlStringForSaving( (String) queryAsMap.queryString )
 
         return (CommunicationPopulation) communicationPopulationService.update( populationAsMap )
     }
@@ -457,17 +457,17 @@ class CommunicationPopulationCompositeService {
 
 //    /**
 //     * Checks the sql if it is valid.
-//     * @param sqlString the sql content
-//     * @return a detail result describing the if the sqlString is valid or not
-//     * @throws ApplicationException if the sqlString is so offensive as to prevent persisting
+//     * @param queryString the sql content
+//     * @return a detail result describing the if the queryString is valid or not
+//     * @throws ApplicationException if the queryString is so offensive as to prevent persisting
 //     */
-//    private CommunicationPopulationQueryParseResult validateSqlStringForSaving( String sqlString ) {
+//    private CommunicationPopulationQueryParseResult validateSqlStringForSaving( String queryString ) {
 //        //check for sql injection and if it returns true then throw invalid exception
-//        if (CommunicationCommonUtility.sqlStatementNotAllowed( sqlString, false )) {
+//        if (CommunicationCommonUtility.sqlStatementNotAllowed( queryString, false )) {
 //            throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
 //        }
 //
-//        return communicationPopulationQueryStatementParseService.parse( sqlString )
+//        return communicationPopulationQueryStatementParseService.parse( queryString )
 //    }
 
     /**

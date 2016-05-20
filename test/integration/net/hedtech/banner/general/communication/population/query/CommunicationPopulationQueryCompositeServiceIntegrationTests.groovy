@@ -45,7 +45,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
             name: "testCreatePopulationQuery",
             description: "testCreatePopulationQuery description",
             folder: testFolder,
-            sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+            queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertNotNull populationQuery?.id
@@ -53,7 +53,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         assertEquals getUser(), populationQuery.createdBy
         assertEquals "testCreatePopulationQuery", populationQuery.name
         assertEquals "testCreatePopulationQuery description", populationQuery.description
-        assertEquals "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", populationQuery.sqlString
+        assertEquals "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", populationQuery.queryString
     }
 
     @Test
@@ -62,7 +62,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
             name: "testUpdatePopulationQuery",
             description: "testUpdatePopulationQuery description",
             folder: testFolder,
-            sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+            queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertNotNull( populationQuery.id )
@@ -73,7 +73,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
             name: "testUpdatePopulationQuery2",
             description: "testUpdatePopulationQuery description2",
             folder: populationQuery.folder,
-            sqlString: "select pidm from spriden",
+            queryString: "select pidm from spriden",
             version: populationQuery.version
         ]
         populationQuery = communicationPopulationQueryCompositeService.updatePopulationQuery( queryAsMap )
@@ -81,7 +81,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         assertTrue( populationQuery.version > 0 )
         assertEquals "testUpdatePopulationQuery2", populationQuery.name
         assertEquals "testUpdatePopulationQuery description2", populationQuery.description
-        assertEquals "select pidm from spriden", populationQuery.sqlString
+        assertEquals "select pidm from spriden", populationQuery.queryString
     }
 
 
@@ -90,7 +90,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
-                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
@@ -100,7 +100,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         assertEquals( 1, queryVersionList.size() )
         CommunicationPopulationQueryVersion fetchedQueryVersion = queryVersionList.get( 0 )
         assertEquals( queryVersion.id,fetchedQueryVersion.id )
-        assertEquals( "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", fetchedQueryVersion.sqlString )
+        assertEquals( "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null", fetchedQueryVersion.queryString )
         assertNotNull( fetchedQueryVersion.getCreateDate() )
     }
 
@@ -109,7 +109,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
-                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
@@ -127,7 +127,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
-                sqlString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
@@ -143,7 +143,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
-                sqlString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
@@ -164,7 +164,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
-                sqlString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         assertTrue( populationQuery.changesPending )
@@ -173,7 +173,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
         Map queryAsMap = [
                 id: populationQuery.id,
-                sqlString: "select spriden_pidm from spriden where rownum < 3 and spriden_change_ind is null",
+                queryString: "select spriden_pidm from spriden where rownum < 3 and spriden_change_ind is null",
                 version: populationQuery.version
         ]
         populationQuery = communicationPopulationQueryCompositeService.updatePopulationQuery(queryAsMap)
@@ -182,7 +182,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         List queryVersionList = CommunicationPopulationQueryVersion.findByQueryId( populationQuery.id )
         assertEquals(1, queryVersionList.size())
         CommunicationPopulationQuery populationQuery1 = CommunicationPopulationQuery.fetchById(populationQuery.id)
-        assertEquals "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null", populationQuery1.sqlString
+        assertEquals "select spriden_pidm from spriden where rownum < 2 and spriden_change_ind is null", populationQuery1.queryString
     }
 
     @Test
@@ -191,7 +191,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
                 name: "testCreatePopulationQuery",
                 description: "testCreatePopulationQuery description",
                 folder: testFolder,
-                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
 

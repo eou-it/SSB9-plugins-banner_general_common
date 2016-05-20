@@ -35,7 +35,7 @@ class CommunicationPopulationQueryExecutionService {
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
         def populationQuery = communicationPopulationQueryService.get(populationQueryId)
 
-        populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.sqlString, false)
+        populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.queryString, false)
         return populationQueryParseResult
     }
 
@@ -134,7 +134,7 @@ class CommunicationPopulationQueryExecutionService {
 
             //make sure the sql statement only selects one value
 
-            Matcher matcher = multipattern.matcher(queryVersion.sqlString.toUpperCase());
+            Matcher matcher = multipattern.matcher(queryVersion.queryString.toUpperCase());
             while (matcher.find()) {
                 if (matcher.group(1).contains(",")) {
                     throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryHasMultiple@@")

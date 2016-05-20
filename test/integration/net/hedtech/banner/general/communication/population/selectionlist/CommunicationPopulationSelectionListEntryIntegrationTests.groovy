@@ -163,7 +163,7 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
                 description: "TTTTTTTTTT",
                 calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
-                sqlString: "",
+                queryString: "",
                 syntaxErrors: "TTTTTTTTTT",
         )
 

@@ -30,7 +30,7 @@ class CommunicationPopulationQueryCompositeService {
         assert( query.id == null )
 
         query.changesPending = true;
-        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.sqlString )
+        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.queryString )
         return (CommunicationPopulationQuery) communicationPopulationQueryService.create( query )
     }
 
@@ -125,7 +125,7 @@ class CommunicationPopulationQueryCompositeService {
                                 id            : Long.valueOf(queryId),
                                 version       : Long.valueOf(version),
                                 changesPending: false,
-                                sqlString     : latestPublishedVersion.sqlString
+                                queryString     : latestPublishedVersion.queryString
                         ]
                         communicationPopulationQueryService.update(queryAsMap)
                     }
@@ -143,7 +143,7 @@ class CommunicationPopulationQueryCompositeService {
                             id             : Long.valueOf(queryId),
                             version        : Long.valueOf(version),
                             changesPending : false,
-                            sqlString      : latestPublishedVersion.sqlString
+                            queryString      : latestPublishedVersion.queryString
                     ]
                     communicationPopulationQueryService.update(queryAsMap)
                     retValue = true
@@ -191,11 +191,11 @@ class CommunicationPopulationQueryCompositeService {
             )
         }
 
-        if (!equals( query.sqlString, (String) queryAsMap.sqlString )) {
+        if (!equals( query.queryString, (String) queryAsMap.queryString )) {
             queryAsMap.changesPending = true;
         }
 
-        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( (String) queryAsMap.sqlString )
+        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( (String) queryAsMap.queryString )
 
         return (CommunicationPopulationQuery) communicationPopulationQueryService.update( queryAsMap )
     }
@@ -239,11 +239,11 @@ class CommunicationPopulationQueryCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQuery.class, "noChangesToPublish" )
         }
 
-        if (!query.sqlString || query.sqlString.trim().length() == 0) {
+        if (!query.queryString || query.queryString.trim().length() == 0) {
             throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
         }
 
-        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.sqlString )
+        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.queryString )
         if (!parseResult.isValid()) {
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
         }
@@ -253,7 +253,7 @@ class CommunicationPopulationQueryCompositeService {
 
         CommunicationPopulationQueryVersion queryVersion = new CommunicationPopulationQueryVersion()
         queryVersion.query = query
-        queryVersion.sqlString = query.sqlString
+        queryVersion.queryString = query.queryString
         queryVersion = communicationPopulationQueryVersionService.create( [ domainModel: queryVersion ] )
         return queryVersion
     }
@@ -277,17 +277,17 @@ class CommunicationPopulationQueryCompositeService {
 
     /**
      * Checks the sql if it is valid.
-     * @param sqlString the sql content
-     * @return a detail result describing the if the sqlString is valid or not
-     * @throws ApplicationException if the sqlString is so offensive as to prevent persisting
+     * @param queryString the sql content
+     * @return a detail result describing the if the queryString is valid or not
+     * @throws ApplicationException if the queryString is so offensive as to prevent persisting
      */
-    private CommunicationPopulationQueryParseResult validateSqlStringForSaving( String sqlString ) {
+    private CommunicationPopulationQueryParseResult validateSqlStringForSaving( String queryString ) {
         //check for sql injection and if it returns true then throw invalid exception
-        if (CommunicationCommonUtility.sqlStatementNotAllowed( sqlString, false )) {
+        if (CommunicationCommonUtility.sqlStatementNotAllowed( queryString, false )) {
             throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
         }
 
-        return communicationPopulationQueryStatementParseService.parse( sqlString )
+        return communicationPopulationQueryStatementParseService.parse( queryString )
     }
 
     /**

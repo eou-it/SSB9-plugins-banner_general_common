@@ -67,34 +67,18 @@ class CommunicationPopulationQueryVersion implements Serializable {
     /** The text of the statement that will be executed. **/
     @Lob
     @Column(name = "GCRQRYV_QUERY_STRING")
-    String sqlString
+    String queryString
 
     @Column(name = "GCRQRYV_TYPE")
     @Enumerated(EnumType.STRING)
     CommunicationPopulationQueryType type = CommunicationPopulationQueryType.SQL_STATEMENT
 
-    @Column(name = "GCRQRYV_APPLICATION_TERM")
-    String applicationTerm
-
-    @Column(name = "GCRQRYV_SELECTION_TERM")
-    String selectionTerm
-
-    @Column(name = "GCRQRYV_CREATOR_ID_TERM")
-    String creatorIdTerm
-
-    @Column(name = "GCRQRYV_USER_ID_TERM")
-    String userIdTerm
-
     static constraints = {
         query(nullable: false)
         type(nullable: false)
-        applicationTerm(nullable: true, maxSize: 30)
-        selectionTerm(nullable: true, maxSize: 30)
-        creatorIdTerm(nullable: true, maxSize: 30)
-        userIdTerm(nullable: true, maxSize: 30)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
-        sqlString(nullable: false)
+        queryString(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

@@ -192,7 +192,7 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                sqlString: ""
+                queryString: ""
         )
 
         return populationQuery

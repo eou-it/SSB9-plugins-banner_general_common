@@ -293,7 +293,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                sqlString: "select spriden_pidm from spriden where spriden_change_ind is null  AND spriden_id LIKE 'A0000091%'"
+                queryString: "select spriden_pidm from spriden where spriden_change_ind is null  AND spriden_id LIKE 'A0000091%'"
         )
 
         return populationQuery

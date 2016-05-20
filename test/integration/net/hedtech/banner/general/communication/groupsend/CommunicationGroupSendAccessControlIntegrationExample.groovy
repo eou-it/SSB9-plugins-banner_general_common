@@ -118,7 +118,7 @@ class CommunicationGroupSendAccessControlIntegrationExample {
 //                folder: defaultFolder,
 //                name: queryName,
 //                description: "test description",
-//                sqlString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+//                queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
 //        )
 //
 //        return populationQuery

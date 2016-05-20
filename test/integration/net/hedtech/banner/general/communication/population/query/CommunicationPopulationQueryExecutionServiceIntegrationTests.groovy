@@ -108,7 +108,7 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
     @Test
     void testExecuteMultiValueSqlStatement() {
         def populationQuery = newValidPopulationQuery()
-        populationQuery.sqlString = i_fail_multiValueSqlStatement
+        populationQuery.queryString = i_fail_multiValueSqlStatement
         shouldFail {
             def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         }
@@ -208,7 +208,7 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
                 description: "TTTTTTTTTT",
                 calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
-                sqlString: i_success_sqlStatement
+                queryString: i_success_sqlStatement
         )
 
         return populationQuery
@@ -228,7 +228,7 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
                 description: "TTTTTTTTTT",
                 calculatedBy: "TTTTTTTTTT",
                 lastCalculatedTime: new Date(),
-                sqlString: i_fail_sqlStatement
+                queryString: i_fail_sqlStatement
         )
 
         return populationQuery

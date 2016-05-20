@@ -161,7 +161,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
                 // Nullable fields
                 description: "TTTTTTTTTT",
-                sqlString: "",
+                queryString: "",
                 syntaxErrors: "TTTTTTTTTT",
         )
 

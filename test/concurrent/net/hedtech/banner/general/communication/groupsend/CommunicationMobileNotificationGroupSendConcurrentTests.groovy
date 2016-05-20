@@ -163,7 +163,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 folder: defaultFolder,
                 name: "testPersonalizationQuery",
                 description: "test description",
-                sqlString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
+                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )

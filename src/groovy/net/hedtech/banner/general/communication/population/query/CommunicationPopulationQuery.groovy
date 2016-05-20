@@ -118,7 +118,7 @@ class CommunicationPopulationQuery implements Serializable {
      */
     @Lob
     @Column(name = "GCBQURY_QUERY_STRING")
-    String sqlString
+    String queryString
 
     /**
      * VALID_IND: Indicator showing if the SQL statement is syntactically valid(Y or N).
@@ -131,34 +131,18 @@ class CommunicationPopulationQuery implements Serializable {
     @Enumerated(EnumType.STRING)
     CommunicationPopulationQueryType type = CommunicationPopulationQueryType.SQL_STATEMENT
 
-    @Column(name = "GCBQURY_APPLICATION_TERM")
-    String applicationTerm
-
-    @Column(name = "GCBQURY_SELECTION_TERM")
-    String selectionTerm
-
-    @Column(name = "GCBQURY_CREATOR_ID_TERM")
-    String creatorIdTerm
-
-    @Column(name = "GCBQURY_USER_ID_TERM")
-    String userIdTerm
-
     static constraints = {
         folder(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         description(nullable: true, maxSize: 2500)
         name(nullable: false, maxSize: 255)
-        sqlString(nullable: true)
+        queryString(nullable: true)
         changesPending(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         type(nullable: false)
-        applicationTerm(nullable: true, maxSize: 30)
-        selectionTerm(nullable: true, maxSize: 30)
-        creatorIdTerm(nullable: true, maxSize: 30)
-        userIdTerm(nullable: true, maxSize: 30)
     }
 
 
