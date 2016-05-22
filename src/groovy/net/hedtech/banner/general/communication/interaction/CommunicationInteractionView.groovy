@@ -6,22 +6,19 @@ package net.hedtech.banner.general.communication.interaction
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
-import javax.persistence.NamedQueries
 import javax.persistence.Table
 
 @Entity
 @EqualsAndHashCode
 @ToString
 @Table(name = "GVQ_GCVINTR")
-@NamedQueries(value = [
-
-])
 class CommunicationInteractionView implements Serializable {
 
     @Id
@@ -68,7 +65,7 @@ class CommunicationInteractionView implements Serializable {
     Boolean deceased
 
     @Column(name = "CHANNEL")
-    String channel
+    CommunicationChannel channel
 
     @Column(name = "TEMPLATE_NAME")
     String templateName
