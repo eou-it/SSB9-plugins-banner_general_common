@@ -258,9 +258,9 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 	}
 
     @Test
-    void testFetchAllByPidmInList() {
-        List<String> pidms = VisaInformation.findAll(max: 10).pidm
-        List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList([pidms.first(), pidms.last()])
+    void testFetchAllWithMaxSeqNumByPidmInList() {
+        List<Integer> pidms = VisaInformation.findAll(max: 10).pidm
+        List<VisaInformation> visaInformationList = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([pidms.first(), pidms.last()])
         visaInformationList.each {
             assertTrue("pidm should be: ${pidms.first()} or ${pidms.last()}, but is ${it.pidm}",
                     (pidms.first().equals(it.pidm) || pidms.last().equals(it.pidm)))
@@ -269,16 +269,16 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    void testFetchAllByPidmInListNullList() {
-        List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList(null)
+    void testFetchAllWithMaxSeqNumByPidmInListNullList() {
+        List<VisaInformation> visaInformationList = VisaInformation.fetchAllWithMaxSeqNumByPidmInList(null)
         assertNotNull visaInformationList
         assertEquals(0, visaInformationList.size())
 
     }
 
     @Test
-    void testFetchAllByPidmInListEmptyList() {
-        List<VisaInformation> visaInformationList = VisaInformation.fetchAllByPidmInList([])
+    void testFetchAllWithMaxSeqNumByPidmInListEmptyList() {
+        List<VisaInformation> visaInformationList = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([])
         assertNotNull visaInformationList
         assertEquals(0, visaInformationList.size())
 

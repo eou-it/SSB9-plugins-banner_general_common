@@ -12,7 +12,7 @@ class VisaInformationService extends ServiceBase {
             VisaInformation.fetchNextSequenceNumber(rec?.pidm)
     }
 
-    public static List<VisaInformation> fetchAllByPidmInList(List<String> pidmList) {
-        return VisaInformation.fetchAllByPidmInList(pidmList)
+    public static List<VisaInformation> fetchAllWithMaxSeqNumByPidmInList(List<Integer> pidmList) {
+        return VisaInformation.fetchAllWithMaxSeqNumByPidmInList(pidmList)
     }
 }
