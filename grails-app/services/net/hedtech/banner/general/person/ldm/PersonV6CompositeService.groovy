@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
@@ -14,9 +15,12 @@ import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
+import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.NameV6
 import net.hedtech.banner.general.system.ldm.v6.PersonV6
+import net.hedtech.banner.general.system.ldm.v6.VisaStatusV6
+import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
@@ -34,6 +38,7 @@ class PersonV6CompositeService extends LdmService {
     UserRoleCompositeService userRoleCompositeService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     VisaInformationService visaInformationService
+    VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
 
     /**
@@ -181,6 +186,18 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
+    private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
+        def pidmToVisaInfoMap = [:]
+        log.debug "Getting GORVISA records for ${pidms?.size()} PIDMs..."
+        List<VisaInformation> entities = visaInformationService.fetchAllWithMaxSeqNumByPidmInList(pidms)
+        log.debug "Got ${entities?.size()} GORVISA records"
+        entities?.each {
+            pidmToVisaInfoMap.put(it.pidm, it)
+        }
+        return pidmToVisaInfoMap
+    }
+
+
     private List<PersonV6> createV6Decorators(List<PersonIdentificationNameCurrent> entities) {
         List<Long> personSurrogateIds = entities?.collect {
             it.id
@@ -213,6 +230,18 @@ class PersonV6CompositeService extends LdmService {
             relCodeToGuidMap = religionCompositeService.fetchGUIDs(religionCodes)
             log.debug "Got ${relCodeToGuidMap?.size() ?: 0} GUIDs for given religion codes"
         }
+        // Get GORVISA records for persons
+        def pidmToVisaInfoMap = fetchVisaInformationByPIDMs(pidms)
+        // Get GUIDs for visa types
+        List<String> visaTypeCodes = pidmToVisaInfoMap?.values()?.findResults {
+            it.visaType?.code
+        }.unique()
+        Map<String, String> vtCodeToGuidMap = [:]
+        if (visaTypeCodes) {
+            log.debug "Getting GUIDs for VisaType codes $visaTypeCodes..."
+            vtCodeToGuidMap = visaTypeCompositeService.fetchGUIDs(visaTypeCodes)
+            log.debug "Got ${vtCodeToGuidMap?.size() ?: 0} GUIDs for given VisaType codes"
+        }
 
         List<PersonV6> decorators = []
         if (entities) {
@@ -229,6 +258,11 @@ class PersonV6CompositeService extends LdmService {
                     if (personBase.religion) {
                         otherParams << ["religionGuid": relCodeToGuidMap.get(personBase.religion.code)]
                     }
+                }
+                VisaInformation visaInfo = pidmToVisaInfoMap.get(it.pidm)
+                if (visaInfo) {
+                    otherParams << ["visaInformation": visaInfo]
+                    otherParams << ["visaTypeGuid": vtCodeToGuidMap.get(visaInfo.visaType.code)]
                 }
                 decorators.add(createV6Decorator(it, otherParams))
             }
@@ -269,6 +303,20 @@ class PersonV6CompositeService extends LdmService {
             nameV6.firstName = personCurrent.firstName
             nameV6.lastName = personCurrent.lastName
             decorator.names << nameV6
+            // visaStatus
+            VisaInformation visaInfo = otherParams["visaInformation"]
+            if (visaInfo) {
+                decorator.visaStatus = new VisaStatusV6()
+                decorator.visaStatus.category = visaTypeCompositeService.getVisaTypeCategory(visaInfo.visaType.nonResIndicator)
+                decorator.visaStatus.detail = ["id": otherParams["visaTypeGuid"]]
+                decorator.visaStatus.status = getVisaStatus(visaInfo)
+                if (visaInfo.visaIssueDate) {
+                    decorator.visaStatus.startOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaIssueDate)
+                }
+                if (visaInfo.visaExpireDate) {
+                    decorator.visaStatus.endOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaExpireDate)
+                }
+            }
         }
         return decorator
     }
@@ -292,6 +340,26 @@ class PersonV6CompositeService extends LdmService {
             propVal = injectedProps.get(propName)
         }
         return propVal
+    }
+
+    /**
+     * There is no status field on visa information in Banner.
+     * If the current date is greater than GORVISA_VISA_EXPIRE_DATE then the status should be set to 'expired'
+     * otherwise, the status should be set to 'current'
+     *
+     * @param visaInfo VisaInformation
+     * @return
+     */
+    private String getVisaStatus(VisaInformation visaInfo) {
+        String status = "current"
+        if (visaInfo && visaInfo.visaExpireDate) {
+            String currentDate = new Date().format("yyyyMMdd")
+            String visaExpireDate = visaInfo.visaExpireDate.format("yyyyMMdd")
+            if (currentDate > visaExpireDate) {
+                status = "expired"
+            }
+        }
+        return status
     }
 
 }
