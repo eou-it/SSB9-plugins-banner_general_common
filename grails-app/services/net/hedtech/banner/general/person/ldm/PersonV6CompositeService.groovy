@@ -13,6 +13,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.NameV6
 import net.hedtech.banner.general.system.ldm.v6.PersonV6
@@ -33,6 +34,7 @@ class PersonV6CompositeService extends LdmService {
     UserRoleCompositeService userRoleCompositeService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     VisaInformationService visaInformationService
+    ReligionCompositeService religionCompositeService
 
     /**
      * GET /api/persons
@@ -192,14 +194,24 @@ class PersonV6CompositeService extends LdmService {
         // Get SPBPERS records for persons
         def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
         // Get GUIDs for CitizenTypes
-        List<String> citizenTypeCodes = pidmToPersonBaseMap?.values()?.collect {
+        List<String> citizenTypeCodes = pidmToPersonBaseMap?.values()?.findResults {
             it.citizenType?.code
-        }
+        }.unique()
         Map<String, String> ctCodeToGuidMap = [:]
         if (citizenTypeCodes) {
             log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
             ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
-            log.debug "Got ${ctCodeToGuidMap?.size()} GUIDs for given CitizenType codes"
+            log.debug "Got ${ctCodeToGuidMap?.size() ?: 0} GUIDs for given CitizenType codes"
+        }
+        // Get GUIDs for regligion codes
+        List<String> religionCodes = pidmToPersonBaseMap?.values()?.findResults {
+            it.religion?.code
+        }.unique()
+        Map<String, String> relCodeToGuidMap = [:]
+        if (religionCodes) {
+            log.debug "Getting GUIDs for religion codes $religionCodes..."
+            relCodeToGuidMap = religionCompositeService.fetchGUIDs(religionCodes)
+            log.debug "Got ${relCodeToGuidMap?.size() ?: 0} GUIDs for given religion codes"
         }
 
         List<PersonV6> decorators = []
@@ -213,6 +225,9 @@ class PersonV6CompositeService extends LdmService {
                     otherParams << ["personBase": personBase]
                     if (personBase.citizenType) {
                         otherParams << ["citizenTypeGuid": ctCodeToGuidMap.get(personBase.citizenType.code)]
+                    }
+                    if (personBase.religion) {
+                        otherParams << ["religionGuid": relCodeToGuidMap.get(personBase.religion.code)]
                     }
                 }
                 decorators.add(createV6Decorator(it, otherParams))
@@ -241,6 +256,10 @@ class PersonV6CompositeService extends LdmService {
                     decorator.citizenshipStatus = new CitizenshipStatusV6()
                     decorator.citizenshipStatus.category = citizenshipStatusCompositeService.getCitizenshipStatusCategory(personBase.citizenType.citizenIndicator)
                     decorator.citizenshipStatus.detail = ["id": otherParams["citizenTypeGuid"]]
+                }
+                // religion
+                if (personBase.religion) {
+                    decorator.religion = ["id": otherParams["religionGuid"]]
                 }
             }
             // Names

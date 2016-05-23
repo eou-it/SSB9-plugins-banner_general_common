@@ -13,5 +13,6 @@ class PersonV6 {
     List<NameV6> names
     CitizenshipStatusV6 citizenshipStatus
     VisaStatusV6 visaStatus
+    def religion
 
 }
