@@ -5,10 +5,16 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
+import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.VisaType
+import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v6.PersonV6
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
@@ -21,6 +27,8 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonV6CompositeService personV6CompositeService
     UserRoleCompositeService userRoleCompositeService
     GlobalUniqueIdentifierService globalUniqueIdentifierService
+    CitizenshipStatusCompositeService citizenshipStatusCompositeService
+    VisaTypeCompositeService visaTypeCompositeService
 
     @Before
     public void setUp() {
@@ -139,6 +147,41 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def person = personV6CompositeService.get(persons[0].guid)
         assertNotNull person
         assertEquals persons[0].guid, person.guid
+
+        String pidm=(globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralCommonConstants.PERSONS_LDM_NAME, person.guid)).domainKey
+        def personBase=PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
+        def visaInformation=VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
+        if(!personBase){
+            def personBasicPersonBase=new PersonBasicPersonBase(pidm: Integer.parseInt(pidm),armedServiceMedalVetIndicator: true)
+            personBasicPersonBase.save(failOnError: true, flush: true)
+            personBase=PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
+        }
+        if(!visaInformation[0]){
+            def visaType=VisaType.findAll()[0]
+            def visaInfo=new VisaInformation(pidm: Integer.parseInt(pidm),sequenceNumber: 1,visaType: visaType,entryIndicator: false,
+            visaIssueDate: new Date(),visaExpireDate: new Date())
+            visaInfo.save(failOnError: true, flush: true)
+            visaInformation=VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
+            person=personV6CompositeService.get(persons[0].guid)
+        }
+        if(!person.citizenshipStatus){
+            def citizenTypeObj=CitizenType.findAll()[0]
+            personBase.citizenType=citizenTypeObj
+            person = personV6CompositeService.get(persons[0].guid)
+        }
+
+        def guids1=citizenshipStatusCompositeService.fetchGUIDs([personBase.citizenType.code])
+        def citizenShipStatus=citizenshipStatusCompositeService.get(guids1.values()[0])
+        assertEquals guids1.values()[0],person.citizenshipStatus.detail.id
+        assertEquals citizenShipStatus.category,person.citizenshipStatus.category
+
+        def guids2=visaTypeCompositeService.fetchGUIDs([visaInformation[0].visaType.code])
+        def visaType=visaTypeCompositeService.get(guids2.values()[0])
+        assertEquals guids2.values()[0],person.visaStatus.detail.id
+        assertEquals visaType.category,person.visaStatus.category
+        assertNotNull person.visaStatus.startOn
+        assertNotNull person.visaStatus.endOn
+        assertNotNull person.visaStatus.status
     }
 
 
