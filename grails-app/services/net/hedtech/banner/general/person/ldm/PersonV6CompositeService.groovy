@@ -55,12 +55,12 @@ class PersonV6CompositeService extends LdmService {
 
         List allowedSortFields = ["firstName", "lastName"]
         if (params.sort) {
-            RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
+            RestfulApiValidationUtility.validateSortField(params.sort.trim(), allowedSortFields)
         } else {
             params.put('sort', allowedSortFields[1])
         }
         if (params.order) {
-            RestfulApiValidationUtility.validateSortOrder(params.order)
+            RestfulApiValidationUtility.validateSortOrder(params.order.trim())
         } else {
             params.put('order', "asc")
         }
@@ -70,15 +70,18 @@ class PersonV6CompositeService extends LdmService {
 
         if (params.role) {
             String role = params.role?.trim()?.toLowerCase()
-            if (role == "instructor" || role == "student") {
-                log.debug "Searching for persons with role $role ...."
-                def returnVal = userRoleCompositeService.fetchAllByRole(params)
-                pidms = returnVal?.pidms
-                totalCount = returnVal?.count
-                log.debug "${totalCount} persons found with role $role."
+            log.debug "Fetching persons with role $role ...."
+            def returnVal
+            if (role == "instructor") {
+                returnVal = userRoleCompositeService.fetchFaculties(params.sort.trim(), params.order.trim(), params.max.trim().toInteger(), params.offset?.trim()?.toInteger() ?: 0)
+            } else if (role == "student") {
+                returnVal = userRoleCompositeService.fetchStudents(params.sort.trim(), params.order.trim(), params.max.trim().toInteger(), params.offset?.trim()?.toInteger() ?: 0)
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
             }
+            pidms = returnVal?.pidms
+            totalCount = returnVal?.totalCount
+            log.debug "${totalCount} persons found with role $role."
         } else {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", []))
         }
