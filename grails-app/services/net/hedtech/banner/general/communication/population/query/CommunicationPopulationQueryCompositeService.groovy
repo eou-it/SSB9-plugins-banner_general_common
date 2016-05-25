@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
 
 /**
@@ -30,7 +31,7 @@ class CommunicationPopulationQueryCompositeService {
         assert( query.id == null )
 
         query.changesPending = true;
-        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.queryString )
+        validateQueryString( query )
         return (CommunicationPopulationQuery) communicationPopulationQueryService.create( query )
     }
 
@@ -195,7 +196,12 @@ class CommunicationPopulationQueryCompositeService {
             queryAsMap.changesPending = true;
         }
 
-        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( (String) queryAsMap.queryString )
+        CommunicationPopulationQueryType queryType = query.type
+        if (queryAsMap.type != null) {
+            queryType = (CommunicationPopulationQueryType) queryAsMap.type
+        }
+
+        validateQueryString( queryType, (String) queryAsMap.queryString, false )
 
         return (CommunicationPopulationQuery) communicationPopulationQueryService.update( queryAsMap )
     }
@@ -243,10 +249,7 @@ class CommunicationPopulationQueryCompositeService {
             throw new ApplicationException( CommunicationPopulationQuery, "@@r1:queryInvalidCall@@" )
         }
 
-        CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( query.queryString )
-        if (!parseResult.isValid()) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
-        }
+        validateQueryString( query, true )
 
         query.changesPending = false
         query = communicationPopulationQueryService.update( query )
@@ -273,6 +276,26 @@ class CommunicationPopulationQueryCompositeService {
         }
 
         return communicationPopulationQueryStatementParseService.parse( populationQuerySql, false )
+    }
+
+    private void validateQueryString( CommunicationPopulationQuery query, boolean performPublishChecks = false ) {
+        validateQueryString( query.type, query.queryString, performPublishChecks )
+    }
+
+    private void validateQueryString(CommunicationPopulationQueryType type, String queryString, boolean performPublishChecks ) {
+        if (type?.equals( CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT )) {
+            CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+            extractStatement.setQueryString( queryString )
+            extractStatement.validate()
+        } else if (type?.equals( CommunicationPopulationQueryType.SQL_STATEMENT )) {
+            validateSqlStringForSaving( queryString )
+            CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( queryString )
+            if (performPublishChecks && !parseResult.isValid()) {
+                throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")
+            }
+        } else {
+            throw new NotImplementedException()
+        }
     }
 
     /**

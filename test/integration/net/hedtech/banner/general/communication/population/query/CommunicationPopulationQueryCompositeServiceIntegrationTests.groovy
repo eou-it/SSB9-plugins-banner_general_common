@@ -32,7 +32,6 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
-
     @After
     public void tearDown() {
         super.tearDown()
@@ -74,7 +73,8 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
             description: "testUpdatePopulationQuery description2",
             folder: populationQuery.folder,
             queryString: "select pidm from spriden",
-            version: populationQuery.version
+            version: populationQuery.version,
+            type: CommunicationPopulationQueryType.SQL_STATEMENT
         ]
         populationQuery = communicationPopulationQueryCompositeService.updatePopulationQuery( queryAsMap )
         assertNotNull( populationQuery.id )
@@ -172,9 +172,10 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         assertFalse( populationQuery.changesPending )
 
         Map queryAsMap = [
-                id: populationQuery.id,
-                queryString: "select spriden_pidm from spriden where rownum < 3 and spriden_change_ind is null",
-                version: populationQuery.version
+            id: populationQuery.id,
+            queryString: "select spriden_pidm from spriden where rownum < 3 and spriden_change_ind is null",
+            version: populationQuery.version,
+            type: CommunicationPopulationQueryType.SQL_STATEMENT
         ]
         populationQuery = communicationPopulationQueryCompositeService.updatePopulationQuery(queryAsMap)
         communicationPopulationQueryCompositeService.deletePopulationQueryVersion(populationQuery.id, populationQuery.version, populationQuery.id, populationQuery.version)
