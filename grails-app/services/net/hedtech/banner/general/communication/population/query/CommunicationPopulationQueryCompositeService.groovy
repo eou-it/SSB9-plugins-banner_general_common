@@ -256,6 +256,7 @@ class CommunicationPopulationQueryCompositeService {
 
         CommunicationPopulationQueryVersion queryVersion = new CommunicationPopulationQueryVersion()
         queryVersion.query = query
+        queryVersion.type = query.type
         queryVersion.queryString = query.queryString
         queryVersion = communicationPopulationQueryVersionService.create( [ domainModel: queryVersion ] )
         return queryVersion
@@ -288,7 +289,6 @@ class CommunicationPopulationQueryCompositeService {
             extractStatement.setQueryString( queryString )
             extractStatement.validate()
         } else if (type?.equals( CommunicationPopulationQueryType.SQL_STATEMENT )) {
-            validateSqlStringForSaving( queryString )
             CommunicationPopulationQueryParseResult parseResult = validateSqlStringForSaving( queryString )
             if (performPublishChecks && !parseResult.isValid()) {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryInvalidCall@@")

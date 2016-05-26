@@ -61,13 +61,15 @@ class CommunicationPopulationQueryExecutionService {
                 throw new ApplicationException(CommunicationPopulationQuery, "@@r1:populationQueryDoesNotExist@@")
             }
 
+            String sqlStatement = getSqlStatement( queryVersion )
+
             def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
 
             def stmt = "{call gckextr.p_execute_pop_queryVersion(?,?,?,?,?)}"
-            def params = [queryVersionId, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
+            def params = [sqlStatement, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
 
             CommunicationPopulationQueryExecutionResult result
             sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
@@ -133,8 +135,9 @@ class CommunicationPopulationQueryExecutionService {
             }
 
             //make sure the sql statement only selects one value
+            String sqlStatement = getSqlStatement( queryVersion )
 
-            Matcher matcher = multipattern.matcher(queryVersion.queryString.toUpperCase());
+            Matcher matcher = multipattern.matcher( sqlStatement );
             while (matcher.find()) {
                 if (matcher.group(1).contains(",")) {
                     throw new ApplicationException(CommunicationPopulationQuery, "@@r1:queryHasMultiple@@")
@@ -147,7 +150,7 @@ class CommunicationPopulationQueryExecutionService {
             def sql = new Sql(session.connection())
 
             def stmt = "{call gckextr.p_execute_pop_query(?,?,?,?,?)}"
-            def params = [populationQueryId, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
+            def params = [sqlStatement, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
 
             CommunicationPopulationQueryExecutionResult result
             sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
@@ -177,6 +180,18 @@ class CommunicationPopulationQueryExecutionService {
             catch (SQLException af) {
                 // ignore
             }
+        }
+    }
+
+    private String getSqlStatement(CommunicationPopulationQueryVersion queryVersion) {
+        assert( queryVersion != null )
+
+        if (queryVersion.type == CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT) {
+            CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+            extractStatement.setQueryString( queryVersion.queryString )
+            return extractStatement.toSqlStatement()
+        } else {
+            return queryVersion.queryString.toUpperCase()
         }
     }
 

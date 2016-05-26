@@ -3,7 +3,6 @@ package net.hedtech.banner.general.communication.population.query
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import org.apache.commons.collections.functors.ExceptionFactory
 import org.apache.log4j.Logger
 
 
@@ -30,6 +29,11 @@ class CommunicationPopulationQueryExtractStatement {
         setSelection( parsedMap?.selection )
         setCreatorId( parsedMap?.creatorId )
         setUserId( parsedMap?.userId )
+    }
+
+    public String toSqlStatement() {
+        return "select to_number( GLBEXTR_KEY ) as GLBEXTR_PIDM from GLBEXTR where GLBEXTR_APPLICATION = '${application}' and " +
+                "GLBEXTR_SELECTION = '${selection}' and GLBEXTR_CREATOR_ID = '${creatorId}' and GLBEXTR_USER_ID = '${userId}'"
     }
 
     public Map toMap() {
