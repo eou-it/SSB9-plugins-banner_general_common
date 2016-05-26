@@ -27,13 +27,14 @@ class PersonFilterCompositeService {
 
     public static final String LDM_NAME = 'person-filters'
     private static final String DOMAIN_KEY_DELIMITER = '-^'
-    private static final List allowedSortFields = [GeneralCommonConstants.ABBREVIATION,GeneralCommonConstants.CODE]
-    private static final List filtersAllowedWithCriterion = [GeneralCommonConstants.ABBREVIATION,GeneralCommonConstants.CODE]
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V2,GeneralCommonConstants.VERSION_V4]
+    private static final List allowedSortFields = [GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.CODE]
+    private static
+    final List filtersAllowedWithCriterion = [GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.CODE]
+    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V2, GeneralCommonConstants.VERSION_V4]
 
     private HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: GeneralCommonConstants.SELECTION,
-            code: GeneralCommonConstants.SELECTION
+            code        : GeneralCommonConstants.SELECTION
     ]
 
     /**
@@ -89,10 +90,8 @@ class PersonFilterCompositeService {
      * @param guid
      * @return
      */
-    PersonFilter get(def guid) {
-        GlobalUniqueIdentifier globalUniqueIdentifier
-        if (guid instanceof GlobalUniqueIdentifier) globalUniqueIdentifier = guid
-        else globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
+    PersonFilter get(String guid) {
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
             throw new ApplicationException(GeneralCommonConstants.PERSON_FILTER, new NotFoundException())
         }
@@ -125,7 +124,7 @@ class PersonFilterCompositeService {
 
         Map namedParams = [:]
 
-        String sortField = GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))?GeneralCommonConstants.CODE:GeneralCommonConstants.ABBREVIATION
+        String sortField = GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS)) ? GeneralCommonConstants.CODE : GeneralCommonConstants.ABBREVIATION
         if (params.containsKey(sortField)) {
             // filter[index][field]=abbreviation
             retainSingleCriterionForFilter(criteria, sortField)
@@ -190,5 +189,55 @@ class PersonFilterCompositeService {
         return domainKeyParts
     }
 
+
+    public
+    def getPidmsOfPopulationExtract(String guidOrDomainKey, String sortField, String sortOrder, int max, int offset) {
+        log.debug "getPidmsOfPopulationExtract: $guidOrDomainKey"
+
+        def pagingAndSortParams = [:]
+        if (max > 0) {
+            pagingAndSortParams.put("max", max)
+        }
+        if (offset > -1) {
+            pagingAndSortParams.put("offset", offset)
+        }
+        if (sortField) {
+            pagingAndSortParams.put("sort", sortField)
+        }
+        if (sortOrder) {
+            pagingAndSortParams.put("order", sortOrder)
+        }
+
+        PersonFilter personFilter = getByDomainKeyOrGuid(guidOrDomainKey)
+
+        // Only one GUID is created for all (application + selection + creatorId + lastModifiedBy) records in GLBEXTR, so can't rely on domain surrogate id. Hence, domain key
+        def domainKeyParts = splitDomainKey(personFilter.title)
+        log.debug "PopulationSelectionExtractReadonly $domainKeyParts.application, $domainKeyParts.selection, $domainKeyParts.creatorId, $domainKeyParts.lastModifiedBy"
+
+        List<PopulationSelectionExtractReadonly> entities = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
+                domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy, pagingAndSortParams)
+        log.debug "query returned ${entities?.size()} rows"
+        List<Integer> pidms = entities?.collect { it.pidm }
+
+        def totalCount = PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
+                domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy)
+        log.debug "Total $totalCount PIDMs available under population extract ${personFilter.title}"
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    public PersonFilter getByDomainKeyOrGuid(String guidOrDomainKey) {
+        String guid
+        // May be domain key
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(LDM_NAME, guidOrDomainKey)[0]
+        if (globalUniqueIdentifier) {
+            guid = globalUniqueIdentifier.guid
+        } else {
+            // guidOrDomainKey represents GUID
+            guid = guidOrDomainKey
+        }
+        return get(guid)
+    }
 
 }

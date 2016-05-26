@@ -9,6 +9,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
+import net.hedtech.banner.general.lettergeneration.ldm.v2.PersonFilter
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
@@ -57,7 +58,6 @@ class PersonCompositeService extends LdmService {
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
-    private static final String PERSON_FILTER_LDM_NAME = "person-filters"
     private static final List<String> VERSIONS = ["v1", "v2", "v3",GeneralValidationCommonConstants.VERSION_V6]
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
@@ -1688,19 +1688,11 @@ class PersonCompositeService extends LdmService {
     private def getPidmsForPersonFilter(String selId, Map sortParams) {
         def personList = []
 
-        // params may come in as pop sel domain values or guid
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(PERSON_FILTER_LDM_NAME, selId)[0]
-        if (!globalUniqueIdentifier) {
-            globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(PERSON_FILTER_LDM_NAME, selId)
-            if (!globalUniqueIdentifier) {
-                throw new ApplicationException("personFilter", new BusinessLogicValidationException("not.found.message", []))
-            }
-        }
-
-        def popSelEntity = personFilterCompositeService.get(globalUniqueIdentifier)
+        // params may come in as pop sel domain key or guid
+        PersonFilter personFilter = personFilterCompositeService.getByDomainKeyOrGuid(selId)
 
         // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
-        def domainKeyParts = personFilterCompositeService.splitDomainKey(popSelEntity.title)
+        def domainKeyParts = personFilterCompositeService.splitDomainKey(personFilter.title)
         log.debug "PopulationSelectionExtractReadonly $domainKeyParts.application, $domainKeyParts.selection, $domainKeyParts.creatorId, $domainKeyParts.lastModifiedBy"
         personList = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
                 domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy, sortParams)
