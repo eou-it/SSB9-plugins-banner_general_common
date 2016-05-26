@@ -12,8 +12,10 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.Religion
 import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v6.PersonV6
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -29,6 +31,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     GlobalUniqueIdentifierService globalUniqueIdentifierService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     VisaTypeCompositeService visaTypeCompositeService
+    ReligionCompositeService religionCompositeService
 
     @Before
     public void setUp() {
@@ -174,6 +177,17 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def citizenShipStatus=citizenshipStatusCompositeService.get(guids1.values()[0])
         assertEquals guids1.values()[0],person.citizenshipStatus.detail.id
         assertEquals citizenShipStatus.category,person.citizenshipStatus.category
+
+        if(!person.religion){
+            def religionObj=Religion.findAll()[0]
+            personBase.religion=religionObj
+            person = personV6CompositeService.get(persons[0].guid)
+        }
+
+        def religionGuids=religionCompositeService.fetchGUIDs([personBase.religion.code])
+        def religion=religionCompositeService.get(religionGuids.values()[0])
+        assertEquals religionGuids.values()[0],person.religion.id
+        assertEquals religion.id,person.religion.id
 
         def guids2=visaTypeCompositeService.fetchGUIDs([visaInformation[0].visaType.code])
         def visaType=visaTypeCompositeService.get(guids2.values()[0])
