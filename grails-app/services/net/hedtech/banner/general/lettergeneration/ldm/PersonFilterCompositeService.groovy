@@ -164,7 +164,7 @@ class PersonFilterCompositeService {
     }
 
 
-    def splitDomainKey(String domainKey) {
+    private def splitDomainKey(String domainKey) {
         def domainKeyParts = [:]
 
         if (domainKey) {
@@ -191,8 +191,8 @@ class PersonFilterCompositeService {
 
 
     public
-    def getPidmsOfPopulationExtract(String guidOrDomainKey, String sortField, String sortOrder, int max, int offset) {
-        log.debug "getPidmsOfPopulationExtract: $guidOrDomainKey"
+    def fetchPidmsOfPopulationExtract(String guidOrDomainKey, String sortField, String sortOrder, int max, int offset) {
+        log.debug "fetchPidmsOfPopulationExtract: $guidOrDomainKey"
 
         def pagingAndSortParams = [:]
         if (max > 0) {
@@ -208,10 +208,18 @@ class PersonFilterCompositeService {
             pagingAndSortParams.put("order", sortOrder)
         }
 
-        PersonFilter personFilter = getByDomainKeyOrGuid(guidOrDomainKey)
+        // May be GUID
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guidOrDomainKey)
+        if (!globalUniqueIdentifier) {
+            // May be domain key
+            globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(LDM_NAME, guidOrDomainKey)[0]
+        }
+        if (!globalUniqueIdentifier) {
+            throw new ApplicationException(GeneralCommonConstants.PERSON_FILTER, new BusinessLogicValidationException("not.found.message", []))
+        }
 
         // Only one GUID is created for all (application + selection + creatorId + lastModifiedBy) records in GLBEXTR, so can't rely on domain surrogate id. Hence, domain key
-        def domainKeyParts = splitDomainKey(personFilter.title)
+        def domainKeyParts = splitDomainKey(globalUniqueIdentifier.domainKey)
         log.debug "PopulationSelectionExtractReadonly $domainKeyParts.application, $domainKeyParts.selection, $domainKeyParts.creatorId, $domainKeyParts.lastModifiedBy"
 
         List<PopulationSelectionExtractReadonly> entities = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
@@ -221,23 +229,9 @@ class PersonFilterCompositeService {
 
         def totalCount = PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
                 domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy)
-        log.debug "Total $totalCount PIDMs available under population extract ${personFilter.title}"
+        log.debug "Total $totalCount PIDMs available under population extract ${globalUniqueIdentifier.domainKey}"
 
-        return [pidms: pidms, totalCount: totalCount]
-    }
-
-
-    public PersonFilter getByDomainKeyOrGuid(String guidOrDomainKey) {
-        String guid
-        // May be domain key
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(LDM_NAME, guidOrDomainKey)[0]
-        if (globalUniqueIdentifier) {
-            guid = globalUniqueIdentifier.guid
-        } else {
-            // guidOrDomainKey represents GUID
-            guid = guidOrDomainKey
-        }
-        return get(guid)
+        return [pidms: pidms, entities: entities, totalCount: totalCount]
     }
 
 }

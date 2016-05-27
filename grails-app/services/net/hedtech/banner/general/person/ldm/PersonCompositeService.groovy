@@ -8,8 +8,6 @@ import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
-import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
-import net.hedtech.banner.general.lettergeneration.ldm.v2.PersonFilter
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
@@ -58,7 +56,7 @@ class PersonCompositeService extends LdmService {
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
-    private static final List<String> VERSIONS = ["v1", "v2", "v3",GeneralValidationCommonConstants.VERSION_V6]
+    private static final List<String> VERSIONS = ["v1", "v2", "v3"]
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
@@ -828,6 +826,7 @@ class PersonCompositeService extends LdmService {
         races
     }
 
+
     private PersonTelephone parseAndCreatePersonTelephone(Integer pidm, Map metadata, TelephoneType telephoneType, Map requestPhone) {
         validatePhoneRequiredFields(requestPhone)
         def parts = PhoneNumberUtility.parsePhoneNumber(requestPhone.phoneNumber, getDefault2CharISOCountryCode())
@@ -845,6 +844,7 @@ class PersonCompositeService extends LdmService {
         personTelephoneMap.put("phoneExtension", requestPhone.phoneExtension)
         return createPersonTelephone(personTelephoneMap)
     }
+
 
     private String getDefault2CharISOCountryCode() {
         IntegrationConfiguration intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_PHONES_COUNTRY_DEFAULT)
@@ -1509,6 +1509,7 @@ class PersonCompositeService extends LdmService {
         additionalIDService.createOrUpdate(existingId)
     }
 
+
     private def splitPhoneNumber(String requestPhoneNumber) {
         def parts = [:]
         if (requestPhoneNumber.length() <= 12) {
@@ -1526,10 +1527,12 @@ class PersonCompositeService extends LdmService {
         parts
     }
 
+
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     private def getStateAndZip(activeAddress, isInternational) {
         getAddressPostalCode(getAddressRegion(activeAddress, isInternational), isInternational)
     }
+
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     private def getAddressRegion(activeAddress, isInternational) {
@@ -1556,6 +1559,7 @@ class PersonCompositeService extends LdmService {
 
         return activeAddress
     }
+
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     private def getAddressPostalCode(activeAddress, isInternational) {
@@ -1588,6 +1592,7 @@ class PersonCompositeService extends LdmService {
         return intConf
     }
 
+
     def validateCredentialsOnUrl(Map param) {
         if (!GeneralCommonConstants.VERSION_V1.equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
             if (!param.containsKey(CREDENTIAL_TYPE)) {
@@ -1602,6 +1607,7 @@ class PersonCompositeService extends LdmService {
             }
         }
     }
+
 
     def validateAddressRequiredFields(address) {
         if (!address.addressType) {
@@ -1685,22 +1691,9 @@ class PersonCompositeService extends LdmService {
     }
 
 
-    private def getPidmsForPersonFilter(String selId, Map sortParams) {
-        def personList = []
-
-        // params may come in as pop sel domain key or guid
-        PersonFilter personFilter = personFilterCompositeService.getByDomainKeyOrGuid(selId)
-
-        // As only one record is inserted in GLBEXTR for application,selection, creatorId and userId combination, can't rely on domain surrogate id. Hence, domain key
-        def domainKeyParts = personFilterCompositeService.splitDomainKey(personFilter.title)
-        log.debug "PopulationSelectionExtractReadonly $domainKeyParts.application, $domainKeyParts.selection, $domainKeyParts.creatorId, $domainKeyParts.lastModifiedBy"
-        personList = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
-                domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy, sortParams)
-        log.debug "query returned ${personList?.size()} rows"
-        def totalCount = PopulationSelectionExtractReadonly.fetchCountByApplicationSelectionCreatorIdLastModifiedBy(domainKeyParts.application,
-                domainKeyParts.selection, domainKeyParts.creatorId, domainKeyParts.lastModifiedBy)
-        log.debug "total PopulationSelectionExtract records $totalCount"
-        return [personList: personList, count: totalCount]
+    private def getPidmsForPersonFilter(String selId, Map params) {
+        def retMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(selId, params.sort.trim(), params.order.trim(), params.max.trim().toInteger(), params.offset?.trim()?.toInteger() ?: 0)
+        return [personList: retMap.entities, count: retMap.totalCount]
     }
 
 

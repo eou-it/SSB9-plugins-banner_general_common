@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
@@ -36,6 +37,7 @@ class PersonV6CompositeService extends LdmService {
     static final int MAX_PAGE_SIZE = 500
 
     UserRoleCompositeService userRoleCompositeService
+    PersonFilterCompositeService personFilterCompositeService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     VisaInformationService visaInformationService
     VisaTypeCompositeService visaTypeCompositeService
@@ -65,25 +67,46 @@ class PersonV6CompositeService extends LdmService {
             params.put('order', "asc")
         }
 
+        String sortField = params.sort.trim()
+        String sortOrder = params.order.trim()
+        int max = params.max.trim().toInteger()
+        int offset = params.offset?.trim()?.toInteger() ?: 0
+
         List<Integer> pidms
         int totalCount = 0
 
-        if (params.role) {
-            String role = params.role?.trim()?.toLowerCase()
-            log.debug "Fetching persons with role $role ...."
-            def returnVal
-            if (role == "instructor") {
-                returnVal = userRoleCompositeService.fetchFaculties(params.sort.trim(), params.order.trim(), params.max.trim().toInteger(), params.offset?.trim()?.toInteger() ?: 0)
-            } else if (role == "student") {
-                returnVal = userRoleCompositeService.fetchStudents(params.sort.trim(), params.order.trim(), params.max.trim().toInteger(), params.offset?.trim()?.toInteger() ?: 0)
-            } else {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
-            }
-            pidms = returnVal?.pidms
-            totalCount = returnVal?.totalCount
-            log.debug "${totalCount} persons found with role $role."
+        if (RestfulApiValidationUtility.isQApiRequest(params)) {
+
         } else {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", []))
+            if (params.containsKey("personFilter") && params.containsKey("role")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination", []))
+            }
+
+            if (params.containsKey("personFilter")) {
+                String guidOrDomainKey = params.get("personFilter")
+                def returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, sortField, sortOrder, max, offset)
+                pidms = returnMap?.pidms
+                totalCount = returnMap?.totalCount
+                log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
+            } else {
+                if (params.role) {
+                    String role = params.role?.trim()?.toLowerCase()
+                    log.debug "Fetching persons with role $role ...."
+                    def returnMap
+                    if (role == "instructor") {
+                        returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
+                    } else if (role == "student") {
+                        returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+                    } else {
+                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
+                    }
+                    pidms = returnMap?.pidms
+                    totalCount = returnMap?.totalCount
+                    log.debug "${totalCount} persons found with role $role."
+                } else {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", []))
+                }
+            }
         }
 
         injectPropertyIntoParams(params, "count", totalCount)
