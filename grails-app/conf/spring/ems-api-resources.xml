@@ -92,6 +92,58 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-gradeModes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>grade-modes</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/grade-modes/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.GradeMode.STVGMOD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="ar-gradeDefinitions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>grade-definitions</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/grade-definitions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.GradeDefinition.SHRGDID</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-gradeschemesV4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>grade-schemes</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/grade-schemes/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.GradeScheme.SHRGSCH</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="ar-instmethods" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>instructional-methods</value>
@@ -444,6 +496,41 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
     </bean>
 
 
+    <bean id="ar-geographicAreas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>geographic-areas</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/geographic-areas/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.GeoArea.SORGEOR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-geographicAreaTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>geographic-area-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>4</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/geographic-area-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.GeoRegion.STVGEOR</value>
+                <value>HEDM.GeoDivision.STVGEOD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="ar-enrollmentstatus" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>enrollment-statuses</value>
@@ -457,6 +544,23 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>HEDM.EnrollmentStatuses.STVCACT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personNameTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-name-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-name-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.NameType.GTVNTYP</value>
             </list>
         </constructor-arg>
     </bean>
@@ -490,6 +594,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-religions"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
+                <ref bean="ar-gradeschemesV4"/>
+                <ref bean="ar-gradeDefinitions"/>
+                <ref bean="ar-gradeModes"/>
+                <ref bean="ar-geographicAreas"/>
+                <ref bean="ar-geographicAreaTypes"/>
+                <ref bean="ar-personNameTypes"/>
             </list>
         </property>
     </bean>
@@ -523,6 +633,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-religions"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
+                <ref bean="ar-gradeschemesV4"/>
+                <ref bean="ar-gradeDefinitions"/>
+                <ref bean="ar-gradeModes"/>
+                <ref bean="ar-geographicAreas"/>
+                <ref bean="ar-geographicAreaTypes"/>
+                <ref bean="ar-personNameTypes"/>
             </list>
         </property>
     </bean>
