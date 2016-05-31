@@ -22,7 +22,11 @@ class CommunicationPopulationQueryExtractStatement {
 
         if (queryString != null && queryString.trim().length() != 0) {
             JsonSlurper jsonSlurper = new JsonSlurper()
-            parsedMap = jsonSlurper.parseText( queryString )
+            try {
+                parsedMap = jsonSlurper.parseText( queryString )
+            } catch (groovy.json.JsonException e) {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQueryExtractStatement.class, "badSyntax" )
+            }
         }
 
         setApplication( parsedMap?.application )

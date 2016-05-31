@@ -71,6 +71,19 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         assertEquals "TTTTTTTTTT", populationQuery.name
     }
 
+    @Test
+    void testCreatePopulationSelectionExtractQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+            name: "testCreatePopulationSelectionExtractQuery",
+            folder: testFolder,
+            type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT
+        )
+
+        populationQuery = communicationPopulationQueryService.create( populationQuery )
+        assertNotNull( populationQuery.id )
+        assertEquals( CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT, populationQuery.type )
+    }
+
 
     @Test
     void testCreateWithMissingFolder() {

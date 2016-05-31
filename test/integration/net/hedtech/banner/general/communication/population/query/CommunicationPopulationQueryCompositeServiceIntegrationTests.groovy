@@ -56,6 +56,107 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
     }
 
     @Test
+    void testCreatePopulationSelectionExtractQuery() {
+        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.creatorId = 'SAISUSR'
+        extractStatement.userId = 'SAISUSR'
+        String extractQueryString = extractStatement.getQueryString()
+
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testCreatePopulationSelectionExtractQuery",
+                description: "testCreatePopulationSelectionExtractQuery description",
+                folder: testFolder,
+                queryString: extractQueryString,
+                type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertNotNull populationQuery.id
+        assertEquals testFolder.name, populationQuery.folder.name
+        assertEquals getUser(), populationQuery.createdBy
+        assertEquals "testCreatePopulationSelectionExtractQuery", populationQuery.name
+        assertEquals "testCreatePopulationSelectionExtractQuery description", populationQuery.description
+        assertEquals CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT, populationQuery.type
+        assertEquals extractQueryString, populationQuery.queryString
+    }
+
+    @Test
+    void testCreatePopulationSelectionExtractInvalidQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                name: "testCreatePopulationSelectionExtractQuery",
+                description: "testCreatePopulationSelectionExtractQuery description",
+                folder: testFolder,
+                type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT,
+                queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+        )
+        try {
+            populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+            fail( "Expected query string is not correct for type" )
+        } catch (ApplicationException ae) {
+            assertEquals( "@@r1:badSyntax@@", ae.getMessage() )
+        }
+
+        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.creatorId = 'SAISUSR'
+        extractStatement.userId = 'SAISUSR'
+        populationQuery.queryString = extractStatement.getQueryString()
+        try {
+            populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+            fail( "Missing application" )
+        } catch (ApplicationException ae) {
+            assertEquals( "@@r1:emptyApplication@@", ae.getMessage() )
+        }
+
+        extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.creatorId = 'SAISUSR'
+        extractStatement.userId = 'SAISUSR'
+        populationQuery.queryString = extractStatement.getQueryString()
+        try {
+            populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+            fail( "Missing selection" )
+        } catch (ApplicationException ae) {
+            assertEquals( "@@r1:emptySelection@@", ae.getMessage() )
+        }
+
+        extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.userId = 'SAISUSR'
+        populationQuery.queryString = extractStatement.getQueryString()
+        try {
+            populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+            fail( "Missing creatorId" )
+        } catch (ApplicationException ae) {
+            assertEquals( "@@r1:emptyCreatorId@@", ae.getMessage() )
+        }
+
+        extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.creatorId = 'SAISUSR'
+        populationQuery.queryString = extractStatement.getQueryString()
+        try {
+            populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+            fail( "Missing userId" )
+        } catch (ApplicationException ae) {
+            assertEquals( "@@r1:emptyUserId@@", ae.getMessage() )
+        }
+
+        extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.creatorId = 'SAISUSR'
+        extractStatement.userId = 'SAISUSR'
+        populationQuery.queryString = extractStatement.getQueryString()
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        assertNotNull populationQuery.id
+        assertEquals( extractStatement.getQueryString(), populationQuery.queryString )
+    }
+
+    @Test
     void testUpdatePopulationQuery() {
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
             name: "testUpdatePopulationQuery",
