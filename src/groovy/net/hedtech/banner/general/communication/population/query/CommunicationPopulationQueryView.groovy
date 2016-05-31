@@ -45,6 +45,10 @@ class CommunicationPopulationQueryView implements Serializable {
     @Column(name = "DESCRIPTION")
     String description
 
+    @Column(name = "TYPE")
+    @Enumerated(EnumType.STRING)
+    CommunicationPopulationQueryType type
+
     /**
      * FOLDER: The folder containing this object.
      */
@@ -110,6 +114,7 @@ class CommunicationPopulationQueryView implements Serializable {
         description(nullable: true, maxSize: 2000)
         name(nullable: false, maxSize: 30)
         changesPending(nullable: false)
+        type(nullable: false)
     }
 
     // Read Only fields that should be protected against update

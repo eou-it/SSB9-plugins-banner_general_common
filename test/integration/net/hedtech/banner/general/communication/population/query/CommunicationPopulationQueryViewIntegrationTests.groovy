@@ -57,9 +57,10 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
         assertEquals "MyTestPop", populationQuery.name
         assertNull populationQuery.queryString
 
-        def CommunicationPopulationQueryView queryView
+        CommunicationPopulationQueryView queryView
         queryView = CommunicationPopulationQueryView.fetchById(populationQuery?.id)
         assertNotNull queryView
+        assertEquals( CommunicationPopulationQueryType.SQL_STATEMENT, queryView.type )
     }
 
 
