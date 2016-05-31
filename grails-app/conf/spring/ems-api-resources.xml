@@ -478,19 +478,36 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-religions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-religions-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <constructor-arg name="resource">
+        <value>religions</value>
+    </constructor-arg>
+    <constructor-arg name="version">
+        <value>6</value>
+    </constructor-arg>
+    <constructor-arg name="path">
+        <value>/religions/</value>
+    </constructor-arg>
+    <constructor-arg name="events">
+        <list>
+            <value>HEDM.Religion.STVRELG</value>
+        </list>
+    </constructor-arg>
+</bean>
+
+    <bean id="ar-personHolds-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>religions</value>
+            <value>person-holds</value>
         </constructor-arg>
         <constructor-arg name="version">
-            <value>5</value>
+            <value>6</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/religions/</value>
+            <value>/person-holds/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Religion.STVRELG</value>
+                <value>HEDM.PersonHold.SPRHOLD</value>
             </list>
         </constructor-arg>
     </bean>
@@ -626,7 +643,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-phone-types"/>
                 <ref bean="ar-academic-disciplines"/>
                 <ref bean="ar-section-crosslist"/>
-                <ref bean="ar-religions"/>
+                <ref bean="ar-religions-v6"/>
+                <ref bean="ar-personHolds-v6"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
                 <ref bean="ar-gradeschemesV4"/>
@@ -667,7 +685,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-phone-types"/>
                 <ref bean="ar-academic-disciplines"/>
                 <ref bean="ar-section-crosslist"/>
-                <ref bean="ar-religions"/>
+                <ref bean="ar-religions-v6"/>
+                <ref bean="ar-personHolds-v6"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
                 <ref bean="ar-gradeschemesV4"/>
