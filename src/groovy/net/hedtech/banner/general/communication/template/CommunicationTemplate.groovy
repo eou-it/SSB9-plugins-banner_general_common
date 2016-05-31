@@ -8,6 +8,7 @@ import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
+import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -220,11 +221,15 @@ public abstract class CommunicationTemplate implements Serializable {
 
         def query
         CommunicationTemplate.withSession { session ->
+            session.setFlushMode(FlushMode.MANUAL);
+            try {
             query = session.getNamedQuery('CommunicationTemplate.existsAnotherNameFolder')
                     .setString('folderName', folderName)
                     .setString('templateName', templateName)
                     .setLong('id', templateId).list()[0]
-
+            } finally {
+                session.setFlushMode(FlushMode.AUTO)
+            }
         }
         return (query != null)
     }

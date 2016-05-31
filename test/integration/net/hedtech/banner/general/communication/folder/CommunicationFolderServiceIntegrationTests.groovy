@@ -104,9 +104,9 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
             communicationFolderService.update(folder1)
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
+            assertEquals("@@r1:folderExists:" + folder2.name  + "@@", e.message)
         }
     }
-
 
     @Test
     void testDelete() {

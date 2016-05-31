@@ -96,6 +96,25 @@ class CommunicationFolderIntegrationTests extends BaseIntegrationTestCase {
         shouldFail { folder.save(failOnError: true, flush: true) }
     }
 
+    @Test
+    void testExistsAnotherNameFolder() {
+        def folder = newValidForCreateFolder()
+        folder.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder.id
+
+        Boolean falseResult = CommunicationFolder.existsAnotherSameNameFolder(folder.id, folder.name)
+        assertFalse(falseResult)
+
+        def folder2 = newValidForCreateFolder()
+        folder2.name = "Duplicate Folder"
+        folder2.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder2.id
+
+        Boolean trueResult = CommunicationFolder.existsAnotherSameNameFolder(folder.id, folder2.name)
+        assertTrue(trueResult)
+    }
 
     private def newValidForCreateFolder() {
         def folder = new CommunicationFolder(

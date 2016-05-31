@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.folder
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import org.hibernate.FlushMode
 import org.hibernate.criterion.Order
 
 import javax.persistence.*
@@ -130,12 +131,18 @@ class CommunicationFolder implements Serializable {
     public static Boolean existsAnotherSameNameFolder(Long folderId, String name ) {
 
         def query
-        CommunicationFolder.withSession { session ->
-            query = session.getNamedQuery('CommunicationFolder.existsAnotherSameNameFolder')
-                    .setString('folderName', name)
-                    .setLong('id', folderId)
-                    .list()[0]
-        }
+
+            CommunicationFolder.withSession { session ->
+                session.setFlushMode(FlushMode.MANUAL);
+                try {
+                    query = session.getNamedQuery('CommunicationFolder.existsAnotherSameNameFolder')
+                            .setString('folderName', name)
+                            .setLong('id', folderId)
+                            .list()[0]
+                } finally {
+                    session.setFlushMode(FlushMode.AUTO)
+                }
+            }
 
         return (query != null)
     }

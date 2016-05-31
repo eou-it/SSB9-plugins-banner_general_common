@@ -3,9 +3,11 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.template
 
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -164,6 +166,18 @@ class CommunicationTemplateServiceIntegrationTests extends BaseIntegrationTestCa
         newTemplate.description = "Updated description"
         def updatedTemplate = communicationEmailTemplateService.update([domainModel: newTemplate])
         assertEquals("Updated description", updatedTemplate.description)
+
+        def template2 = newValidForCreateEmailTemplate(folder2)
+        def newTemplate2 = communicationEmailTemplateService.create([domainModel: template2])
+        //Test if the generated entity now has an id assigned
+        assertNotNull newTemplate2.id
+        newTemplate2.folder = folder1
+        try {
+            communicationEmailTemplateService.update([domainModel: newTemplate2])
+            Assert.fail "Expected sameNameTemplate to fail because of name unique constraint."
+        } catch (ApplicationException e) {
+            assertEquals("@@r1:templateExists:" + newTemplate2.name + "@@", e.message)
+        }
     }
 
 
