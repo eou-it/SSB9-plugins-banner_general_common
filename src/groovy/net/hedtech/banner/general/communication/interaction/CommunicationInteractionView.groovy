@@ -105,4 +105,20 @@ class CommunicationInteractionView implements Serializable {
         }
         return results
     }
+
+    public static findByConstituentNameOrBannerId(String nameOrBannerId) {
+
+        def searchName = CommunicationCommonUtility.getScrubbedInput(nameOrBannerId)
+
+        def queryCriteria = CommunicationInteractionView.createCriteria()
+        def results = queryCriteria.list() {
+            or {
+                ilike("lastName", searchName)
+                ilike("firstName", searchName)
+                ilike("bannerId", searchName)
+            }
+            order(Order.desc("interactionDate"))
+        }
+        return results
+    }
 }
