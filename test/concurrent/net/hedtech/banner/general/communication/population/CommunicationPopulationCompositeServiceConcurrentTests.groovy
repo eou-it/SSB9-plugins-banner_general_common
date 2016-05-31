@@ -1,14 +1,13 @@
+/*******************************************************************************
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
-import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
-import net.hedtech.banner.general.communication.groupsend.*
-import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryType
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
@@ -94,5 +93,52 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
     }
 
+
+    @Test
+    public void testCreatePopulationSelectionExtractQuery() {
+        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.creatorId = 'SAISUSR'
+        extractStatement.userId = 'SAISUSR'
+        String extractQueryString = extractStatement.getQueryString()
+
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+            folder: defaultFolder,
+            name: "testCreatePopulationSelectionExtractQuery",
+            description: "test description",
+            type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT,
+            queryString: extractQueryString
+        )
+
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+
+        CommunicationPopulation communicationPopulation = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+        assertNotNull( communicationPopulation.id )
+        assertEquals( "testPopulation", communicationPopulation.name )
+        assertEquals( "testPopulationDescription", communicationPopulation.description )
+
+        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( communicationPopulation )
+        assertEquals( 1, associations.size() )
+        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
+        assertNotNull( association.id )
+        assertEquals( communicationPopulation.id, association.population.id )
+        assertEquals( populationQuery.id, association.populationQuery.id )
+        assertNull( association.populationQueryVersion )
+
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( communicationPopulation.id, 'BCMADMIN' )
+        assertNotNull( populationVersion )
+        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
+                    aPopulationVersion.status == CommunicationPopulationCalculationStatus.ERROR;
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+    }
 
 }

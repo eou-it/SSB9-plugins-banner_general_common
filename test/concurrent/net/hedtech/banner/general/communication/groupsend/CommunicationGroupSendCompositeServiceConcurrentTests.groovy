@@ -1,6 +1,8 @@
+/*******************************************************************************
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
-import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
@@ -9,12 +11,8 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
@@ -23,14 +21,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 
 import javax.mail.internet.MimeMessage
-import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
-
-import static org.junit.Assert.assertNull
 
 class CommunicationGroupSendCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
