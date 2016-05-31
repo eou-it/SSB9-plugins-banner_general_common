@@ -565,6 +565,41 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-personHoldTypes-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>restriction-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-hold-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.HoldType.STVHLDD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+    <bean id="ar-academicHonors-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-honors</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-honors/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.DepartmentalHonor.STVHOND</value>
+                <value>HEDM.InstitutionalHonor.STVHONR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -600,6 +635,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-geographicAreas"/>
                 <ref bean="ar-geographicAreaTypes"/>
                 <ref bean="ar-personNameTypes"/>
+                <ref bean="ar-personHoldTypes-v6"/>
+                <ref bean="ar-academicHonors-v6"/>
             </list>
         </property>
     </bean>
@@ -639,6 +676,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-geographicAreas"/>
                 <ref bean="ar-geographicAreaTypes"/>
                 <ref bean="ar-personNameTypes"/>
+                <ref bean="ar-personHoldTypes-v6"/>
+                <ref bean="ar-academicHonors-v6"/>
             </list>
         </property>
     </bean>
