@@ -14,18 +14,18 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
-import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
-import net.hedtech.banner.general.system.ldm.v6.NameV6
-import net.hedtech.banner.general.system.ldm.v6.PersonV6
-import net.hedtech.banner.general.system.ldm.v6.VisaStatusV6
+import net.hedtech.banner.general.system.ldm.v6.*
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+
+import java.sql.Timestamp
 
 /**
  * RESTful APIs for Ellucian Ethos Data Model "persons" V6.
@@ -35,6 +35,8 @@ class PersonV6CompositeService extends LdmService {
 
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
+    private static final String ROLE_FACULTY = "faculty"
+    private static final String ROLE_STUDENT = "student"
 
     UserRoleCompositeService userRoleCompositeService
     PersonFilterCompositeService personFilterCompositeService
@@ -111,9 +113,9 @@ class PersonV6CompositeService extends LdmService {
 
         injectPropertyIntoParams(params, "count", totalCount)
 
-        List<PersonIdentificationNameCurrent> personCurrentEntities = fetchPersonCurrentByPIDMs(pidms, params.sort, params.order)
+        List<PersonIdentificationNameCurrent> personCurrentEntities = fetchPersonCurrentByPIDMs(pidms, sortField, sortOrder)
 
-        return createV6Decorators(personCurrentEntities)
+        return createDecorators(personCurrentEntities)
     }
 
     /**
@@ -137,7 +139,7 @@ class PersonV6CompositeService extends LdmService {
     @Transactional(readOnly = true)
     def get(String guid) {
         PersonIdentificationNameCurrent personIdentificationNameCurrent = getPersonIdentificationNameCurrentByGUID(guid)
-        return createV6Decorators([personIdentificationNameCurrent])[0]
+        return createDecorators([personIdentificationNameCurrent])[0]
     }
 
     /**
@@ -172,17 +174,16 @@ class PersonV6CompositeService extends LdmService {
 
     private List<PersonIdentificationNameCurrent> fetchPersonCurrentByPIDMs(List<Integer> pidms, String sortField, String sortOrder) {
         log.trace "fetchPersonCurrentByPIDMs : $pidms : $sortField: $sortOrder"
-        List<PersonIdentificationNameCurrent> entities = null
+        List<PersonIdentificationNameCurrent> entities
         if (pidms) {
             def objectsOfPidms = []
             pidms.each {
                 objectsOfPidms << [data: it]
             }
             Map paramsMap = [pidms: objectsOfPidms]
-            String query = """from PersonIdentificationNameCurrent a
-                                       where a.pidm in (:pidms)
-                                       order by a.$sortField $sortOrder, a.bannerId $sortOrder
-                                    """
+            String query = """ from PersonIdentificationNameCurrent a
+                               where a.pidm in (:pidms)
+                               order by a.$sortField $sortOrder, a.bannerId $sortOrder """
             DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
             log.debug "$query"
             entities = dynamicFinder.find([params: paramsMap, criteria: []], [:])
@@ -192,48 +193,112 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private def fetchPersonGuids(List<Long> personSurrogateIds) {
-        def pidmToGuidMap = [:]
-        List<GlobalUniqueIdentifier> globalUniqueIdentifiers = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(GeneralCommonConstants.PERSONS_LDM_NAME, personSurrogateIds)
-        globalUniqueIdentifiers?.each {
-            pidmToGuidMap.put(it.domainKey.toInteger(), it.guid)
+    private def createDecorators(List<PersonIdentificationNameCurrent> entities) {
+        def decorators = []
+        if (entities) {
+            List<Long> personSurrogateIds = entities?.collect {
+                it.id
+            }
+            List<Integer> pidms = entities?.collect {
+                it.pidm
+            }
+
+            def dataMap = [:]
+            fetchPersonsGuidDataAndPutInMap(personSurrogateIds, dataMap)
+            fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
+            fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
+            fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
+
+            entities?.each {
+                def dataMapForPerson = [:]
+                dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(it.pidm)]
+                PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(it.pidm)
+                if (personBase) {
+                    dataMapForPerson << ["personBase": personBase]
+                    if (personBase.citizenType) {
+                        dataMapForPerson << ["citizenTypeGuid": dataMap.ctCodeToGuidMap.get(personBase.citizenType.code)]
+                    }
+                    if (personBase.religion) {
+                        dataMapForPerson << ["religionGuid": dataMap.relCodeToGuidMap.get(personBase.religion.code)]
+                    }
+                }
+                VisaInformation visaInfo = dataMap.pidmToVisaInfoMap.get(it.pidm)
+                if (visaInfo) {
+                    dataMapForPerson << ["visaInformation": visaInfo]
+                    dataMapForPerson << ["visaTypeGuid": dataMap.vtCodeToGuidMap.get(visaInfo.visaType.code)]
+                }
+                def personRoles = []
+                if (dataMap.pidmToFacultyRoleMap.containsKey(it.pidm)) {
+                    personRoles << dataMap.pidmToFacultyRoleMap.get(it.pidm)
+                }
+                if (dataMap.pidmToStudentRoleMap.containsKey(it.pidm)) {
+                    personRoles << dataMap.pidmToStudentRoleMap.get(it.pidm)
+                }
+                dataMapForPerson << ["personRoles": personRoles]
+                decorators.add(createPersonV6(it, dataMapForPerson))
+            }
         }
-        return pidmToGuidMap
+        return decorators
     }
 
 
-    private def fetchPersonBaseByPIDMs(List<Integer> pidms) {
-        def pidmToPersonBaseMap = [:]
-        List<PersonBasicPersonBase> entities = PersonBasicPersonBase.fetchByPidmList(pidms)
-        entities?.each {
-            pidmToPersonBaseMap.put(it.pidm, it)
+    private PersonV6 createPersonV6(PersonIdentificationNameCurrent personCurrent, def dataMapForPerson) {
+        PersonV6 decorator
+        if (personCurrent) {
+            decorator = new PersonV6()
+            // GUID
+            decorator.guid = dataMapForPerson["personGuid"]
+            PersonBasicPersonBase personBase = dataMapForPerson["personBase"]
+            if (personBase) {
+                // privacyStatus
+                if (personBase.confidIndicator == "Y") {
+                    decorator.privacyStatus = ["privacyCategory": "restricted"]
+                } else {
+                    decorator.privacyStatus = ["privacyCategory": "unrestricted"]
+                }
+                // citizenshipStatus
+                if (personBase.citizenType) {
+                    decorator.citizenshipStatus = createCitizenshipStatusV6(personBase.citizenType, dataMapForPerson["citizenTypeGuid"])
+                }
+                // religion
+                if (personBase.religion) {
+                    decorator.religion = ["id": dataMapForPerson["religionGuid"]]
+                }
+            }
+            // Names
+            decorator.names = []
+            NameV6 nameV6 = new NameV6()
+            nameV6.type = ["category": "personal"]
+            nameV6.firstName = personCurrent.firstName
+            nameV6.lastName = personCurrent.lastName
+            decorator.names << nameV6
+            // visaStatus
+            VisaInformation visaInfo = dataMapForPerson["visaInformation"]
+            if (visaInfo) {
+                decorator.visaStatus = createVisaStatusV6(visaInfo, dataMapForPerson["visaTypeGuid"])
+            }
+            // Roles
+            def personRoles = dataMapForPerson["personRoles"]
+            if (personRoles) {
+                decorator.roles = []
+                personRoles.each {
+                    decorator.roles << createRoleV6(it.role, it.startDate, it.endDate)
+                }
+            }
         }
-        return pidmToPersonBaseMap
+        return decorator
     }
 
 
-    private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
-        def pidmToVisaInfoMap = [:]
-        log.debug "Getting GORVISA records for ${pidms?.size()} PIDMs..."
-        List<VisaInformation> entities = visaInformationService.fetchAllWithMaxSeqNumByPidmInList(pidms)
-        log.debug "Got ${entities?.size()} GORVISA records"
-        entities?.each {
-            pidmToVisaInfoMap.put(it.pidm, it)
-        }
-        return pidmToVisaInfoMap
-    }
-
-
-    private List<PersonV6> createV6Decorators(List<PersonIdentificationNameCurrent> entities) {
-        List<Long> personSurrogateIds = entities?.collect {
-            it.id
-        }
-        List<Integer> pidms = entities?.collect {
-            it.pidm
-        }
-
+    private void fetchPersonsGuidDataAndPutInMap(List<Long> personSurrogateIds, Map dataMap) {
         // Get GUIDs for persons
         def pidmToGuidMap = fetchPersonGuids(personSurrogateIds)
+        // Put in Map
+        dataMap.put("pidmToGuidMap", pidmToGuidMap)
+    }
+
+
+    private void fetchPersonsBiographicalDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get SPBPERS records for persons
         def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
         // Get GUIDs for CitizenTypes
@@ -256,6 +321,14 @@ class PersonV6CompositeService extends LdmService {
             relCodeToGuidMap = religionCompositeService.fetchGUIDs(religionCodes)
             log.debug "Got ${relCodeToGuidMap?.size() ?: 0} GUIDs for given religion codes"
         }
+        // Put in Map
+        dataMap.put("pidmToPersonBaseMap", pidmToPersonBaseMap)
+        dataMap.put("ctCodeToGuidMap", ctCodeToGuidMap)
+        dataMap.put("relCodeToGuidMap", relCodeToGuidMap)
+    }
+
+
+    private void fetchPersonsVisaDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get GORVISA records for persons
         def pidmToVisaInfoMap = fetchVisaInformationByPIDMs(pidms)
         // Get GUIDs for visa types
@@ -268,80 +341,143 @@ class PersonV6CompositeService extends LdmService {
             vtCodeToGuidMap = visaTypeCompositeService.fetchGUIDs(visaTypeCodes)
             log.debug "Got ${vtCodeToGuidMap?.size() ?: 0} GUIDs for given VisaType codes"
         }
-
-        List<PersonV6> decorators = []
-        if (entities) {
-            def otherParams
-            entities?.each {
-                otherParams = [:]
-                otherParams << ["personGuid": pidmToGuidMap.get(it.pidm)]
-                PersonBasicPersonBase personBase = pidmToPersonBaseMap.get(it.pidm)
-                if (personBase) {
-                    otherParams << ["personBase": personBase]
-                    if (personBase.citizenType) {
-                        otherParams << ["citizenTypeGuid": ctCodeToGuidMap.get(personBase.citizenType.code)]
-                    }
-                    if (personBase.religion) {
-                        otherParams << ["religionGuid": relCodeToGuidMap.get(personBase.religion.code)]
-                    }
-                }
-                VisaInformation visaInfo = pidmToVisaInfoMap.get(it.pidm)
-                if (visaInfo) {
-                    otherParams << ["visaInformation": visaInfo]
-                    otherParams << ["visaTypeGuid": vtCodeToGuidMap.get(visaInfo.visaType.code)]
-                }
-                decorators.add(createV6Decorator(it, otherParams))
-            }
-        }
-        return decorators
+        // Put in Map
+        dataMap.put("pidmToVisaInfoMap", pidmToVisaInfoMap)
+        dataMap.put("vtCodeToGuidMap", vtCodeToGuidMap)
     }
 
 
-    private PersonV6 createV6Decorator(PersonIdentificationNameCurrent personCurrent, def otherParams) {
-        PersonV6 decorator
-        if (personCurrent) {
-            decorator = new PersonV6()
-            // GUID
-            decorator.guid = otherParams["personGuid"]
-            PersonBasicPersonBase personBase = otherParams["personBase"]
-            if (personBase) {
-                // privacyStatus
-                if (personBase.confidIndicator == "Y") {
-                    decorator.privacyStatus = ["privacyCategory": "restricted"]
-                } else {
-                    decorator.privacyStatus = ["privacyCategory": "unrestricted"]
-                }
-                // citizenshipStatus
-                if (personBase.citizenType) {
-                    decorator.citizenshipStatus = new CitizenshipStatusV6()
-                    decorator.citizenshipStatus.category = citizenshipStatusCompositeService.getCitizenshipStatusCategory(personBase.citizenType.citizenIndicator)
-                    decorator.citizenshipStatus.detail = ["id": otherParams["citizenTypeGuid"]]
-                }
-                // religion
-                if (personBase.religion) {
-                    decorator.religion = ["id": otherParams["religionGuid"]]
-                }
+    private void fetchPersonsRoleDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        // Faculty role
+        def pidmToFacultyRoleMap = [:]
+        List<Object[]> facList = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
+        facList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            pidmToFacultyRoleMap.put(bdPidm.toInteger(), [role: ROLE_FACULTY, startDate: startDate, endDate: endDate])
+        }
+        // Student role
+        def pidmToStudentRoleMap = [:]
+        List<BigDecimal> studList = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
+        studList?.each {
+            pidmToStudentRoleMap.put(it.toInteger(), [role: ROLE_STUDENT])
+        }
+        // Put in Map
+        dataMap.put("pidmToFacultyRoleMap", pidmToFacultyRoleMap)
+        dataMap.put("pidmToStudentRoleMap", pidmToStudentRoleMap)
+    }
+
+
+    private def fetchPersonGuids(List<Long> personSurrogateIds) {
+        def pidmToGuidMap = [:]
+        if (personSurrogateIds) {
+            log.debug "Getting GORGUID records for ${personSurrogateIds?.size()} Surrogate Ids..."
+            List<GlobalUniqueIdentifier> entities = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds(GeneralCommonConstants.PERSONS_LDM_NAME, personSurrogateIds)
+            log.debug "Got ${entities?.size()} GORGUID records"
+            entities?.each {
+                pidmToGuidMap.put(it.domainKey.toInteger(), it.guid)
             }
-            // Names
-            decorator.names = []
-            NameV6 nameV6 = new NameV6()
-            nameV6.type = ["category": "personal"]
-            nameV6.firstName = personCurrent.firstName
-            nameV6.lastName = personCurrent.lastName
-            decorator.names << nameV6
-            // visaStatus
-            VisaInformation visaInfo = otherParams["visaInformation"]
-            if (visaInfo) {
-                decorator.visaStatus = new VisaStatusV6()
-                decorator.visaStatus.category = visaTypeCompositeService.getVisaTypeCategory(visaInfo.visaType.nonResIndicator)
-                decorator.visaStatus.detail = ["id": otherParams["visaTypeGuid"]]
-                decorator.visaStatus.status = getVisaStatus(visaInfo)
-                if (visaInfo.visaIssueDate) {
-                    decorator.visaStatus.startOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaIssueDate)
-                }
-                if (visaInfo.visaExpireDate) {
-                    decorator.visaStatus.endOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaExpireDate)
-                }
+        }
+        return pidmToGuidMap
+    }
+
+
+    private def fetchPersonBaseByPIDMs(List<Integer> pidms) {
+        def pidmToPersonBaseMap = [:]
+        if (pidms) {
+            log.debug "Getting SPBPERS records for ${pidms?.size()} PIDMs..."
+            List<PersonBasicPersonBase> entities = PersonBasicPersonBase.fetchByPidmList(pidms)
+            log.debug "Got ${entities?.size()} SPBPERS records"
+            entities?.each {
+                pidmToPersonBaseMap.put(it.pidm, it)
+            }
+        }
+        return pidmToPersonBaseMap
+    }
+
+
+    private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
+        def pidmToVisaInfoMap = [:]
+        if (pidms) {
+            log.debug "Getting GORVISA records for ${pidms?.size()} PIDMs..."
+            List<VisaInformation> entities = visaInformationService.fetchAllWithMaxSeqNumByPidmInList(pidms)
+            log.debug "Got ${entities?.size()} GORVISA records"
+            entities?.each {
+                pidmToVisaInfoMap.put(it.pidm, it)
+            }
+        }
+        return pidmToVisaInfoMap
+    }
+
+
+    private CitizenshipStatusV6 createCitizenshipStatusV6(CitizenType citizenType, String citizenTypeGuid) {
+        CitizenshipStatusV6 decorator
+        if (citizenType) {
+            decorator = new CitizenshipStatusV6()
+            decorator.category = citizenshipStatusCompositeService.getCitizenshipStatusCategory(citizenType.citizenIndicator)
+            if (citizenTypeGuid) {
+                decorator.detail = ["id": citizenTypeGuid]
+            }
+        }
+        return decorator
+    }
+
+
+    private VisaStatusV6 createVisaStatusV6(VisaInformation visaInfo, String visaTypeGuid) {
+        VisaStatusV6 decorator
+        if (visaInfo) {
+            decorator = new VisaStatusV6()
+            decorator.category = visaTypeCompositeService.getVisaTypeCategory(visaInfo.visaType?.nonResIndicator)
+            if (visaTypeGuid) {
+                decorator.detail = ["id": visaTypeGuid]
+            }
+            decorator.status = getVisaStatus(visaInfo)
+            if (visaInfo.visaIssueDate) {
+                decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaIssueDate)
+            }
+            if (visaInfo.visaExpireDate) {
+                decorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaExpireDate)
+            }
+        }
+        return decorator
+    }
+
+    /**
+     * There is no status field on visa information in Banner.
+     * If the current date is greater than GORVISA_VISA_EXPIRE_DATE then the status should be set to 'expired'
+     * otherwise, the status should be set to 'current'
+     *
+     * @param visaInfo VisaInformation
+     * @return
+     */
+    private String getVisaStatus(VisaInformation visaInfo) {
+        String status = "current"
+        if (visaInfo && visaInfo.visaExpireDate) {
+            String currentDate = new Date().format("yyyyMMdd")
+            String visaExpireDate = visaInfo.visaExpireDate.format("yyyyMMdd")
+            if (currentDate > visaExpireDate) {
+                status = "expired"
+            }
+        }
+        return status
+    }
+
+
+    private RoleV6 createRoleV6(String role, Timestamp startDate, Timestamp endDate) {
+        RoleV6 decorator
+        if (role) {
+            decorator = new RoleV6()
+            if (role == ROLE_FACULTY) {
+                decorator.role = RoleNameV6.INSTRUCTOR.value
+            } else if (role == ROLE_STUDENT) {
+                decorator.role = RoleNameV6.STUDENT.value
+            }
+            if (startDate) {
+                decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(startDate)
+            }
+            if (endDate) {
+                decorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(endDate)
             }
         }
         return decorator
@@ -366,26 +502,6 @@ class PersonV6CompositeService extends LdmService {
             propVal = injectedProps.get(propName)
         }
         return propVal
-    }
-
-    /**
-     * There is no status field on visa information in Banner.
-     * If the current date is greater than GORVISA_VISA_EXPIRE_DATE then the status should be set to 'expired'
-     * otherwise, the status should be set to 'current'
-     *
-     * @param visaInfo VisaInformation
-     * @return
-     */
-    private String getVisaStatus(VisaInformation visaInfo) {
-        String status = "current"
-        if (visaInfo && visaInfo.visaExpireDate) {
-            String currentDate = new Date().format("yyyyMMdd")
-            String visaExpireDate = visaInfo.visaExpireDate.format("yyyyMMdd")
-            if (currentDate > visaExpireDate) {
-                status = "expired"
-            }
-        }
-        return status
     }
 
 }
