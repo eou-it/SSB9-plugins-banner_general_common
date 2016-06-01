@@ -92,7 +92,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-gradeModes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-gradeModes-v4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>grade-modes</value>
         </constructor-arg>
@@ -110,7 +110,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
     </bean>
 
 
-    <bean id="ar-gradeDefinitions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-gradeDefinitions-v4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>grade-definitions</value>
         </constructor-arg>
@@ -127,7 +127,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-gradeschemesV4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-gradeschemes-v4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>grade-schemes</value>
         </constructor-arg>
@@ -269,6 +269,23 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-races-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>races</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/races/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Race.GORRACE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="ar-restritypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>restriction-types</value>
@@ -353,6 +370,25 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-sites-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>sites</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/sites/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Campus.STVCAMP</value>
+                <value>HEDM.Campus.SLBBLDG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="ar-subjects" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>subjects</value>
@@ -370,12 +406,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-email-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-emailTypes-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>email-types</value>
         </constructor-arg>
         <constructor-arg name="version">
-            <value>4</value>
+            <value>6</value>
         </constructor-arg>
         <constructor-arg name="path">
             <value>/email-types/</value>
@@ -387,15 +423,15 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-location-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-addressTypes-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>location-types</value>
+            <value>address-types</value>
         </constructor-arg>
         <constructor-arg name="version">
-            <value>4</value>
+            <value>6</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/location-types/</value>
+            <value>/address-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
@@ -421,7 +457,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-phoneTypes-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>phone-types</value>
         </constructor-arg>
@@ -513,7 +549,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
     </bean>
 
 
-    <bean id="ar-geographicAreas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-geographicAreas-v4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>geographic-areas</value>
         </constructor-arg>
@@ -530,7 +566,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-geographicAreaTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-geographicAreaTypes-v4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>geographic-area-types</value>
         </constructor-arg>
@@ -565,7 +601,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-personNameTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-personNameTypes-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>person-name-types</value>
         </constructor-arg>
@@ -632,27 +668,29 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-persons"/>
                 <ref bean="ar-personfilters"/>
                 <ref bean="ar-races"/>
+                <ref bean="ar-races-v6"/>
                 <ref bean="ar-restritypes"/>
                 <ref bean="ar-rooms"/>
                 <ref bean="ar-sections"/>
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
+                <ref bean="ar-sites-v6"/>
                 <ref bean="ar-subjects"/>
-                <ref bean="ar-email-types"/>
-                <ref bean="ar-location-types"/>
-                <ref bean="ar-phone-types"/>
+                <ref bean="ar-emailTypes-v6"/>
+                <ref bean="ar-addressTypes-v6"/>
+                <ref bean="ar-phoneTypes-v6"/>
                 <ref bean="ar-academic-disciplines"/>
                 <ref bean="ar-section-crosslist"/>
                 <ref bean="ar-religions-v6"/>
                 <ref bean="ar-personHolds-v6"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
-                <ref bean="ar-gradeschemesV4"/>
-                <ref bean="ar-gradeDefinitions"/>
-                <ref bean="ar-gradeModes"/>
-                <ref bean="ar-geographicAreas"/>
-                <ref bean="ar-geographicAreaTypes"/>
-                <ref bean="ar-personNameTypes"/>
+                <ref bean="ar-gradeschemes-v4"/>
+                <ref bean="ar-gradeDefinitions-v4"/>
+                <ref bean="ar-gradeModes-v4"/>
+                <ref bean="ar-geographicAreas-v4"/>
+                <ref bean="ar-geographicAreaTypes-v4"/>
+                <ref bean="ar-personNameTypes-v6"/>
                 <ref bean="ar-personHoldTypes-v6"/>
                 <ref bean="ar-academicHonors-v6"/>
             </list>
@@ -674,27 +712,29 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-persons"/>
                 <ref bean="ar-personfilters"/>
                 <ref bean="ar-races"/>
+                <ref bean="ar-races-v6"/>
                 <ref bean="ar-restritypes"/>
                 <ref bean="ar-rooms"/>
                 <ref bean="ar-sections"/>
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
+                <ref bean="ar-sites-v6"/>
                 <ref bean="ar-subjects"/>
-                <ref bean="ar-email-types"/>
-                <ref bean="ar-location-types"/>
-                <ref bean="ar-phone-types"/>
+                <ref bean="ar-emailTypes-v6"/>
+                <ref bean="ar-addressTypes-v6"/>
+                <ref bean="ar-phoneTypes-v6"/>
                 <ref bean="ar-academic-disciplines"/>
                 <ref bean="ar-section-crosslist"/>
                 <ref bean="ar-religions-v6"/>
                 <ref bean="ar-personHolds-v6"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
-                <ref bean="ar-gradeschemesV4"/>
-                <ref bean="ar-gradeDefinitions"/>
-                <ref bean="ar-gradeModes"/>
-                <ref bean="ar-geographicAreas"/>
-                <ref bean="ar-geographicAreaTypes"/>
-                <ref bean="ar-personNameTypes"/>
+                <ref bean="ar-gradeschemes-v4"/>
+                <ref bean="ar-gradeDefinitions-v4"/>
+                <ref bean="ar-gradeModes-v4"/>
+                <ref bean="ar-geographicAreas-v4"/>
+                <ref bean="ar-geographicAreaTypes-v4"/>
+                <ref bean="ar-personNameTypes-v6"/>
                 <ref bean="ar-personHoldTypes-v6"/>
                 <ref bean="ar-academicHonors-v6"/>
             </list>
