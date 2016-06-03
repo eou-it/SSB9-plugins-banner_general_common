@@ -370,12 +370,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-sites-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-sites-v4" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>sites</value>
         </constructor-arg>
         <constructor-arg name="version">
-            <value>6</value>
+            <value>4</value>
         </constructor-arg>
         <constructor-arg name="path">
             <value>/sites/</value>
@@ -462,7 +462,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <value>phone-types</value>
         </constructor-arg>
         <constructor-arg name="version">
-            <value>4</value>
+            <value>6</value>
         </constructor-arg>
         <constructor-arg name="path">
             <value>/phone-types/</value>
@@ -674,7 +674,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-sections"/>
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
-                <ref bean="ar-sites-v6"/>
+                <ref bean="ar-sites-v4"/>
                 <ref bean="ar-subjects"/>
                 <ref bean="ar-emailTypes-v6"/>
                 <ref bean="ar-addressTypes-v6"/>
@@ -718,7 +718,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-sections"/>
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
-                <ref bean="ar-sites-v6"/>
+                <ref bean="ar-sites-v4"/>
                 <ref bean="ar-subjects"/>
                 <ref bean="ar-emailTypes-v6"/>
                 <ref bean="ar-addressTypes-v6"/>
