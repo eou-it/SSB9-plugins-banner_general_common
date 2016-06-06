@@ -173,6 +173,19 @@ class CommunicationInteractionType implements Serializable {
         return results
     }
 
+    public static findAvailableByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationInteractionType.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            eq("isAvailable", true)
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
+    }
+
     public static List<CommunicationInteractionType> fetchAvailable() {
         def query
         CommunicationInteractionType.withSession { session ->
