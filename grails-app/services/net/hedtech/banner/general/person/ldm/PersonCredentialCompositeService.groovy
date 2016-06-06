@@ -9,12 +9,12 @@ import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
+import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
-import net.hedtech.banner.general.overall.ldm.LdmService
 
 @Transactional
 class PersonCredentialCompositeService extends LdmService {
@@ -33,10 +33,7 @@ class PersonCredentialCompositeService extends LdmService {
         if (!personDetail) {
             throw new ApplicationException("Person", new NotFoundException())
         }
-        Integer pidm = personDetail.getAt(0)
-        Map personCredentialsMap = getPersonCredentialDetails([pidm])
-        log.trace "getById:End"
-        return buildDecorators(persons, personCredentialsMap, [personDetail])?.getAt(0)
+        return createDecorators([personDetail])[0]
     }
 
     /**
@@ -50,15 +47,9 @@ class PersonCredentialCompositeService extends LdmService {
         log.trace "list:Begin:$params"
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         List<Object[]> personDetailsList = fetchPersons(params)
-        def decorators = [:]
-        List pidms = []
-        personDetailsList?.each {
-            pidms << it.getAt(0)
-        }
-        Map personCredentialsMap = getPersonCredentialDetails(pidms)
-
-        return buildDecorators(decorators, personCredentialsMap, personDetailsList)
+        return createDecorators(personDetailsList)
     }
+
 
     def count(Map params) {
         return fetchPersons(params, true)
@@ -69,7 +60,7 @@ class PersonCredentialCompositeService extends LdmService {
      * @param params
      */
     private def fetchPersons(Map params, boolean count = false) {
-        log.trace "buildPersonCredentials: Begin: $params"
+        log.trace "fetchPersons: Begin: $params"
         def result
         String hql
         if (count) {
@@ -98,7 +89,7 @@ class PersonCredentialCompositeService extends LdmService {
                 }
             }
 
-            log.trace "buildPersonCredentials: End"
+            log.trace "fetchPersons: End"
             return result
         }
     }
@@ -114,31 +105,91 @@ class PersonCredentialCompositeService extends LdmService {
     }
 
 
-    private def buildDecorators(def decorators, Map credentialsMap, def personDetailsList) {
-        log.trace "buildPersonCredentials: Begin"
-        personDetailsList?.each { it ->
-            PersonCredentialsDecorator persCredentialsDecorator = new PersonCredentialsDecorator(it?.getAt(2))
-            persCredentialsDecorator.credentials << new PersonCredential("bannerId", it?.getAt(1))
-            decorators.put(it?.getAt(0), persCredentialsDecorator)
-        }
+    private def createDecorators(def dbRows) {
+        def decorators = []
+        if (dbRows) {
+            List<Integer> pidms = []
+            dbRows?.each {
+                pidms << it.getAt(0)
+            }
 
-        credentialsMap.imsSourcedIdBaseList.each { sourcedIdBase ->
-            PersonCredentialsDecorator persCredentialsDecorator = decorators.get(sourcedIdBase.pidm)
-            persCredentialsDecorator.credentials << new PersonCredential("bannerSourcedId", sourcedIdBase.sourcedId)
-        }
-        credentialsMap.thirdPartyAccessList.each { thirdPartyAccess ->
-            if (thirdPartyAccess.externalUser) {
-                PersonCredentialsDecorator persCredentialsDecorator = decorators.get(thirdPartyAccess.pidm)
-                persCredentialsDecorator.credentials << new PersonCredential("bannerUserName", thirdPartyAccess.externalUser)
+            def pidmToCredentialsMap = preparePidmToCredentialsMap(pidms)
+
+            dbRows?.each {
+                PersonCredentialsDecorator persCredentialsDecorator = new PersonCredentialsDecorator(it?.getAt(2))
+                persCredentialsDecorator.credentials = pidmToCredentialsMap.get(it.getAt(0))
+                persCredentialsDecorator.credentials << new PersonCredential("bannerId", it?.getAt(1))
+                decorators.add(persCredentialsDecorator)
             }
         }
-        credentialsMap.pidmAndUDCIdMappingList.each { pidmAndUDCIdMapping ->
-            PersonCredentialsDecorator persCredentialsDecorator = decorators.get(pidmAndUDCIdMapping.pidm)
-            persCredentialsDecorator.credentials << new PersonCredential("bannerUdcId", pidmAndUDCIdMapping.udcId)
-        }
+        return decorators
+    }
 
-        log.trace "buildPersonCredentials: End"
-        return decorators.values()
+
+    private def preparePidmToCredentialsMap(List<Integer> pidms) {
+        def pidmToCredentialsMap = [:]
+        if (pidms) {
+            def pidmToSourcedIdMap = fetchSourcedIds(pidms)
+            def pidmToPartnerSystemLoginIdMap = fetchThirdPartySystemLoginIds(pidms)
+            def pidmToUdcIdMap = fetchUdcIds(pidms)
+
+            pidms.each {
+                def credentials = []
+                pidmToCredentialsMap.put(it, credentials)
+                if (pidmToSourcedIdMap.containsKey(it)) {
+                    credentials << new PersonCredential("bannerSourcedId", pidmToSourcedIdMap.get(it))
+                }
+                if (pidmToPartnerSystemLoginIdMap.containsKey(it)) {
+                    credentials << new PersonCredential("bannerUserName", pidmToPartnerSystemLoginIdMap.get(it))
+                }
+                if (pidmToUdcIdMap.containsKey(it)) {
+                    credentials << new PersonCredential("bannerUdcId", pidmToUdcIdMap.get(it))
+                }
+            }
+        }
+        return pidmToCredentialsMap
+    }
+
+
+    private def fetchSourcedIds(List<Integer> pidms) {
+        def pidmToSourcedIdMap = [:]
+        if (pidms) {
+            log.debug "Getting GOBSRID records for ${pidms?.size()} PIDMs..."
+            List<ImsSourcedIdBase> entities = ImsSourcedIdBase.findAllByPidmInList(pidms)
+            log.debug "Got ${entities?.size()} GOBSRID records"
+            entities?.each {
+                pidmToSourcedIdMap.put(it.pidm, it.sourcedId)
+            }
+        }
+        return pidmToSourcedIdMap
+    }
+
+
+    private def fetchThirdPartySystemLoginIds(List<Integer> pidms) {
+        def pidmToPartnerSystemLoginIdMap = [:]
+        if (pidms) {
+            log.debug "Getting GOBTPAC records for ${pidms?.size()} PIDMs..."
+            List<ThirdPartyAccess> entities = ThirdPartyAccess.findAllByPidmInList(pidms)
+            log.debug "Got ${entities?.size()} GOBTPAC records"
+            entities?.each {
+                pidmToPartnerSystemLoginIdMap.put(it.pidm, it.externalUser)
+            }
+        }
+        return pidmToPartnerSystemLoginIdMap
+    }
+
+
+    private def fetchUdcIds(List<Integer> pidms) {
+        def pidmToUdcIdMap = [:]
+        if (pidms) {
+            log.debug "Getting GOBUMAP records for ${pidms?.size()} PIDMs..."
+            List<PidmAndUDCIdMapping> entities = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+            log.debug "Got ${entities?.size()} GOBUMAP records"
+            entities?.each {
+                pidmToUdcIdMap.put(it.pidm, it.udcId)
+            }
+        }
+        return pidmToUdcIdMap
     }
 
 }

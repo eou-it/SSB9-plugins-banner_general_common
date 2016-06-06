@@ -9,10 +9,13 @@ import groovy.transform.ToString
 @EqualsAndHashCode(includeFields = true)
 @ToString(includeNames = true, includeFields = true)
 class PersonCredentialsDecorator {
+
     String guid
     List<PersonCredential> credentials = []
+
 
     def PersonCredentialsDecorator(String guid) {
         this.guid = guid
     }
+
 }

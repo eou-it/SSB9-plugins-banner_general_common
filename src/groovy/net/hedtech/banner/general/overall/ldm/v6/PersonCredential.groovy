@@ -4,11 +4,14 @@
 package net.hedtech.banner.general.overall.ldm.v6
 
 class PersonCredential {
+
     String type
     String value
+
 
     def PersonCredential(String type, String value) {
         this.type = type
         this.value = value
     }
+
 }

@@ -183,6 +183,7 @@ class PersonV6CompositeService extends LdmService {
             Map paramsMap = [pidms: objectsOfPidms]
             String query = """ from PersonIdentificationNameCurrent a
                                where a.pidm in (:pidms)
+                               and a.entityIndicator = 'P'
                                order by a.$sortField $sortOrder, a.bannerId $sortOrder """
             DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
             log.debug "$query"
