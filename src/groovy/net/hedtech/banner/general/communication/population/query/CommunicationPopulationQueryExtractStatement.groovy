@@ -40,6 +40,11 @@ class CommunicationPopulationQueryExtractStatement {
                 "GLBEXTR_SELECTION = '${selection}' and GLBEXTR_CREATOR_ID = '${creatorId}' and GLBEXTR_USER_ID = '${userId}'"
     }
 
+    public String getCountSqlStatement() {
+        return "select count( GLBEXTR_KEY ) as GLBEXTR_PIDM_COUNT from GLBEXTR where GLBEXTR_APPLICATION = '${application}' and " +
+                "GLBEXTR_SELECTION = '${selection}' and GLBEXTR_CREATOR_ID = '${creatorId}' and GLBEXTR_USER_ID = '${userId}'"
+    }
+
     public Map toMap() {
         return [ application: getApplication(), selection: getSelection(), creatorId: getCreatorId(), userId: getUserId() ]
     }

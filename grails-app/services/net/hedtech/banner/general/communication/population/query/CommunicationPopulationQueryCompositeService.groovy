@@ -3,12 +3,18 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
+import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
+
+import java.sql.Connection
+import java.sql.SQLException
 
 /**
  * Service for creating and manipulating a population query and query versions.
@@ -18,6 +24,7 @@ class CommunicationPopulationQueryCompositeService {
     def communicationPopulationQueryService
     def communicationPopulationQueryVersionService
     def communicationPopulationQueryStatementParseService
+    def sessionFactory
     def log = Logger.getLogger(this.getClass())
 
 
@@ -277,6 +284,42 @@ class CommunicationPopulationQueryCompositeService {
         }
 
         return communicationPopulationQueryStatementParseService.parse( populationQuerySql, false )
+    }
+
+    /**
+     * Fetches the count of a population selection extract
+     */
+    public int fetchPopulationSelectionExtractQueryCount( String application, String selection, String creatorId, String userId ) {
+        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = application
+        extractStatement.selection = selection
+        extractStatement.creatorId = creatorId
+        extractStatement.userId = userId
+        extractStatement.validate()
+
+        def Sql sql
+        try {
+            int maxRows = 1
+            sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+            List<GroovyRowResult> resultSet = sql.rows( extractStatement.getCountSqlStatement(), 0, 1 )
+
+            int count = 0
+            resultSet.each { row ->
+                row.each { column ->
+                    count = column.value
+                }
+            }
+
+            return count
+        } catch (SQLException e) {
+            log.error( "Failed to execute fetchPopulationSelectionExtractQueryCount with (application, selection, creatorId, userId) = (${application}, ${selection}, ${creatorId}, ${userId}).", e )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationQueryCompositeService.class, e, "fetchPopulationSelectionExtractQueryCountFailed" )
+        } catch (Exception e) {
+            log.error( "Failed to execute fetchPopulationSelectionExtractQueryCount with (application, selection, creatorId, userId) = (${application}, ${selection}, ${creatorId}, ${userId}).", e )
+            throw e
+        } finally {
+            sql?.close()
+        }
     }
 
     private void validateQueryString( CommunicationPopulationQuery query, boolean performPublishChecks = false ) {
