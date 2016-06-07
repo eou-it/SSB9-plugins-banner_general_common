@@ -17,7 +17,7 @@ import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
-import net.hedtech.banner.general.system.ldm.v6.PersonV6
+import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After

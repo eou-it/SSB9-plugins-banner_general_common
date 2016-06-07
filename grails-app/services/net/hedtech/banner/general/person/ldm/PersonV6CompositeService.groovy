@@ -12,8 +12,12 @@ import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.person.ldm.v6.NameV6
+import net.hedtech.banner.general.person.ldm.v6.PersonV6
+import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
@@ -470,9 +474,9 @@ class PersonV6CompositeService extends LdmService {
         if (role) {
             decorator = new RoleV6()
             if (role == ROLE_FACULTY) {
-                decorator.role = RoleNameV6.INSTRUCTOR.value
+                decorator.role = RoleName.INSTRUCTOR.value
             } else if (role == ROLE_STUDENT) {
-                decorator.role = RoleNameV6.STUDENT.value
+                decorator.role = RoleName.STUDENT.value
             }
             if (startDate) {
                 decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(startDate)
