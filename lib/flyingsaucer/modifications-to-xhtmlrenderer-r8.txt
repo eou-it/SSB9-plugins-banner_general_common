@@ -1,0 +1,23 @@
+1) To allow writing of PDF in page-by-page chunks, added ability to not close the output writer stream to createPDF()
+
+Source code changes in org.xhtmlrenderer.pdf.ITextRenderer:
+
+a)
+        PdfWriter writer = PdfWriter.getInstance(doc, os);
+        writer.setCloseStream( _closeStream );
+
+b) Added setter for closeStream (setCloseStream)
+
+2) iText 2.0.8+ broke binary compatibility with com.lowagie.text.pdf.BaseFont.getCharBBox(c)
+iText 2.1.7 is the most recent version (as of 07-2009). 
+Upgraded to iText 2.1.7 to allow unit testing of generated letter contents with PdfTextExtractor.
+
+See http://markmail.org/message/65sajzub3g6w36rd#query:+page:1+mid:wf6x5aiheay4c6be+state:results
+
+Source code changes in org.xhtmlrenderer.pdf.ITextFontResolver:
+
+from:
+            int[] box = _font.getCharBBox('x');
+to:
+            int[] box = _font.getCharBBox(Character.getNumericValue('x'));
+		

@@ -229,7 +229,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         List organizations = communicationOrganizationCompositeService.listOrganizations()
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Test Org")
-            defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
+            defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             defaultOrganization.mobileApplicationName = "StudentSuccess"
             defaultOrganization.clearMobileApplicationKey = "ss-key-value"
 

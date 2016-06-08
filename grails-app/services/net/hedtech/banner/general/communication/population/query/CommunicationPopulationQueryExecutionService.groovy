@@ -191,7 +191,7 @@ class CommunicationPopulationQueryExecutionService {
             extractStatement.setQueryString( queryVersion.queryString )
             return extractStatement.toSqlStatement()
         } else {
-            return queryVersion.queryString.toUpperCase()
+            return queryVersion.queryString
         }
     }
 

@@ -70,7 +70,6 @@ class CommunicationGroupSendCompositeService {
         if(!groupSend.recalculateOnSend) {
             CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
             groupSend.populationVersionId = populationVersion.id
-
         }
         groupSend = communicationGroupSendService.create( groupSend )
 
@@ -275,9 +274,7 @@ class CommunicationGroupSendCompositeService {
         }
         if(request.recalculateOnSend) {
             schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
-        }
-        else
-        {
+        } else {
             schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
         }
         groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled

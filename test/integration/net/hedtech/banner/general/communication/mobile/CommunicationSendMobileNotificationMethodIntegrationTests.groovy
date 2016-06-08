@@ -54,7 +54,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.destinationLink = "http://www.philadelphiaeagles.com"
         message.referenceId = UUID.randomUUID().toString()
 
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
@@ -70,7 +70,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendChildOrganization"
         message.referenceId = UUID.randomUUID().toString()
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
@@ -91,7 +91,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendBadEndpoint"
         message.referenceId = UUID.randomUUID().toString()
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         rootOrganization.mobileEndPointUrl = ""
@@ -150,12 +150,12 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.mobileHeadline = "testSendBadApplicationName"
         message.referenceId = UUID.randomUUID().toString()
 
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         CommunicationOrganization badOrganization = new CommunicationOrganization()
         badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
+        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = "StudentSuccess"
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
@@ -195,12 +195,12 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.mobileHeadline = "testSendBadApplicationKey"
         message.referenceId = UUID.randomUUID().toString()
 
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         CommunicationOrganization badOrganization = new CommunicationOrganization()
         badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
+        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = ""
         badOrganization.clearMobileApplicationKey = "ss-key-value"
         badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
@@ -238,7 +238,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.destinationLink = "http://www.philadelphiaeagles.com"
         message.referenceId = UUID.randomUUID().toString()
 
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
@@ -263,7 +263,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         message.destinationLink = "http://www.philadelphiaeagles.com"
         message.referenceId = UUID.randomUUID().toString()
 
-        message.externalUser = "cmobile"
+        message.externalUser = "amandamason1"
         message.push = true
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
@@ -274,7 +274,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
     protected void setUpTestOrganization() {
         rootOrganization = new CommunicationOrganization()
         rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/banner30-mobileserver/api/notification/notifications/"
+        rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
         rootOrganization.mobileApplicationName = "StudentSuccess"
         rootOrganization.clearMobileApplicationKey = "ss-key-value"
         rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )

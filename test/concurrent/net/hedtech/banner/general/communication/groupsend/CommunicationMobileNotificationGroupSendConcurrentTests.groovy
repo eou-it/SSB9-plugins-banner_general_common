@@ -54,7 +54,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         communicationGroupSendItemProcessingEngine.startRunning()
         communicationJobProcessingEngine.startRunning()
 
-        communicationSendMobileNotificationService.testOverride = [ externalUser: "cmobile" ]
+        communicationSendMobileNotificationService.testOverride = [ externalUser: "amandamason1" ]
 
         setUpDefaultMobileNotificationTemplate()
     }
@@ -161,7 +161,6 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
     @Test
     public void testPersonalization() {
-        CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testPersonalizationQuery",
@@ -173,13 +172,13 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPersonalization population" )
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-
         def isAvailable = {
             def aPopulationVersion = CommunicationPopulationVersion.get( it )
             aPopulationVersion.refresh()
             return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
         assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertEquals( 1, populationVersion.calculatedCount )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -225,7 +224,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 recalculateOnSend: false
         )
 
-        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
         sleepUntilGroupSendComplete( groupSend, 120 )
