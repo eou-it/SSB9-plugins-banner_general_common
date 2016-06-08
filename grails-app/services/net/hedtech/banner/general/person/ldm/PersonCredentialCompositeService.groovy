@@ -94,16 +94,6 @@ class PersonCredentialCompositeService extends LdmService {
     }
 
 
-    private Map getPersonCredentialDetails(List pidms) {
-        log.trace "getPersonCredentialDetails:Begin"
-        List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
-        List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
-        List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
-        log.trace "getPersonCredentialDetails:End"
-        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
-    }
-
-
     private def createDecorators(def dbRows) {
         def decorators = []
         if (dbRows) {
@@ -121,12 +111,14 @@ class PersonCredentialCompositeService extends LdmService {
                 String guid = it?.getAt(2)
 
                 PersonCredentialsDecorator persCredentialsDecorator = new PersonCredentialsDecorator(guid)
+
                 def credentials = []
                 if (dataMap.pidmToCredentialsMap.containsKey(pidm)) {
                     credentials = dataMap.pidmToCredentialsMap.get(pidm)
                 }
                 credentials << [type: CredentialType.BANNER_ID, value: bannerId]
                 persCredentialsDecorator.credentials = createCredentialDecorators(credentials)
+
                 decorators.add(persCredentialsDecorator)
             }
         }
@@ -134,7 +126,7 @@ class PersonCredentialCompositeService extends LdmService {
     }
 
 
-    private void fetchPersonsCredentialDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+    void fetchPersonsCredentialDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         def pidmToCredentialsMap = [:]
         if (pidms) {
             def pidmToSourcedIdMap = fetchSourcedIds(pidms)
@@ -144,13 +136,13 @@ class PersonCredentialCompositeService extends LdmService {
             pidms.each {
                 def credentials = []
                 pidmToCredentialsMap.put(it, credentials)
-                if (pidmToSourcedIdMap.containsKey(it)) {
+                if (pidmToSourcedIdMap.containsKey(it) && pidmToSourcedIdMap.get(it)) {
                     credentials << [type: CredentialType.BANNER_SOURCED_ID, value: pidmToSourcedIdMap.get(it)]
                 }
-                if (pidmToPartnerSystemLoginIdMap.containsKey(it)) {
+                if (pidmToPartnerSystemLoginIdMap.containsKey(it) && pidmToPartnerSystemLoginIdMap.get(it)) {
                     credentials << [type: CredentialType.BANNER_USER_NAME, value: pidmToPartnerSystemLoginIdMap.get(it)]
                 }
-                if (pidmToUdcIdMap.containsKey(it)) {
+                if (pidmToUdcIdMap.containsKey(it) && pidmToUdcIdMap.get(it)) {
                     credentials << [type: CredentialType.BANNER_UDC_ID, value: pidmToUdcIdMap.get(it)]
                 }
             }
@@ -202,7 +194,7 @@ class PersonCredentialCompositeService extends LdmService {
     }
 
 
-    private def createCredentialDecorators(def credentials) {
+    def createCredentialDecorators(def credentials) {
         def decorators = []
         if (credentials) {
             credentials.each {

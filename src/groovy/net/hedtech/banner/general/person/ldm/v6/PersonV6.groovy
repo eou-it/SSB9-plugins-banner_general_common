@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm.v6
 
+import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 
@@ -18,5 +19,6 @@ class PersonV6 {
     VisaStatusV6 visaStatus
     def religion
     List<RoleV6> roles
+    List<PersonCredential> credentials
 
 }

@@ -7,8 +7,10 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
-import net.hedtech.banner.general.common.GeneralValidationCommonConstants
+import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
+import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
@@ -40,7 +42,6 @@ class PersonCompositeService extends LdmService {
     def personIdentificationNameAlternateService
     def commonMatchingCompositeService
     PersonV6CompositeService personV6CompositeService
-    PersonCredentialCompositeService personCredentialCompositeService
 
     static final String ldmName = 'persons'
     static final String PROCESS_CODE = "HEDM"
@@ -1015,7 +1016,7 @@ class PersonCompositeService extends LdmService {
 
         Map credentialsMap = [:]
         if (["v2", "v3"].contains(getAcceptVersion(VERSIONS))) {
-            credentialsMap = personCredentialCompositeService.getPersonCredentialDetails(pidms)
+            credentialsMap = getPersonCredentialDetails(pidms)
         }
 
         if ("v3".equals(getAcceptVersion(VERSIONS))) {
@@ -1054,6 +1055,16 @@ class PersonCompositeService extends LdmService {
         persons = buildPersonRoles(persons, studentRole, pidms)
 
         persons // Map of person objects with pidm as index.
+    }
+
+
+    private Map getPersonCredentialDetails(List pidms) {
+        log.trace "getPersonCredentialDetails:Begin"
+        List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
+        List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
+        List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+        log.trace "getPersonCredentialDetails:End"
+        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
     }
 
 

@@ -22,7 +22,7 @@ import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
-import net.hedtech.banner.general.system.ldm.v6.*
+import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -39,8 +39,6 @@ class PersonV6CompositeService extends LdmService {
 
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
-    private static final String ROLE_FACULTY = "faculty"
-    private static final String ROLE_STUDENT = "student"
 
     UserRoleCompositeService userRoleCompositeService
     PersonFilterCompositeService personFilterCompositeService
@@ -48,6 +46,7 @@ class PersonV6CompositeService extends LdmService {
     VisaInformationService visaInformationService
     VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
+    PersonCredentialCompositeService personCredentialCompositeService
 
     /**
      * GET /api/persons
@@ -213,10 +212,13 @@ class PersonV6CompositeService extends LdmService {
             fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
             fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
             fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
+            personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
+
                 dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(it.pidm)]
+
                 PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(it.pidm)
                 if (personBase) {
                     dataMapForPerson << ["personBase": personBase]
@@ -227,11 +229,14 @@ class PersonV6CompositeService extends LdmService {
                         dataMapForPerson << ["religionGuid": dataMap.relCodeToGuidMap.get(personBase.religion.code)]
                     }
                 }
+
                 VisaInformation visaInfo = dataMap.pidmToVisaInfoMap.get(it.pidm)
                 if (visaInfo) {
                     dataMapForPerson << ["visaInformation": visaInfo]
                     dataMapForPerson << ["visaTypeGuid": dataMap.vtCodeToGuidMap.get(visaInfo.visaType.code)]
                 }
+
+                // roles
                 def personRoles = []
                 if (dataMap.pidmToFacultyRoleMap.containsKey(it.pidm)) {
                     personRoles << dataMap.pidmToFacultyRoleMap.get(it.pidm)
@@ -240,6 +245,15 @@ class PersonV6CompositeService extends LdmService {
                     personRoles << dataMap.pidmToStudentRoleMap.get(it.pidm)
                 }
                 dataMapForPerson << ["personRoles": personRoles]
+
+                // credentials
+                def personCredentials = []
+                if (dataMap.pidmToCredentialsMap.containsKey(it.pidm)) {
+                    personCredentials = dataMap.pidmToCredentialsMap.get(it.pidm)
+                }
+                personCredentials << [type: CredentialType.BANNER_ID, value: it.bannerId]
+                dataMapForPerson << ["personCredentials": personCredentials]
+
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
         }
@@ -290,6 +304,9 @@ class PersonV6CompositeService extends LdmService {
                     decorator.roles << createRoleV6(it.role, it.startDate, it.endDate)
                 }
             }
+            // Credentials
+            def personCredentials = dataMapForPerson["personCredentials"]
+            decorator.credentials = personCredentialCompositeService.createCredentialDecorators(personCredentials)
         }
         return decorator
     }
@@ -360,13 +377,13 @@ class PersonV6CompositeService extends LdmService {
             BigDecimal bdPidm = it[0]
             Timestamp startDate = it[1]
             Timestamp endDate = it[2]
-            pidmToFacultyRoleMap.put(bdPidm.toInteger(), [role: ROLE_FACULTY, startDate: startDate, endDate: endDate])
+            pidmToFacultyRoleMap.put(bdPidm.toInteger(), [role: RoleName.INSTRUCTOR, startDate: startDate, endDate: endDate])
         }
         // Student role
         def pidmToStudentRoleMap = [:]
         List<BigDecimal> studList = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
         studList?.each {
-            pidmToStudentRoleMap.put(it.toInteger(), [role: ROLE_STUDENT])
+            pidmToStudentRoleMap.put(it.toInteger(), [role: RoleName.STUDENT])
         }
         // Put in Map
         dataMap.put("pidmToFacultyRoleMap", pidmToFacultyRoleMap)
@@ -469,15 +486,11 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private RoleV6 createRoleV6(String role, Timestamp startDate, Timestamp endDate) {
+    private RoleV6 createRoleV6(RoleName roleName, Timestamp startDate, Timestamp endDate) {
         RoleV6 decorator
-        if (role) {
+        if (roleName) {
             decorator = new RoleV6()
-            if (role == ROLE_FACULTY) {
-                decorator.role = RoleName.INSTRUCTOR.value
-            } else if (role == ROLE_STUDENT) {
-                decorator.role = RoleName.STUDENT.value
-            }
+            decorator.role = roleName.v6
             if (startDate) {
                 decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(startDate)
             }
