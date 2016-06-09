@@ -7,6 +7,7 @@ import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EmailV6
+import net.hedtech.banner.general.system.ldm.v6.EthnicityDecorator
 import net.hedtech.banner.general.system.ldm.v6.RaceV6
 
 /**
@@ -24,6 +25,7 @@ class PersonV6 {
     List<PersonCredential> credentials
     List<EmailV6> emails
     List<RaceV6> races
+	EthnicityDecorator ethnicity
 
 
 }

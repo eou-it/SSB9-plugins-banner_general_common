@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.VisaInformationService
@@ -26,12 +27,14 @@ import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.EmailTypeReadOnly
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
+import net.hedtech.banner.general.system.ldm.EthnicityCompositeService
 import net.hedtech.banner.general.system.ldm.RaceCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EmailV6
+import net.hedtech.banner.general.system.ldm.v6.EthnicityDecorator
 import net.hedtech.banner.general.system.ldm.v6.RaceV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
@@ -61,6 +64,7 @@ class PersonV6CompositeService extends LdmService {
     EmailTypeCompositeService emailTypeCompositeService
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
+    EthnicityCompositeService ethnicityCompositeService
 
 
     /**
@@ -230,6 +234,7 @@ class PersonV6CompositeService extends LdmService {
             personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
             fetchPersonsRacesDataAndPutInMap(pidms, dataMap)
+            fetchPersonEthnicityDataAndPutInMap(dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -285,6 +290,10 @@ class PersonV6CompositeService extends LdmService {
                     dataMapForPerson << ["raceTypeGuidList": dataMap.raceCodeToGuidMap]
                 }
                 //Races
+
+                //Person Ethnicites Integration
+                dataMapForPerson << ["ethnicityInfo" : dataMap.eCodeToEthnicityMap]
+
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
         }
@@ -313,6 +322,11 @@ class PersonV6CompositeService extends LdmService {
                 // religion
                 if (personBase.religion) {
                     decorator.religion = ["id": dataMapForPerson["religionGuid"]]
+                }
+                //Ethnicites
+                if(personBase.ethnic){
+                    Map ethnicityData = dataMapForPerson["ethnicityInfo"]
+                    decorator.ethnicity =  createEthnicityV6(ethnicityData.get(personBase.ethnic))
                 }
             }
             // Names
@@ -656,5 +670,20 @@ class PersonV6CompositeService extends LdmService {
         }
         return pidmToRacesMap
     }
+    private void fetchPersonEthnicityDataAndPutInMap(Map dataMap){
+        dataMap.put("eCodeToEthnicityMap", ethnicityCompositeService.fetchGUIDs())
+    }
 
+//ethnicities
+    private EthnicityDecorator createEthnicityV6(GlobalUniqueIdentifier globalUniqueIdentifier){
+        String category = null
+        if (globalUniqueIdentifier) {
+            if (globalUniqueIdentifier.domainId == 1L) {
+                category = GeneralValidationCommonConstants.NON_HISPANIC
+            } else if (globalUniqueIdentifier.domainId == 2L) {
+                category = GeneralValidationCommonConstants.HISPANIC
+            }
+            return new EthnicityDecorator(globalUniqueIdentifier.guid, globalUniqueIdentifier.domainKey, category)
+        }
+    }
   }
