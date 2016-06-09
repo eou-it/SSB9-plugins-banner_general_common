@@ -14,15 +14,21 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.PersonBasicPersonBase
+import net.hedtech.banner.general.person.PersonEmail
+import net.hedtech.banner.general.person.PersonEmailService
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.ldm.v6.NameV6
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.EmailTypeReadOnly
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
+import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
+import net.hedtech.banner.general.system.ldm.v6.EmailV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -47,6 +53,9 @@ class PersonV6CompositeService extends LdmService {
     VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
     PersonCredentialCompositeService personCredentialCompositeService
+    PersonEmailService personEmailService
+    EmailTypeCompositeService emailTypeCompositeService
+
 
     /**
      * GET /api/persons
@@ -213,6 +222,7 @@ class PersonV6CompositeService extends LdmService {
             fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
             fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
             personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
+            fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -254,6 +264,13 @@ class PersonV6CompositeService extends LdmService {
                 personCredentials << [type: CredentialType.BANNER_ID, value: it.bannerId]
                 dataMapForPerson << ["personCredentials": personCredentials]
 
+
+                //person email integration
+                List<PersonEmail> personEmailList =  dataMap.pidmToEmailInfoMap.get(it.pidm)
+                if(personEmailList){
+                    dataMapForPerson << ["emailInfo": personEmailList]
+                    dataMapForPerson << ["emailTypeInfo": dataMap.etCodeToEmailTypeMap]
+                }
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
         }
@@ -307,8 +324,25 @@ class PersonV6CompositeService extends LdmService {
             // Credentials
             def personCredentials = dataMapForPerson["personCredentials"]
             decorator.credentials = personCredentialCompositeService.createCredentialDecorators(personCredentials)
+
+            List<PersonEmail>  personEmailList = dataMapForPerson["emailInfo"]
+            if (personEmailList){
+                Map<String,EmailTypeReadOnly> emailTypeDetailsMap = dataMapForPerson["emailTypeInfo"]
+                decorator.emails = []
+                personEmailList.each{
+                    decorator.emails << createEmailV6(it,emailTypeDetailsMap.get(it.emailType.code))
+                }
+            }
         }
         return decorator
+    }
+
+    private EmailV6 createEmailV6(PersonEmail it,EmailTypeReadOnly emailType) {
+        EmailV6 emailV6 = new EmailV6()
+        emailV6.address = it.emailAddress
+        emailV6.type = new EmailTypeDetails(emailType)
+        emailV6.preference = it.preferredIndicator ? 'primaryOverall' : ''
+       return emailV6
     }
 
 
@@ -520,6 +554,41 @@ class PersonV6CompositeService extends LdmService {
             propVal = injectedProps.get(propName)
         }
         return propVal
+    }
+
+    private void fetchPersonsEmailDataAndPutInMap(List<Integer> pidms, Map dataMap){
+
+        // Get GUIDs for Email types
+        Map etCodeToEmailTypeMap = [:]
+        etCodeToEmailTypeMap = emailTypeCompositeService.fetchAllMappedEmailTypes()
+        log.debug "Got ${etCodeToEmailTypeMap?.size() ?: 0} GUIDs for given EmailType codes"
+
+        // Get GOREMAL records for persons
+        Map pidmToEmailInfoMap = fetchPersonEmailByPIDMs(pidms,etCodeToEmailTypeMap.keySet())
+
+        // Put in Map
+        dataMap.put("pidmToEmailInfoMap", pidmToEmailInfoMap)
+        dataMap.put("etCodeToEmailTypeMap", etCodeToEmailTypeMap)
+    }
+
+    private Map fetchPersonEmailByPIDMs(List<Integer> pidms,Set<String> codes) {
+        Map pidmToEmailInfoMap = [:]
+        List<PersonEmail> emailInfo
+        if (pidms) {
+            log.debug "Getting GOREMAL records for ${pidms?.size()} PIDMs..."
+            List<PersonEmail> entities = personEmailService.fetchAllActiveEmails(pidms,codes)
+            log.debug "Got ${entities?.size()} GOREMAL records"
+            entities.each {
+                if(pidmToEmailInfoMap.containsKey(it.pidm)){
+                    emailInfo << it
+                }else{
+                    emailInfo = []
+                    emailInfo << it
+                }
+                pidmToEmailInfoMap.put(it.pidm, emailInfo)
+            }
+        }
+        return pidmToEmailInfoMap
     }
 
 }
