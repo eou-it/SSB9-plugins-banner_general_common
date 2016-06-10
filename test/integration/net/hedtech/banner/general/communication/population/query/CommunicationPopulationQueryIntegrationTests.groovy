@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.population.query
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
+import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -106,6 +107,7 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         // Assert updated domain values
         assertNotNull populationQuery?.id
         assertEquals("###", populationQuery.description) //<<< Assert updated value
+
     }
 
 
@@ -189,6 +191,25 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         shouldFail(HibernateOptimisticLockingFailureException) { populationQuery.save(failOnError: true, flush: true) }
     }
 
+    @Test
+    void testExistsAnotherNameFolder() {
+        def populationQuery = newPopulationQuery("TTTTTTTTTT")
+        populationQuery.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull populationQuery.id
+
+        Boolean falseResult = CommunicationPopulationQuery.existsAnotherNameFolder(populationQuery.id, populationQuery.name, populationQuery.folder.name)
+        assertFalse(falseResult)
+
+        def populationQuery2 = newPopulationQuery("TTTTTTTTTT")
+        populationQuery2.name = "Duplicate Folder"
+        populationQuery2.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull populationQuery2.id
+
+        Boolean trueResult = CommunicationPopulationQuery.existsAnotherNameFolder(populationQuery.id, populationQuery2.name, populationQuery2.folder.name)
+        assertTrue(trueResult)
+    }
     /*--------------------------------------------------------------*/
 
 

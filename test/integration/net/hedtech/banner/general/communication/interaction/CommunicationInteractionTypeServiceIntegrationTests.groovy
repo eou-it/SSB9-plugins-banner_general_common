@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -79,6 +80,22 @@ class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegratio
         assertNotNull interactionType
         assertEquals "###", interactionType.description
 
+        def newInteractionType2 = newCommunicationInteractionType()
+        newInteractionType2.name = "Duplicate Interaction Type"
+        newInteractionType2 = communicationInteractionTypeService.create( [domainModel: newInteractionType2] )
+        assertNotNull newInteractionType2
+        def id2 = newInteractionType2.id
+        // Find the domain
+        def savedInteractionType2 = communicationInteractionTypeService.get( id2 )
+        assertNotNull savedInteractionType2?.id
+        // Update domain values
+        savedInteractionType2.name = newInteractionType.name
+        try {
+            communicationInteractionTypeService.update( [domainModel: savedInteractionType2] )
+            Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
+        } catch (ApplicationException e) {
+            assertEquals("@@r1:not.unique.message@@", e.message)
+        }
     }
 
     @Test
