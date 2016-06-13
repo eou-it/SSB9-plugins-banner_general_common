@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -154,9 +155,13 @@ class CommunicationInteractionType implements Serializable {
 
         def interactionType
         CommunicationInteractionType.withSession { session ->
-            interactionType = session.getNamedQuery('CommunicationInteractionType.existsAnotherNameFolder')
-                    .setString('folderName', folderName).setString('interactionTypeName', interactionTypeName).setLong('id', interactionTypeId).list()[0]
-
+            session.setFlushMode(FlushMode.MANUAL);
+            try {
+                interactionType = session.getNamedQuery('CommunicationInteractionType.existsAnotherNameFolder')
+                        .setString('folderName', folderName).setString('interactionTypeName', interactionTypeName).setLong('id', interactionTypeId).list()[0]
+            } finally {
+                session.setFlushMode(FlushMode.AUTO)
+            }
         }
         return (interactionType != null)
     }

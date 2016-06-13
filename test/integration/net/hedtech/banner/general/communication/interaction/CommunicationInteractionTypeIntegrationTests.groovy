@@ -155,7 +155,26 @@ class CommunicationInteractionTypeIntegrationTests extends BaseIntegrationTestCa
             interactionType.save( failOnError: true, flush: true )
         }
     }
-    
+
+    @Test
+    void testExistsAnotherNameFolder() {
+        def interactionType = newCommunicationInteractionType()
+        interactionType.save( failOnError: true, flush: true )
+        assertNotNull interactionType?.id
+
+        Boolean falseResult = CommunicationInteractionType.existsAnotherNameFolder(interactionType.id, interactionType.name, interactionType.folder.name)
+        assertFalse(falseResult)
+
+        def interactionType2 = newCommunicationInteractionType()
+        interactionType2.name = "Duplicate Interaction Type"
+        interactionType2.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull interactionType2.id
+
+        Boolean trueResult = CommunicationInteractionType.existsAnotherNameFolder(interactionType.id, interactionType2.name, interactionType2.folder.name)
+        assertTrue(trueResult)
+    }
+
     private def newCommunicationInteractionType() {
         def interactionType = new CommunicationInteractionType(
                 // Required fields

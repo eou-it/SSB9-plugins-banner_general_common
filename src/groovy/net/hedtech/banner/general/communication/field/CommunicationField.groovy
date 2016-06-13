@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -236,10 +237,14 @@ class CommunicationField implements Serializable {
 
         def query
         CommunicationField.withSession { session ->
-            query = session.getNamedQuery('CommunicationField.existsAnotherName')
-                    .setString('fieldName', fieldName)
-                    .setLong('id', fieldId).list()[0]
-
+            session.setFlushMode(FlushMode.MANUAL);
+            try {
+                query = session.getNamedQuery('CommunicationField.existsAnotherName')
+                        .setString('fieldName', fieldName)
+                        .setLong('id', fieldId).list()[0]
+            } finally {
+                session.setFlushMode(FlushMode.AUTO)
+            }
         }
         return (query != null)
     }

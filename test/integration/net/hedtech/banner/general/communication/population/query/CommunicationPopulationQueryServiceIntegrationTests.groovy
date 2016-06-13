@@ -11,6 +11,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -117,6 +118,24 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         // Assert updated domain values
         assertNotNull populationQuery
         assertEquals "###", populationQuery.description
+
+        def populationQuery2 = newPopulationQuery( false, false, "Duplicate Query" )
+        populationQuery2 = communicationPopulationQueryService.create( [domainModel: populationQuery2] )
+        assertNotNull populationQuery2
+        def id2 = populationQuery2.id
+
+        // Find the domain
+        populationQuery2 = populationQuery2.get( id2 )
+        assertNotNull populationQuery2?.id
+
+        // Update domain values
+        populationQuery2.name = populationQuery.name
+        try {
+            populationQuery2 = communicationPopulationQueryService.update( [domainModel: populationQuery2] )
+            Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
+        } catch (ApplicationException e) {
+            assertEquals("@@r1:not.unique.message@@", e.message)
+        }
     }
 
 

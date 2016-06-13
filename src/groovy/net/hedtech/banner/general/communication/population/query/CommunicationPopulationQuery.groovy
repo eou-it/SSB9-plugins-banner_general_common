@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population.query
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 
 import javax.persistence.*
@@ -190,9 +191,13 @@ class CommunicationPopulationQuery implements Serializable {
 
         def query
         CommunicationPopulationQuery.withSession { session ->
-            query = session.getNamedQuery('CommunicationPopulationQuery.existsAnotherNameFolder')
-                    .setString('folderName', folderName).setString('queryName', queryName).setLong('id', queryId).list()[0]
-
+            session.setFlushMode(FlushMode.MANUAL);
+            try {
+                query = session.getNamedQuery('CommunicationPopulationQuery.existsAnotherNameFolder')
+                        .setString('folderName', folderName).setString('queryName', queryName).setLong('id', queryId).list()[0]
+            } finally {
+                session.setFlushMode(FlushMode.AUTO)
+            }
         }
         return (query != null)
     }

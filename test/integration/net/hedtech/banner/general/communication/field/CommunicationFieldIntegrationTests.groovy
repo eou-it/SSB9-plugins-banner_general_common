@@ -184,6 +184,26 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testExistsAnotherName() {
+        def communicationField = newCommunicationField()
+        communicationField.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull communicationField.id
+
+        Boolean falseResult = CommunicationField.existsAnotherName(communicationField.id, communicationField.name)
+        assertFalse(falseResult)
+
+        def communicationField2 = newCommunicationField()
+        communicationField2.name = "Duplicate Field"
+        communicationField2.immutableId = UUID.randomUUID().toString();
+        communicationField2.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull communicationField2.id
+
+        Boolean trueResult = CommunicationField.existsAnotherName(communicationField.id, communicationField2.name)
+        assertTrue(trueResult)
+    }
 
     private def newCommunicationField() {
         def communicationField = new CommunicationField(

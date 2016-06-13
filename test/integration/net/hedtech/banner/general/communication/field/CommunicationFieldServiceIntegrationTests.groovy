@@ -3,9 +3,11 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.field
 
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -121,9 +123,9 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testUpdateCommunicationField() {
         def communicationField = newCommunicationField()
-        def newCommunicationField = communicationFieldService.create( [domainModel: communicationField] )
-        assertNotNull newCommunicationField
-        def id = newCommunicationField.id
+        communicationField = communicationFieldService.create( [domainModel: communicationField] )
+        assertNotNull communicationField
+        def id = communicationField.id
         // Find the domain
         def savedCommunicationField = communicationFieldService.get( id )
         assertNotNull savedCommunicationField?.id
@@ -135,6 +137,20 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         // Assert updated domain values
         assertNotNull communicationField
         assertEquals "###", communicationField.formatString
+
+        //Test exists same name
+        def field2 = newCommunicationField()
+        field2.name = "field2"
+        field2.immutableId = UUID.randomUUID().toString()
+        field2 = communicationFieldService.create(field2)
+
+        communicationField.name = field2.name
+        try {
+            communicationFieldService.update(communicationField)
+            Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
+        } catch (ApplicationException e) {
+            assertEquals("@@r1:fieldNameAlreadyExists@@", e.message)
+        }
 
     }
 
