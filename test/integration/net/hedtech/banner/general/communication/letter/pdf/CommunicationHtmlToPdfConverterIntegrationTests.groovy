@@ -10,7 +10,6 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import org.xhtmlrenderer.pdf.ITextRenderer
 
 /**
  * Created by mbrzycki on 6/8/16.
@@ -38,17 +37,17 @@ class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTes
     @Test
     void directPdf() {
         Document document = new Document();
-        OutputStream os = new File( "direct.pdf" ).newOutputStream()
-        try {
-            PdfWriter.getInstance( document, os );
-            document.open();
-            document.add(new Paragraph("Hello world"));
-            document.close();
-        } catch (DocumentException e) { //handle the error
-            e.printStackTrace()
-        } finally {
-            os.close()
-        }
+//        OutputStream os = new File( "direct.pdf" ).newOutputStream()
+//        try {
+//            PdfWriter.getInstance( document, os );
+//            document.open();
+//            document.add(new Paragraph("Hello world"));
+//            document.close();
+//        } catch (DocumentException e) { //handle the error
+//            e.printStackTrace()
+//        } finally {
+//            os.close()
+//        }
     }
 
 //    @Test
@@ -91,14 +90,14 @@ class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTes
         assertNotNull( pdfContent )
         assertTrue( new String( pdfContent ).startsWith( "%PDF" ) )
 
-        File file = new File( "simpleTest.pdf" )
-        file.setBytes( pdfContent )
+//        File file = new File( "simpleTest.pdf" )
+//        file.setBytes( pdfContent )
 
         String pdfContentAsString = converter.toPdfString( htmlContent ).replace( "iText", "BCM Rules!" )
         assertNotNull( pdfContentAsString )
         assertTrue( pdfContentAsString.startsWith( "%PDF" ) )
-        File file2 = new File( "simpleTest2.pdf" )
-        file2.setBytes( pdfContent )
+//        File file2 = new File( "simpleTest2.pdf" )
+//        file2.setBytes( pdfContent )
     }
 
 }
