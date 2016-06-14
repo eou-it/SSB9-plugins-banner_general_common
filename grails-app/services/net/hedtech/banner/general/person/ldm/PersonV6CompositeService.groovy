@@ -24,7 +24,7 @@ import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.general.person.PersonRaceService
 import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.EmailTypeReadOnly
+
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.EthnicityCompositeService
@@ -355,7 +355,7 @@ class PersonV6CompositeService extends LdmService {
 
             List<PersonEmail>  personEmailList = dataMapForPerson["emailInfo"]
             if (personEmailList){
-                Map<String,EmailTypeReadOnly> emailTypeDetailsMap = dataMapForPerson["emailTypeInfo"]
+                Map emailTypeDetailsMap = dataMapForPerson["emailTypeInfo"]
                 decorator.emails = []
                 personEmailList.each{
                     decorator.emails << createEmailV6(it,emailTypeDetailsMap.get(it.emailType.code))
@@ -376,10 +376,10 @@ class PersonV6CompositeService extends LdmService {
         return decorator
     }
 
-    private EmailV6 createEmailV6(PersonEmail it,EmailTypeReadOnly emailType) {
+    private EmailV6 createEmailV6(PersonEmail it,def emailType) {
         EmailV6 emailV6 = new EmailV6()
         emailV6.address = it.emailAddress
-        emailV6.type = new EmailTypeDetails(emailType)
+        emailV6.type = new EmailTypeDetails(emailType[0].code, emailType[0].description, emailType[1].guid, emailType[2].translationValue)
         emailV6.preference = it.preferredIndicator ? 'primaryOverall' : ''
        return emailV6
     }

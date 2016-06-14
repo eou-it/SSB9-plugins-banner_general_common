@@ -8,6 +8,7 @@ import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.InstitutionalDescription
+import net.hedtech.banner.general.utility.DateConvertHelperService
 
 import java.sql.SQLException
 
@@ -213,6 +214,49 @@ class UserRoleCompositeService extends LdmService {
 
         return [pidms: pidms, totalCount: totalCount]
     }
+
+
+    /**
+     * Fetch students from DB
+     *
+     * @param sortField "firstName" or "lastName"
+     * @param sortOrder "asc" or "desc"
+     * @param max maximum number of rows to retrieve
+     * @param offset first row to retrieve (numbered from 0)
+     */
+    public def fetchProspectiveStudent(String sortField, String sortOrder, int max, int offset) {
+        List<Integer> pidms = []
+        def totalCount = 0
+
+        if (sortField?.trim() == "firstName") {
+            sortField = "a.spriden_first_name"
+        } else {
+            sortField = "a.spriden_last_name"
+        }
+        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
+            sortOrder = "asc"
+        }
+
+        if (isStudentInstalled()) {
+            try {
+                // Query for PIDMs
+                def sql = getSQLforFetchingStudents(sortField, sortOrder)
+                def results = executeNativeSQL(sql, max, offset)
+                pidms = results.collect {
+                    if (it instanceof BigDecimal) it.toInteger()
+                    else it[0].toInteger()
+                }
+                // Query for total count
+                sql = getSQLforFetchingStudents(null, null, true)
+                totalCount = executeNativeSQL(sql, 0, 0, true)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
 
 
     public def fetchStudentsByPIDMs(List<Integer> pidms) {
