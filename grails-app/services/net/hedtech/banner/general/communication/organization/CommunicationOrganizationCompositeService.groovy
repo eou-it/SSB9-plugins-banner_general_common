@@ -55,6 +55,31 @@ class CommunicationOrganizationCompositeService {
         removeDependentMailboxAccountsAndEmailServerProperties( organization )
     }
 
+    Boolean emailDetailExists(id) {
+        CommunicationOrganization org =  communicationOrganizationService.get( id )
+        CommunicationOrganization rootOrg = CommunicationOrganization.fetchRoot()
+        if ((org?.senderMailboxAccount && org?.replyToMailboxAccount) &&
+                (org?.sendEmailServerProperties || rootOrg?.sendEmailServerProperties))
+            return true;
+        else
+            return false;
+    }
+
+    Boolean mobileDetailExists() {
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        if (rootorg?.mobileApplicationName && rootorg?.mobileEndPointUrl)
+            return true;
+        else
+            return false;
+    }
+
+    def fetchRootReadOnly() {
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        return ['id':rootorg?.id, 'name':rootorg?.name, 'isRoot':true, 'version':rootorg.version]
+
+    }
+
+
     private void createDependentMailboxAccountAndEmailServerProperties( CommunicationOrganization newOrganization, CommunicationOrganization oldOrganization = null) {
         if (newOrganization.senderMailboxAccount) {
             newOrganization.senderMailboxAccount.type = CommunicationMailboxAccountType.Sender

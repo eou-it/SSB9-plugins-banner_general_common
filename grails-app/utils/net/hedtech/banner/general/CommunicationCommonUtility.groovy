@@ -182,7 +182,7 @@ class CommunicationCommonUtility {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAdmin)
                 return true;
-            else if (usermap.isAuthor && (usermap.userId).equals(createdBy))
+            else if (usermap.isAuthor && (usermap.userId).equals(createdBy.toUpperCase()))
                 return true;
             return false;
         } catch (Exception e) {
@@ -198,7 +198,7 @@ class CommunicationCommonUtility {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAdmin)
                 return true;
-            else if (usermap.isUser && (usermap.userId).equals(createdBy))
+            else if (usermap.isUser && (usermap.userId).equals(createdBy.toUpperCase()))
                 return true;
             return false;
         } catch (Exception e) {
