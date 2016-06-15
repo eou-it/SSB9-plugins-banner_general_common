@@ -394,6 +394,42 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         }
     }
 
+    @Test
+    void testFetchPopulationSelectionExtractQueryCount() {
+        int count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'ADMISSIONS', '199610_APPLICANTS', 'SAISUSR', 'SAISUSR' )
+        assertEquals( 4, count )
+
+        count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'WHATEVER', 'WHATEVER', 'WHATEVER', 'WHATEVER' )
+        assertEquals( 0, count )
+
+        try {
+            count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( null, null, null, null )
+            fail( "Expected emptyApplication" )
+        } catch (ApplicationException e) {
+            assertEquals( e.getMessage(), "@@r1:emptyApplication@@")
+        }
+
+        try {
+            count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'ADMISSIONS', null, null, null )
+            fail( "Expected emptySelection" )
+        } catch (ApplicationException e) {
+            assertEquals( e.getMessage(), "@@r1:emptySelection@@")
+        }
+
+        try {
+            count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'ADMISSIONS', '199610_APPLICANTS', null, null )
+            fail( "Expected emptyCreatorId" )
+        } catch (ApplicationException e) {
+            assertEquals( e.getMessage(), "@@r1:emptyCreatorId@@")
+        }
+
+        try {
+            count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'ADMISSIONS', '199610_APPLICANTS', 'SAISUSR', null )
+            fail( "Expected emptyUserId" )
+        } catch (ApplicationException e) {
+            assertEquals( e.getMessage(), "@@r1:emptyUserId@@")
+        }
+    }
 
 
 //    @Test
