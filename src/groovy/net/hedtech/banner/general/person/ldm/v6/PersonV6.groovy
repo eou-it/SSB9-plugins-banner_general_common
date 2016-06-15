@@ -25,7 +25,6 @@ class PersonV6 {
     List<PersonCredential> credentials
     List<EmailV6> emails
     List<RaceV6> races
-	EthnicityDecorator ethnicity
-
+    EthnicityDecorator ethnicity
 
 }
