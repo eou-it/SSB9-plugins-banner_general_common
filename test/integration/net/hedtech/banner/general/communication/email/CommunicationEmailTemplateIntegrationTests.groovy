@@ -1,7 +1,7 @@
 /*********************************************************************************
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.folder.CommunicationFolder

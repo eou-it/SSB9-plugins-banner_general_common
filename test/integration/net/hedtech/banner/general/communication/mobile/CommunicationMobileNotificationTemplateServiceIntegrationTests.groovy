@@ -1,13 +1,15 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.mobile
 
 import groovy.time.DatumDependentDuration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationExpirationPolicy
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before

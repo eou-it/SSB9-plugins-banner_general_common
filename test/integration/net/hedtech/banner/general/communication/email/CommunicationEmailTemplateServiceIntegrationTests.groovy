@@ -1,7 +1,7 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests crud methods provided by communication template service.
  */
-class CommunicationTemplateServiceIntegrationTests extends BaseIntegrationTestCase {
+class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_valid_emailTemplate_active = true
 
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
