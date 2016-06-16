@@ -11,6 +11,8 @@
 package net.hedtech.banner.general.communication.template
 
 import groovy.sql.Sql
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType

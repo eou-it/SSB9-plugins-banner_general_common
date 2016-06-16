@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.template
 
 import grails.validation.ValidationException
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase

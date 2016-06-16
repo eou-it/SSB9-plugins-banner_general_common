@@ -1,12 +1,15 @@
 /*********************************************************************************
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
+import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 
 
 class CommunicationEmailTemplateService extends CommunicationTemplateService {

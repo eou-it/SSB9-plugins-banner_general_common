@@ -9,7 +9,6 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.joda.time.format.ISODateTimeFormat

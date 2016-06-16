@@ -16,7 +16,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before

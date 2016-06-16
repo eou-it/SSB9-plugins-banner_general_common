@@ -4,11 +4,15 @@
 package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
-import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
+import net.hedtech.banner.general.communication.letter.CommunicationMergedLetterTemplate
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobileNotificationTemplate
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.person.PersonUtility
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -120,63 +124,12 @@ class CommunicationTemplateMergeService {
     }
 
     /**
-     * Validate template variables.
-     * Checks to make sure that each of the variables defined in the template actually exists.
+     * Merges each of the email specific template fields with the recipient data previously calculated
+     *
+     * @param template The template containing the tokens
+     * @param data the map of values that will be substituted for each matching token
+     * @return CommunicationMergedEmailTemplate
      */
-    Boolean allTemplateVariablesExist( Long templateId ) {
-        Boolean result = true
-        List<String> templateVariables = extractTemplateVariables( templateId )
-
-        if (templateVariables.size() > 0) {
-            templateVariables.each { fieldName ->
-                CommunicationField communicationField = CommunicationField.findByName( fieldName )
-                if (communicationField == null || communicationField?.status != CommunicationFieldStatus.PRODUCTION) {
-                    result = false
-                }
-            }
-        }
-        result
-    }
-
-    private CommunicationEmailMessage createEmailMessage( CommunicationMergedEmailTemplate mergedEmailTemplate ) throws AddressException {
-        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
-
-        // create a set of EmailAddress for fromList
-//            if (getFromList() != null && getFromList().trim().length() > 0) {
-//                message.setSenders( createAddresses( getFromList().trim(), ";" ) );
-//            }
-
-        // create a set of EmailAddress for toList
-        if (mergedEmailTemplate.toList && mergedEmailTemplate.toList.trim().length() > 0) {
-            emailMessage.setToList( createAddresses( mergedEmailTemplate.toList.trim(), ";" ) );
-        }
-
-//        // create a set of EmailAddress for ccList
-//        if (getCcList() != null && getCcList().trim().length() > 0) {
-//            message.setCcList( createAddresses( getCcList().trim(), ";" ) );
-//        }
-//
-//        // create a set of EmailAddress for bccList
-//        if (getBccList() != null && getBccList().trim().length() > 0) {
-//            message.setBccList( createAddresses( getBccList().trim(), ";" ) );
-//        }
-
-        emailMessage.setSubjectLine( mergedEmailTemplate.subject );
-        emailMessage.setMessageBody( mergedEmailTemplate.content );
-        emailMessage.setMessageBodyContentType( "text/html; charset=UTF-8" );
-        emailMessage.setDateSent( new Date() );
-
-        return emailMessage;
-    }
-
-
-/**
- * Merges each of the email specific template fields with the recipient data previously calculated
- *
- * @param template The template containing the tokens
- * @param data the map of values that will be substituted for each matching token
- * @return CommunicationMergedEmailTemplate
- */
     CommunicationMergedEmailTemplate mergeEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate, CommunicationRecipientData recipientData ) {
         if (log.isDebugEnabled())
             log.debug( "Merging recipient data into a CommunicationEmailTemplate " )
@@ -189,12 +142,30 @@ class CommunicationTemplateMergeService {
     }
 
     /**
+     * Merges each of the letter specific template fields with the recipient data previously calculated
+     *
+     * @param template The template containing the tokens
+     * @param data the map of values that will be substituted for each matching token
+     * @return CommunicationMergedLetterTemplate
+     */
+    CommunicationMergedLetterTemplate mergeLetterTemplate( CommunicationLetterTemplate template, CommunicationRecipientData recipientData ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "Merging recipient data into a CommunicationLetterTemplate " )
+        }
+
+        CommunicationMergedLetterTemplate mergedTemplate = new CommunicationMergedLetterTemplate()
+        mergedTemplate.toAddress = merge( template.toAddress, recipientData.fieldValues )
+        mergedTemplate.content = merge( template.content, recipientData.fieldValues )
+        return mergedTemplate
+    }
+
+    /**
      * Merges each of the mobile notification specific template fields with the recipient data previously calculated
      *
      * @param template The template containing the tokens
      * @param data the map of values that will be substituted for each matching token
      */
-    CommunicationMergedMobileNotificationTemplate mergeTemplate( CommunicationMobileNotificationTemplate template, CommunicationRecipientData recipientData ) {
+    CommunicationMergedMobileNotificationTemplate mergeMobileTemplate( CommunicationMobileNotificationTemplate template, CommunicationRecipientData recipientData ) {
         log.debug( "Merging recipient data into a CommunicationMergedMobileNotificationTemplate" )
 
         CommunicationMergedMobileNotificationTemplate mergedMessage = new CommunicationMergedMobileNotificationTemplate()
@@ -229,11 +200,11 @@ class CommunicationTemplateMergeService {
         return renderedCommunicationFields
     }
 
-/**
- * Returns a CommunicationMergedEmailTemplate containing the template content with all data fields replaced with their preview value
- * @param CommunicationEmailTemplate
- * @return CommunicationMergedEmailTemplate
- */
+    /**
+     * Returns a CommunicationMergedEmailTemplate containing the template content with all data fields replaced with their preview value
+     * @param CommunicationEmailTemplate
+     * @return CommunicationMergedEmailTemplate
+     */
     CommunicationMergedEmailTemplate renderMergedEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationEmailTemplate with preview values only." )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
@@ -241,6 +212,14 @@ class CommunicationTemplateMergeService {
         communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject ?: "", renderPreviewValues( communicationEmailTemplate.subject ?: "" ) )
         communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content ?: "", renderPreviewValues( communicationEmailTemplate.content ?: "" ) )
         communicationMergedEmailTemplate
+    }
+
+    CommunicationMergedLetterTemplate renderMergedLetterTemplate( CommunicationLetterTemplate communicationLetterTemplate ) {
+        if (log.isDebugEnabled()) log.debug( "Rendering CommunicationLetterTemplate with preview values only." )
+        CommunicationMergedLetterTemplate communicationMergedLetterTemplate = new CommunicationMergedEmailTemplate()
+        communicationMergedLetterTemplate.toAddress = merge( communicationLetterTemplate.toAddress ?: "", renderPreviewValues( communicationLetterTemplate.toAddress ?: "" ) )
+        communicationMergedLetterTemplate.content = merge( communicationLetterTemplate.content ?: "", renderPreviewValues( communicationLetterTemplate.content ?: "" ) )
+        return communicationMergedLetterTemplate
     }
 
     CommunicationMergedMobileNotificationTemplate renderMergedMobileNotificationTemplate( CommunicationMobileNotificationTemplate communicationMobileNotificationTemplate ) {
@@ -311,6 +290,20 @@ class CommunicationTemplateMergeService {
         }
 
         templateVariables
+    }
+
+    List<String> extractTemplateVariables( CommunicationLetterTemplate communicationLetterTemplate ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "Extracting template variables from CommunicationLetterTemplate ${communicationLetterTemplate.name}." )
+        }
+        def templateVariables = []
+        extractTemplateVariables( communicationLetterTemplate.toAddress ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationLetterTemplate.content ).each {
+            templateVariables << it
+        }
+        return templateVariables
     }
 
     /**

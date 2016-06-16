@@ -5,8 +5,15 @@ package net.hedtech.banner.general.communication.job
 
 import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
+import net.hedtech.banner.general.communication.letter.CommunicationLetterMessage
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
+import net.hedtech.banner.general.communication.letter.CommunicationMergedLetterTemplate
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.*
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import org.apache.log4j.Logger
@@ -57,8 +64,18 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
     }
 
     @Override
+    void visitLetter(CommunicationLetterTemplate template) {
+        CommunicationMergedLetterTemplate mergedLetterTemplate = communicationTemplateMergeService.mergeLetterTemplate( template, recipientData )
+
+        CommunicationLetterMessage letterMessage = new CommunicationLetterMessage()
+        letterMessage.toAddress = mergedLetterTemplate.toAddress
+        letterMessage.content = mergedLetterTemplate.content
+        this.message = letterMessage
+    }
+
+    @Override
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
-        CommunicationMergedMobileNotificationTemplate mergedMobileNotificationTemplate = communicationTemplateMergeService.mergeTemplate( template, recipientData )
+        CommunicationMergedMobileNotificationTemplate mergedMobileNotificationTemplate = communicationTemplateMergeService.mergeMobileTemplate( template, recipientData )
 
         CommunicationMobileNotificationMessage mobileNotificationMessage = new CommunicationMobileNotificationMessage(
             mobileHeadline: mergedMobileNotificationTemplate.mobileHeadline,

@@ -2,8 +2,9 @@
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 
-package net.hedtech.banner.general.communication.item
+package net.hedtech.banner.general.communication.mobile
 
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.service.ServiceBase
 
 class CommunicationMobileNotificationItemService extends ServiceBase {

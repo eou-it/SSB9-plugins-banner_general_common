@@ -1,11 +1,14 @@
 /*********************************************************************************
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.mobile
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.item.CommunicationChannel
+import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
 import org.hibernate.annotations.Type
 
 import javax.persistence.*

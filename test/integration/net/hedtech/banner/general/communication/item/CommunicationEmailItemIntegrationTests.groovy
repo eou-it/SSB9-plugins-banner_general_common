@@ -3,11 +3,11 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.item
 
+import net.hedtech.banner.general.communication.email.CommunicationEmailItem
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

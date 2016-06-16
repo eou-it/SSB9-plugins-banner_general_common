@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication
 
 import grails.util.GrailsNameUtils
-import groovy.sql.Sql
 import net.hedtech.banner.configuration.ConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
@@ -27,7 +26,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryCompositeService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import com.icegreen.greenmail.util.*
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
@@ -37,7 +36,6 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken as UPAT
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 

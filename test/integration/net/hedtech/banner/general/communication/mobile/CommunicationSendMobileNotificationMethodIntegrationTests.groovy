@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.mobile
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.organization.*
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationExpirationPolicy
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.commons.logging.LogFactory
 import org.junit.After

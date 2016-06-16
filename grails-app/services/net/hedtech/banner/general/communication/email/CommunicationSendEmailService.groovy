@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import net.hedtech.banner.general.communication.item.CommunicationEmailItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization

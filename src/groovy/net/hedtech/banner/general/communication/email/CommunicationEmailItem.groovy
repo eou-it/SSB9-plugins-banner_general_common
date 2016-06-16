@@ -1,60 +1,76 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
- *********************************************************************************/
-package net.hedtech.banner.general.communication.template
+ ********************************************************************************* */
+package net.hedtech.banner.general.communication.email
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.item.CommunicationChannel
+import net.hedtech.banner.general.communication.item.CommunicationItem
 
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
 
+/**
+ * CommunicationItem.
+ * Defines the attributes for an email item
+ */
 @Entity
-@Table(name = "GCBEMTL")
-@PrimaryKeyJoinColumn(name = "GCBEMTL_SURROGATE_ID")
+@Table(name = "GCREITM")
+@PrimaryKeyJoinColumn(name = "GCREITM_SURROGATE_ID")
 @EqualsAndHashCode
 @ToString
-class CommunicationEmailTemplate extends CommunicationTemplate implements Serializable {
-
+class CommunicationEmailItem extends CommunicationItem implements Serializable {
 
     /**
      * The BCC (blind carbon copy) attribute of an email message with placeholders in raw format.
      */
-    @Column(name = "GCBEMTL_BCCLIST")
+    @Column(name = "GCREITM_BCCLIST")
     String bccList
 
     /**
      * The CC (carbon copy) attribute of an email message with placeholders in raw format.
      */
-    @Column(name = "GCBEMTL_CCLIST")
+    @Column(name = "GCREITM_CCLIST")
     String ccList
 
     /**
      * The message body of the email with placeholders in raw format.
      */
-    @Column(name = "GCBEMTL_CONTENT")
+    @Column(name = "GCREITM_CONTENT")
     String content
 
     /**
      * The FROM attribute of an email message with placeholders in raw format.
      */
-    @Column(name = "GCBEMTL_FROMLIST")
+    @Column(name = "GCREITM_FROMLIST")
     String fromList
 
     /**
      * The SUBJECT attribute of an email message with placeholders in raw format.
      */
-    @Column(name = "GCBEMTL_SUBJECT")
+    @Column(name = "GCREITM_SUBJECT")
     String subject
 
     /**
      * The TO attribute of an email message with placeholders in raw format.
      */
-    @Column(name = "GCBEMTL_TOLIST")
+    @Column(name = "GCREITM_TOLIST")
     String toList
+
+    /**
+     * The sender of the email
+     */
+    @Column(name = "GCREITM_SENDER")
+    String sender
+
+    /**
+     * The reply to in this email
+     */
+    @Column(name = "GCREITM_REPLYTO")
+    String replyTo
+
 
     static constraints = {
         bccList(nullable: true, maxSize: 1020)
@@ -63,16 +79,7 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         fromList(nullable: true, maxSize: 1020)
         subject(nullable: true, maxSize: 1020)
         toList(nullable: true, maxSize: 1020)
-
-    }
-
-    @Override
-    CommunicationChannel getCommunicationChannel() {
-        return CommunicationChannel.EMAIL
-    }
-
-    @Override
-    final CommunicationTemplateVisitor accept(CommunicationTemplateVisitor visitor) {
-        visitor.visitEmail( this )
+        sender(nullable: true)
+        replyTo(nullable: true)
     }
 }

@@ -10,7 +10,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before

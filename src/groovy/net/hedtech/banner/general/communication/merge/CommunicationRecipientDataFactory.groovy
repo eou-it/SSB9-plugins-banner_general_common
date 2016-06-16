@@ -5,8 +5,9 @@ package net.hedtech.banner.general.communication.merge
 
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
 import org.apache.log4j.Logger
@@ -49,9 +50,16 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
         communicationTemplateMergeService.extractTemplateVariables(template.subject?.toString()).each {
             fieldNames << it
         }
-        communicationTemplateMergeService.extractTemplateVariables(template.subject?.toString()).each {
+        communicationTemplateMergeService.extractTemplateVariables(template.content?.toString()).each {
             fieldNames << it
         }
+        fieldNames = fieldNames.unique()
+        recipientData = createCommunicationRecipientData( template, fieldNames )
+    }
+
+    void visitLetter(CommunicationLetterTemplate template) {
+        // Can this list be cached somewhere for similar processing on the same template but different user
+        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables(template.toAddress?.toString())
         communicationTemplateMergeService.extractTemplateVariables(template.content?.toString()).each {
             fieldNames << it
         }

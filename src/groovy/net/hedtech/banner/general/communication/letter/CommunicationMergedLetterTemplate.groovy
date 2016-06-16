@@ -1,5 +1,5 @@
 /** *****************************************************************************
- © 2014 SunGard Higher Education.  All Rights Reserved.
+ © 2016 SunGard Higher Education.  All Rights Reserved.
 
  CONFIDENTIAL BUSINESS INFORMATION
 
@@ -8,7 +8,7 @@
  NOR USED FOR ANY PURPOSE OTHER THAN THAT WHICH IT IS SPECIFICALLY PROVIDED
  WITHOUT THE WRITTEN PERMISSION OF THE SAID COMPANY
  ****************************************************************************** */
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.letter
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -19,8 +19,7 @@ import groovy.transform.ToString
  */
 @ToString
 @EqualsAndHashCode
-class CommunicationMergedEmailTemplate implements Serializable {
-    String toList
-    String subject
+class CommunicationMergedLetterTemplate implements Serializable {
+    String toAddress
     String content
 }

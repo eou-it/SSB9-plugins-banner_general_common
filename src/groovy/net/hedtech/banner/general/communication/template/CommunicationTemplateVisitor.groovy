@@ -3,6 +3,10 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
+
 /**
  * Communication Template Visitor allows subclasses of CommunicationTemplate a call
  * back mechanism akin to a visitor or double dispatch pattern often in the form of passing
@@ -16,5 +20,7 @@ public interface CommunicationTemplateVisitor {
     void visitEmail( CommunicationEmailTemplate template )
 
     void visitMobileNotification( CommunicationMobileNotificationTemplate template )
+
+    void visitLetter( CommunicationLetterTemplate template )
 
 }

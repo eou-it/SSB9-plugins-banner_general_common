@@ -1,17 +1,20 @@
 /*******************************************************************************
  Copyright 2015 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.communication.mobile
+package net.hedtech.banner.general.communication.letter
 
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
+import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationMethod
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 /**
- * Provides a service for submitting a mobile notification.
+ * Provides a service for generating a letter.
  */
-class CommunicationSendMobileNotificationService {
+class CommunicationGenerateLetterService {
     private Log log = LogFactory.getLog( this.getClass() )
     def communicationMobileNotificationItemService
     def communicationOrganizationService

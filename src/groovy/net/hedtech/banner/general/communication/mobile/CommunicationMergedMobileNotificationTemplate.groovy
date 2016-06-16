@@ -1,4 +1,4 @@
-package net.hedtech.banner.general.communication.template
+package net.hedtech.banner.general.communication.mobile
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString

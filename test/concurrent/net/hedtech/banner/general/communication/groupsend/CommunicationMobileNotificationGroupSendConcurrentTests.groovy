@@ -4,35 +4,27 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.json.JsonSlurper
-import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
-import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem
-import net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItemService
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItem
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
-import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
-import net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-
-import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull

@@ -6,8 +6,7 @@ package net.hedtech.banner.general.communication.merge
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
-import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
-import net.hedtech.banner.general.communication.template.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before

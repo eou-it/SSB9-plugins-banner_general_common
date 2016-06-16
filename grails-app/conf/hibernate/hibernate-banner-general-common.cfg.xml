@@ -37,8 +37,9 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount"/>
 
         <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplate"/>
-        <mapping class="net.hedtech.banner.general.communication.template.CommunicationEmailTemplate"/>
-        <mapping class="net.hedtech.banner.general.communication.template.CommunicationMobileNotificationTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.email.CommunicationEmailTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate"/>
         <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplateView"/>
         <mapping class="net.hedtech.banner.general.communication.job.CommunicationJob"/>
 
@@ -58,8 +59,8 @@ there is no concept of an 'entity manager' within this project.
 
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItemView"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationEmailItem"/>
-        <mapping class="net.hedtech.banner.general.communication.item.CommunicationMobileNotificationItem"/>
+        <mapping class="net.hedtech.banner.general.communication.email.CommunicationEmailItem"/>
+        <mapping class="net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItem"/>
 
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
         <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>
