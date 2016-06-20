@@ -1041,7 +1041,7 @@ class PersonCompositeService extends LdmService {
         }
         if ("v3".equals(getAcceptVersion(VERSIONS))) {
             NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
-            List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType(pidms, nameType.code)
+            List<PersonIdentificationNameAlternate> personIdentificationNameAlternateList = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, [nameType.code])
             if (personIdentificationNameAlternateList) {
                 persons = buildPersonAlternateByNameType(personIdentificationNameAlternateList, persons)
             }
@@ -1732,9 +1732,7 @@ class PersonCompositeService extends LdmService {
 
     private PersonIdentificationNameAlternate getPersonIdentificationNameAlternateByNameType(Integer pidm) {
         NameType nameType = getBannerNameTypeFromHEDMNameType('Birth')
-        PersonIdentificationNameAlternate personIdentificationNameAlternate = PersonIdentificationNameAlternate.fetchAllByPidmsAndNameType([pidm], nameType.code)[0]
-
-        return personIdentificationNameAlternate
+        return personIdentificationNameAlternateService.fetchAllMostRecentlyCreated([pidm], [nameType.code])[0]
     }
 
 

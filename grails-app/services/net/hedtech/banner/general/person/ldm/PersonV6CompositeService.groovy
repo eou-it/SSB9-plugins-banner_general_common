@@ -14,10 +14,12 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
+import net.hedtech.banner.general.person.ldm.v6.NameAlternateV6
 import net.hedtech.banner.general.person.ldm.v6.NameV6
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.NameTypeService
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
@@ -52,6 +54,9 @@ class PersonV6CompositeService extends LdmService {
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
     EthnicityCompositeService ethnicityCompositeService
+    NameTypeService nameTypeService
+    PersonNameTypeCompositeService personNameTypeCompositeService
+    PersonIdentificationNameAlternateService personIdentificationNameAlternateService
 
     /**
      * GET /api/persons
@@ -215,6 +220,7 @@ class PersonV6CompositeService extends LdmService {
             def dataMap = [:]
             fetchPersonsGuidDataAndPutInMap(personSurrogateIds, dataMap)
             fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
+            fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
             fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
             fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
             personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
@@ -240,6 +246,12 @@ class PersonV6CompositeService extends LdmService {
                     }
                 }
 
+                // names
+                dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
+                dataMapForPerson << ["nameTypeCodeToGuidMap": dataMap.nameTypeCodeToGuidMap]
+                dataMapForPerson << ["personAlternateNames": dataMap.pidmToAlternateNamesMap.get(it.pidm)]
+
+                // visaStatus
                 VisaInformation visaInfo = dataMap.pidmToVisaInfoMap.get(it.pidm)
                 if (visaInfo) {
                     dataMapForPerson << ["visaInformation": visaInfo]
@@ -264,14 +276,14 @@ class PersonV6CompositeService extends LdmService {
                 personCredentials << [type: CredentialType.BANNER_ID, value: it.bannerId]
                 dataMapForPerson << ["personCredentials": personCredentials]
 
-                //person email integration
+                // emails
                 List<PersonEmail> personEmailList = dataMap.pidmToEmailInfoMap.get(it.pidm)
                 if (personEmailList) {
                     dataMapForPerson << ["emailInfo": personEmailList]
                     dataMapForPerson << ["emailTypeInfo": dataMap.etCodeToEmailTypeMap]
                 }
 
-                //Races
+                // races
                 List<PersonRace> personRaceList = dataMap.pidmToRaceInfoMap.get(it.pidm)
                 if (personRaceList) {
                     dataMapForPerson << ["raceInformationList": personRaceList]
@@ -317,6 +329,12 @@ class PersonV6CompositeService extends LdmService {
             decorator.names = []
             NameV6 nameV6 = createNameV6(personCurrent, personBase)
             decorator.names << nameV6
+            def bannerNameTypeToHedmNameTypeMap = dataMapForPerson["bannerNameTypeToHedmNameTypeMap"]
+            def nameTypeCodeToGuidMap = dataMapForPerson["nameTypeCodeToGuidMap"]
+            List<PersonIdentificationNameAlternate> personAlternateNames = dataMapForPerson["personAlternateNames"]
+            personAlternateNames.each {
+                decorator.names << createNameAlternateV6(it, bannerNameTypeToHedmNameTypeMap.get(it.nameType.code), nameTypeCodeToGuidMap.get(it.nameType.code))
+            }
             // visaStatus
             VisaInformation visaInfo = dataMapForPerson["visaInformation"]
             if (visaInfo) {
@@ -395,6 +413,30 @@ class PersonV6CompositeService extends LdmService {
         dataMap.put("ctCodeToGuidMap", ctCodeToGuidMap)
         dataMap.put("relCodeToGuidMap", relCodeToGuidMap)
         dataMap.put("usEthnicCodeToGuidMap", usEthnicCodeToGuidMap)
+    }
+
+
+    private void fetchPersonsAlternateNameDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHEDMNameTypeMap()
+        log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
+        def nameTypeCodeToGuidMap = nameTypeService.fetchGUIDs(bannerNameTypeToHedmNameTypeMap.keySet().toList())
+        log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
+        List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
+        log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
+        Map pidmToAlternateNamesMap = [:]
+        entities.each {
+            List<PersonIdentificationNameAlternate> personAlternateNames = []
+            if (pidmToAlternateNamesMap.containsKey(it.pidm)) {
+                personAlternateNames = pidmToAlternateNamesMap.get(it.pidm)
+            } else {
+                pidmToAlternateNamesMap.put(it.pidm, personAlternateNames)
+            }
+            personAlternateNames.add(it)
+        }
+        // Put in Map
+        dataMap.put("bannerNameTypeToHedmNameTypeMap", bannerNameTypeToHedmNameTypeMap)
+        dataMap.put("nameTypeCodeToGuidMap", nameTypeCodeToGuidMap)
+        dataMap.put("pidmToAlternateNamesMap", pidmToAlternateNamesMap)
     }
 
 
@@ -569,12 +611,12 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    public NameV6 createNameV6(PersonIdentificationNameCurrent personCurrent, PersonBasicPersonBase personBase) {
+    private NameV6 createNameV6(PersonIdentificationNameCurrent personCurrent, PersonBasicPersonBase personBase) {
         NameV6 decorator
         if (personCurrent) {
             decorator = new NameV6()
             decorator.type = ["category": NameTypeCategory.PERSONAL.v6]
-            decorator.fullName = prepareFullName(personCurrent.firstName, personCurrent.middleName, personCurrent.lastName)
+            decorator.fullName = personCurrent.fullName
             decorator.firstName = personCurrent.firstName
             decorator.middleName = personCurrent.middleName
             decorator.lastName = personCurrent.lastName
@@ -588,24 +630,18 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private String prepareFullName(String firstName, String middleName, String lastName) {
-        StringBuilder sb = new StringBuilder()
-
-        if (firstName) {
-            sb.append(firstName)
-            sb.append(' ')
+    private NameAlternateV6 createNameAlternateV6(PersonIdentificationNameAlternate personAlternate, NameTypeCategory nameTypeCategory, String nameTypeGuid) {
+        NameAlternateV6 decorator
+        if (personAlternate) {
+            decorator = new NameAlternateV6()
+            decorator.type = ["category": nameTypeCategory.v6, "detail": ["id": nameTypeGuid]]
+            decorator.fullName = personAlternate.fullName
+            decorator.firstName = personAlternate.firstName
+            decorator.middleName = personAlternate.middleName
+            decorator.lastName = personAlternate.lastName
+            decorator.lastNamePrefix = personAlternate.surnamePrefix
         }
-
-        if (middleName) {
-            sb.append(middleName)
-            sb.append(' ')
-        }
-
-        if (lastName) {
-            sb.append(lastName)
-        }
-
-        return sb.toString()
+        return decorator
     }
 
 
