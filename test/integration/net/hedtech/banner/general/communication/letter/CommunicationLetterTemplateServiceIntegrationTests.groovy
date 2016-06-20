@@ -5,7 +5,6 @@ package net.hedtech.banner.general.communication.letter
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -85,119 +84,71 @@ class CommunicationLetterTemplateServiceIntegrationTests extends BaseIntegration
         assertEquals( "Updated description", template.description )
     }
 
-//    @Test
-//    void testNoToAddressPublish() {
-//        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
-//                name: "testUpdateTemplate",
-//                validFrom: new Date(),
-//                validTo: null,
-//                folder: defaultFolder,
-//                content: "testToAddressCannotBeNull"
-//        )
-//
-//        template = communicationLetterTemplateService.create([domainModel: template])
-//
-//        try {
-//            template = (CommunicationLetterTemplate) communicationLetterTemplateService.create([domainModel: template])
-//            fail( "Expected application exception from validate exception on creation." )
-//        } catch (ApplicationException e ) {
-//            assertEquals( "", e.message )
-//        }
-//
-//        template.toAddress = "Los Angeles"
-//        template = (CommunicationLetterTemplate) communicationLetterTemplateService.create([domainModel: template])
-//        assertNotNull template.id
-//
-//        template.toAddress = ""
-//        try {
-//            template = (CommunicationLetterTemplate) communicationLetterTemplateService.update([domainModel: template])
-//            fail( "Expected application exception from validate exception on update." )
-//        } catch (ApplicationException ae) {
-//            assertEquals( "ValidationException", ae.wrappedException.getClass().simpleName )
-//        }
-//
-//        template.duration = 2
-//        communicationLetterTemplateService.update([domainModel: template])
-//    }
-//
-//    @Test
-//    void testNoExpirationPublish() {
-//        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
-//            name: "testNoExpirationPublish",
-//            validFrom: new Date(),
-//            validTo: null,
-//            folder: defaultFolder
-//        )
-//        template = communicationLetterTemplateService.create( [domainModel: template] )
-//        assertNotNull template.id
-//        assertFalse template.published
-//
-//        assertCannotPublish( template, "letterHeadlineFieldRequiredToPublish" )
-//        template.letterHeadline = "a letter headline"
-//        template = communicationLetterTemplateService.publish( [domainModel: template] )
-//        assertTrue template.published
-//    }
-//
-//
-//    @Test
-//    void testDateTimeExpirationPublish() {
-//        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
-//            name: "testDateTimeExpirationPublish",
-//            validFrom: new Date(),
-//            validTo: null,
-//            folder: defaultFolder,
-//            expirationPolicy: CommunicationLetterExpirationPolicy.DATE_TIME
-//        )
-//        template = communicationLetterTemplateService.create( [domainModel: template] )
-//        assertNotNull template.id
-//        assertFalse template.published
-//
-//        assertCannotPublish( template, "letterHeadlineFieldRequiredToPublish" )
-//        template.letterHeadline = "a letter headline"
-//        assertCannotPublish( template, "expirationDateRequiredToPublish" )
-//
-//        Date today = new Date()
-//        DatumDependentDuration period = new DatumDependentDuration(0, 0, 2, 0, 0, 0, 0)
-//        Date expirationDate = period + today
-//        template.expirationDateTime = expirationDate
-//        template = communicationLetterTemplateService.publish( [domainModel: template] )
-//        assertTrue template.published
-//    }
-//
-//    @Test
-//    void testDurationExpirationPublish() {
-//        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
-//                name: "testDurationExpirationPublish",
-//                validFrom: new Date(),
-//                validTo: null,
-//                folder: defaultFolder,
-//                expirationPolicy: CommunicationLetterExpirationPolicy.DURATION
-//        )
-//        template = communicationLetterTemplateService.create( [domainModel: template] )
-//        assertNotNull template.id
-//        assertFalse template.published
-//
-//        assertCannotPublish( template, "letterHeadlineFieldRequiredToPublish" )
-//        template.letterHeadline = "a letter headline"
-//        assertCannotPublish( template, "durationRequiredToPublish" )
-//
-//        template.duration = 5
-//        template = communicationLetterTemplateService.publish( [domainModel: template] )
-//        assertTrue template.published
-//    }
+    @Test
+    void testDelete() {
+        Date today = new Date()
+        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
+                name: "testDelete",
+                validFrom: today,
+                folder: defaultFolder
+        )
 
+        template = communicationLetterTemplateService.create( template )
+        assertNotNull template.id
 
-    private void assertCannotPublish( CommunicationTemplate template, String reason ) {
-        Boolean originalPublished = template.published
-        try {
-            communicationLetterTemplateService.publish( template )
-            fail( reason )
-        } catch (ApplicationException ae ) {
-            assertApplicationException ae, reason
-        } finally {
-            template.published = originalPublished
-        }
+        assertNotNull( CommunicationLetterTemplate.get( template.id ) )
+
+        communicationTemplateService.delete( template )
+
+        assertNull( CommunicationLetterTemplate.get( template.id ) )
     }
 
+    @Test
+    void testNoToAddressPublish() {
+        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
+                name: "testUpdateTemplate",
+                validFrom: new Date(),
+                validTo: null,
+                folder: defaultFolder,
+                content: "testToAddressCannotBeNull"
+        )
+
+        template = (CommunicationLetterTemplate) communicationLetterTemplateService.create([domainModel: template])
+
+        try {
+            template = (CommunicationLetterTemplate) communicationLetterTemplateService.publish( template )
+            fail "Expected template to fail publish because of no toAddress"
+        } catch (ApplicationException e ) {
+            assertEquals( "@@r1:toAddressRequiredToPublish@@", e.message )
+        }
+
+        template.toAddress = "Los Angeles"
+        template = (CommunicationLetterTemplate) communicationLetterTemplateService.publish(template)
+        assertTrue template.published
+    }
+
+    @Test
+    void testNoContentPublish() {
+        CommunicationLetterTemplate template = new CommunicationLetterTemplate(
+                name: "testUpdateTemplate",
+                validFrom: new Date(),
+                validTo: null,
+                folder: defaultFolder,
+                toAddress: "attn: santa claus, 1 north pole way, north pole"
+        )
+
+        template = (CommunicationLetterTemplate) communicationLetterTemplateService.create([domainModel: template])
+
+        try {
+            template = (CommunicationLetterTemplate) communicationLetterTemplateService.publish(template)
+            fail "Expected template to fail publish because of no content"
+        } catch (ApplicationException e) {
+            assertEquals("@@r1:contentRequiredToPublish@@", e.message)
+        }
+
+        template.content = "A deployment of BCM"
+        template = (CommunicationLetterTemplate) communicationLetterTemplateService.publish(template)
+        assertTrue template.published
+    }
 
 }

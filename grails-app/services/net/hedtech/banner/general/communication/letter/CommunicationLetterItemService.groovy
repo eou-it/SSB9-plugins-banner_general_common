@@ -12,7 +12,7 @@ class CommunicationLetterItemService extends ServiceBase {
     def preCreate( domainModelOrMap ) {
         CommunicationLetterItem letterItem = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationLetterItem
         letterItem.createDate = new Date()
-        letterItem.communicationChannel = CommunicationChannel.EMAIL
+        letterItem.communicationChannel = CommunicationChannel.LETTER
     }
 
 }
