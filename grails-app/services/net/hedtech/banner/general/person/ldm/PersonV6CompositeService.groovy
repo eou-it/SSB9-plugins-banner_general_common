@@ -260,11 +260,8 @@ class PersonV6CompositeService extends LdmService {
 
                 // roles
                 def personRoles = []
-                if (dataMap.pidmToFacultyRoleMap.containsKey(it.pidm)) {
-                    personRoles << dataMap.pidmToFacultyRoleMap.get(it.pidm)
-                }
-                if (dataMap.pidmToStudentRoleMap.containsKey(it.pidm)) {
-                    personRoles << dataMap.pidmToStudentRoleMap.get(it.pidm)
+                if (dataMap.pidmToRolesMap.containsKey(it.pidm)) {
+                    personRoles = dataMap.pidmToRolesMap.get(it.pidm)
                 }
                 dataMapForPerson << ["personRoles": personRoles]
 
@@ -334,6 +331,15 @@ class PersonV6CompositeService extends LdmService {
             List<PersonIdentificationNameAlternate> personAlternateNames = dataMapForPerson["personAlternateNames"]
             personAlternateNames.each {
                 decorator.names << createNameAlternateV6(it, bannerNameTypeToHedmNameTypeMap.get(it.nameType.code), nameTypeCodeToGuidMap.get(it.nameType.code))
+            }
+            // SPBPERS_LEGAL_NAME is the primary source
+            NameAlternateV6 legalNameAlternateV6 = createLegalNameAlternateV6(personBase?.legalName)
+            if (legalNameAlternateV6) {
+                // Remove "legal" name type
+                decorator.names.removeAll {
+                    it.type.category == NameTypeCategory.LEGAL.v6
+                }
+                decorator.names << legalNameAlternateV6
             }
             // visaStatus
             VisaInformation visaInfo = dataMapForPerson["visaInformation"]
@@ -460,24 +466,27 @@ class PersonV6CompositeService extends LdmService {
 
 
     private void fetchPersonsRoleDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        def pidmToRolesMap = [:]
+        pidms.each {
+            pidmToRolesMap.put(it, [])
+        }
         // Faculty role
-        def pidmToFacultyRoleMap = [:]
         List<Object[]> facList = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
         facList?.each {
             BigDecimal bdPidm = it[0]
             Timestamp startDate = it[1]
             Timestamp endDate = it[2]
-            pidmToFacultyRoleMap.put(bdPidm.toInteger(), [role: RoleName.INSTRUCTOR, startDate: startDate, endDate: endDate])
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.INSTRUCTOR, startDate: startDate, endDate: endDate]
         }
         // Student role
-        def pidmToStudentRoleMap = [:]
         List<BigDecimal> studList = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
         studList?.each {
-            pidmToStudentRoleMap.put(it.toInteger(), [role: RoleName.STUDENT])
+            def personRoles = pidmToRolesMap.get(it.toInteger())
+            personRoles << [role: RoleName.STUDENT]
         }
         // Put in Map
-        dataMap.put("pidmToFacultyRoleMap", pidmToFacultyRoleMap)
-        dataMap.put("pidmToStudentRoleMap", pidmToStudentRoleMap)
+        dataMap.put("pidmToRolesMap", pidmToRolesMap)
     }
 
 
@@ -640,6 +649,17 @@ class PersonV6CompositeService extends LdmService {
             decorator.middleName = personAlternate.middleName
             decorator.lastName = personAlternate.lastName
             decorator.lastNamePrefix = personAlternate.surnamePrefix
+        }
+        return decorator
+    }
+
+
+    private NameAlternateV6 createLegalNameAlternateV6(String fullName) {
+        NameAlternateV6 decorator
+        if (fullName && fullName.trim().length() > 0) {
+            decorator = new NameAlternateV6()
+            decorator.type = ["category": NameTypeCategory.LEGAL.v6]
+            decorator.fullName = fullName
         }
         return decorator
     }
