@@ -1,5 +1,6 @@
 package net.hedtech.banner.general.communication.job
 
+import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.template.CommunicationMessage
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
@@ -17,6 +18,7 @@ class CommunicationJobProcessorService {
     def communicationSendEmailService
     def communicationSendMobileNotificationService
     def communicationTemplateService
+    def communicationGenerateLetterService
 
     public void performCommunicationJob( Long jobId ) {
         log.debug( "performed communication job with job id = ${jobId}." )
@@ -34,7 +36,9 @@ class CommunicationJobProcessorService {
 
         CommunicationMessageDispatcher messageDispatcher = new CommunicationMessageDispatcher(
             communicationSendEmailService: communicationSendEmailService,
-            communicationSendMobileNotificationService: communicationSendMobileNotificationService
+            communicationSendMobileNotificationService: communicationSendMobileNotificationService,
+            communicationGenerateLetterService: communicationGenerateLetterService
+
         )
         messageDispatcher.dispatch( template, recipientData, message )
     }

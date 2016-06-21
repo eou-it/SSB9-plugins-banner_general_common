@@ -33,6 +33,7 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
     public void dispatch( CommunicationTemplate template, CommunicationRecipientData recipientData, CommunicationMessage message ) {
         assert( communicationSendEmailService )
         assert( communicationSendMobileNotificationService )
+        assert( communicationGenerateLetterService )
 
         assert( template )
         assert( recipientData )

@@ -6,19 +6,32 @@ package net.hedtech.banner.general.communication
 import grails.util.GrailsNameUtils
 import net.hedtech.banner.configuration.ConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplateService
+import net.hedtech.banner.general.communication.field.CommunicationFieldService
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.folder.CommunicationFolderService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendCompositeService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendRequest
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
 import net.hedtech.banner.general.communication.job.CommunicationJob
+import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
+import net.hedtech.banner.general.communication.letter.CommunicationLetterItemService
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplateService
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItemService
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplateService
+import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
@@ -50,28 +63,25 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
 
     def communicationGroupSendMonitor
-    CommunicationGroupSendCompositeService communicationGroupSendCompositeService
-    def communicationMailboxAccountService
-    def communicationGroupSendService
-    def communicationGroupSendItemService
-    CommunicationPopulationQueryCompositeService communicationPopulationQueryCompositeService
-    CommunicationPopulationCompositeService communicationPopulationCompositeService
-    def communicationPopulationExecutionService
-    def communicationPopulationSelectionListService
-    def communicationFolderService
-    def communicationTemplateService
-    def communicationEmailTemplateService
-    def communicationMobileNotificationTemplateService
-    def communicationOrganizationCompositeService
     def communicationGroupSendItemProcessingEngine
     def communicationJobProcessingEngine
-    def communicationRecipientDataService
-    def communicationJobService
-    def communicationItemService
-    def communicationEmailItemService
-    def communicationMobileNotificationItemService
-    def communicationFieldService
-    def CommunicationSendMobileNotificationService
+
+    CommunicationGenerateLetterService communicationGenerateLetterService
+    CommunicationLetterItemService communicationLetterItemService
+    CommunicationGroupSendCompositeService communicationGroupSendCompositeService
+    CommunicationMailboxAccountService communicationMailboxAccountService
+    CommunicationGroupSendService communicationGroupSendService
+    CommunicationGroupSendItemService communicationGroupSendItemService
+    CommunicationPopulationQueryCompositeService communicationPopulationQueryCompositeService
+    CommunicationPopulationCompositeService communicationPopulationCompositeService
+    CommunicationFolderService communicationFolderService
+    CommunicationEmailTemplateService communicationEmailTemplateService
+    CommunicationLetterTemplateService communicationLetterTemplateService
+    CommunicationMobileNotificationTemplateService communicationMobileNotificationTemplateService
+    CommunicationOrganizationCompositeService communicationOrganizationCompositeService
+    CommunicationMobileNotificationItemService communicationMobileNotificationItemService
+    CommunicationFieldService communicationFieldService
+    CommunicationSendMobileNotificationService CommunicationSendMobileNotificationService
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
@@ -192,6 +202,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")
                 sql.executeUpdate("Delete from GCRCITM")
@@ -199,6 +210,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBRDAT")
                 sql.executeUpdate("Delete from GCRGSIM")
                 sql.executeUpdate("Delete from GCBGSND")
+                sql.executeUpdate("Delete from GCBLTPL")
                 sql.executeUpdate("Delete from GCBEMTL")
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBTMPL")

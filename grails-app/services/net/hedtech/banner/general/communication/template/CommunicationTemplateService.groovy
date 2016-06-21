@@ -126,7 +126,7 @@ class CommunicationTemplateService extends ServiceBase {
                 throw CommunicationExceptionFactory.createApplicationException( CommunicationTemplate.class, "folderFieldRequiredToPublish" )
             }
 
-            validatePublished( template );
+            validatePublished( template )
         }
     }
 }

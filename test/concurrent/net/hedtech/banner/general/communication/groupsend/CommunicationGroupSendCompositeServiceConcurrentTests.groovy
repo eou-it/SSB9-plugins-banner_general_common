@@ -19,9 +19,6 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-
-import javax.mail.internet.MimeMessage
-
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
@@ -118,10 +115,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         sleepUntilCommunicationJobsComplete( 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
-
-        MimeMessage[] messages = mailServer.getReceivedMessages();
-        assertNotNull(messages);
-        assertEquals(5, messages.length);
 
         sleepUntilGroupSendComplete( groupSend, 3 * 60 )
 
@@ -279,10 +272,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
 
-        MimeMessage[] messages = mailServer.getReceivedMessages();
-        assertNotNull(messages);
-        assertEquals(5, messages.length);
-
         sleepUntilGroupSendComplete( groupSend, 3 * 60 )
 
         // test delete group send
@@ -363,10 +352,6 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         sleepUntilCommunicationJobsComplete( 10 * 60 )
         countCompleted = CommunicationJob.fetchCompleted().size()
         assertEquals( 5, countCompleted )
-
-        MimeMessage[] messages = mailServer.getReceivedMessages();
-        assertNotNull(messages);
-        assertEquals(5, messages.length);
 
         sleepUntilGroupSendComplete( groupSend, 3 * 60 )
 

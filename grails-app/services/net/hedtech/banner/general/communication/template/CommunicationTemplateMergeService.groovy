@@ -293,6 +293,7 @@ class CommunicationTemplateMergeService {
     }
 
     List<String> extractTemplateVariables( CommunicationLetterTemplate communicationLetterTemplate ) {
+        assert( communicationLetterTemplate != null )
         if (log.isDebugEnabled()) {
             log.debug( "Extracting template variables from CommunicationLetterTemplate ${communicationLetterTemplate.name}." )
         }

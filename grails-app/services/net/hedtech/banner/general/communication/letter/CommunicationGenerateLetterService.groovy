@@ -1,12 +1,9 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.letter
 
-import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItem
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
-import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
-import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationMethod
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -16,35 +13,27 @@ import org.apache.commons.logging.LogFactory
  */
 class CommunicationGenerateLetterService {
     private Log log = LogFactory.getLog( this.getClass() )
-    def communicationMobileNotificationItemService
-    def communicationOrganizationService
+    def communicationLetterItemService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
-    def testOverride
 
 
     /**
-     * Sends a mobile notification message (single) based on the contents of mobile notification message passed.
+     * Sends a letter message (single) based on the contents of letter message passed.
      *
      * @param organization the organization address config to use for obtaining configuration and authentication credentials
-     * @param message the mobile notification message to send
+     * @param message the letter message to send
      * @param recipientData a recipient data describing details of the target recipient
      */
-    public void send( Long organizationId, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData ) {
-        log.debug( "sending mobile notification message" )
+    public void send( Long organizationId, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
+        log.debug( "creating letter message" )
 
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
 
         CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(organizationId)
-        if (testOverride) {
-            message.externalUser = testOverride.externalUser
-        }
-
-        CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService );
-        notificationMethod.execute( message, senderOrganization )
 
         try {
-            track( senderOrganization, message, recipientData, notificationMethod.serverResponse )
+            track( senderOrganization, message, recipientData )
         } catch (Throwable t) {
             log.error( t )
             throw t;
@@ -53,9 +42,9 @@ class CommunicationGenerateLetterService {
     }
 
 
-    private void track( CommunicationOrganization organization, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData, String serverResponse ) {
-        log.debug( "tracking mobile notification message sent")
-        CommunicationMobileNotificationItem item = new CommunicationMobileNotificationItem()
+    private void track( CommunicationOrganization organization, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
+        log.debug( "tracking letter message sent")
+        CommunicationLetterItem item = new CommunicationLetterItem()
         // standard communication log entries
         item.setOrganizationId( organization.id )
         item.setReferenceId( recipientData.getReferenceId() )
@@ -64,10 +53,12 @@ class CommunicationGenerateLetterService {
         item.setSentDate( message.dateSent )
         item.setTemplateId(recipientData.templateId)
 
-        item.serverResponse = serverResponse
+        // letter specific fields
+        item.toAddress = message.toAddress
+        item.content = message.content
 
-        item = communicationMobileNotificationItemService.create( item )
-        log.debug( "recorded mobile notification item sent with item id = ${item.id}." )
+        item = communicationLetterItemService.create( item )
+        log.debug( "recorded letter item sent with item id = ${item.id}." )
     }
 
 }

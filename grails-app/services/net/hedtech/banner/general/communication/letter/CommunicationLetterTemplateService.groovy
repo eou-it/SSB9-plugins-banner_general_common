@@ -13,15 +13,15 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplateSe
 
 
 class CommunicationLetterTemplateService extends CommunicationTemplateService {
-    CommunicationTemplateMergeService communicationTemplateMergeService
 
     @Override
     protected void validatePublished( CommunicationTemplate template) {
+        assert( template != null )
         CommunicationLetterTemplate letterTemplate = (CommunicationLetterTemplate) template
         if (!letterTemplate.toAddress || letterTemplate.toAddress.trim().size() == 0 ) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterTemplate.class, "toAddressRequiredToPublish" )
         }
-        if (!letterTemplate.content || letterTemplate.subject.size() == 0 ) {
+        if (!letterTemplate.content || letterTemplate.content.size() == 0 ) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterTemplate.class, "contentRequiredToPublish" )
         }
 
