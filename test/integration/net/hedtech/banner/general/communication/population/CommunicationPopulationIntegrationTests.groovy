@@ -106,6 +106,25 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
         assertEquals("###", population.description) //<<< Assert updated value
     }
 
+    @Test
+    void testExistsAnotherNameFolder() {
+        def population = newPopulation("TEST")
+        population.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull population.id
+
+        Boolean falseResult = CommunicationPopulation.existsAnotherNameFolder(population.id, population.name, population.folder.name)
+        assertFalse(falseResult)
+
+        def population2 = newPopulation("TEST")
+        population2.name = "Duplicate Folder"
+        population2.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull population2.id
+
+        Boolean trueResult = CommunicationPopulation.existsAnotherNameFolder(population.id, population2.name, population2.folder.name)
+        assertTrue(trueResult)
+    }
 
     @Test
     void testDeletePopulation() {

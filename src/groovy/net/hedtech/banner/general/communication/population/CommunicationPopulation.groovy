@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import org.hibernate.FlushMode
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -166,9 +167,13 @@ class CommunicationPopulation implements Serializable {
 
         def population
         CommunicationPopulation.withSession { session ->
-            population = session.getNamedQuery('CommunicationPopulation.existsAnotherNameFolder')
-                    .setString('folderName', folderName).setString('populationName', populationName).setLong('id', populationId).list()[0]
-
+            session.setFlushMode(FlushMode.MANUAL);
+            try {
+                population = session.getNamedQuery('CommunicationPopulation.existsAnotherNameFolder')
+                        .setString('folderName', folderName).setString('populationName', populationName).setLong('id', populationId).list()[0]
+            } finally {
+                session.setFlushMode(FlushMode.AUTO)
+            }
         }
         return (population != null)
     }

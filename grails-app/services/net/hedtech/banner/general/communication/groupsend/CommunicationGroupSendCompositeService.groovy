@@ -375,19 +375,20 @@ class CommunicationGroupSendCompositeService {
             sql.execute(
             [
                 state:CommunicationGroupSendItemExecutionState.Ready.toString(),
-                group_send_key:groupSend.id
+                group_send_key:groupSend.id,
+                current_time:new Date()
             ],
             """
             INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
                                             ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date, gcrgsim_started_date)
                            SELECT gcbgsnd_surrogate_id
                                  ,gcrlent_pidm
-                                 ,SYSDATE
+                                 , :current_time
                                  , :state
                                  , SYS_GUID()
                                  ,gcbgsnd_user_id
-                                 ,SYSDATE
-                                 ,SYSDATE
+                                 , :current_time
+                                 , :current_time
                              FROM gcrslis, gcrlent, gcbgsnd, gcrpvid
                             WHERE gcbgsnd_popversion_id = gcrpvid_popv_id
                                 and gcrslis_surrogate_id = gcrpvid_slis_id
