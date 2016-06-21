@@ -376,7 +376,7 @@ class CommunicationGroupSendCompositeService {
             [
                 state:CommunicationGroupSendItemExecutionState.Ready.toString(),
                 group_send_key:groupSend.id,
-                current_time:new Date()
+                current_time:new Date().toTimestamp()
             ],
             """
             INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime

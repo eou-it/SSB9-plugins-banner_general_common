@@ -7,6 +7,8 @@ import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.service.ServiceBase
 import org.apache.log4j.Logger
@@ -41,8 +43,14 @@ class CommunicationManualInteractionService extends ServiceBase {
         if (manualInteraction.getInteractorPidm() == null)
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:interactorIdCannotBeNull@@")
 
-        if (manualInteraction.getInteractionDate() == null)
+        if (manualInteraction.getInteractionDate() == null) {
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:interactionDateCannotBeNull@@")
+        } else {
+            Date now = new Date(System.currentTimeMillis())
+            if ((manualInteraction.getInteractionDate()).after(now)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationManualInteractionService.class, "invalidInteractionDate")
+            }
+        }
 
         def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
         if (creatorId == null) {
@@ -92,8 +100,14 @@ class CommunicationManualInteractionService extends ServiceBase {
         if (manualInteraction.getInteractorPidm() == null)
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:interactorIdCannotBeNull@@")
 
-        if (manualInteraction.getInteractionDate() == null)
+        if (manualInteraction.getInteractionDate() == null) {
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:interactionDateCannotBeNull@@")
+        } else {
+            Date now = new Date(System.currentTimeMillis())
+            if ((manualInteraction.getInteractionDate()).after(now)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationManualInteractionService.class, "invalidInteractionDate")
+            }
+        }
     }
 
     def preDelete(domainModelOrMap) {

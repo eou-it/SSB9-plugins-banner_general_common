@@ -120,6 +120,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
         def newEmailItem = communicationEmailItemService.create( [domainModel: newValidForCreateEmailItem()] )
         assertNotNull( newEmailItem.id )
+        assertEquals(CommunicationChannel.EMAIL, newEmailItem.communicationChannel)
 
     }
 
