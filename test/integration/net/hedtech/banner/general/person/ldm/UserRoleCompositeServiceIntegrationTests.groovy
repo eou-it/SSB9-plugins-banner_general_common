@@ -23,6 +23,9 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def institution = InstitutionalDescription.fetchByKey()
         assertTrue institution.studentInstalled
+        assertTrue institution.financeInstalled
+        assertTrue institution.hrInstalled
+        assertTrue institution.alumniInstalled
     }
 
 
@@ -192,5 +195,223 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def results1 = userRoleCompositeService.fetchAllByRole([role: "student"])
         assertEquals 0, results1.pidms?.size()
     }
+
+
+    @Test
+    void testEmployeeListWhenHRNotInstalled() {
+        def institution = InstitutionalDescription.fetchByKey()
+        institution.hrInstalled = false
+        institution.save(flush: true, failOnError: true)
+
+        def results = userRoleCompositeService.fetchAllByRole([role: "employee"])
+        assertEquals 0, results.count
+        assertEquals 0, results.pidms?.size()
+    }
+
+
+    @Test
+    void testAlumniListWhenAlumniNotInstalled() {
+        def institution = InstitutionalDescription.fetchByKey()
+        institution.alumniInstalled = false
+        institution.save(flush: true, failOnError: true)
+
+        def results = userRoleCompositeService.fetchAllByRole([role: "employee"])
+        assertEquals 0, results.count
+        assertEquals 0, results.pidms?.size()
+    }
+
+    @Test
+    void testListEmployeePersonsCount() {
+        def results = userRoleCompositeService.fetchEmployees(params.sort?.trim(), params.order?.trim(), 500, 0)
+
+        assertTrue results.totalCount > 0
+    }
+
+    @Test
+    void testListAlumniPersonsCount() {
+        def results = userRoleCompositeService.fetchAlumnis(params.sort?.trim(), params.order?.trim(), 500, 0)
+
+        assertTrue results.totalCount > 0
+    }
+
+
+    @Test
+    void testListEmployeePersonsWithOutPagination() {
+        def results = userRoleCompositeService.fetchEmployees(params.sort?.trim(), params.order?.trim(), 500, 0)
+        def actual = 0
+        if (results.totalCount > 500) actual = 500
+        else actual = results.totalCount.toInteger()
+
+        // service forces pagination of 500
+        assertEquals actual, results?.pidms?.size()
+        results?.pidms?.each { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+    }
+
+
+    @Test
+    void testListEmployeePersonsWithPagination() {
+        def results1 = userRoleCompositeService.fetchEmployees(params.sort?.trim(), params.order?.trim(), 500, 0)
+        def results = userRoleCompositeService.fetchEmployees(params.sort?.trim(), params.order?.trim(), 10, 10)
+        // expect to get rows 50-59 back
+        assertEquals 10, results?.pidms?.size()
+        results.pidms?.find { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+
+        // test pgination beyond number of rows we have to test we get 0 back
+        int maxPages = Math.round((results1.totalCount / 500) + 1) * 500
+        def results3 = userRoleCompositeService.fetchEmployees(params.sort?.trim(), params.order?.trim(), 500, maxPages)
+
+        assertEquals 0, results3?.pidms?.size()
+
+    }
+
+
+    @Test
+    void testListAlumniPersonsWithOutPagination() {
+        def results = userRoleCompositeService.fetchAlumnis(params.sort?.trim(), params.order?.trim(), 500, 0)
+        def actual = 0
+        if (results.totalCount > 500) actual = 500
+        else actual = results.totalCount.toInteger()
+
+        // service forces pagination of 500
+        assertEquals actual, results?.pidms?.size()
+        results?.pidms?.each { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+    }
+
+
+    @Test
+    void testListAlumniPersonsWithPagination() {
+        def results1 = userRoleCompositeService.fetchAlumnis(params.sort?.trim(), params.order?.trim(), 500, 0)
+        def results = userRoleCompositeService.fetchAlumnis(params.sort?.trim(), params.order?.trim(), 10, 10)
+        // expect to get rows 50-59 back
+        assertEquals 10, results?.pidms?.size()
+        results.pidms?.find { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+
+        // test pgination beyond number of rows we have to test we get 0 back
+        int maxPages = Math.round((results1.totalCount / 500) + 1) * 500
+        def results3 = userRoleCompositeService.fetchAlumnis(params.sort?.trim(), params.order?.trim(), 500, maxPages)
+
+        assertEquals 0, results3?.pidms?.size()
+
+    }
+
+
+    @Test
+    void testListAlumniPersonsGivenPidms() {
+        def pidmList = []
+        ["A00000613", "A00000614", "A00000615", "A00000616"].each {
+            def person = PersonUtility.getPerson(it)
+            pidmList << person.pidm
+        }
+        assertEquals 4, pidmList.size()
+        assertTrue pidmList instanceof List
+        def returnList
+        returnList = userRoleCompositeService.fetchAlumnisByPIDMs(pidmList)
+        assertEquals 4, returnList.size()
+    }
+
+
+    @Test
+    void testListEmployeePersonsGivenPidms() {
+        def pidmList = []
+        ["FICA00001", "FLACC0002", "FLACC0003", "FLACS0001"].each {
+            def person = PersonUtility.getPerson(it)
+            pidmList << person.pidm
+        }
+        assertEquals 4, pidmList.size()
+        assertTrue pidmList instanceof List
+        def returnList
+        returnList = userRoleCompositeService.fetchEmployeesByPIDMs(pidmList)
+        assertEquals 4, returnList.size()
+    }
+
+    @Test
+    void testListVendorPersons() {
+        def results = userRoleCompositeService.fetchvendors("firstName","asc",10,5)
+        assertTrue results?.pidms?.size() > 0
+        results.pidms?.find { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+    }
+
+    @Test
+    void testListVendorPersonsCount() {
+        def results = userRoleCompositeService.fetchvendors("firstName","asc",10,5)
+        assertTrue results.totalCount > 0
+    }
+
+    @Test
+    void testListVendorPersonsWithPagination() {
+        def results1 = userRoleCompositeService.fetchvendors("firstName","asc",0,0)
+        assertTrue results1.totalCount > 10
+        def results = userRoleCompositeService.fetchvendors("firstName","asc",10,50)
+        // expect to get rows 50-59 back
+        assertEquals 10, results?.pidms?.size()
+        results.pidms?.find { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+        // test pgination beyond number of rows we have to test we get 0 back
+        Long maxPages = Math.round((results1.totalCount / 500) + 1) * 500
+        def results3 = userRoleCompositeService.fetchvendors("firstName","asc",500,maxPages.intValue())
+        assertEquals 0, results3?.pidms?.size()
+
+    }
+
+
+    @Test
+    void testListVendorPersonsWithOutPagination() {
+        def results = userRoleCompositeService.fetchvendors("firstName","asc",0,0)
+        def actual = 0
+        if (results.totalCount > 500) actual = 500
+        else actual = results.totalCount.toInteger()
+
+        // service forces pagination of 500
+        assertEquals actual, results?.pidms?.size()
+        results?.pidms?.each { pidm ->
+            assertNotNull PersonUtility.getPerson(pidm)
+        }
+    }
+
+
+
+
+
+
+
+    @Test
+    void testVendorListWhenFinanceNotInstalled() {
+        def institution = InstitutionalDescription.fetchByKey()
+        institution.financeInstalled = false
+        institution.save(flush: true, failOnError: true)
+
+        def results = userRoleCompositeService.fetchvendors("firstName","asc",0,0)
+        assertEquals 0, results.totalCount
+        assertEquals 0, results.pidms?.size()
+    }
+
+    @Test
+    void testListVendorPersonsGivenPidms() {
+        def pidmList = []
+        ["A00010104", "A00010107", "A00010100", "A00010210"].each {
+            def person = PersonUtility.getPerson(it)
+            pidmList << person.pidm
+        }
+        assertEquals 4, pidmList.size()
+        assertTrue pidmList instanceof List
+        def cnt
+        def returnList
+        returnList = userRoleCompositeService.fetchVendorsByPIDMs(pidmList)
+        assertNotNull  returnList.size()
+        assertEquals 4, returnList.size()
+    }
+
+
 
 }
