@@ -113,8 +113,8 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         assertEquals(1, sendViewDetails.size())
 
         // Confirm group send item view returns the correct results
-//        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
-//        assertEquals(5, sendItemViewDetails.size())
+        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+        assertEquals(5, sendItemViewDetails.size())
 
         sleepUntilGroupSendItemsComplete( groupSend, 60 )
 
