@@ -1,11 +1,12 @@
 /*********************************************************************************
  Copyright 2014 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
-package net.hedtech.banner.general.communication.item
+package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.general.communication.email.CommunicationEmailItem
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
