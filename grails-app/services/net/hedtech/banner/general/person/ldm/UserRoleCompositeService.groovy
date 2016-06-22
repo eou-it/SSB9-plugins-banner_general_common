@@ -14,8 +14,9 @@ import java.sql.SQLException
 
 class UserRoleCompositeService extends LdmService {
 
-    def sessionFactory
     private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1]
+
+    def sessionFactory
 
 /**
  *
@@ -174,12 +175,53 @@ class UserRoleCompositeService extends LdmService {
         return results
     }
 
+    /**
+     * Fetch students from DB
+     *
+     * @param sortField "firstName" or "lastName"
+     * @param sortOrder "asc" or "desc"
+     * @param max maximum number of rows to retrieve
+     * @param offset first row to retrieve (numbered from 0)
+     */
+    public def fetchStudents(String sortField, String sortOrder, int max, int offset) {
+        List<Integer> pidms = []
+        def totalCount = 0
 
-    public def fetchEmployeesByPIDMs(List<Integer> pidms) {
-        def results
-        if (isEmployeeInstalled() && pidms) {
+        if (sortField?.trim() == "firstName") {
+            sortField = "a.spriden_first_name"
+        } else {
+            sortField = "a.spriden_last_name"
+        }
+        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
+            sortOrder = "asc"
+        }
+
+        if (isStudentInstalled()) {
             try {
-                def sql = getSQLforFetchingEmployeesByPIDMs()
+                // Query for PIDMs
+                def sql = getSQLforFetchingStudents(sortField, sortOrder)
+                def results = executeNativeSQL(sql, max, offset)
+                pidms = results.collect {
+                    if (it instanceof BigDecimal) it.toInteger()
+                    else it[0].toInteger()
+                }
+                // Query for total count
+                sql = getSQLforFetchingStudents(null, null, true)
+                totalCount = executeNativeSQL(sql, 0, 0, true)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    public def fetchStudentsByPIDMs(List<Integer> pidms) {
+        def results
+        if (isStudentInstalled() && pidms) {
+            try {
+                def sql = getSQLforFetchingStudentsByPIDMs()
                 results = executeNativeSQL(sql, pidms)
             } catch (Exception ex) {
                 log.error ex
@@ -187,22 +229,6 @@ class UserRoleCompositeService extends LdmService {
         }
         return results
     }
-
-
-
-    public def fetchAlumnisByPIDMs(List<Integer> pidms) {
-        def results
-        if (isAlumniInstalled() && pidms) {
-            try {
-                def sql = getSQLforFetchingAlumnisByPIDMs()
-                results = executeNativeSQL(sql, pidms)
-            } catch (Exception ex) {
-                log.error ex
-            }
-        }
-        return results
-    }
-
 
     /**
      * Fetch Employees from DB
@@ -246,6 +272,19 @@ class UserRoleCompositeService extends LdmService {
     }
 
 
+    public def fetchEmployeesByPIDMs(List<Integer> pidms) {
+        def results
+        if (isEmployeeInstalled() && pidms) {
+            try {
+                def sql = getSQLforFetchingEmployeesByPIDMs()
+                results = executeNativeSQL(sql, pidms)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+        return results
+    }
+
     /**
      * Fetch Alumni from DB
      *
@@ -287,96 +326,67 @@ class UserRoleCompositeService extends LdmService {
         return [pidms: pidms, totalCount: totalCount]
     }
 
-    /**
-     * Fetch students from DB
-     *
-     * @param sortField "firstName" or "lastName"
-     * @param sortOrder "asc" or "desc"
-     * @param max maximum number of rows to retrieve
-     * @param offset first row to retrieve (numbered from 0)
-     */
-    public def fetchStudents(String sortField, String sortOrder, int max, int offset) {
-        List<Integer> pidms = []
-        def totalCount = 0
 
-        if (sortField?.trim() == "firstName") {
-            sortField = "a.spriden_first_name"
-        } else {
-            sortField = "a.spriden_last_name"
-        }
-        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
-            sortOrder = "asc"
-        }
-
-        if (isStudentInstalled()) {
-            try {
-                // Query for PIDMs
-                def sql = getSQLforFetchingStudents(sortField, sortOrder)
-                def results = executeNativeSQL(sql, max, offset)
-                pidms = results.collect {
-                    if (it instanceof BigDecimal) it.toInteger()
-                    else it[0].toInteger()
-                }
-                // Query for total count
-                sql = getSQLforFetchingStudents(null, null, true)
-                totalCount = executeNativeSQL(sql, 0, 0, true)
-            } catch (Exception ex) {
-                log.error ex
-            }
-        }
-
-        return [pidms: pidms, totalCount: totalCount]
-    }
-
-
-    /**
-     * Fetch students from DB
-     *
-     * @param sortField "firstName" or "lastName"
-     * @param sortOrder "asc" or "desc"
-     * @param max maximum number of rows to retrieve
-     * @param offset first row to retrieve (numbered from 0)
-     */
-    public def fetchProspectiveStudent(String sortField, String sortOrder, int max, int offset) {
-        List<Integer> pidms = []
-        def totalCount = 0
-
-        if (sortField?.trim() == "firstName") {
-            sortField = "a.spriden_first_name"
-        } else {
-            sortField = "a.spriden_last_name"
-        }
-        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
-            sortOrder = "asc"
-        }
-
-        if (isStudentInstalled()) {
-            try {
-                // Query for PIDMs
-                def sql = getSQLforFetchingStudents(sortField, sortOrder)
-                def results = executeNativeSQL(sql, max, offset)
-                pidms = results.collect {
-                    if (it instanceof BigDecimal) it.toInteger()
-                    else it[0].toInteger()
-                }
-                // Query for total count
-                sql = getSQLforFetchingStudents(null, null, true)
-                totalCount = executeNativeSQL(sql, 0, 0, true)
-            } catch (Exception ex) {
-                log.error ex
-            }
-        }
-
-        return [pidms: pidms, totalCount: totalCount]
-    }
-
-
-
-    public def fetchStudentsByPIDMs(List<Integer> pidms) {
+    public def fetchAlumnisByPIDMs(List<Integer> pidms) {
         def results
-        if (isStudentInstalled() && pidms) {
+        if (isAlumniInstalled() && pidms) {
             try {
-                def sql = getSQLforFetchingStudentsByPIDMs()
+                def sql = getSQLforFetchingAlumnisByPIDMs()
+                results = executeNativeSQL(sql, pidms)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+        return results
+    }
+
+    /**
+     * Fetch vendors from DB
+     *
+     * @param sortField "firstName" or "lastName"
+     * @param sortOrder "asc" or "desc"
+     * @param max maximum number of rows to retrieve
+     * @param offset first row to retrieve (numbered from 0)
+     */
+    public def fetchVendors(String sortField, String sortOrder, int max, int offset) {
+        List<Integer> pidms = []
+        def totalCount = 0
+
+        if (sortField?.trim() == "firstName") {
+            sortField = "a.spriden_first_name"
+        } else {
+            sortField = "a.spriden_last_name"
+        }
+        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
+            sortOrder = "asc"
+        }
+
+        if (isFinanceInstalled()) {
+            try {
+                // Query for PIDMs
+                def sql = getSQLforFetchingVendors(sortField, sortOrder)
+                def results = executeNativeSQL(sql, max, offset)
+                pidms = results.collect {
+                    if (it instanceof BigDecimal) it.toInteger()
+                    else it[0].toInteger()
+                }
+                // Query for total count
+                sql = getSQLforFetchingVendors(null, null, true)
+                totalCount = executeNativeSQL(sql, 0, 0, true)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    public def fetchVendorsByPIDMs(List<Integer> pidms) {
+        def results
+        if (isFinanceInstalled() && pidms) {
+            try {
+                def sql = getSQLforFetchingVendorsByPIDMs()
                 results = executeNativeSQL(sql, pidms)
             } catch (Exception ex) {
                 log.error ex
@@ -405,6 +415,7 @@ class UserRoleCompositeService extends LdmService {
         return installed
     }
 
+
     private Boolean isAlumniInstalled() {
         Boolean installed = false
         InstitutionalDescription instDesc = InstitutionalDescription.fetchByKey()
@@ -415,42 +426,13 @@ class UserRoleCompositeService extends LdmService {
     }
 
 
-
-
-
-    private String getSQLforFetchingEmployees(String sortField, String sortOrder, boolean count = false) {
-        String sql = """ select """
-        if (count) {
-            sql += """  count(a.spriden_pidm) """
-        } else {
-            sql += """ a.spriden_pidm  """
+    private Boolean isFinanceInstalled() {
+        Boolean installed = false
+        InstitutionalDescription instDesc = InstitutionalDescription.fetchByKey()
+        if (instDesc) {
+            installed = instDesc.financeInstalled
         }
-        sql += """ from spriden a
-                   where exists (select 1 from pebempl b where b.pebempl_pidm = a.spriden_pidm)
-                   and a.spriden_change_ind is null
-                   and a.spriden_entity_ind = 'P' """
-        if (!count) {
-            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
-        }
-        return sql.replace("\n", "").replaceAll(/  */, " ")
-    }
-
-
-    private String getSQLforFetchingAlumnis(String sortField, String sortOrder, boolean count = false) {
-        String sql = """ select """
-        if (count) {
-            sql += """  count(a.spriden_pidm) """
-        } else {
-            sql += """ a.spriden_pidm  """
-        }
-        sql += """ from spriden a
-                   where exists (select 1 from APRCATG b where b.APRCATG_DONR_CODE = 'ALUM'  and b.APRCATG_PIDM = a.spriden_pidm)
-                   and a.spriden_change_ind is null
-                   and a.spriden_entity_ind = 'P' """
-        if (!count) {
-            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
-        }
-        return sql.replace("\n", "").replaceAll(/  */, " ")
+        return installed
     }
 
 
@@ -491,6 +473,60 @@ class UserRoleCompositeService extends LdmService {
         sql += """ from spriden a
                    where exists (select 1 from sgbstdn b where b.sgbstdn_pidm = a.spriden_pidm)
                    and a.spriden_change_ind is null
+                   and a.spriden_entity_ind = 'P' """
+        if (!count) {
+            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
+        }
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
+
+
+    private String getSQLforFetchingEmployees(String sortField, String sortOrder, boolean count = false) {
+        String sql = """ select """
+        if (count) {
+            sql += """  count(a.spriden_pidm) """
+        } else {
+            sql += """ a.spriden_pidm  """
+        }
+        sql += """ from spriden a
+                   where exists (select 1 from pebempl b where b.pebempl_pidm = a.spriden_pidm)
+                   and a.spriden_change_ind is null
+                   and a.spriden_entity_ind = 'P' """
+        if (!count) {
+            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
+        }
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
+
+
+    private String getSQLforFetchingAlumnis(String sortField, String sortOrder, boolean count = false) {
+        String sql = """ select """
+        if (count) {
+            sql += """  count(a.spriden_pidm) """
+        } else {
+            sql += """ a.spriden_pidm  """
+        }
+        sql += """ from spriden a
+                   where exists (select 1 from APRCATG b where b.APRCATG_DONR_CODE = 'ALUM'  and b.APRCATG_PIDM = a.spriden_pidm)
+                   and a.spriden_change_ind is null
+                   and a.spriden_entity_ind = 'P' """
+        if (!count) {
+            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
+        }
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
+
+
+    private String getSQLforFetchingVendors(String sortField, String sortOrder, boolean count = false) {
+        String sql = """ select """
+        if (count) {
+            sql += """  count(a.spriden_pidm) """
+        } else {
+            sql += """ a.spriden_pidm  """
+        }
+        sql += """ from spriden a, FTVVEND b
+                   where a.spriden_pidm = b.FTVVEND_PIDM
+                  and a.spriden_change_ind is null
                    and a.spriden_entity_ind = 'P' """
         if (!count) {
             sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
@@ -544,6 +580,16 @@ class UserRoleCompositeService extends LdmService {
     }
 
 
+    private String getSQLforFetchingStudentsByPIDMs() {
+        def sql = """ select a.spriden_pidm
+                      from spriden a
+                      where exists (select 1 from sgbstdn b where b.sgbstdn_pidm = a.spriden_pidm)
+                      and a.spriden_change_ind is null
+                      and a.spriden_entity_ind = 'P'
+                      and a.spriden_pidm in (:pidms) """
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
+
 
     private String getSQLforFetchingEmployeesByPIDMs() {
         def sql = """ select pebempl_pidm,pebempl_first_hire_date,pebempl_last_work_date
@@ -554,7 +600,6 @@ class UserRoleCompositeService extends LdmService {
                       and b.pebempl_pidm in (:pidms) """
         return sql.replace("\n", "").replaceAll(/  */, " ")
     }
-
 
 
     private String getSQLforFetchingAlumnisByPIDMs() {
@@ -569,10 +614,10 @@ class UserRoleCompositeService extends LdmService {
     }
 
 
-    private String getSQLforFetchingStudentsByPIDMs() {
-        def sql = """ select a.spriden_pidm
-                      from spriden a
-                      where exists (select 1 from sgbstdn b where b.sgbstdn_pidm = a.spriden_pidm)
+    private String getSQLforFetchingVendorsByPIDMs() {
+        def sql = """ select  a.spriden_pidm as pidm,b.FTVVEND_EFF_DATE ,b.FTVVEND_TERM_DATE
+                      from spriden a, FTVVEND b
+                      where a.spriden_pidm = b.FTVVEND_PIDM
                       and a.spriden_change_ind is null
                       and a.spriden_entity_ind = 'P'
                       and a.spriden_pidm in (:pidms) """
@@ -590,97 +635,6 @@ class UserRoleCompositeService extends LdmService {
             list()
         }
         log.debug "Executed native SQL successfully"
-        return results
-    }
-
-
-    /**
-     * Fetch vendors from DB
-     *
-     * @param sortField "firstName" or "lastName"
-     * @param sortOrder "asc" or "desc"
-     * @param max maximum number of rows to retrieve
-     * @param offset first row to retrieve (numbered from 0)
-     */
-    public def fetchvendors(String sortField, String sortOrder, int max, int offset) {
-        List<Integer> pidms = []
-        def totalCount = 0
-
-        if (sortField?.trim() == "firstName") {
-            sortField = "a.spriden_first_name"
-        } else {
-            sortField = "a.spriden_last_name"
-        }
-        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
-            sortOrder = "asc"
-        }
-
-        if (isFinanceInstalled()) {
-            try {
-                // Query for PIDMs
-                def sql = getSQLforFetchingVendors(sortField, sortOrder)
-                def results = executeNativeSQL(sql, max, offset)
-                pidms = results.collect {
-                    if (it instanceof BigDecimal) it.toInteger()
-                    else it[0].toInteger()
-                }
-                // Query for total count
-                sql = getSQLforFetchingVendors(null, null, true)
-                totalCount = executeNativeSQL(sql, 0, 0, true)
-            } catch (Exception ex) {
-                log.error ex
-            }
-        }
-
-        return [pidms: pidms, totalCount: totalCount]
-    }
-
-    private Boolean isFinanceInstalled() {
-        Boolean installed = false
-        InstitutionalDescription instDesc = InstitutionalDescription.fetchByKey()
-        if (instDesc) {
-            installed = instDesc.financeInstalled
-        }
-        return installed
-    }
-
-    private String getSQLforFetchingVendorsByPIDMs() {
-        def sql = """ select  a.spriden_pidm as pidm,b.FTVVEND_EFF_DATE ,b.FTVVEND_TERM_DATE
-                      from spriden a, FTVVEND b
-                      where a.spriden_pidm = b.FTVVEND_PIDM
-                      and a.spriden_change_ind is null
-                      and a.spriden_entity_ind = 'P'
-                      and a.spriden_pidm in (:pidms) """
-        return sql.replace("\n", "").replaceAll(/  */, " ")
-    }
-
-    private String getSQLforFetchingVendors(String sortField, String sortOrder, boolean count = false) {
-        String sql = """ select """
-        if (count) {
-            sql += """  count(a.spriden_pidm) """
-        } else {
-            sql += """ a.spriden_pidm  """
-        }
-        sql += """ from spriden a, FTVVEND b
-                   where a.spriden_pidm = b.FTVVEND_PIDM
-                  and a.spriden_change_ind is null
-                   and a.spriden_entity_ind = 'P' """
-        if (!count) {
-            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
-        }
-        return sql.replace("\n", "").replaceAll(/  */, " ")
-    }
-
-    public def fetchVendorsByPIDMs(List<Integer> pidms) {
-        def results
-        if (isFinanceInstalled() && pidms) {
-            try {
-                def sql = getSQLforFetchingVendorsByPIDMs()
-                results = executeNativeSQL(sql, pidms)
-            } catch (Exception ex) {
-                log.error ex
-            }
-        }
         return results
     }
 
