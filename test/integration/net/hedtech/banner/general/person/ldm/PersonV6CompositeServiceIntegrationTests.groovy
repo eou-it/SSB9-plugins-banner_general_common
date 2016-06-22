@@ -104,6 +104,54 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue personRoles.contains('Student')
     }
 
+    @Test
+    void testListPersonValidV6ForRoleAlumni() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: "alumni"]
+        def o_success_persons = personV6CompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+        assertNotNull o_success_persons[0].guid
+
+        assertTrue o_success_persons[0].roles.role.contains("alumni")
+    }
+
+    @Test
+    void testListPersonValidV6ForRoleEmployees() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: "employee"]
+        def o_success_persons = personV6CompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+        assertNotNull o_success_persons[0].guid
+        assertTrue o_success_persons[0].roles.role.contains("employee")
+
+    }
+
+    @Test
+    void testListPersonValidV6ForRoleVendor() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: "vendor"]
+        PersonV6 o_success_persons = personV6CompositeService.list(params).get(0)
+
+        assertNotNull o_success_persons
+        assertNotNull o_success_persons.guid
+
+        List <RoleDetail>personRoles = o_success_persons.roles
+        assertNotNull personRoles
+        List vendorRoles = []
+        personRoles.each { roles ->
+            vendorRoles.add(roles.role)
+        }
+        assertNotNull vendorRoles
+        assertTrue vendorRoles.contains('vendor')
+
+    }
 
     @Test
     void testListapiWithRoleStudentAndLargePagination() {
@@ -247,4 +295,6 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Accept", mediaType)
     }
+
+
 }
