@@ -752,8 +752,10 @@ class PersonV6CompositeService extends LdmService {
     private EmailV6 createEmailV6(PersonEmail it, def emailType) {
         EmailV6 emailV6 = new EmailV6()
         emailV6.address = it.emailAddress
-        emailV6.type = new EmailTypeDetails(emailType[0].code, emailType[0].description, emailType[1].guid, emailType[2].translationValue)
-        emailV6.preference = it.preferredIndicator ? 'primaryOverall' : ''
+        emailV6.type = new EmailTypeDetails(emailType[0], null, emailType[1], emailType[2])
+        if(it.preferredIndicator){
+            emailV6.preference =  'primaryOverall'
+        }
         return emailV6
     }
 
