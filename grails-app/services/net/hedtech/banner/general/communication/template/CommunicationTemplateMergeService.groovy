@@ -216,7 +216,7 @@ class CommunicationTemplateMergeService {
 
     CommunicationMergedLetterTemplate renderMergedLetterTemplate( CommunicationLetterTemplate communicationLetterTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationLetterTemplate with preview values only." )
-        CommunicationMergedLetterTemplate communicationMergedLetterTemplate = new CommunicationMergedEmailTemplate()
+        CommunicationMergedLetterTemplate communicationMergedLetterTemplate = new CommunicationMergedLetterTemplate()
         communicationMergedLetterTemplate.toAddress = merge( communicationLetterTemplate.toAddress ?: "", renderPreviewValues( communicationLetterTemplate.toAddress ?: "" ) )
         communicationMergedLetterTemplate.content = merge( communicationLetterTemplate.content ?: "", renderPreviewValues( communicationLetterTemplate.content ?: "" ) )
         return communicationMergedLetterTemplate
