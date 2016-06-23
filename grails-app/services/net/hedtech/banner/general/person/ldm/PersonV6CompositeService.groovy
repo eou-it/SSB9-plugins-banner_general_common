@@ -108,10 +108,16 @@ class PersonV6CompositeService extends LdmService {
                     String role = params.role?.trim()?.toLowerCase()
                     log.debug "Fetching persons with role $role ...."
                     def returnMap
-                    if (role == "instructor") {
+                    if (role == RoleName.INSTRUCTOR.v6) {
                         returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
-                    } else if (role == "student") {
+                    } else if (role == RoleName.STUDENT.v6) {
                         returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+                    } else if (role == RoleName.EMPLOYEE.v6) {
+                        returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
+                    } else if (role == RoleName.ALUMNI.v6) {
+                        returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
+                    } else if (role == RoleName.VENDOR.v6) {
+                        returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
                     }
@@ -225,7 +231,7 @@ class PersonV6CompositeService extends LdmService {
             fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
             personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
-            fetchPersonsRacesDataAndPutInMap(pidms, dataMap)
+            fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -247,9 +253,12 @@ class PersonV6CompositeService extends LdmService {
                 }
 
                 // names
-                dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
-                dataMapForPerson << ["nameTypeCodeToGuidMap": dataMap.nameTypeCodeToGuidMap]
-                dataMapForPerson << ["personAlternateNames": dataMap.pidmToAlternateNamesMap.get(it.pidm)]
+                List<PersonIdentificationNameAlternate> personAlternateNames = dataMap.pidmToAlternateNamesMap.get(it.pidm)
+                if (personAlternateNames) {
+                    dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
+                    dataMapForPerson << ["nameTypeCodeToGuidMap": dataMap.nameTypeCodeToGuidMap]
+                    dataMapForPerson << ["personAlternateNames": personAlternateNames]
+                }
 
                 // visaStatus
                 VisaInformation visaInfo = dataMap.pidmToVisaInfoMap.get(it.pidm)
@@ -281,10 +290,10 @@ class PersonV6CompositeService extends LdmService {
                 }
 
                 // races
-                List<PersonRace> personRaceList = dataMap.pidmToRaceInfoMap.get(it.pidm)
-                if (personRaceList) {
-                    dataMapForPerson << ["raceInformationList": personRaceList]
-                    dataMapForPerson << ["raceTypeGuidList": dataMap.raceCodeToGuidMap]
+                List<PersonRace> personRaces = dataMap.pidmToRacesMap.get(it.pidm)
+                if (personRaces) {
+                    dataMapForPerson << ["personRaces": personRaces]
+                    dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
                 }
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
@@ -329,16 +338,17 @@ class PersonV6CompositeService extends LdmService {
             def bannerNameTypeToHedmNameTypeMap = dataMapForPerson["bannerNameTypeToHedmNameTypeMap"]
             def nameTypeCodeToGuidMap = dataMapForPerson["nameTypeCodeToGuidMap"]
             List<PersonIdentificationNameAlternate> personAlternateNames = dataMapForPerson["personAlternateNames"]
-            personAlternateNames.each {
+            personAlternateNames?.each {
                 decorator.names << createNameAlternateV6(it, bannerNameTypeToHedmNameTypeMap.get(it.nameType.code), nameTypeCodeToGuidMap.get(it.nameType.code))
             }
             // SPBPERS_LEGAL_NAME is the primary source
             NameAlternateV6 legalNameAlternateV6 = createLegalNameAlternateV6(personBase?.legalName)
             if (legalNameAlternateV6) {
-                // Remove "legal" name type
+                // Remove other alternate names of "legal" type
                 decorator.names.removeAll {
                     it.type.category == NameTypeCategory.LEGAL.v6
                 }
+                // Add SPBPERS_LEGAL_NAME as "legal"
                 decorator.names << legalNameAlternateV6
             }
             // visaStatus
@@ -367,13 +377,12 @@ class PersonV6CompositeService extends LdmService {
                 }
             }
             // Races
-            List<PersonRace> personRaceList = dataMapForPerson["raceInformationList"]
-            Map<String, String> raceGuidsMap = dataMapForPerson["raceTypeGuidList"]
-            if (personRaceList) {
+            List<PersonRace> personRaces = dataMapForPerson["personRaces"]
+            Map<String, String> raceCodeToGuidMap = dataMapForPerson["raceCodeToGuidMap"]
+            if (personRaces) {
                 decorator.races = []
-                personRaceList.each {
-                    decorator.races << createRaceV6(raceGuidsMap.get(it.race), it.race)
-
+                personRaces.each {
+                    decorator.races << new RaceV6(raceCodeToGuidMap.get(it.race), raceCompositeService.getLdmRace(it.race))
                 }
             }
         }
@@ -485,6 +494,32 @@ class PersonV6CompositeService extends LdmService {
             def personRoles = pidmToRolesMap.get(it.toInteger())
             personRoles << [role: RoleName.STUDENT]
         }
+        // Employee role
+        List<Object[]> empList = userRoleCompositeService.fetchEmployeesByPIDMs(pidms)
+        empList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.EMPLOYEE, startDate: startDate, endDate: endDate]
+        }
+        // Alumni role
+        List<Object[]> alumniList = userRoleCompositeService.fetchAlumnisByPIDMs(pidms)
+        alumniList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.ALUMNI, startDate: startDate]
+        }
+        // Vendor role
+        List<Object[]> vendorList = userRoleCompositeService.fetchVendorsByPIDMs(pidms)
+        vendorList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.VENDOR, startDate: startDate, endDate: endDate]
+        }
         // Put in Map
         dataMap.put("pidmToRolesMap", pidmToRolesMap)
     }
@@ -506,20 +541,34 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private void fetchPersonsRacesDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+    private void fetchPersonsRaceDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get GORPRAC records for persons
-        Map pidmToRaceInfoMap = fetchByPidmList(pidms)
-        // Get GUIDs for races
-        Set<String> racesCodes = pidmToRaceInfoMap?.values().race.flatten() as Set
-        Map raceCodeToRaceDetailMap = [:]
-        if (racesCodes) {
-            log.debug "Getting GUIDs for Races codes $racesCodes..."
-            raceCodeToRaceDetailMap = raceCompositeService.fetchGuids(racesCodes)
-            log.debug "Got ${raceCodeToRaceDetailMap?.size() ?: 0} GUIDs for given race codes"
+        Map pidmToRacesMap = [:]
+        if (pidms) {
+            log.debug "Getting GV_GORPRAC records for ${pidms?.size()} PIDMs..."
+            List<PersonRace> entities = personRaceService.fetchRaceByPidmList(pidms)
+            log.debug "Got ${entities?.size()} GV_GORPRAC records"
+            entities?.each {
+                List<PersonRace> personRaces = []
+                if (pidmToRacesMap.containsKey(it.pidm)) {
+                    personRaces = pidmToRacesMap.get(it.pidm)
+                } else {
+                    pidmToRacesMap.put(it.pidm, personRaces)
+                }
+                personRaces.add(it)
+            }
+        }
+        // Get GUIDs for race codes
+        Set<String> raceCodes = pidmToRacesMap?.values().race.flatten() as Set
+        Map raceCodeToGuidMap = [:]
+        if (raceCodes) {
+            log.debug "Getting GUIDs for Races codes $raceCodes..."
+            raceCodeToGuidMap = raceCompositeService.fetchGuids(raceCodes)
+            log.debug "Got ${raceCodeToGuidMap?.size() ?: 0} GUIDs for given race codes"
         }
         // Put in Map
-        dataMap.put("pidmToRaceInfoMap", pidmToRaceInfoMap)
-        dataMap.put("raceCodeToGuidMap", raceCodeToRaceDetailMap)
+        dataMap.put("pidmToRacesMap", pidmToRacesMap)
+        dataMap.put("raceCodeToGuidMap", raceCodeToGuidMap)
     }
 
 
@@ -583,27 +632,6 @@ class PersonV6CompositeService extends LdmService {
             }
         }
         return pidmToEmailInfoMap
-    }
-
-
-    private def fetchByPidmList(List<Integer> pidms) {
-        List<PersonRace> raceInfo
-        Map pidmToRacesMap = [:]
-        if (pidms) {
-            log.debug "Getting GORPRAC records for ${pidms?.size()} PIDMs..."
-            List<PersonRace> entities = personRaceService.fetchRaceByPidmList(pidms)
-            log.debug "Got ${entities?.size()} GORPRAC records"
-            entities?.each {
-                if (pidmToRacesMap.containsKey(it.pidm)) {
-                    raceInfo << it
-                } else {
-                    raceInfo = []
-                    raceInfo << it
-                }
-                pidmToRacesMap.put(it.pidm, raceInfo)
-            }
-        }
-        return pidmToRacesMap
     }
 
 
@@ -727,11 +755,6 @@ class PersonV6CompositeService extends LdmService {
         emailV6.type = new EmailTypeDetails(emailType[0].code, emailType[0].description, emailType[1].guid, emailType[2].translationValue)
         emailV6.preference = it.preferredIndicator ? 'primaryOverall' : ''
         return emailV6
-    }
-
-
-    private RaceV6 createRaceV6(String guid, String code) {
-        return new RaceV6(guid, raceCompositeService.getLdmRace(code))
     }
 
 
