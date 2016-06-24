@@ -255,6 +255,16 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 		// Test dates out of range
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], startDate - 1).size()
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate + 1).size()
+
+        // Test null expiration date
+        visaInformation.visaExpireDate = null
+        visaInformation.save(failOnError: true, flush: true)
+        assertEquals 1, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], currentDate).size()
+
+        // Test null start date
+        visaInformation.visaStartDate = null
+        visaInformation.save(failOnError: true, flush: true)
+        assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], currentDate).size()
 	}
 
 

@@ -31,7 +31,7 @@ import javax.persistence.*
 @NamedQuery(name = "VisaInformation.fetchByPidmListAndDateCompare",
 query = """FROM VisaInformation a
           WHERE a.pidm IN :pidm
-            AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(a.visaExpireDate)""")
+            AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(NVL(a.visaExpireDate,:compareDate))""")
 ])
 
 @Entity
