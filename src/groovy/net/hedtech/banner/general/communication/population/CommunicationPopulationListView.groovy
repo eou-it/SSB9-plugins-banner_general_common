@@ -198,7 +198,7 @@ class CommunicationPopulationListView implements Serializable {
 
         def queryCriteria = CommunicationPopulationListView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("queryName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.queryName))
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.populationName))
             ilike("createdBy", filterData?.params?.createdBy)
             order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
         }
