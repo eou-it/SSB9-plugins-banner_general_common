@@ -105,7 +105,7 @@ class PersonV6CompositeService extends LdmService {
                 log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
             } else {
                 if (params.role) {
-                    String role = params.role?.trim()?.toLowerCase()
+                    String role = params.role?.trim()
                     log.debug "Fetching persons with role $role ...."
                     def returnMap
                     if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
@@ -118,6 +118,10 @@ class PersonV6CompositeService extends LdmService {
                         returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
                     } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
+                    }  else if (role == RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]) {
+                        returnMap = userRoleCompositeService.fetchProspectiveStudents(sortField, sortOrder, max, offset)
+                    } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
+                        returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
                     }
@@ -520,6 +524,25 @@ class PersonV6CompositeService extends LdmService {
             def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
             personRoles << [role: RoleName.VENDOR, startDate: startDate, endDate: endDate]
         }
+        // ProspectiveStudent role
+        List<Object[]> prospectiveStudentList = userRoleCompositeService.fetchProspectiveStudentByPIDMs(pidms)
+        prospectiveStudentList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.PROSPECTIVE_STUDENT, startDate: startDate, endDate: endDate]
+        }
+        // Advisor role
+        List<Object[]> advisorList = userRoleCompositeService.fetchAdvisorByPIDMs(pidms)
+        advisorList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.ADVISOR, startDate: startDate, endDate: endDate]
+        }
+
         // Put in Map
         dataMap.put("pidmToRolesMap", pidmToRolesMap)
     }
@@ -667,11 +690,11 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private NameAlternateV6 createNameAlternateV6(PersonIdentificationNameAlternate personAlternate, NameTypeCategory nameTypeCategory, String nameTypeGuid) {
+    private NameAlternateV6 createNameAlternateV6(PersonIdentificationNameAlternate personAlternate, String nameTypeCategory, String nameTypeGuid) {
         NameAlternateV6 decorator
         if (personAlternate) {
             decorator = new NameAlternateV6()
-            decorator.type = ["category": nameTypeCategory.versionToEnumMap["v6"], "detail": ["id": nameTypeGuid]]
+            decorator.type = ["category": nameTypeCategory, "detail": ["id": nameTypeGuid]]
             decorator.fullName = personAlternate.fullName
             decorator.firstName = personAlternate.firstName
             decorator.middleName = personAlternate.middleName

@@ -154,6 +154,40 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    void testListPersonValidV6ForAdvisorRole() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: RoleName.ADVISOR.versionToEnumMap["v6"] ]
+        List<PersonV6> o_success_persons = personV6CompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+
+        o_success_persons.each {
+            assertNotNull it.guid
+            assertTrue it.roles.role.contains(params.role)
+        }
+
+    }
+
+    @Test
+    void testListPersonValidV6ForProspectiveStudentRole() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"] ]
+        List<PersonV6> o_success_persons = personV6CompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+
+        o_success_persons.each {
+            assertNotNull it.guid
+            assertTrue it.roles.role.contains(params.role)
+        }
+
+    }
+
+    @Test
     void testListapiWithRoleStudentAndLargePagination() {
         def params1 = [role: "student"]
         Map resultCount = userRoleCompositeService.fetchAllByRole(params1)
