@@ -5,7 +5,12 @@ package net.hedtech.banner.general.communication.template
 
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.email.CommunicationEmailTemplateService
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
+import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplateService
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplateService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -17,7 +22,9 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
 
     def CommunicationFolder testFolder
     def selfServiceBannerAuthenticationProvider
-    def communicationEmailTemplateService
+    CommunicationEmailTemplateService communicationEmailTemplateService
+    CommunicationMobileNotificationTemplateService communicationMobileNotificationTemplateService
+    CommunicationLetterTemplateService communicationLetterTemplateService
 
 
     @Before
@@ -61,6 +68,26 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
 
         emailTemplate = communicationEmailTemplateService.publishTemplate( ["id": emailTemplate.id] )
         assertEquals( Boolean.TRUE, emailTemplate.published )
+
+        CommunicationMobileNotificationTemplate mobileNotificationTemplate = new CommunicationMobileNotificationTemplate(
+            name: "testMobileNotificationTemplate",
+            folder: testFolder
+        )
+        mobileNotificationTemplate = (CommunicationMobileNotificationTemplate) communicationMobileNotificationTemplateService.create( mobileNotificationTemplate )
+        templateView = CommunicationTemplateView.get( mobileNotificationTemplate.id )
+        assertNotNull( templateView )
+        assertEquals( mobileNotificationTemplate.communicationChannel, templateView.communicationChannel )
+
+        CommunicationLetterTemplate letterTemplate = new CommunicationLetterTemplate(
+                name: "testLetterTemplate",
+                folder: testFolder
+        )
+        letterTemplate = (CommunicationLetterTemplate) communicationLetterTemplateService.create( letterTemplate )
+        templateView = CommunicationTemplateView.get( letterTemplate.id )
+        assertNotNull( templateView )
+        assertEquals( letterTemplate.communicationChannel, templateView.communicationChannel )
+
+        assertEquals( 3, CommunicationTemplateView.list().size() )
 
         cleanUpGorm()
         templateView = CommunicationTemplateView.get( emailTemplate.id )
