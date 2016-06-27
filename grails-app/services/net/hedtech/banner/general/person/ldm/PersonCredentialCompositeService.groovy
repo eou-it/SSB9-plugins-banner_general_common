@@ -208,7 +208,7 @@ class PersonCredentialCompositeService extends LdmService {
     private PersonCredential createCredentialV6(CredentialType credentialType, String value) {
         PersonCredential personCredential
         if (credentialType && value) {
-            personCredential = new PersonCredential(credentialType.v6, value)
+            personCredential = new PersonCredential(credentialType.versionToEnumMap["v6"], value)
         }
         return personCredential
     }

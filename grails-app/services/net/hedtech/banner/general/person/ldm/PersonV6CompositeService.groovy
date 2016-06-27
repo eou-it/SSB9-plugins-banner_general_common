@@ -108,15 +108,15 @@ class PersonV6CompositeService extends LdmService {
                     String role = params.role?.trim()?.toLowerCase()
                     log.debug "Fetching persons with role $role ...."
                     def returnMap
-                    if (role == RoleName.INSTRUCTOR.v6) {
+                    if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.STUDENT.v6) {
+                    } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.EMPLOYEE.v6) {
+                    } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.ALUMNI.v6) {
+                    } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.VENDOR.v6) {
+                    } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
@@ -346,7 +346,7 @@ class PersonV6CompositeService extends LdmService {
             if (legalNameAlternateV6) {
                 // Remove other alternate names of "legal" type
                 decorator.names.removeAll {
-                    it.type.category == NameTypeCategory.LEGAL.v6
+                    it.type.category == NameTypeCategory.LEGAL.versionToEnumMap["v6"]
                 }
                 // Add SPBPERS_LEGAL_NAME as "legal"
                 decorator.names << legalNameAlternateV6
@@ -432,7 +432,7 @@ class PersonV6CompositeService extends LdmService {
 
 
     private void fetchPersonsAlternateNameDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHEDMNameTypeMap()
+        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
         log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
         def nameTypeCodeToGuidMap = nameTypeService.fetchGUIDs(bannerNameTypeToHedmNameTypeMap.keySet().toList())
         log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
@@ -652,7 +652,7 @@ class PersonV6CompositeService extends LdmService {
         NameV6 decorator
         if (personCurrent) {
             decorator = new NameV6()
-            decorator.type = ["category": NameTypeCategory.PERSONAL.v6]
+            decorator.type = ["category": NameTypeCategory.PERSONAL.versionToEnumMap["v6"]]
             decorator.fullName = personCurrent.fullName
             decorator.firstName = personCurrent.firstName
             decorator.middleName = personCurrent.middleName
@@ -671,7 +671,7 @@ class PersonV6CompositeService extends LdmService {
         NameAlternateV6 decorator
         if (personAlternate) {
             decorator = new NameAlternateV6()
-            decorator.type = ["category": nameTypeCategory.v6, "detail": ["id": nameTypeGuid]]
+            decorator.type = ["category": nameTypeCategory.versionToEnumMap["v6"], "detail": ["id": nameTypeGuid]]
             decorator.fullName = personAlternate.fullName
             decorator.firstName = personAlternate.firstName
             decorator.middleName = personAlternate.middleName
@@ -686,7 +686,7 @@ class PersonV6CompositeService extends LdmService {
         NameAlternateV6 decorator
         if (fullName && fullName.trim().length() > 0) {
             decorator = new NameAlternateV6()
-            decorator.type = ["category": NameTypeCategory.LEGAL.v6]
+            decorator.type = ["category": NameTypeCategory.LEGAL.versionToEnumMap["v6"]]
             decorator.fullName = fullName
         }
         return decorator
@@ -737,7 +737,7 @@ class PersonV6CompositeService extends LdmService {
         RoleV6 decorator
         if (roleName) {
             decorator = new RoleV6()
-            decorator.role = roleName.v6
+            decorator.role = roleName.versionToEnumMap["v6"]
             if (startDate) {
                 decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(startDate)
             }
@@ -753,8 +753,8 @@ class PersonV6CompositeService extends LdmService {
         EmailV6 emailV6 = new EmailV6()
         emailV6.address = it.emailAddress
         emailV6.type = new EmailTypeDetails(emailType[0], null, emailType[1], emailType[2])
-        if(it.preferredIndicator){
-            emailV6.preference =  'primaryOverall'
+        if (it.preferredIndicator) {
+            emailV6.preference = 'primaryOverall'
         }
         return emailV6
     }
