@@ -786,7 +786,6 @@ class UserRoleCompositeService extends LdmService {
                      (select x.SRBRECR_PIDM ,  max( nvl(
                     (select min(STVTERM_START_DATE) from SGBSTDN p, STVTERM
                     where SGBSTDN_TERM_CODE_EFF = STVTERM_CODE
-                    AND SGBSTDN_TERM_CODE_EFF = x.SRBRECR_TERM_CODE
                     AND SGBSTDN_PIDM = x.SRBRECR_PIDM)
                     ,y.STVTERM_END_DATE)) as endOn
                     from SRBRECR x , STVTERM y
