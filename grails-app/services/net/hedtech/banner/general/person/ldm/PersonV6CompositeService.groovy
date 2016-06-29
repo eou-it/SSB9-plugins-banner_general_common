@@ -19,11 +19,12 @@ import net.hedtech.banner.general.person.ldm.v6.NameV6
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.NameTypeService
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
+import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EmailV6
+import net.hedtech.banner.general.system.ldm.v6.PhoneV6
 import net.hedtech.banner.general.system.ldm.v6.RaceV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
@@ -54,9 +55,10 @@ class PersonV6CompositeService extends LdmService {
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
     EthnicityCompositeService ethnicityCompositeService
-    NameTypeService nameTypeService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
+    PhoneTypeCompositeService phoneTypeCompositeService
+    PersonTelephoneService personTelephoneService
 
     /**
      * GET /api/persons
@@ -236,6 +238,7 @@ class PersonV6CompositeService extends LdmService {
             personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
             fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
+            fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -287,10 +290,11 @@ class PersonV6CompositeService extends LdmService {
                 dataMapForPerson << ["personCredentials": personCredentials]
 
                 // emails
-                List<PersonEmail> personEmailList = dataMap.pidmToEmailInfoMap.get(it.pidm)
+                List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(it.pidm)
                 if (personEmailList) {
-                    dataMapForPerson << ["emailInfo": personEmailList]
-                    dataMapForPerson << ["emailTypeInfo": dataMap.etCodeToEmailTypeMap]
+                    dataMapForPerson << ["personEmails": personEmailList]
+                    dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": dataMap.bannerEmailTypeToHedmEmailTypeMap]
+                    dataMapForPerson << ["emailCodeToGuidMap": dataMap.emailCodeToGuidMap]
                 }
 
                 // races
@@ -298,6 +302,14 @@ class PersonV6CompositeService extends LdmService {
                 if (personRaces) {
                     dataMapForPerson << ["personRaces": personRaces]
                     dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
+                }
+
+                // phones
+                List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(it.pidm)
+                if (personTelephoneList) {
+                    dataMapForPerson << ["personPhones": personTelephoneList]
+                    dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
+                    dataMapForPerson << ["phoneCodeToGuidMap": dataMap.phoneCodeToGuidMap]
                 }
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
@@ -372,12 +384,13 @@ class PersonV6CompositeService extends LdmService {
             def personCredentials = dataMapForPerson["personCredentials"]
             decorator.credentials = personCredentialCompositeService.createCredentialDecorators(personCredentials)
             // Emails
-            List<PersonEmail> personEmailList = dataMapForPerson["emailInfo"]
+            List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]
             if (personEmailList) {
-                Map emailTypeDetailsMap = dataMapForPerson["emailTypeInfo"]
+                Map emailCodeToGuidMap = dataMapForPerson["emailCodeToGuidMap"]
+                Map bannerEmailTypeToHedmEmailTypeMap = dataMapForPerson["bannerEmailTypeToHedmEmailTypeMap"]
                 decorator.emails = []
                 personEmailList.each {
-                    decorator.emails << createEmailV6(it, emailTypeDetailsMap.get(it.emailType.code))
+                    decorator.emails << createEmailV6(it, it.emailType.code, emailCodeToGuidMap.get(it.emailType.code), bannerEmailTypeToHedmEmailTypeMap.get(it.emailType.code))
                 }
             }
             // Races
@@ -387,6 +400,18 @@ class PersonV6CompositeService extends LdmService {
                 decorator.races = []
                 personRaces.each {
                     decorator.races << new RaceV6(raceCodeToGuidMap.get(it.race), raceCompositeService.getLdmRace(it.race))
+                }
+            }
+            // Phones
+            List<PersonTelephone> personTelephoneListList = dataMapForPerson["personPhones"]
+
+            if (personTelephoneListList) {
+                Map phoneCodeToGuidMap = dataMapForPerson["phoneCodeToGuidMap"]
+                Map bannerPhoneTypeToHedmPhoneTypeMap = dataMapForPerson["bannerPhoneTypeToHedmPhoneTypeMap"]
+
+                decorator.phones = []
+                personTelephoneListList.each {
+                    decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
                 }
             }
         }
@@ -438,7 +463,7 @@ class PersonV6CompositeService extends LdmService {
     private void fetchPersonsAlternateNameDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
         log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
-        def nameTypeCodeToGuidMap = nameTypeService.fetchGUIDs(bannerNameTypeToHedmNameTypeMap.keySet().toList())
+        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(bannerNameTypeToHedmNameTypeMap.keySet())
         log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
         List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
         log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
@@ -550,17 +575,20 @@ class PersonV6CompositeService extends LdmService {
 
     private void fetchPersonsEmailDataAndPutInMap(List<Integer> pidms, Map dataMap) {
 
+        //Get Mapped Codes for Email Types
+        Map<String, String> bannerEmailTypeToHedmEmailTypeMap = emailTypeCompositeService.getBannerEmailTypeToHedmV6EmailTypeMap()
+
         // Get GUIDs for Email types
-        Map etCodeToEmailTypeMap = [:]
-        etCodeToEmailTypeMap = emailTypeCompositeService.fetchAllMappedEmailTypes()
-        log.debug "Got ${etCodeToEmailTypeMap?.size() ?: 0} GUIDs for given EmailType codes"
+        Map<String, String> emailCodeToGuidMap = emailTypeCompositeService.getEmailTypeCodeToGuidMap(bannerEmailTypeToHedmEmailTypeMap.keySet())
+        log.debug "Got ${emailCodeToGuidMap?.size() ?: 0} GUIDs for given EmailType codes"
 
         // Get GOREMAL records for persons
-        Map pidmToEmailInfoMap = fetchPersonEmailByPIDMs(pidms, etCodeToEmailTypeMap.keySet())
+        Map pidmToEmailsMap = fetchPersonEmailByPIDMs(pidms, emailCodeToGuidMap.keySet())
 
         // Put in Map
-        dataMap.put("pidmToEmailInfoMap", pidmToEmailInfoMap)
-        dataMap.put("etCodeToEmailTypeMap", etCodeToEmailTypeMap)
+        dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
+        dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
+        dataMap.put("emailCodeToGuidMap", emailCodeToGuidMap)
     }
 
 
@@ -592,6 +620,23 @@ class PersonV6CompositeService extends LdmService {
         // Put in Map
         dataMap.put("pidmToRacesMap", pidmToRacesMap)
         dataMap.put("raceCodeToGuidMap", raceCodeToGuidMap)
+    }
+
+    private void fetchPersonsPhoneDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+
+        Map<String, String> bannerPhoneTypeToHedmPhoneTypeMap = phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
+
+        // Get GUIDs for Phone types
+        Map phoneCodeToGuidMap  = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+        log.debug "Got ${phoneCodeToGuidMap?.size() ?: 0} GUIDs for given PhoneType codes"
+
+        // Get SPRTELE records for persons
+        Map pidmToPhonesMap = fetchPersonPhoneByPIDMs(pidms, phoneCodeToGuidMap.keySet())
+
+        // Put in Map
+        dataMap.put("pidmToPhonesMap", pidmToPhonesMap)
+        dataMap.put("phoneCodeToGuidMap", phoneCodeToGuidMap)
+        dataMap.put("bannerPhoneTypeToHedmPhoneTypeMap", bannerPhoneTypeToHedmPhoneTypeMap)
     }
 
 
@@ -655,6 +700,27 @@ class PersonV6CompositeService extends LdmService {
             }
         }
         return pidmToEmailInfoMap
+    }
+
+
+    private Map fetchPersonPhoneByPIDMs(List<Integer> pidms, Set<String> codes) {
+        Map pidmToPhoneInfoMap = [:]
+        List<PersonTelephone> phoneInfo
+        if (pidms) {
+            log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
+            List<PersonTelephone> entities = personTelephoneService.fetchListByActiveStatusPidmsAndPhoneTypes(pidms, codes)
+            log.debug "Got ${entities?.size()} SPRTELE records"
+            entities.each {
+                if (pidmToPhoneInfoMap.containsKey(it.pidm)) {
+                    phoneInfo << it
+                } else {
+                    phoneInfo = []
+                    phoneInfo << it
+                }
+                pidmToPhoneInfoMap.put(it.pidm, phoneInfo)
+            }
+        }
+        return pidmToPhoneInfoMap
     }
 
 
@@ -772,16 +838,27 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private EmailV6 createEmailV6(PersonEmail it, def emailType) {
+    private EmailV6 createEmailV6(PersonEmail it, String code, String guid, String emailType) {
         EmailV6 emailV6 = new EmailV6()
         emailV6.address = it.emailAddress
-        emailV6.type = new EmailTypeDetails(emailType[0], null, emailType[1], emailType[2])
+        emailV6.type = new EmailTypeDetails(code, null, guid, emailType)
         if (it.preferredIndicator) {
             emailV6.preference = 'primaryOverall'
         }
         return emailV6
     }
 
+    private PhoneV6 createPhoneV6(PersonTelephone it, String code, String guid, String phoneType) {
+        PhoneV6 phoneV6 = new PhoneV6()
+        phoneV6.countryCallingCode = it.countryPhone
+        phoneV6.number = (it.phoneArea ?: "") + (it.phoneNumber ?: "")
+        phoneV6.extension = it.phoneExtension
+        phoneV6.type = new PhoneTypeDecorator(code, null, guid, phoneType)
+        if(it.primaryIndicator){
+            phoneV6.preference =  'primary'
+        }
+        return phoneV6
+    }
 
     private void injectPropertyIntoParams(Map params, String propName, def propVal) {
         def injectedProps = [:]
