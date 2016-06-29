@@ -10,6 +10,7 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.Religion
@@ -22,6 +23,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -288,6 +290,51 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def persons = personV6CompositeService.list(params)
         assertNotNull persons
         assertListIsSortedOnField(persons, params.sort, params.order)
+    }
+
+
+    @Test
+    void testListNamesWithTypePersonal() {
+        def params = [role: "student"]
+
+        def persons = personV6CompositeService.list(params)
+        assertNotNull persons
+
+        def personDetails = findOnePersonWithGivenBannerID(persons)
+        def personToTest = persons.find { person ->
+            person.guid == personDetails.guid
+        }
+        assertNotNull personToTest
+        assertEquals personToTest.guid, personDetails.guid
+        def personName = personToTest.names.find { categoryType ->
+            categoryType.type.category == 'personal'
+        }
+        assertEquals personName.type.category, "personal"
+        //assertEquals personName.fullName, getPersonFullName(personDetails.personBase)
+        assertEquals personName.title, personDetails.personBase.namePrefix
+        assertEquals personName.firstName, personDetails.personIdentificationName.firstName
+        assertEquals personName.middleName, personDetails.personIdentificationName.middleName
+        assertEquals personName.lastNamePrefix, personDetails.personIdentificationName.surnamePrefix
+        assertEquals personName.lastName, personDetails.personIdentificationName.lastName
+        assertEquals personName.pedigree, personDetails.personBase.nameSuffix
+    }
+
+    private Map findOnePersonWithGivenBannerID(def persons) {
+        def personIdentificationName
+        def personBase
+        Map personDetails = [:]
+        for (def person : persons) {
+            def bannerId = person.credentials.find { credentialType ->
+                credentialType.type == 'bannerId'
+            }
+            personIdentificationName = PersonUtility.getPerson(bannerId.value)
+            personBase = PersonBasicPersonBase.findByPidm(personIdentificationName.pidm)
+            personDetails = ["guid": person.guid, "personBase": personBase, "personIdentificationName": personIdentificationName]
+            if(personBase && personIdentificationName){
+                break
+            }
+        }
+        return personDetails
     }
 
 
