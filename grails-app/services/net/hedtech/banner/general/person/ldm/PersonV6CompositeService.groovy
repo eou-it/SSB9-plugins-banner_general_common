@@ -19,11 +19,12 @@ import net.hedtech.banner.general.person.ldm.v6.NameV6
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.NameTypeService
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
+import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EmailV6
+import net.hedtech.banner.general.system.ldm.v6.PhoneV6
 import net.hedtech.banner.general.system.ldm.v6.RaceV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.query.DynamicFinder
@@ -54,9 +55,10 @@ class PersonV6CompositeService extends LdmService {
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
     EthnicityCompositeService ethnicityCompositeService
-    NameTypeService nameTypeService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
+    PhoneTypeCompositeService phoneTypeCompositeService
+    PersonTelephoneService personTelephoneService
 
     /**
      * GET /api/persons
@@ -105,19 +107,23 @@ class PersonV6CompositeService extends LdmService {
                 log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
             } else {
                 if (params.role) {
-                    String role = params.role?.trim()?.toLowerCase()
+                    String role = params.role?.trim()
                     log.debug "Fetching persons with role $role ...."
                     def returnMap
-                    if (role == RoleName.INSTRUCTOR.v6) {
+                    if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.STUDENT.v6) {
+                    } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.EMPLOYEE.v6) {
+                    } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.ALUMNI.v6) {
+                    } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.VENDOR.v6) {
+                    } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
                         returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
+                    }  else if (role == RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]) {
+                        returnMap = userRoleCompositeService.fetchProspectiveStudents(sortField, sortOrder, max, offset)
+                    } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
+                        returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
                     } else {
                         throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
                     }
@@ -232,6 +238,7 @@ class PersonV6CompositeService extends LdmService {
             personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
             fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
+            fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -283,10 +290,11 @@ class PersonV6CompositeService extends LdmService {
                 dataMapForPerson << ["personCredentials": personCredentials]
 
                 // emails
-                List<PersonEmail> personEmailList = dataMap.pidmToEmailInfoMap.get(it.pidm)
+                List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(it.pidm)
                 if (personEmailList) {
-                    dataMapForPerson << ["emailInfo": personEmailList]
-                    dataMapForPerson << ["emailTypeInfo": dataMap.etCodeToEmailTypeMap]
+                    dataMapForPerson << ["personEmails": personEmailList]
+                    dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": dataMap.bannerEmailTypeToHedmEmailTypeMap]
+                    dataMapForPerson << ["emailCodeToGuidMap": dataMap.emailCodeToGuidMap]
                 }
 
                 // races
@@ -294,6 +302,14 @@ class PersonV6CompositeService extends LdmService {
                 if (personRaces) {
                     dataMapForPerson << ["personRaces": personRaces]
                     dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
+                }
+
+                // phones
+                List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(it.pidm)
+                if (personTelephoneList) {
+                    dataMapForPerson << ["personPhones": personTelephoneList]
+                    dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
+                    dataMapForPerson << ["phoneCodeToGuidMap": dataMap.phoneCodeToGuidMap]
                 }
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
@@ -346,7 +362,7 @@ class PersonV6CompositeService extends LdmService {
             if (legalNameAlternateV6) {
                 // Remove other alternate names of "legal" type
                 decorator.names.removeAll {
-                    it.type.category == NameTypeCategory.LEGAL.v6
+                    it.type.category == NameTypeCategory.LEGAL.versionToEnumMap["v6"]
                 }
                 // Add SPBPERS_LEGAL_NAME as "legal"
                 decorator.names << legalNameAlternateV6
@@ -368,12 +384,13 @@ class PersonV6CompositeService extends LdmService {
             def personCredentials = dataMapForPerson["personCredentials"]
             decorator.credentials = personCredentialCompositeService.createCredentialDecorators(personCredentials)
             // Emails
-            List<PersonEmail> personEmailList = dataMapForPerson["emailInfo"]
+            List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]
             if (personEmailList) {
-                Map emailTypeDetailsMap = dataMapForPerson["emailTypeInfo"]
+                Map emailCodeToGuidMap = dataMapForPerson["emailCodeToGuidMap"]
+                Map bannerEmailTypeToHedmEmailTypeMap = dataMapForPerson["bannerEmailTypeToHedmEmailTypeMap"]
                 decorator.emails = []
                 personEmailList.each {
-                    decorator.emails << createEmailV6(it, emailTypeDetailsMap.get(it.emailType.code))
+                    decorator.emails << createEmailV6(it, it.emailType.code, emailCodeToGuidMap.get(it.emailType.code), bannerEmailTypeToHedmEmailTypeMap.get(it.emailType.code))
                 }
             }
             // Races
@@ -383,6 +400,18 @@ class PersonV6CompositeService extends LdmService {
                 decorator.races = []
                 personRaces.each {
                     decorator.races << new RaceV6(raceCodeToGuidMap.get(it.race), raceCompositeService.getLdmRace(it.race))
+                }
+            }
+            // Phones
+            List<PersonTelephone> personTelephoneListList = dataMapForPerson["personPhones"]
+
+            if (personTelephoneListList) {
+                Map phoneCodeToGuidMap = dataMapForPerson["phoneCodeToGuidMap"]
+                Map bannerPhoneTypeToHedmPhoneTypeMap = dataMapForPerson["bannerPhoneTypeToHedmPhoneTypeMap"]
+
+                decorator.phones = []
+                personTelephoneListList.each {
+                    decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
                 }
             }
         }
@@ -432,9 +461,9 @@ class PersonV6CompositeService extends LdmService {
 
 
     private void fetchPersonsAlternateNameDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHEDMNameTypeMap()
+        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
         log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
-        def nameTypeCodeToGuidMap = nameTypeService.fetchGUIDs(bannerNameTypeToHedmNameTypeMap.keySet().toList())
+        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(bannerNameTypeToHedmNameTypeMap.keySet())
         log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
         List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
         log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
@@ -520,6 +549,25 @@ class PersonV6CompositeService extends LdmService {
             def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
             personRoles << [role: RoleName.VENDOR, startDate: startDate, endDate: endDate]
         }
+        // ProspectiveStudent role
+        List<Object[]> prospectiveStudentList = userRoleCompositeService.fetchProspectiveStudentByPIDMs(pidms)
+        prospectiveStudentList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.PROSPECTIVE_STUDENT, startDate: startDate, endDate: endDate]
+        }
+        // Advisor role
+        List<Object[]> advisorList = userRoleCompositeService.fetchAdvisorByPIDMs(pidms)
+        advisorList?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
+            personRoles << [role: RoleName.ADVISOR, startDate: startDate, endDate: endDate]
+        }
+
         // Put in Map
         dataMap.put("pidmToRolesMap", pidmToRolesMap)
     }
@@ -527,17 +575,20 @@ class PersonV6CompositeService extends LdmService {
 
     private void fetchPersonsEmailDataAndPutInMap(List<Integer> pidms, Map dataMap) {
 
+        //Get Mapped Codes for Email Types
+        Map<String, String> bannerEmailTypeToHedmEmailTypeMap = emailTypeCompositeService.getBannerEmailTypeToHedmV6EmailTypeMap()
+
         // Get GUIDs for Email types
-        Map etCodeToEmailTypeMap = [:]
-        etCodeToEmailTypeMap = emailTypeCompositeService.fetchAllMappedEmailTypes()
-        log.debug "Got ${etCodeToEmailTypeMap?.size() ?: 0} GUIDs for given EmailType codes"
+        Map<String, String> emailCodeToGuidMap = emailTypeCompositeService.getEmailTypeCodeToGuidMap(bannerEmailTypeToHedmEmailTypeMap.keySet())
+        log.debug "Got ${emailCodeToGuidMap?.size() ?: 0} GUIDs for given EmailType codes"
 
         // Get GOREMAL records for persons
-        Map pidmToEmailInfoMap = fetchPersonEmailByPIDMs(pidms, etCodeToEmailTypeMap.keySet())
+        Map pidmToEmailsMap = fetchPersonEmailByPIDMs(pidms, emailCodeToGuidMap.keySet())
 
         // Put in Map
-        dataMap.put("pidmToEmailInfoMap", pidmToEmailInfoMap)
-        dataMap.put("etCodeToEmailTypeMap", etCodeToEmailTypeMap)
+        dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
+        dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
+        dataMap.put("emailCodeToGuidMap", emailCodeToGuidMap)
     }
 
 
@@ -569,6 +620,23 @@ class PersonV6CompositeService extends LdmService {
         // Put in Map
         dataMap.put("pidmToRacesMap", pidmToRacesMap)
         dataMap.put("raceCodeToGuidMap", raceCodeToGuidMap)
+    }
+
+    private void fetchPersonsPhoneDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+
+        Map<String, String> bannerPhoneTypeToHedmPhoneTypeMap = phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
+
+        // Get GUIDs for Phone types
+        Map phoneCodeToGuidMap  = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+        log.debug "Got ${phoneCodeToGuidMap?.size() ?: 0} GUIDs for given PhoneType codes"
+
+        // Get SPRTELE records for persons
+        Map pidmToPhonesMap = fetchPersonPhoneByPIDMs(pidms, phoneCodeToGuidMap.keySet())
+
+        // Put in Map
+        dataMap.put("pidmToPhonesMap", pidmToPhonesMap)
+        dataMap.put("phoneCodeToGuidMap", phoneCodeToGuidMap)
+        dataMap.put("bannerPhoneTypeToHedmPhoneTypeMap", bannerPhoneTypeToHedmPhoneTypeMap)
     }
 
 
@@ -635,6 +703,27 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
+    private Map fetchPersonPhoneByPIDMs(List<Integer> pidms, Set<String> codes) {
+        Map pidmToPhoneInfoMap = [:]
+        List<PersonTelephone> phoneInfo
+        if (pidms) {
+            log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
+            List<PersonTelephone> entities = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList(pidms, codes)
+            log.debug "Got ${entities?.size()} SPRTELE records"
+            entities.each {
+                if (pidmToPhoneInfoMap.containsKey(it.pidm)) {
+                    phoneInfo << it
+                } else {
+                    phoneInfo = []
+                    phoneInfo << it
+                }
+                pidmToPhoneInfoMap.put(it.pidm, phoneInfo)
+            }
+        }
+        return pidmToPhoneInfoMap
+    }
+
+
     private CitizenshipStatusV6 createCitizenshipStatusV6(CitizenType citizenType, String citizenTypeGuid) {
         CitizenshipStatusV6 decorator
         if (citizenType) {
@@ -652,7 +741,7 @@ class PersonV6CompositeService extends LdmService {
         NameV6 decorator
         if (personCurrent) {
             decorator = new NameV6()
-            decorator.type = ["category": NameTypeCategory.PERSONAL.v6]
+            decorator.type = ["category": NameTypeCategory.PERSONAL.versionToEnumMap["v6"]]
             decorator.fullName = personCurrent.fullName
             decorator.firstName = personCurrent.firstName
             decorator.middleName = personCurrent.middleName
@@ -667,11 +756,11 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private NameAlternateV6 createNameAlternateV6(PersonIdentificationNameAlternate personAlternate, NameTypeCategory nameTypeCategory, String nameTypeGuid) {
+    private NameAlternateV6 createNameAlternateV6(PersonIdentificationNameAlternate personAlternate, String nameTypeCategory, String nameTypeGuid) {
         NameAlternateV6 decorator
         if (personAlternate) {
             decorator = new NameAlternateV6()
-            decorator.type = ["category": nameTypeCategory.v6, "detail": ["id": nameTypeGuid]]
+            decorator.type = ["category": nameTypeCategory, "detail": ["id": nameTypeGuid]]
             decorator.fullName = personAlternate.fullName
             decorator.firstName = personAlternate.firstName
             decorator.middleName = personAlternate.middleName
@@ -686,7 +775,7 @@ class PersonV6CompositeService extends LdmService {
         NameAlternateV6 decorator
         if (fullName && fullName.trim().length() > 0) {
             decorator = new NameAlternateV6()
-            decorator.type = ["category": NameTypeCategory.LEGAL.v6]
+            decorator.type = ["category": NameTypeCategory.LEGAL.versionToEnumMap["v6"]]
             decorator.fullName = fullName
         }
         return decorator
@@ -737,7 +826,7 @@ class PersonV6CompositeService extends LdmService {
         RoleV6 decorator
         if (roleName) {
             decorator = new RoleV6()
-            decorator.role = roleName.v6
+            decorator.role = roleName.versionToEnumMap["v6"]
             if (startDate) {
                 decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(startDate)
             }
@@ -749,14 +838,27 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private EmailV6 createEmailV6(PersonEmail it, def emailType) {
+    private EmailV6 createEmailV6(PersonEmail it, String code, String guid, String emailType) {
         EmailV6 emailV6 = new EmailV6()
         emailV6.address = it.emailAddress
-        emailV6.type = new EmailTypeDetails(emailType[0].code, emailType[0].description, emailType[1].guid, emailType[2].translationValue)
-        emailV6.preference = it.preferredIndicator ? 'primaryOverall' : ''
+        emailV6.type = new EmailTypeDetails(code, null, guid, emailType)
+        if (it.preferredIndicator) {
+            emailV6.preference = 'primaryOverall'
+        }
         return emailV6
     }
 
+    private PhoneV6 createPhoneV6(PersonTelephone it, String code, String guid, String phoneType) {
+        PhoneV6 phoneV6 = new PhoneV6()
+        phoneV6.countryCallingCode = it.countryPhone
+        phoneV6.number = (it.phoneArea ?: "") + (it.phoneNumber ?: "")
+        phoneV6.extension = it.phoneExtension
+        phoneV6.type = new PhoneTypeDecorator(code, null, guid, phoneType)
+        if(it.primaryIndicator){
+            phoneV6.preference =  'primary'
+        }
+        return phoneV6
+    }
 
     private void injectPropertyIntoParams(Map params, String propName, def propVal) {
         def injectedProps = [:]

@@ -395,6 +395,115 @@ class UserRoleCompositeService extends LdmService {
         return results
     }
 
+    /**
+     * Fetch prospective students from DB
+     *
+     * @param sortField "firstName" or "lastName"
+     * @param sortOrder "asc" or "desc"
+     * @param max maximum number of rows to retrieve
+     * @param offset first row to retrieve (numbered from 0)
+     */
+    public def fetchProspectiveStudents(String sortField, String sortOrder, int max, int offset) {
+        List<Integer> pidms = []
+        def totalCount = 0
+
+        if (sortField?.trim() == "firstName") {
+            sortField = "a.spriden_first_name"
+        } else {
+            sortField = "a.spriden_last_name"
+        }
+        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
+            sortOrder = "asc"
+        }
+
+        if (isStudentInstalled()) {
+            try {
+                // Query for PIDMs
+                def sql = getSQLforFetchingProspectiveStudent(sortField, sortOrder)
+                def results = executeNativeSQL(sql, max, offset)
+                pidms = results.collect {
+                    if (it instanceof BigDecimal) it.toInteger()
+                    else it[0].toInteger()
+                }
+                // Query for total count
+                sql = getSQLforFetchingProspectiveStudent(null, null, true)
+                totalCount = executeNativeSQL(sql, 0, 0, true)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    public def fetchProspectiveStudentByPIDMs(List<Integer> pidms) {
+        def results
+        if (isStudentInstalled() && pidms) {
+            try {
+                def sql = getSQLforFetchingProspectiveStudentsByPIDMs()
+                results = executeNativeSQL(sql, pidms)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+        return results
+    }
+
+    /**
+     * Fetch Advisors from DB
+     *
+     * @param sortField "firstName" or "lastName"
+     * @param sortOrder "asc" or "desc"
+     * @param max maximum number of rows to retrieve
+     * @param offset first row to retrieve (numbered from 0)
+     */
+    public def fetchAdvisors(String sortField, String sortOrder, int max, int offset) {
+        List<Integer> pidms = []
+        def totalCount = 0
+
+        if (sortField?.trim() == "firstName") {
+            sortField = "a.spriden_first_name"
+        } else {
+            sortField = "a.spriden_last_name"
+        }
+        if (!["asc", "desc"].contains(sortOrder?.trim()?.toLowerCase())) {
+            sortOrder = "asc"
+        }
+
+        if (isStudentInstalled()) {
+            try {
+                // Query for PIDMs
+                def sql = getSQLforFetchingAdvisor(sortField, sortOrder)
+                def results = executeNativeSQL(sql, max, offset)
+                pidms = results.collect {
+                    if (it instanceof BigDecimal) it.toInteger()
+                    else it[0].toInteger()
+                }
+                // Query for total count
+                sql = getSQLforFetchingAdvisor(null, null, true)
+                totalCount = executeNativeSQL(sql, 0, 0, true)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    public def fetchAdvisorByPIDMs(List<Integer> pidms) {
+        def results
+        if (isStudentInstalled() && pidms) {
+            try {
+                def sql = getSQLforFetchingAdvisorByPIDMs()
+                results = executeNativeSQL(sql, pidms)
+            } catch (Exception ex) {
+                log.error ex
+            }
+        }
+        return results
+    }
 
     private Boolean isStudentInstalled() {
         Boolean installed = false
@@ -534,6 +643,51 @@ class UserRoleCompositeService extends LdmService {
         return sql.replace("\n", "").replaceAll(/  */, " ")
     }
 
+    private String getSQLforFetchingProspectiveStudent(String sortField, String sortOrder, boolean count = false) {
+        String sql = """ select """
+        if (count) {
+            sql += """  count(a.spriden_pidm) """
+        } else {
+            sql += """ a.spriden_pidm  """
+        }
+        sql += """ FROM spriden a WHERE EXISTS (SELECT 1 FROM SRBRECR , STVTERM
+					WHERE STVTERM_CODE = SRBRECR_TERM_CODE
+					AND sysdate < STVTERM_END_DATE
+					AND SRBRECR_PIDM = a.SPRIDEN_PIDM)
+					AND a.spriden_change_ind IS NULL AND a.spriden_entity_ind = 'P' """
+        if (!count) {
+            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
+        }
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
+
+    private String getSQLforFetchingAdvisor(String sortField, String sortOrder, boolean count = false) {
+        String sql = """ select """
+        if (count) {
+            sql += """  count(a.spriden_pidm) """
+        } else {
+            sql += """ a.spriden_pidm  """
+        }
+        sql += """ from spriden a, svq_sibinst_access b
+                   where a.spriden_pidm = b.sibinst_pidm
+                   and b.stvfcst_active_ind = 'A'
+                   and b.sibinst_schd_ind = 'Y'
+                   and b.SIBINST_ADVR_IND = 'Y'
+                   and b.sibinst_term_code_eff = (select min(c.sibinst_term_code_eff)
+                                                  from svq_sibinst_access c, stvterm e
+                                                  where c.sibinst_pidm = b.sibinst_pidm
+                                                  and c.end_term = e.stvterm_code
+                                                  and c.stvfcst_active_ind = 'A'
+                                                  and c.sibinst_schd_ind = 'Y'
+                                                  and c.SIBINST_ADVR_IND  = 'Y'
+                                                  and sysdate < e.stvterm_end_date)
+                   and a.spriden_change_ind is null
+                   and a.spriden_entity_ind = 'P' """
+        if (!count) {
+            sql += """ order by $sortField $sortOrder, a.spriden_id $sortOrder """
+        }
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
 
     private def executeNativeSQL(String nativeSql, int max, int offset, boolean count = false) {
         def session = sessionFactory.getCurrentSession()
@@ -624,6 +778,46 @@ class UserRoleCompositeService extends LdmService {
         return sql.replace("\n", "").replaceAll(/  */, " ")
     }
 
+    private String getSQLforFetchingProspectiveStudentsByPIDMs() {
+        def sql = """ select a.SPRIDEN_PIDM, b.startOn ,c.endOn from spriden a,
+                     (select SRBRECR_PIDM, min(STVTERM_START_DATE) as startOn from SRBRECR  , STVTERM
+                     WHERE STVTERM_CODE = SRBRECR_TERM_CODE
+                     AND sysdate < STVTERM_END_DATE group by SRBRECR_PIDM) b,
+                     (select x.SRBRECR_PIDM ,  max( nvl(
+                    (select min(STVTERM_START_DATE) from SGBSTDN p, STVTERM
+                    where SGBSTDN_TERM_CODE_EFF = STVTERM_CODE
+                    AND SGBSTDN_PIDM = x.SRBRECR_PIDM)
+                    ,y.STVTERM_END_DATE)) as endOn
+                    from SRBRECR x , STVTERM y
+                    WHERE y.STVTERM_CODE = x.SRBRECR_TERM_CODE
+                    AND sysdate < y.STVTERM_END_DATE group by x.SRBRECR_PIDM) c
+                    where a.SPRIDEN_PIDM = b.SRBRECR_PIDM and a.SPRIDEN_PIDM = c.SRBRECR_PIDM and
+                    a.spriden_change_ind IS NULL AND a.spriden_entity_ind = 'P' and a.SPRIDEN_PIDM in (:pidms) """
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
+
+    private String getSQLforFetchingAdvisorByPIDMs() {
+        def sql = """ select a.spriden_pidm, d.stvterm_start_date, f.stvterm_end_date
+                      from spriden a, svq_sibinst_access b, stvterm d, stvterm f
+                      where a.spriden_pidm = b.sibinst_pidm
+                      and d.stvterm_code = b.sibinst_term_code_eff
+                      and f.stvterm_code = b.end_term
+                      and b.stvfcst_active_ind = 'A'
+                      and b.sibinst_schd_ind = 'Y'
+                      and b.SIBINST_ADVR_IND = 'Y'
+                      and b.sibinst_term_code_eff = (select min(c.sibinst_term_code_eff)
+                                                     from svq_sibinst_access c, stvterm e
+                                                     where c.sibinst_pidm = b.sibinst_pidm
+                                                     and c.end_term = e.stvterm_code
+                                                     and c.stvfcst_active_ind = 'A'
+                                                     and c.sibinst_schd_ind = 'Y'
+                                                     and c.SIBINST_ADVR_IND = 'Y'
+                                                     and sysdate < e.stvterm_end_date)
+                      and a.spriden_change_ind is null
+                      and a.spriden_entity_ind = 'P'
+                      and b.sibinst_pidm in (:pidms) """
+        return sql.replace("\n", "").replaceAll(/  */, " ")
+    }
 
     private def executeNativeSQL(String nativeSql, List<Integer> pidms) {
         def session = sessionFactory.getCurrentSession()

@@ -10,6 +10,7 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.Religion
@@ -22,6 +23,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -154,6 +156,40 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    void testListPersonValidV6ForAdvisorRole() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: RoleName.ADVISOR.versionToEnumMap["v6"] ]
+        List<PersonV6> o_success_persons = personV6CompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+
+        o_success_persons.each {
+            assertNotNull it.guid
+            assertTrue it.roles.role.contains(params.role)
+        }
+
+    }
+
+    @Test
+    void testListPersonValidV6ForProspectiveStudentRole() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        Map params = [role: RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"] ]
+        List<PersonV6> o_success_persons = personV6CompositeService.list(params)
+
+        assertNotNull o_success_persons
+        assertFalse o_success_persons.isEmpty()
+
+        o_success_persons.each {
+            assertNotNull it.guid
+            assertTrue it.roles.role.contains(params.role)
+        }
+
+    }
+
+    @Test
     void testListapiWithRoleStudentAndLargePagination() {
         def params1 = [role: "student"]
         Map resultCount = userRoleCompositeService.fetchAllByRole(params1)
@@ -254,6 +290,51 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def persons = personV6CompositeService.list(params)
         assertNotNull persons
         assertListIsSortedOnField(persons, params.sort, params.order)
+    }
+
+
+    @Test
+    void testListNamesWithTypePersonal() {
+        def params = [role: "student"]
+
+        def persons = personV6CompositeService.list(params)
+        assertNotNull persons
+
+        def personDetails = findOnePersonWithGivenBannerID(persons)
+        def personToTest = persons.find { person ->
+            person.guid == personDetails.guid
+        }
+        assertNotNull personToTest
+        assertEquals personToTest.guid, personDetails.guid
+        def personName = personToTest.names.find { categoryType ->
+            categoryType.type.category == 'personal'
+        }
+        assertEquals personName.type.category, "personal"
+        //assertEquals personName.fullName, getPersonFullName(personDetails.personBase)
+        assertEquals personName.title, personDetails.personBase.namePrefix
+        assertEquals personName.firstName, personDetails.personIdentificationName.firstName
+        assertEquals personName.middleName, personDetails.personIdentificationName.middleName
+        assertEquals personName.lastNamePrefix, personDetails.personIdentificationName.surnamePrefix
+        assertEquals personName.lastName, personDetails.personIdentificationName.lastName
+        assertEquals personName.pedigree, personDetails.personBase.nameSuffix
+    }
+
+    private Map findOnePersonWithGivenBannerID(def persons) {
+        def personIdentificationName
+        def personBase
+        Map personDetails = [:]
+        for (def person : persons) {
+            def bannerId = person.credentials.find { credentialType ->
+                credentialType.type == 'bannerId'
+            }
+            personIdentificationName = PersonUtility.getPerson(bannerId.value)
+            personBase = PersonBasicPersonBase.findByPidm(personIdentificationName.pidm)
+            personDetails = ["guid": person.guid, "personBase": personBase, "personIdentificationName": personIdentificationName]
+            if(personBase && personIdentificationName){
+                break
+            }
+        }
+        return personDetails
     }
 
 
