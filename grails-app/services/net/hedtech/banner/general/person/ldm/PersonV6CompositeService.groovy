@@ -708,7 +708,7 @@ class PersonV6CompositeService extends LdmService {
         List<PersonTelephone> phoneInfo
         if (pidms) {
             log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
-            List<PersonTelephone> entities = personTelephoneService.fetchListByActiveStatusPidmsAndPhoneTypes(pidms, codes)
+            List<PersonTelephone> entities = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList(pidms, codes)
             log.debug "Got ${entities?.size()} SPRTELE records"
             entities.each {
                 if (pidmToPhoneInfoMap.containsKey(it.pidm)) {
