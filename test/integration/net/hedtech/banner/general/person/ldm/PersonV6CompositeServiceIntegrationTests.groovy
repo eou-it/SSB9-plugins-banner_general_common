@@ -10,12 +10,16 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
+import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
+import net.hedtech.banner.general.person.PersonIdentificationNameAlternateService
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.NameTypeService
 import net.hedtech.banner.general.system.Religion
 import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.PersonNameTypeCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
@@ -23,7 +27,6 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -34,6 +37,10 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
+    NameTypeService nameTypeService
+    PersonNameTypeCompositeService personNameTypeCompositeService
+    PersonIdentificationNameAlternateService personIdentificationNameAlternateService
+    static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24789'
 
     @Before
     public void setUp() {
@@ -317,6 +324,49 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals personName.lastNamePrefix, personDetails.personIdentificationName.surnamePrefix
         assertEquals personName.lastName, personDetails.personIdentificationName.lastName
         assertEquals personName.pedigree, personDetails.personBase.nameSuffix
+    }
+
+
+    @Test
+    void testGetNamesWithTypeBirth() {
+        def personIdentificationName = PersonUtility.getPerson(BANNER_ID_WITH_TYPE_BIRTH)
+        assertNotNull personIdentificationName
+
+        GlobalUniqueIdentifier personGUID = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(GeneralCommonConstants.PERSONS_LDM_NAME,String.valueOf(personIdentificationName.pidm))[0]
+        def person = personV6CompositeService.get(personGUID.guid)
+        assertNotNull person
+
+        def birthNameType = getPersonBirthNameTypeByPidm([personIdentificationName.pidm])
+        //assertNotNull birthNameType
+        //TODO: validate all attributes with returned birthname of person
+    }
+
+    private Map getPersonBirthNameTypeByPidm(List<Integer> pidms) {
+        Map dataMap = getPersonAlternateNamesByPidm(pidms)
+        /*
+        dataMap.find { person ->
+            person.nameType.code == 'birth'
+        }*/
+        //TODO: return person with name type birth
+        return null
+    }
+
+    private Map getPersonAlternateNamesByPidm(List<Integer> pidms) {
+        Map dataMap = [:]
+        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
+        List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
+        Map pidmToAlternateNamesMap = [:]
+        entities.each {
+            List<PersonIdentificationNameAlternate> personAlternateNames = []
+            if (pidmToAlternateNamesMap.containsKey(it.pidm)) {
+                personAlternateNames = pidmToAlternateNamesMap.get(it.pidm)
+            } else {
+                pidmToAlternateNamesMap.put(it.pidm, personAlternateNames)
+            }
+            personAlternateNames.add(it)
+        }
+        dataMap.put("pidmToAlternateNamesMap", pidmToAlternateNamesMap)
+        return dataMap
     }
 
     private Map findOnePersonWithGivenBannerID(def persons) {
