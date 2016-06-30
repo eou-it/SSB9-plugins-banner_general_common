@@ -37,6 +37,90 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    public void testValidateReferenceOrganization() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([referenceOrganization: null])
+        assertNull(generalFeed.referenceOrganization)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //length of referenceOrganization is max 9 so below should fail on validation
+        GeneralFeed generalFeed1 = createNewGenerealFeed([referenceOrganization: "REF_ORGN01"])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('referenceOrganization').code)
+    }
+
+    @Test
+    public void testValidateEncumbranceNumber() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([encumbranceNumber: null])
+        assertNull(generalFeed.encumbranceNumber)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //length of encumbranceNumber is max 8
+        GeneralFeed generalFeed1 = createNewGenerealFeed([encumbranceNumber: 'E'*9])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('encumbranceNumber').code)
+    }
+
+    @Test
+    public void testValidateEncumbranceItemNumber() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([encumbranceItemNumber: null])
+        assertNull(generalFeed.encumbranceItemNumber)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //max value for encumbranceItemNumber is 9999
+        GeneralFeed generalFeed1 = createNewGenerealFeed([encumbranceItemNumber: 19999])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("max.exceeded", generalFeed1.errors.getFieldError('encumbranceItemNumber').code)
+    }
+
+    @Test
+    public void testValidateEncumbranceSequenceNumber() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([encumbranceSequenceNumber: null])
+        assertNull(generalFeed.encumbranceSequenceNumber)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //max value for encumbranceSequenceNumber is 9999
+        GeneralFeed generalFeed1 = createNewGenerealFeed([encumbranceSequenceNumber: 19999])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("max.exceeded", generalFeed1.errors.getFieldError('encumbranceSequenceNumber').code)
+    }
+
+    @Test
+    public void testValidateBudgetOverride() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([budgetOverride: null])
+        assertNull(generalFeed.budgetOverride)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+    }
+
+    @Test
+    public void testValidateBudgetPeriod() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([budgetPeriod: null])
+        assertNull(generalFeed.budgetPeriod)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //length of budgetPeriod is max 2
+        GeneralFeed generalFeed1 = createNewGenerealFeed([budgetPeriod: 'B'*3])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('budgetPeriod').code)
+    }
+
+    @Test
     public void testValidateTransactionNumber() {
         //null is not allowed
         GeneralFeed generalFeed = createNewGenerealFeed([transactionNumber: null])
@@ -92,6 +176,21 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         assertTrue(generalFeed1.hasErrors())
         assertEquals(1, generalFeed1.errors.errorCount)
         assertEquals("max.exceeded", generalFeed1.errors.getFieldError('sequenceNumber').code)
+    }
+
+    @Test
+    public void testValidateAccountingString() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([accountingString: null])
+        assertNull(generalFeed.accountingString)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //max size for accountingString is 60
+        GeneralFeed generalFeed1 = createNewGenerealFeed([accountingString: 'A'*61])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('accountingString').code)
     }
 
     @Test
@@ -315,6 +414,21 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    public void testValidateCurrencyCode() {
+        //null is allowed
+        GeneralFeed generalFeed = createNewGenerealFeed([currencyCode: null])
+        assertNull(generalFeed.currencyCode)
+        generalFeed.validate()
+        assertFalse(generalFeed.hasErrors())
+        //max size for currencyCode is 4
+        GeneralFeed generalFeed1 = createNewGenerealFeed([currencyCode: 'C'*5])
+        generalFeed1.validate()
+        assertTrue(generalFeed1.hasErrors())
+        assertEquals(1, generalFeed1.errors.errorCount)
+        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('currencyCode').code)
+    }
+
+    @Test
     public void testValidateSystemId() {
         //null is not allowed
         GeneralFeed generalFeed = createNewGenerealFeed([systemId: null])
@@ -460,7 +574,14 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.transactionNumber = "TRAN_NUM"
         generalFeed.ledgerDate = new Date()
         generalFeed.referencePerson = 12345678
+        generalFeed.referenceOrganization = "REF_ORGN1"
+        generalFeed.encumbranceNumber = 'E'*8
+        generalFeed.encumbranceItemNumber = 4321
+        generalFeed.encumbranceSequenceNumber = 2413
+        generalFeed.budgetOverride = false
+        generalFeed.budgetPeriod = 'BP'
         generalFeed.sequenceNumber = 1234
+        generalFeed.accountingString = 'A'*60
         generalFeed.chartOfAccountsCode = "1"
         generalFeed.accountIndexCode = "ACCI_C"
         generalFeed.fundCode = "FUND_C"
@@ -475,6 +596,7 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.description = '_DESC' * 7
         generalFeed.type = "C"
         generalFeed.amount = 999999999999999.99
+        generalFeed.currencyCode = 'C'*4
         generalFeed.systemId = "SYS_ID_1"
         generalFeed.recordTypeIndicator = "1"
         generalFeed.systemTimestamp = "SYS_TIME_STAMP"

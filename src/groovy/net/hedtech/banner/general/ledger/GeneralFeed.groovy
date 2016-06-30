@@ -5,6 +5,7 @@ package net.hedtech.banner.general.ledger
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.hibernate.annotations.Type
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -27,95 +28,130 @@ class GeneralFeed implements Serializable{
     @SequenceGenerator(name = "GURFEED_SEQ_GEN", allocationSize = 1, sequenceName = "GURFEED_SURROGATE_ID_SEQUENCE")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GURFEED_SEQ_GEN")
     @Column(name = "GURFEED_SURROGATE_ID")
-    Long id;
+    Long id
 
     @Version
     @Column(name = "GURFEED_VERSION")
-    Long version;
+    Long version
 
     @Column(name = "GURFEED_DOC_REF_NUM")
-    String referenceNumber;
+    String referenceNumber
 
     @Column(name = "GURFEED_DOC_CODE")
-    String transactionNumber;
+    String transactionNumber
 
     @Column(name = "GURFEED_TRANS_DATE")
     @Temporal(TemporalType.DATE)
-    Date ledgerDate;
+    Date ledgerDate
 
     @Column(name = "GURFEED_VENDOR_PIDM")
-    Long referencePerson;
+    Long referencePerson
+
+    @Column(name = "GURFEED_ONE_TIME_VEND_CODE")
+    String referenceOrganization
+
+    @Column(name = "GURFEED_ENCD_NUM")
+    String encumbranceNumber
+
+    @Column(name = "GURFEED_ENCD_ITEM_NUM")
+    Long encumbranceItemNumber
+
+    @Column(name = "GURFEED_ENCD_SEQ_NUM")
+    Long encumbranceSequenceNumber
+
+    @Type(type = "yes_no")
+    @Column(name = "GURFEED_ABAL_OVERRIDE")
+    Boolean budgetOverride
+
+    @Column(name = "GURFEED_BUDGET_PERIOD")
+    String budgetPeriod
 
     @Column(name = "GURFEED_SEQ_NUM")
-    Long sequenceNumber;
+    Long sequenceNumber
+
+    @Column(name = "GURFEED_ACCOUNT")
+    String accountingString
 
     @Column(name = "GURFEED_COAS_CODE")
-    String chartOfAccountsCode;
+    String chartOfAccountsCode
 
     @Column(name = "GURFEED_ACCI_CODE")
-    String accountIndexCode;
+    String accountIndexCode
 
     @Column(name = "GURFEED_FUND_CODE")
-    String fundCode;
+    String fundCode
 
     @Column(name = "GURFEED_ORGN_CODE")
-    String orgnizationCode;
+    String orgnizationCode
 
     @Column(name = "GURFEED_ACCT_CODE")
-    String accountCode;
+    String accountCode
 
     @Column(name = "GURFEED_PROG_CODE")
-    String programCode;
+    String programCode
 
     @Column(name = "GURFEED_ACTV_CODE")
-    String activityCode;
+    String activityCode
 
     @Column(name = "GURFEED_LOCN_CODE")
-    String locationCode;
+    String locationCode
 
     @Column(name = "GURFEED_PRJD_CODE")
-    String projectCode;
+    String projectCode
 
     @Column(name = "GURFEED_BANK_CODE")
-    String bankCode;
+    String bankCode
 
     @Column(name = "GURFEED_RUCL_CODE")
-    String ruleClassCode;
+    String ruleClassCode
 
     @Column(name = "GURFEED_TRANS_DESC")
-    String description ;
+    String description
 
     @Column(name = "GURFEED_DR_CR_IND")
-    String type;
+    String type
 
     @Column(name = "GURFEED_TRANS_AMT")
-    BigDecimal amount;
+    BigDecimal amount
+
+    @Column(name = "GURFEED_CURR_CODE")
+    String currencyCode
 
     @Column(name = "GURFEED_SYSTEM_ID")
-    String systemId;
+    String systemId
 
     @Column(name = "GURFEED_REC_TYPE")
-    String recordTypeIndicator;
+    String recordTypeIndicator
 
     @Column(name = "GURFEED_SYSTEM_TIME_STAMP")
-    String systemTimestamp;
+    String systemTimestamp
 
     @Column(name = "GURFEED_ACTIVITY_DATE")
     @Temporal(TemporalType.DATE)
-    Date activityDate;
+    Date activityDate
 
     @Column(name = "GURFEED_USER_ID")
-    String userId;
+    String userId
 
     @Column(name = "GURFEED_DEP_NUM")
-    String depositNumber;
+    String depositNumber
+
+    @Column(name = "GURFEED_DATA_ORIGIN")
+    String dataOrigin
 
     static constraints = {
         referenceNumber(nullable: true, maxSize: 8)
         transactionNumber(nullable: false, maxSize: 8)
         ledgerDate(nullable: false)
         referencePerson(nullable: true, max: 99999999L)
+        referenceOrganization(nullable: true, maxSize: 9)
+        encumbranceNumber(nullable: true, maxSize: 8)
+        encumbranceItemNumber(nullable: true, max: 9999L)
+        encumbranceSequenceNumber(nullable:true, max: 9999L)
+        budgetOverride(nullable: true)
+        budgetPeriod(nullable: true, maxSize: 2)
         sequenceNumber(nullable: true, max: 9999L)
+        accountingString(nullable: true, maxSize: 60)
         chartOfAccountsCode(nullable: true, maxSize:1)
         accountIndexCode(nullable: true, maxSize: 6)
         fundCode(nullable: true, maxSize: 6)
@@ -136,6 +172,7 @@ class GeneralFeed implements Serializable{
                 }
             )
         amount(nullable:false, min: new BigDecimal(0), max: new BigDecimal(999999999999999.99))
+        currencyCode(nullable: true, maxSize: 4)
         systemId(nullable: false, maxSize: 8)
         recordTypeIndicator(nullable: false, maxSize: 1,
                 validator: {val, obj ->
@@ -148,5 +185,6 @@ class GeneralFeed implements Serializable{
         activityDate(nullable: false)
         userId(nullable: false, maxSize: 30)
         depositNumber(nullable: true, maxSize: 8)
+        dataOrigin(nullable: true)
     }
 }

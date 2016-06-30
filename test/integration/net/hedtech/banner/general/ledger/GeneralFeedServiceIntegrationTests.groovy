@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
+ ****************************************************************************** */
 package net.hedtech.banner.general.ledger
 
 import net.hedtech.banner.exceptions.ApplicationException
@@ -6,9 +9,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-/**
- * Created by vijayt on 6/22/2016.
- */
 class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
     GeneralFeedService generalFeedService;
 
@@ -70,7 +70,9 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.transactionNumber = "TRAN_NUM"
         generalFeed.ledgerDate = new Date()
         generalFeed.referencePerson = 12345678
+        generalFeed.referenceOrganization = "REF_ORGN1"
         generalFeed.sequenceNumber = 1234
+        generalFeed.accountingString = 'A'*60
         generalFeed.chartOfAccountsCode = "1"
         generalFeed.accountIndexCode = "ACCI_C"
         generalFeed.fundCode = "FUND_C"
