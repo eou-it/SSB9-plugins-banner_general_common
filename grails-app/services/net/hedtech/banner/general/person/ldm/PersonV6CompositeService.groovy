@@ -94,46 +94,61 @@ class PersonV6CompositeService extends LdmService {
 
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
 
-        } else {
-            if (params.containsKey("personFilter") && params.containsKey("role")) {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination", []))
+            String contentType = getRequestRepresentation()
+            if (contentType && contentType.contains("duplicate-check")) {
+                log.info "Person duplicate check request with Content-Type ${contentType}"
+
+                lookForMatchingPersons(params)
             }
 
-            if (params.containsKey("personFilter")) {
+        } else {
+
+            if (params.containsKey("role")) {
+                String role = params.role?.trim()
+                log.debug "Fetching persons with role $role ...."
+                def returnMap
+                if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
+                } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+                } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
+                } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
+                } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
+                } else if (role == RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchProspectiveStudents(sortField, sortOrder, max, offset)
+                } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
+                    returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
+                } else {
+                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
+                }
+                pidms = returnMap?.pidms
+                totalCount = returnMap?.totalCount
+                log.debug "${totalCount} persons found with role $role."
+            } else if (params.containsKey("credential.type") && params.containsKey("credential.value")) {
+                String credentialType = params.get("credential.type")?.trim()
+                String credentialValue = params.get("credential.value")?.trim()
+                if (credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
+                    PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credentialValue)
+                    if (personCurrent && personCurrent.entityIndicator == 'P') {
+                        pidms = [personCurrent.pidm]
+                        totalCount = 1
+                    }
+                }
+            } else if (params.containsKey("lastName") || params.containsKey("firstName") || params.containsKey("middleName") || params.containsKey("lastNamePrefix") || params.containsKey("title") || params.containsKey("pedigree")) {
+
+            } else if (params.containsKey("personFilter")) {
                 String guidOrDomainKey = params.get("personFilter")
                 def returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, sortField, sortOrder, max, offset)
                 pidms = returnMap?.pidms
                 totalCount = returnMap?.totalCount
                 log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
             } else {
-                if (params.role) {
-                    String role = params.role?.trim()
-                    log.debug "Fetching persons with role $role ...."
-                    def returnMap
-                    if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
-                    }  else if (role == RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchProspectiveStudents(sortField, sortOrder, max, offset)
-                    } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
-                        returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
-                    } else {
-                        throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
-                    }
-                    pidms = returnMap?.pidms
-                    totalCount = returnMap?.totalCount
-                    log.debug "${totalCount} persons found with role $role."
-                } else {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", []))
-                }
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", null))
             }
+
         }
 
         injectPropertyIntoParams(params, "count", totalCount)
@@ -622,12 +637,13 @@ class PersonV6CompositeService extends LdmService {
         dataMap.put("raceCodeToGuidMap", raceCodeToGuidMap)
     }
 
+
     private void fetchPersonsPhoneDataAndPutInMap(List<Integer> pidms, Map dataMap) {
 
         Map<String, String> bannerPhoneTypeToHedmPhoneTypeMap = phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
 
         // Get GUIDs for Phone types
-        Map phoneCodeToGuidMap  = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+        Map phoneCodeToGuidMap = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(bannerPhoneTypeToHedmPhoneTypeMap.keySet())
         log.debug "Got ${phoneCodeToGuidMap?.size() ?: 0} GUIDs for given PhoneType codes"
 
         // Get SPRTELE records for persons
@@ -742,7 +758,7 @@ class PersonV6CompositeService extends LdmService {
         if (personCurrent) {
             decorator = new NameV6()
             decorator.type = ["category": NameTypeCategory.PERSONAL.versionToEnumMap["v6"]]
-            decorator.fullName = personCurrent.fullName
+            decorator.fullName = prepareFullName(personCurrent.firstName, personCurrent.middleName, personCurrent.lastName)
             decorator.firstName = personCurrent.firstName
             decorator.middleName = personCurrent.middleName
             decorator.lastName = personCurrent.lastName
@@ -761,13 +777,34 @@ class PersonV6CompositeService extends LdmService {
         if (personAlternate) {
             decorator = new NameAlternateV6()
             decorator.type = ["category": nameTypeCategory, "detail": ["id": nameTypeGuid]]
-            decorator.fullName = personAlternate.fullName
+            decorator.fullName = prepareFullName(personAlternate.firstName, personAlternate.middleName, personAlternate.lastName)
             decorator.firstName = personAlternate.firstName
             decorator.middleName = personAlternate.middleName
             decorator.lastName = personAlternate.lastName
             decorator.lastNamePrefix = personAlternate.surnamePrefix
         }
         return decorator
+    }
+
+
+    private String prepareFullName(String firstName, String middleName, String lastName) {
+        StringBuilder sb = new StringBuilder()
+
+        if (firstName) {
+            sb.append(firstName)
+            sb.append(' ')
+        }
+
+        if (middleName) {
+            sb.append(middleName)
+            sb.append(' ')
+        }
+
+        if (lastName) {
+            sb.append(lastName)
+        }
+
+        return sb.toString()
     }
 
 
@@ -848,17 +885,59 @@ class PersonV6CompositeService extends LdmService {
         return emailV6
     }
 
+
     private PhoneV6 createPhoneV6(PersonTelephone it, String code, String guid, String phoneType) {
         PhoneV6 phoneV6 = new PhoneV6()
         phoneV6.countryCallingCode = it.countryPhone
         phoneV6.number = (it.phoneArea ?: "") + (it.phoneNumber ?: "")
         phoneV6.extension = it.phoneExtension
         phoneV6.type = new PhoneTypeDecorator(code, null, guid, phoneType)
-        if(it.primaryIndicator){
-            phoneV6.preference =  'primary'
+        if (it.primaryIndicator) {
+            phoneV6.preference = 'primary'
         }
         return phoneV6
     }
+
+
+    private void lookForMatchingPersons(Map params) {
+        // First name, middle name, last name
+        def personalName = params.names.find {
+            it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v6"] && it.firstName && it.lastName
+        }
+
+        def birthName = params.names.find {
+            it.type.category == NameTypeCategory.BIRTH.versionToEnumMap["v6"] && it.firstName && it.lastName
+        }
+
+        if (personalName && birthName) {
+            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("filter.together.not.supported", null))
+        }
+
+        def nameObj = personalName
+        if (!nameObj) {
+            nameObj = birthName
+        }
+        if (!nameObj) {
+            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.and.type.required.message", null))
+        }
+
+        String firstName = nameObj.firstName
+        String middleName = nameObj.middleName
+        String lastName = nameObj.lastName
+
+        // Social Security Number, Banner ID
+        def credentialObj = params.credentials.find {
+            it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]
+        }
+        String ssn = credentialObj?.value
+
+        credentialObj = params.credentials.find {
+            it.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]
+        }
+        String bannerId = credentialObj?.value
+
+    }
+
 
     private void injectPropertyIntoParams(Map params, String propName, def propVal) {
         def injectedProps = [:]
