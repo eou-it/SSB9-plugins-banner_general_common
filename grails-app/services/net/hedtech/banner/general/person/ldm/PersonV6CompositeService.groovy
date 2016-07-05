@@ -7,7 +7,9 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
@@ -59,6 +61,7 @@ class PersonV6CompositeService extends LdmService {
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
+    CommonMatchingCompositeService commonMatchingCompositeService
 
     /**
      * GET /api/persons
@@ -97,8 +100,9 @@ class PersonV6CompositeService extends LdmService {
             String contentType = getRequestRepresentation()
             if (contentType && contentType.contains("duplicate-check")) {
                 log.info "Person duplicate check request with Content-Type ${contentType}"
-
-                lookForMatchingPersons(params)
+                def returnMap = searchForMatchingPersons(params)
+                pidms = returnMap?.pidms
+                totalCount = returnMap?.totalCount
             }
 
         } else {
@@ -899,13 +903,13 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private void lookForMatchingPersons(Map params) {
+    private def searchForMatchingPersons(Map content) {
         // First name, middle name, last name
-        def personalName = params.names.find {
+        def personalName = content.names.find {
             it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v6"] && it.firstName && it.lastName
         }
 
-        def birthName = params.names.find {
+        def birthName = content.names.find {
             it.type.category == NameTypeCategory.BIRTH.versionToEnumMap["v6"] && it.firstName && it.lastName
         }
 
@@ -926,16 +930,80 @@ class PersonV6CompositeService extends LdmService {
         String lastName = nameObj.lastName
 
         // Social Security Number, Banner ID
-        def credentialObj = params.credentials.find {
+        def credentialObj = content.credentials.find {
             it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]
         }
         String ssn = credentialObj?.value
 
-        credentialObj = params.credentials.find {
+        credentialObj = content.credentials.find {
             it.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]
         }
         String bannerId = credentialObj?.value
 
+        // Gender
+        String gender
+        if (content?.gender == 'male') {
+            gender = 'M'
+        } else if (content?.gender == 'female') {
+            gender = 'F'
+        } else if (content?.gender == 'unknown') {
+            gender = 'N'
+        }
+
+        // Date of Birth
+        Date dob
+        if (content?.dateOfBirth) {
+            dob = convertString2Date(content?.dateOfBirth)
+        }
+
+        // Emails
+        def personEmails = []
+        if (content?.emails) {
+            Map<String, String> bannerEmailTypeToHedmEmailTypeMap = emailTypeCompositeService.getBannerEmailTypeToHedmV6EmailTypeMap()
+            if (bannerEmailTypeToHedmEmailTypeMap) {
+                content?.emails.each {
+                    def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == it.type.emailType }
+                    if (mapEntry) {
+                        personEmails << [email: it.address, emailType: mapEntry.key]
+                    }
+                }
+            }
+        }
+
+        // Common Matching Source Code
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        String commonMatchingSourceCode = intConf?.value
+
+        // Call Common Matching Service
+        commonMatchingCompositeService.commonMatchingCleanup()
+        def cmRequest = [source  : commonMatchingSourceCode,
+                         lastName: lastName, firstName: firstName, mi: middleName,
+                         birthDay: dob?.format("dd"), birthMonth: dob?.format("MM"), birthYear: dob?.format("yyyy"),
+                         sex     : gender,
+                         ssn     : ssn,
+                         bannerId: bannerId,
+                         max     : content?.max, offset: content?.offset,
+                         sort    : content?.sort, order: content?.order]
+        def cmResponse
+        if (personEmails) {
+            // Try with each email until you get match
+            for (def temp : personEmails) {
+                cmRequest << [emailType: temp.emailType]
+                cmRequest << [email: temp.email]
+                log.debug "Common matching request : ${cmRequest}"
+                cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+                if (cmResponse?.personList) break
+            }
+        } else {
+            // Try without email
+            log.debug "Common matching request : ${cmRequest}"
+            cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+        }
+        log.debug "Common matching returned ${cmResponse?.personList?.size()} records"
+        List<Integer> pidms = cmResponse?.personList?.collect { it.pidm }
+        def totalCount = cmResponse?.count
+
+        return [pidms: pidms, totalCount: totalCount]
     }
 
 
