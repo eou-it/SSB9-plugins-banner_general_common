@@ -185,7 +185,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListQapiWithInValidFirstAndLastName() {
         //we will forcefully set the content type so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
         Map params = getParamsWithReqiuredFields()
         params.names[0].firstName = "MarkTT"
         params.names[0].lastName = "Kole"
@@ -435,7 +435,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def schoolEmail = 'test@email.com'
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary",]],
                       emails: [[emailAddress: homeEmail, emailType: i_success_emailType_personal],
@@ -507,7 +508,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         Map params = [action     : [POST: "list"],
                       names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
                       dateOfBirth: '1986-04-16'
@@ -579,7 +581,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         Map params = [action     : [POST: "list"],
                       names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
                       credentials: [[credentialType: "Social Security Number", credentialId: "000333444"]]
@@ -650,7 +653,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         Map params = [action: [POST: "list"],
                       names : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
                       gender: "Male"
@@ -714,7 +718,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // build content for common matching
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         Map params = [action     : [POST: "list"],
                       names      : [[lastName: person.lastName, firstName: person.firstName, nameType: "Primary"]],
                       credentials: [[credentialType: "Banner ID", credentialId: "000333444"]]
@@ -817,6 +822,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def params = [role: "student", max: '2000', offset: '100']
 
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         def persons = personCompositeService.list(params)
         // verify pagination capped at 500
         assertEquals 500, persons.size()
@@ -830,6 +836,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithRoleStudentAndPagination() {
         def params = [role: "student", max: '10', offset: '5']
 
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         def persons = personCompositeService.list(params)
         persons.each {
             it.roles.role == "Student"
@@ -842,7 +849,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def params = [:]
         params.put("personFilter", "xxxx")
-
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         try {
             personCompositeService.list(params)
             fail('This should have failed as person filter GUID is invalid')
@@ -871,6 +878,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def params = [:]
         params.put("personFilter", "")
 
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         try {
             personCompositeService.list(params)
             fail('This should have failed as person filter GUID is null')
@@ -882,6 +890,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithPersonfilterAndRole() {
+
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
 
         def params = [:]
         params.put("personFilter", "xxxx")
@@ -938,6 +950,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull guid2
         def params = [personFilter: 'STUDENT-^HEDM-^BANNER-^GRAILS', max: '3', offset: '0']
 
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         persons = personCompositeService.list(params)
         assertEquals 3, persons.size()
 
@@ -965,6 +978,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull guid2
         def params = [personFilter: guid2, max: '3', offset: '0']
 
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         persons = personCompositeService.list(params)
         assertEquals 3, persons.size()
 
@@ -1090,6 +1104,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithValidPersonfilterAsGuidLargeListsNoPagination() {
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         // remove if pop sel exists
         def popsel = PopulationSelectionExtract.findAllByApplicationAndSelection("STUDENT", 'HEDMPERFORM')
         if (popsel.size() > 0) {
@@ -1146,6 +1161,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testListapiWithValidPersonfilterAsGuidAndLargePaginationAndDetailedPerson() {
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
+
         // find our person hofse2000 who has all data
         def perId = PersonUtility.getPerson("HOSFE2000")
         assertNotNull perId
@@ -2357,6 +2374,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     //Filter on CredentialId and Credential Type
     @Test
     public void testCredentialsFilterOnPersonV3(){
+        setAcceptHeader("application/vnd.hedtech.integration.v3+json")
         def persons = [:]
         params.put("credentialType",i_success_credential_type4_filter)
         params.put("credentialId",i_success_credential_filter);
