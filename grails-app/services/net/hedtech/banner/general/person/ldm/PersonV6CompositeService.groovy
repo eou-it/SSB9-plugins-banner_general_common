@@ -633,7 +633,7 @@ class PersonV6CompositeService extends LdmService {
         Map raceCodeToGuidMap = [:]
         if (raceCodes) {
             log.debug "Getting GUIDs for Races codes $raceCodes..."
-            raceCodeToGuidMap = raceCompositeService.fetchGuids(raceCodes)
+            raceCodeToGuidMap = raceCompositeService.getRaceCodeToGuidMap(raceCodes)
             log.debug "Got ${raceCodeToGuidMap?.size() ?: 0} GUIDs for given race codes"
         }
         // Put in Map
