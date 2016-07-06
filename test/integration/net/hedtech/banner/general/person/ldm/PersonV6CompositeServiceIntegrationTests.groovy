@@ -3,26 +3,20 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
-import net.hedtech.banner.general.person.PersonBasicPersonBase
-import net.hedtech.banner.general.person.PersonIdentificationNameAlternate
-import net.hedtech.banner.general.person.PersonIdentificationNameAlternateService
-import net.hedtech.banner.general.person.PersonUtility
+import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
-import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.NameTypeService
-import net.hedtech.banner.general.system.Religion
-import net.hedtech.banner.general.system.VisaType
-import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
-import net.hedtech.banner.general.system.ldm.PersonNameTypeCompositeService
-import net.hedtech.banner.general.system.ldm.ReligionCompositeService
-import net.hedtech.banner.general.system.ldm.VisaTypeCompositeService
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
+import net.hedtech.banner.general.system.*
+import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
@@ -42,6 +36,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
     static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24789'
 
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -53,6 +48,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     public void tearDown() {
         super.tearDown()
     }
+
 
     @Test
     void testListPersonV6InvalidRoleRequired() {
@@ -113,6 +109,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue personRoles.contains('Student')
     }
 
+
     @Test
     void testListPersonValidV6ForRoleAlumni() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
@@ -126,6 +123,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertTrue o_success_persons[0].roles.role.contains("alumni")
     }
+
 
     @Test
     void testListPersonValidV6ForRoleEmployees() {
@@ -141,6 +139,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testListPersonValidV6ForRoleVendor() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
@@ -151,7 +150,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_success_persons
         assertNotNull o_success_persons.guid
 
-        List <RoleDetail>personRoles = o_success_persons.roles
+        List<RoleDetail> personRoles = o_success_persons.roles
         assertNotNull personRoles
         List vendorRoles = []
         personRoles.each { roles ->
@@ -162,11 +161,12 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testListPersonValidV6ForAdvisorRole() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
-        Map params = [role: RoleName.ADVISOR.versionToEnumMap["v6"] ]
+        Map params = [role: RoleName.ADVISOR.versionToEnumMap["v6"]]
         List<PersonV6> o_success_persons = personV6CompositeService.list(params)
 
         assertNotNull o_success_persons
@@ -178,12 +178,13 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
 
     }
+
 
     @Test
     void testListPersonValidV6ForProspectiveStudentRole() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
-        Map params = [role: RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"] ]
+        Map params = [role: RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]]
         List<PersonV6> o_success_persons = personV6CompositeService.list(params)
 
         assertNotNull o_success_persons
@@ -195,6 +196,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
 
     }
+
 
     @Test
     void testListapiWithRoleStudentAndLargePagination() {
@@ -231,7 +233,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
 
     @Test
-    void testGetValid(){
+    void testGetValid() {
         def params = [role: "student", max: '5']
 
         def persons = personV6CompositeService.list(params)
@@ -242,48 +244,48 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull person
         assertEquals persons[0].guid, person.guid
 
-        String pidm=(globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralCommonConstants.PERSONS_LDM_NAME, person.guid)).domainKey
-        def personBase=PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
-        def visaInformation=VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
-        if(!personBase){
-            def personBasicPersonBase=new PersonBasicPersonBase(pidm: Integer.parseInt(pidm),armedServiceMedalVetIndicator: true)
+        String pidm = (globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralCommonConstants.PERSONS_LDM_NAME, person.guid)).domainKey
+        def personBase = PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
+        def visaInformation = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
+        if (!personBase) {
+            def personBasicPersonBase = new PersonBasicPersonBase(pidm: Integer.parseInt(pidm), armedServiceMedalVetIndicator: true)
             personBasicPersonBase.save(failOnError: true, flush: true)
-            personBase=PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
+            personBase = PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
         }
-        if(!visaInformation[0]){
-            def visaType=VisaType.findAll()[0]
-            def visaInfo=new VisaInformation(pidm: Integer.parseInt(pidm),sequenceNumber: 1,visaType: visaType,entryIndicator: false,
-            visaIssueDate: new Date(),visaExpireDate: new Date())
+        if (!visaInformation[0]) {
+            def visaType = VisaType.findAll()[0]
+            def visaInfo = new VisaInformation(pidm: Integer.parseInt(pidm), sequenceNumber: 1, visaType: visaType, entryIndicator: false,
+                    visaIssueDate: new Date(), visaExpireDate: new Date())
             visaInfo.save(failOnError: true, flush: true)
-            visaInformation=VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
-            person=personV6CompositeService.get(persons[0].guid)
+            visaInformation = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
+            person = personV6CompositeService.get(persons[0].guid)
         }
-        if(!person.citizenshipStatus){
-            def citizenTypeObj=CitizenType.findAll()[0]
-            personBase.citizenType=citizenTypeObj
+        if (!person.citizenshipStatus) {
+            def citizenTypeObj = CitizenType.findAll()[0]
+            personBase.citizenType = citizenTypeObj
             person = personV6CompositeService.get(persons[0].guid)
         }
 
-        def guids1=citizenshipStatusCompositeService.fetchGUIDs([personBase.citizenType.code])
-        def citizenShipStatus=citizenshipStatusCompositeService.get(guids1.values()[0])
-        assertEquals guids1.values()[0],person.citizenshipStatus.detail.id
-        assertEquals citizenShipStatus.category,person.citizenshipStatus.category
+        def guids1 = citizenshipStatusCompositeService.fetchGUIDs([personBase.citizenType.code])
+        def citizenShipStatus = citizenshipStatusCompositeService.get(guids1.values()[0])
+        assertEquals guids1.values()[0], person.citizenshipStatus.detail.id
+        assertEquals citizenShipStatus.category, person.citizenshipStatus.category
 
-        if(!person.religion){
-            def religionObj=Religion.findAll()[0]
-            personBase.religion=religionObj
+        if (!person.religion) {
+            def religionObj = Religion.findAll()[0]
+            personBase.religion = religionObj
             person = personV6CompositeService.get(persons[0].guid)
         }
 
-        def religionGuids=religionCompositeService.fetchGUIDs([personBase.religion.code])
-        def religion=religionCompositeService.get(religionGuids.values()[0])
-        assertEquals religionGuids.values()[0],person.religion.id
-        assertEquals religion.id,person.religion.id
+        def religionGuids = religionCompositeService.fetchGUIDs([personBase.religion.code])
+        def religion = religionCompositeService.get(religionGuids.values()[0])
+        assertEquals religionGuids.values()[0], person.religion.id
+        assertEquals religion.id, person.religion.id
 
-        def guids2=visaTypeCompositeService.fetchGUIDs([visaInformation[0].visaType.code])
-        def visaType=visaTypeCompositeService.get(guids2.values()[0])
-        assertEquals guids2.values()[0],person.visaStatus.detail.id
-        assertEquals visaType.category,person.visaStatus.category
+        def guids2 = visaTypeCompositeService.fetchGUIDs([visaInformation[0].visaType.code])
+        def visaType = visaTypeCompositeService.get(guids2.values()[0])
+        assertEquals guids2.values()[0], person.visaStatus.detail.id
+        assertEquals visaType.category, person.visaStatus.category
         assertNotNull person.visaStatus.startOn
         assertNotNull person.visaStatus.endOn
         assertNotNull person.visaStatus.status
@@ -332,7 +334,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def personIdentificationName = PersonUtility.getPerson(BANNER_ID_WITH_TYPE_BIRTH)
         assertNotNull personIdentificationName
 
-        GlobalUniqueIdentifier personGUID = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(GeneralCommonConstants.PERSONS_LDM_NAME,String.valueOf(personIdentificationName.pidm))[0]
+        GlobalUniqueIdentifier personGUID = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(GeneralCommonConstants.PERSONS_LDM_NAME, String.valueOf(personIdentificationName.pidm))[0]
         def person = personV6CompositeService.get(personGUID.guid)
         assertNotNull person
 
@@ -340,6 +342,146 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         //assertNotNull birthNameType
         //TODO: validate all attributes with returned birthname of person
     }
+
+
+    @Test
+    void testList_DuplicateCheck_PersonalLastNameSearch() {
+        setContentTypeHeader("application/vnd.hedtech.integration.duplicate-check.v6+json")
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        // Common Matching Rule
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        String commonMatchingSourceCode = intConf?.value
+        CommonMatchingSource commonMatchingSource = CommonMatchingSource.findByCode(commonMatchingSourceCode)
+        assertNotNull commonMatchingSource
+        List<CommonMatchingSourceRule> commonMatchingSourceRules = CommonMatchingSourceRule.findAllByCommonMatchingSource(commonMatchingSource)
+        assertTrue commonMatchingSourceRules.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def gorcmsrRows = sql.rows("select gorcmsr_column_name from gorcmsr where  gorcmsr_cmsc_code = ?", [commonMatchingSource.code])
+        assertTrue gorcmsrRows.size() > 0
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_LAST_NAME" }
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_FIRST_NAME" }
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_MI" }
+
+        // Prepare QAPI duplicate check request
+        PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(BANNER_ID_WITH_TYPE_BIRTH)
+        assertNotNull personCurrent
+        assertEquals 'P', personCurrent.entityIndicator
+        GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(personCurrent.pidm.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)
+        assertNotNull globalUniqueIdentifier
+        Map content = [
+                action: [POST: "list"],
+                names : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName, middleName: personCurrent.middleName]]
+        ]
+
+        // Call the service
+        def response = personV6CompositeService.list(content)
+        assertNotNull response
+        assertTrue response.size() > 0
+        def obj = response.find { it.guid == globalUniqueIdentifier.guid }
+        assertNotNull obj
+        def personalName = obj.names.find { it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v6"] }
+        assertNotNull personalName
+        assertEquals personCurrent.lastName, personalName.lastName
+        assertEquals personCurrent.firstName, personalName.firstName
+        assertEquals personCurrent.middleName, personalName.middleName
+    }
+
+
+    @Test
+    void testList_DuplicateCheck_BirthLastNameSearch() {
+        setContentTypeHeader("application/vnd.hedtech.integration.duplicate-check.v6+json")
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        // Common Matching Rule
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        String commonMatchingSourceCode = intConf?.value
+        CommonMatchingSource commonMatchingSource = CommonMatchingSource.findByCode(commonMatchingSourceCode)
+        assertNotNull commonMatchingSource
+        List<CommonMatchingSourceRule> commonMatchingSourceRules = CommonMatchingSourceRule.findAllByCommonMatchingSource(commonMatchingSource)
+        assertTrue commonMatchingSourceRules.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def gorcmsrRows = sql.rows("select gorcmsr_column_name from gorcmsr where  gorcmsr_cmsc_code = ?", [commonMatchingSource.code])
+        assertTrue gorcmsrRows.size() > 0
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_LAST_NAME" }
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_FIRST_NAME" }
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_SEARCH_MI" }
+
+        // Prepare QAPI duplicate check request
+        PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(BANNER_ID_WITH_TYPE_BIRTH)
+        assertNotNull personCurrent
+        assertEquals 'P', personCurrent.entityIndicator
+        GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(personCurrent.pidm.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)
+        assertNotNull globalUniqueIdentifier
+        PersonIdentificationNameAlternate personAlternate = PersonIdentificationNameAlternate.findByPidmAndNameType(personCurrent.pidm, NameType.findByCode("BRTH"))
+        assertNotNull personAlternate
+        Map content = [
+                action: [POST: "list"],
+                names : [[type: [category: NameTypeCategory.BIRTH.versionToEnumMap["v6"]], firstName: personAlternate.firstName, lastName: personAlternate.lastName, middleName: personAlternate.middleName]]
+        ]
+
+        // Call the service
+        def response = personV6CompositeService.list(content)
+        assertNotNull response
+        assertTrue response.size() > 0
+        def obj = response.find { it.guid == globalUniqueIdentifier.guid }
+        assertNotNull obj
+        def birthName = obj.names.find { it.type.category == NameTypeCategory.BIRTH.versionToEnumMap["v6"] }
+        assertNotNull birthName
+        assertEquals personAlternate.lastName, birthName.lastName
+        assertEquals personAlternate.firstName, birthName.firstName
+        assertEquals personAlternate.middleName, birthName.middleName
+    }
+
+
+    @Test
+    void testList_DuplicateCheck_BannerIdSsnSearch() {
+        setContentTypeHeader("application/vnd.hedtech.integration.duplicate-check.v6+json")
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+
+        // Common Matching Rule
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        String commonMatchingSourceCode = intConf?.value
+        CommonMatchingSource commonMatchingSource = CommonMatchingSource.findByCode(commonMatchingSourceCode)
+        assertNotNull commonMatchingSource
+        List<CommonMatchingSourceRule> commonMatchingSourceRules = CommonMatchingSourceRule.findAllByCommonMatchingSource(commonMatchingSource)
+        assertTrue commonMatchingSourceRules.size() > 0
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def gorcmsrRows = sql.rows("select gorcmsr_column_name from gorcmsr where  gorcmsr_cmsc_code = ?", [commonMatchingSource.code])
+        assertTrue gorcmsrRows.size() > 0
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPRIDEN_ID" }
+        assertNotNull gorcmsrRows.find { it.GORCMSR_COLUMN_NAME == "SPBPERS_SSN" }
+
+        // Prepare QAPI duplicate check request
+        PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(BANNER_ID_WITH_TYPE_BIRTH)
+        assertNotNull personCurrent
+        assertEquals 'P', personCurrent.entityIndicator
+        GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(personCurrent.pidm.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)
+        assertNotNull globalUniqueIdentifier
+        PersonBasicPersonBase personBase = PersonBasicPersonBase.fetchByPidm(personCurrent.pidm)
+        assertNotNull personBase
+        Map content = [
+                action     : [POST: "list"],
+                names      : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName]],
+                credentials: [[type: CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"], value: personBase.ssn],
+                              [type: CredentialType.BANNER_ID.versionToEnumMap["v6"], value: personCurrent.bannerId]]
+        ]
+
+        // Call service
+        def response = personV6CompositeService.list(content)
+        assertNotNull response
+        assertTrue response.size() > 0
+        response.each {
+            it.credentials.each { credential ->
+                if (credential.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]) {
+                    assertEquals personBase.ssn, credential.value
+                } else if (credential.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
+                    assertEquals personCurrent.bannerId, credential.value
+                }
+            }
+        }
+    }
+
 
     private Map getPersonBirthNameTypeByPidm(List<Integer> pidms) {
         Map dataMap = getPersonAlternateNamesByPidm(pidms)
@@ -350,6 +492,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         //TODO: return person with name type birth
         return null
     }
+
 
     private Map getPersonAlternateNamesByPidm(List<Integer> pidms) {
         Map dataMap = [:]
@@ -369,6 +512,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         return dataMap
     }
 
+
     private Map findOnePersonWithGivenBannerID(def persons) {
         def personIdentificationName
         def personBase
@@ -380,7 +524,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             personIdentificationName = PersonUtility.getPerson(bannerId.value)
             personBase = PersonBasicPersonBase.findByPidm(personIdentificationName.pidm)
             personDetails = ["guid": person.guid, "personBase": personBase, "personIdentificationName": personIdentificationName]
-            if(personBase && personIdentificationName){
+            if (personBase && personIdentificationName) {
                 break
             }
         }
@@ -427,5 +571,10 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Accept", mediaType)
     }
 
+
+    private void setContentTypeHeader(String mediaType) {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", mediaType)
+    }
 
 }
