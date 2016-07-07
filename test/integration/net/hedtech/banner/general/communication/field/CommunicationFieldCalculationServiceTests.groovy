@@ -57,8 +57,8 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
 
         def params = [:]
-        params << ['pidm': 37815]
-        params << ['bannerId': "AA0037815"]
+        params << ['pidm': 2]
+        params << ['bannerId': "710000001"]
 
         def resultSet = communicationFieldCalculationService.calculateFieldByMap(
                 (String) communicationField.ruleContent,
@@ -77,8 +77,8 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
         assertNotNull communicationField.immutableId
         def params = [:]
-        params << ['pidm': 37815]
-        params << ['bannerId': "AA0037815"]
+        params << ['pidm': 2]
+        params << ['bannerId': "710000001"]
         def resultSet = communicationFieldCalculationService.calculateFieldByMap(
                 (String) communicationField.ruleContent,
                 (Boolean) communicationField.returnsArrayArguments,
@@ -169,14 +169,14 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         communicationField = communicationFieldService.create( [domainModel: communicationField] )
         assertNotNull communicationField.immutableId
 
-        final Long pidm = 37815L
+        final Long pidm = 2L
         String result = communicationFieldCalculationService.calculateFieldByPidm(
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
             (String) communicationField.formatString,
             (Long) pidm
         )
-        assertEquals( "Hello test carter roll", result )
+        assertEquals( "Hello Robert Jones", result )
 
         communicationField.formatString = "\$firstname\$"
         communicationField = communicationFieldService.update( communicationField )
@@ -186,7 +186,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             (String) communicationField.formatString,
             (Long) pidm
         )
-        assertEquals( "test", result )
+        assertEquals( "Robert", result )
 
         communicationField.formatString = "\$empty_string\$"
         communicationField = communicationFieldService.update( communicationField )

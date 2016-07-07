@@ -153,7 +153,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertEquals 2, activeAccounts.size()
 
         // First account
-        activeAccounts = activeAccounts.sort{it.id}
+        activeAccounts = activeAccounts.sort{it.priority}
         def userAccount = activeAccounts[0]
 
         assertNotNull userAccount.id

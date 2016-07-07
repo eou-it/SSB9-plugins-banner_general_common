@@ -157,7 +157,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testRePrioritizeNewAccount() {
-        def pidm = PersonUtility.getPerson("MYE000001").pidm
+        def pidm = PersonUtility.getPerson("710000001").pidm
 
         def testBankRoutingInfo1 = [
                 bankRoutingNum: '748972234'
@@ -194,7 +194,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testGetLastPayDistribution() {
-            def pidm = PersonUtility.getPerson("MYE000009").pidm
+            def pidm = PersonUtility.getPerson("710000001").pidm
 
         def item = DirectDepositAccount.fetchByPidm(pidm)
 

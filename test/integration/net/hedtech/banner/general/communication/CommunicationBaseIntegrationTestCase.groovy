@@ -78,6 +78,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")
                 sql.executeUpdate("Delete from GCRCITM")
@@ -88,6 +89,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCBGSND")
                 sql.executeUpdate("Delete from GCBEMTL")
                 sql.executeUpdate("Delete from GCBMNTL")
+                sql.executeUpdate("Delete from GCBLTPL")
                 sql.executeUpdate("Delete from GCBTMPL")
                 sql.executeUpdate("Delete from GCRCFLD")
                 sql.executeUpdate("Delete from GCRLENT")
