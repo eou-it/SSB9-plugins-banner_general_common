@@ -7,13 +7,9 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
-import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
-import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.VisaInformation
-import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.NameAlternateV6
@@ -21,7 +17,7 @@ import net.hedtech.banner.general.person.ldm.v6.NameV6
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.general.system.ldm.NameTypeCategory
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
@@ -40,28 +36,10 @@ import java.sql.Timestamp
  * RESTful APIs for Ellucian Ethos Data Model "persons" V6.
  */
 @Transactional
-class PersonV6CompositeService extends LdmService {
+class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
-
-    UserRoleCompositeService userRoleCompositeService
-    PersonFilterCompositeService personFilterCompositeService
-    CitizenshipStatusCompositeService citizenshipStatusCompositeService
-    VisaInformationService visaInformationService
-    VisaTypeCompositeService visaTypeCompositeService
-    ReligionCompositeService religionCompositeService
-    PersonCredentialCompositeService personCredentialCompositeService
-    PersonEmailService personEmailService
-    EmailTypeCompositeService emailTypeCompositeService
-    PersonRaceService personRaceService
-    RaceCompositeService raceCompositeService
-    EthnicityCompositeService ethnicityCompositeService
-    PersonNameTypeCompositeService personNameTypeCompositeService
-    PersonIdentificationNameAlternateService personIdentificationNameAlternateService
-    PhoneTypeCompositeService phoneTypeCompositeService
-    PersonTelephoneService personTelephoneService
-    CommonMatchingCompositeService commonMatchingCompositeService
 
     /**
      * GET /api/persons
@@ -522,76 +500,6 @@ class PersonV6CompositeService extends LdmService {
     }
 
 
-    private void fetchPersonsRoleDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        def pidmToRolesMap = [:]
-        pidms.each {
-            pidmToRolesMap.put(it, [])
-        }
-        // Faculty role
-        List<Object[]> facList = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
-        facList?.each {
-            BigDecimal bdPidm = it[0]
-            Timestamp startDate = it[1]
-            Timestamp endDate = it[2]
-            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
-            personRoles << [role: RoleName.INSTRUCTOR, startDate: startDate, endDate: endDate]
-        }
-        // Student role
-        List<BigDecimal> studList = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
-        studList?.each {
-            def personRoles = pidmToRolesMap.get(it.toInteger())
-            personRoles << [role: RoleName.STUDENT]
-        }
-        // Employee role
-        List<Object[]> empList = userRoleCompositeService.fetchEmployeesByPIDMs(pidms)
-        empList?.each {
-            BigDecimal bdPidm = it[0]
-            Timestamp startDate = it[1]
-            Timestamp endDate = it[2]
-            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
-            personRoles << [role: RoleName.EMPLOYEE, startDate: startDate, endDate: endDate]
-        }
-        // Alumni role
-        List<Object[]> alumniList = userRoleCompositeService.fetchAlumnisByPIDMs(pidms)
-        alumniList?.each {
-            BigDecimal bdPidm = it[0]
-            Timestamp startDate = it[1]
-            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
-            personRoles << [role: RoleName.ALUMNI, startDate: startDate]
-        }
-        // Vendor role
-        List<Object[]> vendorList = userRoleCompositeService.fetchVendorsByPIDMs(pidms)
-        vendorList?.each {
-            BigDecimal bdPidm = it[0]
-            Timestamp startDate = it[1]
-            Timestamp endDate = it[2]
-            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
-            personRoles << [role: RoleName.VENDOR, startDate: startDate, endDate: endDate]
-        }
-        // ProspectiveStudent role
-        List<Object[]> prospectiveStudentList = userRoleCompositeService.fetchProspectiveStudentByPIDMs(pidms)
-        prospectiveStudentList?.each {
-            BigDecimal bdPidm = it[0]
-            Timestamp startDate = it[1]
-            Timestamp endDate = it[2]
-            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
-            personRoles << [role: RoleName.PROSPECTIVE_STUDENT, startDate: startDate, endDate: endDate]
-        }
-        // Advisor role
-        List<Object[]> advisorList = userRoleCompositeService.fetchAdvisorByPIDMs(pidms)
-        advisorList?.each {
-            BigDecimal bdPidm = it[0]
-            Timestamp startDate = it[1]
-            Timestamp endDate = it[2]
-            def personRoles = pidmToRolesMap.get(bdPidm.toInteger())
-            personRoles << [role: RoleName.ADVISOR, startDate: startDate, endDate: endDate]
-        }
-
-        // Put in Map
-        dataMap.put("pidmToRolesMap", pidmToRolesMap)
-    }
-
-
     private void fetchPersonsEmailDataAndPutInMap(List<Integer> pidms, Map dataMap) {
 
         //Get Mapped Codes for Email Types
@@ -1025,6 +933,12 @@ class PersonV6CompositeService extends LdmService {
             propVal = injectedProps.get(propName)
         }
         return propVal
+    }
+
+
+    @Override
+    List<RoleName> getRolesRequired() {
+        return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
     }
 
 }
