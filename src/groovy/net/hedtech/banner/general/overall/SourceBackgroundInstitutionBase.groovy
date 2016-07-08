@@ -2,7 +2,7 @@
   Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
@@ -140,6 +140,13 @@ class SourceBackgroundInstitutionBase implements Serializable {
     ])
     Nation nation
 
+    /**
+     * Global Unique Identifier for SOBSBGI
+     */
+    @Column(name= "SOBSBGI_GUID")
+    String addressGuid
+
+
 
     public String toString() {
         """SourceBackgroundInstitutionBase[
@@ -157,8 +164,9 @@ class SourceBackgroundInstitutionBase implements Serializable {
 					dataOrigin=$dataOrigin, 
 					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution, 
 					state=$state, 
-					county=$county, 
-					nation=$nation]"""
+					county=$county,
+					nation=$nation,
+                    addressGuid=$addressGuid]"""
     }
 
 
@@ -182,6 +190,7 @@ class SourceBackgroundInstitutionBase implements Serializable {
         if (state != that.state) return false
         if (county != that.county) return false
         if (nation != that.nation) return false
+        if (addressGuid != that.addressGuid) return false
         return true
     }
 
@@ -204,6 +213,7 @@ class SourceBackgroundInstitutionBase implements Serializable {
         result = 31 * result + (state != null ? state.hashCode() : 0)
         result = 31 * result + (county != null ? county.hashCode() : 0)
         result = 31 * result + (nation != null ? nation.hashCode() : 0)
+        result = 31 * result + (addressGuid != null ? addressGuid.hashCode() : 0)
         return result
     }
 
@@ -229,6 +239,7 @@ class SourceBackgroundInstitutionBase implements Serializable {
         state(nullable: true)
         county(nullable: true)
         nation(nullable: true)
+        addressGuid(nullable: true, maxSize: 36)
     }
 
     //Read Only fields that should be protected against update

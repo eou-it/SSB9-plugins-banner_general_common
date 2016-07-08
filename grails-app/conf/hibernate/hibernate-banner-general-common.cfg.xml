@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- *****************************************************************************
 
-Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
+Copyright 2009-2016 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** -->
 
 <!--
@@ -75,5 +75,6 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.ldm.SectionMeetingTimeHedmDetail"/>
         <mapping class="net.hedtech.banner.general.ledger.GeneralFeed" />
         <mapping class="net.hedtech.banner.general.ledger.GeneralFeedShadow" />
+        <mapping class="net.hedtech.banner.general.overall.AddressView" />
     </session-factory>
 </hibernate-configuration>
