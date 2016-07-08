@@ -8,6 +8,7 @@ import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.job.CommunicationJob
+import net.hedtech.banner.general.communication.letter.CommunicationLetterItemView
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.letter.CommunicationLetterItem
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
@@ -19,6 +20,7 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import org.apache.commons.logging.LogFactory
+import org.hibernate.ScrollMode;
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -126,6 +128,23 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         assertEquals( 5, countCompleted )
 
         sleepUntilGroupSendComplete( groupSend, 3 * 60 )
+
+        CommunicationLetterItemView.withSession() { session ->
+            assertEquals( 5, CommunicationLetterItemView.fetchCountByGroupSendId( groupSend.id ) )
+
+            def criteria = CommunicationLetterItemView.createCriteria().buildCriteria() {
+                eq( 'groupSendId', groupSend.id )
+                order('lastName', 'asc')
+            }
+            def result = criteria.scroll(ScrollMode.FORWARD_ONLY)
+            int letterItemViewCount = 0;
+            while (result.next()) {
+                letterItemViewCount++
+                def letterItemView = result.get()[0]
+                assertEquals( groupSend.id, letterItemView.groupSendId )
+            }
+            assertEquals( 5, letterItemViewCount )
+        }
 
         // test delete group send
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
