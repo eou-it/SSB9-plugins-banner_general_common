@@ -34,6 +34,7 @@ class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTes
     void simpleTest() {
         String htmlContent = """
 <h1>My First Heading</h1>
+&nbsp;
 <p>My first paragraph.</p>
 This is a test.
 """
