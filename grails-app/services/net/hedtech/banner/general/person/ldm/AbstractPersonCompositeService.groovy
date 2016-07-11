@@ -37,11 +37,32 @@ abstract class AbstractPersonCompositeService extends LdmService {
     CommonMatchingCompositeService commonMatchingCompositeService
 
 
-    abstract def prepareRequestForCommonMatching(final Map content)
+    abstract String getPopSelGuidOrDomainKey(final Map requestParams)
+
+
+    abstract def prepareCommonMatchingRequest(final Map content)
+
+
+    abstract List<RoleName> getRolesRequired()
+
+
+    def listQApi(final Map requestParams) {
+        def returnMap
+        String contentType = getRequestRepresentation()
+        log.debug "Content-Type ${contentType}"
+        if (contentType?.contains('person-filter')) {
+            String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
+            returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort.trim(), requestParams.order.trim(), requestParams.max.trim().toInteger(), requestParams.offset?.trim()?.toInteger() ?: 0)
+            log.debug "${returnMap?.totalCount} persons in population extract ${guidOrDomainKey}."
+        } else if (contentType?.contains("duplicate-check")) {
+            returnMap = searchForMatchingPersons(requestParams)
+        }
+        return returnMap
+    }
 
 
     protected def searchForMatchingPersons(final Map content) {
-        def cmRequest = prepareRequestForCommonMatching(content)
+        def cmRequest = prepareCommonMatchingRequest(content)
 
         if (cmRequest?.dateOfBirth) {
             Date dob = cmRequest.remove("dateOfBirth")
@@ -85,9 +106,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         return [pidms: pidms, totalCount: totalCount]
     }
-
-
-    abstract List<RoleName> getRolesRequired()
 
 
     protected void fetchPersonsRoleDataAndPutInMap(List<Integer> pidms, Map dataMap) {

@@ -810,8 +810,35 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
+    private void injectPropertyIntoParams(Map params, String propName, def propVal) {
+        def injectedProps = [:]
+        if (params.containsKey("persons-injected") && params.get("persons-injected") instanceof Map) {
+            injectedProps = params.get("persons-injected")
+        } else {
+            params.put("persons-injected", injectedProps)
+        }
+        injectedProps.putAt(propName, propVal)
+    }
+
+
+    private def getInjectedPropertyFromParams(Map params, String propName) {
+        def propVal
+        def injectedProps = params.get("persons-injected")
+        if (injectedProps instanceof Map && injectedProps.containsKey(propName)) {
+            propVal = injectedProps.get(propName)
+        }
+        return propVal
+    }
+
+
     @Override
-    def prepareRequestForCommonMatching(final Map content) {
+    String getPopSelGuidOrDomainKey(final Map requestParams) {
+        return requestParams.get("personFilter")
+    }
+
+
+    @Override
+    def prepareCommonMatchingRequest(final Map content) {
         def cmRequest = [:]
 
         // First name, middle name, last name
@@ -892,27 +919,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         return cmRequest
-    }
-
-
-    private void injectPropertyIntoParams(Map params, String propName, def propVal) {
-        def injectedProps = [:]
-        if (params.containsKey("persons-injected") && params.get("persons-injected") instanceof Map) {
-            injectedProps = params.get("persons-injected")
-        } else {
-            params.put("persons-injected", injectedProps)
-        }
-        injectedProps.putAt(propName, propVal)
-    }
-
-
-    private def getInjectedPropertyFromParams(Map params, String propName) {
-        def propVal
-        def injectedProps = params.get("persons-injected")
-        if (injectedProps instanceof Map && injectedProps.containsKey(propName)) {
-            propVal = injectedProps.get(propName)
-        }
-        return propVal
     }
 
 
