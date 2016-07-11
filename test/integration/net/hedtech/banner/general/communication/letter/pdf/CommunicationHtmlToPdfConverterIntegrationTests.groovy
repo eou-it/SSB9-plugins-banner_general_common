@@ -1,9 +1,5 @@
 package net.hedtech.banner.general.communication.letter.pdf
 
-import com.lowagie.text.Document
-import com.lowagie.text.DocumentException
-import com.lowagie.text.Paragraph
-import com.lowagie.text.pdf.PdfWriter
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -12,7 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 
 /**
- * Created by mbrzycki on 6/8/16.
+ * Tests converting html to pdf.
  */
 class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTestCase {
 
@@ -33,36 +29,6 @@ class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTes
         super.tearDown()
         logout()
     }
-
-    @Test
-    void directPdf() {
-        Document document = new Document();
-//        OutputStream os = new File( "direct.pdf" ).newOutputStream()
-//        try {
-//            PdfWriter.getInstance( document, os );
-//            document.open();
-//            document.add(new Paragraph("Hello world"));
-//            document.close();
-//        } catch (DocumentException e) { //handle the error
-//            e.printStackTrace()
-//        } finally {
-//            os.close()
-//        }
-    }
-
-//    @Test
-//    void htmlToPdfTest() {
-//        String File_To_Convert = "test.htm";
-//        String url = new File(File_To_Convert).toURI().toURL().toString();
-//        System.out.println(""+url);
-//        String HTML_TO_PDF = "ConvertedFile.pdf";
-//        OutputStream os = new FileOutputStream(HTML_TO_PDF);
-//        ITextRenderer renderer = new ITextRenderer();
-//        renderer.setDocument(url);
-//        renderer.layout();
-//        renderer.createPDF(os);
-//        os.close();
-//    }
 
     @Test
     void simpleTest() {
@@ -86,18 +52,12 @@ class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTes
 </html>
 """
         CommunicationHtmlToPdfConverter converter = new CommunicationHtmlToPdfConverter()
-        byte[] pdfContent = converter.toPdf( htmlContent )
+        converter.writeHtml( htmlContent )
+        converter.finish()
+        byte[] pdfContent = converter.toPdf()
+
         assertNotNull( pdfContent )
         assertTrue( new String( pdfContent ).startsWith( "%PDF" ) )
-
-//        File file = new File( "simpleTest.pdf" )
-//        file.setBytes( pdfContent )
-
-        String pdfContentAsString = converter.toPdfString( htmlContent ).replace( "iText", "BCM Rules!" )
-        assertNotNull( pdfContentAsString )
-        assertTrue( pdfContentAsString.startsWith( "%PDF" ) )
-//        File file2 = new File( "simpleTest2.pdf" )
-//        file2.setBytes( pdfContent )
     }
 
 }

@@ -9,40 +9,42 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
  */
 class CommunicationHtmlToPdfConverter {
     Logger log = Logger.getLogger( this.getClass() )
+    ByteArrayOutputStream outputStream
+    ITextRenderer renderer
+    int documentCount
+    boolean finished
 
     public CommunicationHtmlToPdfConverter() {
-
+        reset()
     }
 
-    public void printITextRenderer() {
-        ITextRenderer renderer = new ITextRenderer()
-        ITextFontResolver fontResolver = renderer.getFontResolver()
-        System.out.println( "The iText renderer = ${renderer} and fontResolver = ${fontResolver}.")
+    public void reset() {
+        outputStream = new ByteArrayOutputStream()
+        renderer = new ITextRenderer()
+        documentCount = 0
+        finished = false
     }
 
+    public void writeHtml( String html ) {
+        renderer.setDocumentFromString( html )
+        renderer.layout()
 
-    public byte[] toPdf( String html ) {
-        byte[] pdf = null
-
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
-
-            ITextRenderer renderer = new ITextRenderer()
-            renderer.setDocumentFromString( html )
-            renderer.layout()
+        if (documentCount == 0) {
             renderer.createPDF( outputStream, false )
-            renderer.finishPDF()
-            pdf = outputStream.toByteArray()
-        } catch (Exception e) {
-            e.printStackTrace()
+        } else {
+            renderer.writeNextDocument()
         }
-
-        return pdf
+        documentCount++
     }
 
-    public String toPdfString( String html ) {
-        byte[] pdf = toPdf( html )
-        return new String( pdf, 0, pdf.length, "UTF-8" )
+    public void finish() {
+        renderer.finishPDF()
+        finished = true
+    }
+
+    public byte[] toPdf() {
+        assert( finished )
+        return outputStream.toByteArray()
     }
 
 }
