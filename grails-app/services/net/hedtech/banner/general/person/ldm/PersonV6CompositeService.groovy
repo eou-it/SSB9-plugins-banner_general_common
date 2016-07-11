@@ -7,7 +7,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
-import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
@@ -811,7 +810,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private def searchForMatchingPersons(Map content) {
+    @Override
+    def prepareRequestForCommonMatching(final Map content) {
+        def cmRequest = [:]
+
         // First name, middle name, last name
         def personalName = content.names.find {
             it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v6"] && it.firstName && it.lastName
@@ -833,20 +835,26 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.and.type.required.message", null))
         }
 
-        String firstName = nameObj.firstName
-        String middleName = nameObj.middleName
-        String lastName = nameObj.lastName
+        cmRequest << [firstName: nameObj.firstName, lastName: nameObj.lastName]
+        if (nameObj.middleName) {
+            cmRequest << [mi: nameObj.middleName]
+        }
 
-        // Social Security Number, Banner ID
+        // Social Security Number
         def credentialObj = content.credentials.find {
             it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]
         }
-        String ssn = credentialObj?.value
+        if (credentialObj?.value) {
+            cmRequest << [ssn: credentialObj?.value]
+        }
 
+        // Banner ID
         credentialObj = content.credentials.find {
             it.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]
         }
-        String bannerId = credentialObj?.value
+        if (credentialObj?.value) {
+            cmRequest << [bannerId: credentialObj?.value]
+        }
 
         // Gender
         String gender
@@ -857,11 +865,15 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         } else if (content?.gender == 'unknown') {
             gender = 'N'
         }
+        if (gender) {
+            cmRequest << [sex: gender]
+        }
 
         // Date of Birth
         Date dob
         if (content?.dateOfBirth) {
             dob = convertString2Date(content?.dateOfBirth)
+            cmRequest << [dateOfBirth: dob]
         }
 
         // Emails
@@ -876,42 +888,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     }
                 }
             }
+            cmRequest << [personEmails: personEmails]
         }
 
-        // Common Matching Source Code
-        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
-        String commonMatchingSourceCode = intConf?.value
-
-        // Call Common Matching Service
-        commonMatchingCompositeService.commonMatchingCleanup()
-        def cmRequest = [source  : commonMatchingSourceCode,
-                         lastName: lastName, firstName: firstName, mi: middleName,
-                         birthDay: dob?.format("dd"), birthMonth: dob?.format("MM"), birthYear: dob?.format("yyyy"),
-                         sex     : gender,
-                         ssn     : ssn,
-                         bannerId: bannerId,
-                         max     : content?.max, offset: content?.offset,
-                         sort    : content?.sort, order: content?.order]
-        def cmResponse
-        if (personEmails) {
-            // Try with each email until you get match
-            for (def temp : personEmails) {
-                cmRequest << [emailType: temp.emailType]
-                cmRequest << [email: temp.email]
-                log.debug "Common matching request : ${cmRequest}"
-                cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
-                if (cmResponse?.personList) break
-            }
-        } else {
-            // Try without email
-            log.debug "Common matching request : ${cmRequest}"
-            cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
-        }
-        log.debug "Common matching returned ${cmResponse?.personList?.size()} records"
-        List<Integer> pidms = cmResponse?.personList?.collect { it.pidm }
-        def totalCount = cmResponse?.count
-
-        return [pidms: pidms, totalCount: totalCount]
+        return cmRequest
     }
 
 

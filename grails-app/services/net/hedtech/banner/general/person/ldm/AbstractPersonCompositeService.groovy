@@ -5,6 +5,7 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonEmailService
@@ -34,6 +35,56 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
     CommonMatchingCompositeService commonMatchingCompositeService
+
+
+    abstract def prepareRequestForCommonMatching(final Map content)
+
+
+    protected def searchForMatchingPersons(final Map content) {
+        def cmRequest = prepareRequestForCommonMatching(content)
+
+        if (cmRequest?.dateOfBirth) {
+            Date dob = cmRequest.remove("dateOfBirth")
+            cmRequest << [birthDay: dob?.format("dd")]
+            cmRequest << [birthMonth: dob?.format("MM")]
+            cmRequest << [birthYear: dob?.format("yyyy")]
+        }
+
+        cmRequest << [max: content?.max]
+        cmRequest << [offset: content?.offset]
+        cmRequest << [sort: content?.sort]
+        cmRequest << [order: content?.order]
+
+        def personEmails = cmRequest.remove("personEmails")
+
+        // Common Matching Source Code
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        cmRequest << [source: intConf?.value]
+
+        // Call Common Matching Service
+        commonMatchingCompositeService.commonMatchingCleanup()
+
+        def cmResponse
+        if (personEmails) {
+            // Try with each email until you get match
+            for (def temp : personEmails) {
+                cmRequest << [emailType: temp.emailType]
+                cmRequest << [email: temp.email]
+                log.debug "Common matching request : ${cmRequest}"
+                cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+                if (cmResponse?.personList) break
+            }
+        } else {
+            // Try without email
+            log.debug "Common matching request : ${cmRequest}"
+            cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+        }
+        log.debug "Common matching returned ${cmResponse?.personList?.size()} records"
+        List<Integer> pidms = cmResponse?.personList?.collect { it.pidm }
+        def totalCount = cmResponse?.count
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
 
 
     abstract List<RoleName> getRolesRequired()
