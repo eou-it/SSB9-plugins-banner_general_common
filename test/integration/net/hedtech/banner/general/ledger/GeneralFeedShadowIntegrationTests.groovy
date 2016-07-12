@@ -31,11 +31,28 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(1, generalFeedShadow.errors.errorCount)
         assertEquals("nullable", generalFeedShadow.errors.getFieldError('guid').code)
         //length of guid is max 36
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([guid: 'G'*37])
+        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([guid: 'G' * 37])
         generalFeedShadow1.validate()
         assertTrue(generalFeedShadow1.hasErrors())
         assertEquals(1, generalFeedShadow1.errors.errorCount)
         assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('guid').code)
+    }
+
+    @Test
+    public void testValidateProcessMode() {
+        //null is not allowed
+        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([processMode: null])
+        assertNull(generalFeedShadow.processMode)
+        generalFeedShadow.validate()
+        assertTrue(generalFeedShadow.hasErrors())
+        assertEquals(1, generalFeedShadow.errors.errorCount)
+        assertEquals("nullable", generalFeedShadow.errors.getFieldError('processMode').code)
+        //length of processMode is max 30
+        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([processMode: 'P' * 31])
+        generalFeedShadow1.validate()
+        assertTrue(generalFeedShadow1.hasErrors())
+        assertEquals(1, generalFeedShadow1.errors.errorCount)
+        assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('processMode').code)
     }
 
     @Test
@@ -78,75 +95,6 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
-    public void testValidateEncumbranceNumber() {
-        //null is allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([encumbranceNumber: null])
-        assertNull(generalFeedShadow.encumbranceNumber)
-        generalFeedShadow.validate()
-        assertFalse(generalFeedShadow.hasErrors())
-        //length of encumbranceNumber is max 8
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([encumbranceNumber: 'E'*9])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('encumbranceNumber').code)
-    }
-
-    @Test
-    public void testValidateEncumbranceItemNumber() {
-        //null is allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([encumbranceItemNumber: null])
-        assertNull(generalFeedShadow.encumbranceItemNumber)
-        generalFeedShadow.validate()
-        assertFalse(generalFeedShadow.hasErrors())
-        //max value for encumbranceItemNumber is 9999
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([encumbranceItemNumber: 19999])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("max.exceeded", generalFeedShadow1.errors.getFieldError('encumbranceItemNumber').code)
-    }
-
-    @Test
-    public void testValidateEncumbranceSequenceNumber() {
-        //null is allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([encumbranceSequenceNumber: null])
-        assertNull(generalFeedShadow.encumbranceSequenceNumber)
-        generalFeedShadow.validate()
-        assertFalse(generalFeedShadow.hasErrors())
-        //max value for encumbranceSequenceNumber is 9999
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([encumbranceSequenceNumber: 19999])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("max.exceeded", generalFeedShadow1.errors.getFieldError('encumbranceSequenceNumber').code)
-    }
-
-    @Test
-    public void testValidateBudgetOverride() {
-        //null is allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([budgetOverride: null])
-        assertNull(generalFeedShadow.budgetOverride)
-        generalFeedShadow.validate()
-        assertFalse(generalFeedShadow.hasErrors())
-    }
-
-    @Test
-    public void testValidateBudgetPeriod() {
-        //null is allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([budgetPeriod: null])
-        assertNull(generalFeedShadow.budgetPeriod)
-        generalFeedShadow.validate()
-        assertFalse(generalFeedShadow.hasErrors())
-        //length of budgetPeriod is max 2
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([budgetPeriod: 'B'*3])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('budgetPeriod').code)
-    }
-
-    @Test
     public void testValidateTransactionNumber() {
         //null is not allowed
         GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([transactionNumber: null])
@@ -173,7 +121,7 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(1, generalFeedShadow.errors.errorCount)
         assertEquals("nullable", generalFeedShadow.errors.getFieldError('transactionType').code)
         //length of transactionType is max 50
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([transactionType: 'T'*51])
+        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([transactionType: 'T' * 51])
         generalFeedShadow1.validate()
         assertTrue(generalFeedShadow1.hasErrors())
         assertEquals(1, generalFeedShadow1.errors.errorCount)
@@ -233,7 +181,7 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(1, generalFeedShadow.errors.errorCount)
         assertEquals("nullable", generalFeedShadow.errors.getFieldError('accountingString').code)
         //max size for accountingString is 60
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([accountingString: 'A'*61])
+        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([accountingString: 'A' * 61])
         generalFeedShadow1.validate()
         assertTrue(generalFeedShadow1.hasErrors())
         assertEquals(1, generalFeedShadow1.errors.errorCount)
@@ -309,28 +257,11 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
         assertEquals(1, generalFeedShadow.errors.errorCount)
         assertEquals("nullable", generalFeedShadow.errors.getFieldError('currencyCode').code)
         //max size for currencyCode is 4
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([currencyCode: 'C'*5])
+        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([currencyCode: 'C' * 5])
         generalFeedShadow1.validate()
         assertTrue(generalFeedShadow1.hasErrors())
         assertEquals(1, generalFeedShadow1.errors.errorCount)
         assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('currencyCode').code)
-    }
-
-    @Test
-    public void testValidateSystemId() {
-        //null is not allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([systemId: null])
-        assertNull(generalFeedShadow.systemId)
-        generalFeedShadow.validate()
-        assertTrue(generalFeedShadow.hasErrors())
-        assertEquals(1, generalFeedShadow.errors.errorCount)
-        assertEquals("nullable", generalFeedShadow.errors.getFieldError('systemId').code)
-        //max size for systemId is 8
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([systemId: "SYS_ID_01"])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('systemId').code)
     }
 
     @Test
@@ -359,38 +290,6 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
         assertTrue(generalFeedShadow.hasErrors())
         assertEquals(1, generalFeedShadow.errors.errorCount)
         assertEquals("nullable", generalFeedShadow.errors.getFieldError('activityDate').code)
-    }
-
-    @Test
-    public void testValidateUserId() {
-        //null is not allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([userId: null])
-        assertNull(generalFeedShadow.userId)
-        generalFeedShadow.validate()
-        assertTrue(generalFeedShadow.hasErrors())
-        assertEquals(1, generalFeedShadow.errors.errorCount)
-        assertEquals("nullable", generalFeedShadow.errors.getFieldError('userId').code)
-        //max size for userId is 30
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([userId: 'U' * 31])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('userId').code)
-    }
-
-    @Test
-    public void testValidateDepositNumber() {
-        //null is allowed
-        GeneralFeedShadow generalFeedShadow = createNewGenerealFeed([depositNumber: null])
-        assertNull(generalFeedShadow.depositNumber)
-        generalFeedShadow.validate()
-        assertFalse(generalFeedShadow.hasErrors())
-        //max size for depositNumber is 8
-        GeneralFeedShadow generalFeedShadow1 = createNewGenerealFeed([depositNumber: "DEPO_NUM1"])
-        generalFeedShadow1.validate()
-        assertTrue(generalFeedShadow1.hasErrors())
-        assertEquals(1, generalFeedShadow1.errors.errorCount)
-        assertEquals("maxSize.exceeded", generalFeedShadow1.errors.getFieldError('depositNumber').code)
     }
 
     @Test
@@ -433,29 +332,23 @@ class GeneralFeedShadowIntegrationTests extends BaseIntegrationTestCase {
 
     private createNewGenerealFeed(Map properties) {
         GeneralFeedShadow generalFeedShadow = new GeneralFeedShadow()
-        generalFeedShadow.guid = 'G'*36
+        generalFeedShadow.guid = 'G' * 36
+        generalFeedShadow.processMode = 'PM' * 15
         generalFeedShadow.referenceNumber = "REF_NUM1"
         generalFeedShadow.transactionNumber = "TRAN_NUM"
-        generalFeedShadow.transactionType = 'T'*50
+        generalFeedShadow.transactionType = 'T' * 50
         generalFeedShadow.ledgerDate = new Date()
         generalFeedShadow.referencePerson = 12345678
         generalFeedShadow.referenceOrganization = "REF_ORGN1"
         generalFeedShadow.transactionTypeReferenceDate = new Date()
-        generalFeedShadow.encumbranceNumber = 'E'*8
-        generalFeedShadow.encumbranceItemNumber = 4321
-        generalFeedShadow.encumbranceSequenceNumber = 2413
-        generalFeedShadow.budgetOverride = false
-        generalFeedShadow.budgetPeriod = 'BP'
         generalFeedShadow.sequenceNumber = 1234
-        generalFeedShadow.accountingString = 'A'*60
+        generalFeedShadow.accountingString = 'A' * 60
         generalFeedShadow.description = '_DESC' * 7
         generalFeedShadow.type = "C"
         generalFeedShadow.amount = 999999999999999.99
-        generalFeedShadow.currencyCode = 'C'*4
-        generalFeedShadow.systemId = "SYS_ID_1"
+        generalFeedShadow.currencyCode = 'C' * 4
         generalFeedShadow.systemTimestamp = "SYS_TIME_STAMP"
         generalFeedShadow.activityDate = new Date()
-        generalFeedShadow.userId = '_USER' * 6
 
 
         if (properties && properties.size() > 0) {

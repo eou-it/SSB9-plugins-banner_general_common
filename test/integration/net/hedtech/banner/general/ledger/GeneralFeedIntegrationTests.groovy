@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.ledger
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -565,6 +566,60 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.delete()
         GeneralFeed.withNewSession {
             assertNull(GeneralFeed.get(generalFeed.id))
+        }
+    }
+
+    @Test
+    public void testFetchAllByGuidInListNullList(){
+        List<String> guids = null
+        assertEquals([], GeneralFeedShadow.fetchAllByGuidInList(guids))
+    }
+
+    @Test
+    public void testFetchAllByGuidInListEmptyList(){
+        List<String> guids = []
+        assertEquals([], GeneralFeedShadow.fetchAllByGuidInList(guids))
+    }
+
+    @Test
+    public void testFetchAllByGuidInListInvalidValues(){
+        List<String> guids = ["garbage-value","invalid-value","random-value"]
+        assertEquals([], GeneralFeedShadow.fetchAllByGuidInList(guids))
+    }
+
+    @Test
+    public void testFetchAllByGuidInListValidValues(){
+        runSeedData('general-ledger')
+        String guid = GeneralFeedShadow.findAll().guid.unique()[0]
+        assertNotNull(guid)
+        List<String> guids = [guid,"invalid-value","random-value"]
+        assertEquals([guid], GeneralFeedShadow.fetchAllByGuidInList(guids).guid.unique())
+        String guid1 = GeneralFeedShadow.findAll().guid.unique()[1]
+        assertNotNull(guid1)
+        guids = [guid, guid1]
+        assertEquals([guid, guid1].unique().sort(), GeneralFeedShadow.fetchAllByGuidInList(guids).guid.unique().sort())
+        runSeedData('general-ledger-clean')
+    }
+
+    def runSeedData(String seedTestTarget) {
+        def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
+        def inputData = clazzInputData.newInstance([dataSource: dataSource])
+
+        def xmlFiles = inputData.targets.find { it.key == seedTestTarget }?.value
+        if (!xmlFiles) xmlFiles = inputData.seleniumTargets.find { it.key == seedTestTarget }?.value
+
+        def basedir = System.properties['base.dir']
+        xmlFiles.each { xmlFileName ->
+            inputData.xmlFile = GrailsPluginUtils.getPluginDirForName('banner-seeddata-catalog').path + xmlFileName.value
+            inputData.tableCnts = []
+            inputData.username = "baninst1"
+            inputData.password = "u_pick_it"
+            inputData.tableSize = 0
+            def inputFile = new File(inputData.xmlFile)
+            if (!inputFile.exists())
+                inputData.xmlFile = "${basedir}${xmlFileName.value}"
+            def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
+            seedDataLoader.execute()
         }
     }
 

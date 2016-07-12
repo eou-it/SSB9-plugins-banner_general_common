@@ -9,6 +9,10 @@ class GeneralFeedShadowService extends ServiceBase{
     static transactional = true;
 
     public List<GeneralFeedShadow> fetchByGuid(String guid){
-        return GeneralFeedShadow.fetchByGuid(guid)
+        return GeneralFeedShadow.fetchAllByGuidInList([guid])
+    }
+
+    public List<GeneralFeedShadow> fetchAllByGuidInList(List<String> guids){
+        return GeneralFeedShadow.fetchAllByGuidInList(guids)
     }
 }

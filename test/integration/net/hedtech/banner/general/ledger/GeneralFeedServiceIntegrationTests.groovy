@@ -5,6 +5,7 @@ package net.hedtech.banner.general.ledger
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -72,7 +73,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.referencePerson = 12345678
         generalFeed.referenceOrganization = "REF_ORGN1"
         generalFeed.sequenceNumber = 1234
-        generalFeed.accountingString = 'A'*60
+        generalFeed.accountingString = 'A' * 60
         generalFeed.chartOfAccountsCode = "1"
         generalFeed.accountIndexCode = "ACCI_C"
         generalFeed.fundCode = "FUND_C"

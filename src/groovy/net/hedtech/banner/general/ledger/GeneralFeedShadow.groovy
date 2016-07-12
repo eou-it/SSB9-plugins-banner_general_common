@@ -15,7 +15,9 @@ import javax.persistence.*
 @ToString(includeFields = true, includeNames = true)
 @NamedQueries([
         @NamedQuery(name = "GeneralFeedShadow.fetchByGuid",
-        query = """FROM GeneralFeedShadow a where a.guid = :guid""")
+        query = """FROM GeneralFeedShadow a where a.guid = :guid"""),
+        @NamedQuery(name = "GeneralFeedShadow.fetchAllByGuidInList",
+        query = """FROM GeneralFeedShadow a where a.guid in (:guids)""")
 ])
 class GeneralFeedShadow implements Serializable {
 
@@ -32,20 +34,23 @@ class GeneralFeedShadow implements Serializable {
     @Column(name = "GURTRNH_GUID")
     String guid
 
+    @Column(name = "GURTRNH_PROCESS_MODE")
+    String processMode
+
     @Column(name = "GURTRNH_DOC_REF_NUM")
     String referenceNumber
 
     @Column(name = "GURTRNH_DOC_CODE")
     String transactionNumber
 
-    @Column(name = "GURTRNH_TYPE")
+    @Column(name = "GURTRNH_TRANS_TYPE")
     String transactionType
 
     @Column(name = "GURTRNH_TRANS_DATE")
     @Temporal(TemporalType.DATE)
     Date ledgerDate
 
-    @Column(name = "GURTRNH_VENDOR_PIDM")
+    @Column(name = "GURTRNH_VENDOR_ID")
     Long referencePerson
 
     @Column(name = "GURTRNH_ONE_TIME_VEND_CODE")
@@ -54,22 +59,6 @@ class GeneralFeedShadow implements Serializable {
     @Column(name = "GURTRNH_TRANS_TYPE_REF_DATE")
     @Temporal(TemporalType.DATE)
     Date transactionTypeReferenceDate
-
-    @Column(name = "GURTRNH_ENCD_NUM")
-    String encumbranceNumber
-
-    @Column(name = "GURTRNH_ENCD_ITEM_NUM")
-    Long encumbranceItemNumber
-
-    @Column(name = "GURTRNH_ENCD_SEQ_NUM")
-    Long encumbranceSequenceNumber
-
-    @Type(type = "yes_no")
-    @Column(name = "GURTRNH_ABAL_OVERRIDE")
-    Boolean budgetOverride
-
-    @Column(name = "GURTRNH_BUDGET_PERIOD")
-    String budgetPeriod
 
     @Column(name = "GURTRNH_SEQ_NUM")
     Long sequenceNumber
@@ -89,9 +78,6 @@ class GeneralFeedShadow implements Serializable {
     @Column(name = "GURTRNH_CURR_CODE")
     String currencyCode
 
-    @Column(name = "GURTRNH_SYSTEM_ID")
-    String systemId
-
     @Column(name = "GURTRNH_SYSTEM_TIME_STAMP")
     String systemTimestamp
 
@@ -99,17 +85,12 @@ class GeneralFeedShadow implements Serializable {
     @Temporal(TemporalType.DATE)
     Date activityDate
 
-    @Column(name = "GURTRNH_USER_ID")
-    String userId
-
-    @Column(name = "GURTRNH_DEP_NUM")
-    String depositNumber
-
     @Column(name = "GURTRNH_DATA_ORIGIN")
     String dataOrigin
 
     static constraints = {
         guid(nullable: false, maxSize: 36)
+        processMode(nullable: false, maxSize: 30)
         referenceNumber(nullable: true, maxSize: 8)
         transactionNumber(nullable: false, maxSize: 8)
         transactionType(nullable: false, maxSize: 50)
@@ -117,11 +98,6 @@ class GeneralFeedShadow implements Serializable {
         referencePerson(nullable: true, max: 99999999L)
         referenceOrganization(nullable: true, maxSize: 9)
         transactionTypeReferenceDate(nullable: true)
-        encumbranceNumber(nullable: true, maxSize: 8)
-        encumbranceItemNumber(nullable: true, max: 9999L)
-        encumbranceSequenceNumber(nullable:true, max: 9999L)
-        budgetOverride(nullable: true)
-        budgetPeriod(nullable: true, maxSize: 2)
         sequenceNumber(nullable: false, max: 9999L)
         accountingString(nullable: false, maxSize: 60)
         description(nullable: false, maxSize: 35)
@@ -134,11 +110,8 @@ class GeneralFeedShadow implements Serializable {
         )
         amount(nullable: false, min: new BigDecimal(0), max: new BigDecimal(999999999999999.99))
         currencyCode(nullable: false, maxSize: 4)
-        systemId(nullable: false, maxSize: 8)
         systemTimestamp(nullable: false, maxSize: 14)
         activityDate(nullable: false)
-        userId(nullable: false, maxSize: 30)
-        depositNumber(nullable: true, maxSize: 8)
         dataOrigin(nullable: true)
     }
 
@@ -146,6 +119,16 @@ class GeneralFeedShadow implements Serializable {
         List<GeneralFeedShadow> generalFeedShadowList = []
         GeneralFeedShadow.withSession{session ->
             generalFeedShadowList = session.getNamedQuery("GeneralFeedShadow.fetchByGuid").setString('guid', guid).list()
+        }
+        return generalFeedShadowList
+    }
+
+    public static List<GeneralFeedShadow> fetchAllByGuidInList(List<String> guids){
+        List<GeneralFeedShadow> generalFeedShadowList = []
+        if(guids){
+            GeneralFeedShadow.withSession{session ->
+                generalFeedShadowList = generalFeedShadowList = session.getNamedQuery("GeneralFeedShadow.fetchAllByGuidInList").setParameterList('guids', guids).list()
+            }
         }
         return generalFeedShadowList
     }
