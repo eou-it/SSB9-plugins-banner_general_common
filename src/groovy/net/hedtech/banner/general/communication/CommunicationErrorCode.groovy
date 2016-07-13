@@ -30,6 +30,10 @@ enum CommunicationErrorCode implements Serializable {
     INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY,
     UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT,
 
+    /** Letter error codes **/
+    EMPTY_LETTER_TO_ADDRESS,
+    EMPTY_LETTER_CONTENT,
+
     UNKNOWN_ERROR; //Unknown Error
 
     /**

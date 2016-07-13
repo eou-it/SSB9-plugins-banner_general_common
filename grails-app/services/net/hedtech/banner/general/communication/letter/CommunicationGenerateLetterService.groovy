@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.letter
 
+import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.Log
@@ -44,6 +46,21 @@ class CommunicationGenerateLetterService {
 
     private void track( CommunicationOrganization organization, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
         log.debug( "tracking letter message sent")
+
+        if (isEmpty(message.toAddress)) {
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
+                CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS.toString(),
+                "emptyLetterToAddress"
+            )
+        }
+
+        if (isEmpty(message.content)) {
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
+                CommunicationErrorCode.EMPTY_LETTER_CONTENT.toString(),
+                "emptyLetterContent"
+            )
+        }
+
         CommunicationLetterItem item = new CommunicationLetterItem()
         // standard communication log entries
         item.setOrganizationId( organization.id )
@@ -59,6 +76,10 @@ class CommunicationGenerateLetterService {
 
         item = communicationLetterItemService.create( item )
         log.debug( "recorded letter item sent with item id = ${item.id}." )
+    }
+
+    private boolean isEmpty(String s) {
+        return !s || s.length() == 0
     }
 
 }
