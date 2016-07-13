@@ -32,5 +32,7 @@ class PersonV6 {
     List<RaceV6> races
     EthnicityDecorator ethnicity
     List<PhoneV6> phones
+    List interests
+
 
 }

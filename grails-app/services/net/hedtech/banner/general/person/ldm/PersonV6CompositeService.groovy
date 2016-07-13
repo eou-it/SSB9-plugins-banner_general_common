@@ -36,6 +36,10 @@ import java.sql.Timestamp
 @Transactional
 class PersonV6CompositeService extends AbstractPersonCompositeService {
 
+
+    def outsideInterestService
+    def interestCompositeService
+
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
 
@@ -198,6 +202,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
             fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
             fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
+            fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -270,6 +275,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
                     dataMapForPerson << ["phoneCodeToGuidMap": dataMap.phoneCodeToGuidMap]
                 }
+
+                // interests
+                List personInterestList = dataMap.pidmToInterestsMap.get(it.pidm)
+                if (personInterestList) {
+                    dataMapForPerson << ["personInterests": personInterestList]
+                    dataMapForPerson << ["interestCodeToGuidMap": dataMap.interestCodeToGuidMap]
+                }
+
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
@@ -371,6 +384,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 decorator.phones = []
                 personTelephoneListList.each {
                     decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
+                }
+            }
+
+            // interests
+            List personInterests = dataMapForPerson["personInterests"]
+            Map<String, String> iterestCodeToGuidMap = dataMapForPerson["interestCodeToGuidMap"]
+            if (personInterests) {
+                decorator.interests = []
+                personInterests.each {
+                    decorator.interests << ["id": iterestCodeToGuidMap.get(it.interest.code)]
                 }
             }
         }
@@ -478,6 +501,36 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
         dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
         dataMap.put("emailCodeToGuidMap", emailCodeToGuidMap)
+    }
+
+
+    private void fetchPersonsInterestDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        // Get SORINTS records for persons
+        Map pidmToInterestsMap = [:]
+        if (pidms) {
+            log.debug "Getting SORINTS records for ${pidms?.size()} PIDMs..."
+            List entities = outsideInterestService.getOutsideInterestByPidmList(pidms)
+            entities?.each {
+                List personInterests = []
+                if (pidmToInterestsMap.containsKey(it.pidm)) {
+                    personInterests = pidmToInterestsMap.get(it.pidm)
+                } else {
+                    pidmToInterestsMap.put(it.pidm, personInterests)
+                }
+                personInterests.add(it)
+            }
+        }
+        // Get GUIDs for interest codes
+        Set<String> interestCodes = pidmToInterestsMap?.values().interest.code.flatten() as Set
+        Map interestCodeToGuidMap = [:]
+        if (interestCodes) {
+            log.debug "Getting GUIDs for interest codes $interestCodes..."
+            interestCodeToGuidMap = interestCompositeService.getInterestCodeToGuidMap(interestCodes)
+            log.debug "Got ${interestCodeToGuidMap?.size() ?: 0} GUIDs for given interest codes"
+        }
+        // Put in Map
+        dataMap.put("pidmToInterestsMap", pidmToInterestsMap)
+        dataMap.put("interestCodeToGuidMap", interestCodeToGuidMap)
     }
 
 
