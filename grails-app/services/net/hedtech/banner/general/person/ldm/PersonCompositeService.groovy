@@ -1022,7 +1022,7 @@ class PersonCompositeService extends LdmService {
         personList.each {
             Person currentRecord = persons.get(it.pidm) ?: new Person(null)
             PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByPidm(it.pidm)
-            if (!it.containsKey("bannerId")) {
+            if (it instanceof Map && !it.containsKey("bannerId")) {
                 it["bannerId"] = personIdentificationNameCurrent.bannerId
             }
             def name = new Name(personIdentificationNameCurrent, currentRecord)

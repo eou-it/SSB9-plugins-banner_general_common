@@ -375,7 +375,8 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
 
         // Call the service
-        def response = personV6CompositeService.list(content)
+        def requestProcessingResult = personV6CompositeService.listQApi(content)
+        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         def obj = response.find { it.guid == globalUniqueIdentifier.guid }
@@ -421,7 +422,8 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
 
         // Call the service
-        def response = personV6CompositeService.list(content)
+        def requestProcessingResult = personV6CompositeService.listQApi(content)
+        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         def obj = response.find { it.guid == globalUniqueIdentifier.guid }
@@ -468,7 +470,8 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
 
         // Call service
-        def response = personV6CompositeService.list(content)
+        def requestProcessingResult = personV6CompositeService.listQApi(content)
+        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         response.each {
