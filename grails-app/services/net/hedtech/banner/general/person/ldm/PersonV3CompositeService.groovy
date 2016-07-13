@@ -25,11 +25,11 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
         // First name, middle name, last name
         def personalName = content.names.find {
-            it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v3"] && it.firstName && it.lastName
+            it.nameType == NameTypeCategory.PERSONAL.versionToEnumMap["v3"] && it.firstName && it.lastName
         }
 
         def birthName = content.names.find {
-            it.type.category == NameTypeCategory.BIRTH.versionToEnumMap["v3"] && it.firstName && it.lastName
+            it.nameType == NameTypeCategory.BIRTH.versionToEnumMap["v3"] && it.firstName && it.lastName
         }
 
         if (personalName && birthName) {
@@ -51,18 +51,18 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
         // Social Security Number
         def credentialObj = content.credentials.find {
-            it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v3"]
+            it.credentialType == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v3"]
         }
-        if (credentialObj?.value) {
-            cmRequest << [ssn: credentialObj?.value]
+        if (credentialObj?.credentialId) {
+            cmRequest << [ssn: credentialObj?.credentialId]
         }
 
         // Banner ID
         credentialObj = content.credentials.find {
-            it.type == CredentialType.BANNER_ID.versionToEnumMap["v3"]
+            it.credentialType == CredentialType.BANNER_ID.versionToEnumMap["v3"]
         }
-        if (credentialObj?.value) {
-            cmRequest << [bannerId: credentialObj?.value]
+        if (credentialObj?.credentialId) {
+            cmRequest << [bannerId: credentialObj?.credentialId]
         }
 
         // Gender
@@ -91,9 +91,9 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
             Map<String, String> bannerEmailTypeToHedmEmailTypeMap = emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
             if (bannerEmailTypeToHedmEmailTypeMap) {
                 content?.emails.each {
-                    def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == it.type.emailType }
+                    def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == it.emailType }
                     if (mapEntry) {
-                        personEmails << [email: it.address, emailType: mapEntry.key]
+                        personEmails << [email: it.emailAddress, emailType: mapEntry.key]
                     }
                 }
             }

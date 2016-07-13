@@ -18,7 +18,6 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -2377,96 +2376,32 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     //Filter on CredentialId and Credential Type
     @Test
-    public void testCredentialsFilterOnPersonV3(){
+    public void testCredentialsFilterOnPersonV3() {
         setAcceptHeader("application/vnd.hedtech.integration.v3+json")
 
-        def persons = [:]
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_filter);
-        params.put("role","faculty")
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
-        persons = personCompositeService.list(params);
-        assert persons.size()>0
-        assertEquals 1,persons.size()
+        def params = [:]
+        def decorators = [:]
 
-        persons.clear()
+        params.put("credentialType", i_success_credential_type4_filter)
+        params.put("credentialId", i_success_credential_filter);
+        params.put("role", "faculty")
+        decorators = personCompositeService.list(params)
+        assert decorators.size() > 0
+        assertEquals 1, decorators.size()
+
+        decorators.clear()
         params.clear()
 
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_success_credential_filter);
-        params.put("role","student")
-        persons = personCompositeService.list(params);
-        assert persons.size()>0
-        assertEquals 1,persons.size()
+        params.put("credentialType", i_success_credential_type4_filter)
+        params.put("credentialId", i_success_credential_filter);
+        params.put("role", "student")
+        decorators = personCompositeService.list(params);
+        assert decorators.size() > 0
+        assertEquals 1, decorators.size()
 
-        persons.clear()
+        decorators.clear()
         params.clear()
-
-
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_filter)
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'not.found.message'
-        }
-
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_success_credential_id4);
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'creadential.type.invalid'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_failure_credential_type4_filter)
-        params.put("credentialId",i_failure_credential_filter);
-        params.put("role","student")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'creadential.type.invalid'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialId",i_failure_credential_filter);
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'creadential.type.required'
-        }
-        assertEquals 0,persons.size()
-
-        persons.clear()
-        params.clear()
-
-        params.put("credentialType",i_success_credential_type4_filter)
-        params.put("role","faculty")
-        try{
-            persons = personCompositeService.list(params)
-        }catch(ApplicationException ae){
-            assertApplicationException ae, 'creadential.id.required'
-        }
-        assertEquals 0,persons.size()
     }
-
 
 
     private def createPersonBasicPersonBase() {
