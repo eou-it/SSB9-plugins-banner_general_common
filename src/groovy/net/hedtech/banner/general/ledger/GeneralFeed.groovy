@@ -82,7 +82,7 @@ class GeneralFeed implements Serializable{
     String fundCode
 
     @Column(name = "GURFEED_ORGN_CODE")
-    String orgnizationCode
+    String organizationCode
 
     @Column(name = "GURFEED_ACCT_CODE")
     String accountCode
@@ -155,7 +155,7 @@ class GeneralFeed implements Serializable{
         chartOfAccountsCode(nullable: true, maxSize:1)
         accountIndexCode(nullable: true, maxSize: 6)
         fundCode(nullable: true, maxSize: 6)
-        orgnizationCode(nullable: true, maxSize: 6)
+        organizationCode(nullable: true, maxSize: 6)
         accountCode(nullable: true, maxSize: 6)
         programCode(nullable: true, maxSize: 6)
         activityCode(nullable: true, maxSize: 6)

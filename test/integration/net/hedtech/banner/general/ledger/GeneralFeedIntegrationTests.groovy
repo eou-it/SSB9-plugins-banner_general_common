@@ -243,15 +243,15 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
     public void testValidateOrgnizationCode() {
         //null is allowed
         GeneralFeed generalFeed = createNewGenerealFeed([orgnizationCode: null])
-        assertNull(generalFeed.orgnizationCode)
+        assertNull(generalFeed.organizationCode)
         generalFeed.validate()
         assertFalse(generalFeed.hasErrors())
-        //max size for orgnizationCode is 6
+        //max size for organizationCode is 6
         GeneralFeed generalFeed1 = createNewGenerealFeed([orgnizationCode: "ORGN_C1"])
         generalFeed1.validate()
         assertTrue(generalFeed1.hasErrors())
         assertEquals(1, generalFeed1.errors.errorCount)
-        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('orgnizationCode').code)
+        assertEquals("maxSize.exceeded", generalFeed1.errors.getFieldError('organizationCode').code)
     }
 
     @Test
@@ -640,7 +640,7 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.chartOfAccountsCode = "1"
         generalFeed.accountIndexCode = "ACCI_C"
         generalFeed.fundCode = "FUND_C"
-        generalFeed.orgnizationCode = "ORGN_C"
+        generalFeed.organizationCode = "ORGN_C"
         generalFeed.accountCode = "ACCT_C"
         generalFeed.programCode = "PROG_C"
         generalFeed.activityCode = "ACTV_C"
