@@ -43,6 +43,7 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
         this.recipientData = recipientData
         message = null
         template.accept( this )
+        message.setDateSent( new Date() )
         return message
     }
 
@@ -58,7 +59,6 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
         emailMessage.setSubjectLine( mergedEmailTemplate.subject );
         emailMessage.setMessageBody( mergedEmailTemplate.content );
         emailMessage.setMessageBodyContentType( "text/html; charset=UTF-8" );
-        emailMessage.setDateSent( new Date() );
 
         message = emailMessage
     }
@@ -91,7 +91,6 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
             sticky: template.sticky,
             referenceId: recipientData.referenceId,
             externalUser: fetchExternalLoginIdByPidm( recipientData.pidm ),
-            dateSent: new Date()
         )
 
         message = mobileNotificationMessage
