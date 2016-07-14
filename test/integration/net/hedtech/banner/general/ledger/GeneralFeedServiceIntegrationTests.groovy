@@ -72,11 +72,11 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.referencePerson = 12345678
         generalFeed.referenceOrganization = "REF_ORGN1"
         generalFeed.sequenceNumber = 1234
-        generalFeed.accountingString = 'A'*60
+        generalFeed.accountingString = 'A' * 60
         generalFeed.chartOfAccountsCode = "1"
         generalFeed.accountIndexCode = "ACCI_C"
         generalFeed.fundCode = "FUND_C"
-        generalFeed.orgnizationCode = "ORGN_C"
+        generalFeed.organizationCode = "ORGN_C"
         generalFeed.accountCode = "ACCT_C"
         generalFeed.programCode = "PROG_C"
         generalFeed.activityCode = "ACTV_C"

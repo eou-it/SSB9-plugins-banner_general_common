@@ -24,7 +24,6 @@ import net.hedtech.banner.general.system.ldm.v6.EmailV6
 import net.hedtech.banner.general.system.ldm.v6.PhoneV6
 import net.hedtech.banner.general.system.ldm.v6.RaceV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
-import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -36,6 +35,10 @@ import java.sql.Timestamp
  */
 @Transactional
 class PersonV6CompositeService extends AbstractPersonCompositeService {
+
+
+    def outsideInterestService
+    def interestCompositeService
 
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
@@ -72,64 +75,50 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         List<Integer> pidms
         int totalCount = 0
 
-        if (RestfulApiValidationUtility.isQApiRequest(params)) {
-
-            String contentType = getRequestRepresentation()
-            if (contentType && contentType.contains("duplicate-check")) {
-                log.info "Person duplicate check request with Content-Type ${contentType}"
-                def returnMap = searchForMatchingPersons(params)
-                pidms = returnMap?.pidms
-                totalCount = returnMap?.totalCount
-            }
-
-        } else {
-
-            if (params.containsKey("role")) {
-                String role = params.role?.trim()
-                log.debug "Fetching persons with role $role ...."
-                def returnMap
-                if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
-                } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
-                } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
-                } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
-                } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
-                } else if (role == RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchProspectiveStudents(sortField, sortOrder, max, offset)
-                } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
-                    returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
-                } else {
-                    throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
-                }
-                pidms = returnMap?.pidms
-                totalCount = returnMap?.totalCount
-                log.debug "${totalCount} persons found with role $role."
-            } else if (params.containsKey("credential.type") && params.containsKey("credential.value")) {
-                String credentialType = params.get("credential.type")?.trim()
-                String credentialValue = params.get("credential.value")?.trim()
-                if (credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
-                    PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credentialValue)
-                    if (personCurrent && personCurrent.entityIndicator == 'P') {
-                        pidms = [personCurrent.pidm]
-                        totalCount = 1
-                    }
-                }
-            } else if (params.containsKey("lastName") || params.containsKey("firstName") || params.containsKey("middleName") || params.containsKey("lastNamePrefix") || params.containsKey("title") || params.containsKey("pedigree")) {
-
-            } else if (params.containsKey("personFilter")) {
-                String guidOrDomainKey = params.get("personFilter")
-                def returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, sortField, sortOrder, max, offset)
-                pidms = returnMap?.pidms
-                totalCount = returnMap?.totalCount
-                log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
+        if (params.containsKey("role")) {
+            String role = params.role?.trim()
+            log.debug "Fetching persons with role $role ...."
+            def returnMap
+            if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchAlumnis(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.VENDOR.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchVendors(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchProspectiveStudents(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
+                returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
             } else {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", null))
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
             }
+            pidms = returnMap?.pidms
+            totalCount = returnMap?.totalCount
+            log.debug "${totalCount} persons found with role $role."
+        } else if (params.containsKey("credential.type") && params.containsKey("credential.value")) {
+            String credentialType = params.get("credential.type")?.trim()
+            String credentialValue = params.get("credential.value")?.trim()
+            if (credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
+                PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credentialValue)
+                if (personCurrent && personCurrent.entityIndicator == 'P') {
+                    pidms = [personCurrent.pidm]
+                    totalCount = 1
+                }
+            }
+        } else if (params.containsKey("lastName") || params.containsKey("firstName") || params.containsKey("middleName") || params.containsKey("lastNamePrefix") || params.containsKey("title") || params.containsKey("pedigree")) {
 
+        } else if (params.containsKey("personFilter")) {
+            String guidOrDomainKey = params.get("personFilter")
+            def returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, sortField, sortOrder, max, offset)
+            pidms = returnMap?.pidms
+            totalCount = returnMap?.totalCount
+            log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
+        } else {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", null))
         }
 
         injectPropertyIntoParams(params, "count", totalCount)
@@ -193,29 +182,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private List<PersonIdentificationNameCurrent> fetchPersonCurrentByPIDMs(List<Integer> pidms, String sortField, String sortOrder) {
-        log.trace "fetchPersonCurrentByPIDMs : $pidms : $sortField: $sortOrder"
-        List<PersonIdentificationNameCurrent> entities
-        if (pidms) {
-            def objectsOfPidms = []
-            pidms.each {
-                objectsOfPidms << [data: it]
-            }
-            Map paramsMap = [pidms: objectsOfPidms]
-            String query = """ from PersonIdentificationNameCurrent a
-                               where a.pidm in (:pidms)
-                               and a.entityIndicator = 'P'
-                               order by a.$sortField $sortOrder, a.bannerId $sortOrder """
-            DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
-            log.debug "$query"
-            entities = dynamicFinder.find([params: paramsMap, criteria: []], [:])
-            log.debug "Query returned ${entities?.size()} records"
-        }
-        return entities
-    }
-
-
-    private def createDecorators(List<PersonIdentificationNameCurrent> entities) {
+    def createDecorators(List<PersonIdentificationNameCurrent> entities) {
         def decorators = []
         if (entities) {
             List<Long> personSurrogateIds = entities?.collect {
@@ -235,6 +202,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
             fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
             fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
+            fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -306,6 +274,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     dataMapForPerson << ["personPhones": personTelephoneList]
                     dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
                     dataMapForPerson << ["phoneCodeToGuidMap": dataMap.phoneCodeToGuidMap]
+                }
+
+                // interests
+                List personInterests = dataMap.pidmToInterestsMap.get(it.pidm)
+                if (personInterests) {
+                    dataMapForPerson << ["personInterests": personInterests]
+                    dataMapForPerson << ["interestCodeToGuidMap": dataMap.interestCodeToGuidMap]
                 }
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
@@ -408,6 +383,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 decorator.phones = []
                 personTelephoneListList.each {
                     decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
+                }
+            }
+
+            // interests
+            List personInterests = dataMapForPerson["personInterests"]
+            Map<String, String> iterestCodeToGuidMap = dataMapForPerson["interestCodeToGuidMap"]
+            if (personInterests) {
+                decorator.interests = []
+                personInterests.each {
+                    decorator.interests << ["id": iterestCodeToGuidMap.get(it.interest.code)]
                 }
             }
         }
@@ -515,6 +500,42 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
         dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
         dataMap.put("emailCodeToGuidMap", emailCodeToGuidMap)
+    }
+
+
+    private void fetchPersonsInterestDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        if(!outsideInterestService) {
+            // Test mode
+            dataMap.put("pidmToInterestsMap", [:])
+            dataMap.put("interestCodeToGuidMap", [:])
+            return
+        }
+        // Get SORINTS records for persons
+        Map pidmToInterestsMap = [:]
+        if (pidms) {
+            log.debug "Getting SORINTS records for ${pidms?.size()} PIDMs..."
+            List entities = outsideInterestService.fetchAllByPidmInList(pidms)
+            entities?.each {
+                List personInterests = []
+                if (pidmToInterestsMap.containsKey(it.pidm)) {
+                    personInterests = pidmToInterestsMap.get(it.pidm)
+                } else {
+                    pidmToInterestsMap.put(it.pidm, personInterests)
+                }
+                personInterests.add(it)
+            }
+        }
+        // Get GUIDs for interest codes
+        Set<String> interestCodes = pidmToInterestsMap?.values().interest.code.flatten() as Set
+        Map interestCodeToGuidMap = [:]
+        if (interestCodes) {
+            log.debug "Getting GUIDs for interest codes $interestCodes..."
+            interestCodeToGuidMap = interestCompositeService.getInterestCodeToGuidMap(interestCodes)
+            log.debug "Got ${interestCodeToGuidMap?.size() ?: 0} GUIDs for given interest codes"
+        }
+        // Put in Map
+        dataMap.put("pidmToInterestsMap", pidmToInterestsMap)
+        dataMap.put("interestCodeToGuidMap", interestCodeToGuidMap)
     }
 
 

@@ -371,11 +371,14 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull globalUniqueIdentifier
         Map content = [
                 action: [POST: "list"],
-                names : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName, middleName: personCurrent.middleName]]
+                names : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName, middleName: personCurrent.middleName]],
+                sort  : "lastName",
+                order : "asc"
         ]
 
         // Call the service
-        def response = personV6CompositeService.list(content)
+        def requestProcessingResult = personV6CompositeService.listQApi(content)
+        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         def obj = response.find { it.guid == globalUniqueIdentifier.guid }
@@ -417,11 +420,14 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull personAlternate
         Map content = [
                 action: [POST: "list"],
-                names : [[type: [category: NameTypeCategory.BIRTH.versionToEnumMap["v6"]], firstName: personAlternate.firstName, lastName: personAlternate.lastName, middleName: personAlternate.middleName]]
+                names : [[type: [category: NameTypeCategory.BIRTH.versionToEnumMap["v6"]], firstName: personAlternate.firstName, lastName: personAlternate.lastName, middleName: personAlternate.middleName]],
+                sort  : "lastName",
+                order : "asc"
         ]
 
         // Call the service
-        def response = personV6CompositeService.list(content)
+        def requestProcessingResult = personV6CompositeService.listQApi(content)
+        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         def obj = response.find { it.guid == globalUniqueIdentifier.guid }
@@ -464,11 +470,14 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 action     : [POST: "list"],
                 names      : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName]],
                 credentials: [[type: CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"], value: personBase.ssn],
-                              [type: CredentialType.BANNER_ID.versionToEnumMap["v6"], value: personCurrent.bannerId]]
+                              [type: CredentialType.BANNER_ID.versionToEnumMap["v6"], value: personCurrent.bannerId]],
+                sort       : "lastName",
+                order      : "asc"
         ]
 
         // Call service
-        def response = personV6CompositeService.list(content)
+        def requestProcessingResult = personV6CompositeService.listQApi(content)
+        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         response.each {

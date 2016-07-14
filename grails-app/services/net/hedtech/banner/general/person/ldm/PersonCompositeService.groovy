@@ -27,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class PersonCompositeService extends LdmService {
 
+    PersonV3CompositeService personV3CompositeService
+    PersonV6CompositeService personV6CompositeService
+
     def personIdentificationNameCurrentService
     def personBasicPersonBaseService
     def personAddressService
@@ -41,7 +44,6 @@ class PersonCompositeService extends LdmService {
     def personFilterCompositeService
     def personIdentificationNameAlternateService
     def commonMatchingCompositeService
-    PersonV6CompositeService personV6CompositeService
 
     static final String ldmName = 'persons'
     static final String PROCESS_CODE = "HEDM"
@@ -57,7 +59,7 @@ class PersonCompositeService extends LdmService {
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
-    private static final List<String> VERSIONS = ["v1", "v2", "v3"]
+    private static final List<String> VERSIONS = ["v1", "v2", "v3", "v6"]
     List<GlobalUniqueIdentifier> allEthnicities
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
@@ -73,7 +75,7 @@ class PersonCompositeService extends LdmService {
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def get(String id) {
-        if (needToCallPersonV6CompositeService()) {
+        if ("v6".equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
             return personV6CompositeService.get(id)
         }
         PersonIdentificationNameCurrent personIdentificationNameCurrent = getPersonIdentificationNameCurrentByGUID(id)
@@ -95,9 +97,6 @@ class PersonCompositeService extends LdmService {
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def list(params) {
-        if (needToCallPersonV6CompositeService(params)) {
-            return personV6CompositeService.list(params)
-        }
         log.trace "list:Begin"
         log.debug "Request parameters: ${params}"
         def total = 0
@@ -113,13 +112,6 @@ class PersonCompositeService extends LdmService {
             params.put('sort', allowedSortFields[1])
         }
 
-        //Validating Request URL Based on Credential Type and Credential ID
-        if (params.containsKey(CREDENTIAL_TYPE) || params.containsKey(CREDENTIAL_ID)) {
-            Map map = new HashMap()
-            map.putAll(params)
-            validateCredentialsOnUrl(map)
-        }
-
         if (params.order) {
             RestfulApiValidationUtility.validateSortOrder(params.order)
         } else {
@@ -128,44 +120,41 @@ class PersonCompositeService extends LdmService {
 
         RestfulApiValidationUtility.correctMaxAndOffset(params, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
 
-        // Check if it is qapi request, if so do matching
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
-            log.info "Person Duplicate service:"
-            log.debug "Request parameters: ${params}"
-            def contentType = LdmService.getRequestRepresentation()
-            if (contentType.contains('person-filter')) {
-                String selId = params.get("personFilter")
-                searchResult = getPidmsForPersonFilter(selId, params)
-                personList = searchResult.personList
-                total = searchResult.count
-            } else {
-                def name
-                def primaryName = params.names.find { primaryNameType ->
-                    primaryNameType.nameType == "Primary" && primaryNameType.firstName && primaryNameType.lastName
-                }
-                if (primaryName) {
-                    name = primaryName
-                }
-                if ("v3".equals(getAcceptVersion(VERSIONS))) {
-                    def birthName = params.names.find { birthNameType ->
-                        birthNameType.nameType == "Birth" && birthNameType.firstName && birthNameType.lastName
+            // Use Content-Type header for request processing
+            AbstractPersonCompositeService abstractPersonCompositeService
+            switch (LdmService.getContentTypeVersion(VERSIONS)) {
+                case "v6":
+                    abstractPersonCompositeService = personV6CompositeService
+                    break
+                default:
+                    abstractPersonCompositeService = personV3CompositeService
+                    break
+            }
+            def requestProcessingResult = abstractPersonCompositeService.listQApi(params)
+            total = requestProcessingResult.totalCount
+            // Use Accept header for response rendering
+            switch (LdmService.getAcceptVersion(VERSIONS)) {
+                case "v6":
+                    def decorators = personV6CompositeService.createDecorators(params, requestProcessingResult)
+                    // To make this class, NOT to create decorators
+                    decorators?.each {
+                        resultList.put(it.guid, it)
                     }
-                    if (name && birthName) {
-                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("filter.together.not.supported", []))
+                    break
+                default:
+                    // To make this class, to create decorators
+                    List<Integer> pidms = requestProcessingResult.get("pidms")
+                    pidms.each {
+                        personList << [pidm: it]
                     }
-                    if (!name && birthName) {
-                        name = birthName
-                    } else if (!name) {
-                        throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.and.type.required.message", []))
-                    }
-                } else if (!name) {
-                    throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.required.message", []))
-                }
-                searchResult = searchPerson(params, name)
-                personList = searchResult.personList
-                total = searchResult.count
+                    break
             }
         } else {
+            if ("v6".equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
+                return personV6CompositeService.list(params)
+            }
+
             //Add DynamicFinder on PersonIdentificationName in future.
             if (params.containsKey("personFilter") && params.containsKey("role")) {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination", []))
@@ -210,7 +199,6 @@ class PersonCompositeService extends LdmService {
                     personList = dynamicFinder.find([params: pidmsMap, criteria: []], [:])
                     total = personList.size()
                 }
-
             } else {
                 if (params.role) {
                     String role = params.role?.trim()?.toLowerCase()
@@ -246,6 +234,7 @@ class PersonCompositeService extends LdmService {
                 }
             }
         }
+
         if (personList?.size() > 0) {
             log.debug "buildLdmPersonObjects begins"
             resultList = buildLdmPersonObjects(personList, studentRole)
@@ -1032,7 +1021,11 @@ class PersonCompositeService extends LdmService {
         def domainIds = []
         personList.each {
             Person currentRecord = persons.get(it.pidm) ?: new Person(null)
-            def name = new Name(PersonIdentificationNameCurrent.fetchByPidm(it.pidm), currentRecord)
+            PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByPidm(it.pidm)
+            if (it instanceof Map && !it.containsKey("bannerId")) {
+                it["bannerId"] = personIdentificationNameCurrent.bannerId
+            }
+            def name = new Name(personIdentificationNameCurrent, currentRecord)
             name.setNameType("Primary")
             currentRecord.names << name
             domainIds << name.personName.id
@@ -1807,21 +1800,6 @@ class PersonCompositeService extends LdmService {
         }
 
         return exists
-    }
-
-
-    private boolean needToCallPersonV6CompositeService(Map params = null) {
-        boolean needToCall = false
-        String mediaTypeVersion
-        if (RestfulApiValidationUtility.isQApiRequest(params)) {
-            mediaTypeVersion = getRequestRepresentationVersion()
-        } else {
-            mediaTypeVersion = getResponseRepresentationVersion()
-        }
-        if (mediaTypeVersion == null || mediaTypeVersion >= "v6") {
-            needToCall = true
-        }
-        return needToCall
     }
 
 }

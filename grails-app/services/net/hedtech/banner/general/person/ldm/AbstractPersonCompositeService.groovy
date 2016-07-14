@@ -8,11 +8,9 @@ import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeServ
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.LdmService
-import net.hedtech.banner.general.person.PersonEmailService
-import net.hedtech.banner.general.person.PersonIdentificationNameAlternateService
-import net.hedtech.banner.general.person.PersonRaceService
-import net.hedtech.banner.general.person.PersonTelephoneService
+import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.query.DynamicFinder
 
 import java.sql.Timestamp
 
@@ -46,18 +44,62 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract List<RoleName> getRolesRequired()
 
 
+    abstract def createDecorators(List<PersonIdentificationNameCurrent> entities)
+
+
     def listQApi(final Map requestParams) {
-        def returnMap
+        def requestProcessingResult
         String contentType = getRequestRepresentation()
-        log.debug "Content-Type ${contentType}"
+        log.debug "Content-Type: ${contentType}"
         if (contentType?.contains('person-filter')) {
-            String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
-            returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort.trim(), requestParams.order.trim(), requestParams.max.trim().toInteger(), requestParams.offset?.trim()?.toInteger() ?: 0)
-            log.debug "${returnMap?.totalCount} persons in population extract ${guidOrDomainKey}."
+            log.debug "PopSel"
+            requestProcessingResult = getPidmsOfPopulationExtract(requestParams)
         } else if (contentType?.contains("duplicate-check")) {
-            returnMap = searchForMatchingPersons(requestParams)
+            log.debug("Duplicate Check")
+            requestProcessingResult = searchForMatchingPersons(requestParams)
         }
-        return returnMap
+        return requestProcessingResult
+    }
+
+
+    def createDecorators(final Map requestParams, final Map requestProcessingResult) {
+        if (requestProcessingResult.containsKey("totalCount")) {
+            log.debug("Total records ${requestProcessingResult.totalCount}")
+        }
+        List<PersonIdentificationNameCurrent> personCurrentEntities = []
+        if (requestProcessingResult.containsKey("pidms")) {
+            List<Integer> pidms = requestProcessingResult.get("pidms")
+            personCurrentEntities = fetchPersonCurrentByPIDMs(pidms, requestParams.sort.trim(), requestParams.order.trim())
+        }
+        return createDecorators(personCurrentEntities)
+    }
+
+
+    private List<PersonIdentificationNameCurrent> fetchPersonCurrentByPIDMs(List<Integer> pidms, String sortField, String sortOrder) {
+        log.trace "fetchPersonCurrentByPIDMs : $pidms : $sortField: $sortOrder"
+        List<PersonIdentificationNameCurrent> entities
+        if (pidms) {
+            def objectsOfPidms = []
+            pidms.each {
+                objectsOfPidms << [data: it]
+            }
+            Map paramsMap = [pidms: objectsOfPidms]
+            String query = """ from PersonIdentificationNameCurrent a
+                               where a.pidm in (:pidms)
+                               and a.entityIndicator = 'P'
+                               order by a.$sortField $sortOrder, a.bannerId $sortOrder """
+            DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
+            log.debug "$query"
+            entities = dynamicFinder.find([params: paramsMap, criteria: []], [:])
+            log.debug "Query returned ${entities?.size()} records"
+        }
+        return entities
+    }
+
+
+    protected getPidmsOfPopulationExtract(final Map requestParams) {
+        String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
+        return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort.trim(), requestParams.order.trim(), requestParams.max.trim().toInteger(), requestParams.offset?.trim()?.toInteger() ?: 0)
     }
 
 
