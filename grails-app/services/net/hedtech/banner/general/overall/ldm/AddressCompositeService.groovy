@@ -67,35 +67,23 @@ class AddressCompositeService extends LdmService {
         return addresses
     }
 
-    private AddressV6 getDecorator(AddressView address) {
-        List<String> addressLines = []
+    private AddressV6 getDecorator(AddressView addressView) {
+        return new AddressV6(addressView, getNationISO(addressView))
+    }
+
+    private getNationISO(AddressView addressView) {
         String nationISO
-        if(address.addressLine1) {
-            addressLines << address.addressLine1
-        }
-        if(address.addressLine2) {
-            addressLines << address.addressLine2
-        }
-        if(address.addressLine3) {
-            addressLines << address.addressLine3
-        }
-        if(address.addressLine4) {
-            addressLines << address.addressLine4
-        }
-        if(!addressLines){
-            addressLines=["."]
-        }
-        if (address.sourceTable==COLLEGE_ADDRESS) {
-            nationISO=address.countryCode
+        if (addressView.sourceTable==COLLEGE_ADDRESS) {
+            nationISO=addressView.countryCode
         }
         else {
-            if (address.countryCode) {
-                nationISO = (Nation.findByCode(address.countryCode)).scodIso
+            if (addressView.countryCode) {
+                nationISO = (Nation.findByCode(addressView.countryCode)).scodIso
             }
         }
         if(integrationConfigurationService.isInstitutionUsingISO2CountryCodes()){
             nationISO=isoCodeService.getISO3CountryCode(nationISO)
         }
-        return new AddressV6(address.id, addressLines, nationISO)
+        return nationISO
     }
 }
