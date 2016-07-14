@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
@@ -140,8 +141,9 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             int letterItemViewCount = 0;
             while (result.next()) {
                 letterItemViewCount++
-                def letterItemView = result.get()[0]
+                CommunicationLetterItemView letterItemView = (CommunicationLetterItemView) result.get()[0]
                 assertEquals( groupSend.id, letterItemView.groupSendId )
+                assertNotNull( letterItemView.sentDate )
             }
             assertEquals( 5, letterItemViewCount )
         }
@@ -157,7 +159,6 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         assertEquals( 0, CommunicationJob.findAll().size() )
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
-
 
     @Test
     public void testDeleteGroupSend() {
@@ -242,6 +243,149 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         assert( item.content.indexOf( "test description cbeaver" ) >= 0 )
     }
 
+    @Test
+    public void testGroupSendRequestMissingToAddress() {
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop", 1))
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertNotNull( populationVersion )
+        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        CommunicationField communicationField = new CommunicationField(
+                // Required fields
+                folder: defaultFolder,
+                immutableId: UUID.randomUUID().toString(),
+                name: "name",
+                returnsArrayArguments: false,
+
+                formatString: "\$gobtpac_external_user\$",
+                previewValue: "MB",
+                renderAsHtml: false,
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                ruleContent: "select '' name from dual where :pidm = :pidm"
+        )
+        communicationField = communicationFieldService.create( [domainModel: communicationField] )
+        communicationField = communicationFieldService.publishDataField( [id: communicationField.id] )
+
+        CommunicationLetterTemplate letterTemplate = new CommunicationLetterTemplate (
+                name: "testPersonalization",
+                personal: false,
+                oneOff: false,
+                folder: defaultFolder,
+
+                toAddress: "\$name\$",
+                content: "test description \$name\$",
+
+                push: true,
+                sticky: false
+        )
+        letterTemplate = communicationLetterTemplateService.create( letterTemplate )
+        letterTemplate = communicationLetterTemplateService.publish( letterTemplate )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestMissingToAddress",
+                populationId: population.id,
+                templateId: letterTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        sleepUntilGroupSendComplete( groupSend, 120 )
+        List groupSendItemList = CommunicationGroupSendItem.list()
+        assertEquals( 1, groupSendItemList.size() )
+        List communicationJobList = CommunicationJob.list()
+        assertEquals( 1, communicationJobList.size() )
+        assertEquals(CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS, communicationJobList.get(0).errorCode )
+        List letterItemViewList = CommunicationLetterItemView.list()
+        assertEquals( 0, letterItemViewList.size() )
+    }
+
+    @Test
+    public void testGroupSendRequestMissingContent() {
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop", 1))
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertNotNull( populationVersion )
+        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        CommunicationField communicationField = new CommunicationField(
+                // Required fields
+                folder: defaultFolder,
+                immutableId: UUID.randomUUID().toString(),
+                name: "name",
+                returnsArrayArguments: false,
+
+                formatString: "\$gobtpac_external_user\$",
+                previewValue: "MB",
+                renderAsHtml: false,
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                ruleContent: "select '' name from dual where :pidm = :pidm"
+        )
+        communicationField = communicationFieldService.create( [domainModel: communicationField] )
+        communicationField = communicationFieldService.publishDataField( [id: communicationField.id] )
+
+        CommunicationLetterTemplate letterTemplate = new CommunicationLetterTemplate (
+                name: "testPersonalization",
+                personal: false,
+                oneOff: false,
+                folder: defaultFolder,
+
+                toAddress: "whatever",
+                content: "\$name\$",
+
+                push: true,
+                sticky: false
+        )
+        letterTemplate = communicationLetterTemplateService.create( letterTemplate )
+        letterTemplate = communicationLetterTemplateService.publish( letterTemplate )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestMissingContent",
+                populationId: population.id,
+                templateId: letterTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        sleepUntilGroupSendComplete( groupSend, 120 )
+        List groupSendItemList = CommunicationGroupSendItem.list()
+        assertEquals( 1, groupSendItemList.size() )
+        List communicationJobList = CommunicationJob.list()
+        assertEquals( 1, communicationJobList.size() )
+        assertEquals(CommunicationErrorCode.EMPTY_LETTER_CONTENT, communicationJobList.get(0).errorCode )
+        List letterItemViewList = CommunicationLetterItemView.list()
+        assertEquals( 0, letterItemViewList.size() )
+    }
 
     protected void setUpDefaultLetterTemplate() {
         defaultLetterTemplate = CommunicationLetterTemplate.findByName( "CommunicationLetterGroupSendConcurrentTests_template" )

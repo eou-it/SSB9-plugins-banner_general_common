@@ -641,13 +641,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     }
 
 
-    protected def newPopulationQuery( String queryName ) {
+    protected def newPopulationQuery( String queryName, int maxRows = 5 ) {
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: defaultFolder,
                 name: queryName,
                 description: "test description",
-                queryString: "select spriden_pidm from spriden where rownum < 6 and spriden_change_ind is null"
+                queryString: "select spriden_pidm from spriden where rownum <= ${maxRows} and spriden_change_ind is null"
         )
 
         return populationQuery

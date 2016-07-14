@@ -79,7 +79,7 @@ class CommunicationGenerateLetterService {
     }
 
     private boolean isEmpty(String s) {
-        return !s || s.length() == 0
+        return !s || s.trim().length() == 0
     }
 
 }
