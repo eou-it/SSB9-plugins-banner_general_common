@@ -33,6 +33,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
     CommonMatchingCompositeService commonMatchingCompositeService
+    AddressTypeCompositeService addressTypeCompositeService
+    PersonAddressService personAddressService
+    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
 
 
     abstract String getPopSelGuidOrDomainKey(final Map requestParams)

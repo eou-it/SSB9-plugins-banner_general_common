@@ -33,6 +33,7 @@ class PersonV6 {
     EthnicityDecorator ethnicity
     List<PhoneV6> phones
     List interests
+    List<PersonAddressDecorator> addresses
 
 
 }

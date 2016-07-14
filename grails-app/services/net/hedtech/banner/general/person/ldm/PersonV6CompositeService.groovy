@@ -13,12 +13,14 @@ import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.NameAlternateV6
 import net.hedtech.banner.general.person.ldm.v6.NameV6
+import net.hedtech.banner.general.person.ldm.v6.PersonAddressDecorator
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.system.CitizenType
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
+import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EmailV6
 import net.hedtech.banner.general.system.ldm.v6.PhoneV6
@@ -203,6 +205,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
             fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
             fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
+            fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -282,6 +285,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     dataMapForPerson << ["personInterests": personInterests]
                     dataMapForPerson << ["interestCodeToGuidMap": dataMap.interestCodeToGuidMap]
                 }
+
+                // addresses
+                List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(it.pidm)
+                if (personAddresses) {
+                    dataMapForPerson << ["personAddresses": personAddresses]
+                    dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
+                    dataMapForPerson << ["addressTypeCodeToGuidMap": dataMap.addressTypeCodeToGuidMap]
+                    dataMapForPerson << ["personAddressSurrogateIdToGuidMap": dataMap.personAddressSurrogateIdToGuidMap]
+                }
+
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
@@ -395,6 +408,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     decorator.interests << ["id": iterestCodeToGuidMap.get(it.interest.code)]
                 }
             }
+            // Addresses
+            List<PersonAddress> personAddresses = dataMapForPerson["personAddresses"]
+            if (personAddresses) {
+                Map addressTypeCodeToGuidMap = dataMapForPerson["addressTypeCodeToGuidMap"]
+                Map bannerAddressTypeToHedmAddressTypeMap = dataMapForPerson["bannerAddressTypeToHedmAddressTypeMap"]
+                Map personAddressSurrogateIdToGuidMap = dataMapForPerson["personAddressSurrogateIdToGuidMap"]
+                decorator.addresses = []
+                personAddresses.each {
+                    decorator.addresses << createPersonAddressDecorator(it, personAddressSurrogateIdToGuidMap.get(it.id), addressTypeCodeToGuidMap.get(it.addressType.code), bannerAddressTypeToHedmAddressTypeMap.get(it.addressType.code))
+                }
+            }
         }
         return decorator
     }
@@ -504,7 +528,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     private void fetchPersonsInterestDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        if(!outsideInterestService) {
+        if (!outsideInterestService) {
             // Test mode
             dataMap.put("pidmToInterestsMap", [:])
             dataMap.put("interestCodeToGuidMap", [:])
@@ -588,6 +612,30 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
+    private void fetchPersonsAddressDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+
+        //Get Mapped Codes for Address Types
+        Map<String, String> bannerAddressTypeToHedmAddressTypeMap = addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
+
+        // Get GUIDs for Address types
+        Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(bannerAddressTypeToHedmAddressTypeMap.keySet())
+        log.debug "Got ${addressTypeCodeToGuidMap?.size() ?: 0} GUIDs for given AddressType codes"
+
+        // Get SPRADDR records for persons
+        Map pidmToAddressesMap = fetchPersonAddressByPIDMs(pidms, addressTypeCodeToGuidMap.keySet())
+
+        Set<Long> personAddressSurrogateIds = pidmToAddressesMap?.values().id.flatten() as Set
+
+        Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
+
+        // Put in Map
+        dataMap.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
+        dataMap.put("pidmToAddressesMap", pidmToAddressesMap)
+        dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
+        dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
+    }
+
+
     private def fetchPersonGuids(List<Long> personSurrogateIds) {
         def pidmToGuidMap = [:]
         if (personSurrogateIds) {
@@ -630,45 +678,77 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private Map fetchPersonEmailByPIDMs(List<Integer> pidms, Set<String> codes) {
+    private Map fetchPersonEmailByPIDMs(Collection<Integer> pidms, Collection<String> emailTypeCodes) {
         Map pidmToEmailInfoMap = [:]
-        List<PersonEmail> emailInfo
-        if (pidms) {
+        if (pidms && emailTypeCodes) {
             log.debug "Getting GOREMAL records for ${pidms?.size()} PIDMs..."
-            List<PersonEmail> entities = personEmailService.fetchAllActiveEmails(pidms, codes)
+            List<PersonEmail> entities = personEmailService.fetchAllActiveEmails(pidms, emailTypeCodes)
             log.debug "Got ${entities?.size()} GOREMAL records"
-            entities.each {
+            entities?.each {
+                List<PersonEmail> personEmails = []
                 if (pidmToEmailInfoMap.containsKey(it.pidm)) {
-                    emailInfo << it
+                    personEmails = pidmToEmailInfoMap.get(it.pidm)
                 } else {
-                    emailInfo = []
-                    emailInfo << it
+                    pidmToEmailInfoMap.put(it.pidm, personEmails)
                 }
-                pidmToEmailInfoMap.put(it.pidm, emailInfo)
+                personEmails.add(it)
             }
         }
         return pidmToEmailInfoMap
     }
 
 
-    private Map fetchPersonPhoneByPIDMs(List<Integer> pidms, Set<String> codes) {
+    private Map fetchPersonPhoneByPIDMs(Collection<Integer> pidms, Collection<String> phoneTypeCodes) {
         Map pidmToPhoneInfoMap = [:]
-        List<PersonTelephone> phoneInfo
-        if (pidms) {
+        if (pidms && phoneTypeCodes) {
             log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
-            List<PersonTelephone> entities = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList(pidms, codes)
+            List<PersonTelephone> entities = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList(pidms, phoneTypeCodes)
             log.debug "Got ${entities?.size()} SPRTELE records"
-            entities.each {
+            entities?.each {
+                List<PersonTelephone> personTelephones = []
                 if (pidmToPhoneInfoMap.containsKey(it.pidm)) {
-                    phoneInfo << it
+                    personTelephones = pidmToPhoneInfoMap.get(it.pidm)
                 } else {
-                    phoneInfo = []
-                    phoneInfo << it
+                    pidmToPhoneInfoMap.put(it.pidm, personTelephones)
                 }
-                pidmToPhoneInfoMap.put(it.pidm, phoneInfo)
+                personTelephones.add(it)
             }
         }
         return pidmToPhoneInfoMap
+    }
+
+
+    private Map fetchPersonAddressByPIDMs(Collection<Integer> pidms, Collection<String> addressTypeCodes) {
+        Map pidmToAddressInfoMap = [:]
+        if (pidms && addressTypeCodes) {
+            log.debug "Getting SV_SPRADDR records for ${pidms?.size()} PIDMs..."
+            List<PersonAddress> entities = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes(pidms, addressTypeCodes)
+            log.debug "Got ${entities?.size()} SV_SPRADDR records"
+            entities?.each {
+                List<PersonAddress> personAddresses = []
+                if (pidmToAddressInfoMap.containsKey(it.pidm)) {
+                    personAddresses = pidmToAddressInfoMap.get(it.pidm)
+                } else {
+                    pidmToAddressInfoMap.put(it.pidm, personAddresses)
+                }
+                personAddresses.add(it)
+            }
+        }
+        return pidmToAddressInfoMap
+    }
+
+
+    private Map getPersonAddressSurrogateIdToGuidMap(Collection<String> personAddressSurrogateIds) {
+        Map personAddressSurrogateIdToGuidMap = [:]
+        if (personAddressSurrogateIds) {
+            log.debug "Getting SPRADDR records for ${personAddressSurrogateIds?.size()} PIDMs..."
+            List<PersonAddressExtendedProperties> entities = personAddressExtendedPropertiesService.fetchAllBySurrogateIds(personAddressSurrogateIds)
+            log.debug "Got ${entities?.size()} SPRADDR records"
+            entities?.each {
+                personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
+            }
+        }
+        return personAddressSurrogateIdToGuidMap
     }
 
 
@@ -828,6 +908,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             phoneV6.preference = 'primary'
         }
         return phoneV6
+    }
+
+
+    private PersonAddressDecorator createPersonAddressDecorator(PersonAddress personAddress, String addressGuid, String addressTypeGuid, String addressType) {
+        PersonAddressDecorator personAddressDecorator = new PersonAddressDecorator()
+        personAddressDecorator.addressGuid = addressGuid
+        personAddressDecorator.type = new AddressTypeDecorator(null, null, addressTypeGuid, addressType)
+        personAddressDecorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.fromDate)
+        personAddressDecorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.toDate)
+        return personAddressDecorator
     }
 
 
