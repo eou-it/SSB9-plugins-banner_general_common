@@ -277,12 +277,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
 
                 // interests
-                List personInterestList = dataMap.pidmToInterestsMap.get(it.pidm)
-                if (personInterestList) {
-                    dataMapForPerson << ["personInterests": personInterestList]
+                List personInterests = dataMap.pidmToInterestsMap.get(it.pidm)
+                if (personInterests) {
+                    dataMapForPerson << ["personInterests": personInterests]
                     dataMapForPerson << ["interestCodeToGuidMap": dataMap.interestCodeToGuidMap]
                 }
-
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
@@ -505,11 +504,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     private void fetchPersonsInterestDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        if(!outsideInterestService) {
+            // Test mode
+            dataMap.put("pidmToInterestsMap", [:])
+            dataMap.put("interestCodeToGuidMap", [:])
+            return
+        }
         // Get SORINTS records for persons
         Map pidmToInterestsMap = [:]
         if (pidms) {
             log.debug "Getting SORINTS records for ${pidms?.size()} PIDMs..."
-            List entities = outsideInterestService.getOutsideInterestByPidmList(pidms)
+            List entities = outsideInterestService.fetchAllByPidmInList(pidms)
             entities?.each {
                 List personInterests = []
                 if (pidmToInterestsMap.containsKey(it.pidm)) {
