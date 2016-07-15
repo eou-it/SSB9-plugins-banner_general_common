@@ -33,6 +33,17 @@ import javax.persistence.Version
         query = """FROM AddressRolePrivileges a
                              WHERE  role = :role
                              AND  (a.privilegeIndicator = 'D' or a.privilegeIndicator = 'U')
+                    """),
+@NamedQuery(name = "AddressRolePrivileges.fetchUpdatePrivsByRoleList",
+                query = """FROM AddressRolePrivileges a
+                             WHERE  role IN :roles
+                             AND  a.privilegeIndicator = 'U'
+                    """),
+@NamedQuery(name = "AddressRolePrivileges.fetchUpdatePrivByCodeAndRoles",
+                query = """FROM AddressRolePrivileges a
+                             WHERE  role IN :roles
+                             AND  a.privilegeIndicator = 'U'
+                             and  a.addressType.code = :code
                     """)
 ])
 @DatabaseModifiesState
@@ -157,6 +168,25 @@ class AddressRolePrivileges  implements Serializable{
             return session.getNamedQuery('AddressRolePrivileges.fetchPrivilegedByRole').setString('role', role).list()
 
         }
+    }
+
+    static def fetchUpdatePrivsByRoleList(List roles) {
+        def result
+        result = AddressRolePrivileges.withSession { session ->
+            session.getNamedQuery('AddressRolePrivileges.fetchUpdatePrivsByRoleList')
+                    .setParameterList('roles', roles).list()
+        }
+        return result
+    }
+
+    static def fetchUpdatePrivByCodeAndRoles(List roles, String code) {
+        def result
+        result = AddressRolePrivileges.withSession { session ->
+            session.getNamedQuery('AddressRolePrivileges.fetchUpdatePrivByCodeAndRoles')
+                    .setParameterList('roles', roles)
+                    .setString('code', code).list()[0]
+        }
+        return result
     }
 
 }
