@@ -30,6 +30,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationListView"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView"/>
+        <mapping class="net.hedtech.banner.general.communication.population.selectionextract.CommunicationPopulationSelectionExtractView"/>
         <mapping class="net.hedtech.banner.general.communication.folder.CommunicationFolder"/>
         <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganization"/>
         <mapping class="net.hedtech.banner.general.communication.organization.CommunicationOrganizationView"/>
