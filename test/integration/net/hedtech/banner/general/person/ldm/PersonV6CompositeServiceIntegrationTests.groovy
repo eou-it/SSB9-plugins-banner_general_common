@@ -14,9 +14,11 @@ import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
+import net.hedtech.banner.general.person.ldm.v6.PersonAddressDecorator
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.After
@@ -35,18 +37,23 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
     static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24789'
-
+    String i_succes_person_banner_id = 'HOSFE2000'
+    GlobalUniqueIdentifier personGlobalUniqueIdentifier
+    PersonIdentificationName personIdentificationName
+    PersonAddressService personAddressService
+    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        initializeTestDataForReferences()
     }
 
 
-    @After
-    public void tearDown() {
-        super.tearDown()
+    void initializeTestDataForReferences() {
+        personIdentificationName = PersonUtility.getPerson(i_succes_person_banner_id)
+        personGlobalUniqueIdentifier = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(personIdentificationName.pidm.toString(), 'persons')
     }
 
 
@@ -467,12 +474,12 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         PersonBasicPersonBase personBase = PersonBasicPersonBase.fetchByPidm(personCurrent.pidm)
         assertNotNull personBase
         Map content = [
-                action     : [POST: "list"],
-                names      : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName]],
+                action: [POST: "list"],
+                names: [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName]],
                 credentials: [[type: CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"], value: personBase.ssn],
                               [type: CredentialType.BANNER_ID.versionToEnumMap["v6"], value: personCurrent.bannerId]],
-                sort       : "lastName",
-                order      : "asc"
+                sort: "lastName",
+                order: "asc"
         ]
 
         // Call service
@@ -489,6 +496,30 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 }
             }
         }
+    }
+
+
+    @Test
+    void testShow_ValidPersonAddresses_v6() {
+        setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+        PersonV6 getPersonV6 = personV6CompositeService.get(personGlobalUniqueIdentifier.guid)
+        assertNotNull getPersonV6
+        assertEquals personGlobalUniqueIdentifier.guid, getPersonV6.guid
+        PersonAddress getPersonAddress = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([personIdentificationName.pidm], ['MA'])[0]
+        assertNotNull getPersonAddress
+        PersonAddressExtendedProperties getPersonAddressExtendedProperties = personAddressExtendedPropertiesService.fetchAllBySurrogateIds([getPersonAddress.id])[0]
+        assertNotNull getPersonAddressExtendedProperties
+        PersonAddressDecorator getPersonAddressDecorator = getPersonV6.addresses.find {
+            it.addressGuid == getPersonAddressExtendedProperties.addressGuid
+        }
+        assertNotNull getPersonAddressDecorator
+        String getPersonAddressGuid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName('MA', 'address-types')?.guid
+        assertNotNull getPersonAddressGuid
+        assertEquals getPersonAddressExtendedProperties.addressGuid, getPersonAddressDecorator.addressGuid
+        assertEquals getPersonAddressGuid, getPersonAddressDecorator.type.id
+        assertEquals 'mailing', getPersonAddressDecorator.type.addressType
+        assertEquals DateConvertHelperService.convertDateIntoUTCFormat(getPersonAddress.fromDate), getPersonAddressDecorator.startOn
+        assertEquals DateConvertHelperService.convertDateIntoUTCFormat(getPersonAddress.toDate), getPersonAddressDecorator.endOn
     }
 
 
