@@ -10,6 +10,7 @@ class AddressV6 {
     String guid
     List<String> addressLines
     PlaceV6 place
+    List<String> geographicAreas
 
     def AddressV6(AddressView addressView, String countryCode){
         this.guid = addressView.id

@@ -59,7 +59,8 @@ class AddressCompositeService extends LdmService {
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max=(map?.max as Integer)
         int offset=((map?.offset ?:'0') as Integer)
-        addressViewService.fetchAll(max,offset).each{
+        List<AddressView> addressesView = addressViewService.fetchAll(max,offset)
+        addressesView.each{
             address ->
             addresses << getDecorator(address)
         }
