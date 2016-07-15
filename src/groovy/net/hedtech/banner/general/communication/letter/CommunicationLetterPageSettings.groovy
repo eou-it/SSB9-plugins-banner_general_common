@@ -49,7 +49,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setUnitOfMeasure( String s ) {
-        queryMap.unitOfMeasure = (s == null) ? "" : s
+        queryMap.unitOfMeasure = (s == null) ? CommunicationLetterUnitOfMeasure.INCH.toString() : s
     }
 
     public String getPageSize() {
@@ -57,7 +57,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setPageSize( String s ) {
-        queryMap.pageSize = (s == null) ? "" : s
+        queryMap.pageSize = (s == null) ? CommunicationLetterPageSize.LETTER.toString() : s
     }
 
     public String getTopMargin() {
@@ -65,7 +65,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setTopMargin( String s ) {
-        queryMap.topMargin = (s == null) ? "" : s
+        queryMap.topMargin = (s == null) ? "1.0" : s
     }
 
     public String getLeftMargin() {
@@ -73,7 +73,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setLeftMargin( String s ) {
-        queryMap.leftMargin = (s == null) ? "" : s
+        queryMap.leftMargin = (s == null) ? "1.0" : s
     }
 
     public String getBottomMargin() {
@@ -81,7 +81,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setBottomMargin( String s ) {
-        queryMap.bottomMargin = (s == null) ? "" : s
+        queryMap.bottomMargin = (s == null) ? "1.0" : s
     }
 
     public String getRightMargin() {
@@ -89,7 +89,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setRightMargin( String s ) {
-        queryMap.rightMargin = (s == null) ? "" : s
+        queryMap.rightMargin = (s == null) ? "1.0" : s
     }
 
     public void validate() {
