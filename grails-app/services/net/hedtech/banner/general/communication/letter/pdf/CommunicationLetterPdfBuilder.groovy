@@ -1,5 +1,7 @@
 package net.hedtech.banner.general.communication.letter.pdf
 
+import com.lowagie.text.PageSize
+import com.lowagie.text.Rectangle
 import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSize
 import net.hedtech.banner.general.communication.letter.CommunicationLetterUnitOfMeasure
 import org.apache.log4j.Logger
@@ -17,10 +19,10 @@ class CommunicationLetterPdfBuilder {
 
     CommunicationLetterPageSize pageSize = CommunicationLetterPageSize.LETTER
     CommunicationLetterUnitOfMeasure unitOfMeasure = CommunicationLetterUnitOfMeasure.INCH
-    float topMargin = 1.0
-    float bottomMargin = 1.0
-    float leftMargin = 1.0
-    float rightMargin = 1.0
+    String topMargin = "1.0"
+    String bottomMargin = "1.0"
+    String leftMargin = "1.0"
+    String rightMargin = "1.0"
 
     public CommunicationLetterPdfBuilder() {
         reset()
