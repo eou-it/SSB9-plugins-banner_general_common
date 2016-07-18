@@ -9,6 +9,8 @@ import groovy.transform.ToString
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.Table
 
 /**
@@ -18,6 +20,12 @@ import javax.persistence.Table
 @Table(name = "SVQ_GEOGRAPHIC_AREAS_GUID")
 @EqualsAndHashCode(includeFields = true)
 @ToString(includeNames = true, includeFields = true)
+
+@NamedQueries(value = [
+    @NamedQuery(name = "AddressGeographicAreasView.fetchAllByPidm",
+            query = """FROM AddressGeographicAreasView a
+                         WHERE a.pidmOrCode IN (:pidms)""")
+])
 
 class AddressGeographicAreasView {
 
@@ -52,5 +60,17 @@ class AddressGeographicAreasView {
      */
     @Column(name="GEOGRAPHIC_AREA_SOURCE")
     String geographicAreasSource
+
+
+    static List<AddressGeographicAreasView> fetchAllByPidm(List pidms) {
+        List result = []
+        if ( pidms && (pidms.size() > 0) ) {
+            AddressGeographicAreasView.withSession { session ->
+                result = session.getNamedQuery('AddressGeographicAreasView.fetchAllByPidm')
+                        .setParameterList('pidms', pidms).list()
+            }
+        }
+        return result
+    }
 
 }

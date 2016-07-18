@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.overall.AddressGeographicAreasView
 import net.hedtech.banner.general.overall.AddressViewService
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ldm.v6.AddressV6
@@ -35,7 +36,7 @@ class AddressCompositeService extends LdmService {
         if (!addressView) {
             throw new ApplicationException("address", new NotFoundException())
         }
-        getDecorator(addressView)
+        getDecorators([addressView]).get(0)
     }
 
     /**
@@ -55,22 +56,47 @@ class AddressCompositeService extends LdmService {
      * @return
      */
     def list(Map map) {
-        List<AddressV6> addresses = []
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max=(map?.max as Integer)
         int offset=((map?.offset ?:'0') as Integer)
         List<AddressView> addressesView = addressViewService.fetchAll(max,offset)
-        addressesView.each{
-            address ->
-            addresses << getDecorator(address)
+        return getDecorators(addressesView)
+    }
+
+    private List<AddressV6> getDecorators(List<AddressView> addressesView) {
+        List<AddressV6> addresses = []
+        List pidmsOrCodes = []
+        addressesView.collect { address ->
+            pidmsOrCodes << address.pidmOrCode
+        }
+        List<AddressGeographicAreasView> geographicAreasView = AddressGeographicAreasView.fetchAllByPidm(pidmsOrCodes)
+        Map geographicAreasGUID = [:]
+        geographicAreasView.each { geographicArea ->
+            String geoAreaKey = geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber + geographicArea.geographicAreasSource
+            List<String> guids = geographicAreasGUID.get(geoAreaKey)
+            if(guids){
+                guids << geographicArea.id
+            } else {
+                geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
+            }
         }
 
+        addressesView.each { address ->
+            String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey))
+        }
         return addresses
     }
 
-    private AddressV6 getDecorator(AddressView addressView) {
-        return new AddressV6(addressView, getNationISO(addressView))
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs) {
+        AddressV6 addressV6 = new AddressV6(addressView, getNationISO(addressView))
+        addressV6.geographicAreas = []
+        geographicAreasGUIDs.each { guid ->
+            addressV6.geographicAreas << ["id": guid]
+        }
+        return addressV6
     }
+
 
     private getNationISO(AddressView addressView) {
         String nationISO
