@@ -6,11 +6,9 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.VisaInformationService
 import net.hedtech.banner.general.overall.ldm.LdmService
-import net.hedtech.banner.general.person.*
-import net.hedtech.banner.general.system.ldm.*
-import net.hedtech.banner.query.DynamicFinder
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
 
 import java.sql.Timestamp
 
@@ -18,24 +16,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     UserRoleCompositeService userRoleCompositeService
     PersonFilterCompositeService personFilterCompositeService
-    CitizenshipStatusCompositeService citizenshipStatusCompositeService
-    VisaInformationService visaInformationService
-    VisaTypeCompositeService visaTypeCompositeService
-    ReligionCompositeService religionCompositeService
-    PersonCredentialCompositeService personCredentialCompositeService
-    PersonEmailService personEmailService
-    EmailTypeCompositeService emailTypeCompositeService
-    PersonRaceService personRaceService
-    RaceCompositeService raceCompositeService
-    EthnicityCompositeService ethnicityCompositeService
-    PersonNameTypeCompositeService personNameTypeCompositeService
-    PersonIdentificationNameAlternateService personIdentificationNameAlternateService
-    PhoneTypeCompositeService phoneTypeCompositeService
-    PersonTelephoneService personTelephoneService
     CommonMatchingCompositeService commonMatchingCompositeService
-    AddressTypeCompositeService addressTypeCompositeService
-    PersonAddressService personAddressService
-    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
+    PersonIdentificationNameCurrentService personIdentificationNameCurrentService
 
 
     abstract String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -47,7 +29,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract List<RoleName> getRolesRequired()
 
 
-    abstract def createDecorators(List<PersonIdentificationNameCurrent> entities)
+    abstract def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
 
 
     def listQApi(final Map requestParams) {
@@ -70,33 +52,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
             log.debug("Total records ${requestProcessingResult.totalCount}")
         }
         List<PersonIdentificationNameCurrent> personCurrentEntities = []
+        def pidmToGuidMap = [:]
         if (requestProcessingResult.containsKey("pidms")) {
             List<Integer> pidms = requestProcessingResult.get("pidms")
-            personCurrentEntities = fetchPersonCurrentByPIDMs(pidms, requestParams.sort.trim(), requestParams.order.trim())
+            def rows = personIdentificationNameCurrentService.fetchAllWithGuidByPidmInList(pidms, requestParams.sort.trim(), requestParams.order.trim())
+            personCurrentEntities = rows?.collect { it.personIdentificationNameCurrent }
+            pidmToGuidMap = getPidmToGuidMap(rows)
         }
-        return createDecorators(personCurrentEntities)
-    }
-
-
-    private List<PersonIdentificationNameCurrent> fetchPersonCurrentByPIDMs(List<Integer> pidms, String sortField, String sortOrder) {
-        log.trace "fetchPersonCurrentByPIDMs : $pidms : $sortField: $sortOrder"
-        List<PersonIdentificationNameCurrent> entities
-        if (pidms) {
-            def objectsOfPidms = []
-            pidms.each {
-                objectsOfPidms << [data: it]
-            }
-            Map paramsMap = [pidms: objectsOfPidms]
-            String query = """ from PersonIdentificationNameCurrent a
-                               where a.pidm in (:pidms)
-                               and a.entityIndicator = 'P'
-                               order by a.$sortField $sortOrder, a.bannerId $sortOrder """
-            DynamicFinder dynamicFinder = new DynamicFinder(PersonIdentificationNameCurrent.class, query, "a")
-            log.debug "$query"
-            entities = dynamicFinder.find([params: paramsMap, criteria: []], [:])
-            log.debug "Query returned ${entities?.size()} records"
-        }
-        return entities
+        return createDecorators(personCurrentEntities, pidmToGuidMap)
     }
 
 
@@ -310,6 +273,15 @@ abstract class AbstractPersonCompositeService extends LdmService {
             pidmToAdvisorRoleMap.put(bdPidm.toInteger(), [role: RoleName.ADVISOR, startDate: startDate, endDate: endDate])
         }
         return pidmToAdvisorRoleMap
+    }
+
+
+    protected def getPidmToGuidMap(def rows) {
+        Map<Integer, String> pidmToGuidMap = [:]
+        rows?.each {
+            pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
+        }
+        return pidmToGuidMap
     }
 
 }
