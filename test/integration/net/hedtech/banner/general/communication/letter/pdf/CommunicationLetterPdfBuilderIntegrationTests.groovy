@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests converting html to pdf.
  */
-class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTestCase {
+class CommunicationLetterPdfBuilderIntegrationTests extends BaseIntegrationTestCase {
 
     def selfServiceBannerAuthenticationProvider
 
@@ -38,7 +38,7 @@ class CommunicationHtmlToPdfConverterIntegrationTests extends BaseIntegrationTes
 <p>My first paragraph.</p>
 This is a test.
 """
-        CommunicationHtmlToPdfConverter converter = new CommunicationHtmlToPdfConverter()
+        CommunicationLetterPdfBuilder converter = new CommunicationLetterPdfBuilder()
         converter.writeHtml( htmlContent )
         converter.finish()
         byte[] pdfContent = converter.toPdf()
