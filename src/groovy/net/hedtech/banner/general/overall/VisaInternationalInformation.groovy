@@ -12,6 +12,11 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "GOBINTL")
+@NamedQueries(value = [
+        @NamedQuery(name = "VisaInternationalInformation.fetchAllByPidmInList",
+                query = """FROM VisaInternationalInformation a
+        WHERE a.passportId IS NOT NULL AND a.pidm IN :pidms""")
+])
 class VisaInternationalInformation implements Serializable {
 
     /**

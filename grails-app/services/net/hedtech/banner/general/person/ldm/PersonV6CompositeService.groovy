@@ -6,17 +6,22 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.VisaInformationService
+import net.hedtech.banner.general.overall.VisaInternationalInformation
+import net.hedtech.banner.general.overall.VisaInternationalInformationService
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.*
 import net.hedtech.banner.general.utility.DateConvertHelperService
+import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -50,6 +55,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     PersonAddressService personAddressService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
     PersonAdvancedSearchViewService personAdvancedSearchViewService
+    VisaInternationalInformationService visaInternationalInformationService
+    NationCompositeService nationCompositeService
+    IntegrationConfigurationService integrationConfigurationService
+    IsoCodeService isoCodeService
 
     static final int DEFAULT_PAGE_SIZE = 500
     static final int MAX_PAGE_SIZE = 500
@@ -198,7 +207,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     }
 
-
     def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         def decorators = []
         if (entities) {
@@ -208,6 +216,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             def dataMap = [:]
             dataMap.put("pidmToGuidMap", pidmToGuidMap)
+            dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
             fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
             fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
             fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
@@ -218,12 +227,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
             fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
             fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
+            fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
 
                 dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(it.pidm)]
-
+                dataMapForPerson.put("isInstitutionUsingISO2CountryCodes", dataMap.get("isInstitutionUsingISO2CountryCodes"))
                 PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(it.pidm)
                 if (personBase) {
                     dataMapForPerson << ["personBase": personBase]
@@ -305,6 +315,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
                     dataMapForPerson << ["addressTypeCodeToGuidMap": dataMap.addressTypeCodeToGuidMap]
                     dataMapForPerson << ["personAddressSurrogateIdToGuidMap": dataMap.personAddressSurrogateIdToGuidMap]
+                }
+
+                // identity Documents
+                VisaInternationalInformation visaIntlInformation = dataMap.pidmToPassportMap.get(it.pidm)
+                if (visaIntlInformation) {
+                    dataMapForPerson << ["passport": visaIntlInformation]
+                    dataMapForPerson << ["codeToNationMap": dataMap.codeToNationMap]
                 }
 
 
@@ -430,6 +447,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 personAddresses.each {
                     decorator.addresses << createPersonAddressDecorator(it, personAddressSurrogateIdToGuidMap.get(it.id), addressTypeCodeToGuidMap.get(it.addressType.code), bannerAddressTypeToHedmAddressTypeMap.get(it.addressType.code))
                 }
+            }
+
+            // indentityDocuments
+            VisaInternationalInformation visaIntlInformation = dataMapForPerson["passport"]
+            if (visaIntlInformation) {
+                Map codeToNationMap = dataMapForPerson["codeToNationMap"]
+                decorator.identityDocuments = []
+                decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForPerson.get("isInstitutionUsingISO2CountryCodes"))
             }
         }
         return decorator
@@ -565,6 +590,30 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("pidmToInterestsMap", pidmToInterestsMap)
         dataMap.put("interestCodeToGuidMap", interestCodeToGuidMap)
     }
+
+
+    private void fetchPersonsPassportDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        // Get GOBINTL records for persons
+        Map pidmToPassportMap = [:]
+        List<VisaInternationalInformation> entities = visaInternationalInformationService.fetchAllByPidmInList(pidms)
+        entities?.each {
+            pidmToPassportMap.put(it.pidm, it)
+        }
+
+        Set<String> issuingNationCodes = pidmToPassportMap?.values().nationIssue.flatten().unique()
+        // Get STVNATN records for country information
+        Map codeToNationMap = [:]
+        if (issuingNationCodes) {
+            log.debug "Getting nations for country codes $issuingNationCodes..."
+            codeToNationMap = nationCompositeService.fetchAllByCodesInList(issuingNationCodes)
+            log.debug "Got ${codeToNationMap?.size() ?: 0} nations for given country codes"
+        }
+
+        // Put in Map
+        dataMap.put("pidmToPassportMap", pidmToPassportMap)
+        dataMap.put("codeToNationMap", codeToNationMap)
+    }
+
 
 
     private void fetchPersonsRaceDataAndPutInMap(List<Integer> pidms, Map dataMap) {
@@ -908,6 +957,22 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         personAddressDecorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.fromDate)
         personAddressDecorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.toDate)
         return personAddressDecorator
+    }
+
+    private IdentityDocumentV6 createIdentityDocumentV6(VisaInternationalInformation visaIntlInformation, Nation nation, boolean isInstitutionUsingISO2CountryCodes) {
+        IdentityDocumentV6 decorator
+        if (visaIntlInformation) {
+            decorator = new IdentityDocumentV6()
+            decorator.documentId = visaIntlInformation.passportId
+            decorator.expiresOn = visaIntlInformation.passportExpenditureDate
+            decorator.issuingAuthority = nation.nation
+            String iso3CountryCode = nation.scodIso
+            if (isInstitutionUsingISO2CountryCodes) {
+                iso3CountryCode = isoCodeService.getISO3CountryCode(nation.scodIso)
+            }
+            decorator.countryCode = iso3CountryCode
+        }
+        return decorator
     }
 
 

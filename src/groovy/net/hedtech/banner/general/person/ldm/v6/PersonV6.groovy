@@ -10,6 +10,7 @@ import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EmailV6
 import net.hedtech.banner.general.system.ldm.v6.EthnicityDecorator
+import net.hedtech.banner.general.system.ldm.v6.IdentityDocumentV6
 import net.hedtech.banner.general.system.ldm.v6.PhoneV6
 import net.hedtech.banner.general.system.ldm.v6.RaceV6
 
@@ -34,6 +35,7 @@ class PersonV6 {
     List<PhoneV6> phones
     List interests
     List<PersonAddressDecorator> addresses
+    def identityDocuments
 
 
 }
