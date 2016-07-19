@@ -1,7 +1,5 @@
 package net.hedtech.banner.general.communication.letter.pdf
 
-import com.lowagie.text.PageSize
-import com.lowagie.text.Rectangle
 import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSize
 import net.hedtech.banner.general.communication.letter.CommunicationLetterUnitOfMeasure
 import org.apache.log4j.Logger
@@ -88,10 +86,9 @@ class CommunicationLetterPdfBuilder {
 
     private String getStyleDeclaration() {
         StringBuilder stringBuilder = new StringBuilder();
-
         stringBuilder.append( "<style type=\"text/css\">" );
         stringBuilder.append( "@page { " );
-        stringBuilder.append( "size: " ).append( pageSize.toString() ).append( "; " );
+        stringBuilder.append( "size: " ).append( pageSize.cssSize ).append( "; " );
         stringBuilder.append( "margin-top: " ).append( topMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
         stringBuilder.append( "margin-bottom: " ).append( bottomMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
         stringBuilder.append( "margin-left: " ).append( leftMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
