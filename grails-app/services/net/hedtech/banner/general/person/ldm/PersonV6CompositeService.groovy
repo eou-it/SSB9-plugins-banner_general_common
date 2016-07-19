@@ -6,15 +6,13 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.overall.IntegrationConfigurationService
-import net.hedtech.banner.general.overall.VisaInformation
-import net.hedtech.banner.general.overall.VisaInformationService
-import net.hedtech.banner.general.overall.VisaInternationalInformation
-import net.hedtech.banner.general.overall.VisaInternationalInformationService
+import net.hedtech.banner.general.overall.*
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.InstitutionalDescription
+import net.hedtech.banner.general.system.InstitutionalDescriptionService
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
@@ -37,6 +35,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     def outsideInterestService
     def interestCompositeService
+    InstitutionalDescriptionService institutionalDescriptionService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     VisaInformationService visaInformationService
     VisaTypeCompositeService visaTypeCompositeService
@@ -206,6 +205,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     def update(Map content) {
 
     }
+
 
     def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         def decorators = []
@@ -528,7 +528,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Map<String, String> vtCodeToGuidMap = [:]
         if (visaTypeCodes) {
             log.debug "Getting GUIDs for VisaType codes $visaTypeCodes..."
-            vtCodeToGuidMap = visaTypeCompositeService.fetchGUIDs(visaTypeCodes)
+            vtCodeToGuidMap = visaTypeCompositeService.getVisaTypeCodeToGuidMap(visaTypeCodes)
             log.debug "Got ${vtCodeToGuidMap?.size() ?: 0} GUIDs for given VisaType codes"
         }
         // Put in Map
@@ -613,7 +613,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("pidmToPassportMap", pidmToPassportMap)
         dataMap.put("codeToNationMap", codeToNationMap)
     }
-
 
 
     private void fetchPersonsRaceDataAndPutInMap(List<Integer> pidms, Map dataMap) {
@@ -704,10 +703,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
+        log.debug "The visa status of the person with regards to the country where a given institution is located"
+        InstitutionalDescription institutionalDescription = institutionalDescriptionService.findByKey()
+        log.debug "Institution is located in nation ${institutionalDescription?.natnCode}"
         def pidmToVisaInfoMap = [:]
         if (pidms) {
             log.debug "Getting GORVISA records for ${pidms?.size()} PIDMs..."
-            List<VisaInformation> entities = visaInformationService.fetchAllWithMaxSeqNumByPidmInList(pidms)
+            List<VisaInformation> entities = visaInformationService.fetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList(pidms, institutionalDescription?.natnCode)
             log.debug "Got ${entities?.size()} GORVISA records"
             entities?.each {
                 pidmToVisaInfoMap.put(it.pidm, it)
@@ -958,6 +960,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         personAddressDecorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.toDate)
         return personAddressDecorator
     }
+
 
     private IdentityDocumentV6 createIdentityDocumentV6(VisaInternationalInformation visaIntlInformation, Nation nation, boolean isInstitutionUsingISO2CountryCodes) {
         IdentityDocumentV6 decorator
