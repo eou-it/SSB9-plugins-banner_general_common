@@ -34,7 +34,7 @@ query = """FROM VisaInformation a
             AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(a.visaExpireDate)"""),
 @NamedQuery(name = "VisaInformation.fetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList",
                 query = """ FROM VisaInformation a
-                           WHERE a.pidm in :pidmList
+                           WHERE a.pidm in :pidms
                              AND a.nationIssue = :issuingNationCode
                              AND SYSDATE BETWEEN NVL(visaIssueDate,SYSDATE-1) AND visaExpireDate
                              AND (a.pidm, a.sequenceNumber) IN (SELECT pidm,MAX(sequenceNumber) FROM VisaInformation b
