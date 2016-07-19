@@ -12,6 +12,8 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.NamedQueries
+import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -22,6 +24,10 @@ import javax.persistence.Version
 @Table(name = "GURFEED")
 @EqualsAndHashCode
 @ToString(includeFields = true, includeNames = true)
+@NamedQueries([
+        @NamedQuery(name = "GeneralFeed.transactionNumberExist",
+        query = "SELECT distinct 'Y' from GeneralFeed where transactionNumber in (:transactionNumbers)")
+])
 class GeneralFeed implements Serializable{
 
     @Id
@@ -186,5 +192,18 @@ class GeneralFeed implements Serializable{
         userId(nullable: false, maxSize: 30)
         depositNumber(nullable: true, maxSize: 8)
         dataOrigin(nullable: true)
+    }
+
+
+    public static Boolean transactionNumberExist(List<String> transactionNumbers){
+        Boolean exist = false
+        if(transactionNumbers){
+            GeneralFeed.withSession{ session ->
+                if(session.getNamedQuery("GeneralFeed.transactionNumberExist").setParameterList('transactionNumbers', transactionNumbers).list().size()>0){
+                    exist = true
+                }
+            }
+        }
+        return exist
     }
 }

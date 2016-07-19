@@ -5,6 +5,7 @@ package net.hedtech.banner.general.ledger
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -61,6 +62,40 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         generalFeedService.delete(generalFeed)
         shouldFail(ApplicationException) {
             generalFeedService.read(generalFeed.id)
+        }
+    }
+
+    @Test
+    public void testTransactionExistDataPresent() {
+        runSeedData('general-ledger-gurfeed')
+        assertEquals(true, generalFeedService.transactionNumberExist(['DCITTST']))
+        runSeedData('general-ledger-gurfeed-clean')
+    }
+
+    @Test
+    public void testTransactionExistNoDataPresent() {
+        assertEquals(false, generalFeedService.transactionNumberExist(['DCITTST']))
+    }
+
+    def runSeedData(String seedTestTarget) {
+        def clazzInputData = Thread.currentThread().contextClassLoader.loadClass("net.hedtech.banner.seeddata.InputData")
+        def inputData = clazzInputData.newInstance([dataSource: dataSource])
+
+        def xmlFiles = inputData.targets.find { it.key == seedTestTarget }?.value
+        if (!xmlFiles) xmlFiles = inputData.seleniumTargets.find { it.key == seedTestTarget }?.value
+
+        def basedir = System.properties['base.dir']
+        xmlFiles.each { xmlFileName ->
+            inputData.xmlFile = GrailsPluginUtils.getPluginDirForName('banner-seeddata-catalog').path + xmlFileName.value
+            inputData.tableCnts = []
+            inputData.username = "baninst1"
+            inputData.password = "u_pick_it"
+            inputData.tableSize = 0
+            def inputFile = new File(inputData.xmlFile)
+            if (!inputFile.exists())
+                inputData.xmlFile = "${basedir}${xmlFileName.value}"
+            def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
+            seedDataLoader.execute()
         }
     }
 

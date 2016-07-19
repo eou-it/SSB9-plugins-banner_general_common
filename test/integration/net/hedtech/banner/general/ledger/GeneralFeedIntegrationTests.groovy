@@ -242,12 +242,12 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
     @Test
     public void testValidateOrgnizationCode() {
         //null is allowed
-        GeneralFeed generalFeed = createNewGenerealFeed([orgnizationCode: null])
+        GeneralFeed generalFeed = createNewGenerealFeed([organizationCode: null])
         assertNull(generalFeed.organizationCode)
         generalFeed.validate()
         assertFalse(generalFeed.hasErrors())
         //max size for organizationCode is 6
-        GeneralFeed generalFeed1 = createNewGenerealFeed([orgnizationCode: "ORGN_C1"])
+        GeneralFeed generalFeed1 = createNewGenerealFeed([organizationCode: "ORGN_C1"])
         generalFeed1.validate()
         assertTrue(generalFeed1.hasErrors())
         assertEquals(1, generalFeed1.errors.errorCount)
@@ -599,6 +599,28 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         guids = [guid, guid1]
         assertEquals([guid, guid1].unique().sort(), GeneralFeedShadow.fetchAllByGuidInList(guids).guid.unique().sort())
         runSeedData('general-ledger-clean')
+    }
+
+    @Test
+    public void testTransactionNumberExistNullList() {
+        assertEquals(false, GeneralFeed.transactionNumberExist(null))
+    }
+
+    @Test
+    public void testTransactionNumberExistEmptyList() {
+        assertEquals(false, GeneralFeed.transactionNumberExist([]))
+    }
+
+    @Test
+    public void testTransactionNumberExistInvalidList() {
+        assertEquals(false, GeneralFeed.transactionNumberExist(['invalid1', 'invalid2']))
+    }
+
+    @Test
+    public void testTransactionNumberExist() {
+        runSeedData('general-ledger-gurfeed')
+        assertEquals(true, GeneralFeed.transactionNumberExist(['DCITTST']))
+        runSeedData('general-ledger-gurfeed-clean')
     }
 
     def runSeedData(String seedTestTarget) {
