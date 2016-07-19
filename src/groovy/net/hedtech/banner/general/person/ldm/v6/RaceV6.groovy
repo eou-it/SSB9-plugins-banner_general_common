@@ -1,9 +1,10 @@
 /*******************************************************************************
  Copyright 2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
-package net.hedtech.banner.general.system.ldm.v6
+package net.hedtech.banner.general.person.ldm.v6
 
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
+import net.hedtech.banner.general.system.ldm.v6.ReportingDecorator
 
 /**
  * Decorator used in  "persons" V6

@@ -32,8 +32,15 @@ import javax.persistence.*
 query = """FROM VisaInformation a
           WHERE a.pidm IN :pidm
             AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(a.visaExpireDate)"""),
-@NamedQuery(name = "VisaInformation.fetchAllWithMaxSeqNumByPidmInList",
-                query = """ FROM VisaInformation where (pidm, sequenceNumber) in (select pidm,max(sequenceNumber) from VisaInformation group by pidm) and pidm in (:pidmList)""")
+@NamedQuery(name = "VisaInformation.fetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList",
+                query = """ FROM VisaInformation a
+                           WHERE a.pidm in :pidms
+                             AND a.nationIssue = :issuingNationCode
+                             AND SYSDATE BETWEEN NVL(visaIssueDate,SYSDATE-1) AND visaExpireDate
+                             AND (a.pidm, a.sequenceNumber) IN (SELECT pidm,MAX(sequenceNumber) FROM VisaInformation b
+                                                                 WHERE b.nationIssue = :issuingNationCode
+                                                                   AND SYSDATE BETWEEN NVL(visaIssueDate,SYSDATE-1) AND visaExpireDate
+                                                                 GROUP BY pidm) """)
 
 ])
 
@@ -317,13 +324,4 @@ class VisaInformation implements Serializable {
         return new DynamicFinder(VisaInformation.class, query, "a")
     }
 
-    public static List<VisaInformation> fetchAllWithMaxSeqNumByPidmInList(List<Integer> pidmList) {
-        List<VisaInformation> visaList = []
-        if (pidmList) {
-            VisaInformation.withSession { session ->
-                visaList = session.getNamedQuery("VisaInformation.fetchAllWithMaxSeqNumByPidmInList").setParameterList("pidmList", pidmList).list()
-            }
-        }
-        return visaList
-    }
 }

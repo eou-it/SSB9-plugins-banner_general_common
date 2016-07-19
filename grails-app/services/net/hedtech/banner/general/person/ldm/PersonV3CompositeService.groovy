@@ -111,7 +111,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
 
     @Override
-    def createDecorators(List<PersonIdentificationNameCurrent> entities) {
+    def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         return []
     }
 

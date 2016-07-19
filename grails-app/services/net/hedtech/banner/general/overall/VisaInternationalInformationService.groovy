@@ -96,4 +96,18 @@ class VisaInternationalInformationService extends ServiceBase {
             }
         }
     }
+
+
+    def fetchAllByPidmInList(List<Integer> pidms) {
+        def entities = []
+        if (pidms) {
+            entities = VisaInternationalInformation.withSession { session ->
+                session.getNamedQuery('VisaInternationalInformation.fetchAllByPidmInList')
+                        .setParameterList('pidms', pidms)
+                        .list()
+            }
+        }
+        return entities
+    }
+
 }

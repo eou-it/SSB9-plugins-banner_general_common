@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.overall.AddressGeographicAreasView
 import net.hedtech.banner.general.overall.AddressViewService
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ldm.v6.AddressV6
@@ -35,7 +36,7 @@ class AddressCompositeService extends LdmService {
         if (!addressView) {
             throw new ApplicationException("address", new NotFoundException())
         }
-        getDecorator(addressView)
+        getDecorators([addressView]).get(0)
     }
 
     /**
@@ -55,47 +56,61 @@ class AddressCompositeService extends LdmService {
      * @return
      */
     def list(Map map) {
-        List<AddressV6> addresses = []
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max=(map?.max as Integer)
         int offset=((map?.offset ?:'0') as Integer)
-        addressViewService.fetchAll(max,offset).each{
-            address ->
-            addresses << getDecorator(address)
+        List<AddressView> addressesView = addressViewService.fetchAll(max,offset)
+        return getDecorators(addressesView)
+    }
+
+    private List<AddressV6> getDecorators(List<AddressView> addressesView) {
+        List<AddressV6> addresses = []
+        List pidmsOrCodes = []
+        addressesView.collect { address ->
+            pidmsOrCodes << address.pidmOrCode
+        }
+        List<AddressGeographicAreasView> geographicAreasView = AddressGeographicAreasView.fetchAllByPidm(pidmsOrCodes)
+        Map geographicAreasGUID = [:]
+        geographicAreasView.each { geographicArea ->
+            String geoAreaKey = geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber + geographicArea.geographicAreasSource
+            List<String> guids = geographicAreasGUID.get(geoAreaKey)
+            if(guids){
+                guids << geographicArea.id
+            } else {
+                geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
+            }
         }
 
+        addressesView.each { address ->
+            String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey))
+        }
         return addresses
     }
 
-    private AddressV6 getDecorator(AddressView address) {
-        List<String> addressLines = []
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs) {
+        AddressV6 addressV6 = new AddressV6(addressView, getNationISO(addressView))
+        addressV6.geographicAreas = []
+        geographicAreasGUIDs.each { guid ->
+            addressV6.geographicAreas << ["id": guid]
+        }
+        return addressV6
+    }
+
+
+    private getNationISO(AddressView addressView) {
         String nationISO
-        if(address.addressLine1) {
-            addressLines << address.addressLine1
-        }
-        if(address.addressLine2) {
-            addressLines << address.addressLine2
-        }
-        if(address.addressLine3) {
-            addressLines << address.addressLine3
-        }
-        if(address.addressLine4) {
-            addressLines << address.addressLine4
-        }
-        if(!addressLines){
-            addressLines=["."]
-        }
-        if (address.sourceTable==COLLEGE_ADDRESS) {
-            nationISO=address.countryCode
+        if (addressView.sourceTable==COLLEGE_ADDRESS) {
+            nationISO=addressView.countryCode
         }
         else {
-            if (address.countryCode) {
-                nationISO = (Nation.findByCode(address.countryCode)).scodIso
+            if (addressView.countryCode) {
+                nationISO = (Nation.findByCode(addressView.countryCode)).scodIso
             }
         }
         if(integrationConfigurationService.isInstitutionUsingISO2CountryCodes()){
             nationISO=isoCodeService.getISO3CountryCode(nationISO)
         }
-        return new AddressV6(address.id, addressLines, nationISO)
+        return nationISO
     }
 }
