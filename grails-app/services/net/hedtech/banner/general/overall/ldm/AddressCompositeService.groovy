@@ -66,7 +66,7 @@ class AddressCompositeService extends LdmService {
     private List<AddressV6> getDecorators(List<AddressView> addressesView) {
         def dataMap = [:]
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
-        dataMap.put("getDefaultISO3CountryCodeForAddress", integrationConfigurationService.getDefaultISO3CountryCodeForAddress())
+        dataMap.put("getDefaultISOCountryCodeForAddress", integrationConfigurationService.getDefaultISOCountryCodeForAddress())
         List<AddressV6> addresses = []
         List pidmsOrCodes = []
         addressesView.collect { address ->
@@ -113,13 +113,14 @@ class AddressCompositeService extends LdmService {
             }
         }
 
+        if(!nationISO){
+            nationISO = dataMap.get("getDefaultISOCountryCodeForAddress")
+        }
+
         if( dataMap.get("isInstitutionUsingISO2CountryCodes") ){
             nationISO=isoCodeService.getISO3CountryCode(nationISO)
         }
 
-        if(!nationISO){
-            nationISO = dataMap.get("getDefaultISO3CountryCodeForAddress")
-        }
         return nationISO
     }
 }
