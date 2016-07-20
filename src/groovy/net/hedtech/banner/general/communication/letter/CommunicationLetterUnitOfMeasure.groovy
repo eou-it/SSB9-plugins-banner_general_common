@@ -1,7 +1,7 @@
 package net.hedtech.banner.general.communication.letter
 
 public enum CommunicationLetterUnitOfMeasure {
-    CENTIMETER ( "cm" ),
+    MILLIMETER ( "mm" ),
     INCH ( "in" );
 
     private String symbol

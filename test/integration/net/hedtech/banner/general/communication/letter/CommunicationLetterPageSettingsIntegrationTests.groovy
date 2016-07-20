@@ -39,7 +39,7 @@ class CommunicationLetterPageSettingsIntegrationTests extends BaseIntegrationTes
         String json = extractStatement.toJson()
         assertNotNull( json )
 
-        extractStatement.setStyle( "{ \"unitOfMeasure\":\"CENTIMETER\", \"topMargin\": \"1\", \"leftMargin\":\"1\", \"bottomMargin\": \"0.5\", \"rightMargin\": \"2\", \"pageSize\":\"A4\" }" )
+        extractStatement.setStyle( "{ \"unitOfMeasure\":\"INCH\", \"topMargin\": \"1\", \"leftMargin\":\"1\", \"bottomMargin\": \"0.5\", \"rightMargin\": \"2\", \"pageSize\":\"LETTER\" }" )
         extractStatement.validate()
     }
 
