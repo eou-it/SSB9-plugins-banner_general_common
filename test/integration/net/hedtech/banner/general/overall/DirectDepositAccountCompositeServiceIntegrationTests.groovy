@@ -19,8 +19,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.context.i18n.LocaleContextHolder
+
 
 /**
  *
@@ -43,7 +43,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         apIndicator: 'A',
         hrIndicator: 'I',
         intlAchTransactionIndicator: 'N',
-        pidm: 37859,
+        pidm: 95999,
         status: 'P'
     ]
 
@@ -194,11 +194,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testGetLastPayDistribution() {
-            def pidm = PersonUtility.getPerson("MYE000009").pidm
-
-        def item = DirectDepositAccount.fetchByPidm(pidm)
-
-
+        def pidm = PersonUtility.getPerson("HOP510001").pidm
 
         def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
 
@@ -206,137 +202,113 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     }
 
 
+    @Test
+    /**
+     * No accounts
+     */
+    void testGetUserHrAllocationsNoAccounts() {
+        def pidm = PersonUtility.getPerson("MYE000001").pidm
+        def allocationsObj = directDepositAccountCompositeService.getUserHrAllocations(pidm) //36732 // No accounts
 
-    // TODO: All of the below tests PASSED when they were broken out into their own temporary file
-    // which corresponded to a temporary DirectDepositCompositeService class which was located at the app level (as
-    // opposed to being in the the banner_general_common plugin) so that it had access to the required payroll
-    // plugin.  Per story http://jirateams.ellucian.com:8080/browse/DID-303 "Eliminate dependency on payroll plugin"
-    // we plan to move all of that payroll functionality into this plugin.  Whether it happens that way or not,
-    // make sure these temporarily commented out tests are made to run.  "directDepositCompositeService" will
-    // probably have to be renamed to "directDepositAccountCompositeService" or whatever.  Note that seed data was
-    // committed to mar2016_dev that is required for the below tests.  JDC 12/3/15
-    // ADDITIONAL NOTE 1:  When fixing the tests, the calculated amounts will also have to be adjusted
-    // due to story http://jirateams.ellucian.com:8080/browse/DID-323, which was committed 1/5/16. JDC
-    // ADDITIONAL NOTE 2: Actually, calculated amount logic has now been moved to the frontend so should be
-    // removed from these tests.  JDC 2/10/16
-//    @Test
-//    /**
-//     * No accounts
-//     */
-//    void testGetUserHrAllocationsNoAccounts() {
-//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(36732) // No accounts
-//
-//        // Assert domain values
-//        assertNotNull allocationsObj
-//        assertNotNull allocationsObj.allocations
-//        assertEquals 0, allocationsObj.allocations.size()
-//
-//        assertEquals "", allocationsObj.totalAmount
-//    }
-//
-//    @Test
-//    /**
-//     * One account:
-//     *   100% allocated
-//     */
-//    void testGetUserHrAllocationsOneAccount() {
-//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(49548) // One account
-//
-//        // Assert domain values
-//        assertNotNull allocationsObj
-//        assertNotNull allocationsObj.allocations
-//        assertEquals 1, allocationsObj.allocations.size()
-//
-//        def allocation = allocationsObj.allocations[0]
-//
-//        assertNotNull allocation.id
-//        assertEquals "1293902", allocation.bankAccountNum
-//        assertEquals "C", allocation.accountType
-//        assertNull allocation.amount
-//        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
-//        assertEquals "\$2,806.23", allocation.calculatedAmount
-//
-//        assertEquals "\$2,806.23", allocationsObj.totalAmount
-//    }
-//
-//    @Test
-//    /**
-//     * Two accounts:
-//     *   Priority 1) $50.00 allocated
-//     *   Priority 2) 100% allocated
-//     */
-//    void testGetUserHrAllocationsTwoAccounts() {
-//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(37700) // Two accounts
-//
-//        // Assert domain values
-//        assertNotNull allocationsObj
-//        assertNotNull allocationsObj.allocations
-//        assertEquals 2, allocationsObj.allocations.size()
-//
-//        def allocation = allocationsObj.allocations[0]
-//
-//        assertNotNull allocation.id
-//        assertEquals "95003546", allocation.bankAccountNum
-//        assertEquals "S", allocation.accountType
-//        assertTrue(49.9 < allocation.amount && allocation.amount < 50.1)
-//        assertNull allocation.percent
-//        assertEquals "\$50.00", allocation.calculatedAmount
-//
-//        allocation = allocationsObj.allocations[1]
-//
-//        assertNotNull allocation.id
-//        assertEquals "736900542", allocation.bankAccountNum
-//        assertEquals "C", allocation.accountType
-//        assertNull allocation.amount
-//        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
-//        assertEquals "\$2,007.01", allocation.calculatedAmount
-//
-//        assertEquals "\$2,057.01", allocationsObj.totalAmount
-//    }
-//
-//    @Test
-//    /**
-//     * Three accounts:
-//     *   Priority 1) $77.00 allocated
-//     *   Priority 2) 50% allocated
-//     *   Priority 3) 100% allocated
-//     */
-//    void testGetUserHrAllocationsThreeAccounts() {
-//        def allocationsObj = directDepositCompositeService.getUserHrAllocations(36743) // Two accounts
-//
-//        // Assert domain values
-//        assertNotNull allocationsObj
-//        assertNotNull allocationsObj.allocations
-//        assertEquals 3, allocationsObj.allocations.size()
-//
-//        def allocation = allocationsObj.allocations[0]
-//
-//        assertNotNull allocation.id
-//        assertEquals "736900542", allocation.bankAccountNum
-//        assertEquals "C", allocation.accountType
-//        assertTrue(76.9 < allocation.amount && allocation.amount < 77.1)
-//        assertNull allocation.percent
-//        assertEquals "\$77.00", allocation.calculatedAmount
-//
-//
-//        allocation = allocationsObj.allocations[1]
-//
-//        assertNotNull allocation.id
-//        assertEquals "95003546", allocation.bankAccountNum
-//        assertEquals "S", allocation.accountType
-//        assertNull allocation.amount
-//        assertTrue(49.9 < allocation.percent && allocation.percent < 50.1)
-//        assertEquals "\$1,397.74", allocation.calculatedAmount
-//
-//        allocation = allocationsObj.allocations[2]
-//
-//        assertNotNull allocation.id
-//        assertEquals "67674852", allocation.bankAccountNum
-//        assertEquals "C", allocation.accountType
-//        assertNull allocation.amount
-//        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
-//        assertEquals "\$1,320.74", allocation.calculatedAmount
-//
-//        assertEquals "\$2,795.47", allocationsObj.totalAmount
-//    }
+        // Assert domain values
+        assertNotNull allocationsObj
+        assertNotNull allocationsObj.allocations
+        assertEquals 0, allocationsObj.allocations.size()
+    }
+
+    @Test
+    /**
+     * One account:
+     *   100% allocated
+     */
+    void testGetUserHrAllocationsOneAccount() {
+        def pidm = PersonUtility.getPerson("MYE000003").pidm
+        def allocationsObj = directDepositAccountCompositeService.getUserHrAllocations(pidm) //49548 // One account
+
+        // Assert domain values
+        assertNotNull allocationsObj
+        assertNotNull allocationsObj.allocations
+        assertEquals 1, allocationsObj.allocations.size()
+
+        def allocation = allocationsObj.allocations[0]
+
+        assertNotNull allocation.id
+        assertEquals "1293902", allocation.bankAccountNum
+        assertEquals "C", allocation.accountType
+        assertNull allocation.amount
+        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+    }
+
+    @Test
+    /**
+     * Three accounts:
+     *   Priority 1) $77.00 allocated
+     *   Priority 2) 50% allocated
+     *   Priority 3) 100% allocated
+     */
+    void testGetUserHrAllocationsThreeAccounts() {
+        def pidm = PersonUtility.getPerson("MYE000005").pidm
+        def allocationsObj = directDepositAccountCompositeService.getUserHrAllocations(pidm) //36743 // Two accounts
+
+        // Assert domain values
+        assertNotNull allocationsObj
+        assertNotNull allocationsObj.allocations
+        assertEquals 3, allocationsObj.allocations.size()
+
+        def allocation = allocationsObj.allocations[0]
+
+        assertNotNull allocation.id
+        assertEquals "736900542", allocation.bankAccountNum
+        assertEquals "C", allocation.accountType
+        assertTrue(76.9 < allocation.amount && allocation.amount < 77.1)
+        assertNull allocation.percent
+
+        allocation = allocationsObj.allocations[1]
+
+        assertNotNull allocation.id
+        assertEquals "95003546", allocation.bankAccountNum
+        assertEquals "S", allocation.accountType
+        assertNull allocation.amount
+        assertTrue(49.9 < allocation.percent && allocation.percent < 50.1)
+
+        allocation = allocationsObj.allocations[2]
+
+        assertNotNull allocation.id
+        assertEquals "67674852", allocation.bankAccountNum
+        assertEquals "C", allocation.accountType
+        assertNull allocation.amount
+        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+    }
+
+    @Test
+    void testGetCurrencySymbolPreDigits() {
+        def symbol = directDepositAccountCompositeService.getCurrencySymbol()
+
+        assertEquals '$', symbol
+    }
+
+    @Test
+    void testGetCurrencySymbolPostDigits() {
+        LocaleContextHolder.setLocale(new Locale("fr-CA"))
+        def symbol = directDepositAccountCompositeService.getCurrencySymbol()
+
+        assertEquals '\u00A0$US', symbol
+    }
+
+    @Test
+    void testReorderAccounts() {
+        def pidm = PersonUtility.getPerson("MYE000005").pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+
+        accts[0].priority = 2
+        accts[1].priority = 1
+
+        def oldId = accts[0].id
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        def newId = result[1].id
+
+        assertEquals false, oldId == newId
+    }
 }
