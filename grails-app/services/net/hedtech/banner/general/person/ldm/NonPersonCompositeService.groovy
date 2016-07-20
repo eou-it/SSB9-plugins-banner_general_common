@@ -12,11 +12,11 @@ import net.hedtech.banner.general.person.ldm.v6.EmailV6
 import net.hedtech.banner.general.person.ldm.v6.PhoneV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.person.view.NonPersonPersonView
+import net.hedtech.banner.general.person.view.NonPersonPersonViewService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.PhoneTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
-import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 
@@ -78,7 +78,7 @@ class NonPersonCompositeService extends LdmService {
             String credentialType = params.get("credential.type")?.trim()
             String credentialValue = params.get("credential.value")?.trim()
             if (credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
-                rows = nonPersonPersonViewService.fetchAllWithGuidByCriteria([bannerId: credentialValue], max, offset)
+                rows = nonPersonPersonViewService.fetchAllWithGuidByCriteria([bannerId: credentialValue])
                 totalCount = nonPersonPersonViewService.countByCriteria([bannerId: credentialValue])
             }
         } else {
