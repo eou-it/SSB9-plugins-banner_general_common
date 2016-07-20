@@ -18,6 +18,9 @@ class CountryV6 {
     RegionV6 subRegion
     String locality
     String postalCode
+    String deliveryPoint
+    String carrierRoute
+    String correctionDigit
 
     CountryV6(String isoCode, AddressView addressView){
         this.code = isoCode
@@ -27,6 +30,9 @@ class CountryV6 {
         this.subRegion = new RegionV6(addressView.countrySubRegionCode, addressView.countrySubRegionTitle)
         this.locality = addressView.countryLocality
         this.postalCode = getPostalCode(addressView,isoCode)
+        this.deliveryPoint = addressView.deliveryPoint
+        this.carrierRoute = addressView.carrierRoute
+        this.correctionDigit = addressView.correctionDigit
     }
 
 

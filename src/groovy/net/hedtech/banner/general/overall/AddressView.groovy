@@ -126,4 +126,22 @@ class AddressView implements Serializable{
      */
     @Column(name="ADDRESS_SEQNO")
     String sequenceNumber
+
+    /**
+     * Address delivery point
+     */
+    @Column(name="ADDRESS_DELIVERY_POINT")
+    String deliveryPoint
+
+    /**
+     * Address carrier route
+     */
+    @Column(name="ADDRESS_CARRIER_ROUTE")
+    String carrierRoute
+
+    /**
+     * Address correction digit
+     */
+    @Column(name="ADDRESS_CORRECTION_DIGIT")
+    String correctionDigit
 }
