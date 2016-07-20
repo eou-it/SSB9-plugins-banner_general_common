@@ -106,7 +106,31 @@ class CommunicationInteractionView implements Serializable {
         return results
     }
 
-    public static findDistinctConstituentsByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+    public static Map findDistinctConstituentsByNameWithPagingAndSortParams(filter, pagingAndSortParams) {
+        return [list: CommunicationInteractionView.findAllDistinctConstituentsByNameWithPagingAndSortParams(filter, pagingAndSortParams)
+                , totalCount: CommunicationInteractionView.findCountDistinctConstituentsByName(filter)]
+    }
+
+    public static findCountDistinctConstituentsByName(filterData) {
+        if(!filterData)
+            return 0;
+
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+        def queryCriteria = CommunicationInteractionView.createCriteria()
+        def results = queryCriteria.get() {
+            or {
+                ilike("lastName", searchName)
+                ilike("firstName", searchName)
+                ilike("bannerId", searchName)
+            }
+            projections {
+                countDistinct("interacteePidm")
+            }
+        }
+        return results
+    }
+
+    public static findAllDistinctConstituentsByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
         def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
