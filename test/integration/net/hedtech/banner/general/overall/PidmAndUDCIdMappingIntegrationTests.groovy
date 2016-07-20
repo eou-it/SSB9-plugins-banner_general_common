@@ -122,6 +122,8 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
+        def expectedHour = new SimpleDateFormat('HH')
+        expectedHour.setTimeZone(TimeZone.getTimeZone("UTC"))
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()
 
@@ -134,7 +136,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 
         // test date values -
         assertEquals date.format(today), date.format(pidmAndUDCIdMapping.lastModified)
-        assertEquals hour.format(today), hour.format(pidmAndUDCIdMapping.lastModified)
+        assertEquals expectedHour.format(today), hour.format(pidmAndUDCIdMapping.lastModified)
 
         assertEquals time.format(pidmAndUDCIdMapping.createDate), "000000"
 

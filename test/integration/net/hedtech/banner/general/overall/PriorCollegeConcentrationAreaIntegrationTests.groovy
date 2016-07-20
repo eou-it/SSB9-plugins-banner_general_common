@@ -60,6 +60,8 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
     @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
+        def expectedHour = new SimpleDateFormat('HH')
+        expectedHour.setTimeZone(TimeZone.getTimeZone("UTC"))
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()
 
@@ -71,7 +73,7 @@ class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestC
 
         // test date values -
         assertEquals date.format(today), date.format(priorCollegeConcentrationArea.lastModified)
-        assertEquals hour.format(today), hour.format(priorCollegeConcentrationArea.lastModified)
+        assertEquals expectedHour.format(today), hour.format(priorCollegeConcentrationArea.lastModified)
     }
 
 

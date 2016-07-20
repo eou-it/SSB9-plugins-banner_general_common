@@ -161,6 +161,8 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     @Test
     void testDates() {
         def hour = new SimpleDateFormat('HH')
+        def expectedHour = new SimpleDateFormat('HH')
+        expectedHour.setTimeZone(TimeZone.getTimeZone("UTC"))
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()
 
@@ -174,7 +176,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
 
         // test date values -
         assertEquals date.format(today), date.format(generalForStoringResponsesAndPinQuestion.lastModified)
-        assertEquals hour.format(today), hour.format(generalForStoringResponsesAndPinQuestion.lastModified)
+        assertEquals expectedHour.format(today), hour.format(generalForStoringResponsesAndPinQuestion.lastModified)
 
 
     }
