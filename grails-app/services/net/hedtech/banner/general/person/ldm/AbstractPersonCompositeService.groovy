@@ -3,12 +3,16 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Timestamp
 
@@ -44,6 +48,21 @@ abstract class AbstractPersonCompositeService extends LdmService {
             requestProcessingResult = searchForMatchingPersons(requestParams)
         }
         return requestProcessingResult
+    }
+
+    /**
+     * GET /api/persons/<guid>
+     *
+     * @param guid
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    def get(String guid) {
+        def row = personIdentificationNameCurrentService.fetchByGuid(guid)
+        if (!row) {
+            throw new ApplicationException("Person", new NotFoundException())
+        }
+        return createDecorators([row.personIdentificationNameCurrent], getPidmToGuidMap([row]))[0]
     }
 
 

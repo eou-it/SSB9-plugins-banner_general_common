@@ -5,7 +5,6 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.*
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
@@ -17,7 +16,8 @@ import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
-import net.hedtech.banner.general.system.ldm.v6.*
+import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
+import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -171,21 +171,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     def count(Map params) {
         log.trace "count v6: Begin: Request parameters ${params}"
         return getInjectedPropertyFromParams(params, "count")
-    }
-
-    /**
-     * GET /api/persons/<guid>
-     *
-     * @param guid
-     * @return
-     */
-    @Transactional(readOnly = true)
-    def get(String guid) {
-        def row = personIdentificationNameCurrentService.fetchByGuid(guid)
-        if (!row) {
-            throw new ApplicationException("Person", new NotFoundException())
-        }
-        return createDecorators([row.personIdentificationNameCurrent], getPidmToGuidMap([row]))[0]
     }
 
     /**

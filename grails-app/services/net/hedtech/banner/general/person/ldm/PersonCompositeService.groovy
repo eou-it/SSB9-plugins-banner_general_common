@@ -77,21 +77,14 @@ class PersonCompositeService extends LdmService {
     def get(String id) {
         if ("v6".equalsIgnoreCase(getAcceptVersion(VERSIONS))) {
             return personV6CompositeService.get(id)
+        } else {
+            def row = personIdentificationNameCurrentService.fetchByGuid(id)
+            if (!row) {
+                throw new ApplicationException("Person", new NotFoundException())
+            }
+            def resultList = buildLdmPersonObjects([row.personIdentificationNameCurrent])
+            return resultList.get(row.personIdentificationNameCurrent.pidm)
         }
-        PersonIdentificationNameCurrent personIdentificationNameCurrent = getPersonIdentificationNameCurrentByGUID(id)
-        def resultList = buildLdmPersonObjects([personIdentificationNameCurrent])
-        resultList.get(personIdentificationNameCurrent.pidm)
-    }
-
-
-    PersonIdentificationNameCurrent getPersonIdentificationNameCurrentByGUID(String guid) {
-        def entity = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ldmName, guid)
-        if (!entity) {
-            throw new ApplicationException("Person", new NotFoundException())
-        }
-        PersonIdentificationNameCurrent personIdentificationNameCurrent =
-                PersonIdentificationNameCurrent.findByPidm(entity.domainKey?.toInteger())
-        return personIdentificationNameCurrent
     }
 
 
