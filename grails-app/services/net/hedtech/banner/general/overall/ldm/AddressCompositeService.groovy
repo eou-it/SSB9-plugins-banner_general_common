@@ -64,6 +64,9 @@ class AddressCompositeService extends LdmService {
     }
 
     private List<AddressV6> getDecorators(List<AddressView> addressesView) {
+        def dataMap = [:]
+        dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
+        dataMap.put("getDefaultISO3CountryCodeForAddress", integrationConfigurationService.getDefaultISO3CountryCodeForAddress())
         List<AddressV6> addresses = []
         List pidmsOrCodes = []
         addressesView.collect { address ->
@@ -83,13 +86,14 @@ class AddressCompositeService extends LdmService {
 
         addressesView.each { address ->
             String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
-            addresses << getDecorator(address, geographicAreasGUID.get(addressKey))
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), dataMap)
         }
         return addresses
     }
 
-    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs) {
-        AddressV6 addressV6 = new AddressV6(addressView, getNationISO(addressView))
+
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, def dataMap) {
+        AddressV6 addressV6 = new AddressV6(addressView, getNationISO(addressView, dataMap))
         addressV6.geographicAreas = []
         geographicAreasGUIDs.each { guid ->
             addressV6.geographicAreas << ["id": guid]
@@ -98,7 +102,7 @@ class AddressCompositeService extends LdmService {
     }
 
 
-    private getNationISO(AddressView addressView) {
+    private getNationISO(AddressView addressView, def dataMap) {
         String nationISO
         if (addressView.sourceTable==COLLEGE_ADDRESS) {
             nationISO=addressView.countryCode
@@ -108,8 +112,13 @@ class AddressCompositeService extends LdmService {
                 nationISO = (Nation.findByCode(addressView.countryCode)).scodIso
             }
         }
-        if(integrationConfigurationService.isInstitutionUsingISO2CountryCodes()){
+
+        if( dataMap.get("isInstitutionUsingISO2CountryCodes") ){
             nationISO=isoCodeService.getISO3CountryCode(nationISO)
+        }
+
+        if(!nationISO){
+            nationISO = dataMap.get("getDefaultISO3CountryCodeForAddress")
         }
         return nationISO
     }
