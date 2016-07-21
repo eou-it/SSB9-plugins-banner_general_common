@@ -147,6 +147,9 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             }
             assertEquals( 5, letterItemViewCount )
         }
+        CommunicationLetterItemView itemView = CommunicationLetterItemView.fetchByGroupSendItemId( sendItemViewDetails[0].id )
+        assertTrue( itemView != null )
+        assertEquals( sendItemViewDetails[0].id, itemView.groupSendItemId )
 
         // test delete group send
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )

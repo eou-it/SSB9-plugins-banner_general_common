@@ -5,10 +5,7 @@ package net.hedtech.banner.general.communication.letter
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.item.CommunicationChannel
-import org.hibernate.annotations.Type
-import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -19,6 +16,12 @@ import javax.persistence.*
 @EqualsAndHashCode
 @ToString
 @Table(name = "GVQ_GCRLETM")
+@NamedQueries(value = [
+    @NamedQuery( name = "CommunicationLetterItemView.fetchByGroupSendItemId",
+            query = """ FROM CommunicationLetterItemView view
+                WHERE view.groupSendItemId = :groupSendItemId """
+    )
+])
 class CommunicationLetterItemView implements Serializable {
 
     /**
@@ -33,6 +36,9 @@ class CommunicationLetterItemView implements Serializable {
      */
     @Column(name = "GROUP_SEND_ID")
     Long groupSendId
+
+    @Column(name = "GROUP_SEND_ITEM_ID")
+    Long groupSendItemId
 
     /**
      * Username of the person who initiated the communication.
@@ -121,6 +127,19 @@ class CommunicationLetterItemView implements Serializable {
             }
             eq( 'groupSendId', groupSendId )
         }[0]
+    }
+
+    public static CommunicationLetterItemView fetchByGroupSendItemId(Long groupSendItemId) {
+        def results = null
+        CommunicationLetterItemView.withSession { session ->
+            results = session.getNamedQuery('CommunicationLetterItemView.fetchByGroupSendItemId')
+                .setLong('groupSendItemId', groupSendItemId).list()
+        }
+        if (results == null || results.size() == 0) {
+            return null
+        } else {
+            return results[0]
+        }
     }
 
 }
