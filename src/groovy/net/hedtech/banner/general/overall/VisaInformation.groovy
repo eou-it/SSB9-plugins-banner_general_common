@@ -36,10 +36,10 @@ query = """FROM VisaInformation a
                 query = """ FROM VisaInformation a
                            WHERE a.pidm in :pidms
                              AND a.nationIssue = :issuingNationCode
-                             AND SYSDATE BETWEEN NVL(visaIssueDate,SYSDATE-1) AND visaExpireDate
+                             AND TRUNC(SYSDATE) BETWEEN TRUNC(NVL(visaIssueDate,SYSDATE-1)) AND TRUNC(visaExpireDate)
                              AND (a.pidm, a.sequenceNumber) IN (SELECT pidm,MAX(sequenceNumber) FROM VisaInformation b
                                                                  WHERE b.nationIssue = :issuingNationCode
-                                                                   AND SYSDATE BETWEEN NVL(visaIssueDate,SYSDATE-1) AND visaExpireDate
+                                                                   AND TRUNC(SYSDATE) BETWEEN TRUNC(NVL(visaIssueDate,SYSDATE-1)) AND TRUNC(visaExpireDate)
                                                                  GROUP BY pidm) """)
 
 ])
