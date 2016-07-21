@@ -40,7 +40,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     ReligionCompositeService religionCompositeService
     PersonCredentialCompositeService personCredentialCompositeService
     PersonEmailService personEmailService
-    EmailTypeCompositeService emailTypeCompositeService
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
     EthnicityCompositeService ethnicityCompositeService

@@ -12,6 +12,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
+import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,6 +25,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     CommonMatchingCompositeService commonMatchingCompositeService
     PersonIdentificationNameCurrentService personIdentificationNameCurrentService
     PersonAdvancedSearchViewService personAdvancedSearchViewService
+    EmailTypeCompositeService emailTypeCompositeService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
