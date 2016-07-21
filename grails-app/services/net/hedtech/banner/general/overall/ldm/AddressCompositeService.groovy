@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.overall.AddressGeographicAreasView
 import net.hedtech.banner.general.overall.AddressViewService
@@ -83,17 +84,20 @@ class AddressCompositeService extends LdmService {
                 geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
             }
         }
-
+        String nationISO
         addressesView.each { address ->
+            validateRegion(address)
+            nationISO = getNationISO(address, dataMap)
+            validateSubRegion(address, nationISO)
             String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
-            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), dataMap)
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO, dataMap)
         }
         return addresses
     }
 
 
-    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, def dataMap) {
-        AddressV6 addressV6 = new AddressV6(addressView, getNationISO(addressView, dataMap))
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String nationISO, def dataMap) {
+        AddressV6 addressV6 = new AddressV6(addressView, nationISO)
         addressV6.geographicAreas = []
         geographicAreasGUIDs.each { guid ->
             addressV6.geographicAreas << ["id": guid]
@@ -102,7 +106,7 @@ class AddressCompositeService extends LdmService {
     }
 
 
-    private getNationISO(AddressView addressView, def dataMap) {
+    private String getNationISO(AddressView addressView, def dataMap) {
         String nationISO
         if (addressView.sourceTable==COLLEGE_ADDRESS) {
             nationISO=addressView.countryCode
@@ -122,5 +126,21 @@ class AddressCompositeService extends LdmService {
         }
 
         return nationISO
+    }
+
+
+    private void validateRegion(AddressView addressView) {
+        if(addressView.countryRegionCode == null & addressView.stateCode != null & addressView.sourceTable != COLLEGE_ADDRESS){
+            throw new ApplicationException('Country Region', new BusinessLogicValidationException("soaxref.region.mapping.not.found.message", [addressView.stateCode]))
+        }
+    }
+
+
+    private void validateSubRegion(AddressView addressView, String nationISO) {
+        if(addressView.countrySubRegionCode == null & addressView.countyCode != null & addressView.sourceTable != COLLEGE_ADDRESS){
+            if(nationISO && nationISO.equals(CountryName.GBR)){
+                throw new ApplicationException('Country Sub Region', new BusinessLogicValidationException("soaxref.sub.region.mapping.not.found.message", [addressView.countyCode]))
+            }
+        }
     }
 }

@@ -97,6 +97,18 @@ class AddressView implements Serializable{
     String countryPostalCode
 
     /**
+     * State Code of Address
+     */
+    @Column(name="ADDRESS_STAT_CODE")
+    String stateCode
+
+    /**
+     * Address County code
+     */
+    @Column(name="ADDRESS_CNTY_CODE")
+    String countyCode
+
+    /**
      * Source of an Address
      */
     @Column(name="ADDRESS_SOURCE")

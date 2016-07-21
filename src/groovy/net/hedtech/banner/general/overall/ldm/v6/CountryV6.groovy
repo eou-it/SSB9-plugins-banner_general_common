@@ -26,8 +26,12 @@ class CountryV6 {
         this.code = isoCode
         this.title = addressView.countryTitle
         this.postalTitle = getPostalTitleByISOCode(isoCode)
-        this.region = new RegionV6(addressView.countryRegionCode, addressView.countryRegionTitle)
-        this.subRegion = new RegionV6(addressView.countrySubRegionCode, addressView.countrySubRegionTitle)
+        if(addressView.countryRegionCode || addressView.countryRegionTitle) {
+            this.region = new RegionV6(addressView.countryRegionCode, addressView.countryRegionTitle)
+        }
+        if(addressView.countrySubRegionCode || addressView.countrySubRegionTitle) {
+            this.subRegion = new RegionV6(addressView.countrySubRegionCode, addressView.countrySubRegionTitle)
+        }
         this.locality = addressView.countryLocality
         this.postalCode = getPostalCode(addressView,isoCode)
         this.deliveryPoint = addressView.deliveryPoint
