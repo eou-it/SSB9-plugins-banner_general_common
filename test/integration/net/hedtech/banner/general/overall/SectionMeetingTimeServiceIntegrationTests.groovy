@@ -577,7 +577,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def ischeduleType = "L"  //Unable to access ScheduleType
         def ifunction = new Function(code: "TTTTT",
                 description: "TTTTT",
-                etypCode: "TTTT")
+                etypCode: "EBRK")
         save ifunction
         def icommittee = CommitteeAndServiceType.findByCode("GRAD")
         def myFormat = 'MM/dd/yyyy'

@@ -57,12 +57,12 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull sectionCrossListSection.id
         assertEquals 0L, sectionCrossListSection.version
-        assertEquals "TT", sectionCrossListSection.xlstGroup
+        assertEquals "B1", sectionCrossListSection.xlstGroup
         assertEquals "TTTTT", sectionCrossListSection.courseReferenceNumber
 
         //Update the entity
         def testDate = new Date()
-        sectionCrossListSection.xlstGroup = "UU"
+        sectionCrossListSection.xlstGroup = "J1"
         sectionCrossListSection.courseReferenceNumber = "UUUUU"
         sectionCrossListSection.lastModified = testDate
         sectionCrossListSection.lastModifiedBy = "test"
@@ -71,7 +71,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
         sectionCrossListSection = SectionCrossListSection.get(sectionCrossListSection.id)
         assertEquals 1L, sectionCrossListSection?.version
-        assertEquals "UU", sectionCrossListSection.xlstGroup
+        assertEquals "J1", sectionCrossListSection.xlstGroup
         assertEquals "UUUUU", sectionCrossListSection.courseReferenceNumber
     }
 
@@ -149,7 +149,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         def term = Term.findByCode ( "201410")
 
         def sectionCrossListSection = new SectionCrossListSection(
-                xlstGroup: "TT",
+                xlstGroup: "B1",
                 courseReferenceNumber: "TTTTT",
                 term: term
         )
