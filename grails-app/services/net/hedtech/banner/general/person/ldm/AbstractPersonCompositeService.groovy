@@ -125,7 +125,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         def pidmToGuidMap = [:]
         if (requestProcessingResult.containsKey("pidms")) {
             List<Integer> pidms = requestProcessingResult.get("pidms")
-            def rows = personIdentificationNameCurrentService.fetchAllWithGuidByPidmInList(pidms, requestParams.sort.trim(), requestParams.order.trim())
+            def rows = personIdentificationNameCurrentService.fetchAllWithGuidByPidmInList(pidms, requestParams.sort?.trim(), requestParams.order?.trim())
             personCurrentEntities = rows?.collect { it.personIdentificationNameCurrent }
             pidmToGuidMap = getPidmToGuidMap(rows)
         }
