@@ -149,9 +149,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     protected Map processListApiRequest(final Map requestParams) {
-        String sortField = requestParams.sort.trim()
-        String sortOrder = requestParams.order.trim()
-        int max = requestParams.max.trim().toInteger()
+        String sortField = requestParams.sort?.trim()
+        String sortOrder = requestParams.order?.trim()
+        int max = requestParams.max?.trim()?.toInteger() ?: 0
         int offset = requestParams.offset?.trim()?.toInteger() ?: 0
 
         List<Integer> pidms

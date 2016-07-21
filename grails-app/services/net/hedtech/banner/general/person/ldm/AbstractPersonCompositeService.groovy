@@ -133,7 +133,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     protected getPidmsOfPopulationExtract(final Map requestParams) {
         String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
-        return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort.trim(), requestParams.order.trim(), requestParams.max.trim().toInteger(), requestParams.offset?.trim()?.toInteger() ?: 0)
+        return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort?.trim(), requestParams.order?.trim(), requestParams.max?.trim()?.toInteger() ?: 0, requestParams.offset?.trim()?.toInteger() ?: 0)
     }
 
 
