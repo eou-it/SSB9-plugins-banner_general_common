@@ -9,6 +9,7 @@ import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
 import org.springframework.transaction.annotation.Propagation
@@ -22,22 +23,32 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonFilterCompositeService personFilterCompositeService
     CommonMatchingCompositeService commonMatchingCompositeService
     PersonIdentificationNameCurrentService personIdentificationNameCurrentService
+    PersonAdvancedSearchViewService personAdvancedSearchViewService
 
 
-    abstract String getPopSelGuidOrDomainKey(final Map requestParams)
+    abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
 
 
-    abstract def prepareCommonMatchingRequest(final Map content)
+    abstract protected def prepareCommonMatchingRequest(final Map content)
 
 
-    abstract List<RoleName> getRolesRequired()
+    abstract protected Map processListApiRequest(final Map requestParams)
 
 
-    abstract def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
+    abstract protected List<RoleName> getRolesRequired()
 
 
-    def listQApi(final Map requestParams) {
-        def requestProcessingResult
+    abstract protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
+
+    /**
+     * GET /qapi/persons
+     *
+     * @param requestParams
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    def listQApi(Map requestParams) {
+        Map requestProcessingResult
         String contentType = getRequestRepresentation()
         log.debug "Content-Type: ${contentType}"
         if (contentType?.contains('person-filter')) {
@@ -47,7 +58,48 @@ abstract class AbstractPersonCompositeService extends LdmService {
             log.debug("Duplicate Check")
             requestProcessingResult = searchForMatchingPersons(requestParams)
         }
+
+        if (requestProcessingResult.containsKey("totalCount")) {
+            log.debug("Total records ${requestProcessingResult.totalCount}")
+            injectPropertyIntoParams(requestParams, "totalCount", requestProcessingResult.totalCount)
+        }
+
         return requestProcessingResult
+    }
+
+    /**
+     * GET /api/persons
+     *
+     * @param requestParams
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    def listApi(Map requestParams) {
+        Map requestProcessingResult = processListApiRequest(requestParams)
+
+        if (requestProcessingResult.containsKey("totalCount")) {
+            log.debug("Total records ${requestProcessingResult.totalCount}")
+            injectPropertyIntoParams(requestParams, "totalCount", requestProcessingResult.totalCount)
+        }
+
+        return createDecorators(requestParams, requestProcessingResult)
+    }
+
+    /**
+     * GET /api/persons
+     * or
+     * GET /qapi/persons
+     *
+     * The count method must return the total number of instances of the resource.
+     * It is used in conjunction with the list method when returning a list of resources.
+     * RestfulApiController will make call to "count" only if the "list" execution happens without any exception.
+     *
+     * @param requestParams
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    def count(Map requestParams) {
+        return getInjectedPropertyFromParams(requestParams, "totalCount")
     }
 
     /**
@@ -67,9 +119,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     def createDecorators(final Map requestParams, final Map requestProcessingResult) {
-        if (requestProcessingResult.containsKey("totalCount")) {
-            log.debug("Total records ${requestProcessingResult.totalCount}")
-        }
         List<PersonIdentificationNameCurrent> personCurrentEntities = []
         def pidmToGuidMap = [:]
         if (requestProcessingResult.containsKey("pidms")) {
@@ -295,12 +344,33 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def getPidmToGuidMap(def rows) {
+    private def getPidmToGuidMap(def rows) {
         Map<Integer, String> pidmToGuidMap = [:]
         rows?.each {
             pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
         }
         return pidmToGuidMap
+    }
+
+
+    private void injectPropertyIntoParams(Map params, String propName, def propVal) {
+        def injectedProps = [:]
+        if (params.containsKey("persons-injected") && params.get("persons-injected") instanceof Map) {
+            injectedProps = params.get("persons-injected")
+        } else {
+            params.put("persons-injected", injectedProps)
+        }
+        injectedProps.putAt(propName, propVal)
+    }
+
+
+    private def getInjectedPropertyFromParams(Map params, String propName) {
+        def propVal
+        def injectedProps = params.get("persons-injected")
+        if (injectedProps instanceof Map && injectedProps.containsKey(propName)) {
+            propVal = injectedProps.get(propName)
+        }
+        return propVal
     }
 
 }

@@ -20,8 +20,6 @@ import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.general.utility.IsoCodeService
-import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Timestamp
@@ -53,49 +51,114 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     AddressTypeCompositeService addressTypeCompositeService
     PersonAddressService personAddressService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
-    PersonAdvancedSearchViewService personAdvancedSearchViewService
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
 
-    static final int DEFAULT_PAGE_SIZE = 500
-    static final int MAX_PAGE_SIZE = 500
 
-    /**
-     * GET /api/persons
-     *
-     * @param params Request parameters
-     * @return
-     */
-    @Transactional(readOnly = true)
-    def list(Map params) {
-        log.trace "list v6:Begin"
+    @Override
+    String getPopSelGuidOrDomainKey(final Map requestParams) {
+        return requestParams.get("personFilter")
+    }
 
-        RestfulApiValidationUtility.correctMaxAndOffset(params, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
 
-        List allowedSortFields = ["firstName", "lastName"]
-        if (params.sort) {
-            RestfulApiValidationUtility.validateSortField(params.sort.trim(), allowedSortFields)
-        } else {
-            params.put('sort', allowedSortFields[1])
-        }
-        if (params.order) {
-            RestfulApiValidationUtility.validateSortOrder(params.order.trim())
-        } else {
-            params.put('order', "asc")
+    @Override
+    def prepareCommonMatchingRequest(final Map content) {
+        def cmRequest = [:]
+
+        // First name, middle name, last name
+        def personalName = content.names.find {
+            it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v6"] && it.firstName && it.lastName
         }
 
-        String sortField = params.sort.trim()
-        String sortOrder = params.order.trim()
-        int max = params.max.trim().toInteger()
-        int offset = params.offset?.trim()?.toInteger() ?: 0
+        def birthName = content.names.find {
+            it.type.category == NameTypeCategory.BIRTH.versionToEnumMap["v6"] && it.firstName && it.lastName
+        }
+
+        if (personalName && birthName) {
+            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("filter.together.not.supported", null))
+        }
+
+        def nameObj = personalName
+        if (!nameObj) {
+            nameObj = birthName
+        }
+        if (!nameObj) {
+            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.and.type.required.message", null))
+        }
+
+        cmRequest << [firstName: nameObj.firstName, lastName: nameObj.lastName]
+        if (nameObj.middleName) {
+            cmRequest << [mi: nameObj.middleName]
+        }
+
+        // Social Security Number
+        def credentialObj = content.credentials.find {
+            it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]
+        }
+        if (credentialObj?.value) {
+            cmRequest << [ssn: credentialObj?.value]
+        }
+
+        // Banner ID
+        credentialObj = content.credentials.find {
+            it.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]
+        }
+        if (credentialObj?.value) {
+            cmRequest << [bannerId: credentialObj?.value]
+        }
+
+        // Gender
+        String gender
+        if (content?.gender == 'male') {
+            gender = 'M'
+        } else if (content?.gender == 'female') {
+            gender = 'F'
+        } else if (content?.gender == 'unknown') {
+            gender = 'N'
+        }
+        if (gender) {
+            cmRequest << [sex: gender]
+        }
+
+        // Date of Birth
+        Date dob
+        if (content?.dateOfBirth) {
+            dob = convertString2Date(content?.dateOfBirth)
+            cmRequest << [dateOfBirth: dob]
+        }
+
+        // Emails
+        def personEmails = []
+        if (content?.emails) {
+            Map<String, String> bannerEmailTypeToHedmEmailTypeMap = emailTypeCompositeService.getBannerEmailTypeToHedmV6EmailTypeMap()
+            if (bannerEmailTypeToHedmEmailTypeMap) {
+                content?.emails.each {
+                    def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == it.type.emailType }
+                    if (mapEntry) {
+                        personEmails << [email: it.address, emailType: mapEntry.key]
+                    }
+                }
+            }
+            cmRequest << [personEmails: personEmails]
+        }
+
+        return cmRequest
+    }
+
+
+    protected Map processListApiRequest(final Map requestParams) {
+        String sortField = requestParams.sort.trim()
+        String sortOrder = requestParams.order.trim()
+        int max = requestParams.max.trim().toInteger()
+        int offset = requestParams.offset?.trim()?.toInteger() ?: 0
 
         List<Integer> pidms
         int totalCount = 0
 
-        if (params.containsKey("role")) {
-            String role = params.role?.trim()
+        if (requestParams.containsKey("role")) {
+            String role = requestParams.role?.trim()
             log.debug "Fetching persons with role $role ...."
             def returnMap
             if (role == RoleName.INSTRUCTOR.versionToEnumMap["v6"]) {
@@ -113,82 +176,65 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             } else if (role == RoleName.ADVISOR.versionToEnumMap["v6"]) {
                 returnMap = userRoleCompositeService.fetchAdvisors(sortField, sortOrder, max, offset)
             } else {
-                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", []))
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported.v6", null))
             }
             pidms = returnMap?.pidms
             totalCount = returnMap?.totalCount
             log.debug "${totalCount} persons found with role $role."
-        } else if (params.containsKey("credential.type") && params.containsKey("credential.value")) {
-            String credentialType = params.get("credential.type")?.trim()
-            String credentialValue = params.get("credential.value")?.trim()
-            if (credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
-                PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credentialValue)
-                if (personCurrent && personCurrent.entityIndicator == 'P') {
-                    pidms = [personCurrent.pidm]
-                    totalCount = 1
-                }
+        } else if (requestParams.containsKey("credential.type") || requestParams.containsKey("credential.value")) {
+            if (!requestParams.containsKey("credential.type")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.required", null))
             }
-        } else if (params.containsKey("lastName") || params.containsKey("firstName") || params.containsKey("middleName") || params.containsKey("lastNamePrefix") || params.containsKey("title") || params.containsKey("pedigree")) {
+
+            if (!requestParams.containsKey("credential.value")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.id.required", null))
+            }
+
+            String credentialType = requestParams.get("credential.type")?.trim()
+            String credentialValue = requestParams.get("credential.value")?.trim()
+
+            if (credentialType != CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", null))
+            }
+
+            def mapForSearch = [bannerId: credentialValue]
+            def entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
+            pidms = entities?.collect { it.pidm }
+            totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
+        } else if (requestParams.containsKey("lastName") || requestParams.containsKey("firstName") || requestParams.containsKey("middleName") || requestParams.containsKey("lastNamePrefix") || requestParams.containsKey("title") || requestParams.containsKey("pedigree")) {
             def mapForSearch = [:]
-            if (params.containsKey("lastName")) {
-                mapForSearch = [lastName: params.get("lastName")]
-            } else if (params.containsKey("firstName")) {
-                mapForSearch = [firstName: params.get("firstName")]
-            } else if (params.containsKey("middleName")) {
-                mapForSearch = [middleName: params.get("middleName")]
-            } else if (params.containsKey("lastNamePrefix")) {
-                mapForSearch = [surnamePrefix: params.get("lastNamePrefix")]
-            } else if (params.containsKey("title")) {
-                mapForSearch = [namePrefix: params.get("title")]
-            } else if (params.containsKey("pedigree")) {
-                mapForSearch = [nameSuffix: params.get("pedigree")]
+            if (requestParams.containsKey("lastName")) {
+                mapForSearch = [lastName: requestParams.get("lastName")]
+            } else if (requestParams.containsKey("firstName")) {
+                mapForSearch = [firstName: requestParams.get("firstName")]
+            } else if (requestParams.containsKey("middleName")) {
+                mapForSearch = [middleName: requestParams.get("middleName")]
+            } else if (requestParams.containsKey("lastNamePrefix")) {
+                mapForSearch = [surnamePrefix: requestParams.get("lastNamePrefix")]
+            } else if (requestParams.containsKey("title")) {
+                mapForSearch = [namePrefix: requestParams.get("title")]
+            } else if (requestParams.containsKey("pedigree")) {
+                mapForSearch = [nameSuffix: requestParams.get("pedigree")]
             }
             def entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
             pidms = entities?.collect { it.pidm }
             totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
-        } else if (params.containsKey("personFilter")) {
-            String guidOrDomainKey = params.get("personFilter")
-            def returnMap = personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, sortField, sortOrder, max, offset)
+        } else if (requestParams.containsKey("personFilter")) {
+            Map returnMap = getPidmsOfPopulationExtract(requestParams)
             pidms = returnMap?.pidms
             totalCount = returnMap?.totalCount
-            log.debug "${totalCount} persons in population extract ${guidOrDomainKey}."
+            log.debug "${totalCount} persons in population extract."
         } else {
             throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", null))
         }
 
-        injectPropertyIntoParams(params, "count", totalCount)
-
-        return createDecorators(params, [pidms: pidms, totalCount: totalCount])
+        return [pidms: pidms, totalCount: totalCount]
     }
 
-    /**
-     * GET /api/persons
-     *
-     * @param params Request parameters
-     * @return
-     */
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def count(Map params) {
-        log.trace "count v6: Begin: Request parameters ${params}"
-        return getInjectedPropertyFromParams(params, "count")
-    }
 
-    /**
-     * POST /api/persons
-     *
-     * @param content Request body
-     */
-    def create(Map content) {
-
-    }
-
-    /**
-     * PUT /api/persons/<guid>
-     *
-     * @param content Request body
-     */
-    def update(Map content) {
-
+    @Override
+    List<RoleName> getRolesRequired() {
+        return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
     }
 
 
@@ -961,124 +1007,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             decorator.countryCode = iso3CountryCode
         }
         return decorator
-    }
-
-
-    private void injectPropertyIntoParams(Map params, String propName, def propVal) {
-        def injectedProps = [:]
-        if (params.containsKey("persons-injected") && params.get("persons-injected") instanceof Map) {
-            injectedProps = params.get("persons-injected")
-        } else {
-            params.put("persons-injected", injectedProps)
-        }
-        injectedProps.putAt(propName, propVal)
-    }
-
-
-    private def getInjectedPropertyFromParams(Map params, String propName) {
-        def propVal
-        def injectedProps = params.get("persons-injected")
-        if (injectedProps instanceof Map && injectedProps.containsKey(propName)) {
-            propVal = injectedProps.get(propName)
-        }
-        return propVal
-    }
-
-
-    @Override
-    String getPopSelGuidOrDomainKey(final Map requestParams) {
-        return requestParams.get("personFilter")
-    }
-
-
-    @Override
-    def prepareCommonMatchingRequest(final Map content) {
-        def cmRequest = [:]
-
-        // First name, middle name, last name
-        def personalName = content.names.find {
-            it.type.category == NameTypeCategory.PERSONAL.versionToEnumMap["v6"] && it.firstName && it.lastName
-        }
-
-        def birthName = content.names.find {
-            it.type.category == NameTypeCategory.BIRTH.versionToEnumMap["v6"] && it.firstName && it.lastName
-        }
-
-        if (personalName && birthName) {
-            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("filter.together.not.supported", null))
-        }
-
-        def nameObj = personalName
-        if (!nameObj) {
-            nameObj = birthName
-        }
-        if (!nameObj) {
-            throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("name.and.type.required.message", null))
-        }
-
-        cmRequest << [firstName: nameObj.firstName, lastName: nameObj.lastName]
-        if (nameObj.middleName) {
-            cmRequest << [mi: nameObj.middleName]
-        }
-
-        // Social Security Number
-        def credentialObj = content.credentials.find {
-            it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]
-        }
-        if (credentialObj?.value) {
-            cmRequest << [ssn: credentialObj?.value]
-        }
-
-        // Banner ID
-        credentialObj = content.credentials.find {
-            it.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]
-        }
-        if (credentialObj?.value) {
-            cmRequest << [bannerId: credentialObj?.value]
-        }
-
-        // Gender
-        String gender
-        if (content?.gender == 'male') {
-            gender = 'M'
-        } else if (content?.gender == 'female') {
-            gender = 'F'
-        } else if (content?.gender == 'unknown') {
-            gender = 'N'
-        }
-        if (gender) {
-            cmRequest << [sex: gender]
-        }
-
-        // Date of Birth
-        Date dob
-        if (content?.dateOfBirth) {
-            dob = convertString2Date(content?.dateOfBirth)
-            cmRequest << [dateOfBirth: dob]
-        }
-
-        // Emails
-        def personEmails = []
-        if (content?.emails) {
-            Map<String, String> bannerEmailTypeToHedmEmailTypeMap = emailTypeCompositeService.getBannerEmailTypeToHedmV6EmailTypeMap()
-            if (bannerEmailTypeToHedmEmailTypeMap) {
-                content?.emails.each {
-                    def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == it.type.emailType }
-                    if (mapEntry) {
-                        personEmails << [email: it.address, emailType: mapEntry.key]
-                    }
-                }
-            }
-            cmRequest << [personEmails: personEmails]
-        }
-
-        return cmRequest
-    }
-
-
-    @Override
-    List<RoleName> getRolesRequired() {
-        return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
     }
 
 }

@@ -104,6 +104,96 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
+    protected Map processListApiRequest(final Map requestParams) {
+        String sortField = requestParams.sort.trim()
+        String sortOrder = requestParams.order.trim()
+        int max = requestParams.max.trim().toInteger()
+        int offset = requestParams.offset?.trim()?.toInteger() ?: 0
+
+        List<Integer> pidms
+        int totalCount = 0
+
+        if (requestParams.containsKey("role") && requestParams.containsKey("personFilter")) {
+            // Note: Just decide on priority and proceed in future
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("UnsupportedFilterCombination", null))
+        } else if (requestParams.containsKey("role") && (requestParams.containsKey("credentialType") || requestParams.containsKey("credentialId"))) {
+            // Note: These combinations should not be supported in future, as pagination is not possible
+            if (!requestParams.containsKey("credentialType")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.required", null))
+            }
+            if (!requestParams.containsKey("credentialId")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.id.required", null))
+            }
+            String credentialType = requestParams.get("credentialType")?.trim()
+            String credentialValue = requestParams.get("credentialId")?.trim()
+            if (credentialType != CredentialType.BANNER_ID.versionToEnumMap["v3"]) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", null))
+            }
+            def mapForSearch = [bannerId: credentialValue]
+            def entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
+            pidms = entities?.collect { it.pidm }
+            totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
+
+            // Now check if the persons has role
+            String role = requestParams.role?.trim()
+            log.debug "Fetching persons with role $role ...."
+            List<Object[]> rows
+            if (role == RoleName.INSTRUCTOR.versionToEnumMap["v3"]) {
+                rows = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
+            } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
+                rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
+            } else {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
+            }
+            pidms = rows?.collect { it[0].toInteger() }
+            totalCount = pidms?.size()
+        } else if (requestParams.containsKey("role")) {
+            String role = requestParams.role?.trim()
+            log.debug "Fetching persons with role $role ...."
+            def returnMap
+            if (role == RoleName.INSTRUCTOR.versionToEnumMap["v3"]) {
+                returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
+            } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
+                returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+            } else {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
+            }
+            pidms = returnMap?.pidms
+            totalCount = returnMap?.totalCount
+            log.debug "${totalCount} persons found with role $role."
+        } else if (requestParams.containsKey("credentialType") || requestParams.containsKey("credentialId")) {
+            if (!requestParams.containsKey("credentialType")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.required", null))
+            }
+
+            if (!requestParams.containsKey("credentialId")) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.id.required", null))
+            }
+
+            String credentialType = requestParams.get("credentialType")?.trim()
+            String credentialValue = requestParams.get("credentialId")?.trim()
+
+            if (credentialType != CredentialType.BANNER_ID.versionToEnumMap["v3"]) {
+                throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", null))
+            }
+
+            def mapForSearch = [bannerId: credentialValue]
+            def entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
+            pidms = entities?.collect { it.pidm }
+            totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
+        } else if (requestParams.containsKey("personFilter")) {
+            Map returnMap = getPidmsOfPopulationExtract(requestParams)
+            pidms = returnMap?.pidms
+            totalCount = returnMap?.totalCount
+            log.debug "${totalCount} persons in population extract."
+        } else {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.required", null))
+        }
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
     @Override
     List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR]

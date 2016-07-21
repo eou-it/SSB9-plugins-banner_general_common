@@ -62,7 +62,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         try {
-            personV6CompositeService.list(params)
+            personV6CompositeService.listApi(params)
             fail('Role is Required')
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'role.required'
@@ -77,7 +77,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         Map params = [role: "faculty"]
 
         try {
-            personV6CompositeService.list(params)
+            personV6CompositeService.listApi(params)
             fail('Invalid role for Person V6')
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'role.supported.v6'
@@ -90,7 +90,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: "instructor"]
-        def o_success_persons = personV6CompositeService.list(params)
+        def o_success_persons = personV6CompositeService.listApi(params)
 
         assertNotNull o_success_persons
         assertFalse o_success_persons.isEmpty()
@@ -106,7 +106,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: "student"]
-        def o_success_persons = personV6CompositeService.list(params)
+        def o_success_persons = personV6CompositeService.listApi(params)
 
         assertNotNull o_success_persons
         assertFalse o_success_persons.isEmpty()
@@ -122,7 +122,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: "alumni"]
-        def o_success_persons = personV6CompositeService.list(params)
+        def o_success_persons = personV6CompositeService.listApi(params)
 
         assertNotNull o_success_persons
         assertFalse o_success_persons.isEmpty()
@@ -137,7 +137,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: "employee"]
-        def o_success_persons = personV6CompositeService.list(params)
+        def o_success_persons = personV6CompositeService.listApi(params)
 
         assertNotNull o_success_persons
         assertFalse o_success_persons.isEmpty()
@@ -152,7 +152,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: "vendor"]
-        PersonV6 o_success_persons = personV6CompositeService.list(params).get(0)
+        PersonV6 o_success_persons = personV6CompositeService.listApi(params).get(0)
 
         assertNotNull o_success_persons
         assertNotNull o_success_persons.guid
@@ -174,7 +174,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: RoleName.ADVISOR.versionToEnumMap["v6"]]
-        List<PersonV6> o_success_persons = personV6CompositeService.list(params)
+        List<PersonV6> o_success_persons = personV6CompositeService.listApi(params)
 
         assertNotNull o_success_persons
         assertFalse o_success_persons.isEmpty()
@@ -192,7 +192,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         Map params = [role: RoleName.PROSPECTIVE_STUDENT.versionToEnumMap["v6"]]
-        List<PersonV6> o_success_persons = personV6CompositeService.list(params)
+        List<PersonV6> o_success_persons = personV6CompositeService.listApi(params)
 
         assertNotNull o_success_persons
         assertFalse o_success_persons.isEmpty()
@@ -213,7 +213,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def params = [role: "student", max: '2000', offset: '100']
 
-        def persons = personV6CompositeService.list(params)
+        def persons = personV6CompositeService.listApi(params)
         // verify pagination capped at 500
         assertEquals 500, persons.size()
         /*
@@ -228,7 +228,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithRoleStudentAndPaginationMaxTen() {
         def params = [role: "student", max: '10', offset: '5']
 
-        def persons = personV6CompositeService.list(params)
+        def persons = personV6CompositeService.listApi(params)
         assertNotNull persons
         assertEquals params.max, persons.size().toString()
         /*
@@ -243,7 +243,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testGetValid() {
         def params = [role: "student", max: '5']
 
-        def persons = personV6CompositeService.list(params)
+        def persons = personV6CompositeService.listApi(params)
         assertNotNull persons
         assertEquals params.max, persons.size().toString()
 
@@ -303,7 +303,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListSortByFirstNameASC() {
         def params = [role: "student", sort: "firstName", order: "ASC"]
 
-        def persons = personV6CompositeService.list(params)
+        def persons = personV6CompositeService.listApi(params)
         assertNotNull persons
         assertListIsSortedOnField(persons, params.sort, params.order)
     }
@@ -313,7 +313,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListNamesWithTypePersonal() {
         def params = [role: "student"]
 
-        def persons = personV6CompositeService.list(params)
+        def persons = personV6CompositeService.listApi(params)
         assertNotNull persons
 
         def personDetails = findOnePersonWithGivenBannerID(persons)
