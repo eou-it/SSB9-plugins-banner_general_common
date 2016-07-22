@@ -143,7 +143,7 @@ class AddressCompositeService extends LdmService {
 
     private void validateSubRegion(AddressView addressView, String nationISO) {
         if(addressView.countrySubRegionCode == null & addressView.countyCode != null & addressView.sourceTable != COLLEGE_ADDRESS){
-            if(nationISO && nationISO.equals(CountryName.GBR)){
+            if(nationISO?.equals(CountryName.GBR.toString())){
                 throw new ApplicationException('Country Sub Region', new BusinessLogicValidationException("soaxref.sub.region.mapping.not.found.message", [addressView.countyCode]))
             }
         }
