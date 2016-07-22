@@ -68,6 +68,7 @@ class AddressCompositeService extends LdmService {
         def dataMap = [:]
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         dataMap.put("getDefaultISOCountryCodeForAddress", integrationConfigurationService.getDefaultISOCountryCodeForAddress())
+        dataMap.put("defaultTitleForDefaultCountryCode", Nation.findByScodIso(dataMap.get("getDefaultISOCountryCodeForAddress")).nation)
         List<AddressV6> addresses = []
         List pidmsOrCodes = []
         addressesView.collect { address ->
@@ -122,6 +123,7 @@ class AddressCompositeService extends LdmService {
 
         if(!nationISO){
             nationISO = dataMap.get("getDefaultISOCountryCodeForAddress")
+            addressView.countryTitle = dataMap.get("defaultTitleForDefaultCountryCode")
         }
 
         if( dataMap.get("isInstitutionUsingISO2CountryCodes") ){
