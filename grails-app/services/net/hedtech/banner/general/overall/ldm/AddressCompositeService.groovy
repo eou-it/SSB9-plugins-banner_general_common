@@ -114,6 +114,9 @@ class AddressCompositeService extends LdmService {
         else {
             if (addressView.countryCode) {
                 nationISO = (Nation.findByCode(addressView.countryCode)).scodIso
+                if(nationISO == null) {
+                    throw new ApplicationException('Country ISO', new BusinessLogicValidationException("country.code.not.mapped.to.iso.code.message", [addressView.countryCode]))
+                }
             }
         }
 
