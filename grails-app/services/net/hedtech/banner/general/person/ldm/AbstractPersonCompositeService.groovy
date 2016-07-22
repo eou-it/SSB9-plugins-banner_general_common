@@ -13,12 +13,16 @@ import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
+import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Timestamp
 
 abstract class AbstractPersonCompositeService extends LdmService {
+
+    private static final int MAX_DEFAULT = 500
+    private static final int MAX_UPPER_LIMIT = 500
 
     UserRoleCompositeService userRoleCompositeService
     PersonFilterCompositeService personFilterCompositeService
@@ -43,28 +47,23 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
 
     /**
-     * GET /qapi/persons
+     * POST /qapi/persons
+     *
+     * Query-with-POST
+     * URL mapping with prefix qapi can be used to allow the use of a POST for querying a resource.
      *
      * @param requestParams
      * @return
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def listQApi(Map requestParams) {
-        Map requestProcessingResult
-        String contentType = getRequestRepresentation()
-        log.debug "Content-Type: ${contentType}"
-        if (contentType?.contains('person-filter')) {
-            log.debug "PopSel"
-            requestProcessingResult = getPidmsOfPopulationExtract(requestParams)
-        } else if (contentType?.contains("duplicate-check")) {
-            log.debug("Duplicate Check")
-            requestProcessingResult = searchForMatchingPersons(requestParams)
-        }
+        setPagingParams(requestParams)
 
-        if (requestProcessingResult.containsKey("totalCount")) {
-            log.debug("Total records ${requestProcessingResult.totalCount}")
-            injectPropertyIntoParams(requestParams, "totalCount", requestProcessingResult.totalCount)
-        }
+        setSortingParams(requestParams)
+
+        Map requestProcessingResult = processQueryWithPostRequest(requestParams)
+
+        injectTotalCountIntoParams(requestParams, requestProcessingResult)
 
         return requestProcessingResult
     }
@@ -77,12 +76,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     def listApi(Map requestParams) {
+        setPagingParams(requestParams)
+
+        setSortingParams(requestParams)
+
         Map requestProcessingResult = processListApiRequest(requestParams)
 
-        if (requestProcessingResult.containsKey("totalCount")) {
-            log.debug("Total records ${requestProcessingResult.totalCount}")
-            injectPropertyIntoParams(requestParams, "totalCount", requestProcessingResult.totalCount)
-        }
+        injectTotalCountIntoParams(requestParams, requestProcessingResult)
 
         return createDecorators(requestParams, requestProcessingResult)
     }
@@ -90,7 +90,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     /**
      * GET /api/persons
      * or
-     * GET /qapi/persons
+     * POST /qapi/persons
      *
      * The count method must return the total number of instances of the resource.
      * It is used in conjunction with the list method when returning a list of resources.
@@ -130,6 +130,21 @@ abstract class AbstractPersonCompositeService extends LdmService {
             pidmToGuidMap = getPidmToGuidMap(rows)
         }
         return createDecorators(personCurrentEntities, pidmToGuidMap)
+    }
+
+
+    protected Map processQueryWithPostRequest(final Map requestParams) {
+        Map requestProcessingResult
+        String contentType = getRequestRepresentation()
+        log.debug "Content-Type: ${contentType}"
+        if (contentType?.contains('person-filter')) {
+            log.debug "PopSel"
+            requestProcessingResult = getPidmsOfPopulationExtract(requestParams)
+        } else if (contentType?.contains("duplicate-check")) {
+            log.debug("Duplicate Check")
+            requestProcessingResult = searchForMatchingPersons(requestParams)
+        }
+        return requestProcessingResult
     }
 
 
@@ -346,12 +361,46 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
+    protected void setPagingParams(Map requestParams) {
+        RestfulApiValidationUtility.correctMaxAndOffset(requestParams, MAX_DEFAULT, MAX_UPPER_LIMIT)
+
+        if (!requestParams.containsKey("offset")) {
+            requestParams.put("offset", "0")
+        }
+    }
+
+
+    protected void setSortingParams(Map requestParams) {
+        def allowedSortFields = ["firstName", "lastName"]
+
+        if (requestParams.containsKey("sort")) {
+            RestfulApiValidationUtility.validateSortField(requestParams.sort, allowedSortFields)
+        } else {
+            requestParams.put('sort', allowedSortFields[1])
+        }
+
+        if (requestParams.containsKey("order")) {
+            RestfulApiValidationUtility.validateSortOrder(requestParams.order)
+        } else {
+            requestParams.put('order', "asc")
+        }
+    }
+
+
     private def getPidmToGuidMap(def rows) {
         Map<Integer, String> pidmToGuidMap = [:]
         rows?.each {
             pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
         }
         return pidmToGuidMap
+    }
+
+
+    private void injectTotalCountIntoParams(Map requestParams, Map requestProcessingResult) {
+        if (requestProcessingResult.containsKey("totalCount")) {
+            log.debug("X-Total-Count = ${requestProcessingResult.totalCount}")
+            injectPropertyIntoParams(requestParams, "totalCount", requestProcessingResult.totalCount)
+        }
     }
 
 

@@ -54,16 +54,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     NationCompositeService nationCompositeService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
+    def crossReferenceRuleService
 
 
     @Override
-    String getPopSelGuidOrDomainKey(final Map requestParams) {
+    protected String getPopSelGuidOrDomainKey(final Map requestParams) {
         return requestParams.get("personFilter")
     }
 
 
     @Override
-    def prepareCommonMatchingRequest(final Map content) {
+    protected def prepareCommonMatchingRequest(final Map content) {
         def cmRequest = [:]
 
         // First name, middle name, last name
@@ -232,12 +233,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     @Override
-    List<RoleName> getRolesRequired() {
+    protected List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
     }
 
 
-    def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
+    protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         def decorators = []
         if (entities) {
             List<Integer> pidms = entities?.collect {
@@ -352,8 +353,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (visaIntlInformation) {
                     dataMapForPerson << ["passport": visaIntlInformation]
                     dataMapForPerson << ["codeToNationMap": dataMap.codeToNationMap]
+                    if (visaIntlInformation.language) {
+                        dataMapForPerson << ["iso3LanguageCode": dataMap.stvlangCodeToISO3LangCodeMap.get(visaIntlInformation.language.code)]
+                    }
                 }
-
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
             }
@@ -485,6 +488,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 Map codeToNationMap = dataMapForPerson["codeToNationMap"]
                 decorator.identityDocuments = []
                 decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForPerson.get("isInstitutionUsingISO2CountryCodes"))
+                if (visaIntlInformation.language) {
+                    decorator.languages = []
+                    decorator.languages << ["code": dataMapForPerson["iso3LanguageCode"]]
+                }
             }
         }
         return decorator
@@ -639,9 +646,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             log.debug "Got ${codeToNationMap?.size() ?: 0} nations for given country codes"
         }
 
+        // ISO3 language codes
+        Set<String> stvlangCodes = pidmToPassportMap?.values().language.code.flatten().unique()
+        Map<String, String> stvlangCodeToISO3LangCodeMap = [:]
+        if (crossReferenceRuleService) {
+            stvlangCodeToISO3LangCodeMap = crossReferenceRuleService.getISO3LanguageCodes(stvlangCodes)
+        }
+
         // Put in Map
         dataMap.put("pidmToPassportMap", pidmToPassportMap)
         dataMap.put("codeToNationMap", codeToNationMap)
+        dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
     }
 
 

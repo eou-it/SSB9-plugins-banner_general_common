@@ -14,13 +14,13 @@ import net.hedtech.banner.general.system.ldm.NameTypeCategory
 class PersonV3CompositeService extends AbstractPersonCompositeService {
 
     @Override
-    String getPopSelGuidOrDomainKey(Map requestParams) {
+    protected String getPopSelGuidOrDomainKey(Map requestParams) {
         return requestParams.get("personFilter")
     }
 
 
     @Override
-    def prepareCommonMatchingRequest(Map content) {
+    protected def prepareCommonMatchingRequest(Map content) {
         def cmRequest = [:]
 
         // First name, middle name, last name
@@ -195,13 +195,13 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
 
     @Override
-    List<RoleName> getRolesRequired() {
+    protected List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR]
     }
 
 
     @Override
-    def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
+    protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         return []
     }
 

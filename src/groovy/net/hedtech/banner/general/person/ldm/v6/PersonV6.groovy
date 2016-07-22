@@ -32,6 +32,6 @@ class PersonV6 {
     List interests
     List<PersonAddressDecorator> addresses
     def identityDocuments
-
+    def languages
 
 }

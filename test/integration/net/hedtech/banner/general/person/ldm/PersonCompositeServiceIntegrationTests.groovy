@@ -810,7 +810,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithRoleFacultyAndPaginationV3() {
         setAcceptHeader("application/vnd.hedtech.integration.v3+json")
 
-        def params = [role: "faculty", max: '10', offset: '5']
+        def params = [role: "Faculty", max: '10', offset: '5']
 
         def persons = personCompositeService.list(params)
         persons.each {
@@ -827,7 +827,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         Map resultCount = userRoleCompositeService.fetchAllByRole(params1)
         assertTrue resultCount.count > 500
 
-        def params = [role: "student", max: '2000', offset: '100']
+        def params = [role: "Student", max: '2000', offset: '100']
         def persons = personCompositeService.list(params)
         // verify pagination capped at 500
         assertEquals 500, persons.size()
@@ -841,7 +841,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListapiWithRoleStudentAndPagination() {
         setAcceptHeader("application/vnd.hedtech.integration.v3+json")
 
-        def params = [role: "student", max: '10', offset: '5']
+        def params = [role: "Student", max: '10', offset: '5']
 
         def persons = personCompositeService.list(params)
         persons.each {
@@ -2373,7 +2373,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         params.put("credentialType", i_success_credential_type4_filter)
         params.put("credentialId", i_success_credential_filter);
-        params.put("role", "faculty")
+        params.put("role", "Faculty")
         decorators = personCompositeService.list(params)
         assert decorators.size() > 0
         assertEquals 1, decorators.size()
