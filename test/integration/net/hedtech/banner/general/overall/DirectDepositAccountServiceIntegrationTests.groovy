@@ -102,7 +102,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveHrAccountsWhereOneAccountExists() {
-        def pidm = PersonUtility.getPerson("MYE000003").pidm //49548
+        def pidm = PersonUtility.getPerson("GDP000003").pidm //49548
         def activeAccounts = directDepositAccountService.getActiveHrAccounts(pidm) // One account
 
         // Assert domain values
@@ -123,7 +123,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveHrAccountsWhereMultipleAccountsExist() {
-        def pidm = PersonUtility.getPerson("MYE000004").pidm //37700;
+        def pidm = PersonUtility.getPerson("GDP000004").pidm //37700;
         def activeAccounts = directDepositAccountService.getActiveHrAccounts(pidm) // Multiple accounts
 
         // Assert domain values

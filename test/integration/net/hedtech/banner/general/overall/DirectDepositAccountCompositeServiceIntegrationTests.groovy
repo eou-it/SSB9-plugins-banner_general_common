@@ -103,7 +103,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testRePrioritizeExistingAccount() {
-        def pidm = PersonUtility.getPerson("MYE000001").pidm
+        def pidm = PersonUtility.getPerson("GDP000001").pidm
 
         //   def existingItem = DirectDepositAccount.findById(1164) as DirectDepositAccount
         def account1
@@ -157,7 +157,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testRePrioritizeNewAccount() {
-        def pidm = PersonUtility.getPerson("MYE000001").pidm
+        def pidm = PersonUtility.getPerson("GDP000001").pidm
 
         def testBankRoutingInfo1 = [
                 bankRoutingNum: '748972234'
@@ -207,7 +207,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
      * No accounts
      */
     void testGetUserHrAllocationsNoAccounts() {
-        def pidm = PersonUtility.getPerson("MYE000001").pidm
+        def pidm = PersonUtility.getPerson("GDP000001").pidm
         def allocationsObj = directDepositAccountCompositeService.getUserHrAllocations(pidm) //36732 // No accounts
 
         // Assert domain values
@@ -222,7 +222,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
      *   100% allocated
      */
     void testGetUserHrAllocationsOneAccount() {
-        def pidm = PersonUtility.getPerson("MYE000003").pidm
+        def pidm = PersonUtility.getPerson("GDP000003").pidm
         def allocationsObj = directDepositAccountCompositeService.getUserHrAllocations(pidm) //49548 // One account
 
         // Assert domain values
@@ -247,7 +247,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
      *   Priority 3) 100% allocated
      */
     void testGetUserHrAllocationsThreeAccounts() {
-        def pidm = PersonUtility.getPerson("MYE000005").pidm
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
         def allocationsObj = directDepositAccountCompositeService.getUserHrAllocations(pidm) //36743 // Two accounts
 
         // Assert domain values
@@ -297,7 +297,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testReorderAccounts() {
-        def pidm = PersonUtility.getPerson("MYE000005").pidm
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
         def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
 
         accts[0].priority = 2
