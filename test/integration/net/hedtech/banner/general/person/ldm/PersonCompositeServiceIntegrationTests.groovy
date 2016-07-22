@@ -903,7 +903,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         def params = [:]
         params.put("personFilter", "xxxx")
-        params.put("role", "faculty")
+        params.put("role", "Faculty")
 
         try {
             personCompositeService.list(params)
@@ -2383,7 +2383,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         params.put("credentialType", i_success_credential_type4_filter)
         params.put("credentialId", i_success_credential_filter);
-        params.put("role", "student")
+        params.put("role", "Student")
         decorators = personCompositeService.list(params);
         assert decorators.size() > 0
         assertEquals 1, decorators.size()
