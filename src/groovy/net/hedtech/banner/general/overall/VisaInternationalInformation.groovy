@@ -15,7 +15,7 @@ import javax.persistence.*
 @NamedQueries(value = [
         @NamedQuery(name = "VisaInternationalInformation.fetchAllByPidmInList",
                 query = """FROM VisaInternationalInformation a
-        WHERE a.passportId IS NOT NULL AND a.pidm IN :pidms""")
+        WHERE a.pidm IN :pidms""")
 ])
 class VisaInternationalInformation implements Serializable {
 

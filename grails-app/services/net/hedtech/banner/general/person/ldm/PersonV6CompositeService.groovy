@@ -353,9 +353,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (visaIntlInformation) {
                     dataMapForPerson << ["passport": visaIntlInformation]
                     dataMapForPerson << ["codeToNationMap": dataMap.codeToNationMap]
-                    if (visaIntlInformation.language) {
-                        dataMapForPerson << ["iso3LanguageCode": dataMap.stvlangCodeToISO3LangCodeMap.get(visaIntlInformation.language.code)]
-                    }
+                }
+
+                // languages
+                if (dataMap.pidmToLanguageCodeMap.containsKey(it.pidm)) {
+                    dataMapForPerson << ["iso3LanguageCode": dataMap.stvlangCodeToISO3LangCodeMap.get(dataMap.pidmToLanguageCodeMap.get(it.pidm))]
                 }
 
                 decorators.add(createPersonV6(it, dataMapForPerson))
@@ -488,10 +490,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 Map codeToNationMap = dataMapForPerson["codeToNationMap"]
                 decorator.identityDocuments = []
                 decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForPerson.get("isInstitutionUsingISO2CountryCodes"))
-                if (visaIntlInformation.language) {
-                    decorator.languages = []
-                    decorator.languages << ["code": dataMapForPerson["iso3LanguageCode"]]
-                }
+            }
+
+            // languages
+            if (dataMapForPerson["iso3LanguageCode"]) {
+                decorator.languages = []
+                decorator.languages << ["code": dataMapForPerson["iso3LanguageCode"]]
             }
         }
         return decorator
@@ -631,10 +635,18 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     private void fetchPersonsPassportDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get GOBINTL records for persons
-        Map pidmToPassportMap = [:]
         List<VisaInternationalInformation> entities = visaInternationalInformationService.fetchAllByPidmInList(pidms)
+
+        // Passport
+        Map pidmToPassportMap = [:]
+        Map pidmToLanguageCodeMap = [:]
         entities?.each {
-            pidmToPassportMap.put(it.pidm, it)
+            if (it.passportId) {
+                pidmToPassportMap.put(it.pidm, it)
+            }
+            if(it.language?.code) {
+                pidmToLanguageCodeMap.put(it.pidm, it.language.code)
+            }
         }
 
         Set<String> issuingNationCodes = pidmToPassportMap?.values().nationIssue.flatten().unique()
@@ -647,7 +659,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         // ISO3 language codes
-        Set<String> stvlangCodes = pidmToPassportMap?.values().language.code.flatten().unique()
+        Set<String> stvlangCodes = entities.language.code.flatten().unique()
         Map<String, String> stvlangCodeToISO3LangCodeMap = [:]
         if (crossReferenceRuleService) {
             stvlangCodeToISO3LangCodeMap = crossReferenceRuleService.getISO3LanguageCodes(stvlangCodes)
@@ -656,6 +668,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         // Put in Map
         dataMap.put("pidmToPassportMap", pidmToPassportMap)
         dataMap.put("codeToNationMap", codeToNationMap)
+        dataMap.put("pidmToLanguageCodeMap", pidmToLanguageCodeMap)
         dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
     }
 
