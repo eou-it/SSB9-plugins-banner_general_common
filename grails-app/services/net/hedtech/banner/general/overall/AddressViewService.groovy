@@ -23,7 +23,7 @@ class AddressViewService extends ServiceBase {
     }
 
     def throwUnsupportedException() {
-        throw new ApplicationException(StudentChargeView, "@@r1:unsupported.operation@@")
+        throw new ApplicationException(AddressView, "@@r1:unsupported.operation@@")
     }
 
     public static List<AddressView> fetchAll(int max=0, int offset=-1){
