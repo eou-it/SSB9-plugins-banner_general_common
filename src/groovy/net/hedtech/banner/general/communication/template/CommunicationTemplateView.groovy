@@ -12,32 +12,10 @@ import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
-/*
-CREATE OR REPLACE FORCE VIEW gvq_gcbtmpl
-(
-   surrogate_id
-  ,name
-  ,description
-  ,folder_name
-  ,active
-  ,communication_channel
-)
- */
 @Entity
 @Table(name = "GVQ_GCBTMPL")
 @EqualsAndHashCode
 @ToString
-//@NamedQueries(value = [
-//        @NamedQuery(name = "CommunicationTemplateView.fetchByTemplateNameAndFolderName",
-//                query = """ FROM CommunicationTemplate a
-//                    WHERE a.folder.name = :folderName
-//                      AND upper(a.name) = upper(:templateName)"""),
-//        @NamedQuery(name = "CommunicationTemplate.existsAnotherNameFolder",
-//                query = """ FROM CommunicationTemplate a
-//                    WHERE a.folder.name = :folderName
-//                    AND   upper(a.name) = upper(:templateName)
-//                    AND   a.id <> :id""")
-//])
 public class CommunicationTemplateView implements Serializable {
     /**
      * KEY: Generated unique key.
@@ -99,33 +77,6 @@ public class CommunicationTemplateView implements Serializable {
     @Column(name = "version")
     Long version
 
-
-//    /******************* Named Queries *******************/
-//
-//    public static CommunicationTemplate fetchByTemplateNameAndFolderName(String templateName, String folderName) {
-//
-//        def query
-//        CommunicationTemplate.withSession { session ->
-//            query = session.getNamedQuery('CommunicationTemplate.fetchByTemplateNameAndFolderName')
-//                    .setString('folderName', folderName)
-//                    .setString('templateName', templateName)
-//                    .list()[0]
-//        }
-//        return query
-//    }
-//
-//    public static Boolean existsAnotherNameFolder(Long templateId, String templateName, String folderName) {
-//
-//        def query
-//        CommunicationTemplate.withSession { session ->
-//            query = session.getNamedQuery('CommunicationTemplate.existsAnotherNameFolder')
-//                    .setString('folderName', folderName)
-//                    .setString('templateName', templateName)
-//                    .setLong('id', templateId).list()[0]
-//
-//        }
-//        return (query != null)
-//    }
 
     /**
      * Return list of templates along with count for display on list page

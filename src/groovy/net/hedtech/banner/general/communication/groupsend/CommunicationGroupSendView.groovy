@@ -72,6 +72,9 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "template_name")
     String templateName;
 
+    @Column(name = "template_id")
+    String templateId;
+
     @Column(name = "population_name")
     String populationName;
 

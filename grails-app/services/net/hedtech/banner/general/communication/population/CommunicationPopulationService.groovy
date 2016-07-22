@@ -35,7 +35,7 @@ class CommunicationPopulationService extends ServiceBase {
             validateFolder( population.getFolder().id )
 
         if (CommunicationPopulation.fetchByPopulationNameAndFolderName(population.name, population.folder.name))
-            throw new ApplicationException(CommunicationPopulation, "@@r1:not.unique.message@@")
+            throw new ApplicationException(CommunicationPopulation, "@@r1:not.unique.message:" + population.getFolder().name  +"@@")
 
         def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
         if (creatorId == null) {
