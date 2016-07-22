@@ -90,13 +90,13 @@ class AddressCompositeService extends LdmService {
             nationISO = getNationISO(address, dataMap)
             validateSubRegion(address, nationISO)
             String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
-            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO, dataMap)
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO)
         }
         return addresses
     }
 
 
-    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String nationISO, def dataMap) {
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String nationISO) {
         AddressV6 addressV6 = new AddressV6(addressView, nationISO)
         addressV6.geographicAreas = []
         geographicAreasGUIDs.each { guid ->

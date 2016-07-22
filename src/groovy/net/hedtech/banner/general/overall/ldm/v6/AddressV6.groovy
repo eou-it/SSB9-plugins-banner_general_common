@@ -14,7 +14,10 @@ class AddressV6 {
 
     def AddressV6(AddressView addressView, String countryCode){
         this.guid = addressView.id
-        this.addressLines = getAddressLines(addressView)
+        List<String> addressLines = getAddressLines(addressView)
+        if(addressLines?.size() > 0) {
+            this.addressLines = addressLines
+        }
         if(countryCode) {
             CountryV6 country = new CountryV6(countryCode, addressView)
             this.place = new PlaceV6(country)
