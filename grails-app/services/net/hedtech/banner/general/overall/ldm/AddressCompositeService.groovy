@@ -72,12 +72,17 @@ class AddressCompositeService extends LdmService {
         List<AddressV6> addresses = []
         List pidmsOrCodes = []
         addressesView.collect { address ->
-            pidmsOrCodes << address.pidmOrCode
+            if (!address.sourceTable.equals(COLLEGE_ADDRESS)) {
+                pidmsOrCodes << address.pidmOrCode
+            }
         }
-        List<AddressGeographicAreasView> geographicAreasView = AddressGeographicAreasView.fetchAllByPidm(pidmsOrCodes)
+        List<AddressGeographicAreasView> geographicAreasView
+        if (pidmsOrCodes?.size() > 0) {
+            geographicAreasView = AddressGeographicAreasView.fetchAllByPidm(pidmsOrCodes)
+        }
         Map geographicAreasGUID = [:]
         geographicAreasView.each { geographicArea ->
-            String geoAreaKey = geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber + geographicArea.geographicAreasSource
+            String geoAreaKey = geographicArea.geographicAreasSource + geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber
             List<String> guids = geographicAreasGUID.get(geoAreaKey)
             if(guids){
                 guids << geographicArea.id
@@ -90,7 +95,7 @@ class AddressCompositeService extends LdmService {
             validateRegion(address)
             nationISO = getNationISO(address, dataMap)
             validateSubRegion(address, nationISO)
-            String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
+            String addressKey = address.sourceTable + address.pidmOrCode + address.atypCode + address.sequenceNumber
             addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO, dataMap)
         }
         return addresses
