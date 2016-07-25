@@ -91,14 +91,14 @@ class AddressCompositeService extends LdmService {
             nationISO = getNationISO(address, dataMap)
             validateSubRegion(address, nationISO)
             String addressKey = address.pidmOrCode + address.atypCode + address.sequenceNumber + address.sourceTable
-            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO)
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO, dataMap)
         }
         return addresses
     }
 
 
-    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String nationISO) {
-        AddressV6 addressV6 = new AddressV6(addressView, nationISO)
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String nationISO, def dataMap) {
+        AddressV6 addressV6 = new AddressV6(addressView, nationISO, dataMap)
         addressV6.geographicAreas = []
         geographicAreasGUIDs.each { guid ->
             addressV6.geographicAreas << ["id": guid]
@@ -123,7 +123,7 @@ class AddressCompositeService extends LdmService {
 
         if(!nationISO){
             nationISO = dataMap.get("getDefaultISOCountryCodeForAddress")
-            addressView.countryTitle = dataMap.get("defaultTitleForDefaultCountryCode")
+            //addressView.countryTitle = dataMap.get("defaultTitleForDefaultCountryCode")
         }
 
         if( dataMap.get("isInstitutionUsingISO2CountryCodes") ){

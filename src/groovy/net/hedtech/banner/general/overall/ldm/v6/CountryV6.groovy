@@ -22,9 +22,14 @@ class CountryV6 {
     String carrierRoute
     String correctionDigit
 
-    CountryV6(String isoCode, AddressView addressView){
+    CountryV6(String isoCode, AddressView addressView, def dataMap){
         this.code = isoCode
-        this.title = addressView.countryTitle
+        if(addressView.countryTitle){
+            this.title = addressView.countryTitle
+        } else {
+            this.title = dataMap.get("defaultTitleForDefaultCountryCode")
+        }
+
         this.postalTitle = getPostalTitleByISOCode(isoCode)
         if(addressView.countryRegionCode || addressView.countryRegionTitle) {
             this.region = new RegionV6(addressView.countryRegionCode, addressView.countryRegionTitle)

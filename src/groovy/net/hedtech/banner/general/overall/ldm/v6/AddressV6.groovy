@@ -12,14 +12,14 @@ class AddressV6 {
     PlaceV6 place
     List geographicAreas
 
-    def AddressV6(AddressView addressView, String countryCode){
+    def AddressV6(AddressView addressView, String countryCode, def dataMap){
         this.guid = addressView.id
         List<String> addressLines = getAddressLines(addressView)
         if(addressLines?.size() > 0) {
             this.addressLines = addressLines
         }
         if(countryCode) {
-            CountryV6 country = new CountryV6(countryCode, addressView)
+            CountryV6 country = new CountryV6(countryCode, addressView, dataMap)
             this.place = new PlaceV6(country)
         }
     }
