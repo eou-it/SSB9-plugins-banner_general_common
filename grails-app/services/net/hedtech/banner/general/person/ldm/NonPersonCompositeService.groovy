@@ -9,14 +9,18 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.NonPersonDecorator
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.EmailV6
+import net.hedtech.banner.general.person.ldm.v6.PersonAddressDecorator
 import net.hedtech.banner.general.person.ldm.v6.PhoneV6
 import net.hedtech.banner.general.person.ldm.v6.RoleV6
 import net.hedtech.banner.general.person.view.NonPersonPersonView
 import net.hedtech.banner.general.person.view.NonPersonPersonViewService
+import net.hedtech.banner.general.system.ldm.AddressTypeCompositeService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.PhoneTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
+import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
+import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 
@@ -32,6 +36,10 @@ class NonPersonCompositeService extends LdmService {
     NonPersonRoleCompositeService nonPersonRoleCompositeService
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
+    PersonAddressService personAddressService
+    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
+    AddressTypeCompositeService addressTypeCompositeService
+
 
     /**
      * GET /api/organizations
@@ -107,6 +115,7 @@ class NonPersonCompositeService extends LdmService {
             dataMap.put("pidmToGuidMap", pidmToGuidMap)
             fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
             fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
+            fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
 
             entities?.each {
                 def dataMapForPerson = [:]
@@ -141,6 +150,15 @@ class NonPersonCompositeService extends LdmService {
                     dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
                     dataMapForPerson << ["phoneCodeToGuidMap": dataMap.phoneCodeToGuidMap]
                 }
+                // addresses
+                List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(it.pidm)
+                if (personAddresses) {
+                    dataMapForPerson << ["personAddresses": personAddresses]
+                    dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
+                    dataMapForPerson << ["addressTypeCodeToGuidMap": dataMap.addressTypeCodeToGuidMap]
+                    dataMapForPerson << ["personAddressSurrogateIdToGuidMap": dataMap.personAddressSurrogateIdToGuidMap]
+                }
+
                 decorators.add(createNonPersonV6(it, dataMapForPerson))
             }
         }
@@ -188,6 +206,18 @@ class NonPersonCompositeService extends LdmService {
                 decorator.phones = []
                 personTelephoneListList.each {
                     decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
+                }
+            }
+
+            // Addresses
+            List<PersonAddress> personAddresses = dataMapForPerson["personAddresses"]
+            if (personAddresses) {
+                Map addressTypeCodeToGuidMap = dataMapForPerson["addressTypeCodeToGuidMap"]
+                Map bannerAddressTypeToHedmAddressTypeMap = dataMapForPerson["bannerAddressTypeToHedmAddressTypeMap"]
+                Map personAddressSurrogateIdToGuidMap = dataMapForPerson["personAddressSurrogateIdToGuidMap"]
+                decorator.addresses = []
+                personAddresses.each {
+                    decorator.addresses << createPersonAddressDecorator(it, personAddressSurrogateIdToGuidMap.get(it.id), addressTypeCodeToGuidMap.get(it.addressType.code), bannerAddressTypeToHedmAddressTypeMap.get(it.addressType.code))
                 }
             }
         }
@@ -268,6 +298,63 @@ class NonPersonCompositeService extends LdmService {
         return pidmToPhoneInfoMap
     }
 
+    private Map fetchPersonAddressByPIDMs(Collection<Integer> pidms, Collection<String> addressTypeCodes) {
+        Map pidmToAddressInfoMap = [:]
+        if (pidms && addressTypeCodes) {
+            log.debug "Getting SV_SPRADDR records for ${pidms?.size()} PIDMs..."
+            List<PersonAddress> entities = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes(pidms, addressTypeCodes)
+            log.debug "Got ${entities?.size()} SV_SPRADDR records"
+            entities?.each {
+                List<PersonAddress> personAddresses = []
+                if (pidmToAddressInfoMap.containsKey(it.pidm)) {
+                    personAddresses = pidmToAddressInfoMap.get(it.pidm)
+                } else {
+                    pidmToAddressInfoMap.put(it.pidm, personAddresses)
+                }
+                personAddresses.add(it)
+            }
+        }
+        return pidmToAddressInfoMap
+    }
+
+
+    private void fetchPersonsAddressDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+
+        //Get Mapped Codes for Address Types
+        Map<String, String> bannerAddressTypeToHedmAddressTypeMap = addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
+
+        // Get GUIDs for Address types
+        Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(bannerAddressTypeToHedmAddressTypeMap.keySet())
+        log.debug "Got ${addressTypeCodeToGuidMap?.size() ?: 0} GUIDs for given AddressType codes"
+
+        // Get SPRADDR records for persons
+        Map pidmToAddressesMap = fetchPersonAddressByPIDMs(pidms, addressTypeCodeToGuidMap.keySet())
+
+        Set<Long> personAddressSurrogateIds = pidmToAddressesMap?.values().id.flatten() as Set
+
+        Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
+
+        // Put in Map
+        dataMap.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
+        dataMap.put("pidmToAddressesMap", pidmToAddressesMap)
+        dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
+        dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
+    }
+
+
+    private Map getPersonAddressSurrogateIdToGuidMap(Collection<String> personAddressSurrogateIds) {
+        Map personAddressSurrogateIdToGuidMap = [:]
+        if (personAddressSurrogateIds) {
+            log.debug "Getting SPRADDR records for ${personAddressSurrogateIds?.size()} PIDMs..."
+            List<PersonAddressExtendedProperties> entities = personAddressExtendedPropertiesService.fetchAllBySurrogateIds(personAddressSurrogateIds)
+            log.debug "Got ${entities?.size()} SPRADDR records"
+            entities?.each {
+                personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
+            }
+        }
+        return personAddressSurrogateIdToGuidMap
+    }
+
 
     private def getPidmToVendorRoleMap(List<Integer> pidms) {
         def pidmToVendorRoleMap = [:]
@@ -312,6 +399,16 @@ class NonPersonCompositeService extends LdmService {
             phoneV6.preference = 'primary'
         }
         return phoneV6
+    }
+
+
+    private PersonAddressDecorator createPersonAddressDecorator(PersonAddress personAddress, String addressGuid, String addressTypeGuid, String addressType) {
+        PersonAddressDecorator personAddressDecorator = new PersonAddressDecorator()
+        personAddressDecorator.addressGuid = addressGuid
+        personAddressDecorator.type = new AddressTypeDecorator(null, null, addressTypeGuid, addressType)
+        personAddressDecorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.fromDate)
+        personAddressDecorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(personAddress.toDate)
+        return personAddressDecorator
     }
 
     private def getPidmToGuidMap(def rows) {
