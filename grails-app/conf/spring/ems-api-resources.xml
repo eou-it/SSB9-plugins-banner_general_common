@@ -195,19 +195,21 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-organizations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-educationalinstitutionunits-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>organizations</value>
         </constructor-arg>
         <constructor-arg name="version">
-            <value>1</value>
+            <value>6</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/organizations/</value>
+            <value>/educational-institution-units/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
                 <value>HEDM.College.STVCOLL</value>
+                <value>HEDM.Department.STVDEPT</value>
+                <value>HEDM.Division.STVDIVS</value>
             </list>
         </constructor-arg>
     </bean>
@@ -669,6 +671,25 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-educationalinstitutions-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>interests</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/educational-institutions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.SourceBackgroundInstitution.STVSBGI</value>
+                <value>HEDM.SourceBackgroundInstBase.SOBSBGI</value>
+                <value>HEDM.InstitutionalDescription.GUBINST</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
@@ -682,7 +703,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-instmethods"/>
                 <ref bean="ar-instplatforms"/>
                 <ref bean="ar-maritalstatuses"/>
-                <ref bean="ar-organizations"/>
+                <ref bean="ar-educationalinstitutionunits-v6"/>
                 <ref bean="ar-persons"/>
                 <ref bean="ar-personfilters"/>
                 <ref bean="ar-races"/>
@@ -711,6 +732,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-personNameTypes-v6"/>
                 <ref bean="ar-personHoldTypes-v6"/>
                 <ref bean="ar-academicHonors-v6"/>
+                <ref bean="ar-educationalinstitutions-v6"/>
             </list>
         </property>
     </bean>
@@ -726,7 +748,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-instmethods"/>
                 <ref bean="ar-instplatforms"/>
                 <ref bean="ar-maritalstatuses"/>
-                <ref bean="ar-organizations"/>
+                <ref bean="ar-educationalinstitutionunits-v6"/>
                 <ref bean="ar-persons"/>
                 <ref bean="ar-personfilters"/>
                 <ref bean="ar-races"/>
@@ -755,6 +777,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-personNameTypes-v6"/>
                 <ref bean="ar-personHoldTypes-v6"/>
                 <ref bean="ar-academicHonors-v6"/>
+                <ref bean="ar-educationalinstitutions-v6"/>
             </list>
         </property>
     </bean>
