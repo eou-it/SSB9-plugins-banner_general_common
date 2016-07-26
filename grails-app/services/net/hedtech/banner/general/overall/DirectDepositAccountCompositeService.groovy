@@ -377,6 +377,8 @@ class DirectDepositAccountCompositeService {
                     model.docAccts[i].net = acct.phrdocm_net
 
                     model.totalNet += acct.phrdocm_net
+
+                    model.docAccts[i].net = formatCurrency(model.docAccts[i].net)
                 }
             } else {
 
