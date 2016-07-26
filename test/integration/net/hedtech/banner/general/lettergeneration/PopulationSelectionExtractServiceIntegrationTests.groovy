@@ -16,9 +16,9 @@ class PopulationSelectionExtractServiceIntegrationTests extends BaseIntegrationT
 
     //Test data for creating new domain instance
     //Valid test data (For success tests)
-    def i_success_application = "TTTTT"
-    def i_success_selection = "TTTTT"
-    def i_success_creatorId = "TTTTT"
+    def i_success_application = "GENERAL"
+    def i_success_selection = "ALL"
+    def i_success_creatorId = "BANNER"
     def i_success_key = "TTTTT"
     def i_success_systemIndicator = "M"
     def i_success_selectIndicator = "Y"
