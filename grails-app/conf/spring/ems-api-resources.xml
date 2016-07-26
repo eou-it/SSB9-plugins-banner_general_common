@@ -237,6 +237,38 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+
+    <bean id="ar-persons-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>persons</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/persons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.Person.SPRIDEN</value>
+                <value>HEDM.Person.GORVISA</value>
+                <value>HEDM.Person.GOBINTL</value>
+                <value>HEDM.Person.SORINTS</value>
+                <value>HEDM.Person.GOREMAL</value>
+                <value>HEDM.Person.GORPRAC</value>
+                <value>HEDM.Person.GORADID</value>
+                <value>HEDM.Person.GOBSRID</value>
+                <value>HEDM.Person.GOBTPAC</value>
+                <value>HEDM.Person.GOBUMAP</value>
+                <value>HEDM.Person.SIBINST</value>
+                <value>HEDM.Person.PEBEMPL</value>
+                <value>HEDM.Person.FTVVEND</value>
+                <value>HEDM.Person.APRCATG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="ar-personfilters" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>person-filters</value>
@@ -732,6 +764,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-personNameTypes-v6"/>
                 <ref bean="ar-personHoldTypes-v6"/>
                 <ref bean="ar-academicHonors-v6"/>
+                <ref bean="ar-interests-v5"/>
+                <ref bean="ar-persons-v6"/>
                 <ref bean="ar-educationalinstitutions-v6"/>
             </list>
         </property>
@@ -777,6 +811,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-personNameTypes-v6"/>
                 <ref bean="ar-personHoldTypes-v6"/>
                 <ref bean="ar-academicHonors-v6"/>
+                <ref bean="ar-interests-v5"/>
+                <ref bean="ar-persons-v6"/>
                 <ref bean="ar-educationalinstitutions-v6"/>
             </list>
         </property>
