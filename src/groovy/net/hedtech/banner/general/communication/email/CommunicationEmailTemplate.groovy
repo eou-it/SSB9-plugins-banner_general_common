@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
 
 import javax.persistence.Column
+import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
 import javax.persistence.PrimaryKeyJoinColumn
 import javax.persistence.Table
@@ -65,12 +66,10 @@ class CommunicationEmailTemplate extends CommunicationTemplate implements Serial
         fromList(nullable: true, maxSize: 1020)
         subject(nullable: true, maxSize: 1020)
         toList(nullable: true, maxSize: 1020)
-
     }
 
-    @Override
-    CommunicationChannel getCommunicationChannel() {
-        return CommunicationChannel.EMAIL
+    public CommunicationEmailTemplate() {
+        super( CommunicationChannel.EMAIL )
     }
 
     @Override

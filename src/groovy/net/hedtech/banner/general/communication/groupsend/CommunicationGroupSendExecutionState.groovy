@@ -43,7 +43,7 @@ enum CommunicationGroupSendExecutionState implements Serializable {
     }
 
     boolean isRunning() {
-        return this.equals(Calculating) || this.equals(Processing);
+        return !terminal;
     }
 
 }

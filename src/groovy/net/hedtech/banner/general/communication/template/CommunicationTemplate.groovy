@@ -9,6 +9,7 @@ import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.FlushMode
+import org.hibernate.annotations.DiscriminatorOptions
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -144,10 +145,12 @@ public abstract class CommunicationTemplate implements Serializable {
     @Column(name = "GCBTMPL_DATA_ORIGIN")
     String dataOrigin
 
-
     @Column(name="GCBTMPL_VPDI_CODE", insertable = false, updatable = false )
     String mepCode
 
+    @Column(name="GCBTMPL_COMM_CHANNEL")
+    @Enumerated(value = EnumType.STRING)
+    CommunicationChannel communicationChannel
 
     static constraints = {
         name(nullable: false, maxSize: 250)
@@ -162,15 +165,12 @@ public abstract class CommunicationTemplate implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable: true)
+        communicationChannel(nullable: false)
     }
 
-    /**
-     * Temporary method implemented by subclasses to indicate which kind of communication channel each serves.
-     * Eventually templates will support more than one kind of communication channel and the choice of channel
-     * between will be a runtime decision based on channels supported by the template and the parameters of
-     * the communication plan.
-     */
-    public abstract CommunicationChannel getCommunicationChannel()
+    CommunicationTemplate( CommunicationChannel communicationChannel ) {
+        this.communicationChannel = communicationChannel
+    }
 
     /**
      * Calls the visitor method that pertains to type of this object. An email template will call the

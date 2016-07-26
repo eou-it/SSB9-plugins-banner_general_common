@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -71,6 +72,10 @@ class CommunicationGroupSendView implements Serializable {
 
     @Column(name = "template_name")
     String templateName;
+
+    @Column(name = "comm_channel")
+    @Enumerated(value = EnumType.STRING)
+    CommunicationChannel communicationChannel
 
     @Column(name = "template_id")
     String templateId;

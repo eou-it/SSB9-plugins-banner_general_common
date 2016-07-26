@@ -7,7 +7,7 @@ public enum CommunicationChannel implements Serializable {
 
     EMAIL,
     MOBILE_NOTIFICATION,
-    LETTER, // reserved
+    LETTER,
     ERROR, // reserved
     MANUAL_INTERACTION
 

@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
 
 import javax.persistence.Column
+import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
 import javax.persistence.Lob
 import javax.persistence.PrimaryKeyJoinColumn
@@ -40,9 +41,8 @@ class CommunicationLetterTemplate extends CommunicationTemplate implements Seria
         content(nullable: true)
     }
 
-    @Override
-    CommunicationChannel getCommunicationChannel() {
-        return CommunicationChannel.LETTER
+    public CommunicationLetterTemplate() {
+        super( CommunicationChannel.LETTER )
     }
 
     @Override

@@ -58,6 +58,10 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
     @Type(type="yes_no")
     boolean sticky = false
 
+    public CommunicationMobileNotificationTemplate() {
+        super( CommunicationChannel.MOBILE_NOTIFICATION )
+    }
+
     static constraints = {
         mobileHeadline(nullable: true)
         headline(nullable: true)
@@ -70,11 +74,6 @@ class CommunicationMobileNotificationTemplate extends CommunicationTemplate impl
         expirationDateTime(nullable: true)
         push(nullable: false)
         sticky(nullable: false)
-    }
-
-    @Override
-    CommunicationChannel getCommunicationChannel() {
-        return CommunicationChannel.MOBILE_NOTIFICATION
     }
 
     @Override

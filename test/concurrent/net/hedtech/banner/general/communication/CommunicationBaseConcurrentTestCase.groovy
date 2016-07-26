@@ -296,6 +296,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
         try {
             communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+            fail( "Expected cannotDeleteRunningGroupSend" )
         } catch (ApplicationException e) {
             assertEquals( "@@r1:cannotDeleteRunningGroupSend@@", e.getWrappedException().getMessage() )
         }

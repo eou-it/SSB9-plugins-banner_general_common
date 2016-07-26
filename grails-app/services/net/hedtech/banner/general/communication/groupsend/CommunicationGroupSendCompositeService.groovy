@@ -261,7 +261,7 @@ class CommunicationGroupSendCompositeService {
                 "generateGroupSendItems",
                 ["groupSendId": groupSend.id]
         )
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
         groupSend = communicationGroupSendService.update(groupSend)
         return groupSend
     }
