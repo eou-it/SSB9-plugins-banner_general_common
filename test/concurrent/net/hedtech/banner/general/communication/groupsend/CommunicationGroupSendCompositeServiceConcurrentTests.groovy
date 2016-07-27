@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import static org.junit.Assert.assertEquals
@@ -144,7 +145,18 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 3, runningList.size() )
 
         assertTrue( groupSendB.currentExecutionState.isRunning() )
-        groupSendB = communicationGroupSendCompositeService.stopGroupSend( groupSendB.id )
+
+        int retries = 2
+        while(retries > 0) {
+            retries--
+            try {
+                groupSendB = communicationGroupSendCompositeService.stopGroupSend(groupSendB.id)
+            } catch (HibernateOptimisticLockingFailureException e) {
+                if(retries == 0) {
+                    throw e
+                }
+            }
+        }
         assertTrue( groupSendB.currentExecutionState.isTerminal() )
 
         runningList = communicationGroupSendService.findRunning()
@@ -163,16 +175,11 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
-        List runningList = communicationGroupSendService.findRunning()
-        assertEquals( 1, runningList.size() )
-
-        assertTrue( groupSend.currentExecutionState.isRunning() )
-        sleepUntilGroupSendItemsComplete( groupSend, 30 )
         groupSend = communicationGroupSendCompositeService.stopGroupSend( groupSend.id )
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
         assertTrue( groupSend.currentExecutionState.isTerminal() )
 
-        runningList = communicationGroupSendService.findRunning()
+        List runningList = communicationGroupSendService.findRunning()
         assertEquals( 0, runningList.size() )
 
         try{
@@ -189,9 +196,9 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
-        assertTrue(groupSend.currentExecutionState.isRunning())
         sleepUntilGroupSendItemsComplete( groupSend, 30 )
-        groupSend = communicationGroupSendCompositeService.completeGroupSend(groupSend.id)
+
+        groupSend = completeGroupSend(groupSend.id)
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
 
         List runningList = communicationGroupSendService.findRunning()

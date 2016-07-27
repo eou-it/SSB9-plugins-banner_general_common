@@ -186,28 +186,30 @@ class CommunicationGroupSendCompositeService {
             throw new ApplicationException("groupSend", new NotFoundException())
         }
 
-        try {
-            CommunicationPopulation population = CommunicationPopulation.fetchById( groupSend.getPopulationId() )
-            if (!population) {
-                throw new ApplicationException("population", new NotFoundException())
-            }
+        if(!groupSend.currentExecutionState.isTerminal()) {
+            try {
+                CommunicationPopulation population = CommunicationPopulation.fetchById(groupSend.getPopulationId())
+                if (!population) {
+                    throw new ApplicationException("population", new NotFoundException())
+                }
 
-            if (!groupSend.populationVersionId) {
-                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+                if (!groupSend.populationVersionId) {
+                    groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
 
-                //Calculate the population version
-                CommunicationPopulationVersion populationVersion = communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
-                groupSend.populationVersionId = populationVersion.id
+                    //Calculate the population version
+                    CommunicationPopulationVersion populationVersion = communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
+                    groupSend.populationVersionId = populationVersion.id
+                    groupSend = communicationGroupSendService.update(groupSend)
+                    // double check this is the correct user
+                }
+                groupSend = generateGroupSendItemsImpl(groupSend)
+            } catch (Throwable t) {
+                log.error(t.getMessage())
+                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
+                groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+                groupSend.errorText = t.getMessage()
                 groupSend = communicationGroupSendService.update(groupSend)
-                // double check this is the correct user
             }
-            groupSend = generateGroupSendItemsImpl( groupSend )
-        } catch(Throwable t) {
-            log.error(t.getMessage())
-            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
-            groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
-            groupSend.errorText = t.getMessage()
-            groupSend = communicationGroupSendService.update(groupSend)
         }
         return groupSend
     }
@@ -228,14 +230,16 @@ class CommunicationGroupSendCompositeService {
             throw new ApplicationException("groupSend", new NotFoundException())
         }
 
-        try {
-            groupSend = generateGroupSendItemsImpl( groupSend )
-        } catch(Throwable t) {
-            log.error(t.getMessage())
-            groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
-            groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
-            groupSend.errorText = t.getMessage()
-            groupSend = communicationGroupSendService.update(groupSend)
+        if(!groupSend.currentExecutionState.isTerminal()) {
+            try {
+                groupSend = generateGroupSendItemsImpl(groupSend)
+            } catch (Throwable t) {
+                log.error(t.getMessage())
+                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
+                groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+                groupSend.errorText = t.getMessage()
+                groupSend = communicationGroupSendService.update(groupSend)
+            }
         }
         return groupSend
     }
@@ -261,7 +265,7 @@ class CommunicationGroupSendCompositeService {
                 "generateGroupSendItems",
                 ["groupSendId": groupSend.id]
         )
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
         groupSend = communicationGroupSendService.update(groupSend)
         return groupSend
     }

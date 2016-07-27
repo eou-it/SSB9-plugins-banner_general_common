@@ -26,7 +26,9 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationGroupSend.findRunning",
                 query = """ FROM CommunicationGroupSend gs
                     WHERE gs.currentExecutionState = :new_ or
-                          gs.currentExecutionState = :processing_ """
+                          gs.currentExecutionState = :processing_ or
+                          gs.currentExecutionState = :scheduled_ or
+                          gs.currentExecutionState = :calculating_"""
         ),
         @NamedQuery(name = "CommunicationGroupSend.fetchCompleted",
                 query = """ FROM CommunicationGroupSend gs
@@ -166,6 +168,8 @@ class CommunicationGroupSend implements Serializable {
             query = session.getNamedQuery('CommunicationGroupSend.findRunning')
                     .setParameter('new_', CommunicationGroupSendExecutionState.New)
                     .setParameter('processing_', CommunicationGroupSendExecutionState.Processing)
+                    .setParameter('scheduled_', CommunicationGroupSendExecutionState.Scheduled)
+                    .setParameter('calculating_', CommunicationGroupSendExecutionState.Calculating)
                     .list()
         }
         return query
