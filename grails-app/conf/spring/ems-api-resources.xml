@@ -744,7 +744,24 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-
+    <bean id="ar-addresses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>addresses</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/addresses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Addresses.SPRADDR</value>
+                <value>EEDM.Addresses.SOBSBGI</value>
+                <value>EEDM.Addresses.STVCOLL</value>
+            </list>
+        </constructor-arg>
+    </bean>
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -790,6 +807,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-persons-v6"/>
                 <ref bean="ar-educationalinstitutions-v6"/>
                 <ref bean="ar-organization-v6"/>
+                <ref bean="ar-addresses"/>
             </list>
         </property>
     </bean>
@@ -838,6 +856,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-persons-v6"/>
                 <ref bean="ar-educationalinstitutions-v6"/>
                 <ref bean="ar-organization-v6"/>
+                <ref bean="ar-addresses"/>
             </list>
         </property>
     </bean>
