@@ -45,10 +45,10 @@ class PersonFilterCompositeServiceIntegrationTests extends BaseIntegrationTestCa
 
 
     private void initiializeDataReferences() {
-        application = "GENERAL"
-        user = "GRAILS_USER"
-        selection = "SAT_TEST"
-        selection1 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        application = "STUDENT"
+        user = "BANNER"
+        selection = "HEDM"
+        selection1 = "HEDM2"
         key = "1001"
     }
 
