@@ -214,6 +214,28 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-organization-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>organizations</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>6</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/organizations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value> HEDM.Organization.SPRIDEN </value>
+                <value> HEDM.Organization.GOREMAL </value>
+                <value> HEDM.Organization.SPRTELE </value>
+                <value> HEDM.Organization.FTVVEND </value>
+                <value> HEDM.Organization.SPRADDR </value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="ar-persons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>persons</value>
@@ -767,6 +789,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-interests-v5"/>
                 <ref bean="ar-persons-v6"/>
                 <ref bean="ar-educationalinstitutions-v6"/>
+                <ref bean="ar-organization-v6"/>
             </list>
         </property>
     </bean>
@@ -814,6 +837,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-interests-v5"/>
                 <ref bean="ar-persons-v6"/>
                 <ref bean="ar-educationalinstitutions-v6"/>
+                <ref bean="ar-organization-v6"/>
             </list>
         </property>
     </bean>
