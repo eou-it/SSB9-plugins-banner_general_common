@@ -48,6 +48,7 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -641,6 +642,26 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         assertEquals( CommunicationGroupSendExecutionState.Complete, groupSend.getCurrentExecutionState() )
     }
 
+    /**
+     * Calls the compete group send method of service class.
+     * @param groupSendId the id of the group send.
+     * @return the updated group send
+     */
+    protected CommunicationGroupSend completeGroupSend( Long groupSendId ) {
+        if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
+
+        int retries = 2
+        while(retries > 0) {
+            retries--
+            try {
+                return communicationGroupSendCompositeService.completeGroupSend( groupSendId )
+            } catch (HibernateOptimisticLockingFailureException e) {
+                if (retries == 0) {
+                    throw e
+                }
+            }
+        }
+    }
 
     protected def newPopulationQuery( String queryName, int maxRows = 5 ) {
         def populationQuery = new CommunicationPopulationQuery(

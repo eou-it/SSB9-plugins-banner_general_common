@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.annotation.Required
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
 /**
  * Created by mbrzycki on 12/5/14.
@@ -95,7 +96,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                 if (groupSend.currentExecutionState.equals(CommunicationGroupSendExecutionState.Processing)) {
                     int runningCount = communicationGroupSendItemService.fetchRunningGroupSendItemCount(groupSend.id)
                     if (runningCount == 0) {
-                        communicationGroupSendCompositeService.completeGroupSend( groupSend.id )
+                        completeGroupSend( groupSend.id )
                     }
                 }
             }
@@ -135,5 +136,24 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 //        } as Callable )
     }
 
+    /**
+     * Calls the compete group send method of service class.
+     * @param groupSendId the id of the group send.
+     * @return the updated group send
+     */
+    private CommunicationGroupSend completeGroupSend( Long groupSendId ) {
+        if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
 
+        int retries = 2
+        while(retries > 0) {
+            retries--
+            try {
+                return communicationGroupSendCompositeService.completeGroupSend( groupSendId )
+            } catch (HibernateOptimisticLockingFailureException e) {
+                if (retries == 0) {
+                    throw e
+                }
+            }
+        }
+    }
 }
