@@ -255,6 +255,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>HEDM.Person.SPRIDEN</value>
                 <value>HEDM.Person.SPRTELE</value>
                 <value>HEDM.Faculty.SIBINST</value>
+                <value>HEDM.Person.SRBRECR</value>
             </list>
         </constructor-arg>
     </bean>
