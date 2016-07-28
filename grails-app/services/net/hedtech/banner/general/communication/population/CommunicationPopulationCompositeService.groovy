@@ -154,7 +154,11 @@ class CommunicationPopulationCompositeService {
 
                 List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
                 //Delete the CommunicationPopulationVersionQueryAssociation
-                communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociations)
+                populationVersionQueryAssociations.each() { populationVersionQueryAssociation ->
+                    populationVersionQueryAssociation.refresh()
+                    communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociation)
+                }
+
                 //Delete the CommunicationPopulationSelectionList
                 communicationPopulationSelectionListService.delete(populationVersionQueryAssociations.get(0).selectionList)
                 //Delete the CommunicationPopulationSelectionListEntry
@@ -162,7 +166,16 @@ class CommunicationPopulationCompositeService {
                 communicationPopulationSelectionListEntryService.delete(selectionListEntries)
             }
             //Delete the CommunicationPopulationVersion
-            communicationPopulationVersionService.delete(populationVersions)
+            try {
+                communicationPopulationVersionService.delete(populationVersions)
+            } catch( ApplicationException e ) {
+                if (e.getWrappedException().getCause().getConstraintName().equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPV" )) {
+                    throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotDeletePopulationWithExistingGroupSends")
+                } else {
+                    throw e
+                }
+            }
+
         }
 
         //Delete the CommunicationPopulationQueryAssociation

@@ -131,6 +131,53 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
+
+    @Test
+    public void testDeletePopulationWithGroupSend() {
+        CommunicationGroupSend groupSend
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeletePopulationWithGroupSend Query") )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeletePopulationWithGroupSend Population" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testDeleteGroupSend",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication( request )
+        assertNotNull(groupSend)
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+
+        try {
+            communicationPopulationCompositeService.deletePopulation( population )
+            fail( "Expected cannotDeletePopulationWithExistingGroupSends" )
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotDeletePopulationWithExistingGroupSends@@", e.getMessage() )
+        }
+
+        sleepUntilGroupSendComplete( groupSend, 120 )
+
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+        communicationPopulationCompositeService.deletePopulation( population )
+
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+    }
+
+
     @Test
     void testFindRunning() {
 
