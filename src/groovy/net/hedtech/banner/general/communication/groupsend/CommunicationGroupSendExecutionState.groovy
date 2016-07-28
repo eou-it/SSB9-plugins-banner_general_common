@@ -11,6 +11,7 @@ enum CommunicationGroupSendExecutionState implements Serializable {
 
     New (false),
     Scheduled (false),
+    Queued (false),
     Calculating (false),
     Processing (false),
     Complete (true),

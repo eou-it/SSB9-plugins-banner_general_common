@@ -28,6 +28,7 @@ import javax.persistence.*
                     WHERE gs.currentExecutionState = :new_ or
                           gs.currentExecutionState = :processing_ or
                           gs.currentExecutionState = :scheduled_ or
+                          gs.currentExecutionState = :queued_ or
                           gs.currentExecutionState = :calculating_"""
         ),
         @NamedQuery(name = "CommunicationGroupSend.fetchCompleted",
@@ -169,6 +170,7 @@ class CommunicationGroupSend implements Serializable {
                     .setParameter('new_', CommunicationGroupSendExecutionState.New)
                     .setParameter('processing_', CommunicationGroupSendExecutionState.Processing)
                     .setParameter('scheduled_', CommunicationGroupSendExecutionState.Scheduled)
+                    .setParameter('queued_', CommunicationGroupSendExecutionState.Queued)
                     .setParameter('calculating_', CommunicationGroupSendExecutionState.Calculating)
                     .list()
         }

@@ -105,8 +105,9 @@ class CommunicationGroupSendCompositeService {
 
         //if group send is scheduled
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-        if(groupSend.currentExecutionState == CommunicationGroupSendExecutionState.Scheduled) {
-            def result = schedulerJobService.deleteScheduledJob(groupSend.jobId, "communicationGroupSendCompositeService", "generateGroupSendItems")
+        if((groupSend.currentExecutionState == CommunicationGroupSendExecutionState.Scheduled) ||
+                (groupSend.currentExecutionState == CommunicationGroupSendExecutionState.Queued)) {
+            schedulerJobService.deleteScheduledJob(groupSend.jobId, "communicationGroupSendCompositeService", "generateGroupSendItems")
         }
         else {
             //if Group send is not scheduled then remove job and recipient data
@@ -265,7 +266,7 @@ class CommunicationGroupSendCompositeService {
                 "generateGroupSendItems",
                 ["groupSendId": groupSend.id]
         )
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
+        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Queued
         groupSend = communicationGroupSendService.update(groupSend)
         return groupSend
     }
