@@ -197,7 +197,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-educationalinstitutionunits-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>organizations</value>
+            <value>educational-institution-units</value>
         </constructor-arg>
         <constructor-arg name="version">
             <value>6</value>
