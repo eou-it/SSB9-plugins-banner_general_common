@@ -253,20 +253,12 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         String pidm = (globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralCommonConstants.PERSONS_LDM_NAME, person.guid)).domainKey
         def personBase = PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
-        def visaInformation = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
         if (!personBase) {
             def personBasicPersonBase = new PersonBasicPersonBase(pidm: Integer.parseInt(pidm), armedServiceMedalVetIndicator: true)
             personBasicPersonBase.save(failOnError: true, flush: true)
             personBase = PersonBasicPersonBase.fetchByPidm(Integer.parseInt(pidm))
         }
-        if (!visaInformation[0]) {
-            def visaType = VisaType.findAll()[0]
-            def visaInfo = new VisaInformation(pidm: Integer.parseInt(pidm), sequenceNumber: 1, visaType: visaType, entryIndicator: false,
-                    visaIssueDate: new Date(), visaExpireDate: new Date())
-            visaInfo.save(failOnError: true, flush: true)
-            visaInformation = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([Integer.parseInt(pidm)])
-            person = personV6CompositeService.get(persons[0].guid)
-        }
+
         if (!person.citizenshipStatus) {
             def citizenTypeObj = CitizenType.findAll()[0]
             personBase.citizenType = citizenTypeObj
@@ -288,14 +280,6 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def religion = religionCompositeService.get(religionGuids.values()[0])
         assertEquals religionGuids.values()[0], person.religion.id
         assertEquals religion.id, person.religion.id
-
-        def guids2 = visaTypeCompositeService.fetchGUIDs([visaInformation[0].visaType.code])
-        def visaType = visaTypeCompositeService.get(guids2.values()[0])
-        assertEquals guids2.values()[0], person.visaStatus.detail.id
-        assertEquals visaType.category, person.visaStatus.category
-        assertNotNull person.visaStatus.startOn
-        assertNotNull person.visaStatus.endOn
-        assertNotNull person.visaStatus.status
     }
 
 

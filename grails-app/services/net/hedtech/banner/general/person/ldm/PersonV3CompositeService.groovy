@@ -140,12 +140,13 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
             List<Object[]> rows
             if (role == RoleName.INSTRUCTOR.versionToEnumMap["v3"]) {
                 rows = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
+                pidms = rows?.collect { it[0].toInteger() }
             } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
                 rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
+                pidms = rows?.collect { it.toInteger() }
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
             }
-            pidms = rows?.collect { it[0].toInteger() }
             totalCount = pidms?.size()
         } else if (requestParams.containsKey("role")) {
             String role = requestParams.role?.trim()
