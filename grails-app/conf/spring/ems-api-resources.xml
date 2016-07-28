@@ -287,6 +287,9 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>HEDM.Person.FTVVEND</value>
                 <value>HEDM.Person.APRCATG</value>
                 <value>HEDM.Person.SRBRECR</value>
+                <value>HEDM.Person.SPBPERS</value>
+                <value>HEDM.Person.SPRADDR</value>
+                <value>HEDM.Person.SPRTELE</value>
             </list>
         </constructor-arg>
     </bean>
@@ -728,7 +731,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-educationalinstitutions-v6" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>interests</value>
+            <value>educational-institutions</value>
         </constructor-arg>
         <constructor-arg name="version">
             <value>6</value>
