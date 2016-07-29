@@ -25,12 +25,6 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationOrganization.fetchById",
                 query = """ FROM CommunicationOrganization a
                     WHERE a.id = :id"""),
-        @NamedQuery(name = "CommunicationOrganization.fetchByName",
-                query = """ FROM CommunicationOrganization a
-                    WHERE a.name = :name"""),
-        @NamedQuery(name = "CommunicationOrganization.fetchAvailable",
-                query = """ FROM CommunicationOrganization a
-                    WHERE a.isAvailable = true"""),
         @NamedQuery(name = "CommunicationOrganization.fetchRoot",
                 query = """ FROM CommunicationOrganization a
                     WHERE a.parent is null"""),
@@ -179,22 +173,6 @@ class CommunicationOrganization implements Serializable {
             query = session.getNamedQuery('CommunicationOrganization.fetchById')
                     .setLong('id', id).list()[0]
 
-        }
-        return query
-    }
-
-    public static CommunicationOrganization fetchByName(String name) {
-        def query
-        CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('CommunicationOrganization.fetchByName').setString('name', name).list()[0]
-        }
-        return query
-    }
-
-    public static List<CommunicationOrganization> fetchAvailable() {
-        def query
-        CommunicationOrganization.withSession { session ->
-            query = session.getNamedQuery('CommunicationOrganization.fetchAvailable').list()
         }
         return query
     }

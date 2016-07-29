@@ -18,8 +18,6 @@ import javax.persistence.*
 @Table(name = "GCRLENT")
 @DatabaseModifiesState
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationPopulationSelectionListEntry.fetch",
-                query = """ FROM CommunicationPopulationSelectionListEntry a"""),
         @NamedQuery(name = "CommunicationPopulationSelectionListEntry.fetchBySelectionListId",
                 query = """ FROM CommunicationPopulationSelectionListEntry a where a.populationSelectionList.id = :selectionListId """)
 ])

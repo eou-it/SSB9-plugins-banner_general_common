@@ -30,18 +30,11 @@ import javax.persistence.*
                 query = """ FROM CommunicationFolder a
                     WHERE upper(a.name) = upper(:folderName)
                     AND   a.id <> :id"""),
-        @NamedQuery(name = "CommunicationFolder.fetchFoldersWithActiveTemplates",
-                query = """ FROM CommunicationFolder a
-                    WHERE exists (select b.id from CommunicationEmailTemplate b
-                                  where b.folder.id = a.id
-                                  AND b.published = 'Y'
-                                  AND SYSDATE between NVL(b.validFrom,SYSDATE) and NVL(b.validTo, SYSDATE)
-                                  AND (b.personal = 'N' or lower(b.createdBy) = lower(:currentuser)))"""),
         @NamedQuery(name = "CommunicationFolder.fetchFoldersWithPublishedDatafields",
                 query = """ FROM CommunicationFolder a
                     WHERE exists (select b.id from CommunicationField b
                                   where b.folder.id = a.id
-                                  AND lower(b.status) = 'production'
+                                  AND b.status = 'PRODUCTION'
                                   )""")
 ])
 class CommunicationFolder implements Serializable {
@@ -145,17 +138,6 @@ class CommunicationFolder implements Serializable {
             }
 
         return (query != null)
-    }
-
-    public static List<CommunicationFolder> fetchFoldersWithActiveTemplates() {
-
-        def folderList
-        CommunicationFolder.withSession { session ->
-            folderList = session.getNamedQuery('CommunicationFolder.fetchFoldersWithActiveTemplates')
-                    .setString('currentuser', CommunicationCommonUtility.getUserOracleUserName())
-                    .list()
-        }
-        return folderList
     }
 
     public static List<CommunicationFolder> fetchFoldersWithPublishedDatafields() {

@@ -36,7 +36,7 @@ import javax.persistence.Version
                         order by a.interactionDate"""),
         @NamedQuery(name = "CommunicationManualInteraction.fetchByConstituentPidm",
                 query = """ FROM CommunicationManualInteraction a
-                    WHERE upper(a.constituentPidm) = upper(:constituentPidm)
+                    WHERE a.constituentPidm = :constituentPidm
                     order by a.interactionDate""")
 ])
 class CommunicationManualInteraction implements Serializable {

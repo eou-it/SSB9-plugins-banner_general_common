@@ -21,11 +21,6 @@ import javax.persistence.*
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationGroupSendView.fetchByPopulationId",
-                query = """ FROM CommunicationGroupSendView a
-                            WHERE  a.populationId = :populationId
-                            ORDER BY a.creationDateTime desc
-                        """),
         @NamedQuery(name = "CommunicationGroupSendView.fetchById",
                 query = """ FROM CommunicationGroupSendView a
                             WHERE  a.id = :groupSendId
@@ -140,18 +135,6 @@ class CommunicationGroupSendView implements Serializable {
     @Type(type="yes_no")
     @Column(name = "recalc_on_send")
     boolean recalculateOnSend
-
-    public static List<CommunicationGroupSendView> fetchByPopulationId(Long populationId) {
-
-        def query =
-                CommunicationGroupSendView.withSession { session ->
-                    session.getNamedQuery('CommunicationGroupSendView.fetchByPopulationId')
-                            .setLong('populationId', populationId)
-                            .list()
-
-                }
-        return query
-    }
 
     public static CommunicationGroupSendView fetchById(Long groupSendId) {
 

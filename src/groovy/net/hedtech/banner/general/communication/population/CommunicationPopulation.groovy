@@ -48,11 +48,7 @@ import javax.persistence.Version
                     WHERE a.folder.name = :folderName"""),
         @NamedQuery(name = "CommunicationPopulation.findAllByPopulationName",
                 query = """ FROM CommunicationPopulation a
-                    WHERE a.name like :populationName"""),
-        @NamedQuery(name = "CommunicationPopulation.fetchByNameAndId",
-                query = """ FROM CommunicationPopulation a
-                      where a.id = :id
-                      and a.lastModifiedBy = upper( :userId ) """)
+                    WHERE a.name like :populationName""")
 ])
 class CommunicationPopulation implements Serializable {
 
@@ -194,14 +190,5 @@ class CommunicationPopulation implements Serializable {
             population = session.getNamedQuery('CommunicationPopulation.findAllByPopulationName').setString('populationName', populationName + "%").list()
         }
         return population
-    }
-
-    public static CommunicationPopulation fetchByNameAndId(Long populationId, String userId) {
-
-        def populations = []
-        CommunicationPopulation.withSession { session ->
-            populations = session.getNamedQuery('CommunicationPopulationSelectionList.fetchByNameAndId').setLong('id', populationId).setString('userId', userId).list()
-        }
-        return populations.getAt(0)
     }
 }

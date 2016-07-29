@@ -20,7 +20,7 @@ import javax.persistence.*
                 WHERE populationVersion.population.id = :populationId order by populationVersion.createDate DESC"""),
         @NamedQuery(name = "CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy",
                 query = """ FROM CommunicationPopulationVersion populationVersion
-                WHERE populationVersion.population.id = :populationId and upper( populationVersion.createdBy ) = upper( :userId ) order by populationVersion.createDate DESC"""),
+                WHERE populationVersion.population.id = :populationId and populationVersion.createdBy = upper( :userId ) order by populationVersion.createDate DESC"""),
         @NamedQuery(name = "CommunicationPopulationVersion.fetchById",
                 query = """ FROM CommunicationPopulationVersion populationVersion
                 WHERE populationVersion.id = :id""")
