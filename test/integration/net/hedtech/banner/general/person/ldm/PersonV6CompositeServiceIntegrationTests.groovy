@@ -8,7 +8,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.VisaInformation
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
@@ -21,7 +20,6 @@ import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -42,6 +40,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonIdentificationName personIdentificationName
     PersonAddressService personAddressService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
+
 
     @Before
     public void setUp() {
@@ -369,7 +368,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // Call the service
         def requestProcessingResult = personV6CompositeService.listQApi(content)
-        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
+        def response = personV6CompositeService.createPersonDataModels(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         def obj = response.find { it.guid == globalUniqueIdentifier.guid }
@@ -418,7 +417,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         // Call the service
         def requestProcessingResult = personV6CompositeService.listQApi(content)
-        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
+        def response = personV6CompositeService.createPersonDataModels(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         def obj = response.find { it.guid == globalUniqueIdentifier.guid }
@@ -458,17 +457,17 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         PersonBasicPersonBase personBase = PersonBasicPersonBase.fetchByPidm(personCurrent.pidm)
         assertNotNull personBase
         Map content = [
-                action: [POST: "list"],
-                names: [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName]],
+                action     : [POST: "list"],
+                names      : [[type: [category: NameTypeCategory.PERSONAL.versionToEnumMap["v6"]], firstName: personCurrent.firstName, lastName: personCurrent.lastName]],
                 credentials: [[type: CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"], value: personBase.ssn],
                               [type: CredentialType.BANNER_ID.versionToEnumMap["v6"], value: personCurrent.bannerId]],
-                sort: "lastName",
-                order: "asc"
+                sort       : "lastName",
+                order      : "asc"
         ]
 
         // Call service
         def requestProcessingResult = personV6CompositeService.listQApi(content)
-        def response = personV6CompositeService.createDecorators(content, requestProcessingResult)
+        def response = personV6CompositeService.createPersonDataModels(content, requestProcessingResult)
         assertNotNull response
         assertTrue response.size() > 0
         response.each {

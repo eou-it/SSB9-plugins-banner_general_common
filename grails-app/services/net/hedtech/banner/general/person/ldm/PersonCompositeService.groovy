@@ -128,7 +128,7 @@ class PersonCompositeService extends LdmService {
             // Use Accept header for response rendering
             switch (LdmService.getAcceptVersion(VERSIONS)) {
                 case "v6":
-                    def decorators = personV6CompositeService.createDecorators(params, requestProcessingResult)
+                    def decorators = personV6CompositeService.createPersonDataModels(params, requestProcessingResult)
                     // To make this class, NOT to create decorators
                     decorators?.each {
                         resultList.put(it.guid, it)

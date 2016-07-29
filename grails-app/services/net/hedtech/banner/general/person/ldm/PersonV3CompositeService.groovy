@@ -137,16 +137,15 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
             // Now check if the persons has role
             String role = requestParams.role?.trim()
             log.debug "Fetching persons with role $role ...."
-            List<Object[]> rows
+            def pidmToRoleMap = [:]
             if (role == RoleName.INSTRUCTOR.versionToEnumMap["v3"]) {
-                rows = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
-                pidms = rows?.collect { it[0].toInteger() }
+                pidmToRoleMap = getPidmToFacultyRoleMap(pidms)
             } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
-                rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
-                pidms = rows?.collect { it.toInteger() }
+                pidmToRoleMap = getPidmToStudentRoleMap(pidms)
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
             }
+            pidms = pidmToRoleMap.keySet() as List
             totalCount = pidms?.size()
         } else if (requestParams.containsKey("role")) {
             String role = requestParams.role?.trim()
@@ -156,6 +155,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
                 returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
             } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
                 returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+                setStudentPidmsInThreadLocal(returnMap?.pidms)
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
             }
@@ -202,7 +202,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
 
     @Override
-    protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
+    protected def createPersonDataModels(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         return []
     }
 

@@ -165,6 +165,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
             } else if (role == RoleName.STUDENT.versionToEnumMap["v6"]) {
                 returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
+                setStudentPidmsInThreadLocal(returnMap?.pidms)
             } else if (role == RoleName.EMPLOYEE.versionToEnumMap["v6"]) {
                 returnMap = userRoleCompositeService.fetchEmployees(sortField, sortOrder, max, offset)
             } else if (role == RoleName.ALUMNI.versionToEnumMap["v6"]) {
@@ -238,7 +239,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
+    protected def createPersonDataModels(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
         def decorators = []
         if (entities) {
             List<Integer> pidms = entities?.collect {
@@ -644,7 +645,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             if (it.passportId) {
                 pidmToPassportMap.put(it.pidm, it)
             }
-            if(it.language?.code) {
+            if (it.language?.code) {
                 pidmToLanguageCodeMap.put(it.pidm, it.language.code)
             }
         }

@@ -24,6 +24,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
     private static final int MAX_DEFAULT = 500
     private static final int MAX_UPPER_LIMIT = 500
 
+    private static final ThreadLocal<Map> threadLocal =
+            new ThreadLocal<Map>() {
+                @Override
+                protected Map initialValue() {
+                    return [:]
+                }
+            }
+
     UserRoleCompositeService userRoleCompositeService
     PersonFilterCompositeService personFilterCompositeService
     CommonMatchingCompositeService commonMatchingCompositeService
@@ -44,7 +52,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract protected List<RoleName> getRolesRequired()
 
 
-    abstract protected def createDecorators(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
+    abstract protected def createPersonDataModels(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
 
     /**
      * POST /qapi/persons
@@ -84,7 +92,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         injectTotalCountIntoParams(requestParams, requestProcessingResult)
 
-        return createDecorators(requestParams, requestProcessingResult)
+        return createPersonDataModels(requestParams, requestProcessingResult)
     }
 
     /**
@@ -116,11 +124,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (!row) {
             throw new ApplicationException("Person", new NotFoundException())
         }
-        return createDecorators([row.personIdentificationNameCurrent], getPidmToGuidMap([row]))[0]
+        return createPersonDataModels([row.personIdentificationNameCurrent], getPidmToGuidMap([row]))[0]
     }
 
 
-    def createDecorators(final Map requestParams, final Map requestProcessingResult) {
+    def createPersonDataModels(final Map requestParams, final Map requestProcessingResult) {
         List<PersonIdentificationNameCurrent> personCurrentEntities = []
         def pidmToGuidMap = [:]
         if (requestProcessingResult.containsKey("pidms")) {
@@ -129,7 +137,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             personCurrentEntities = rows?.collect { it.personIdentificationNameCurrent }
             pidmToGuidMap = getPidmToGuidMap(rows)
         }
-        return createDecorators(personCurrentEntities, pidmToGuidMap)
+        return createPersonDataModels(personCurrentEntities, pidmToGuidMap)
     }
 
 
@@ -217,7 +225,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
             for (RoleName roleName : roleNames) {
                 switch (roleName) {
                     case RoleName.STUDENT:
-                        pidmToStudentRoleMap = getPidmToStudentRoleMap(pidms)
+                        if (isThreadLocalContainsStudentPidms()) {
+                            // Saving query time
+                            pidmToStudentRoleMap = getPidmToStudentRoleMapUsingThreadLocal()
+                        } else {
+                            pidmToStudentRoleMap = getPidmToStudentRoleMap(pidms)
+                        }
                         break
                     case RoleName.INSTRUCTOR:
                         pidmToFacultyRoleMap = getPidmToFacultyRoleMap(pidms)
@@ -422,6 +435,34 @@ abstract class AbstractPersonCompositeService extends LdmService {
             propVal = injectedProps.get(propName)
         }
         return propVal
+    }
+
+
+    protected void setStudentPidmsInThreadLocal(List<Integer> pidms) {
+        Map map = threadLocal.get()
+        map.put("studentPidms", pidms)
+        threadLocal.set(map)
+    }
+
+
+    private def getStudentPidmsFromThreadLocal() {
+        Map map = threadLocal.get()
+        return map.get("studentPidms")
+    }
+
+
+    private boolean isThreadLocalContainsStudentPidms() {
+        return threadLocal.get().containsKey("studentPidms")
+    }
+
+
+    private def getPidmToStudentRoleMapUsingThreadLocal() {
+        List<Integer> pidms = getStudentPidmsFromThreadLocal()
+        def pidmToStudentRoleMap = [:]
+        pidms?.each {
+            pidmToStudentRoleMap.put(it, [role: RoleName.STUDENT])
+        }
+        return pidmToStudentRoleMap
     }
 
 }
