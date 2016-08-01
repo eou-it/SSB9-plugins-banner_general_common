@@ -201,9 +201,21 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    @Override
-    protected def createPersonDataModels(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
-        return []
+    protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
+    }
+
+
+    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                                 final Map dataMap, Map dataMapForPerson) {
+    }
+
+
+    protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                        final Map dataMapForPerson) {
+    }
+
+
+    protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
     }
 
 }

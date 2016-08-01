@@ -10,9 +10,11 @@ import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeServ
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
+import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
+import net.hedtech.banner.general.system.ldm.EthnicityCompositeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -38,6 +40,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonIdentificationNameCurrentService personIdentificationNameCurrentService
     PersonAdvancedSearchViewService personAdvancedSearchViewService
     EmailTypeCompositeService emailTypeCompositeService
+    EthnicityCompositeService ethnicityCompositeService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -52,7 +55,19 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract protected List<RoleName> getRolesRequired()
 
 
-    abstract protected def createPersonDataModels(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap)
+    abstract protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap)
+
+
+    abstract protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
+
+
+    abstract
+    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                                 final Map dataMap, Map dataMapForPerson)
+
+
+    abstract protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                 final Map dataMapForPerson)
 
     /**
      * POST /qapi/persons
@@ -64,7 +79,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
      * @return
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def listQApi(Map requestParams) {
+    protected def listQApi(Map requestParams) {
         setPagingParams(requestParams)
 
         setSortingParams(requestParams)
@@ -83,7 +98,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
      * @return
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def listApi(Map requestParams) {
+    protected def listApi(Map requestParams) {
         setPagingParams(requestParams)
 
         setSortingParams(requestParams)
@@ -108,7 +123,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
      * @return
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def count(Map requestParams) {
+    protected def count(Map requestParams) {
         return getInjectedPropertyFromParams(requestParams, "totalCount")
     }
 
@@ -119,7 +134,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
      * @return
      */
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    def get(String guid) {
+    protected def get(String guid) {
         def row = personIdentificationNameCurrentService.fetchByGuid(guid)
         if (!row) {
             throw new ApplicationException("Person", new NotFoundException())
@@ -128,7 +143,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    def createPersonDataModels(final Map requestParams, final Map requestProcessingResult) {
+    protected def createPersonDataModels(final Map requestParams, final Map requestProcessingResult) {
         List<PersonIdentificationNameCurrent> personCurrentEntities = []
         def pidmToGuidMap = [:]
         if (requestProcessingResult.containsKey("pidms")) {
@@ -141,7 +156,27 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected Map processQueryWithPostRequest(final Map requestParams) {
+    protected def createPersonDataModels(List<PersonIdentificationNameCurrent> entities, def pidmToGuidMap) {
+        def decorators = []
+        if (entities) {
+            List<Integer> pidms = entities?.collect {
+                it.pidm
+            }
+
+            def dataMap = [:]
+            dataMap.put("pidmToGuidMap", pidmToGuidMap)
+            fetchDataAndPutInMap(pidms, dataMap)
+
+            entities?.each {
+                def dataMapForPerson = prepareDataMapForSinglePerson(it, dataMap)
+                decorators << createPersonDataModel(it, dataMapForPerson)
+            }
+        }
+        return decorators
+    }
+
+
+    private Map processQueryWithPostRequest(final Map requestParams) {
         Map requestProcessingResult
         String contentType = getRequestRepresentation()
         log.debug "Content-Type: ${contentType}"
@@ -162,7 +197,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def searchForMatchingPersons(final Map content) {
+    private def searchForMatchingPersons(final Map content) {
         def cmRequest = prepareCommonMatchingRequest(content)
 
         if (cmRequest?.dateOfBirth) {
@@ -206,6 +241,49 @@ abstract class AbstractPersonCompositeService extends LdmService {
         def totalCount = cmResponse?.count
 
         return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    private void fetchDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
+
+        fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
+    }
+
+
+    private def prepareDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                              final Map dataMap) {
+        Map dataMapForPerson = [:]
+
+        dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(personIdentificationNameCurrent.pidm)]
+
+        PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
+        if (personBase) {
+            dataMapForPerson << ["personBase": personBase]
+
+            if (personBase.ethnic) {
+                dataMapForPerson << ["usEthnicCodeGuid": dataMap.usEthnicCodeToGuidMap.get(personBase.ethnic)]
+            }
+        }
+
+        prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
+
+        return dataMapForPerson
+    }
+
+
+    private void fetchPersonsBiographicalDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        // Get SPBPERS records for persons
+        def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
+
+        // Get GUIDs for US ethnic codes (SPBPERS_ETHN_CDE)
+        Map<String, String> usEthnicCodeToGuidMap = ethnicityCompositeService.fetchGUIDsForUnitedStatesEthnicCodes()
+
+        // Put in Map
+        dataMap.put("pidmToPersonBaseMap", pidmToPersonBaseMap)
+        dataMap.put("usEthnicCodeToGuidMap", usEthnicCodeToGuidMap)
+
+        fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
     }
 
 
@@ -297,6 +375,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
+    private def getPidmToStudentRoleMapUsingThreadLocal() {
+        List<Integer> pidms = getStudentPidmsFromThreadLocal()
+        def pidmToStudentRoleMap = [:]
+        pidms?.each {
+            pidmToStudentRoleMap.put(it, [role: RoleName.STUDENT])
+        }
+        return pidmToStudentRoleMap
+    }
+
+
     protected def getPidmToFacultyRoleMap(List<Integer> pidms) {
         def pidmToFacultyRoleMap = [:]
         List<Object[]> rows = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
@@ -374,6 +462,29 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
+    private def getPidmToGuidMap(def rows) {
+        Map<Integer, String> pidmToGuidMap = [:]
+        rows?.each {
+            pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
+        }
+        return pidmToGuidMap
+    }
+
+
+    private def fetchPersonBaseByPIDMs(List<Integer> pidms) {
+        def pidmToPersonBaseMap = [:]
+        if (pidms) {
+            log.debug "Getting SPBPERS records for ${pidms?.size()} PIDMs..."
+            List<PersonBasicPersonBase> entities = PersonBasicPersonBase.fetchByPidmList(pidms)
+            log.debug "Got ${entities?.size()} SPBPERS records"
+            entities?.each {
+                pidmToPersonBaseMap.put(it.pidm, it)
+            }
+        }
+        return pidmToPersonBaseMap
+    }
+
+
     protected void setPagingParams(Map requestParams) {
         RestfulApiValidationUtility.correctMaxAndOffset(requestParams, MAX_DEFAULT, MAX_UPPER_LIMIT)
 
@@ -397,15 +508,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         } else {
             requestParams.put('order', "asc")
         }
-    }
-
-
-    private def getPidmToGuidMap(def rows) {
-        Map<Integer, String> pidmToGuidMap = [:]
-        rows?.each {
-            pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
-        }
-        return pidmToGuidMap
     }
 
 
@@ -453,16 +555,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     private boolean isThreadLocalContainsStudentPidms() {
         return threadLocal.get().containsKey("studentPidms")
-    }
-
-
-    private def getPidmToStudentRoleMapUsingThreadLocal() {
-        List<Integer> pidms = getStudentPidmsFromThreadLocal()
-        def pidmToStudentRoleMap = [:]
-        pidms?.each {
-            pidmToStudentRoleMap.put(it, [role: RoleName.STUDENT])
-        }
-        return pidmToStudentRoleMap
     }
 
 }
