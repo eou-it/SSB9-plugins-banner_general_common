@@ -137,8 +137,6 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
-        def expectedHour = new SimpleDateFormat('HH')
-        expectedHour.setTimeZone(TimeZone.getTimeZone("UTC"))
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()
 
@@ -154,7 +152,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
 
         // test date values -
         assertEquals date.format(today), date.format(priorCollegeDegree.lastModified)
-        assertEquals expectedHour.format(today), hour.format(priorCollegeDegree.lastModified)
+        assertEquals hour.format(today), hour.format(priorCollegeDegree.lastModified)
 
         assertEquals time.format(priorCollegeDegree.attendenceFrom), "000000"
         assertEquals time.format(priorCollegeDegree.attendenceTo), "000000"

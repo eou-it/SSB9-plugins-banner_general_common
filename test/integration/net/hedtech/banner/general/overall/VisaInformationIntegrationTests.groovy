@@ -116,8 +116,6 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
     void testDates() {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
-        def expectedHour = new SimpleDateFormat('HH')
-        expectedHour.setTimeZone(TimeZone.getTimeZone("UTC"))
         def date = new SimpleDateFormat('yyyy-M-d')
         def today = new Date()
 
@@ -134,7 +132,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 
         // test date values -
         assertEquals date.format(today), date.format(visaInformation.lastModified)
-        assertEquals expectedHour.format(today), hour.format(visaInformation.lastModified)
+        assertEquals hour.format(today), hour.format(visaInformation.lastModified)
 
         assertEquals time.format(visaInformation.visaStartDate), "000000"
         assertEquals time.format(visaInformation.visaExpireDate), "000000"
