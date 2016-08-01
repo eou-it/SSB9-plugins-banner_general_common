@@ -34,7 +34,7 @@ class SiteDetailCompositeServiceIntegrationTests extends BaseIntegrationTestCase
     }
 
     private void initializeDataReferences() {
-        campus = Campus.findByCode('ACC')
+        campus = Campus.findByCode('10')
     }
 
     /**
