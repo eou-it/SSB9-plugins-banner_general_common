@@ -151,19 +151,22 @@ class CommunicationPopulationCompositeService {
         List populationVersions = CommunicationPopulationVersion.findByPopulationId( population.id )
         if(populationVersions != null && populationVersions.size() > 0) {
             for(CommunicationPopulationVersion populationVersion : populationVersions) {
-
-                List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
-                //Delete the CommunicationPopulationVersionQueryAssociation
-                populationVersionQueryAssociations.each() { populationVersionQueryAssociation ->
-                    populationVersionQueryAssociation.refresh()
-                    communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociation)
+                if (populationVersion.status == CommunicationPopulationCalculationStatus.PENDING_EXECUTION) {
+                    schedulerJobService.deleteScheduledJob( populationVersion.jobId, "communicationPopulationCompositeService", "calculatePendingPopulationVersion" )
                 }
 
-                //Delete the CommunicationPopulationSelectionList
-                communicationPopulationSelectionListService.delete(populationVersionQueryAssociations.get(0).selectionList)
-                //Delete the CommunicationPopulationSelectionListEntry
-                List<CommunicationPopulationSelectionListEntry> selectionListEntries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationVersionQueryAssociations.get(0).selectionList.id)
-                communicationPopulationSelectionListEntryService.delete(selectionListEntries)
+                List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
+                populationVersionQueryAssociations.each() { populationVersionQueryAssociation ->
+                    populationVersionQueryAssociation.refresh()
+                    CommunicationPopulationSelectionList selectionList = populationVersionQueryAssociation.selectionList
+                    communicationPopulationVersionQueryAssociationService.delete( populationVersionQueryAssociation )
+                    if (selectionList) {
+                        Long selectionListId = selectionList.id
+                        communicationPopulationSelectionListService.delete( selectionList )
+                        List<CommunicationPopulationSelectionListEntry> selectionListEntries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( selectionListId )
+                        communicationPopulationSelectionListEntryService.delete(selectionListEntries)
+                    }
+                }
             }
             //Delete the CommunicationPopulationVersion
             try {
@@ -360,19 +363,27 @@ class CommunicationPopulationCompositeService {
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, oracleName )
         if (populationVersion) {
             if (populationVersion.status.equals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION ) ) {
-                // if we decide to support this capability in the future, we should unschedule the quartz job
                 throw CommunicationExceptionFactory.createApplicationException( this.getClass(), "cannotRecalculatePopulationPendingExecution" )
             } else {
                 //TODO: (1) Check for not able to delete population version when a job using this population version is processing
 
-                List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
                 //Delete the CommunicationPopulationVersionQueryAssociation
-                communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociations)
+                List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
+                populationVersionQueryAssociations.each { CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation ->
+                    populationVersionQueryAssociation.refresh()
+                    communicationPopulationVersionQueryAssociationService.delete( populationVersionQueryAssociation )
+                }
+
                 //Delete the CommunicationPopulationSelectionListEntry
                 List<CommunicationPopulationSelectionListEntry> selectionListEntries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationVersionQueryAssociations.get(0).selectionList.id)
-                communicationPopulationSelectionListEntryService.delete(selectionListEntries)
+                selectionListEntries.each { CommunicationPopulationSelectionListEntry selectionListEntry ->
+                    selectionListEntry.refresh()
+                    communicationPopulationSelectionListEntryService.delete( selectionListEntry )
+                }
+
                 //Delete the CommunicationPopulationSelectionList, currently only one exist
                 communicationPopulationSelectionListService.delete(populationVersionQueryAssociations.get(0).selectionList)
+
                 //Delete the CommunicationPopulationVersion
                 communicationPopulationVersionService.delete( populationVersion )
             }
@@ -411,8 +422,10 @@ class CommunicationPopulationCompositeService {
         Long populationVersionId = parameters.get( "populationVersionId" )
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.fetchById( populationVersionId )
         if (!populationVersion) {
-            log.error( "Could not fetch communication population version with id ${populationVersionId}." )
+            // Population Version may have been deleted in which case silently return
+            return null
         }
+
         if (!populationVersion.getStatus().equals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION )) {
             throw CommunicationExceptionFactory.createApplicationException( this.class, "populationCalculationInvalidState" )
         }
@@ -447,6 +460,7 @@ class CommunicationPopulationCompositeService {
 
         populationVersion.calculatedCount = totalCount
         populationVersion.status = errorFound ? CommunicationPopulationCalculationStatus.ERROR : CommunicationPopulationCalculationStatus.AVAILABLE
+        populationVersion.jobId = null
         populationVersion = communicationPopulationVersionService.update( populationVersion )
         return populationVersion
     }

@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
+import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
@@ -56,8 +57,6 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:jobNameInvalid@@" )
         }
 
-        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
         groupSend.templateId = request.getTemplateId()
         groupSend.populationId = request.getPopulationId()
@@ -66,6 +65,7 @@ class CommunicationGroupSendCompositeService {
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.jobId = request.referenceId
+        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
         if(!groupSend.recalculateOnSend) {
             CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
@@ -75,7 +75,7 @@ class CommunicationGroupSendCompositeService {
 
         String mepCode = groupSend.mepCode
         if (request.scheduledStartDate) {
-            groupSend = scheduleGroupSend(request, bannerUser, mepCode, groupSend)
+            groupSend = scheduleGroupSend( groupSend, bannerUser )
         } else {
             groupSend = scheduleGroupSendImmediately( groupSend, bannerUser )
         }
@@ -99,17 +99,15 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createNotFoundException( groupSendId, CommunicationGroupSend.class )
         }
 
-        if (groupSend.currentExecutionState.running) {
+        if (!groupSend.currentExecutionState.pending && !groupSend.currentExecutionState.terminal) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "cannotDeleteRunningGroupSend" )
         }
 
         //if group send is scheduled
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
-        if((groupSend.currentExecutionState == CommunicationGroupSendExecutionState.Scheduled) ||
-                (groupSend.currentExecutionState == CommunicationGroupSendExecutionState.Queued)) {
-            schedulerJobService.deleteScheduledJob(groupSend.jobId, "communicationGroupSendCompositeService", "generateGroupSendItems")
-        }
-        else {
+        if(groupSend.jobId != null) {
+            schedulerJobService.deleteScheduledJob( groupSend.jobId, groupSend.groupId )
+        } else {
             //if Group send is not scheduled then remove job and recipient data
             deleteCommunicationJobsByGroupSendId(groupSendId)
             deleteRecipientDataByGroupSendId(groupSendId)
@@ -133,19 +131,12 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService.class, "cannotStopConcludedGroupSend" )
         }
 
-        // Note: Scheduled is not enabled for CR1, but this is how we would do the check:
-//        if (groupSend.getScheduledStartJobID() != null && !groupSend.isStarted()) {
-//            try {
-//                jobSubmissionService.unSchedule( groupSend.getScheduledStartJobID() );
-//            } catch (ApplicationException e) {
-//                if (log.isErrorEnabled()) log.error( "Error trying to clean up scheduled group send start job while stopping group send with pk = " + groupSend.getId() + ".", e );
-//            }
-//        }
-
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
-        groupSend.stopDate = new Date()
-
+        groupSend.markStopped()
         groupSend = saveGroupSend( groupSend )
+
+        if (groupSend.jobId != null) {
+            this.schedulerJobService.deleteScheduledJob( groupSend.jobId, groupSend.groupId )
+        }
 
         // fetch any communication jobs for this group send and marked as stopped
         stopPendingCommunicationJobs( groupSend.id )
@@ -162,8 +153,7 @@ class CommunicationGroupSendCompositeService {
         if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
 
         CommunicationGroupSend aGroupSend = communicationGroupSendService.get( groupSendId )
-        aGroupSend.currentExecutionState = CommunicationGroupSendExecutionState.Complete
-        aGroupSend.stopDate = new Date()
+        aGroupSend.markComplete()
         return saveGroupSend( aGroupSend )
     }
 
@@ -206,9 +196,7 @@ class CommunicationGroupSendCompositeService {
                 groupSend = generateGroupSendItemsImpl(groupSend)
             } catch (Throwable t) {
                 log.error(t.getMessage())
-                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
-                groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
-                groupSend.errorText = t.getMessage()
+                groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, t.getMessage() )
                 groupSend = communicationGroupSendService.update(groupSend)
             }
         }
@@ -236,16 +224,14 @@ class CommunicationGroupSendCompositeService {
                 groupSend = generateGroupSendItemsImpl(groupSend)
             } catch (Throwable t) {
                 log.error(t.getMessage())
-                groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Error
-                groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
-                groupSend.errorText = t.getMessage()
+                groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, t.getMessage() )
                 groupSend = communicationGroupSendService.update(groupSend)
             }
         }
         return groupSend
     }
 
-    private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser, String scheduledJobId = UUID.randomUUID().toString() ) {
+    private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser ) {
         if (!groupSend.populationVersionId) {
             CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
             if (populationVersion) {
@@ -258,42 +244,44 @@ class CommunicationGroupSendCompositeService {
 
         assert( groupSend.populationVersionId )
 
-        schedulerJobService.scheduleNowServiceMethod(
-                scheduledJobId,
+        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod(
+                groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString(),
                 bannerUser,
                 groupSend.mepCode,
                 "communicationGroupSendCompositeService",
                 "generateGroupSendItems",
                 ["groupSendId": groupSend.id]
         )
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Queued
+        groupSend.markQueued( jobReceipt.jobId, jobReceipt.groupId )
         groupSend = communicationGroupSendService.update(groupSend)
         return groupSend
     }
 
 
-    private CommunicationGroupSend scheduleGroupSend(CommunicationGroupSendRequest request, String bannerUser, String mepCode, CommunicationGroupSend groupSend) {
+    private CommunicationGroupSend scheduleGroupSend( CommunicationGroupSend groupSend, String bannerUser ) {
         Date now = new Date(System.currentTimeMillis())
-        if (now.after(request.scheduledStartDate)) {
+        if (now.after(groupSend.scheduledStartDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidScheduledDate")
         }
-        if(request.recalculateOnSend) {
-            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+        SchedulerJobReceipt jobReceipt
+        if(groupSend.recalculateOnSend) {
+            jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
         } else {
-            schedulerJobService.scheduleServiceMethod(request.scheduledStartDate, request.referenceId, bannerUser, mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
+            jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
         }
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Scheduled
+
+        groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
         groupSend = communicationGroupSendService.update(groupSend)
-        groupSend
+        return groupSend
     }
 
     private CommunicationGroupSend generateGroupSendItemsImpl( CommunicationGroupSend groupSend ) {
         // We'll created the group send items synchronously for now until we have support for scheduling.
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems(groupSend)
-        groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Processing
+        groupSend.markProcessing()
         groupSend = communicationGroupSendService.update(groupSend)
-        groupSend
+        return groupSend
     }
 
     private CommunicationGroupSend saveGroupSend( CommunicationGroupSend groupSend ) {

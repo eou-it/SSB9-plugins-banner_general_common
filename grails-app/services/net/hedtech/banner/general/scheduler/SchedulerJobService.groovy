@@ -82,6 +82,10 @@ class SchedulerJobService {
 
     public boolean deleteScheduledJob(String jobId, String service, String method) {
         String groupId = service + "." + method
+        deleteScheduledJob( jobId, groupId )
+    }
+
+    public boolean deleteScheduledJob(String jobId, String groupId) {
         JobKey jobKey = new JobKey(jobId, groupId)
         boolean result
         try {

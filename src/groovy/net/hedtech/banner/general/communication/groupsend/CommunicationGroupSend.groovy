@@ -135,10 +135,16 @@ class CommunicationGroupSend implements Serializable {
     String errorText
 
     /**
-     * JOB ID : UUID of the quartz job for the group send scheduling
+     * Job ID : job id of a quartz scheduled task for this group send
      */
     @Column(name = "GCBGSND_JOB_ID")
     String jobId
+
+    /**
+     * Group ID : group id of the quartz job and/or trigger for a group send scheduled task
+     */
+    @Column(name = "GCBGSND_GROUP_ID")
+    String groupId
 
     static constraints = {
         mepCode(nullable: true)
@@ -160,8 +166,46 @@ class CommunicationGroupSend implements Serializable {
         errorText(nullable:true)
         errorCode(nullable:true)
         jobId(nullable:true)
+        groupId(nullable:true)
     }
 
+    public void markScheduled( String jobId, String groupId ) {
+        assert jobId != null
+        assert groupId != null
+        assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Scheduled, jobId, groupId )
+    }
+
+    public void markQueued( String jobId, String groupId ) {
+        assert jobId != null
+        assert groupId != null
+        assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Queued, jobId, groupId )
+    }
+
+    public void markStopped( Date stopDate = new Date() ) {
+        assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Stopped )
+        this.stopDate = stopDate
+    }
+
+    public void markComplete( Date stopDate = new Date() ) {
+        assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Complete )
+        this.stopDate = stopDate
+    }
+
+    public void markProcessing() {
+        assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Processing )
+    }
+
+    public void markError( CommunicationErrorCode errorCode, String errorText ) {
+        assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Error )
+        this.errorCode = errorCode
+        this.errorText = errorText
+    }
+
+    private void assignGroupSendExecutionState( CommunicationGroupSendExecutionState executionState, String jobId = null, String groupId = null ) {
+        this.currentExecutionState = executionState
+        this.jobId = jobId
+        this.groupId = groupId
+    }
 
     public static List findRunning() {
         def query

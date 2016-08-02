@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import static org.junit.Assert.assertEquals
@@ -177,48 +176,115 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
     }
 
+    @Test
+    public void testDeletePopulationWithGroupSendWaitingRecalculation() {
+        CommunicationGroupSend groupSend
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeletePopulationWithGroupSendWaitingRecalculation Query") )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeletePopulationWithGroupSendWaitingRecalculation Population" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testDeleteGroupSend",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: true
+        )
+
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication( request )
+        assertNotNull(groupSend)
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+
+        try {
+            communicationPopulationCompositeService.deletePopulation( population )
+            fail( "Expected cannotDeletePopulationWithExistingGroupSends" )
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotDeletePopulationWithExistingGroupSends@@", e.getMessage() )
+        }
+
+        sleepUntilGroupSendComplete( groupSend, 120 )
+
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+        communicationPopulationCompositeService.deletePopulation( population )
+
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+    }
+
+    @Test
+    public void testRecalculatePopulationAfterScheduledGroupSend() {
+        CommunicationGroupSend groupSend
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testRecalculatePopulationAfterScheduledGroupSend Query") )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testRecalculatePopulationAfterScheduledGroupSend Population" )
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+
+        def isAvailable = {
+            def aPopulationVersion = CommunicationPopulationVersion.get( it )
+            aPopulationVersion.refresh()
+            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        Calendar now = Calendar.getInstance()
+        now.add(Calendar.HOUR, 1)
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testDeleteGroupSend",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                scheduledStartDate: now.getTime(),
+                recalculateOnSend: true
+        )
+
+        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication( request )
+        assertNotNull(groupSend)
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+
+        populationVersion = communicationPopulationCompositeService.calculatePopulationForUser( population )
+        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+        communicationPopulationCompositeService.deletePopulation( population )
+
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+    }
 
     @Test
     void testFindRunning() {
-
-        CommunicationGroupSendRequest request = createGroupSendRequest()
-        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning1" ))
         assertNotNull(groupSend)
-
-        CommunicationGroupSend groupSendB = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
-        CommunicationGroupSend groupSendC = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        CommunicationGroupSend groupSendB = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning2" ))
+        assertNotNull(groupSendB)
+        CommunicationGroupSend groupSendC = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning3" ))
+        assertNotNull(groupSendC)
 
         List runningList = communicationGroupSendService.findRunning()
         assertEquals( 3, runningList.size() )
 
-        assertTrue( groupSendB.currentExecutionState.isRunning() )
-
-        int retries = 2
-        while(retries > 0) {
-            retries--
-            try {
-                groupSendB = communicationGroupSendCompositeService.stopGroupSend(groupSendB.id)
-            } catch (HibernateOptimisticLockingFailureException e) {
-                if(retries == 0) {
-                    throw e
-                }
-            }
+        def allDone = {
+            return communicationGroupSendService.findRunning().size() == 0
         }
-        assertTrue( groupSendB.currentExecutionState.isTerminal() )
-
-        runningList = communicationGroupSendService.findRunning()
-        assertEquals( 2, runningList.size() )
-
-        groupSendC = communicationGroupSendCompositeService.completeGroupSend( groupSendC.id )
-        assertTrue( groupSendC.currentExecutionState.isTerminal() )
-
-        runningList = communicationGroupSendService.findRunning()
-        assertEquals( 1, runningList.size() )
+        assertTrueWithRetry( allDone, null, 10, 10 )
     }
 
     @Test
     void testStopStoppedGroupSend() {
-        CommunicationGroupSendRequest request = createGroupSendRequest()
+        CommunicationGroupSendRequest request = createGroupSendRequest( "testStopStoppedGroupSend" )
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
@@ -239,7 +305,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     void testStopCompletedGroupSend() {
-        CommunicationGroupSendRequest request = createGroupSendRequest()
+        CommunicationGroupSendRequest request = createGroupSendRequest( "testStopCompletedGroupSend" )
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
@@ -421,12 +487,12 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
-    private CommunicationGroupSendRequest createGroupSendRequest() {
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
+    private CommunicationGroupSendRequest createGroupSendRequest( String defaultName ) {
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery( defaultName ))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, defaultName )
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
         assertNotNull( populationVersion )
         assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
@@ -448,13 +514,17 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 
+        Calendar now = Calendar.getInstance()
+        now.add(Calendar.SECOND, 3)
+
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
-                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
-                populationId: population.id,
-                templateId: defaultEmailTemplate.id,
-                organizationId: defaultOrganization.id,
-                referenceId: UUID.randomUUID().toString(),
-                recalculateOnSend: false
+            name: defaultName,
+            populationId: population.id,
+            templateId: defaultEmailTemplate.id,
+            organizationId: defaultOrganization.id,
+            referenceId: UUID.randomUUID().toString(),
+            scheduledStartDate: now.getTime(),
+            recalculateOnSend: false
         )
 
         return request
