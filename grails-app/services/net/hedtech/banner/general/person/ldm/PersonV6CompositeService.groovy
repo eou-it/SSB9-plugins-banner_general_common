@@ -42,8 +42,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     PersonEmailService personEmailService
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
-    PersonNameTypeCompositeService personNameTypeCompositeService
-    PersonIdentificationNameAlternateService personIdentificationNameAlternateService
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
     AddressTypeCompositeService addressTypeCompositeService
@@ -240,7 +238,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
-        fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
         fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
         fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
         personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
@@ -257,6 +254,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                                                                  final Map dataMap, Map dataMapForPerson) {
         dataMapForPerson.put("isInstitutionUsingISO2CountryCodes", dataMap.get("isInstitutionUsingISO2CountryCodes"))
 
+        // Biographical
         PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
         if (personBase) {
             if (personBase.citizenType) {
@@ -270,9 +268,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         // names
         List<PersonIdentificationNameAlternate> personAlternateNames = dataMap.pidmToAlternateNamesMap.get(personIdentificationNameCurrent.pidm)
         if (personAlternateNames) {
-            dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
             dataMapForPerson << ["nameTypeCodeToGuidMap": dataMap.nameTypeCodeToGuidMap]
-            dataMapForPerson << ["personAlternateNames": personAlternateNames]
         }
 
         // visaStatus
@@ -515,27 +511,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsAlternateNameDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        def bannerNameTypeToHedmNameTypeMap = personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
-        log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
-        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(bannerNameTypeToHedmNameTypeMap.keySet())
+    protected def getBannerNameTypeToHedmNameTypeMap() {
+        return personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
+    }
+
+
+    protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(dataMap.bannerNameTypeToHedmNameTypeMap.keySet())
         log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
-        List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
-        log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
-        Map pidmToAlternateNamesMap = [:]
-        entities.each {
-            List<PersonIdentificationNameAlternate> personAlternateNames = []
-            if (pidmToAlternateNamesMap.containsKey(it.pidm)) {
-                personAlternateNames = pidmToAlternateNamesMap.get(it.pidm)
-            } else {
-                pidmToAlternateNamesMap.put(it.pidm, personAlternateNames)
-            }
-            personAlternateNames.add(it)
-        }
+
         // Put in Map
-        dataMap.put("bannerNameTypeToHedmNameTypeMap", bannerNameTypeToHedmNameTypeMap)
         dataMap.put("nameTypeCodeToGuidMap", nameTypeCodeToGuidMap)
-        dataMap.put("pidmToAlternateNamesMap", pidmToAlternateNamesMap)
     }
 
 

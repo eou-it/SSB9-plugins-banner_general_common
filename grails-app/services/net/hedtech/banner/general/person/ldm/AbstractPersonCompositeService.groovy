@@ -9,12 +9,10 @@ import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.LdmService
-import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
-import net.hedtech.banner.general.person.PersonBasicPersonBase
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
+import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.EthnicityCompositeService
+import net.hedtech.banner.general.system.ldm.PersonNameTypeCompositeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -41,6 +39,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonAdvancedSearchViewService personAdvancedSearchViewService
     EmailTypeCompositeService emailTypeCompositeService
     EthnicityCompositeService ethnicityCompositeService
+    PersonNameTypeCompositeService personNameTypeCompositeService
+    PersonIdentificationNameAlternateService personIdentificationNameAlternateService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -59,6 +59,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
+
+
+    abstract protected def getBannerNameTypeToHedmNameTypeMap()
+
+
+    abstract protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
 
 
     abstract
@@ -246,6 +252,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     private void fetchDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
+        fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
 
         fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
     }
@@ -257,6 +264,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(personIdentificationNameCurrent.pidm)]
 
+        // Biographical
         PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
         if (personBase) {
             dataMapForPerson << ["personBase": personBase]
@@ -264,6 +272,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
             if (personBase.ethnic) {
                 dataMapForPerson << ["usEthnicCodeGuid": dataMap.usEthnicCodeToGuidMap.get(personBase.ethnic)]
             }
+        }
+
+        // names
+        List<PersonIdentificationNameAlternate> personAlternateNames = dataMap.pidmToAlternateNamesMap.get(personIdentificationNameCurrent.pidm)
+        if (personAlternateNames) {
+            dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
+            dataMapForPerson << ["personAlternateNames": personAlternateNames]
         }
 
         prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
@@ -284,6 +299,31 @@ abstract class AbstractPersonCompositeService extends LdmService {
         dataMap.put("usEthnicCodeToGuidMap", usEthnicCodeToGuidMap)
 
         fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
+    }
+
+
+    private void fetchPersonsAlternateNameDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        def bannerNameTypeToHedmNameTypeMap = getBannerNameTypeToHedmNameTypeMap()
+        log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
+
+        List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
+        log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
+        Map pidmToAlternateNamesMap = [:]
+        entities.each {
+            List<PersonIdentificationNameAlternate> personAlternateNames = []
+            if (pidmToAlternateNamesMap.containsKey(it.pidm)) {
+                personAlternateNames = pidmToAlternateNamesMap.get(it.pidm)
+            } else {
+                pidmToAlternateNamesMap.put(it.pidm, personAlternateNames)
+            }
+            personAlternateNames.add(it)
+        }
+
+        // Put in Map
+        dataMap.put("bannerNameTypeToHedmNameTypeMap", bannerNameTypeToHedmNameTypeMap)
+        dataMap.put("pidmToAlternateNamesMap", pidmToAlternateNamesMap)
+
+        fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(pidms, dataMap)
     }
 
 

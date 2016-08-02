@@ -216,6 +216,19 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
 
     protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        Set<String> maritalStatusCodes = dataMap.pidmToPersonBaseMap?.values().maritalStatus.code.flatten().unique()
+        // MaritalStatus.fetchAllWithGuidByCodeInList
+        // MaritalStatusCompositeService.getMaritalStatusCodeToGuidMap
+    }
+
+
+    protected def getBannerNameTypeToHedmNameTypeMap() {
+        return personNameTypeCompositeService.getBannerNameTypeToHedmV3NameTypeMap()
+    }
+
+
+    protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+
     }
 
 }
