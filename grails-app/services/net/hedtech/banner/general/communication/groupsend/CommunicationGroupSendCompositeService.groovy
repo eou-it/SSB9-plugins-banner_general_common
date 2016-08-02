@@ -103,6 +103,12 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "cannotDeleteRunningGroupSend" )
         }
 
+        // Grab population version if only used for this group send
+        CommunicationPopulationVersion populationVersion = null
+        if (groupSend.recalculateOnSend && groupSend.populationVersionId != null) {
+            populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
+        }
+
         //if group send is scheduled
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
         if(groupSend.jobId != null) {
@@ -112,8 +118,13 @@ class CommunicationGroupSendCompositeService {
             deleteCommunicationJobsByGroupSendId(groupSendId)
             deleteRecipientDataByGroupSendId(groupSendId)
         }
-
         communicationGroupSendService.delete( groupSendId )
+
+        // Garbage collect the population version
+        if (populationVersion != null) {
+            // Delete if only used by this group send.
+            communicationPopulationCompositeService.deletePopulationVersion( populationVersion )
+        }
     }
 
     /**
@@ -237,8 +248,7 @@ class CommunicationGroupSendCompositeService {
             if (populationVersion) {
                 groupSend.populationVersionId = populationVersion.id
             } else {
-                // TODO: create exception in messages.properties and confirm if we would rather calculate on the fly for this scenario.
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "populationNotCalculatedForUser" )
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser" )
             }
         }
 
