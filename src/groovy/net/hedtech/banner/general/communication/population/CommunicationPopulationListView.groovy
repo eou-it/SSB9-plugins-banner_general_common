@@ -26,10 +26,11 @@ import javax.persistence.*
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.populationQueryId = :populationQueryId
                     AND    upper(a.createdBy) = upper(:userid) """),
-        @NamedQuery(name = "CommunicationPopulationListView.fetchAllByPopulationIdUserId",
+        @NamedQuery(name = "CommunicationPopulationListView.fetchLatestByPopulationIdAndUserId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.id = :populationId
-                    AND    upper(a.createdBy) = upper(:userid) """),
+                    AND    upper(a.createdBy) = upper(:userid)
+                    ORDER BY a.lastCalculatedTime desc """),
         @NamedQuery(name = "CommunicationPopulationListView.fetchByPopulationId",
                 query = """ FROM CommunicationPopulationListView a
                     WHERE  a.id = :populationId """)
@@ -183,11 +184,11 @@ class CommunicationPopulationListView implements Serializable {
         return populationListView
     }
 
-    public static CommunicationPopulationListView fetchAllByPopulationIdUserId(Long populationId, String userid) {
+    public static CommunicationPopulationListView fetchLatestByPopulationIdAndUserId(Long populationId, String userid) {
 
         def CommunicationPopulationListView populationListView
         populationListView = CommunicationPopulationListView.withSession { session ->
-            session.getNamedQuery('CommunicationPopulationListView.fetchAllByPopulationIdUserId')
+            session.getNamedQuery('CommunicationPopulationListView.fetchLatestByPopulationIdAndUserId')
                     .setLong('populationId', populationId)
                     .setString('userid', userid)
                     .list()[0]

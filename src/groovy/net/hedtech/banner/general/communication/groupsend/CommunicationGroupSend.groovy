@@ -232,6 +232,14 @@ class CommunicationGroupSend implements Serializable {
         return results
     }
 
+    public static int findCountByPopulationVersionId( Long populationVersionId ) {
+        return CommunicationGroupSend.createCriteria().list {
+            projections {
+                count()
+            }
+            eq( 'populationVersionId', populationVersionId )
+        }[0]
+    }
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 

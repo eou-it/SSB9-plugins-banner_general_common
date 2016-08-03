@@ -105,7 +105,8 @@ class CommunicationGroupSendCompositeService {
 
         // Grab population version if only used for this group send
         CommunicationPopulationVersion populationVersion = null
-        if (groupSend.recalculateOnSend && groupSend.populationVersionId != null) {
+        boolean recalculateOnSend = groupSend.recalculateOnSend
+        if (groupSend.populationVersionId != null) {
             populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
         }
 
@@ -122,8 +123,15 @@ class CommunicationGroupSendCompositeService {
 
         // Garbage collect the population version
         if (populationVersion != null) {
-            // Delete if only used by this group send.
-            communicationPopulationCompositeService.deletePopulationVersion( populationVersion )
+            if (recalculateOnSend) {
+                communicationPopulationCompositeService.deletePopulationVersion( populationVersion )
+            } else {
+                CommunicationPopulationVersion latestPopulationVersion =
+                    CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( populationVersion.population.id, populationVersion.createdBy )
+                if (populationVersion.id != latestPopulationVersion.id) {
+                    communicationPopulationCompositeService.deletePopulationVersion( populationVersion )
+                }
+            }
         }
     }
 

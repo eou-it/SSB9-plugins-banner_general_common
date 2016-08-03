@@ -9,6 +9,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
@@ -192,109 +193,6 @@ class CommunicationPopulationCompositeService {
         return communicationPopulationService.delete( populationAsMap )
     }
 
-
-    /**
-     * Deletes the population population and/or population version.
-     *
-     * @param population the population
-     * @param populationVersion the population version
-     */
-    public boolean deletePopulationVersion( CommunicationPopulation population, CommunicationPopulationVersion populationVersion ) {
-        return deletePopulationVersion(population.id, population.version, populationVersion?populationVersion.id:0, populationVersion?populationVersion.version:0)
-    }
-
-
-    /**
-     * Deletes the population and/or population version.
-     *
-     * @param populationId the primary key of the population
-     * @param version the optimistic lock counter
-     * @param versionId the primary key of the population version
-     * @param revisionVersion the optimistic lock counter
-     */
-    public boolean deletePopulationVersion( long populationId, long version, long versionId, long revisionVersion) {
-        log.trace("deletePopulationVersion called")
-        boolean retValue = true
-        CommunicationPopulation parentPopulation = CommunicationPopulation.fetchById(populationId)
-        List populationVersions = CommunicationPopulationVersion.findByPopulationId(populationId)
-
-        // TODO: Delete any pop version job associations with this version
-
-//        if(!parentPopulation.changesPending)
-//        {
-//            //Request to delete a published version from query table where other published version exists
-//            if (populationVersions != null && populationVersions.size() > 0) {
-//                def queryVersionAsMap = [
-//                        id     : Long.valueOf(versionId),
-//                        version: Long.valueOf(revisionVersion)
-//                ]
-//                retValue = communicationPopulationQueryVersionService.delete(queryVersionAsMap)
-//                if(populationVersions.size() == 1)
-//                {
-//                    //Delete the parent query as well since all versions got deleted
-//                    def queryAsMap = [
-//                            id     : Long.valueOf(populationId),
-//                            version: Long.valueOf(version)
-//                    ]
-//                    retValue = communicationPopulationQueryService.delete(queryAsMap)
-//                }
-//                else
-//                {
-//                    boolean updateParentQuery = versionId == ((CommunicationPopulationQueryVersion)populationVersions[0]).id
-//                    if (updateParentQuery) {
-//                        //Update the parent query only if deleting the latest published version
-//                        CommunicationPopulationQueryVersion latestPublishedVersion = populationVersions[1]
-//                        def queryAsMap = [
-//                                id            : Long.valueOf(populationId),
-//                                version       : Long.valueOf(version),
-//                                changesPending: Boolean.toString(false),
-//                                queryString     : latestPublishedVersion.queryString
-//                        ]
-//                        communicationPopulationQueryService.update(queryAsMap)
-//                    }
-//                }
-//            }
-//        }
-//        else
-//        {
-//            if (populationVersions != null && populationVersions.size() > 0) {
-//                if(populationId == versionId)
-//                {
-//                    //Request to delete the unpublished version from query table where an older published version exists
-//                    CommunicationPopulationQueryVersion latestPublishedVersion = populationVersions[0]
-//                    def queryAsMap = [
-//                            id             : Long.valueOf(populationId),
-//                            version        : Long.valueOf(version),
-//                            changesPending : Boolean.toString(false),
-//                            queryString      : latestPublishedVersion.queryString
-//                    ]
-//                    communicationPopulationQueryService.update(queryAsMap)
-//                    retValue = true
-//                }
-//                else
-//                {
-//                    //Request to delete a published version from query table where an unpublished version and other older published version exists
-//                    def queryVersionAsMap = [
-//                            id     : Long.valueOf(versionId),
-//                            version: Long.valueOf(revisionVersion)
-//                    ]
-//                    retValue = communicationPopulationVersionService.delete(queryVersionAsMap)
-//                }
-//            }
-//            else
-//            {
-//                //Single unpublished new parent query exists, delete from query table alone
-//                def queryAsMap = [
-//                        id     : Long.valueOf(populationId),
-//                        version: Long.valueOf(version)
-//                ]
-//                retValue = communicationPopulationService.delete(queryAsMap)
-//            }
-//        }
-        return retValue
-    }
-
-
     /**
      * Updates an existing population.
      *
@@ -362,7 +260,13 @@ class CommunicationPopulationCompositeService {
 
         CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, oracleName )
         if (populationVersion) {
-            deletePopulationVersion(populationVersion)
+            if (populationVersion.status.equals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION )) {
+                throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotRecalculatePopulationPendingExecution")
+            } else {
+                if (CommunicationGroupSend.findCountByPopulationVersionId( populationVersion.id ) == 0) {
+                    deletePopulationVersion( populationVersion )
+                }
+            }
         }
 
         populationVersion = createPopulationVersion( population, oracleName, UUID.randomUUID().toString() )
@@ -382,7 +286,6 @@ class CommunicationPopulationCompositeService {
         assert populationVersion != null
 
         if (populationVersion.status.equals(CommunicationPopulationCalculationStatus.PENDING_EXECUTION)) {
-            throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotRecalculatePopulationPendingExecution")
         } else {
             //TODO: (1) Check for not able to delete population version when a job using this population version is processing
 
