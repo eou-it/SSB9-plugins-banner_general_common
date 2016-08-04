@@ -767,6 +767,40 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-campus-involvement-roles" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-involvement-roles</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>7</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-involvement-roles/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CampusInvolvementsRoles.STVCOMF</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-campus-organization-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-organization-types</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>7</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-organization-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CampusOrganizationsTypes.STVACTP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -812,6 +846,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-educationalinstitutions-v6"/>
                 <ref bean="ar-organizations-v6"/>
                 <ref bean="ar-addresses"/>
+                <ref bean="ar-campus-involvement-roles"/>
+                <ref bean="ar-campus-organization-types"/>
             </list>
         </property>
     </bean>
@@ -861,6 +897,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-educationalinstitutions-v6"/>
                 <ref bean="ar-organizations-v6"/>
                 <ref bean="ar-addresses"/>
+                <ref bean="ar-campus-involvement-roles"/>
+                <ref bean="ar-campus-organization-types"/>
             </list>
         </property>
     </bean>
