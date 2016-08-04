@@ -185,7 +185,7 @@ class NonPersonCompositeService extends LdmService {
 
             // Credentials
             def personCredentials = dataMapForPerson["personCredentials"]
-            decorator.credentials = personCredentialCompositeService.createCredentialDecorators(personCredentials)
+            decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
 
             // Emails
             List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]

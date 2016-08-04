@@ -195,23 +195,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    @Override
-    protected List<RoleName> getRolesRequired() {
-        return [RoleName.STUDENT, RoleName.INSTRUCTOR]
-    }
-
-
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
-    }
-
-
-    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                                 final Map dataMap, Map dataMapForPerson) {
-    }
-
-
-    protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                        final Map dataMapForPerson) {
     }
 
 
@@ -229,6 +213,22 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
     protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
 
+    }
+
+
+    @Override
+    protected List<RoleName> getRolesRequired() {
+        return [RoleName.STUDENT, RoleName.INSTRUCTOR]
+    }
+
+
+    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                                 final Map dataMap, Map dataMapForPerson) {
+    }
+
+
+    protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                        final Map dataMapForPerson) {
     }
 
 }

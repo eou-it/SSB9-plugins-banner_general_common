@@ -6,6 +6,7 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
@@ -13,6 +14,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.person.ldm.v1.Credential
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 
@@ -117,7 +119,7 @@ class PersonCredentialCompositeService extends LdmService {
                     credentials = dataMap.pidmToCredentialsMap.get(pidm)
                 }
                 credentials << [type: CredentialType.BANNER_ID, value: bannerId]
-                persCredentialsDecorator.credentials = createCredentialDecorators(credentials)
+                persCredentialsDecorator.credentials = createCredentialObjectsV6(credentials)
 
                 decorators.add(persCredentialsDecorator)
             }
@@ -194,23 +196,42 @@ class PersonCredentialCompositeService extends LdmService {
     }
 
 
-    def createCredentialDecorators(def credentials) {
+    def createCredentialObjectsV3(def credentials) {
+        return createCredentialObjects(credentials, GeneralValidationCommonConstants.VERSION_V3)
+    }
+
+
+    def createCredentialObjectsV6(def credentials) {
+        return createCredentialObjects(credentials, GeneralValidationCommonConstants.VERSION_V6)
+    }
+
+
+    private def createCredentialObjects(def credentials, String version) {
         def decorators = []
         if (credentials) {
             credentials.each {
-                decorators << createCredentialV6(it.type, it.value)
+                if (GeneralValidationCommonConstants.VERSION_V6.equals(version)) {
+                    decorators << createCredentialObjectV6(it.type, it.value)
+                } else if (GeneralValidationCommonConstants.VERSION_V3.equals(version)) {
+                    decorators << createCredentialObjectV3(it.type, it.value)
+                }
             }
         }
         return decorators
     }
 
 
-    private PersonCredential createCredentialV6(CredentialType credentialType, String value) {
+    private PersonCredential createCredentialObjectV6(CredentialType credentialType, String value) {
         PersonCredential personCredential
         if (credentialType && value) {
             personCredential = new PersonCredential(credentialType.versionToEnumMap["v6"], value)
         }
         return personCredential
+    }
+
+
+    private Credential createCredentialObjectV3(CredentialType credentialType, String value) {
+        return new Credential(credentialType.versionToEnumMap["v3"], value, null, null)
     }
 
 }

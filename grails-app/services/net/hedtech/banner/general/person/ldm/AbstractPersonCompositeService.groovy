@@ -41,6 +41,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     EthnicityCompositeService ethnicityCompositeService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
+    PersonCredentialCompositeService personCredentialCompositeService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -50,9 +51,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected Map processListApiRequest(final Map requestParams)
-
-
-    abstract protected List<RoleName> getRolesRequired()
 
 
     abstract protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap)
@@ -65,6 +63,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
+
+
+    abstract protected List<RoleName> getRolesRequired()
 
 
     abstract
@@ -253,6 +254,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     private void fetchDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
         fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
+        fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
+        personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
 
         fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
     }
@@ -281,6 +284,21 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson << ["personAlternateNames": personAlternateNames]
         }
 
+        // roles
+        def personRoles = []
+        if (dataMap.pidmToRolesMap.containsKey(personIdentificationNameCurrent.pidm)) {
+            personRoles = dataMap.pidmToRolesMap.get(personIdentificationNameCurrent.pidm)
+        }
+        dataMapForPerson << ["personRoles": personRoles]
+
+        // credentials
+        def personCredentials = []
+        if (dataMap.pidmToCredentialsMap.containsKey(personIdentificationNameCurrent.pidm)) {
+            personCredentials = dataMap.pidmToCredentialsMap.get(personIdentificationNameCurrent.pidm)
+        }
+        personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
+        dataMapForPerson << ["personCredentials": personCredentials]
+
         prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
 
         return dataMapForPerson
@@ -289,7 +307,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     private void fetchPersonsBiographicalDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get SPBPERS records for persons
-        def pidmToPersonBaseMap = fetchPersonBaseByPIDMs(pidms)
+        def pidmToPersonBaseMap = getPidmToPersonBaseMap(pidms)
 
         // Get GUIDs for US ethnic codes (SPBPERS_ETHN_CDE)
         Map<String, String> usEthnicCodeToGuidMap = ethnicityCompositeService.fetchGUIDsForUnitedStatesEthnicCodes()
@@ -306,18 +324,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         def bannerNameTypeToHedmNameTypeMap = getBannerNameTypeToHedmNameTypeMap()
         log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
 
-        List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
-        log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
-        Map pidmToAlternateNamesMap = [:]
-        entities.each {
-            List<PersonIdentificationNameAlternate> personAlternateNames = []
-            if (pidmToAlternateNamesMap.containsKey(it.pidm)) {
-                personAlternateNames = pidmToAlternateNamesMap.get(it.pidm)
-            } else {
-                pidmToAlternateNamesMap.put(it.pidm, personAlternateNames)
-            }
-            personAlternateNames.add(it)
-        }
+        def pidmToAlternateNamesMap = getPidmToAlternateNamesMap(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
 
         // Put in Map
         dataMap.put("bannerNameTypeToHedmNameTypeMap", bannerNameTypeToHedmNameTypeMap)
@@ -327,7 +334,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected void fetchPersonsRoleDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+    private void fetchPersonsRoleDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         def pidmToRolesMap = [:]
 
         List<RoleName> roleNames = getRolesRequired()
@@ -405,6 +412,46 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
+    private def getPidmToGuidMap(def rows) {
+        Map<Integer, String> pidmToGuidMap = [:]
+        rows?.each {
+            pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
+        }
+        return pidmToGuidMap
+    }
+
+
+    private def getPidmToPersonBaseMap(List<Integer> pidms) {
+        def pidmToPersonBaseMap = [:]
+        if (pidms) {
+            log.debug "Getting SPBPERS records for ${pidms?.size()} PIDMs..."
+            List<PersonBasicPersonBase> entities = PersonBasicPersonBase.fetchByPidmList(pidms)
+            log.debug "Got ${entities?.size()} SPBPERS records"
+            entities?.each {
+                pidmToPersonBaseMap.put(it.pidm, it)
+            }
+        }
+        return pidmToPersonBaseMap
+    }
+
+
+    private def getPidmToAlternateNamesMap(List<Integer> pidms, List<String> nameTypeCodes) {
+        List<PersonIdentificationNameAlternate> entities = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated(pidms, nameTypeCodes)
+        log.debug "Got ${entities?.size() ?: 0} SV_SPRIDEN_ALT records"
+        def pidmToAlternateNamesMap = [:]
+        entities.each {
+            List<PersonIdentificationNameAlternate> personAlternateNames = []
+            if (pidmToAlternateNamesMap.containsKey(it.pidm)) {
+                personAlternateNames = pidmToAlternateNamesMap.get(it.pidm)
+            } else {
+                pidmToAlternateNamesMap.put(it.pidm, personAlternateNames)
+            }
+            personAlternateNames.add(it)
+        }
+        return pidmToAlternateNamesMap
+    }
+
+
     protected def getPidmToStudentRoleMap(List<Integer> pidms) {
         def pidmToStudentRoleMap = [:]
         List<BigDecimal> rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
@@ -438,7 +485,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def getPidmToEmployeeRoleMap(List<Integer> pidms) {
+    private def getPidmToEmployeeRoleMap(List<Integer> pidms) {
         def pidmToEmployeeRoleMap = [:]
         List<Object[]> rows = userRoleCompositeService.fetchEmployeesByPIDMs(pidms)
         rows?.each {
@@ -451,7 +498,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def getPidmToAlumniRoleMap(List<Integer> pidms) {
+    private def getPidmToAlumniRoleMap(List<Integer> pidms) {
         def pidmToAlumniRoleMap = [:]
         List<Object[]> alumniList = userRoleCompositeService.fetchAlumnisByPIDMs(pidms)
         alumniList?.each {
@@ -463,7 +510,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def getPidmToVendorRoleMap(List<Integer> pidms) {
+    private def getPidmToVendorRoleMap(List<Integer> pidms) {
         def pidmToVendorRoleMap = [:]
         List<Object[]> rows = userRoleCompositeService.fetchVendorsByPIDMs(pidms)
         rows?.each {
@@ -476,7 +523,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def getPidmToProspectiveStudentRoleMap(List<Integer> pidms) {
+    private def getPidmToProspectiveStudentRoleMap(List<Integer> pidms) {
         def pidmToProspectiveStudentRoleMap = [:]
         List<Object[]> rows = userRoleCompositeService.fetchProspectiveStudentByPIDMs(pidms)
         rows?.each {
@@ -489,7 +536,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def getPidmToAdvisorRoleMap(List<Integer> pidms) {
+    private def getPidmToAdvisorRoleMap(List<Integer> pidms) {
         def pidmToAdvisorRoleMap = [:]
         List<Object[]> rows = userRoleCompositeService.fetchAdvisorByPIDMs(pidms)
         rows?.each {
@@ -499,29 +546,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
             pidmToAdvisorRoleMap.put(bdPidm.toInteger(), [role: RoleName.ADVISOR, startDate: startDate, endDate: endDate])
         }
         return pidmToAdvisorRoleMap
-    }
-
-
-    private def getPidmToGuidMap(def rows) {
-        Map<Integer, String> pidmToGuidMap = [:]
-        rows?.each {
-            pidmToGuidMap.put(it.personIdentificationNameCurrent.pidm, it.globalUniqueIdentifier.guid)
-        }
-        return pidmToGuidMap
-    }
-
-
-    private def fetchPersonBaseByPIDMs(List<Integer> pidms) {
-        def pidmToPersonBaseMap = [:]
-        if (pidms) {
-            log.debug "Getting SPBPERS records for ${pidms?.size()} PIDMs..."
-            List<PersonBasicPersonBase> entities = PersonBasicPersonBase.fetchByPidmList(pidms)
-            log.debug "Got ${entities?.size()} SPBPERS records"
-            entities?.each {
-                pidmToPersonBaseMap.put(it.pidm, it)
-            }
-        }
-        return pidmToPersonBaseMap
     }
 
 

@@ -38,7 +38,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     VisaInformationService visaInformationService
     VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
-    PersonCredentialCompositeService personCredentialCompositeService
     PersonEmailService personEmailService
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
@@ -230,23 +229,64 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    @Override
-    protected List<RoleName> getRolesRequired() {
-        return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
-    }
-
-
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
-        fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
-        personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
         fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
         fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
         fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
+    }
+
+
+    protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        // Get GUIDs for CitizenTypes
+        List<String> citizenTypeCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
+            it.citizenType?.code
+        }.unique()
+        Map<String, String> ctCodeToGuidMap = [:]
+        if (citizenTypeCodes) {
+            log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
+            ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
+            log.debug "Got ${ctCodeToGuidMap?.size() ?: 0} GUIDs for given CitizenType codes"
+        }
+
+        // Get GUIDs for regligion codes
+        List<String> religionCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
+            it.religion?.code
+        }.unique()
+        Map<String, String> relCodeToGuidMap = [:]
+        if (religionCodes) {
+            log.debug "Getting GUIDs for religion codes $religionCodes..."
+            relCodeToGuidMap = religionCompositeService.fetchGUIDs(religionCodes)
+            log.debug "Got ${relCodeToGuidMap?.size() ?: 0} GUIDs for given religion codes"
+        }
+
+        // Put in Map
+        dataMap.put("ctCodeToGuidMap", ctCodeToGuidMap)
+        dataMap.put("relCodeToGuidMap", relCodeToGuidMap)
+    }
+
+
+    protected def getBannerNameTypeToHedmNameTypeMap() {
+        return personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
+    }
+
+
+    protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(dataMap.bannerNameTypeToHedmNameTypeMap.keySet())
+        log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
+
+        // Put in Map
+        dataMap.put("nameTypeCodeToGuidMap", nameTypeCodeToGuidMap)
+    }
+
+
+    @Override
+    protected List<RoleName> getRolesRequired() {
+        return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
     }
 
 
@@ -277,21 +317,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             dataMapForPerson << ["visaInformation": visaInfo]
             dataMapForPerson << ["visaTypeGuid": dataMap.vtCodeToGuidMap.get(visaInfo.visaType.code)]
         }
-
-        // roles
-        def personRoles = []
-        if (dataMap.pidmToRolesMap.containsKey(personIdentificationNameCurrent.pidm)) {
-            personRoles = dataMap.pidmToRolesMap.get(personIdentificationNameCurrent.pidm)
-        }
-        dataMapForPerson << ["personRoles": personRoles]
-
-        // credentials
-        def personCredentials = []
-        if (dataMap.pidmToCredentialsMap.containsKey(personIdentificationNameCurrent.pidm)) {
-            personCredentials = dataMap.pidmToCredentialsMap.get(personIdentificationNameCurrent.pidm)
-        }
-        personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
-        dataMapForPerson << ["personCredentials": personCredentials]
 
         // emails
         List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)
@@ -410,7 +435,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
             // Credentials
             def personCredentials = dataMapForPerson["personCredentials"]
-            decorator.credentials = personCredentialCompositeService.createCredentialDecorators(personCredentials)
+            decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
             // Emails
             List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]
             if (personEmailList) {
@@ -479,49 +504,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
         }
         return decorator
-    }
-
-
-    protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        // Get GUIDs for CitizenTypes
-        List<String> citizenTypeCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
-            it.citizenType?.code
-        }.unique()
-        Map<String, String> ctCodeToGuidMap = [:]
-        if (citizenTypeCodes) {
-            log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
-            ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
-            log.debug "Got ${ctCodeToGuidMap?.size() ?: 0} GUIDs for given CitizenType codes"
-        }
-
-        // Get GUIDs for regligion codes
-        List<String> religionCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
-            it.religion?.code
-        }.unique()
-        Map<String, String> relCodeToGuidMap = [:]
-        if (religionCodes) {
-            log.debug "Getting GUIDs for religion codes $religionCodes..."
-            relCodeToGuidMap = religionCompositeService.fetchGUIDs(religionCodes)
-            log.debug "Got ${relCodeToGuidMap?.size() ?: 0} GUIDs for given religion codes"
-        }
-
-        // Put in Map
-        dataMap.put("ctCodeToGuidMap", ctCodeToGuidMap)
-        dataMap.put("relCodeToGuidMap", relCodeToGuidMap)
-    }
-
-
-    protected def getBannerNameTypeToHedmNameTypeMap() {
-        return personNameTypeCompositeService.getBannerNameTypeToHedmV6NameTypeMap()
-    }
-
-
-    protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(dataMap.bannerNameTypeToHedmNameTypeMap.keySet())
-        log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
-
-        // Put in Map
-        dataMap.put("nameTypeCodeToGuidMap", nameTypeCodeToGuidMap)
     }
 
 
