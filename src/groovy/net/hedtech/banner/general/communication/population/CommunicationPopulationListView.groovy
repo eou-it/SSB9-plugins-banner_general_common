@@ -149,6 +149,12 @@ class CommunicationPopulationListView implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date queryVersionName
 
+    /**
+     * Indicates what advanced option user selected for regenerating population
+     */
+    @Column(name = "QUERY_VERSION_SELECTED")
+    String useRecentOrCurrent
+
     static constraints = {
         name(nullable: false)
         populationQueryId(nullable: false)
