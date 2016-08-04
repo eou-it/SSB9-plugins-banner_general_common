@@ -257,7 +257,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
                       p_match_pidm_out   => new_pidm);
 
                 end;
-             """, ["Smith", "John"]) { output_info ->
+             """, ["Lincoln", "Abraham"]) { output_info ->
                 result = output_info
             }
         }
