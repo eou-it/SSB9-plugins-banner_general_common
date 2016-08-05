@@ -148,17 +148,21 @@ class CommunicationGroupSendView implements Serializable {
         return query
     }
 
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-
-        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
-
-        def queryCriteria = CommunicationGroupSendView.createCriteria()
-        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
-            ilike("createdBy", filterData?.params?.createdBy)
-            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
-        }
-        return results
-    }
+//    Commented out for performance reason in calling a very complex view. Instead of paging through this view directly,
+//    the controller fetches from the main entity GroupSend and then does a CommunicationGroupSendView#fetchById on each
+//    found object for the current page it is returning back.
+//
+//    public static def findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+//
+//        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+//
+//        def queryCriteria = CommunicationGroupSendView.createCriteria()
+//        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+//            ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
+//            ilike("createdBy", filterData?.params?.createdBy)
+//            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+//        }
+//        return results
+//    }
 }
 

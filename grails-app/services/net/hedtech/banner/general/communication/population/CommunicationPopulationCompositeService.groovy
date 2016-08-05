@@ -162,50 +162,21 @@ class CommunicationPopulationCompositeService {
         log.trace("deletePopulation( populationId, version ) called")
         CommunicationPopulation population = CommunicationPopulation.fetchById(populationId)
         List populationVersions = CommunicationPopulationVersion.findByPopulationId( population.id )
-        if(populationVersions != null && populationVersions.size() > 0) {
-            for(CommunicationPopulationVersion populationVersion : populationVersions) {
-                if (populationVersion.status == CommunicationPopulationCalculationStatus.PENDING_EXECUTION) {
-                    schedulerJobService.deleteScheduledJob( populationVersion.jobId, "communicationPopulationCompositeService", "calculatePendingPopulationVersion" )
-                }
-
-                List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
-                populationVersionQueryAssociations.each() { populationVersionQueryAssociation ->
-                    populationVersionQueryAssociation.refresh()
-                    CommunicationPopulationSelectionList selectionList = populationVersionQueryAssociation.selectionList
-                    if (log.isDebugEnabled()) log.debug( "Deleting population version query association with id = ${populationVersionQueryAssociation.id}")
-                    communicationPopulationVersionQueryAssociationService.delete( populationVersionQueryAssociation )
-
-                    if (selectionList) {
-                        Long selectionListId = selectionList.id
-                        communicationPopulationSelectionListService.delete( selectionList )
-                        List<CommunicationPopulationSelectionListEntry> selectionListEntries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( selectionListId )
-                        communicationPopulationSelectionListEntryService.delete(selectionListEntries)
-                    }
-                }
-            }
-            //Delete the CommunicationPopulationVersion
-            try {
-                communicationPopulationVersionService.delete(populationVersions)
-            } catch( ApplicationException e ) {
-                if (e.getWrappedException().getCause().getConstraintName().equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPV" )) {
-                    throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotDeletePopulationWithExistingGroupSends")
-                } else {
-                    throw e
-                }
-            }
-
+        populationVersions.each { CommunicationPopulationVersion populationVersion ->
+            populationVersion.refresh()
+            deletePopulationVersion( populationVersion )
         }
 
         //Delete the CommunicationPopulationQueryAssociation
-        List<CommunicationPopulationQueryAssociation> populationQueryAssociations = CommunicationPopulationQueryAssociation.findAllByPopulation(population)
-        communicationPopulationQueryAssociationService.delete(populationQueryAssociations)
-        //Delete the CommunicationPopulation
-        def populationAsMap = [
-            id     : Long.valueOf( populationId ),
-            version: Long.valueOf( version )
-        ]
-        return communicationPopulationService.delete( populationAsMap )
+        List<CommunicationPopulationQueryAssociation> populationQueryAssociations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
+        populationQueryAssociations.each { CommunicationPopulationQueryAssociation populationQueryAssociation ->
+            populationQueryAssociation.refresh()
+            communicationPopulationQueryAssociationService.delete( populationQueryAssociation )
+        }
+
+        return communicationPopulationService.delete( [ id : Long.valueOf( populationId ), version: Long.valueOf( version ) ] )
     }
+
 
     /**
      * Updates an existing population.
@@ -225,12 +196,6 @@ class CommunicationPopulationCompositeService {
                 new NotFoundException(id: populationAsMap.id, entityClassName: CommunicationPopulation.class.simpleName)
             )
         }
-
-//        if (!equals( query.queryString, (String) queryAsMap.queryString )) {
-//            queryAsMap.changesPending = true;
-//        }
-
-//        validateSqlStringForSaving( (String) queryAsMap.queryString )
 
         return (CommunicationPopulation) communicationPopulationService.update( populationAsMap )
     }
@@ -305,20 +270,30 @@ class CommunicationPopulationCompositeService {
             log.trace( "deletePopulationVersion( populationVersion = ${populationVersion.id} ) called")
         }
 
-        if (!populationVersion.status.equals(CommunicationPopulationCalculationStatus.PENDING_EXECUTION)) {
-            //Delete the CommunicationPopulationVersionQueryAssociation
-            List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
-            populationVersionQueryAssociations.each { CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation ->
-                populationVersionQueryAssociation.refresh()
-                if (log.isDebugEnabled()) log.debug( "Deleting population version query association with id = ${populationVersionQueryAssociation.id}")
-                communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociation)
-            }
-            deleteSelectionListEntries( populationVersionQueryAssociations.get(0).selectionList )
-            //Delete the CommunicationPopulationSelectionList, currently only one exist
-            communicationPopulationSelectionListService.delete(populationVersionQueryAssociations.get(0).selectionList)
+        if (populationVersion.status == CommunicationPopulationCalculationStatus.PENDING_EXECUTION) {
+            schedulerJobService.deleteScheduledJob( populationVersion.jobId, "communicationPopulationCompositeService", "calculatePendingPopulationVersion" )
+        }
 
-            //Delete the CommunicationPopulationVersion
-            communicationPopulationVersionService.delete(populationVersion)
+        //Delete the CommunicationPopulationVersionQueryAssociation
+        List<CommunicationPopulationVersionQueryAssociation> populationVersionQueryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
+        populationVersionQueryAssociations.each { CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation ->
+            populationVersionQueryAssociation.refresh()
+            if (log.isDebugEnabled()) log.debug( "Deleting population version query association with id = ${populationVersionQueryAssociation.id}")
+            communicationPopulationVersionQueryAssociationService.delete(populationVersionQueryAssociation)
+        }
+        deleteSelectionListEntries( populationVersionQueryAssociations.get(0).selectionList )
+        //Delete the CommunicationPopulationSelectionList, currently only one exist
+        communicationPopulationSelectionListService.delete(populationVersionQueryAssociations.get(0).selectionList)
+
+        //Delete the CommunicationPopulationVersion
+        try {
+            communicationPopulationVersionService.delete( populationVersion )
+        } catch( ApplicationException e ) {
+            if (e.getWrappedException().getCause().getConstraintName().equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPV" )) {
+                throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotDeletePopulationWithExistingGroupSends")
+            } else {
+                throw e
+            }
         }
     }
 
