@@ -95,7 +95,7 @@ class SourceBackgroundInstitutionTestScoreServiceIntegrationTests extends BaseIn
         assertNotNull sourceBackgroundInstitutionTestScore.lastModified
 
         //Update the entity with new invalid values
-        sourceBackgroundInstitutionTestScore.meanTestScore = "123456"
+        sourceBackgroundInstitutionTestScore.meanTestScore = "1234567890123456"
         map.domainModel = sourceBackgroundInstitutionTestScore
         shouldFail(ApplicationException) {
             sourceBackgroundInstitutionTestScore = sourceBackgroundInstitutionTestScoreService.update(map)

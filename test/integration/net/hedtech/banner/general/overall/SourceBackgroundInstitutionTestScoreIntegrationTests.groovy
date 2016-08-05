@@ -83,7 +83,7 @@ class SourceBackgroundInstitutionTestScoreIntegrationTests extends BaseIntegrati
         assertEquals "JL", sourceBackgroundInstitutionTestScore.testScore.code
 
         //Update the entity with invalid values
-        sourceBackgroundInstitutionTestScore.meanTestScore = "123456"
+        sourceBackgroundInstitutionTestScore.meanTestScore = "1234567890123456"
         shouldFail(ValidationException) {
             sourceBackgroundInstitutionTestScore.save(failOnError: true, flush: true)
         }
