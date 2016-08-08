@@ -257,32 +257,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 		assertEquals 0, VisaInformation.fetchByPidmListAndDateCompare([PersonUtility.getPerson("HOR000008").pidm], expireDate + 1).size()
 	}
 
-    @Test
-    void testFetchAllWithMaxSeqNumByPidmInList() {
-        List<Integer> pidms = VisaInformation.findAll(max: 10).pidm
-        List<VisaInformation> visaInformationList = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([pidms.first(), pidms.last()])
-        visaInformationList.each {
-            assertTrue("pidm should be: ${pidms.first()} or ${pidms.last()}, but is ${it.pidm}",
-                    (pidms.first().equals(it.pidm) || pidms.last().equals(it.pidm)))
-        }
 
-    }
-
-    @Test
-    void testFetchAllWithMaxSeqNumByPidmInListNullList() {
-        List<VisaInformation> visaInformationList = VisaInformation.fetchAllWithMaxSeqNumByPidmInList(null)
-        assertNotNull visaInformationList
-        assertEquals(0, visaInformationList.size())
-
-    }
-
-    @Test
-    void testFetchAllWithMaxSeqNumByPidmInListEmptyList() {
-        List<VisaInformation> visaInformationList = VisaInformation.fetchAllWithMaxSeqNumByPidmInList([])
-        assertNotNull visaInformationList
-        assertEquals(0, visaInformationList.size())
-
-    }
 
 
     private def newValidForCreateVisaInformation() {
