@@ -222,6 +222,16 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
+    protected def getBannerAddressTypeToHedmAddressTypeMap() {
+        return addressTypeCompositeService.getBannerAddressTypeToHedmV3AddressTypeMap()
+    }
+
+
+    protected void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+
+    }
+
+
     protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
                                                                  final Map dataMap, Map dataMapForPerson) {
     }

@@ -43,8 +43,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     RaceCompositeService raceCompositeService
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
-    AddressTypeCompositeService addressTypeCompositeService
-    PersonAddressService personAddressService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
@@ -236,7 +234,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
         fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
-        fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
     }
 
@@ -287,6 +284,26 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     @Override
     protected List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
+    }
+
+
+    protected def getBannerAddressTypeToHedmAddressTypeMap() {
+        return addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
+    }
+
+
+    protected void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        // Get GUID for each AddressType
+        Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(dataMap.bannerAddressTypeToHedmAddressTypeMap.keySet())
+        log.debug "GUIDs for ${addressTypeCodeToGuidMap.keySet()} are ${addressTypeCodeToGuidMap.values()}"
+
+        // Get GUID for each PersonAddress
+        Set<Long> personAddressSurrogateIds = dataMap.pidmToAddressesMap?.values().id.flatten().unique()
+        Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
+
+        // Put in Map
+        dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
+        dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
     }
 
 
@@ -351,8 +368,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         // addresses
         List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(personIdentificationNameCurrent.pidm)
         if (personAddresses) {
-            dataMapForPerson << ["personAddresses": personAddresses]
-            dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
             dataMapForPerson << ["addressTypeCodeToGuidMap": dataMap.addressTypeCodeToGuidMap]
             dataMapForPerson << ["personAddressSurrogateIdToGuidMap": dataMap.personAddressSurrogateIdToGuidMap]
         }
@@ -670,30 +685,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsAddressDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-
-        //Get Mapped Codes for Address Types
-        Map<String, String> bannerAddressTypeToHedmAddressTypeMap = addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
-
-        // Get GUIDs for Address types
-        Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(bannerAddressTypeToHedmAddressTypeMap.keySet())
-        log.debug "Got ${addressTypeCodeToGuidMap?.size() ?: 0} GUIDs for given AddressType codes"
-
-        // Get SPRADDR records for persons
-        Map pidmToAddressesMap = fetchPersonAddressByPIDMs(pidms, addressTypeCodeToGuidMap.keySet())
-
-        Set<Long> personAddressSurrogateIds = pidmToAddressesMap?.values().id.flatten() as Set
-
-        Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
-
-        // Put in Map
-        dataMap.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
-        dataMap.put("pidmToAddressesMap", pidmToAddressesMap)
-        dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
-        dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
-    }
-
-
     private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
         log.debug "The visa status of the person with regards to the country where a given institution is located"
         InstitutionalDescription institutionalDescription = institutionalDescriptionService.findByKey()
@@ -748,26 +739,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
         }
         return pidmToPhoneInfoMap
-    }
-
-
-    private Map fetchPersonAddressByPIDMs(Collection<Integer> pidms, Collection<String> addressTypeCodes) {
-        Map pidmToAddressInfoMap = [:]
-        if (pidms && addressTypeCodes) {
-            log.debug "Getting SV_SPRADDR records for ${pidms?.size()} PIDMs..."
-            List<PersonAddress> entities = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes(pidms, addressTypeCodes)
-            log.debug "Got ${entities?.size()} SV_SPRADDR records"
-            entities?.each {
-                List<PersonAddress> personAddresses = []
-                if (pidmToAddressInfoMap.containsKey(it.pidm)) {
-                    personAddresses = pidmToAddressInfoMap.get(it.pidm)
-                } else {
-                    pidmToAddressInfoMap.put(it.pidm, personAddresses)
-                }
-                personAddresses.add(it)
-            }
-        }
-        return pidmToAddressInfoMap
     }
 
 

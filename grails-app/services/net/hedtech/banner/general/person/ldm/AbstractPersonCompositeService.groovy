@@ -10,6 +10,7 @@ import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeServ
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
+import net.hedtech.banner.general.system.ldm.AddressTypeCompositeService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.EthnicityCompositeService
 import net.hedtech.banner.general.system.ldm.PersonNameTypeCompositeService
@@ -42,6 +43,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
     PersonCredentialCompositeService personCredentialCompositeService
+    AddressTypeCompositeService addressTypeCompositeService
+    PersonAddressService personAddressService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -66,6 +69,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected List<RoleName> getRolesRequired()
+
+
+    abstract protected def getBannerAddressTypeToHedmAddressTypeMap()
+
+
+    abstract protected void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
 
 
     abstract
@@ -256,6 +265,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
         fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
         personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
+        fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
 
         fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
     }
@@ -298,6 +308,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
         personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
         dataMapForPerson << ["personCredentials": personCredentials]
+
+        // addresses
+        List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(personIdentificationNameCurrent.pidm)
+        if (personAddresses) {
+            dataMapForPerson << ["personAddresses": personAddresses]
+            dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
+        }
 
         prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
 
@@ -409,6 +426,19 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         // Put in Map
         dataMap.put("pidmToRolesMap", pidmToRolesMap)
+    }
+
+
+    private void fetchPersonsAddressDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        Map<String, String> bannerAddressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
+
+        Map pidmToAddressesMap = getPidmToAddressesMap(pidms, bannerAddressTypeToHedmAddressTypeMap.keySet())
+
+        // Put in Map
+        dataMap.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
+        dataMap.put("pidmToAddressesMap", pidmToAddressesMap)
+
+        fetchPersonsAddressDataAndPutInMap_VersionSpecific(pidms, dataMap)
     }
 
 
@@ -546,6 +576,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
             pidmToAdvisorRoleMap.put(bdPidm.toInteger(), [role: RoleName.ADVISOR, startDate: startDate, endDate: endDate])
         }
         return pidmToAdvisorRoleMap
+    }
+
+
+    private def getPidmToAddressesMap(Collection<Integer> pidms, Collection<String> addressTypeCodes) {
+        def pidmToAddressesMap = [:]
+        if (pidms && addressTypeCodes) {
+            log.debug "Getting SV_SPRADDR records for ${pidms?.size()} PIDMs..."
+            List<PersonAddress> entities = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes(pidms, addressTypeCodes)
+            log.debug "Got ${entities?.size()} SV_SPRADDR records"
+            entities?.each {
+                List<PersonAddress> personAddresses = []
+                if (pidmToAddressesMap.containsKey(it.pidm)) {
+                    personAddresses = pidmToAddressesMap.get(it.pidm)
+                } else {
+                    pidmToAddressesMap.put(it.pidm, personAddresses)
+                }
+                personAddresses.add(it)
+            }
+        }
+        return pidmToAddressesMap
     }
 
 
