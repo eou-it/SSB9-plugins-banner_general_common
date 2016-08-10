@@ -9,6 +9,7 @@ import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class AddressCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
@@ -26,6 +27,7 @@ class AddressCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    @Ignore
     void testValidList(){
         updateGoriccr(PROCESS_CODE, NATION_ISO, 2)
         updateGoriccr(PROCESS_CODE, COUNTRY_DEFAULT_ISO, "US")
@@ -37,6 +39,7 @@ class AddressCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    @Ignore
     void testGet(){
         updateGoriccr(PROCESS_CODE, NATION_ISO, 2)
         updateGoriccr(PROCESS_CODE, COUNTRY_DEFAULT_ISO, "US")
