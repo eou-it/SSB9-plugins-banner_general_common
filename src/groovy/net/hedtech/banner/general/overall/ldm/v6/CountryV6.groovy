@@ -4,13 +4,12 @@
 package net.hedtech.banner.general.overall.ldm.v6
 
 import net.hedtech.banner.general.overall.AddressView
-import net.hedtech.banner.general.overall.ldm.CountryName
-import net.hedtech.banner.general.overall.ldm.CountryPostalCodePattern
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class CountryV6 {
+
     String code
     String title
     String postalTitle
@@ -22,69 +21,64 @@ class CountryV6 {
     String carrierRoute
     String correctionDigit
 
-    CountryV6(String isoCode, AddressView addressView, def dataMap){
-        this.code = isoCode
-        if(addressView.countryTitle){
+    CountryV6(String iso3CountryCode, AddressView addressView, String defaultCountryTitle) {
+        this.code = iso3CountryCode
+        if (addressView.countryTitle) {
             this.title = addressView.countryTitle
         } else {
-            this.title = dataMap.get("defaultTitleForDefaultCountryCode")
+            this.title = defaultCountryTitle
         }
 
-        this.postalTitle = getPostalTitleByISOCode(isoCode)
-        if(addressView.countryRegionCode || addressView.countryRegionTitle) {
+        this.postalTitle = getPostalTitleForAddress(iso3CountryCode)
+        if (addressView.countryRegionCode || addressView.countryRegionTitle) {
             this.region = new RegionV6(addressView.countryRegionCode, addressView.countryRegionTitle)
         }
-        if(addressView.countrySubRegionCode || addressView.countrySubRegionTitle) {
+        if (addressView.countrySubRegionCode || addressView.countrySubRegionTitle) {
             this.subRegion = new RegionV6(addressView.countrySubRegionCode, addressView.countrySubRegionTitle)
         }
         this.locality = addressView.countryLocality
-        this.postalCode = getPostalCode(addressView,isoCode)
+        this.postalCode = getPostalCodeForAddress(addressView, iso3CountryCode)
         this.deliveryPoint = addressView.deliveryPoint
         this.carrierRoute = addressView.carrierRoute
         this.correctionDigit = addressView.correctionDigit
     }
 
 
-    String getPostalCode(AddressView addressView, String isoCode){
-        if(isMatch(getPostalPatternByISOCode(isoCode), addressView.countryPostalCode)){
+    private String getPostalCodeForAddress(AddressView addressView, String iso3CountryCode) {
+        if (isValueMatchesPattern(getPostalCodePattern(iso3CountryCode), addressView.countryPostalCode)) {
             return addressView.countryPostalCode
         }
         return null
     }
 
-    boolean isMatch(String countryPattern, String postalCode) {
-        if(countryPattern && postalCode) {
-            Pattern pattern = Pattern.compile(countryPattern)
-            Matcher matcher = pattern.matcher(postalCode);
-            return matcher.matches()
-        } else {
-            return false
+    private boolean isValueMatchesPattern(String patternStr, String value) {
+        boolean matches = false
+        if (patternStr && value) {
+            Pattern pattern = Pattern.compile(patternStr)
+            Matcher matcher = pattern.matcher(value);
+            matches = matcher.matches()
         }
+        return matches
     }
 
 
-    String getPostalPatternByISOCode(String isoCode){
+    private String getPostalCodePattern(String iso3CountryCode) {
         String pattern
-        Iterator postalPatterns = CountryPostalCodePattern.values().iterator()
-        while(postalPatterns.hasNext()) {
-            String countryCode = postalPatterns.next()
-            if(countryCode.equals(isoCode)) {
-                return CountryPostalCodePattern.valueOf(isoCode).getPostalCodePattern()
-            }
+        HedmCountry hedmCountry = HedmCountry.valueOf(iso3CountryCode)
+        if (hedmCountry) {
+            pattern = hedmCountry.postalCodePattern
         }
         return pattern
     }
 
 
-    String getPostalTitleByISOCode(String isoCode){
-        String title = null
-        Iterator countryCodes = CountryName.values().iterator()
-        while(countryCodes.hasNext()) {
-            String countryCode = countryCodes.next()
-            if(countryCode.equals(isoCode)){
-                return CountryName.valueOf(isoCode).getCountryTitle()
-            }
+    private String getPostalTitleForAddress(String iso3CountryCode) {
+        String addrTitle = null
+        HedmCountry hedmCountry = HedmCountry.valueOf(iso3CountryCode)
+        if (hedmCountry) {
+            addrTitle = hedmCountry.postalTitle
         }
-        return title
+        return addrTitle
     }
+
 }

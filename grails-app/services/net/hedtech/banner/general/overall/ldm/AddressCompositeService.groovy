@@ -11,6 +11,7 @@ import net.hedtech.banner.general.overall.AddressViewService
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ldm.v6.AddressV6
 import net.hedtech.banner.general.overall.AddressView
+import net.hedtech.banner.general.overall.ldm.v6.HedmCountry
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -58,17 +59,23 @@ class AddressCompositeService extends LdmService {
      */
     def list(Map map) {
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        int max=(map?.max as Integer)
-        int offset=((map?.offset ?:'0') as Integer)
-        List<AddressView> addressesView = addressViewService.fetchAll(max,offset)
+        int max = (map?.max as Integer)
+        int offset = ((map?.offset ?: '0') as Integer)
+        List<AddressView> addressesView = addressViewService.fetchAll(max, offset)
         return getDecorators(addressesView)
     }
 
     private List<AddressV6> getDecorators(List<AddressView> addressesView) {
         def dataMap = [:]
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
-        dataMap.put("getDefaultISOCountryCodeForAddress", integrationConfigurationService.getDefaultISOCountryCodeForAddress())
-        dataMap.put("defaultTitleForDefaultCountryCode", Nation.findByScodIso(dataMap.get("getDefaultISOCountryCodeForAddress")).nation)
+        dataMap.put("defaultISO3CountryCodeForAddress", integrationConfigurationService.getDefaultISO3CountryCodeForAddress(dataMap.get("isInstitutionUsingISO2CountryCodes")))
+        Nation nation = Nation.findByScodIso(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
+        if(!nation) {
+            dataMap.put("defaultTitleForDefaultCountryCode", "Unknown")
+        } else {
+            dataMap.put("defaultTitleForDefaultCountryCode", nation.nation)
+        }
+
         List<AddressV6> addresses = []
         List pidmsOrCodes = []
         addressesView.collect { address ->
@@ -84,26 +91,31 @@ class AddressCompositeService extends LdmService {
         geographicAreasView.each { geographicArea ->
             String geoAreaKey = geographicArea.geographicAreasSource + geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber
             List<String> guids = geographicAreasGUID.get(geoAreaKey)
-            if(guids){
+            if (guids) {
                 guids << geographicArea.id
             } else {
                 geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
             }
         }
-        String nationISO
         addressesView.each { address ->
+            String iso3CountryCode = getISO3CountryCode(address, dataMap.get("isInstitutionUsingISO2CountryCodes"))
+            if (!iso3CountryCode) {
+                iso3CountryCode = dataMap.get("defaultISO3CountryCodeForAddress")
+            }
             validateRegion(address)
-            nationISO = getNationISO(address, dataMap)
-            validateSubRegion(address, nationISO)
+            if (iso3CountryCode?.equals(HedmCountry.GBR.toString())) {
+                validateSubRegion(address)
+            }
             String addressKey = address.sourceTable + address.pidmOrCode + address.atypCode + address.sequenceNumber
-            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), nationISO, dataMap)
+            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), iso3CountryCode, dataMap.get("defaultTitleForDefaultCountryCode"))
         }
         return addresses
     }
 
 
-    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String nationISO, def dataMap) {
-        AddressV6 addressV6 = new AddressV6(addressView, nationISO, dataMap)
+    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String iso3CountryCode,
+                                   String defaultCountryTitle) {
+        AddressV6 addressV6 = new AddressV6(addressView, iso3CountryCode, defaultCountryTitle)
         addressV6.geographicAreas = []
         geographicAreasGUIDs.each { guid ->
             addressV6.geographicAreas << ["id": guid]
@@ -112,45 +124,58 @@ class AddressCompositeService extends LdmService {
     }
 
 
-    private String getNationISO(AddressView addressView, def dataMap) {
-        String nationISO
-        if (addressView.sourceTable==COLLEGE_ADDRESS) {
-            nationISO=addressView.countryCode
+    private void validateRegion(AddressView addressView) {
+        if (!isISOCodeAvailableForState(addressView)) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("soaxref.region.mapping.not.found.message", [addressView.stateCode]))
         }
-        else {
+    }
+
+
+    private void validateSubRegion(AddressView addressView) {
+        if (!isISOCodeAvailableForCounty(addressView)) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("soaxref.sub.region.mapping.not.found.message", [addressView.countyCode]))
+        }
+    }
+
+    private String getISO3CountryCode(AddressView addressView, boolean institutionUsingISO2CountryCodes) {
+        String isoCountryCode
+        if (addressView.sourceTable == COLLEGE_ADDRESS) {
+            isoCountryCode = addressView.countryCode
+        } else {
             if (addressView.countryCode) {
-                nationISO = (Nation.findByCode(addressView.countryCode)).scodIso
-                if(nationISO == null) {
-                    throw new ApplicationException('Country ISO', new BusinessLogicValidationException("country.code.not.mapped.to.iso.code.message", [addressView.countryCode]))
+                isoCountryCode = Nation.findByCode(addressView.countryCode).scodIso
+                if (isoCountryCode == null) {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.not.mapped.to.iso.code.message", [addressView.countryCode]))
                 }
             }
         }
 
-        if(!nationISO){
-            nationISO = dataMap.get("getDefaultISOCountryCodeForAddress")
-            //addressView.countryTitle = dataMap.get("defaultTitleForDefaultCountryCode")
+        if (institutionUsingISO2CountryCodes) {
+            isoCountryCode = isoCodeService.getISO3CountryCode(isoCountryCode)
         }
 
-        if( dataMap.get("isInstitutionUsingISO2CountryCodes") ){
-            nationISO=isoCodeService.getISO3CountryCode(nationISO)
-        }
-
-        return nationISO
+        return isoCountryCode
     }
 
 
-    private void validateRegion(AddressView addressView) {
-        if(addressView.countryRegionCode == null & addressView.stateCode != null & addressView.sourceTable != COLLEGE_ADDRESS){
-            throw new ApplicationException('Country Region', new BusinessLogicValidationException("soaxref.region.mapping.not.found.message", [addressView.stateCode]))
-        }
-    }
-
-
-    private void validateSubRegion(AddressView addressView, String nationISO) {
-        if(addressView.countrySubRegionCode == null & addressView.countyCode != null & addressView.sourceTable != COLLEGE_ADDRESS){
-            if(nationISO?.equals(CountryName.GBR.toString())){
-                throw new ApplicationException('Country Sub Region', new BusinessLogicValidationException("soaxref.sub.region.mapping.not.found.message", [addressView.countyCode]))
+    private boolean isISOCodeAvailableForState(AddressView addressView) {
+        boolean available = true
+        if (addressView.sourceTable != COLLEGE_ADDRESS) {
+            if (addressView.stateCode != null && addressView.countryRegionCode == null) {
+                available = false
             }
         }
+        return available
     }
+
+    private boolean isISOCodeAvailableForCounty(AddressView addressView) {
+        boolean available = true
+        if (addressView.sourceTable != COLLEGE_ADDRESS) {
+            if (addressView.countyCode != null && addressView.countrySubRegionCode == null) {
+                available = false
+            }
+        }
+        return available
+    }
+
 }

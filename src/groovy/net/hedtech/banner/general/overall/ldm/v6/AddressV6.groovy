@@ -12,36 +12,34 @@ class AddressV6 {
     PlaceV6 place
     List geographicAreas
 
-    def AddressV6(AddressView addressView, String countryCode, def dataMap){
+    AddressV6(AddressView addressView, String iso3CountryCode, String defaultCountryTitle) {
         this.guid = addressView.id
-        List<String> addressLines = getAddressLines(addressView)
-        if(addressLines?.size() > 0) {
-            this.addressLines = addressLines
+        this.addressLines = getAddressLinesForAddress(addressView)
+        if (!this.addressLines) {
+            addressLines = ["."]
         }
-        if(countryCode) {
-            CountryV6 country = new CountryV6(countryCode, addressView, dataMap)
+        if (iso3CountryCode) {
+            CountryV6 country = new CountryV6(iso3CountryCode, addressView, defaultCountryTitle)
             this.place = new PlaceV6(country)
         }
     }
 
 
-    List<String> getAddressLines(AddressView address) {
+    private List<String> getAddressLinesForAddress(AddressView addressView) {
         List<String> addressLines = []
-        if(address.addressLine1) {
-            addressLines << address.addressLine1
+        if (addressView.addressLine1) {
+            addressLines << addressView.addressLine1
         }
-        if(address.addressLine2) {
-            addressLines << address.addressLine2
+        if (addressView.addressLine2) {
+            addressLines << addressView.addressLine2
         }
-        if(address.addressLine3) {
-            addressLines << address.addressLine3
+        if (addressView.addressLine3) {
+            addressLines << addressView.addressLine3
         }
-        if(address.addressLine4) {
-            addressLines << address.addressLine4
-        }
-        if(!addressLines){
-            addressLines = ["."]
+        if (addressView.addressLine4) {
+            addressLines << addressView.addressLine4
         }
         return addressLines
     }
+
 }
