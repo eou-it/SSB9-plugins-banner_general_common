@@ -41,8 +41,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     PersonEmailService personEmailService
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
-    PhoneTypeCompositeService phoneTypeCompositeService
-    PersonTelephoneService personTelephoneService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
@@ -228,17 +226,20 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
+        fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
+        fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(pidms, dataMap)
+        fetchPersonsAddressDataAndPutInMap_VersionSpecific(pidms, dataMap)
+        fetchPersonsPhoneDataAndPutInMap_VersionSpecific(pidms, dataMap)
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
         fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
         fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
-        fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
     }
 
 
-    protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+    private void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
         // Get GUIDs for CitizenTypes
         List<String> citizenTypeCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
             it.citizenType?.code
@@ -272,7 +273,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+    private void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
         def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(dataMap.bannerNameTypeToHedmNameTypeMap.keySet())
         log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
 
@@ -292,7 +293,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+    private void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
         // Get GUID for each AddressType
         Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(dataMap.bannerAddressTypeToHedmAddressTypeMap.keySet())
         log.debug "GUIDs for ${addressTypeCodeToGuidMap.keySet()} are ${addressTypeCodeToGuidMap.values()}"
@@ -304,6 +305,20 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         // Put in Map
         dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
         dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
+    }
+
+
+    protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
+        return phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
+    }
+
+
+    private void fetchPersonsPhoneDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        // Get GUID for each PhoneType
+        Map phoneTypeCodeToGuidMap = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(dataMap.bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+
+        // Put in Map
+        dataMap.put("phoneTypeCodeToGuidMap", phoneTypeCodeToGuidMap)
     }
 
 
@@ -353,9 +368,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         // phones
         List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(personIdentificationNameCurrent.pidm)
         if (personTelephoneList) {
-            dataMapForPerson << ["personPhones": personTelephoneList]
-            dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
-            dataMapForPerson << ["phoneCodeToGuidMap": dataMap.phoneCodeToGuidMap]
+            dataMapForPerson << ["phoneTypeCodeToGuidMap": dataMap.phoneTypeCodeToGuidMap]
         }
 
         // interests
@@ -391,8 +404,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         PersonV6 decorator
         if (personIdentificationNameCurrent) {
             decorator = new PersonV6()
+
             // GUID
             decorator.guid = dataMapForPerson["personGuid"]
+
             PersonBasicPersonBase personBase = dataMapForPerson["personBase"]
             if (personBase) {
                 // privacyStatus
@@ -415,6 +430,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     decorator.ethnicity = ethnicityCompositeService.createEthnicityV6(usEthnicCodeGuid, null, personBase.ethnic)
                 }
             }
+
             // Names
             decorator.names = []
             NameV6 nameV6 = createNameV6(personIdentificationNameCurrent, personBase)
@@ -435,11 +451,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 // Add SPBPERS_LEGAL_NAME as "legal"
                 decorator.names << legalNameAlternateV6
             }
+
             // visaStatus
             VisaInformation visaInfo = dataMapForPerson["visaInformation"]
             if (visaInfo) {
                 decorator.visaStatus = createVisaStatusV6(visaInfo, dataMapForPerson["visaTypeGuid"])
             }
+
             // Roles
             def personRoles = dataMapForPerson["personRoles"]
             if (personRoles) {
@@ -448,9 +466,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     decorator.roles << createRoleV6(it.role, it.startDate, it.endDate)
                 }
             }
+
             // Credentials
             def personCredentials = dataMapForPerson["personCredentials"]
             decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
+
             // Emails
             List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]
             if (personEmailList) {
@@ -461,6 +481,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     decorator.emails << createEmailV6(it, it.emailType.code, emailCodeToGuidMap.get(it.emailType.code), bannerEmailTypeToHedmEmailTypeMap.get(it.emailType.code))
                 }
             }
+
             // Races
             List<PersonRace> personRaces = dataMapForPerson["personRaces"]
             Map<String, String> raceCodeToGuidMap = dataMapForPerson["raceCodeToGuidMap"]
@@ -470,16 +491,15 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     decorator.races << new RaceV6(raceCodeToGuidMap.get(it.race), raceCompositeService.getLdmRace(it.race))
                 }
             }
+
             // Phones
             List<PersonTelephone> personTelephoneListList = dataMapForPerson["personPhones"]
-
             if (personTelephoneListList) {
-                Map phoneCodeToGuidMap = dataMapForPerson["phoneCodeToGuidMap"]
+                Map phoneTypeCodeToGuidMap = dataMapForPerson["phoneTypeCodeToGuidMap"]
                 Map bannerPhoneTypeToHedmPhoneTypeMap = dataMapForPerson["bannerPhoneTypeToHedmPhoneTypeMap"]
-
                 decorator.phones = []
                 personTelephoneListList.each {
-                    decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
+                    decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneTypeCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
                 }
             }
 
@@ -492,6 +512,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     decorator.interests << ["id": iterestCodeToGuidMap.get(it.interest.code)]
                 }
             }
+
             // Addresses
             List<PersonAddress> personAddresses = dataMapForPerson["personAddresses"]
             if (personAddresses) {
@@ -667,24 +688,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsPhoneDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-
-        Map<String, String> bannerPhoneTypeToHedmPhoneTypeMap = phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
-
-        // Get GUIDs for Phone types
-        Map phoneCodeToGuidMap = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(bannerPhoneTypeToHedmPhoneTypeMap.keySet())
-        log.debug "Got ${phoneCodeToGuidMap?.size() ?: 0} GUIDs for given PhoneType codes"
-
-        // Get SPRTELE records for persons
-        Map pidmToPhonesMap = fetchPersonPhoneByPIDMs(pidms, phoneCodeToGuidMap.keySet())
-
-        // Put in Map
-        dataMap.put("pidmToPhonesMap", pidmToPhonesMap)
-        dataMap.put("phoneCodeToGuidMap", phoneCodeToGuidMap)
-        dataMap.put("bannerPhoneTypeToHedmPhoneTypeMap", bannerPhoneTypeToHedmPhoneTypeMap)
-    }
-
-
     private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
         log.debug "The visa status of the person with regards to the country where a given institution is located"
         InstitutionalDescription institutionalDescription = institutionalDescriptionService.findByKey()
@@ -719,26 +722,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
         }
         return pidmToEmailInfoMap
-    }
-
-
-    private Map fetchPersonPhoneByPIDMs(Collection<Integer> pidms, Collection<String> phoneTypeCodes) {
-        Map pidmToPhoneInfoMap = [:]
-        if (pidms && phoneTypeCodes) {
-            log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
-            List<PersonTelephone> entities = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList(pidms, phoneTypeCodes)
-            log.debug "Got ${entities?.size()} SPRTELE records"
-            entities?.each {
-                List<PersonTelephone> personTelephones = []
-                if (pidmToPhoneInfoMap.containsKey(it.pidm)) {
-                    personTelephones = pidmToPhoneInfoMap.get(it.pidm)
-                } else {
-                    pidmToPhoneInfoMap.put(it.pidm, personTelephones)
-                }
-                personTelephones.add(it)
-            }
-        }
-        return pidmToPhoneInfoMap
     }
 
 

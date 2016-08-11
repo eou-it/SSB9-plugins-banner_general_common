@@ -10,10 +10,7 @@ import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeServ
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
-import net.hedtech.banner.general.system.ldm.AddressTypeCompositeService
-import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
-import net.hedtech.banner.general.system.ldm.EthnicityCompositeService
-import net.hedtech.banner.general.system.ldm.PersonNameTypeCompositeService
+import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -45,6 +42,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonCredentialCompositeService personCredentialCompositeService
     AddressTypeCompositeService addressTypeCompositeService
     PersonAddressService personAddressService
+    PhoneTypeCompositeService phoneTypeCompositeService
+    PersonTelephoneService personTelephoneService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -59,13 +58,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap)
 
 
-    abstract protected void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
-
-
     abstract protected def getBannerNameTypeToHedmNameTypeMap()
-
-
-    abstract protected void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
 
 
     abstract protected List<RoleName> getRolesRequired()
@@ -74,7 +67,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     abstract protected def getBannerAddressTypeToHedmAddressTypeMap()
 
 
-    abstract protected void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap)
+    abstract protected def getBannerPhoneTypeToHedmPhoneTypeMap()
 
 
     abstract
@@ -266,6 +259,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
         personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
         fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
+        fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
 
         fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
     }
@@ -316,6 +310,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
         }
 
+        // phones
+        List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(personIdentificationNameCurrent.pidm)
+        if (personTelephoneList) {
+            dataMapForPerson << ["personPhones": personTelephoneList]
+            dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
+        }
+
         prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
 
         return dataMapForPerson
@@ -332,8 +333,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // Put in Map
         dataMap.put("pidmToPersonBaseMap", pidmToPersonBaseMap)
         dataMap.put("usEthnicCodeToGuidMap", usEthnicCodeToGuidMap)
-
-        fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
     }
 
 
@@ -346,8 +345,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // Put in Map
         dataMap.put("bannerNameTypeToHedmNameTypeMap", bannerNameTypeToHedmNameTypeMap)
         dataMap.put("pidmToAlternateNamesMap", pidmToAlternateNamesMap)
-
-        fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(pidms, dataMap)
     }
 
 
@@ -437,8 +434,17 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // Put in Map
         dataMap.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
         dataMap.put("pidmToAddressesMap", pidmToAddressesMap)
+    }
 
-        fetchPersonsAddressDataAndPutInMap_VersionSpecific(pidms, dataMap)
+
+    private void fetchPersonsPhoneDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        Map<String, String> bannerPhoneTypeToHedmPhoneTypeMap = getBannerPhoneTypeToHedmPhoneTypeMap()
+
+        Map pidmToPhonesMap = getPidmToPhonesMap(pidms, bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+
+        // Put in Map
+        dataMap.put("bannerPhoneTypeToHedmPhoneTypeMap", bannerPhoneTypeToHedmPhoneTypeMap)
+        dataMap.put("pidmToPhonesMap", pidmToPhonesMap)
     }
 
 
@@ -596,6 +602,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
         return pidmToAddressesMap
+    }
+
+
+    private Map getPidmToPhonesMap(Collection<Integer> pidms, Collection<String> phoneTypeCodes) {
+        def pidmToPhonesMap = [:]
+        if (pidms && phoneTypeCodes) {
+            log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
+            List<PersonTelephone> entities = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList(pidms, phoneTypeCodes)
+            log.debug "Got ${entities?.size()} SPRTELE records"
+            entities?.each {
+                List<PersonTelephone> personTelephones = []
+                if (pidmToPhonesMap.containsKey(it.pidm)) {
+                    personTelephones = pidmToPhonesMap.get(it.pidm)
+                } else {
+                    pidmToPhonesMap.put(it.pidm, personTelephones)
+                }
+                personTelephones.add(it)
+            }
+        }
+        return pidmToPhonesMap
     }
 
 
