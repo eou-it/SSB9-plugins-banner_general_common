@@ -81,8 +81,8 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "population_id")
     Long populationId
 
-    @Column(name = "population_version_id")
-    Long populationVersionId
+    @Column(name = "population_calculation_id")
+    Long populationCalculationId
 
     @Column(name = "organization_name")
     String organizationName;

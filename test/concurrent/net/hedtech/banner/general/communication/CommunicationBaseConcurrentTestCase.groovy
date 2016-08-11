@@ -33,6 +33,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
@@ -218,6 +219,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCRCFLD")
                 sql.executeUpdate("Delete from GCRLENT")
                 sql.executeUpdate("Delete from GCRPVID")
+                sql.executeUpdate("Delete from GCRPOPC")
                 sql.executeUpdate("Delete from GCRPOPV")
                 sql.executeUpdate("Delete from GCRPQID")
                 sql.executeUpdate("Delete from GCBPOPL")
@@ -274,13 +276,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeleteGroupSend Population" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",

@@ -67,30 +67,27 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
 
-        CommunicationPopulation communicationPopulation = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
-        assertNotNull( communicationPopulation.id )
-        assertEquals( "testPopulation", communicationPopulation.name )
-        assertEquals( "testPopulationDescription", communicationPopulation.description )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+        assertNotNull( population.id )
+        assertEquals( "testPopulation", population.name )
+        assertEquals( "testPopulationDescription", population.description )
 
-        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( communicationPopulation )
+        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
         assertEquals( 1, associations.size() )
         CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
         assertNotNull( association.id )
-        assertEquals( communicationPopulation.id, association.population.id )
+        assertEquals( population.id, association.population.id )
         assertEquals( populationQuery.id, association.populationQuery.id )
         assertNull( association.populationQueryVersion )
 
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( communicationPopulation.id, 'BCMADMIN' )
-        assertNotNull( populationVersion )
-        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
-                    aPopulationVersion.status == CommunicationPopulationCalculationStatus.ERROR;
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
     }
 
 
@@ -115,30 +112,27 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
 
-        CommunicationPopulation communicationPopulation = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
-        assertNotNull( communicationPopulation.id )
-        assertEquals( "testPopulation", communicationPopulation.name )
-        assertEquals( "testPopulationDescription", communicationPopulation.description )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+        assertNotNull( population.id )
+        assertEquals( "testPopulation", population.name )
+        assertEquals( "testPopulationDescription", population.description )
 
-        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( communicationPopulation )
+        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
         assertEquals( 1, associations.size() )
         CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
         assertNotNull( association.id )
-        assertEquals( communicationPopulation.id, association.population.id )
+        assertEquals( population.id, association.population.id )
         assertEquals( populationQuery.id, association.populationQuery.id )
         assertNull( association.populationQueryVersion )
 
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( communicationPopulation.id, 'BCMADMIN' )
-        assertNotNull( populationVersion )
-        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
-                    aPopulationVersion.status == CommunicationPopulationCalculationStatus.ERROR;
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
+                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
     }
 
 }

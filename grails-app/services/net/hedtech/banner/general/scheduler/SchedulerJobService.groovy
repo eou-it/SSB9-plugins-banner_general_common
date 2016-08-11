@@ -1,20 +1,19 @@
 package net.hedtech.banner.general.scheduler
 
-import grails.transaction.Transactional
 import grails.util.Holders
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.quartz.JobDetail
 import org.quartz.JobKey
+import org.quartz.SimpleTrigger
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate;
 import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
+import static org.quartz.TriggerBuilder.*;
+import static org.quartz.SimpleScheduleBuilder.*;
 
-import org.quartz.Trigger
 import org.quartz.impl.StdScheduler
 import org.springframework.transaction.annotation.Transactional
 
@@ -44,7 +43,9 @@ class SchedulerJobService {
         String groupId = service + "." + method
         JobDetail jobDetail = createJobDetail(jobId, groupId, bannerUser, mepCode, service, method, parameters )
 
-        Trigger trigger = newTrigger().withIdentity( jobId, groupId ).startAt( evenMinuteDate( runTime ) ).build()
+        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobId, groupId ).
+            withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
+            startAt( evenMinuteDate( runTime ) ).build()
         quartzScheduler.scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
@@ -67,7 +68,9 @@ class SchedulerJobService {
         String groupId = service + "." + method
         JobDetail jobDetail = createJobDetail(jobId, groupId, bannerUser, mepCode, service, method, parameters )
 
-        Trigger trigger = newTrigger().withIdentity( jobId, groupId ).startNow().build()
+        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobId, groupId ).
+            withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
+            startNow().build()
         quartzScheduler.scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
@@ -114,7 +117,7 @@ class SchedulerJobService {
 
 
     private JobDetail createJobDetail(String jobId, String groupId, String bannerUser, String mepCode, String service, String method, Map parameters) {
-        JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity(jobId, groupId).build();
+        JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity(jobId, groupId).requestRecovery().build();
         jobDetail.getJobDataMap().put("bannerUser", bannerUser)
         jobDetail.getJobDataMap().put("mepCode", mepCode)
         jobDetail.getJobDataMap().put("service", service)

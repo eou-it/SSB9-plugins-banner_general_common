@@ -89,8 +89,8 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_POPLIST_ID")
     Long populationId;
 
-    @Column(name = "GCBGSND_POPVERSION_ID")
-    Long populationVersionId;
+    @Column(name = "GCBGSND_POPCALC_ID")
+    Long populationCalculationId;
 
     @Column(name = "GCBGSND_TEMPLATE_ID")
     Long templateId;
@@ -150,7 +150,7 @@ class CommunicationGroupSend implements Serializable {
         mepCode(nullable: true)
         name(nullable: false)
         populationId(nullable: false)
-        populationVersionId(nullable: true)
+        populationCalculationId(nullable: true)
         organizationId(nullable: false)
         templateId(nullable: false)
         createdBy(nullable: false, maxSize: 30)
@@ -232,12 +232,12 @@ class CommunicationGroupSend implements Serializable {
         return results
     }
 
-    public static int findCountByPopulationVersionId( Long populationVersionId ) {
+    public static int findCountByPopulationCalculationId( Long populationCalculationId) {
         return CommunicationGroupSend.createCriteria().list {
             projections {
                 count()
             }
-            eq( 'populationVersionId', populationVersionId )
+            eq( 'populationCalculationId', populationCalculationId )
         }[0]
     }
 

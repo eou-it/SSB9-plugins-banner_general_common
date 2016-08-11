@@ -62,6 +62,9 @@ class CommunicationPopulationListView implements Serializable {
     @Column(name = "POPULATION_VERSION_ID")
     Long populationVersionId
 
+    @Column(name = "POPULATION_CALCULATION_ID")
+    Long populationCalculationId
+
     /**
      * Record creation date
      */

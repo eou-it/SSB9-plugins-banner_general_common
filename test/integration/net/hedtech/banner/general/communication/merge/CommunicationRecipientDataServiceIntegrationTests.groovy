@@ -11,8 +11,8 @@ import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
@@ -163,7 +163,8 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
         //execute the query to get a population
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery(validQuery.id, "TEST NAME", "TEST DESC")
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy(population.id, getUser())
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy(population.id, getUser())
+        assertNotNull( populationCalculation )
         List publishedQueryVersionList = CommunicationPopulationQueryVersion.findByQueryId( validQuery.id )
         assertEquals( 1, publishedQueryVersionList.size() )
         CommunicationPopulationQueryVersion publishedQueryVersion = publishedQueryVersionList.get( 0 )

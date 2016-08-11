@@ -18,9 +18,9 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationVersion.findByPopulationId",
                 query = """ FROM CommunicationPopulationVersion populationVersion
                 WHERE populationVersion.population.id = :populationId order by populationVersion.createDate DESC"""),
-        @NamedQuery(name = "CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy",
+        @NamedQuery(name = "CommunicationPopulationVersion.findLatestByPopulationId",
                 query = """ FROM CommunicationPopulationVersion populationVersion
-                WHERE populationVersion.population.id = :populationId and populationVersion.createdBy = upper( :userId ) order by populationVersion.createDate DESC"""),
+                WHERE populationVersion.population.id = :populationId order by populationVersion.createDate DESC"""),
         @NamedQuery(name = "CommunicationPopulationVersion.fetchById",
                 query = """ FROM CommunicationPopulationVersion populationVersion
                 WHERE populationVersion.id = :id""")
@@ -58,31 +58,6 @@ class CommunicationPopulationVersion implements Serializable {
     String createdBy
 
     /**
-     * CALC_COUUNT: The count of persons calculated by the populationQuery.
-     */
-    @Column(name = "GCRPOPV_CALC_COUNT")
-    Long calculatedCount
-
-    /**
-     * CALC_BY: ID of the user who last calculated the populationQuery.
-     */
-    @Column(name = "GCRPOPV_CALC_BY")
-    String calculatedBy
-
-    /**
-     * Population Calculation status: SCHEDULED, PENDING_EXECUTION, ERROR, AVAILABLE
-     */
-    @Column(name = "GCRPOPV_STATUS")
-    @Enumerated(EnumType.STRING)
-    CommunicationPopulationCalculationStatus status
-
-    /**
-     * JOB ID : UUID of the job for the population version calculation
-     */
-    @Column(name = "GCRPOPV_JOB_ID")
-    String jobId
-
-    /**
      * VERSION: Optimistic lock token
      */
     @Version
@@ -95,7 +70,6 @@ class CommunicationPopulationVersion implements Serializable {
     @Column(name = "GCRPOPV_ACTIVITY_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date lastModified
-
 
     /**
      * USER_ID: Oracle User ID of the person who last inserted or last updated the data.
@@ -116,14 +90,10 @@ class CommunicationPopulationVersion implements Serializable {
         population(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
-        calculatedCount(nullable: true)
-        calculatedBy(nullable: false)
-        status(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable: true)
-        jobId(nullable: true)
     }
 
     // Read Only fields that should be protected against update
@@ -142,11 +112,11 @@ class CommunicationPopulationVersion implements Serializable {
         return population
     }
 
-    public static CommunicationPopulationVersion findLatestByPopulationIdAndCreatedBy( Long populationId, String userId ) {
+    public static CommunicationPopulationVersion findLatestByPopulationId( Long populationId ) {
         CommunicationPopulationVersion populationVersion
         CommunicationPopulationVersion.withSession { session ->
-            populationVersion = session.getNamedQuery('CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy').
-                setLong( 'populationId', populationId ).setString( 'userId', userId ).list()[0]
+            populationVersion = session.getNamedQuery('CommunicationPopulationVersion.findLatestByPopulationId').
+                setLong( 'populationId', populationId ).list()[0]
         }
         return populationVersion
     }

@@ -10,8 +10,9 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
@@ -67,9 +68,13 @@ class CommunicationGroupSendCompositeService {
         groupSend.jobId = request.referenceId
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
-        if(!groupSend.recalculateOnSend) {
-            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
-            groupSend.populationVersionId = populationVersion.id
+        if(!groupSend.recalculateOnSend || !request.scheduledStartDate) {
+            // May want to have UI pass the current calculation as part of the request so there is no chance of picking the wrong one.
+            CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
+            if (!calculation || !calculation.status.equals( CommunicationPopulationCalculationStatus.AVAILABLE )) {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser" )
+            }
+            groupSend.populationCalculationId = calculation.id
         }
         groupSend = communicationGroupSendService.create( groupSend )
 
@@ -103,11 +108,11 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "cannotDeleteRunningGroupSend" )
         }
 
-        // Grab population version if only used for this group send
-        CommunicationPopulationVersion populationVersion = null
+        // Grab population calculation if only used for this group send
+        CommunicationPopulationCalculation calculation = null
         boolean recalculateOnSend = groupSend.recalculateOnSend
-        if (groupSend.populationVersionId != null) {
-            populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
+        if (groupSend.populationCalculationId != null) {
+            calculation = CommunicationPopulationCalculation.get( groupSend.populationCalculationId )
         }
 
         //if group send is scheduled
@@ -121,15 +126,15 @@ class CommunicationGroupSendCompositeService {
         }
         communicationGroupSendService.delete( groupSendId )
 
-        // Garbage collect the population version
-        if (populationVersion != null) {
+        // Garbage collect the population calculation
+        if (calculation != null) {
             if (recalculateOnSend) {
-                communicationPopulationCompositeService.deletePopulationVersion( populationVersion )
+                communicationPopulationCompositeService.deletePopulationCalculation( groupSend.populationCalculationId )
             } else {
-                CommunicationPopulationVersion latestPopulationVersion =
-                    CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( populationVersion.population.id, populationVersion.createdBy )
-                if (populationVersion.id != latestPopulationVersion.id) {
-                    communicationPopulationCompositeService.deletePopulationVersion( populationVersion )
+                CommunicationPopulationCalculation latestCalculation =
+                        CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCreatedBy( calculation.populationVersion.id, calculation.createdBy )
+                if (calculation.id != latestCalculation.id) {
+                    communicationPopulationCompositeService.deletePopulationCalculation( latestCalculation )
                 }
             }
         }
@@ -203,18 +208,16 @@ class CommunicationGroupSendCompositeService {
                     throw new ApplicationException("population", new NotFoundException())
                 }
 
-                if (!groupSend.populationVersionId) {
+                if (!groupSend.populationCalculationId) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
-
-                    //Calculate the population version
-                    CommunicationPopulationVersion populationVersion = communicationPopulationCompositeService.calculatePopulationForGroupSend(population, groupSend.createdBy)
-                    groupSend.populationVersionId = populationVersion.id
-                    groupSend = communicationGroupSendService.update(groupSend)
-                    // double check this is the correct user
+                    CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationForGroupSend( population )
+                    groupSend.populationCalculationId = calculation.id
+                    groupSend = communicationGroupSendService.update( groupSend )
                 }
                 groupSend = generateGroupSendItemsImpl(groupSend)
             } catch (Throwable t) {
-                log.error(t.getMessage())
+                log.error( t.getMessage() )
+                groupSend.refresh()
                 groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, t.getMessage() )
                 groupSend = communicationGroupSendService.update(groupSend)
             }
@@ -251,16 +254,7 @@ class CommunicationGroupSendCompositeService {
     }
 
     private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser ) {
-        if (!groupSend.populationVersionId) {
-            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
-            if (populationVersion) {
-                groupSend.populationVersionId = populationVersion.id
-            } else {
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser" )
-            }
-        }
-
-        assert( groupSend.populationVersionId )
+        assert( groupSend.populationCalculationId != null )
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod(
                 groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString(),
@@ -401,8 +395,8 @@ class CommunicationGroupSendCompositeService {
                                  , :current_time
                                  , :current_time
                              FROM gcrslis, gcrlent, gcbgsnd, gcrpvid
-                            WHERE gcbgsnd_popversion_id = gcrpvid_popv_id
-                                and gcrslis_surrogate_id = gcrpvid_slis_id
+                            WHERE (SELECT gcrpopc_popv_id from gcrpopc where gcbgsnd_popcalc_id = gcrpopc_surrogate_id) = gcrpvid_popv_id
+                                  and gcrslis_surrogate_id = gcrpvid_slis_id
                                   AND gcrlent_slis_id = gcrslis_surrogate_id
                                   AND gcbgsnd_surrogate_id = :group_send_key
             """ )

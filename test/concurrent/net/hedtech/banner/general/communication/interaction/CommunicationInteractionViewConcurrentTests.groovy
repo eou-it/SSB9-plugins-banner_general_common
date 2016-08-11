@@ -11,6 +11,7 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
@@ -66,18 +67,16 @@ class CommunicationInteractionViewConcurrentTests extends CommunicationBaseConcu
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery(populationQuery, "testPopulation")
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy(population.id, 'BCMADMIN')
-        assertNotNull(populationVersion)
-        assertEquals(CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status)
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get(it)
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry(isAvailable, populationVersion.id, 30, 10)
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
-        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationVersion)
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals(1, queryAssociations.size())
         CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get(0)
         queryAssociation.refresh()
@@ -101,7 +100,7 @@ class CommunicationInteractionViewConcurrentTests extends CommunicationBaseConcu
 
         def checkExpectedGroupSendItemsCreated = {
             CommunicationGroupSend each = CommunicationGroupSend.get(it)
-            return communicationGroupSendItemService.fetchByGroupSend(each).size() == 5
+            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
         assertTrueWithRetry(checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10)
 

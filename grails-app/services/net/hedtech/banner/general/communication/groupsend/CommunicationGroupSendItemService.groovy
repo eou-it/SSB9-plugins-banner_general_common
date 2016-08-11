@@ -18,10 +18,6 @@ class CommunicationGroupSendItemService extends ServiceBase {
         };
     }
 
-    public List fetchByGroupSend( CommunicationGroupSend groupSend ) {
-        return CommunicationGroupSendItem.fetchByGroupSend( groupSend )
-    }
-
     public def fetchRunningGroupSendItemCount( Long groupSendId ) {
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
         def count = 0

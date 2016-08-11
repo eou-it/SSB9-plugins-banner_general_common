@@ -23,6 +23,7 @@ there is no concept of an 'entity manager' within this project.
 
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulation"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationVersion"/>
+        <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation"/>
         <mapping class="net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation"/>
 

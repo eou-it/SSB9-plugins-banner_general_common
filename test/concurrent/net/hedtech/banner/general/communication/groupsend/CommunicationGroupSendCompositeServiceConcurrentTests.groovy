@@ -3,12 +3,14 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.PagedResultList
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.CommunicationPopulationListView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
@@ -60,18 +62,16 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-        assertNotNull( populationVersion )
-        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
-        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
         CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
         queryAssociation.refresh()
@@ -95,7 +95,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         def checkExpectedGroupSendItemsCreated = {
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
-            return communicationGroupSendItemService.fetchByGroupSend( each ).size() == 5
+            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
         assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
@@ -138,14 +138,14 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeletePopulationWithGroupSend Population" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
@@ -183,14 +183,14 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeletePopulationWithGroupSendWaitingRecalculation Population" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
@@ -228,14 +228,15 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testRecalculatePopulationAfterScheduledGroupSend Population" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
+        Long populationCalculationId = populationCalculation.id
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( populationCalculationId )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, null, 30, 10 )
 
         Calendar now = Calendar.getInstance()
         now.add(Calendar.HOUR, 1)
@@ -254,8 +255,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertNotNull(groupSend)
         assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
 
-        populationVersion = communicationPopulationCompositeService.calculatePopulationForUser( population )
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        populationCalculation = communicationPopulationCompositeService.calculatePopulationVersionForUser( populationCalculation.populationVersion )
+        assertTrueWithRetry( isAvailable, populationCalculation.populationVersion.id, 30, 10 )
 
         communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         communicationPopulationCompositeService.deletePopulation( population )
@@ -332,18 +333,16 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-        assertNotNull( populationVersion )
-        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
-        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
         CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
         queryAssociation.refresh()
@@ -371,7 +370,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         def checkExpectedGroupSendItemsCreated = {
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
-            return communicationGroupSendItemService.fetchByGroupSend( each ).size() == 5
+            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
         assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
@@ -413,18 +412,16 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-        assertNotNull( populationVersion )
-        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
-        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
         CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
         queryAssociation.refresh()
@@ -450,11 +447,13 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
 
+        Long groupSendId = groupSend.id
         def checkExpectedGroupSendItemsCreated = {
-            CommunicationGroupSend each = CommunicationGroupSend.get( it )
-            return communicationGroupSendItemService.fetchByGroupSend( each ).size() == 5
+            CommunicationGroupSend each = CommunicationGroupSend.get( groupSendId )
+            List groupSendItemList = CommunicationGroupSendItem.fetchByGroupSend( each )
+            return groupSendItemList.size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, null, 30, 10 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendView.findAll()
@@ -487,24 +486,125 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
+    @Test
+    public void testMediumPopulationAndDelete() {
+        // 0) Test parameters
+        String testName = "testMediumPopulationAndDelete"
+        String testUserId = 'BCMADMIN'
+        int lowerPopulationSizeRange = 2000
+        int upperPopulationSizeRange = 4000
+
+        // 1)Generate such a population which will fetch large number of people from the system (in the range 2000-4000 etc.)
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+            folder: defaultFolder,
+            name: testName,
+            queryString: "SELECT spriden_pidm FROM spriden, spbpers WHERE spriden_change_ind IS NULL AND spriden_pidm = spbpers_pidm AND spbpers_sex in ( 'F' ) AND rownum < 2001"
+        )
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, testName )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, testUserId )
+        assertNotNull( populationCalculation )
+
+        def isAvailable = {
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+
+        populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, testUserId )
+        boolean isPopulationSizeInRange = (populationCalculation.calculatedCount >= lowerPopulationSizeRange) && (populationCalculation.calculatedCount <= upperPopulationSizeRange)
+        assertTrue( "Expected population size ${populationCalculation.calculatedCount} to be in range of ${lowerPopulationSizeRange} to ${upperPopulationSizeRange}", isPopulationSizeInRange )
+
+        // 2)Using this population send any Email template.
+        // Wait on the Open com job page till status becomes "Processing" and at least few items got completed.
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+            name: testName,
+            populationId: population.id,
+            templateId: defaultEmailTemplate.id,
+            organizationId: defaultOrganization.id,
+            referenceId: UUID.randomUUID().toString(),
+            recalculateOnSend: false
+        )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication( request )
+        assertNotNull( groupSend )
+
+        Map pagingAndSortParams = [sortColumn: "lastName", sortDirection: "desc", max: 10, offset: 0]
+        Map filterData = [params: ["jobId": groupSend.id, "name": '%', "status": CommunicationGroupSendItemExecutionState.Complete.toString()]]
+        def isProcessingAndAFewItemsCompleted = {
+            PagedResultList results = CommunicationGroupSendItemView.findByNameWithPagingAndSortParams(filterData, pagingAndSortParams)
+            println "total count = ${results.totalCount} + return = " + (results.totalCount >= 3)
+            return results.totalCount >= 3
+        }
+        assertTrueWithRetry( isProcessingAndAFewItemsCompleted, null, 30, 2 )
+        // 3)When few items are completed and rest of them are still processing,
+        // navigate to populations list page and Open large population used in above mentioned steps.
+        pagingAndSortParams = [sortColumn: "lastCalculatedTime", sortDirection: "desc", max: 10, offset: 0]
+        filterData = [params: ["populationName": '%', "createdBy": testUserId]]
+        PagedResultList results = communicationPopulationCompositeService.findByNameWithPagingAndSortParams(filterData, pagingAndSortParams)
+        assertEquals( 1, results.size() )
+        CommunicationPopulationListView populationListView = results.get( 0 )
+        groupSend.refresh()
+        assertEquals( groupSend.populationId, populationListView.id )
+        assertEquals( groupSend.populationCalculationId, populationListView.populationCalculationId )
+
+        // 4)Now try to "Delete" this population for which com job is still processing.
+        try {
+            communicationPopulationCompositeService.deletePopulation( populationListView.id, populationListView.version )
+            fail( "Expected cannotDeletePopulationWithExistingGroupSends" )
+        } catch( ApplicationException e ) {
+            // 5)Error message displays. Ignore or acknowledge that message so that it will disappear.
+            assertEquals( e.message, "@@r1:cannotDeletePopulationWithExistingGroupSends@@" )
+        }
+
+        // 6)Then refresh the page using browser control and click on "Regenerate" immediately.
+        // Some technical error messages may display ignore them and close them. Again attempt to "Delete", refresh page using browser control. Repeat it 3-4 times doing quick actions.
+        populationListView = CommunicationPopulationListView.fetchLatestByPopulationIdAndUserId( populationListView.id, testUserId )
+        populationCalculation = communicationPopulationCompositeService.calculatePopulationForUser( populationListView.id, populationListView.version, testUserId )
+
+        try {
+            communicationPopulationCompositeService.deletePopulation( populationListView.id, populationListView.version )
+            fail( "Expected cannotDeletePopulationWithExistingGroupSends" )
+        } catch( ApplicationException e ) {
+            // 5)Error message displays. Ignore or acknowledge that message so that it will disappear.
+            assertEquals( e.message, "@@r1:cannotDeletePopulationWithExistingGroupSends@@" )
+        }
+
+        // Note: the controller is receiving the recalculatedPopulationVersion instead of getting an updated populationListView (might be a mistake)
+
+        // 7)Notice that at some point population details page will display blank field,
+        // no data and only Delete button. At this point navigate back to population list page.
+
+        // 8)Notice that population does not display anymore on the list page. It disappears from the page.
+
+
+        // 9)Navigate to Communication job list page to see the status of the processing job.
+
+
+        // 10)Notice that com job list page either displays weird blank line or there is No data at all.
+        // Blank com job list page display. Only total count of records may display at the bottom of the page.
+    }
+
     private CommunicationGroupSendRequest createGroupSendRequest( String defaultName ) {
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery( defaultName ))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, defaultName )
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-        assertNotNull( populationVersion )
-        assertEquals( CommunicationPopulationCalculationStatus.PENDING_EXECUTION, populationVersion.status )
-
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
-            def aPopulationVersion = CommunicationPopulationVersion.get( it )
-            aPopulationVersion.refresh()
-            return aPopulationVersion.status == CommunicationPopulationCalculationStatus.AVAILABLE
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationVersion.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
-        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationVersion )
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
         CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
         queryAssociation.refresh()
@@ -534,6 +634,5 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     public void testDeleteGroupSend() {
         testDeleteGroupSend( defaultEmailTemplate )
     }
-
 
 }

@@ -21,6 +21,7 @@ class CommunicationPopulationVersionService extends ServiceBase {
         }
 
         CommunicationPopulationVersion populationVersion = getPopulationVersion( domainModelOrMap )
+        populationVersion.createdBy = getCurrentUserBannerId()
         populationVersion.createDate = new Date()
     }
 
@@ -40,5 +41,18 @@ class CommunicationPopulationVersionService extends ServiceBase {
 
     private CommunicationPopulationVersion getPopulationVersion( domainModelOrMap ) {
         (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationPopulationVersion
+    }
+
+
+    /**
+     * Returns the banner id of the current session in uppercase.
+     */
+    private String getCurrentUserBannerId() {
+        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
+        if (creatorId == null) {
+            def config = Holders.config
+            creatorId = config?.bannerSsbDataSource?.username
+        }
+        return creatorId.toUpperCase()
     }
 }
