@@ -5,6 +5,7 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
+import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 
@@ -197,6 +198,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
         fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
+        fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
     }
 
 
@@ -228,6 +230,20 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
+    protected def getBannerEmailTypeToHedmEmailTypeMap() {
+        return emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
+    }
+
+
+    private void fetchPersonsEmailDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
+        Set<Long> personEmailSurrogateIds = dataMap.pidmToEmailsMap?.values().id.flatten().unique()
+        Map<Long, String> personEmailSurrogateIdToGuidMap = getPersonEmailSurrogateIdToGuidMap(personEmailSurrogateIds)
+
+        // Put in Map
+        dataMap.put("personEmailSurrogateIdToGuidMap", personEmailSurrogateIdToGuidMap)
+    }
+
+
     protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
                                                                  final Map dataMap, Map dataMapForPerson) {
     }
@@ -235,6 +251,18 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
     protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
                                         final Map dataMapForPerson) {
+    }
+
+
+    private def getPersonEmailSurrogateIdToGuidMap(Collection<String> personEmailSurrogateIds) {
+        def personEmailSurrogateIdToGuidMap = [:]
+        if (personEmailSurrogateIds) {
+            List<GlobalUniqueIdentifier> entities = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds("person-emails", personEmailSurrogateIds)
+            entities?.each {
+                personEmailSurrogateIdToGuidMap.put(it.domainId, it.guid)
+            }
+        }
+        return personEmailSurrogateIdToGuidMap
     }
 
 }

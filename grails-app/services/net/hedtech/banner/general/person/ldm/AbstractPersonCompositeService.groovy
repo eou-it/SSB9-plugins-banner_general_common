@@ -36,6 +36,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonIdentificationNameCurrentService personIdentificationNameCurrentService
     PersonAdvancedSearchViewService personAdvancedSearchViewService
     EmailTypeCompositeService emailTypeCompositeService
+    PersonEmailService personEmailService
     EthnicityCompositeService ethnicityCompositeService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
@@ -68,6 +69,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected def getBannerPhoneTypeToHedmPhoneTypeMap()
+
+
+    abstract protected def getBannerEmailTypeToHedmEmailTypeMap()
 
 
     abstract
@@ -260,6 +264,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
         fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
         fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
+        fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
 
         fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
     }
@@ -315,6 +320,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (personTelephoneList) {
             dataMapForPerson << ["personPhones": personTelephoneList]
             dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
+        }
+
+        // emails
+        List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)
+        if (personEmailList) {
+            dataMapForPerson << ["personEmails": personEmailList]
+            dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": dataMap.bannerEmailTypeToHedmEmailTypeMap]
         }
 
         prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
@@ -445,6 +457,17 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // Put in Map
         dataMap.put("bannerPhoneTypeToHedmPhoneTypeMap", bannerPhoneTypeToHedmPhoneTypeMap)
         dataMap.put("pidmToPhonesMap", pidmToPhonesMap)
+    }
+
+
+    private void fetchPersonsEmailDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        Map<String, String> bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
+
+        Map pidmToEmailsMap = getPidmToEmailsMap(pidms, bannerEmailTypeToHedmEmailTypeMap.keySet())
+
+        // Put in Map
+        dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
+        dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
     }
 
 
@@ -605,7 +628,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    private Map getPidmToPhonesMap(Collection<Integer> pidms, Collection<String> phoneTypeCodes) {
+    private def getPidmToPhonesMap(Collection<Integer> pidms, Collection<String> phoneTypeCodes) {
         def pidmToPhonesMap = [:]
         if (pidms && phoneTypeCodes) {
             log.debug "Getting SPRTELE records for ${pidms?.size()} PIDMs..."
@@ -622,6 +645,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
         return pidmToPhonesMap
+    }
+
+
+    private def getPidmToEmailsMap(Collection<Integer> pidms, Collection<String> emailTypeCodes) {
+        def pidmToEmailsMap = [:]
+        if (pidms && emailTypeCodes) {
+            log.debug "Getting GOREMAL records for ${pidms?.size()} PIDMs..."
+            List<PersonEmail> entities = personEmailService.fetchAllActiveEmails(pidms, emailTypeCodes)
+            log.debug "Got ${entities?.size()} GOREMAL records"
+            entities?.each {
+                List<PersonEmail> personEmails = []
+                if (pidmToEmailsMap.containsKey(it.pidm)) {
+                    personEmails = pidmToEmailsMap.get(it.pidm)
+                } else {
+                    pidmToEmailsMap.put(it.pidm, personEmails)
+                }
+                personEmails.add(it)
+            }
+        }
+        return pidmToEmailsMap
     }
 
 
