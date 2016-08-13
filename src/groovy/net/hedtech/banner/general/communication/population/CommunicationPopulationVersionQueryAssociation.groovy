@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.service.DatabaseModifiesState
@@ -55,6 +56,11 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
     @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPVID_INV_GCRPOPV")
     CommunicationPopulationVersion populationVersion
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "GCRPVID_QUERY_ID", referencedColumnName = "GCBQURY_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPVID_INV_GCBQURY")
+    CommunicationPopulationQuery populationQuery
+
     /**
      * Foreign key reference to the population query version.
      */
@@ -62,27 +68,6 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
     @JoinColumn(name = "GCRPVID_QRYV_ID", referencedColumnName = "GCRQRYV_SURROGATE_ID")
     @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPVID_INV_GCRQRYV")
     CommunicationPopulationQueryVersion populationQueryVersion
-
-    /**
-     * Foreign key reference to the population selection list.
-     */
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "GCRPVID_SLIS_ID", referencedColumnName = "GCRSLIS_SURROGATE_ID")
-    @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPVID_INV_GCRSLIS")
-    CommunicationPopulationSelectionList selectionList
-
-    /**
-     * The error code if calculation results in an error
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "GCRPVID_ERROR_CODE")
-    CommunicationErrorCode errorCode
-
-    /**
-     * The error text or stacktrace if calculation results in an error
-     */
-    @Column(name = "GCRPVID_ERROR_TEXT")
-    String errorText
 
     /**
      * ACTIVITY_DATE: Most current date record was created or changed.
@@ -112,10 +97,8 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
 
     static constraints = {
         populationVersion(nullable: false)
-        populationQueryVersion(nullable: false)
-        selectionList(nullable: true)
-        errorCode(nullable: true)
-        errorText(nullable: true)
+        populationQuery(nullable: false)
+        populationQueryVersion(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
@@ -127,5 +110,9 @@ class CommunicationPopulationVersionQueryAssociation implements Serializable {
             list = session.getNamedQuery( 'CommunicationPopulationVersionQueryAssociation.findByPopulationVersion' ).setParameter( 'populationVersion', populationVersion ).list()
         }
         return list
+    }
+
+    public boolean shouldRequestLatestQueryVersion() {
+        return populationQueryVersion == null
     }
 }

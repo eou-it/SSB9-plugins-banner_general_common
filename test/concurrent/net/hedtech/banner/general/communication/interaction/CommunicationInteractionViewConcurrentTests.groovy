@@ -78,11 +78,8 @@ class CommunicationInteractionViewConcurrentTests extends CommunicationBaseConcu
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals(1, queryAssociations.size())
-        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get(0)
-        queryAssociation.refresh()
-        assertNotNull(queryAssociation.selectionList)
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(queryAssociation.selectionList.id)
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 

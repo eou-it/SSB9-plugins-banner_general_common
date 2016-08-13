@@ -16,7 +16,6 @@ import net.hedtech.banner.general.communication.letter.CommunicationLetterTempla
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
@@ -84,11 +83,8 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
-        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
-        queryAssociation.refresh()
-        assertNotNull( queryAssociation.selectionList )
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 

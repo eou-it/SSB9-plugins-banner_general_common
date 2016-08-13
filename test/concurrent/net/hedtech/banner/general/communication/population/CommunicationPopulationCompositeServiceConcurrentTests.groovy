@@ -61,16 +61,53 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
     }
 
 
+//    @Test
+//    public void testCreatePopulationFromQuery() {
+//        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery( "testQuery" ) )
+//        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+//        assertFalse( populationQuery.changesPending )
+//
+//        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+//        assertNotNull( population.id )
+//        assertEquals( "testPopulation", population.name )
+//        assertEquals( "testPopulationDescription", population.description )
+//
+//        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
+//        assertEquals( 1, associations.size() )
+//        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
+//        assertNotNull( association.id )
+//        assertEquals( population.id, association.population.id )
+//        assertEquals( populationQuery.id, association.populationQuery.id )
+//        assertNull( association.populationQueryVersion )
+//
+//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+//        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
+//        def isAvailable = {
+//            def theCalculation = CommunicationPopulationCalculation.get( it )
+//            theCalculation.refresh()
+//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+//        }
+//        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+//    }
+
+
     @Test
-    public void testCreatePopulationFromQuery() {
-        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery( "testQuery" ) )
+    public void testAllSpridenPopulationFromQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                folder: defaultFolder,
+                name: "testAllSpridenPopulationFromQuery",
+                description: "test description",
+                queryString: "select SPRIDEN_PIDM from SPRIDEN"
+        )
+
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         assertFalse( populationQuery.changesPending )
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery" )
         assertNotNull( population.id )
-        assertEquals( "testPopulation", population.name )
-        assertEquals( "testPopulationDescription", population.description )
+        assertEquals( "testAllSpridenPopulationFromQuery", population.name )
+        assertEquals( "", population.description )
 
         List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
         assertEquals( 1, associations.size() )
@@ -88,51 +125,51 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
         assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrue( populationCalculation.calculatedCount >= 10000 )
     }
 
-
-    @Test
-    public void testCreatePopulationSelectionExtractQuery() {
-        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
-        extractStatement.application = 'ADMISSIONS'
-        extractStatement.selection = '199610_APPLICANTS'
-        extractStatement.creatorId = 'SAISUSR'
-        extractStatement.userId = 'SAISUSR'
-        String extractQueryString = extractStatement.getQueryString()
-
-        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
-            folder: defaultFolder,
-            name: "testCreatePopulationSelectionExtractQuery",
-            description: "test description",
-            type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT,
-            queryString: extractQueryString
-        )
-
-        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
-        assertFalse( populationQuery.changesPending )
-
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
-        assertNotNull( population.id )
-        assertEquals( "testPopulation", population.name )
-        assertEquals( "testPopulationDescription", population.description )
-
-        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
-        assertEquals( 1, associations.size() )
-        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
-        assertNotNull( association.id )
-        assertEquals( population.id, association.population.id )
-        assertEquals( populationQuery.id, association.populationQuery.id )
-        assertNull( association.populationQueryVersion )
-
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
-        def isAvailable = {
-            def theCalculation = CommunicationPopulationCalculation.get( it )
-            theCalculation.refresh()
-            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
-                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
-        }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
-    }
+//    @Test
+//    public void testCreatePopulationSelectionExtractQuery() {
+//        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+//        extractStatement.application = 'ADMISSIONS'
+//        extractStatement.selection = '199610_APPLICANTS'
+//        extractStatement.creatorId = 'SAISUSR'
+//        extractStatement.userId = 'SAISUSR'
+//        String extractQueryString = extractStatement.getQueryString()
+//
+//        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+//            folder: defaultFolder,
+//            name: "testCreatePopulationSelectionExtractQuery",
+//            description: "test description",
+//            type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT,
+//            queryString: extractQueryString
+//        )
+//
+//        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+//        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+//        assertFalse( populationQuery.changesPending )
+//
+//        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+//        assertNotNull( population.id )
+//        assertEquals( "testPopulation", population.name )
+//        assertEquals( "testPopulationDescription", population.description )
+//
+//        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
+//        assertEquals( 1, associations.size() )
+//        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
+//        assertNotNull( association.id )
+//        assertEquals( population.id, association.population.id )
+//        assertEquals( populationQuery.id, association.populationQuery.id )
+//        assertNull( association.populationQueryVersion )
+//
+//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+//        def isAvailable = {
+//            def theCalculation = CommunicationPopulationCalculation.get( it )
+//            theCalculation.refresh()
+//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
+//                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
+//        }
+//        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+//    }
 
 }

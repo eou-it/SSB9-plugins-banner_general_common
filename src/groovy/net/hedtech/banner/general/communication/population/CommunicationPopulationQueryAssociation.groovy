@@ -102,6 +102,15 @@ class CommunicationPopulationQueryAssociation implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
     }
 
+    public CommunicationPopulationVersionQueryAssociation createVersion( CommunicationPopulationVersion populationVersion ) {
+        assert populationVersion.population.equals( this.population )
+
+        CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = new CommunicationPopulationVersionQueryAssociation()
+        populationVersionQueryAssociation.populationVersion = populationVersion
+        populationVersionQueryAssociation.populationQuery = this.populationQuery
+        populationVersionQueryAssociation.populationQueryVersion = this.populationQueryVersion
+        return populationVersionQueryAssociation
+    }
 
     public static List findAllByPopulation( CommunicationPopulation population ) {
         def list

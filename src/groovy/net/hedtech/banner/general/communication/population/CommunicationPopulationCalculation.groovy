@@ -5,6 +5,9 @@ package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.hibernate.annotations.Type
 
 import javax.persistence.*
@@ -14,6 +17,9 @@ import javax.persistence.*
 @ToString
 @Table(name = "GCRPOPC")
 @NamedQueries(value = [
+        @NamedQuery(name = "CommunicationPopulationCalculation.fetchById",
+                query = """ FROM CommunicationPopulationCalculation a
+                    WHERE a.id = :id"""),
         @NamedQuery(name = "CommunicationPopulationCalculation.findByPopulationVersionId",
                 query = """ FROM CommunicationPopulationCalculation calculation
                 WHERE calculation.populationVersion.id = :populationVersionId order by calculation.createDate DESC"""),
@@ -42,6 +48,11 @@ class CommunicationPopulationCalculation implements Serializable {
     @JoinColumn(name = "GCRPOPC_POPV_ID", referencedColumnName = "GCRPOPV_SURROGATE_ID")
     @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPOPC_INV_GCRPOPV")
     CommunicationPopulationVersion populationVersion
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "GCRPOPC_QRYV_ID", referencedColumnName = "GCRQRYV_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPOPC_INV_GCRQRYV")
+    CommunicationPopulationQueryVersion populationQueryVersion
 
     /**
      * CREATE_DATE: The date the record was created.
@@ -84,6 +95,27 @@ class CommunicationPopulationCalculation implements Serializable {
     CommunicationPopulationCalculationStatus status
 
     /**
+     * Foreign key reference to the population selection list.
+     */
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "GCRPOPC_SLIS_ID", referencedColumnName = "GCRSLIS_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCRPOPC_INV_GCRSLIS")
+    CommunicationPopulationSelectionList selectionList
+
+    /**
+     * The error code if calculation results in an error
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "GCRPOPC_ERROR_CODE")
+    CommunicationErrorCode errorCode
+
+    /**
+     * The error text or stacktrace if calculation results in an error
+     */
+    @Column(name = "GCRPOPC_ERROR_TEXT")
+    String errorText
+
+    /**
      * JOB ID : UUID of the job for the population version calculation
      */
     @Column(name = "GCRPOPC_JOB_ID")
@@ -121,11 +153,15 @@ class CommunicationPopulationCalculation implements Serializable {
 
     static constraints = {
         populationVersion(nullable: false)
+        populationQueryVersion(nullable: false)
         createDate(nullable: false)
         createdBy(nullable: false, maxSize: 30)
         calculatedCount(nullable: true)
         calculatedBy(nullable: false)
         status(nullable: false)
+        selectionList(nullable: true)
+        errorCode(nullable: true)
+        errorText(nullable: true)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
@@ -164,6 +200,15 @@ class CommunicationPopulationCalculation implements Serializable {
         CommunicationPopulationCalculation.withSession { session ->
             calculation = session.getNamedQuery('CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCreatedBy').
                 setLong( 'populationVersionId', populationVersionId ).setString( 'userId', userId ).list()[0]
+        }
+        return calculation
+    }
+
+    public static CommunicationPopulationCalculation fetchById(Long id) {
+        def calculation
+        CommunicationPopulationCalculation.withSession { session ->
+            calculation = session.getNamedQuery('CommunicationPopulationCalculation.fetchById')
+                    .setLong('id', id).list()[0]
         }
         return calculation
     }

@@ -120,6 +120,12 @@ class CommunicationPopulation implements Serializable {
     @Column(name = "GCBPOPL_DATA_ORIGIN")
     String dataOrigin
 
+    public CommunicationPopulationVersion createVersion() {
+        CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
+        populationVersion.population = this
+        return populationVersion
+    }
+
     static constraints = {
         name(nullable: false)
         description(nullable:true)

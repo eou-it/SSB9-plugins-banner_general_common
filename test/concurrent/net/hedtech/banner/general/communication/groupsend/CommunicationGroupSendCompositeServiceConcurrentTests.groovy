@@ -73,11 +73,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
-        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
-        queryAssociation.refresh()
-        assertNotNull( queryAssociation.selectionList )
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 
@@ -344,11 +341,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
-        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
-        queryAssociation.refresh()
-        assertNotNull( queryAssociation.selectionList )
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 
@@ -423,11 +417,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
-        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
-        queryAssociation.refresh()
-        assertNotNull( queryAssociation.selectionList )
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 
@@ -571,7 +562,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             fail( "Expected cannotDeletePopulationWithExistingGroupSends" )
         } catch( ApplicationException e ) {
             // 5)Error message displays. Ignore or acknowledge that message so that it will disappear.
-            assertEquals( e.message, "@@r1:cannotDeletePopulationWithExistingGroupSends@@" )
+            assertEquals( "@@r1:cannotDeletePopulationWithExistingGroupSends@@", e.message )
         }
 
         // Note: the controller is receiving the recalculatedPopulationVersion instead of getting an updated populationListView (might be a mistake)
@@ -606,11 +597,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
-        CommunicationPopulationVersionQueryAssociation queryAssociation = queryAssociations.get( 0 )
-        queryAssociation.refresh()
-        assertNotNull( queryAssociation.selectionList )
 
-        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( queryAssociation.selectionList.id )
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
         assertEquals(5, selectionListEntryList.size())
 

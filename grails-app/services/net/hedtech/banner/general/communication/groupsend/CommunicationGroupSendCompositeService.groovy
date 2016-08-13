@@ -9,10 +9,10 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
-import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
@@ -61,6 +61,12 @@ class CommunicationGroupSendCompositeService {
         CommunicationGroupSend groupSend = new CommunicationGroupSend();
         groupSend.templateId = request.getTemplateId()
         groupSend.populationId = request.getPopulationId()
+
+        // do lookup for population version
+        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( request.getPopulationId() )
+        assert populationVersion.id
+        groupSend.populationVersionId = populationVersion.id
+
         groupSend.organizationId = request.getOrganizationId()
         groupSend.name = jobName
         groupSend.scheduledStartDate = request.scheduledStartDate
@@ -189,11 +195,11 @@ class CommunicationGroupSendCompositeService {
      * This method is called by the scheduler to regenerate a population list specifically for the group send
      * and change the state of the group send to next state.
      */
-    public CommunicationGroupSend calculatePopulationForGroupSend( Map parameters ) {
+    public CommunicationGroupSend calculatePopulationVersionForGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         assert( groupSendId )
         if (log.isDebugEnabled()) {
-            log.debug( "Calling calculatePopulationForGroupSend for groupSendId = ${groupSendId}.")
+            log.debug( "Calling calculatePopulationVersionForGroupSend for groupSendId = ${groupSendId}.")
         }
 
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
@@ -203,14 +209,14 @@ class CommunicationGroupSendCompositeService {
 
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
-                CommunicationPopulation population = CommunicationPopulation.fetchById(groupSend.getPopulationId())
-                if (!population) {
-                    throw new ApplicationException("population", new NotFoundException())
+                CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
+                if (!populationVersion) {
+                    throw new ApplicationException( "populationVersion", new NotFoundException() )
                 }
 
                 if (!groupSend.populationCalculationId) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
-                    CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationForGroupSend( population )
+                    CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
                     groupSend = communicationGroupSendService.update( groupSend )
                 }
@@ -277,7 +283,7 @@ class CommunicationGroupSendCompositeService {
         }
         SchedulerJobReceipt jobReceipt
         if(groupSend.recalculateOnSend) {
-            jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "calculatePopulationForGroupSend", ["groupSendId": groupSend.id])
+            jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSend", ["groupSendId": groupSend.id])
         } else {
             jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
         }
@@ -394,9 +400,9 @@ class CommunicationGroupSendCompositeService {
                                  ,gcbgsnd_user_id
                                  , :current_time
                                  , :current_time
-                             FROM gcrslis, gcrlent, gcbgsnd, gcrpvid
-                            WHERE (SELECT gcrpopc_popv_id from gcrpopc where gcbgsnd_popcalc_id = gcrpopc_surrogate_id) = gcrpvid_popv_id
-                                  and gcrslis_surrogate_id = gcrpvid_slis_id
+                            FROM gcrslis, gcrlent, gcbgsnd, gcrpopc
+                            WHERE gcbgsnd_popcalc_id = gcrpopc_surrogate_id
+                                  and gcrslis_surrogate_id = gcrpopc_slis_id
                                   AND gcrlent_slis_id = gcrslis_surrogate_id
                                   AND gcbgsnd_surrogate_id = :group_send_key
             """ )
