@@ -28,7 +28,7 @@ class AddressViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCreateExceptionResults() {
-        AddressView existingAddress = AddressView.findAll()[0]
+        AddressView existingAddress = AddressView.findAll([max: 10])[0]
         assertNotNull existingAddress.toString()
         AddressView newAddress = new AddressView(existingAddress.properties)
         newAddress.addressLine1="random-test-address"
@@ -42,7 +42,7 @@ class AddressViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testUpdateExceptionResults() {
-        AddressView existingAddress = AddressView.findAll()[0]
+        AddressView existingAddress = AddressView.findAll([max: 10])[0]
         assertNotNull existingAddress.toString()
         existingAddress.sourceTable = "This is a test update"
         shouldFail(InvalidDataAccessResourceUsageException) {
@@ -53,7 +53,7 @@ class AddressViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testDeleteExceptionResults() {
-        AddressView existingAddress = AddressView.findAll()[0]
+        AddressView existingAddress = AddressView.findAll([max: 10])[0]
         assertNotNull existingAddress.toString()
         //Changed from org.springframework.orm.hibernate3.HibernateJdbcException due to spring 4.1.5
         shouldFail() {
