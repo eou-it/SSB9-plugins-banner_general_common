@@ -11,8 +11,10 @@ class AddressV6 {
     List<String> addressLines
     PlaceV6 place
     List geographicAreas
+    private String addressTypeGuid
+    private String hedmAddressType
 
-    AddressV6(AddressView addressView, String iso3CountryCode, String defaultCountryTitle) {
+    AddressV6(AddressView addressView, String iso3CountryCode, String defaultCountryTitle, String hedmAddressType) {
         this.guid = addressView.id
         this.addressLines = getAddressLinesForAddress(addressView)
         if (!this.addressLines) {
@@ -22,6 +24,21 @@ class AddressV6 {
             CountryV6 country = new CountryV6(iso3CountryCode, addressView, defaultCountryTitle)
             this.place = new PlaceV6(country)
         }
+        this.addressTypeGuid = addressView.addressTypeGuid
+        this.hedmAddressType = hedmAddressType
+    }
+
+    /**
+     * For 'person-guardians' V7 schema
+     *
+     * @return
+     */
+    def getType() {
+        def obj
+        if (hedmAddressType) {
+            obj = ["addressType": hedmAddressType, "detail": ["id": addressTypeGuid]]
+        }
+        return obj
     }
 
 

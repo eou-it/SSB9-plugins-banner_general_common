@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.AddressGeographicAreasView
 import net.hedtech.banner.general.overall.AddressViewService
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
@@ -20,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class AddressCompositeService extends LdmService {
 
-    static final String COLLEGE_ADDRESS = "STVCOLL"
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
+    private static final String COLLEGE_ADDRESS = "STVCOLL"
+
     AddressViewService addressViewService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
@@ -33,12 +36,14 @@ class AddressCompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     def get(String guid) {
+        String acceptVersion = getAcceptVersion(VERSIONS)
+
         AddressView addressView
         addressView = AddressView.get(guid)
         if (!addressView) {
             throw new ApplicationException("address", new NotFoundException())
         }
-        getDecorators([addressView]).get(0)
+        createAddressDataModels([addressView]).get(0)
     }
 
     /**
@@ -58,35 +63,32 @@ class AddressCompositeService extends LdmService {
      * @return
      */
     def list(Map map) {
+        String acceptVersion = getAcceptVersion(VERSIONS)
+
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max = (map?.max as Integer)
         int offset = ((map?.offset ?: '0') as Integer)
         List<AddressView> addressesView = addressViewService.fetchAll(max, offset)
-        return getDecorators(addressesView)
+        return createAddressDataModels(addressesView)
     }
 
-    private List<AddressV6> getDecorators(List<AddressView> addressesView) {
-        def dataMap = [:]
-        dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
-        dataMap.put("defaultISO3CountryCodeForAddress", integrationConfigurationService.getDefaultISO3CountryCodeForAddress(dataMap.get("isInstitutionUsingISO2CountryCodes")))
-        Nation nation = Nation.findByScodIso(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
-        if(!nation) {
-            dataMap.put("defaultTitleForDefaultCountryCode", "Unknown")
-        } else {
-            dataMap.put("defaultTitleForDefaultCountryCode", nation.nation)
-        }
+    private List<AddressV6> createAddressDataModels(List<AddressView> addressesView) {
+        boolean institutionUsingISO2CountryCodes = integrationConfigurationService.isInstitutionUsingISO2CountryCodes()
+        String defaultISO3CountryCode = integrationConfigurationService.getDefaultISO3CountryCodeForAddress(institutionUsingISO2CountryCodes)
+        String defaultCountryTitle = getDefaultCountryTitle()
 
-        List<AddressV6> addresses = []
         List pidmsOrCodes = []
         addressesView.collect { address ->
             if (!address.sourceTable.equals(COLLEGE_ADDRESS)) {
                 pidmsOrCodes << address.pidmOrCode
             }
         }
+
         List<AddressGeographicAreasView> geographicAreasView
         if (pidmsOrCodes?.size() > 0) {
             geographicAreasView = AddressGeographicAreasView.fetchAllByPidm(pidmsOrCodes)
         }
+
         Map geographicAreasGUID = [:]
         geographicAreasView.each { geographicArea ->
             String geoAreaKey = geographicArea.geographicAreasSource + geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber
@@ -97,27 +99,37 @@ class AddressCompositeService extends LdmService {
                 geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
             }
         }
+
+        List<AddressV6> addresses = []
         addressesView.each { address ->
-            String iso3CountryCode = getISO3CountryCode(address, dataMap.get("isInstitutionUsingISO2CountryCodes"))
-            if (!iso3CountryCode) {
-                iso3CountryCode = dataMap.get("defaultISO3CountryCodeForAddress")
-            }
-            validateRegion(address)
-            if (iso3CountryCode?.equals(HedmCountry.GBR.toString())) {
-                validateSubRegion(address)
-            }
-            String addressKey = address.sourceTable + address.pidmOrCode + address.atypCode + address.sequenceNumber
-            addresses << getDecorator(address, geographicAreasGUID.get(addressKey), iso3CountryCode, dataMap.get("defaultTitleForDefaultCountryCode"))
+            String addressKey = address.sourceTable + address.pidmOrCode + address.addressTypeCode + address.sequenceNumber
+            addresses << createAddressDataModelV6(address, geographicAreasGUID.get(addressKey), institutionUsingISO2CountryCodes, defaultISO3CountryCode, defaultCountryTitle, null)
         }
         return addresses
     }
 
 
-    private AddressV6 getDecorator(AddressView addressView, List<String> geographicAreasGUIDs, String iso3CountryCode,
-                                   String defaultCountryTitle) {
-        AddressV6 addressV6 = new AddressV6(addressView, iso3CountryCode, defaultCountryTitle)
+    AddressV6 createAddressDataModelV6(AddressView addressView, List<String> geographicAreaGUIDs, boolean institutionUsingISO2CountryCodes, String defaultISO3CountryCode, String defaultCountryTitle, String hedmAddressType) {
+        String iso3CountryCode = getISO3CountryCode(addressView, institutionUsingISO2CountryCodes)
+        if (!iso3CountryCode) {
+            iso3CountryCode = defaultISO3CountryCode
+        }
+
+        validateRegion(addressView)
+
+        if (iso3CountryCode?.equals(HedmCountry.GBR.toString())) {
+            validateSubRegion(addressView)
+        }
+
+        return createAddressDataModelV6(addressView, geographicAreaGUIDs, iso3CountryCode, defaultCountryTitle, hedmAddressType)
+    }
+
+
+    AddressV6 createAddressDataModelV6(AddressView addressView, List<String> geographicAreasGUIDs, String iso3CountryCode,
+                                       String defaultCountryTitle, String hedmAddressType) {
+        AddressV6 addressV6 = new AddressV6(addressView, iso3CountryCode, defaultCountryTitle, hedmAddressType)
         addressV6.geographicAreas = []
-        geographicAreasGUIDs.each { guid ->
+        geographicAreasGUIDs?.each { guid ->
             addressV6.geographicAreas << ["id": guid]
         }
         return addressV6
@@ -176,6 +188,17 @@ class AddressCompositeService extends LdmService {
             }
         }
         return available
+    }
+
+    String getDefaultCountryTitle() {
+        String temp
+        Nation nation = Nation.findByScodIso(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
+        if (!nation) {
+            temp = "Unknown"
+        } else {
+            temp = nation.nation
+        }
+        return temp
     }
 
 }
