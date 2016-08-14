@@ -6,7 +6,6 @@ package net.hedtech.banner.general.person.ldm.v6
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.person.PersonTelephone
-import net.hedtech.banner.general.system.TelephoneType
 import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 
 /**
@@ -33,5 +32,15 @@ class PhoneV6 {
         }
         return phoneV6
     }
+
+    /**
+     * For 'person-guardians' V7 schema
+     *
+     * @return
+     */
+    def getPhoneTypeDetail() {
+        return ["phoneType": type.phoneType, "detail": type.getDetail()]
+    }
+
 
 }
