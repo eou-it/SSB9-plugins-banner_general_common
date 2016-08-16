@@ -205,7 +205,7 @@ class NonPersonCompositeService extends LdmService {
                 Map bannerPhoneTypeToHedmPhoneTypeMap = dataMapForPerson["bannerPhoneTypeToHedmPhoneTypeMap"]
                 decorator.phones = []
                 personTelephoneListList.each {
-                    decorator.phones << createPhoneV6(it, it.telephoneType.code, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
+                    decorator.phones << PhoneV6.createPhoneV6(it, phoneCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
                 }
             }
 
@@ -386,19 +386,6 @@ class NonPersonCompositeService extends LdmService {
             emailV6.preference = 'primaryOverall'
         }
         return emailV6
-    }
-
-
-    private PhoneV6 createPhoneV6(PersonTelephone it, String code, String guid, String phoneType) {
-        PhoneV6 phoneV6 = new PhoneV6()
-        phoneV6.countryCallingCode = it.countryPhone
-        phoneV6.number = (it.phoneArea ?: "") + (it.phoneNumber ?: "")
-        phoneV6.extension = it.phoneExtension
-        phoneV6.type = new PhoneTypeDecorator(code, null, guid, phoneType)
-        if (it.primaryIndicator) {
-            phoneV6.preference = 'primary'
-        }
-        return phoneV6
     }
 
 
