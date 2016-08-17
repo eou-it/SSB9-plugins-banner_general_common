@@ -801,6 +801,24 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-campus-organizations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-organizations</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>7</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-organizations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentActivity.STVACTC</value>
+                <value>EEDM.CommitteeType.STVCOMT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -848,6 +866,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-addresses"/>
                 <ref bean="ar-campus-involvement-roles"/>
                 <ref bean="ar-campus-organization-types"/>
+                <ref bean="ar-campus-organizations"/>
             </list>
         </property>
     </bean>
@@ -899,6 +918,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-addresses"/>
                 <ref bean="ar-campus-involvement-roles"/>
                 <ref bean="ar-campus-organization-types"/>
+                <ref bean="ar-campus-organizations"/>
             </list>
         </property>
     </bean>
