@@ -24,7 +24,10 @@ import javax.persistence.Table
 @NamedQueries(value = [
         @NamedQuery(name = "CampusOrganizationsView.fetchByGuid",
                 query = """FROM CampusOrganizationsView a
-                    where a.id = :guid""")
+                    where a.id = :guid"""),
+        @NamedQuery(name = "CampusOrganizationsView.fetchByCode",
+                query = """FROM CampusOrganizationsView a
+                    where a.campusOrgCode = :code""")
 ])
 
 class CampusOrganizationsView implements Serializable {
@@ -60,6 +63,16 @@ class CampusOrganizationsView implements Serializable {
         CampusOrganizationsView.withSession {
             session ->
                 campusOrganizationsView = session.getNamedQuery('CampusOrganizationsView.fetchByGuid').setString('guid', guid).uniqueResult()
+        }
+        return campusOrganizationsView
+    }
+
+
+    public static CampusOrganizationsView fetchByCode(String code) {
+        CampusOrganizationsView campusOrganizationsView
+        CampusOrganizationsView.withSession {
+            session ->
+                campusOrganizationsView = session.getNamedQuery('CampusOrganizationsView.fetchByCode').setString('code', code).uniqueResult()
         }
         return campusOrganizationsView
     }

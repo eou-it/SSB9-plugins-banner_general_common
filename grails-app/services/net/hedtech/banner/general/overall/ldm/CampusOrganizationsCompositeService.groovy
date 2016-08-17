@@ -55,7 +55,6 @@ class CampusOrganizationsCompositeService extends LdmService {
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max = (map?.max as Integer)
         int offset = ((map?.offset ?: '0') as Integer)
-        //TODO: default sort
         List<CampusOrganizationsView> campusOrganizationsViews = campusOrganizationsViewService.fetchAll(max, offset)
         return createCampOrgDataModels(campusOrganizationsViews)
     }

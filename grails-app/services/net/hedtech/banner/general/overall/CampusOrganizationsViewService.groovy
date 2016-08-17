@@ -39,6 +39,12 @@ class CampusOrganizationsViewService extends ServiceBase {
         }
     }
 
+
+    public CampusOrganizationsView fetchByCode(String code) {
+        return CampusOrganizationsView.fetchByCode(code)
+    }
+
+
     public CampusOrganizationsView fetchByGuid(String guid) {
         CampusOrganizationsView.fetchByGuid(guid)
     }
