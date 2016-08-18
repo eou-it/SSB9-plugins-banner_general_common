@@ -15,7 +15,6 @@ import net.hedtech.banner.general.system.InstitutionalDescriptionService
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
-import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.utility.DateConvertHelperService
@@ -38,8 +37,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     VisaInformationService visaInformationService
     VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
-    PersonRaceService personRaceService
-    RaceCompositeService raceCompositeService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
@@ -232,7 +229,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
-        fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
     }
@@ -380,13 +376,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         if (visaInfo) {
             dataMapForPerson << ["visaInformation": visaInfo]
             dataMapForPerson << ["visaTypeGuid": dataMap.vtCodeToGuidMap.get(visaInfo.visaType.code)]
-        }
-
-        // races
-        List<PersonRace> personRaces = dataMap.pidmToRacesMap.get(personIdentificationNameCurrent.pidm)
-        if (personRaces) {
-            dataMapForPerson << ["personRaces": personRaces]
-            dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
         }
 
         // interests
@@ -646,37 +635,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("codeToNationMap", codeToNationMap)
         dataMap.put("pidmToLanguageCodeMap", pidmToLanguageCodeMap)
         dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
-    }
-
-
-    private void fetchPersonsRaceDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        // Get GORPRAC records for persons
-        Map pidmToRacesMap = [:]
-        if (pidms) {
-            log.debug "Getting GV_GORPRAC records for ${pidms?.size()} PIDMs..."
-            List<PersonRace> entities = personRaceService.fetchRaceByPidmList(pidms)
-            log.debug "Got ${entities?.size()} GV_GORPRAC records"
-            entities?.each {
-                List<PersonRace> personRaces = []
-                if (pidmToRacesMap.containsKey(it.pidm)) {
-                    personRaces = pidmToRacesMap.get(it.pidm)
-                } else {
-                    pidmToRacesMap.put(it.pidm, personRaces)
-                }
-                personRaces.add(it)
-            }
-        }
-        // Get GUIDs for race codes
-        Set<String> raceCodes = pidmToRacesMap?.values().race.flatten() as Set
-        Map raceCodeToGuidMap = [:]
-        if (raceCodes) {
-            log.debug "Getting GUIDs for Races codes $raceCodes..."
-            raceCodeToGuidMap = raceCompositeService.getRaceCodeToGuidMap(raceCodes)
-            log.debug "Got ${raceCodeToGuidMap?.size() ?: 0} GUIDs for given race codes"
-        }
-        // Put in Map
-        dataMap.put("pidmToRacesMap", pidmToRacesMap)
-        dataMap.put("raceCodeToGuidMap", raceCodeToGuidMap)
     }
 
 
