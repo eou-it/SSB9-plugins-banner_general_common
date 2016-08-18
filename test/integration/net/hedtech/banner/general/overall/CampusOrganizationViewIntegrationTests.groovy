@@ -12,7 +12,7 @@ import org.junit.Test
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 
 
-class CampusOrganizationsViewIntegrationTests extends BaseIntegrationTestCase {
+class CampusOrganizationViewIntegrationTests extends BaseIntegrationTestCase {
 
     final String i_success_code_1 = '180'
     GlobalUniqueIdentifier o_success_guid_1
@@ -42,9 +42,9 @@ class CampusOrganizationsViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCreateExceptionResults() {
-        CampusOrganizationsView existingList = CampusOrganizationsView.findAll()[0]
+        CampusOrganizationView existingList = CampusOrganizationView.findAll()[0]
         assertNotNull existingList.toString()
-        CampusOrganizationsView newRecord = new CampusOrganizationsView(existingList.properties)
+        CampusOrganizationView newRecord = new CampusOrganizationView(existingList.properties)
         newRecord.campusOrgCode = "99999"
         newRecord.id = 'random-guid'
         shouldFail(InvalidDataAccessResourceUsageException) {
@@ -56,7 +56,7 @@ class CampusOrganizationsViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testUpdateExceptionResults() {
-        CampusOrganizationsView existingList = CampusOrganizationsView.findAll()[0]
+        CampusOrganizationView existingList = CampusOrganizationView.findAll()[0]
         assertNotNull existingList.toString()
         existingList.campusOrgDesc = "This is a test update"
         shouldFail(InvalidDataAccessResourceUsageException) {
@@ -67,30 +67,12 @@ class CampusOrganizationsViewIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testDeleteExceptionResults() {
-        CampusOrganizationsView existingList = CampusOrganizationsView.findAll()[0]
+        CampusOrganizationView existingList = CampusOrganizationView.findAll()[0]
         assertNotNull existingList.toString()
         //Changed from org.springframework.orm.hibernate3.HibernateJdbcException due to spring 4.1.5
         shouldFail() {
             existingList.delete(flush: true, onError: true)
         }
-    }
-
-
-    @Test
-    void testFetchByGuid() {
-        CampusOrganizationsView campusOrganizationsView = CampusOrganizationsView.fetchByGuid(o_success_guid_1.guid)
-        assertNotNull campusOrganizationsView
-        assertNotNull campusOrganizationsView.id
-        assertNotNull campusOrganizationsView.campusOrgDesc
-    }
-
-
-    @Test
-    void testFetchByCode() {
-        CampusOrganizationsView campusOrganizationsView = CampusOrganizationsView.fetchByCode(o_success_guid_1.domainKey)
-        assertNotNull campusOrganizationsView
-        assertNotNull campusOrganizationsView.id
-        assertNotNull campusOrganizationsView.campusOrgDesc
     }
 
 }

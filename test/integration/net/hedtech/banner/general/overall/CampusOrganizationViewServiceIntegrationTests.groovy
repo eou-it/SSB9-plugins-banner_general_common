@@ -11,9 +11,9 @@ import org.junit.Before
 import org.junit.Test
 
 
-class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTestCase {
+class CampusOrganizationViewServiceIntegrationTests extends BaseIntegrationTestCase {
 
-    CampusOrganizationsViewService campusOrganizationsViewService
+    CampusOrganizationViewService campusOrganizationViewService
     final String i_success_code_1 = '180'
     GlobalUniqueIdentifier o_success_guid_1
 
@@ -34,7 +34,7 @@ class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTest
     @Test
     void testCreateNotAllowed() {
         shouldFail( ApplicationException ) {
-            campusOrganizationsViewService.create( [campusOrganizationsView: new CampusOrganizationsView()] )
+            campusOrganizationViewService.create( [campusOrganizationsView: new CampusOrganizationView()] )
         }
     }
 
@@ -42,7 +42,7 @@ class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTest
     @Test
     void testUpdateNotAllowed() {
         shouldFail( ApplicationException ) {
-            campusOrganizationsViewService.update( [campusOrganizationsView: new CampusOrganizationsView()] )
+            campusOrganizationViewService.update( [campusOrganizationsView: new CampusOrganizationView()] )
         }
     }
 
@@ -50,15 +50,15 @@ class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTest
     @Test
     void testDeleteNotAllowed() {
         shouldFail( ApplicationException ) {
-            campusOrganizationsViewService.delete( [campusOrganizationsView: new CampusOrganizationsView()] )
+            campusOrganizationViewService.delete( [campusOrganizationsView: new CampusOrganizationView()] )
         }
     }
 
 
     @Test
     void testReadAllowed() {
-        CampusOrganizationsView campusOrganizationsView = CampusOrganizationsView.findAll()[0]
-        CampusOrganizationsView objReadUsingService = campusOrganizationsViewService.read( campusOrganizationsView.id ) as CampusOrganizationsView
+        CampusOrganizationView campusOrganizationsView = CampusOrganizationView.findAll()[0]
+        CampusOrganizationView objReadUsingService = campusOrganizationViewService.read( campusOrganizationsView.id ) as CampusOrganizationView
         assertNotNull objReadUsingService
         assertEquals( campusOrganizationsView.id, objReadUsingService.id )
         assertEquals( campusOrganizationsView.campusOrgDesc, objReadUsingService.campusOrgDesc )
@@ -67,7 +67,7 @@ class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTest
 
     @Test
     void testFetchAll() {
-        List<CampusOrganizationsView> campusOrganizationsViewList = campusOrganizationsViewService.fetchAll(500, 0)
+        List<CampusOrganizationView> campusOrganizationsViewList = campusOrganizationViewService.fetchAll(500, 0)
         assertNotNull campusOrganizationsViewList
         assertTrue campusOrganizationsViewList.size() > 0
 
@@ -80,7 +80,7 @@ class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTest
 
     @Test
     void testFetchByCode() {
-        CampusOrganizationsView campusOrganizationsView = campusOrganizationsViewService.fetchByCode(o_success_guid_1.domainKey)
+        CampusOrganizationView campusOrganizationsView = campusOrganizationViewService.fetchByCode(o_success_guid_1.domainKey)
         assertNotNull campusOrganizationsView
         assertNotNull campusOrganizationsView.id
         assertNotNull campusOrganizationsView.campusOrgDesc
@@ -89,7 +89,7 @@ class CampusOrganizationsViewServiceIntegrationTests extends BaseIntegrationTest
 
     @Test
     void testFetchByGuid() {
-        CampusOrganizationsView campusOrganizationsView = campusOrganizationsViewService.fetchByGuid(o_success_guid_1.guid)
+        CampusOrganizationView campusOrganizationsView = campusOrganizationViewService.fetchByGuid(o_success_guid_1.guid)
         assertNotNull campusOrganizationsView
         assertNotNull campusOrganizationsView.id
         assertNotNull campusOrganizationsView.campusOrgDesc

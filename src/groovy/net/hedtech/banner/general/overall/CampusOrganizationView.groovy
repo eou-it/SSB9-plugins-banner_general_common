@@ -23,14 +23,14 @@ import javax.persistence.Table
 @ToString(includeNames = true, includeFields = true)
 @NamedQueries(value = [
         @NamedQuery(name = "CampusOrganizationsView.fetchByGuid",
-                query = """FROM CampusOrganizationsView a
+                query = """FROM CampusOrganizationView a
                     where a.id = :guid"""),
         @NamedQuery(name = "CampusOrganizationsView.fetchByCode",
-                query = """FROM CampusOrganizationsView a
+                query = """FROM CampusOrganizationView a
                     where a.campusOrgCode = :code""")
 ])
 
-class CampusOrganizationsView implements Serializable {
+class CampusOrganizationView implements Serializable {
 
     /**
      * GUID of an Campus Organizations
@@ -56,42 +56,5 @@ class CampusOrganizationsView implements Serializable {
      */
     @Column(name = "CAMP_ORG_CODE")
     String campusOrgCode
-
-
-    public static CampusOrganizationsView fetchByGuid(String guid) {
-        CampusOrganizationsView campusOrganizationsView
-        CampusOrganizationsView.withSession {
-            session ->
-                campusOrganizationsView = session.getNamedQuery('CampusOrganizationsView.fetchByGuid').setString('guid', guid).uniqueResult()
-        }
-        return campusOrganizationsView
-    }
-
-
-    public static CampusOrganizationsView fetchByCode(String code) {
-        CampusOrganizationsView campusOrganizationsView
-        CampusOrganizationsView.withSession {
-            session ->
-                campusOrganizationsView = session.getNamedQuery('CampusOrganizationsView.fetchByCode').setString('code', code).uniqueResult()
-        }
-        return campusOrganizationsView
-    }
-
-
-    def static countAll(filterData) {
-        return finderByAll().count(filterData)
-    }
-
-
-    def static fetchSearch(filterData, pagingAndSortParams) {
-        return finderByAll().find(filterData, pagingAndSortParams)
-
-    }
-
-
-    def private static finderByAll = {
-        def query = "from CampusOrganizationsView a where 1 = 1"
-        return new DynamicFinder(CampusOrganizationsView.class, query, "a")
-    }
 
 }

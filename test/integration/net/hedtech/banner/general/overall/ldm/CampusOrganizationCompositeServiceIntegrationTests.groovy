@@ -5,16 +5,16 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
-import net.hedtech.banner.general.overall.ldm.v7.CampusOrganizationsV7
+import net.hedtech.banner.general.overall.ldm.v7.CampusOrganizationV7
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
 import org.junit.Test
 
 
-class CampusOrganizationsCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
+class CampusOrganizationCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
-    CampusOrganizationsCompositeService campusOrganizationsCompositeService
+    CampusOrganizationCompositeService campusOrganizationCompositeService
     final String i_success_code_1 = '180'
     final String i_success_code_2 = 'MBA'
     GlobalUniqueIdentifier o_success_guid_1
@@ -41,7 +41,7 @@ class CampusOrganizationsCompositeServiceIntegrationTests extends BaseIntegratio
     void testValidList_v7() {
         setAcceptHeader("application/vnd.hedtech.integration.v7+json")
         Map params = [:]
-        List<CampusOrganizationsV7> campusOrganizationsV7List = campusOrganizationsCompositeService.list(params)
+        List<CampusOrganizationV7> campusOrganizationsV7List = campusOrganizationCompositeService.list(params)
         assertNotNull campusOrganizationsV7List
     }
 
@@ -52,7 +52,7 @@ class CampusOrganizationsCompositeServiceIntegrationTests extends BaseIntegratio
         //Required Properties are id and name
         Map params = [:]
         setAcceptHeader("application/vnd.hedtech.integration.v7+json")
-        List<CampusOrganizationsV7> campusOrganizationsV7List = campusOrganizationsCompositeService.list(params)
+        List<CampusOrganizationV7> campusOrganizationsV7List = campusOrganizationCompositeService.list(params)
         assertNotNull campusOrganizationsV7List
 
         campusOrganizationsV7List.each { campusOrganizationsV7 ->
@@ -65,12 +65,12 @@ class CampusOrganizationsCompositeServiceIntegrationTests extends BaseIntegratio
     @Test
     void testValidGet_v7() {
         setAcceptHeader("application/vnd.hedtech.integration.v7+json")
-        CampusOrganizationsV7 campusOrganizationsV7_stuAct = campusOrganizationsCompositeService.get(o_success_guid_1.guid)
+        CampusOrganizationV7 campusOrganizationsV7_stuAct = campusOrganizationCompositeService.get(o_success_guid_1.guid)
         assertNotNull campusOrganizationsV7_stuAct
         assertNotNull campusOrganizationsV7_stuAct.guid
         assertNotNull campusOrganizationsV7_stuAct.name
 
-        CampusOrganizationsV7 campusOrganizationsV7_comType = campusOrganizationsCompositeService.get(o_success_guid_2.guid)
+        CampusOrganizationV7 campusOrganizationsV7_comType = campusOrganizationCompositeService.get(o_success_guid_2.guid)
         assertNotNull campusOrganizationsV7_comType
         assertNotNull campusOrganizationsV7_comType.guid
         assertNotNull campusOrganizationsV7_comType.name
@@ -81,7 +81,7 @@ class CampusOrganizationsCompositeServiceIntegrationTests extends BaseIntegratio
     void testGet_NotFound() {
         setAcceptHeader("application/vnd.hedtech.integration.v7+json")
         try {
-            campusOrganizationsCompositeService.get("invalid-guid")
+            campusOrganizationCompositeService.get("invalid-guid")
         } catch (ApplicationException ae) {
             assertApplicationException ae, "NotFoundException"
         }

@@ -77,6 +77,6 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.ledger.GeneralFeedShadow" />
         <mapping class="net.hedtech.banner.general.overall.AddressView" />
         <mapping class="net.hedtech.banner.general.overall.AddressGeographicAreasView" />
-        <mapping class="net.hedtech.banner.general.overall.CampusOrganizationsView" />
+        <mapping class="net.hedtech.banner.general.overall.CampusOrganizationView" />
     </session-factory>
 </hibernate-configuration>
