@@ -56,9 +56,9 @@ class CampusOrganizationCompositeService extends LdmService {
     def get(String guid) {
         String acceptVersion = getAcceptVersion(VERSIONS)
 
-        CampusOrganizationView campusOrganizationsView = campusOrganizationViewService.get(guid?.trim()?.toLowerCase())
+        CampusOrganizationView campusOrganizationsView = campusOrganizationViewService.fetchByGuid(guid?.trim()?.toLowerCase())
         if (!campusOrganizationsView) {
-            throw new ApplicationException(this.class.simpleName, new NotFoundException())
+            throw new ApplicationException("CampusOrganization", new NotFoundException())
         }
 
         return createCampusOrganizationDataModels([campusOrganizationsView])[0]
