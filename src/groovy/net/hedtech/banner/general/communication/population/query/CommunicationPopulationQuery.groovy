@@ -125,7 +125,7 @@ class CommunicationPopulationQuery implements Serializable {
      * VALID_IND: Indicator showing if the SQL statement is syntactically valid(Y or N).
      */
     @Type(type = "yes_no")
-    @Column(name = "GCBQURY_VALID_IND")
+    @Column(name = "GCBQURY_CHANGED_IND")
     Boolean changesPending = false
 
     @Column(name = "GCBQURY_TYPE")
