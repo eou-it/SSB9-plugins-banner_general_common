@@ -45,6 +45,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonAddressService personAddressService
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
+    PersonRaceService personRaceService
+    RaceCompositeService raceCompositeService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -265,6 +267,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
         fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
         fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
+        fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
 
         fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
     }
@@ -327,6 +330,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (personEmailList) {
             dataMapForPerson << ["personEmails": personEmailList]
             dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": dataMap.bannerEmailTypeToHedmEmailTypeMap]
+        }
+
+        // races
+        List<PersonRace> personRaces = dataMap.pidmToRacesMap.get(personIdentificationNameCurrent.pidm)
+        if (personRaces) {
+            dataMapForPerson << ["personRaces": personRaces]
+            dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
         }
 
         prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
@@ -468,6 +478,20 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // Put in Map
         dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
         dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
+    }
+
+
+    private void fetchPersonsRaceDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        // Get GORPRAC records for persons
+        Map pidmToRacesMap = getPidmToRacesMap()
+
+        // Get GUID for each race
+        Set<String> raceCodes = pidmToRacesMap?.values().race.flatten() as Set
+        Map raceCodeToGuidMap = raceCompositeService.getRaceCodeToGuidMap(raceCodes)
+
+        // Put in Map
+        dataMap.put("pidmToRacesMap", pidmToRacesMap)
+        dataMap.put("raceCodeToGuidMap", raceCodeToGuidMap)
     }
 
 
@@ -665,6 +689,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
         return pidmToEmailsMap
+    }
+
+
+    private def getPidmToRacesMap(Collection<Integer> pidms) {
+        def pidmToRacesMap = [:]
+        if (pidms) {
+            log.debug "Getting GV_GORPRAC records for ${pidms?.size()} PIDMs..."
+            List<PersonRace> entities = personRaceService.fetchRaceByPidmList(pidms)
+            log.debug "Got ${entities?.size()} GV_GORPRAC records"
+            entities?.each {
+                List<PersonRace> personRaces = []
+                if (pidmToRacesMap.containsKey(it.pidm)) {
+                    personRaces = pidmToRacesMap.get(it.pidm)
+                } else {
+                    pidmToRacesMap.put(it.pidm, personRaces)
+                }
+                personRaces.add(it)
+            }
+        }
+        return pidmToRacesMap
     }
 
 
