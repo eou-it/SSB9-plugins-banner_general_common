@@ -22,7 +22,14 @@ import javax.persistence.*
                 WHERE queryVersion.query.id = :queryId order by queryVersion.createDate DESC"""),
     @NamedQuery(name = "CommunicationPopulationQueryVersion.fetchById",
             query = """ FROM CommunicationPopulationQueryVersion queryVersion
-            WHERE queryVersion.id = :id""")
+            WHERE queryVersion.id = :id"""),
+    @NamedQuery(name = "CommunicationPopulationQueryVersion.fetchMaxByQueryId",
+                query = """ FROM CommunicationPopulationQueryVersion queryVersion
+            WHERE queryVersion.id = (select max(qv.id) FROM CommunicationPopulationQueryVersion qv
+                                     where qv.query.id = :queryId
+                                     group by qv.query.id)
+            AND queryVersion.query.id = :queryId""")
+
 ])
 class CommunicationPopulationQueryVersion implements Serializable {
 
@@ -104,6 +111,17 @@ class CommunicationPopulationQueryVersion implements Serializable {
         CommunicationPopulationQueryVersion.withSession { session ->
             query = session.getNamedQuery('CommunicationPopulationQueryVersion.fetchById')
                     .setLong('id', id).list()[0]
+
+        }
+        return query
+    }
+
+    public static CommunicationPopulationQueryVersion fetchMaxByQueryId(Long queryId) {
+
+        def query
+        CommunicationPopulationQueryVersion.withSession { session ->
+            query = session.getNamedQuery('CommunicationPopulationQueryVersion.fetchMaxByQueryId')
+                    .setLong('queryId', queryId).list()[0]
 
         }
         return query
