@@ -189,11 +189,19 @@ class RoomCompositeService extends LdmService {
         }
         noOfDays += 1
         if (noOfDays == 1) {
-            validDays.add(days.find { it.number == startDate.getDay().toString() }?.description)
+            int day =  startDate.getDay()
+            if(day == 0){
+                day += 7
+            }
+            validDays.add(days.find { it.number == day.toString() }?.description)
         } else if (noOfDays <= 7) {
             for (int i = 0; i < noOfDays; i++) {
                 Date calculatedDate = startDate + i
-                validDays.add(days.find { it.number == calculatedDate.getDay().toString() }?.description)
+                int day =  calculatedDate.getDay()
+                if(day == 0){
+                    day += 7
+                }
+                validDays.add(days.find { it.number == day.toString() }?.description)
             }
         } else if (noOfDays > 7) {
             validDays = days.description
@@ -203,7 +211,6 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("invalid.recurrence.byDay", []))
         }
     }
-
 
     private void validateOccupancies(Map params) {
         if (!params.occupancies) {
