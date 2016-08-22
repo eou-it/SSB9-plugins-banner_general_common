@@ -45,10 +45,17 @@ class CountryV6 {
 
 
     private String getPostalCodeForAddress(AddressView addressView, String iso3CountryCode) {
-        if (isValueMatchesPattern(getPostalCodePattern(iso3CountryCode), addressView.countryPostalCode)) {
-            return addressView.countryPostalCode
+        String pattern = getPostalCodePattern(iso3CountryCode)
+        String postalCode = null
+        if(pattern){
+            if (isValueMatchesPattern(pattern, addressView.countryPostalCode)) {
+                postalCode = addressView.countryPostalCode
+            }
+        } else {
+            //pattern will be null for generic countries and validation not required
+            postalCode = addressView.countryPostalCode
         }
-        return null
+        return postalCode
     }
 
     private boolean isValueMatchesPattern(String patternStr, String value) {
@@ -63,8 +70,9 @@ class CountryV6 {
 
 
     private String getPostalCodePattern(String iso3CountryCode) {
-        String pattern
-        HedmCountry hedmCountry = HedmCountry.valueOf(iso3CountryCode)
+        // NULL if Generic Country
+        String pattern = null
+        HedmCountry hedmCountry = HedmCountry.getByString(iso3CountryCode)
         if (hedmCountry) {
             pattern = hedmCountry.postalCodePattern
         }
@@ -73,8 +81,9 @@ class CountryV6 {
 
 
     private String getPostalTitleForAddress(String iso3CountryCode) {
+        // NULL if Generic Country
         String addrTitle = null
-        HedmCountry hedmCountry = HedmCountry.valueOf(iso3CountryCode)
+        HedmCountry hedmCountry = HedmCountry.getByString(iso3CountryCode)
         if (hedmCountry) {
             addrTitle = hedmCountry.postalTitle
         }

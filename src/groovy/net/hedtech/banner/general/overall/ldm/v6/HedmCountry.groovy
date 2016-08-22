@@ -31,4 +31,18 @@ enum HedmCountry {
         return postalCodePattern
     }
 
+
+    public static HedmCountry getByString(String value) {
+        if (value) {
+            Iterator itr = HedmCountry.values().iterator()
+            while (itr.hasNext()) {
+                HedmCountry hedmCountry = itr.next()
+                if (hedmCountry.toString().equals(value)) {
+                    return hedmCountry
+                }
+            }
+        }
+        return null
+    }
+
 }
