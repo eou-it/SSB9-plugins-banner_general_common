@@ -146,9 +146,11 @@ class AddressCompositeService extends LdmService {
     AddressV6 createAddressDataModelV6(AddressView addressView, List<String> geographicAreasGUIDs, String iso3CountryCode,
                                        String defaultCountryTitle, String hedmAddressType) {
         AddressV6 addressV6 = new AddressV6(addressView, iso3CountryCode, defaultCountryTitle, hedmAddressType)
-        addressV6.geographicAreas = []
-        geographicAreasGUIDs?.each { guid ->
-            addressV6.geographicAreas << ["id": guid]
+        if(geographicAreasGUIDs){
+            addressV6.geographicAreas = []
+            geographicAreasGUIDs.each { guid ->
+                addressV6.geographicAreas << ["id": guid]
+            }
         }
         return addressV6
     }
