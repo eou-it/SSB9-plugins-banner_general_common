@@ -22,8 +22,8 @@ import javax.persistence.Table
 @ToString(includeNames = true, includeFields = true)
 
 @NamedQueries(value = [
-    @NamedQuery(name = "AddressGeographicAreasView.fetchAllByPidm",
-            query = """FROM AddressGeographicAreasView a
+        @NamedQuery(name = "AddressGeographicAreasView.fetchAllByPidmOrCodeInList",
+                query = """FROM AddressGeographicAreasView a
                          WHERE a.pidmOrCode IN (:pidms)""")
 ])
 
@@ -33,44 +33,32 @@ class AddressGeographicAreasView {
      * GUID of an Address Geographic Areas
      */
     @Id
-    @Column(name="GEOGRAPHIC_AREA_GUID")
+    @Column(name = "GEOGRAPHIC_AREA_GUID")
     String id
 
     /**
      * PIDM or Code of person or non-person
      */
-    @Column(name="PIDM_OR_CODE")
+    @Column(name = "PIDM_OR_CODE")
     String pidmOrCode
 
     /**
      * Address type of SPRADDR row the Region/Division is defined for.
      */
-    @Column(name="ATYP_CODE")
-    String atypCode
+    @Column(name = "ATYP_CODE")
+    String addressAtypCode
 
     /**
      * Sequence number of SPRADDR row the Region/Division is defined for.
      */
-    @Column(name="ADDR_SEQNO")
+    @Column(name = "ADDR_SEQNO")
     String addressSequenceNumber
 
     /**
      * Source details of the Geographic Areas.
      * Like, source is from SPRADDR or SOBSBGI
      */
-    @Column(name="GEOGRAPHIC_AREA_SOURCE")
+    @Column(name = "GEOGRAPHIC_AREA_SOURCE")
     String geographicAreasSource
-
-
-    static List<AddressGeographicAreasView> fetchAllByPidm(List pidms) {
-        List result = []
-        if ( pidms && (pidms.size() > 0) ) {
-            AddressGeographicAreasView.withSession { session ->
-                result = session.getNamedQuery('AddressGeographicAreasView.fetchAllByPidm')
-                        .setParameterList('pidms', pidms).list()
-            }
-        }
-        return result
-    }
 
 }

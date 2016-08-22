@@ -14,6 +14,11 @@ import javax.persistence.*
 @Table(name = "SVQ_ADDR_GUID_DTLS")
 @EqualsAndHashCode(includeFields = true)
 @ToString(includeNames = true, includeFields = true)
+@NamedQueries(value = [
+        @NamedQuery(name = "AddressView.fetchByGuid",
+                query = """FROM AddressView a
+                    where a.id = :guid""")
+])
 
 class AddressView implements Serializable {
 

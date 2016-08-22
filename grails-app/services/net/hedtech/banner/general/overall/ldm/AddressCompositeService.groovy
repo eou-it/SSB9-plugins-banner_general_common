@@ -8,6 +8,7 @@ import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.AddressGeographicAreasView
+import net.hedtech.banner.general.overall.AddressGeographicAreasViewService
 import net.hedtech.banner.general.overall.AddressViewService
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ldm.v6.AddressV6
@@ -27,34 +28,7 @@ class AddressCompositeService extends LdmService {
     AddressViewService addressViewService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
-
-    /**
-     * GET /api/addresses/<guid>
-     *
-     * @param guid
-     * @return
-     */
-    @Transactional(readOnly = true)
-    def get(String guid) {
-        String acceptVersion = getAcceptVersion(VERSIONS)
-
-        AddressView addressView
-        addressView = AddressView.get(guid)
-        if (!addressView) {
-            throw new ApplicationException("address", new NotFoundException())
-        }
-        createAddressDataModels([addressView]).get(0)
-    }
-
-    /**
-     * GET /api/addresses
-     *
-     * @return
-     */
-    @Transactional(readOnly = true)
-    Long count(Map params) {
-        return AddressView.count()
-    }
+    AddressGeographicAreasViewService addressGeographicAreasViewService
 
     /**
      * GET /api/addresses
@@ -72,33 +46,45 @@ class AddressCompositeService extends LdmService {
         return createAddressDataModels(addressesView)
     }
 
+    /**
+     * GET /api/addresses
+     *
+     * @return
+     */
+    @Transactional(readOnly = true)
+    Long count(Map params) {
+        return AddressView.count()
+    }
+
+    /**
+     * GET /api/addresses/<guid>
+     *
+     * @param guid
+     * @return
+     */
+    @Transactional(readOnly = true)
+    def get(String guid) {
+        String acceptVersion = getAcceptVersion(VERSIONS)
+
+        AddressView addressView
+        addressView = addressViewService.fetchByGuid(guid?.trim()?.toString())
+        if (!addressView) {
+            throw new ApplicationException("address", new NotFoundException())
+        }
+        createAddressDataModels([addressView]).get(0)
+    }
+
+
     private List<AddressV6> createAddressDataModels(List<AddressView> addressesView) {
         boolean institutionUsingISO2CountryCodes = integrationConfigurationService.isInstitutionUsingISO2CountryCodes()
         String defaultISO3CountryCode = integrationConfigurationService.getDefaultISO3CountryCodeForAddress(institutionUsingISO2CountryCodes)
         String defaultCountryTitle = getDefaultCountryTitle()
 
-        List pidmsOrCodes = []
-        addressesView.collect { address ->
-            if (!address.sourceTable.equals(COLLEGE_ADDRESS)) {
-                pidmsOrCodes << address.pidmOrCode
-            }
-        }
+        List pidmsOrCodes = preparePidmOrCodeList(addressesView)
 
-        List<AddressGeographicAreasView> geographicAreasView
-        if (pidmsOrCodes?.size() > 0) {
-            geographicAreasView = AddressGeographicAreasView.fetchAllByPidm(pidmsOrCodes)
-        }
+        List<AddressGeographicAreasView> geographicAreasView = getAddressGeographicAreasToMap(pidmsOrCodes)
 
-        Map geographicAreasGUID = [:]
-        geographicAreasView.each { geographicArea ->
-            String geoAreaKey = geographicArea.geographicAreasSource + geographicArea.pidmOrCode + geographicArea.atypCode + geographicArea.addressSequenceNumber
-            List<String> guids = geographicAreasGUID.get(geoAreaKey)
-            if (guids) {
-                guids << geographicArea.id
-            } else {
-                geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
-            }
-        }
+        Map geographicAreasGUID = constructGeographicAreasMap(geographicAreasView)
 
         List<AddressV6> addresses = []
         addressesView.each { address ->
@@ -106,6 +92,38 @@ class AddressCompositeService extends LdmService {
             addresses << createAddressDataModelV6(address, geographicAreasGUID.get(addressKey), institutionUsingISO2CountryCodes, defaultISO3CountryCode, defaultCountryTitle, null)
         }
         return addresses
+    }
+
+    private Map constructGeographicAreasMap(List<AddressGeographicAreasView> geographicAreasView) {
+        Map geographicAreasGUID = [:]
+        geographicAreasView.each { geographicArea ->
+            String geoAreaKey = geographicArea.geographicAreasSource + geographicArea.pidmOrCode + geographicArea.addressAtypCode + geographicArea.addressSequenceNumber
+            List<String> guids = geographicAreasGUID.get(geoAreaKey)
+            if (guids) {
+                guids << geographicArea.id
+            } else {
+                geographicAreasGUID.put(geoAreaKey, [geographicArea.id])
+            }
+        }
+        geographicAreasGUID
+    }
+
+    private List<AddressGeographicAreasView> getAddressGeographicAreasToMap(List pidmsOrCodes) {
+        List<AddressGeographicAreasView> geographicAreasView
+        if (pidmsOrCodes) {
+            geographicAreasView = addressGeographicAreasViewService.fetchAllByPidmOrCodeInList(pidmsOrCodes)
+        }
+        geographicAreasView
+    }
+
+    private List preparePidmOrCodeList(List<AddressView> addressesView) {
+        List pidmsOrCodes = []
+        addressesView.collect { address ->
+            if (!address.sourceTable.equals(COLLEGE_ADDRESS)) {
+                pidmsOrCodes << address.pidmOrCode
+            }
+        }
+        pidmsOrCodes
     }
 
 
