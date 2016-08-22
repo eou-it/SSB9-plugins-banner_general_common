@@ -92,15 +92,11 @@ class CommunicationInteractionView implements Serializable {
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
-        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+        def searchName = filterData?.params?.name
 
         def queryCriteria = CommunicationInteractionView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            or {
-                ilike("lastName", searchName)
-                ilike("firstName", searchName)
-                ilike("bannerId", searchName)
-            }
+                eq("bannerId", searchName)
             order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
         }
         return results
