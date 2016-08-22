@@ -34,7 +34,7 @@ class CommunicationCommonUtility {
      * @param sqlstring
      * @return true if disallowed words are found false otherwise
      */
-    public static Boolean sqlStatementNotAllowed(String sqlstring, Boolean multiSelectColumnAllowed = true) {
+    public static Boolean sqlStatementNotAllowed(String sqlstring, Boolean isDataFieldQuery = true) {
 
         //replace disallowed words with this for testing
         def stringToReplace = "**ZZZZ**"
@@ -52,18 +52,23 @@ class CommunicationCommonUtility {
 
         //make sure the sql statement only selects one value if requested in the params
 
-        if (!multiSelectColumnAllowed) {
-            def z = 0
-            Matcher matcher = multipattern.matcher(sqlstring.toUpperCase())
-            while (matcher.find() && z == 0) {
+        if (!isDataFieldQuery) {
+            // Must be a population based query
+            String upperCase = sqlstring.toUpperCase()
+            Matcher matcher = multipattern.matcher( upperCase )
+            if (matcher.find()) {
                 if (matcher.group(1).contains(",")) {
                     return true
                 }
                 if (!matcher.group(1).contains("PIDM")) {
                     return true
                 }
-                z = 1
+                if (upperCase.matches( "(.*)FROM(.*)ORDER\\s+BY(.*)" )) {
+                    return true
+                }
             }
+
+
         };
 
         //return true if disallowed pattern was found, false if string was clean

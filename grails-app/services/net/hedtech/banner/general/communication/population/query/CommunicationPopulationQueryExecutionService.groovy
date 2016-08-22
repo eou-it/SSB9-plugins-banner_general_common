@@ -25,19 +25,19 @@ class CommunicationPopulationQueryExecutionService {
     def Pattern multipattern = Pattern.compile("SELECT(.*?)FROM");
 
 
-    def CommunicationPopulationQueryParseResult parse(Long populationQueryId) {
-
-        //throw exception if the banner security for query execution is not setup for this user
-        if (!CommunicationCommonUtility.userCanExecuteQuery()) {
-            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
-        }
-
-        def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
-        def populationQuery = communicationPopulationQueryService.get(populationQueryId)
-
-        populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.queryString, false)
-        return populationQueryParseResult
-    }
+//    def CommunicationPopulationQueryParseResult parse(Long populationQueryId) {
+//
+//        //throw exception if the banner security for query execution is not setup for this user
+//        if (!CommunicationCommonUtility.userCanExecuteQuery()) {
+//            throw new ApplicationException(CommunicationPopulationQuery, "@@r1:operation.not.authorized@@")
+//        }
+//
+//        def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
+//        def populationQuery = communicationPopulationQueryService.get(populationQueryId)
+//
+//        populationQueryParseResult = communicationPopulationQueryStatementParseService.parse(populationQuery.queryString, false)
+//        return populationQueryParseResult
+//    }
 
 
     /**

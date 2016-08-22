@@ -48,40 +48,40 @@ class CommunicationPopulationQueryExecutionServiceIntegrationTests extends BaseI
     }
 
 
-    @Test
-    void testValidParse() {
-        def populationQuery = newValidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+//    @Test
+//    void testValidParse() {
+//        def populationQuery = newValidPopulationQuery()
+//        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+//
+//        def populationQueryParseResult = communicationPopulationQueryExecutionService.parse(savedPopulationQuery.id)
+//        assertEquals("Y", populationQueryParseResult.status)
+//        assertNull(populationQueryParseResult.message)
+//        assertNotNull(populationQueryParseResult.cost)
+//        assertNotNull(populationQueryParseResult.cardinality)
+//        /* Make sure the populationQuery got flagged as good */
+//        CommunicationPopulationQuery validatedPopulationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery( savedPopulationQuery.id )
+//        communicationPopulationQueryCompositeService.publishPopulationQuery( validatedPopulationQuery )
+//    }
 
-        def populationQueryParseResult = communicationPopulationQueryExecutionService.parse(savedPopulationQuery.id)
-        assertEquals("Y", populationQueryParseResult.status)
-        assertNull(populationQueryParseResult.message)
-        assertNotNull(populationQueryParseResult.cost)
-        assertNotNull(populationQueryParseResult.cardinality)
-        /* Make sure the populationQuery got flagged as good */
-        CommunicationPopulationQuery validatedPopulationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery( savedPopulationQuery.id )
-        communicationPopulationQueryCompositeService.publishPopulationQuery( validatedPopulationQuery )
-    }
 
-
-    @Test
-    void testInValidParse() {
-        def populationQuery = newInvalidPopulationQuery()
-        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-        def populationQueryParseResult = communicationPopulationQueryExecutionService.parse(savedPopulationQuery.id)
-        assertEquals("N", populationQueryParseResult.status)
-        assertNotNull(populationQueryParseResult.message)
-        assertEquals(0, populationQueryParseResult.cost)
-        assertEquals(0, populationQueryParseResult.cardinality)
-        /* Make sure the populationQuery got flagged as bad */
-        def validatedPopulationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery(savedPopulationQuery.id)
-        try {
-            communicationPopulationQueryCompositeService.publishPopulationQuery( validatedPopulationQuery )
-            fail( "Expected application exception with queryInvalidCall")
-        } catch (ApplicationException e) {
-            assertEquals( "@@r1:queryInvalidCall@@", e.getMessage() )
-        }
-    }
+//    @Test
+//    void testInValidParse() {
+//        def populationQuery = newInvalidPopulationQuery()
+//        def savedPopulationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+//        def populationQueryParseResult = communicationPopulationQueryExecutionService.parse(savedPopulationQuery.id)
+//        assertEquals("N", populationQueryParseResult.status)
+//        assertNotNull(populationQueryParseResult.message)
+//        assertEquals(0, populationQueryParseResult.cost)
+//        assertEquals(0, populationQueryParseResult.cardinality)
+//        /* Make sure the populationQuery got flagged as bad */
+//        def validatedPopulationQuery = communicationPopulationQueryCompositeService.fetchPopulationQuery(savedPopulationQuery.id)
+//        try {
+//            communicationPopulationQueryCompositeService.publishPopulationQuery( validatedPopulationQuery )
+//            fail( "Expected application exception with queryInvalidCall")
+//        } catch (ApplicationException e) {
+//            assertEquals( "@@r1:queryInvalidCall@@", e.getMessage() )
+//        }
+//    }
 
 
     @Test

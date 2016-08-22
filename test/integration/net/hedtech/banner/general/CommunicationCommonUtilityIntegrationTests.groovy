@@ -33,6 +33,25 @@ class CommunicationCommonUtilityIntegrationTests extends BaseIntegrationTestCase
         assertFalse(result)
     }
 
+    @Test
+    void testOrderBySql() {
+        String sqlStatement = "select spriden_pidm from spriden where spriden_change_ind is null AND spriden_id LIKE 'A0000091%'"
+        String orderByClause = " Order By spriden_pidm"
+
+        final boolean forDataField = true
+        final boolean forPopulationQuery = false
+
+        assertFalse( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement ) )
+        assertFalse( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement + orderByClause ) )
+        assertFalse( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement + orderByClause, forDataField ) )
+        assertTrue( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement + orderByClause, forPopulationQuery ) )
+
+        String goofyOrderByClause = "    ORDER            BY  spriden_pidm"
+        assertFalse( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement + goofyOrderByClause ) )
+        assertFalse( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement + goofyOrderByClause, forDataField ) )
+        assertTrue( CommunicationCommonUtility.sqlStatementNotAllowed( sqlStatement + goofyOrderByClause, forPopulationQuery ) )
+    }
+
 
     @Test
     void testInsertSql() {
