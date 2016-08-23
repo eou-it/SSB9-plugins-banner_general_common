@@ -10,7 +10,7 @@ import org.apache.log4j.Logger
  */
 class CommunicationLetterPageSettings {
     def log = Logger.getLogger(this.getClass())
-    private Map queryMap = [ unitOfMeasure: "${CommunicationLetterUnitOfMeasure.INCH.toString()}", topMargin: "1.0", leftMargin: "1.0", bottomMargin: "1.0", rightMargin: "1.0", pageSize: "${CommunicationLetterPageSize.LETTER.toString()}" ]
+    private Map queryMap = createDefaultQueryMap()
 
     public String toJson() {
         return JsonOutput.toJson( queryMap )
@@ -26,6 +26,8 @@ class CommunicationLetterPageSettings {
             } catch (groovy.json.JsonException e) {
                 throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, "badSyntax" )
             }
+        } else {
+            parsedMap = createDefaultQueryMap()
         }
 
         setUnitOfMeasure( parsedMap?.unitOfMeasure )
@@ -134,5 +136,9 @@ class CommunicationLetterPageSettings {
         } catch (NumberFormatException e ) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, invalidResourceId )
         }
+    }
+
+    private static LinkedHashMap<String, String> createDefaultQueryMap() {
+        return [unitOfMeasure: "${CommunicationLetterUnitOfMeasure.INCH.toString()}", topMargin: "1.0", leftMargin: "1.0", bottomMargin: "1.0", rightMargin: "1.0", pageSize: "${CommunicationLetterPageSize.LETTER.toString()}"]
     }
 }
