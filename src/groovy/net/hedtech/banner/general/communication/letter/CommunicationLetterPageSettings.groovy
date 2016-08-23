@@ -65,7 +65,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setTopMargin( String s ) {
-        queryMap.topMargin = (s == null) ? "1.0" : s
+        queryMap.topMargin = s
     }
 
     public String getLeftMargin() {
@@ -73,7 +73,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setLeftMargin( String s ) {
-        queryMap.leftMargin = (s == null) ? "1.0" : s
+        queryMap.leftMargin = s
     }
 
     public String getBottomMargin() {
@@ -81,7 +81,7 @@ class CommunicationLetterPageSettings {
     }
 
     public void setBottomMargin( String s ) {
-        queryMap.bottomMargin = (s == null) ? "1.0" : s
+        queryMap.bottomMargin = s
     }
 
     public String getRightMargin() {
@@ -89,15 +89,24 @@ class CommunicationLetterPageSettings {
     }
 
     public void setRightMargin( String s ) {
-        queryMap.rightMargin = (s == null) ? "1.0" : s
+        queryMap.rightMargin = s
     }
 
     public void validate() {
         validateNotMissing( getUnitOfMeasure(), "missingUnitOfMeasure" )
+
         validateNotMissing( getTopMargin(), "missingTopMargin" )
+        validateNumberFormat( getTopMargin(), "invalidTopMargin" )
+
         validateNotMissing( getLeftMargin(), "missingLeftMargin" )
+        validateNumberFormat( getLeftMargin(), "invalidLeftMargin" )
+
         validateNotMissing( getBottomMargin(), "missingBottomMargin" )
+        validateNumberFormat( getBottomMargin(), "invalidBottomMargin" )
+
         validateNotMissing( getRightMargin(), "missingRightMargin" )
+        validateNumberFormat( getRightMargin(), "invalidRightMargin" )
+
         validateNotMissing( getPageSize(), "missingPageSize" )
 
         try {
@@ -116,6 +125,14 @@ class CommunicationLetterPageSettings {
     private void validateNotMissing( String keyValue, String missingResourceId ) {
         if (keyValue == null || keyValue.trim().length() == 0) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, missingResourceId )
+        }
+    }
+
+    private void validateNumberFormat( String value, String invalidResourceId ) {
+        try {
+            Float.parseFloat( value )
+        } catch (NumberFormatException e ) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, invalidResourceId )
         }
     }
 }

@@ -39,4 +39,14 @@ class CommunicationLetterTemplateService extends CommunicationTemplateService {
         }
     }
 
+
+    @Override
+    protected void validateTemplate( CommunicationTemplate template ) {
+        super.validateTemplate( template )
+        CommunicationLetterTemplate letterTemplate = (CommunicationLetterTemplate) template
+        CommunicationLetterPageSettings letterPageSettings = new CommunicationLetterPageSettings()
+        letterPageSettings.setStyle( letterTemplate.style )
+        letterPageSettings.validate()
+    }
+
 }

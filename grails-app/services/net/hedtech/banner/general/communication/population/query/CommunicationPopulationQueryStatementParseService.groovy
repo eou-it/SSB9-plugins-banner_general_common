@@ -23,7 +23,7 @@ class CommunicationPopulationQueryStatementParseService {
     def sessionFactory
 
 
-    def CommunicationPopulationQueryParseResult parse(String statement, Boolean multiSelectColumnAllowed=true) {
+    def CommunicationPopulationQueryParseResult parse(String statement, Boolean isDataFieldQuery=true) {
         def conn = sessionFactory.getCurrentSession().connection()
         def sql = new Sql(conn)
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
@@ -38,8 +38,8 @@ class CommunicationPopulationQueryStatementParseService {
             //test for sql injection and throw exception if found
             // TODO: Remove the if statement by providing seperate methods for communication field and
             // population query parsing.
-            if (CommunicationCommonUtility.sqlStatementNotAllowed(statement,multiSelectColumnAllowed )) {
-                if (multiSelectColumnAllowed)
+            if (CommunicationCommonUtility.sqlStatementNotAllowed( statement, isDataFieldQuery )) {
+                if (isDataFieldQuery)
                     throw new ApplicationException(CommunicationField, "@@r1:sqlStatementInvalidCall@@")
                 else {
                     // TODO: Should be refactored to return the parse result with a status of N

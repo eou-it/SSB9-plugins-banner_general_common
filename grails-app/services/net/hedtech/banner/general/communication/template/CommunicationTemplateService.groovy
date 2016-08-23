@@ -89,7 +89,7 @@ class CommunicationTemplateService extends ServiceBase {
     protected void validatePublished( CommunicationTemplate template ) {
     }
 
-    private void stampAndValidate( template ) {
+    protected void stampAndValidate( template ) {
         stamp( template )
         validateTemplate( template )
 
@@ -102,11 +102,11 @@ class CommunicationTemplateService extends ServiceBase {
         }
     }
 
-    private void stamp( template ) {
+    protected void stamp( template ) {
         template.validFrom = template.validFrom ?: new Date()
     }
 
-    private void validateTemplate( CommunicationTemplate template ) {
+    protected void validateTemplate( CommunicationTemplate template ) {
         if (template.getName() == null || template.getName().size() == 0 ) throw new ApplicationException( CommunicationTemplate, "@@r1:nameCannotBeNull@@" )
 
         if (template.folder == null) throw new ApplicationException( CommunicationTemplate, "@@r1:folderNameCannotBeNull@@" )
