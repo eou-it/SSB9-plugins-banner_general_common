@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class PersonCredentialCompositeService extends LdmService {
 
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
+
     /**
      * GET /api/persons-credentials
      *
@@ -30,6 +32,8 @@ class PersonCredentialCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def get(id) {
         log.trace "getById:Begin:$id"
+        String acceptVersion = getAcceptVersion(VERSIONS)
+
         def persons = [:]
         Object[] personDetail = fetchPersons(["guid": id])
         if (!personDetail) {
@@ -47,6 +51,8 @@ class PersonCredentialCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def list(Map params) {
         log.trace "list:Begin:$params"
+        String acceptVersion = getAcceptVersion(VERSIONS)
+
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         List<Object[]> personDetailsList = fetchPersons(params)
         return createDecorators(personDetailsList)
