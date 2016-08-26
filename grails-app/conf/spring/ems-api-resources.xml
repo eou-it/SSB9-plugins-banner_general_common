@@ -819,6 +819,41 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-personguardians-v7" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-guardians</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>7</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-guardians/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.PersonGuardian.SORFOLK</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="ar-personcontacts-v7" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-contacts</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>7</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-contacts/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>HEDM.PersonContact.SPREMRG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -867,6 +902,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-campus-involvement-roles"/>
                 <ref bean="ar-campus-organization-types"/>
                 <ref bean="ar-campus-organizations"/>
+                <ref bean="ar-personguardians-v7"/>
+                <ref bean="ar-personcontacts-v7"/>
             </list>
         </property>
     </bean>
@@ -919,6 +956,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-campus-involvement-roles"/>
                 <ref bean="ar-campus-organization-types"/>
                 <ref bean="ar-campus-organizations"/>
+                <ref bean="ar-personguardians-v7"/>
+                <ref bean="ar-personcontacts-v7"/>
             </list>
         </property>
     </bean>
