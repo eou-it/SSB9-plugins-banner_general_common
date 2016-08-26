@@ -7,6 +7,7 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -60,6 +61,12 @@ class CommunicationGroupSendItemView implements Serializable {
 
     @Column(name="ITEM_STATUS")
     String currentExecutionState;
+
+    /**
+     * The error code
+     */
+    @Column(name = "error_code")
+    CommunicationErrorCode errorCode
 
     @Column(name="START_DATE")
     @Temporal(TemporalType.TIMESTAMP)
