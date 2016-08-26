@@ -121,6 +121,7 @@ ssbEnabled = true
 ssbOracleUsersProxied = true
 
 communication {
+    weblogicDeployment = false
     engine {
         isEnabled = true
         groupSendEngine {
