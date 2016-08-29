@@ -292,4 +292,28 @@ class SectionMeetingTimeService extends ServiceBase {
     }
 
 
+    def fetchAllSectionMeetingTimeByCRNAndTermCode(Collection<String> crns, Collection<String> termCodes ) {
+        String queryString = """ FROM GlobalUniqueIdentifier a, SectionMeetingTime c
+                            WHERE   c.term in :termCodes
+                            AND     c.courseReferenceNumber in :crns
+                            AND     a.ldmName = 'instructional-events'
+                            AND     a.domainId = c.id
+                            """
+
+        def queryResult = SectionMeetingTime.withSession { session ->
+            def query = session.createQuery(queryString)
+            query.setParameterList('termCodes', termCodes)
+            query.setParameterList('crns', crns)
+
+            return query.list()
+        }
+        List entities = []
+        queryResult.each {
+            Map entitiesMap = [sectionMeetingTime : it[1], globalUniqueIdentifier : it[0]]
+            entities << entitiesMap
+        }
+
+        return entities
+    }
+
 }

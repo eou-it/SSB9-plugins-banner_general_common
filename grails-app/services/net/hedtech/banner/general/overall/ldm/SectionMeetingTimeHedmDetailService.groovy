@@ -53,7 +53,7 @@ class SectionMeetingTimeHedmDetailService extends ServiceBase {
         throw new ApplicationException(SectionMeetingTimeHedmDetail.class, "unsupported.operation")
     }
 
-    public List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(List guids){
+    public List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(Collection<String> guids){
         List<SectionMeetingTimeHedmDetail> sectionMeetingTimeHedmDetails = []
         sectionMeetingTimeHedmDetails = SectionMeetingTimeHedmDetail.fetchAllByGuidInList(guids)
         return sectionMeetingTimeHedmDetails
