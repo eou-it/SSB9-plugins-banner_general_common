@@ -29,15 +29,15 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         Map map = [:]
 
         def lstBannerId = [] as List
-        lstBannerId.add '613238760'
+        lstBannerId.add 'HOSP0001'
         map.put 'bannerId', lstBannerId
 
         def lstEnterpriseId = [] as List
-        lstEnterpriseId.add '683'
+        lstEnterpriseId.add 'FORTEST'
         map.put 'enterpriseId', lstEnterpriseId
 
         def lstSourcedId = [] as List
-        lstSourcedId.add '252'
+        lstSourcedId.add '2600'
         map.put 'sourcedId', lstSourcedId
 
         def lstLdapUserMapping = [] as List
@@ -53,8 +53,33 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals 5, personList.size()
 
         PersonIdentificationDecorator personIdentificationDecorator = personList.get(0)
+        assertEquals "HOSP0001", personIdentificationDecorator.bannerId
+        assertEquals "GRAILS", personIdentificationDecorator.dataOrigin
+        assertEquals "DSTERLIN", personIdentificationDecorator.enterpriseId
+        assertEquals "Steve", personIdentificationDecorator.firstName
+        assertEquals "Steve A Jorden", personIdentificationDecorator.fullName
+        assertEquals "Elevate0001", personIdentificationDecorator.imsSourcedIdBase.sourcedId
+        assertEquals "Jorden", personIdentificationDecorator.lastName
+        assertEquals "A", personIdentificationDecorator.middleName
+        assertEquals null, personIdentificationDecorator.surnamePrefix
+        assertEquals 'sjorden', personIdentificationDecorator.thirdPartyAccess.externalUser
+        assertEquals null, personIdentificationDecorator.thirdPartyAccess.ldapUserMapping
+
+        personIdentificationDecorator = personList.get(1)
+        assertEquals "GDP000011", personIdentificationDecorator.bannerId
+        assertEquals "GRAILS", personIdentificationDecorator.dataOrigin
+        assertEquals "FORTEST", personIdentificationDecorator.enterpriseId
+        assertEquals "Nissan", personIdentificationDecorator.firstName
+        assertEquals "Nissan Maxima", personIdentificationDecorator.fullName
+        assertEquals "forTest", personIdentificationDecorator.imsSourcedIdBase.sourcedId
+        assertEquals "Maxima", personIdentificationDecorator.lastName
+        assertEquals null, personIdentificationDecorator.middleName
+        assertEquals null, personIdentificationDecorator.surnamePrefix
+        assertEquals "nmaxima", personIdentificationDecorator.thirdPartyAccess.externalUser
+        assertEquals "systest32", personIdentificationDecorator.thirdPartyAccess.ldapUserMapping
+
+        personIdentificationDecorator = personList.get(2)
         assertEquals "613238760", personIdentificationDecorator.bannerId
-        assertEquals "Banner", personIdentificationDecorator.dataOrigin
         assertEquals "025EB9EF4906F0D0E05018958B283255", personIdentificationDecorator.enterpriseId
         assertEquals "Karen", personIdentificationDecorator.firstName
         assertEquals "Karen S Hevermeyer", personIdentificationDecorator.fullName
@@ -65,35 +90,8 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals null, personIdentificationDecorator.thirdPartyAccess.externalUser
         assertEquals null, personIdentificationDecorator.thirdPartyAccess.ldapUserMapping
 
-        personIdentificationDecorator = personList.get(1)
-        assertEquals "SYS000001", personIdentificationDecorator.bannerId
-        assertEquals "Banner", personIdentificationDecorator.dataOrigin
-        assertEquals "683", personIdentificationDecorator.enterpriseId
-        assertEquals "Terry", personIdentificationDecorator.firstName
-        assertEquals "Terry Akers", personIdentificationDecorator.fullName
-        assertEquals "189", personIdentificationDecorator.imsSourcedIdBase.sourcedId
-        assertEquals "Akers", personIdentificationDecorator.lastName
-        assertEquals null, personIdentificationDecorator.middleName
-        assertEquals null, personIdentificationDecorator.surnamePrefix
-        assertEquals "takers", personIdentificationDecorator.thirdPartyAccess.externalUser
-        assertEquals null, personIdentificationDecorator.thirdPartyAccess.ldapUserMapping
-
-        personIdentificationDecorator = personList.get(2)
-        assertEquals "HP", personIdentificationDecorator.bannerId
-        assertEquals "Banner", personIdentificationDecorator.dataOrigin
-        assertEquals "025EB9EF5CCDF0D0E05018958B283255", personIdentificationDecorator.enterpriseId
-        assertEquals "Harry The Great.............................................", personIdentificationDecorator.firstName
-        assertEquals "Harry The Great............................................. Gotta Love Him ............................................. Potter Super Duper Extra Special Crazy Long Name ...........", personIdentificationDecorator.fullName
-        assertEquals "252", personIdentificationDecorator.imsSourcedIdBase.sourcedId
-        assertEquals "Potter Super Duper Extra Special Crazy Long Name ...........", personIdentificationDecorator.lastName
-        assertEquals "Gotta Love Him .............................................", personIdentificationDecorator.middleName
-        assertEquals null, personIdentificationDecorator.surnamePrefix
-        assertEquals "harry", personIdentificationDecorator.thirdPartyAccess.externalUser
-        assertEquals "HP", personIdentificationDecorator.thirdPartyAccess.ldapUserMapping
-
         personIdentificationDecorator = personList.get(3)
         assertEquals "A00000671", personIdentificationDecorator.bannerId
-        assertEquals null, personIdentificationDecorator.dataOrigin
         assertEquals "2134", personIdentificationDecorator.enterpriseId
         assertEquals "Faculty", personIdentificationDecorator.firstName
         assertEquals "Faculty PCC", personIdentificationDecorator.fullName
@@ -106,7 +104,6 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
 
         personIdentificationDecorator = personList.get(4)
         assertEquals "SJGRIM", personIdentificationDecorator.bannerId
-        assertEquals "Banner", personIdentificationDecorator.dataOrigin
         assertEquals "025EB9EF618DF0D0E05018958B283255", personIdentificationDecorator.enterpriseId
         assertEquals "Warren", personIdentificationDecorator.firstName
         assertEquals "Warren Zevon Grim", personIdentificationDecorator.fullName

@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
@@ -977,7 +977,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                    SYSDATE
                 from spriden
                 where spriden_CHANGE_ind is null
-                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and exists ( select 1 from spraddr where spraddr_pidm = spriden_pidm)
                 and not exists ( select 'x' from glbextr old
                   where old.glbextr_key = to_char(spriden_pidm)
                   and old.glbextr_application = 'STUDENT'
@@ -989,7 +989,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
         assertTrue insertCount > 500
         def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
-        assertEquals insertCount, persextract.size()
+        assertTrue insertCount >= persextract.size()
         def pidmlist = persextract.groupBy { it.pidm }
         // verify the list of pidms is unique
         pidmlist.each {
@@ -1160,7 +1160,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                    SYSDATE
                 from spriden
                 where spriden_CHANGE_ind is null
-                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and exists ( select 1 from spraddr where spraddr_pidm = spriden_pidm)
                 and not exists ( select 'x' from glbextr old
                   where old.glbextr_key = to_char(spriden_pidm)
                   and old.glbextr_application = 'STUDENT'
@@ -1173,7 +1173,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         }
         assertTrue insertCount > 500
         def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
-        assertEquals insertCount, persextract.size()
+
+        assertTrue insertCount >= persextract.size()
 
         // find our test person HOSFE2000
         def cnt = 0
@@ -1184,8 +1185,8 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
                 found = cnt
             }
         }
-        assertTrue found > 1100
-        def offset = found - 1100
+        assertTrue found > 300
+        def offset = found - 300
         // set up params for call
         def persons = []
 

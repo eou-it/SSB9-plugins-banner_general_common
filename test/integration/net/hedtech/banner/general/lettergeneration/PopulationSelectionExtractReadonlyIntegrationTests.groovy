@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.lettergeneration
 
@@ -237,7 +237,7 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
                    SYSDATE
                 from spriden
                 where spriden_CHANGE_ind is null
-                and exists ( select 1 from sfrstcr where sfrstcr_pidm = spriden_pidm)
+                and exists ( select 1 from spraddr where spraddr_pidm = spriden_pidm)
                 and not exists ( select 'x' from glbextr old
                   where old.glbextr_key = to_char(spriden_pidm)
                   and old.glbextr_application = 'STUDENT'
@@ -245,7 +245,7 @@ class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegration
         def insertCount = sql.executeUpdate(idSql)
         assertTrue insertCount > 500
         def persextract = PopulationSelectionExtractReadonly.fetchAllPidmsByApplicationSelectionCreatorIdLastModifiedBy("STUDENT", "HEDMPERFORM", "BANNER", "GRAILS")
-        assertEquals insertCount, persextract.size()
+        assertTrue insertCount >= persextract.size()
         def pidmlist = persextract.groupBy { it.pidm }
         // verify the list of pidms is unique
         pidmlist.each {

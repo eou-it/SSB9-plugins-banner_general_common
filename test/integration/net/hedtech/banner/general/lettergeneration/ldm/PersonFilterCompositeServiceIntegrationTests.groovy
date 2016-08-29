@@ -1,5 +1,5 @@
 /** *****************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.lettergeneration.ldm
 
@@ -49,7 +49,7 @@ class PersonFilterCompositeServiceIntegrationTests extends BaseIntegrationTestCa
         user = "GRAILS_USER"
         selection = "SAT_TEST"
         selection1 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        key = "1001"
+        key = "30000"
     }
 
 

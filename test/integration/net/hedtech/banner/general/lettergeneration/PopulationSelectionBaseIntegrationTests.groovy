@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.lettergeneration
 
@@ -18,7 +18,7 @@ class PopulationSelectionBaseIntegrationTests extends BaseIntegrationTestCase {
     //Test data for creating new domain instance
     //Valid test data (For success tests)
 
-    def i_success_application = "TTTTT"
+    def i_success_application = "GENERAL"
     def i_success_selection = "TTTTT"
     def i_success_creatorId = "TTTTT"
     def i_success_description = "TTTTT"

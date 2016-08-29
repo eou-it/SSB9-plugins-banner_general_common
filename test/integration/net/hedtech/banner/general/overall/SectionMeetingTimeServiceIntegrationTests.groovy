@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -577,7 +577,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
         def ischeduleType = "L"  //Unable to access ScheduleType
         def ifunction = new Function(code: "TTTTT",
                 description: "TTTTT",
-                etypCode: "TTTT")
+                etypCode: "EBRK")
         save ifunction
         def icommittee = CommitteeAndServiceType.findByCode("GRAD")
         def myFormat = 'MM/dd/yyyy'

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -56,62 +56,40 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull directDepositAccount
     }
 
-//  UNCOMMENT ONCE SEED DATA IS IN ORDER - JDC 4/5/16
-//    @Test
-//    void testGetActiveApAccountsWhereOneAccountExists() {
-//        def pidm = PersonUtility.getPerson("MYE000001").pidm
-//        def activeAccounts = directDepositAccountService.getActiveApAccounts(pidm) // One account
-//
-//        // Assert domain values
-//        assertNotNull activeAccounts
-//        assertEquals 1, activeAccounts.size()
-//
-//        def userAccount = activeAccounts[0]
-//
-//        assertNotNull userAccount.id
-//        assertEquals "9876543", userAccount.bankAccountNum
-//        assertEquals "C", userAccount.accountType
-//        assertEquals "A", userAccount.apIndicator
-//        assertEquals "I", userAccount.hrIndicator
-//        assertNotNull userAccount.version
-//        assertNotNull userAccount.lastModifiedBy
-//        assertNotNull userAccount.lastModified
-//    }
+    @Test
+    void testGetActiveApAccountsWhereMultipleAccountsExist() {
+        def pidm = PersonUtility.getPerson("HOSH00018").pidm
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(pidm) // Multiple accounts
 
-//  UNCOMMENT ONCE SEED DATA IS IN ORDER - JDC 4/5/16
-//    @Test
-//    void testGetActiveApAccountsWhereMultipleAccountsExist() {
-//        def activeAccounts = directDepositAccountService.getActiveApAccounts(37859) // Multiple accounts
-//
-//        // Assert domain values
-//        assertNotNull activeAccounts
-//        assertEquals 2, activeAccounts.size()
-//
-//        // First account
-//        activeAccounts = activeAccounts.sort{it.id}
-//        def userAccount = activeAccounts[0]
-//
-//        assertNotNull userAccount.id
-//        assertEquals "9876543", userAccount.bankAccountNum
-//        assertEquals "C", userAccount.accountType
-//        assertEquals "A", userAccount.apIndicator
-//        assertEquals "I", userAccount.hrIndicator
-//        assertNotNull userAccount.version
-//        assertNotNull userAccount.lastModifiedBy
-//        assertNotNull userAccount.lastModified
-//
-//        // Second account
-//        userAccount = activeAccounts[1]
-//
-//        assertNotNull userAccount.id
-//        assertEquals "38167543", userAccount.bankAccountNum
-//        assertEquals "C", userAccount.accountType
-//        assertEquals "A", userAccount.apIndicator
-//        assertEquals "I", userAccount.hrIndicator
-//        assertNotNull userAccount.version
-//        assertNotNull userAccount.lastModifiedBy
-//        assertNotNull userAccount.lastModified
-//    }
+         //Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 2, activeAccounts.size()
+
+        // First account
+        activeAccounts = activeAccounts.sort{it.id}
+        def userAccount = activeAccounts[0]
+
+        assertNotNull userAccount.id
+        assertEquals "9876543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
+
+        // Second account
+        userAccount = activeAccounts[1]
+
+        assertNotNull userAccount.id
+        assertEquals "38167543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+        assertNotNull userAccount.lastModifiedBy
+        assertNotNull userAccount.lastModified
+    }
 
     @Test
     void testGetActiveApAccountsWhereNoAccountsExist() {
@@ -124,7 +102,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveHrAccountsWhereOneAccountExists() {
-        def pidm = 49548
+        def pidm = PersonUtility.getPerson("GDP000003").pidm //49548
         def activeAccounts = directDepositAccountService.getActiveHrAccounts(pidm) // One account
 
         // Assert domain values
@@ -145,7 +123,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveHrAccountsWhereMultipleAccountsExist() {
-        def pidm = 37700;
+        def pidm = PersonUtility.getPerson("GDP000004").pidm //37700;
         def activeAccounts = directDepositAccountService.getActiveHrAccounts(pidm) // Multiple accounts
 
         // Assert domain values
@@ -153,7 +131,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertEquals 2, activeAccounts.size()
 
         // First account
-        activeAccounts = activeAccounts.sort{it.id}
+        activeAccounts = activeAccounts.sort{it.priority}
         def userAccount = activeAccounts[0]
 
         assertNotNull userAccount.id
@@ -205,7 +183,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
         def directDepositAccountMap1 = [
                 id: directDepositAccount1.id,
-                pidm: 37859, //49758,
+                pidm: 95999, //49758,
                 status: "P",
                 documentType: "D",
                 priority: 16,
@@ -226,7 +204,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
         def directDepositAccountMap2 = [
                 id: directDepositAccount2.id,
-                pidm: 37859, //49758,
+                pidm: 95999, //49758,
                 status: "P",
                 documentType: "D",
                 priority: 16,
@@ -251,6 +229,60 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
 
     @Test
+    void testSetupAccountsForDeleteAP() {
+        def directDepositAccount1 = newDirectDepositAccount()
+        directDepositAccount1 = directDepositAccountService.create([domainModel: directDepositAccount1])
+
+        def directDepositAccountMap1 = [
+                id: directDepositAccount1.id,
+                pidm: 95999, //49758,
+                status: "P",
+                documentType: "D",
+                priority: 16,
+                apIndicator: "I",
+                hrIndicator: "A",
+                bankAccountNum: "36948575",
+                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                amount: null,
+                percent: 11.0,
+                accountType: "C",
+                intlAchTransactionIndicator: "N"
+        ]
+
+        def directDepositAccount2 = newDirectDepositAccount()
+        directDepositAccount2.apIndicator = "A"
+        directDepositAccount2.hrIndicator = "I"
+        directDepositAccount2.priority = 17
+        directDepositAccount2.percent = 100
+        directDepositAccount2 = directDepositAccountService.create([domainModel: directDepositAccount2])
+
+        def directDepositAccountMap2 = [
+                id: directDepositAccount2.id,
+                pidm: 95999, //49758,
+                status: "P",
+                documentType: "D",
+                priority: 17,
+                apIndicator: "A",
+                hrIndicator: "I",
+                bankAccountNum: "36948575",
+                bankRoutingInfo: [bankRoutingNum: "234798944"],
+                amount: null,
+                percent: 100.0,
+                accountType: "C",
+                intlAchTransactionIndicator: "N",
+                apDelete: true
+        ]
+
+        def list = []
+        list[0] = directDepositAccountMap2
+
+        def result = directDepositAccountService.setupAccountsForDelete(list)
+
+        assert true, result.toBeDeleted.size() == 1
+        assert 'PR', result.messages[0].activeType
+    }
+
+    @Test
     void testSetupAccountsForDeleteLegacy() {
         def directDepositAccount = newDirectDepositAccount()
         directDepositAccount.apIndicator = 'A'
@@ -258,7 +290,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
         def directDepositAccountMap = [
             id: directDepositAccount.id,
-            pidm: 37859, //49758,
+            pidm: 95999, //49758,
             status: "P",
             documentType: "D",
             priority: 16,
@@ -459,7 +491,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         bankRoutingInfo.bankRoutingNum = 234798944
 
         def domain = new DirectDepositAccount(
-            pidm: 37859, //49758,
+            pidm: 95999, //49758,
             status: "P",
             documentType: "D",
             priority: 16,
