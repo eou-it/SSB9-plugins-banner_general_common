@@ -892,6 +892,25 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-campus-involvements-v7" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-involvements</value>
+        </constructor-arg>
+        <constructor-arg name="version">
+            <value>7</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-involvements/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CampusInvolvements.SGRSACT</value>
+                <value>EEDM.CampusInvolvements.SGRSPRT</value>
+                <value>EEDM.CampusInvolvements.SHRCOMM</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -944,6 +963,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-personcontacts-v7"/>
                 <ref bean="ar-studentacademicprograms-v7"/>
                 <ref bean="ar-academicprograms-v7"/>
+                <ref bean="ar-campus-involvements-v7"/>
             </list>
         </property>
     </bean>
@@ -1000,6 +1020,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-personcontacts-v7"/>
                 <ref bean="ar-studentacademicprograms-v7"/>
                 <ref bean="ar-academicprograms-v7"/>
+                <ref bean="ar-campus-involvements-v7"/>
             </list>
         </property>
     </bean>
