@@ -373,10 +373,13 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
 
         } catch (ApplicationException e) {
-            log.error("JobProcessingEngine " + this + " - A handler failed processing for job " + job.getId() + ", the job will be marked as failed", e);
+            if (log.isWarnEnabled()) {
+                log.warn( "Marking job with id = ${job.getId()} as failed because of ${e.message} for service ${jobManager.getClass()}." )
+            } else if (log.isDebugEnabled()) {
+                log.debug( "Marking job with id = ${job.getId()} as failed because of ${e.message} for service ${jobManager.getClass()}.", e )
+            }
 
             errorExecutor.execute(new ErrorHandler(job, e));
-
         } catch (Throwable t) {
             log.error("Async job handler caught an unexpected error and will mark the job as having an error state")
             //log.error( "JobProcessingEngine " + this + " - A handler encountered a Throwable for job " + job.getId() + ", and will mark it as failed", t );

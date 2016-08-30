@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.scheduler
 
 import grails.util.Holders
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -46,11 +47,10 @@ class SchedulerJobService {
         SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobId, groupId ).
             withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
             startAt( evenMinuteDate( runTime ) ).build()
-        quartzScheduler.scheduleJob( jobDetail, trigger )
+        scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
     }
-
 
     /**
      * Schedules calling a service method using the quartz scheduler to run immediately.
@@ -71,7 +71,7 @@ class SchedulerJobService {
         SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobId, groupId ).
             withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
             startNow().build()
-        quartzScheduler.scheduleJob( jobDetail, trigger )
+        scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
     }
@@ -116,6 +116,19 @@ class SchedulerJobService {
     }
 
 
+    private Date scheduleJob(JobDetail jobDetail, SimpleTrigger trigger) {
+        try {
+            return quartzScheduler.scheduleJob(jobDetail, trigger)
+        } catch (NoClassDefFoundError e) {
+            log.error( e )
+            if ("weblogic/jdbc/vendor/oracle/OracleThinBlob".equals( e.message ) && isConfiguredForWeblogic()) {
+                throw CommunicationExceptionFactory.createApplicationException( SchedulerJobService.class, "weblogicOracleDriverNotFound" )
+            } else {
+                throw e
+            }
+        }
+    }
+
     private JobDetail createJobDetail(String jobId, String groupId, String bannerUser, String mepCode, String service, String method, Map parameters) {
         JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity(jobId, groupId).requestRecovery().build();
         jobDetail.getJobDataMap().put("bannerUser", bannerUser)
@@ -124,5 +137,9 @@ class SchedulerJobService {
         jobDetail.getJobDataMap().put("method", method)
         assignParameters( jobDetail, parameters )
         return jobDetail
+    }
+
+    private boolean isConfiguredForWeblogic() {
+        return grails.util.Holders.getConfig()?.communication?.weblogicDeployment == true
     }
 }

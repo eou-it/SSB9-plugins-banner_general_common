@@ -107,7 +107,7 @@ class CommunicationPopulationCompositeService {
      * @param population the population to persist
      */
     public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description ) {
-        log.trace( "createPopulationFromQueryVersion( populationVersion, name, description ) called" )
+        log.trace( "createPopulationFromQueryVersion( populationVersion, name, d`escription ) called" )
         assert(populationQueryVersion)
 
         CommunicationPopulation population = new CommunicationPopulation()
@@ -177,7 +177,6 @@ class CommunicationPopulationCompositeService {
         CommunicationPopulation population = CommunicationPopulation.fetchById(populationId)
         List populationVersions = CommunicationPopulationVersion.findByPopulationId( population.id )
         populationVersions.each { CommunicationPopulationVersion populationVersion ->
-            populationVersion.refresh()
             deletePopulationVersion( populationVersion )
         }
 
@@ -308,6 +307,7 @@ class CommunicationPopulationCompositeService {
 
             if (selectionList) {
                 deleteSelectionListEntries( selectionList )
+                selectionList.refresh()
                 communicationPopulationSelectionListService.delete( selectionList )
             }
         }
