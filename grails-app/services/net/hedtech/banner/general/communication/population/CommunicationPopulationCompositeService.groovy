@@ -451,7 +451,7 @@ class CommunicationPopulationCompositeService {
     }
 
     private void removeObsoleteCalculationIfNecessaryForUser(CommunicationPopulationVersion populationVersion, String oracleName) {
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCreatedBy(populationVersion.id, oracleName)
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCalculatedBy(populationVersion.id, oracleName)
         if (populationCalculation) {
             if (populationCalculation.status.equals(CommunicationPopulationCalculationStatus.PENDING_EXECUTION)) {
                 throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotRecalculatePopulationPendingExecution")

@@ -62,7 +62,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -135,7 +135,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeletePopulationWithGroupSend Population" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -180,7 +180,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeletePopulationWithGroupSendWaitingRecalculation Population" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -225,7 +225,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testRecalculatePopulationAfterScheduledGroupSend Population" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         Long populationCalculationId = populationCalculation.id
         def isAvailable = {
@@ -330,7 +330,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -406,7 +406,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -496,7 +496,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, testName )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, testUserId )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, testUserId )
         assertNotNull( populationCalculation )
 
         def isAvailable = {
@@ -506,7 +506,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         }
         assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
 
-        populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, testUserId )
+        populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, testUserId )
         boolean isPopulationSizeInRange = (populationCalculation.calculatedCount >= lowerPopulationSizeRange) && (populationCalculation.calculatedCount <= upperPopulationSizeRange)
         assertTrue( "Expected population size ${populationCalculation.calculatedCount} to be in range of ${lowerPopulationSizeRange} to ${upperPopulationSizeRange}", isPopulationSizeInRange )
 
@@ -586,7 +586,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, defaultName )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )

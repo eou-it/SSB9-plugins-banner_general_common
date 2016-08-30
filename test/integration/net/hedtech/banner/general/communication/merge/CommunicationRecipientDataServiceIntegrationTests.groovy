@@ -163,7 +163,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
         //execute the query to get a population
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( validQuery.id, "TEST NAME", "TEST DESC" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy(population.id, getUser())
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(population.id, getUser())
         assertNotNull( populationCalculation )
         List publishedQueryVersionList = CommunicationPopulationQueryVersion.findByQueryId( validQuery.id )
         assertEquals( 1, publishedQueryVersionList.size() )
