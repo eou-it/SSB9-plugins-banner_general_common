@@ -886,7 +886,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>EEDM.Addresses.SPRADDR</value>
                 <value>EEDM.Addresses.SOBSBGI</value>
-                <value>EEDM.Addresses.STVCOLL</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">

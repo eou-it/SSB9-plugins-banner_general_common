@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional
 class AddressCompositeService extends LdmService {
 
     private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
-    private static final String COLLEGE_ADDRESS = "STVCOLL"
 
     AddressViewService addressViewService
     IntegrationConfigurationService integrationConfigurationService
@@ -119,9 +118,7 @@ class AddressCompositeService extends LdmService {
     private List preparePidmOrCodeList(List<AddressView> addressesView) {
         List pidmsOrCodes = []
         addressesView.collect { address ->
-            if (!address.sourceTable.equals(COLLEGE_ADDRESS)) {
-                pidmsOrCodes << address.pidmOrCode
-            }
+            pidmsOrCodes << address.pidmOrCode
         }
         pidmsOrCodes
     }
@@ -171,14 +168,10 @@ class AddressCompositeService extends LdmService {
 
     private String getISO3CountryCode(AddressView addressView, boolean institutionUsingISO2CountryCodes) {
         String isoCountryCode
-        if (addressView.sourceTable == COLLEGE_ADDRESS) {
-            isoCountryCode = addressView.countryCode
-        } else {
-            if (addressView.countryCode) {
-                isoCountryCode = Nation.findByCode(addressView.countryCode).scodIso
-                if (isoCountryCode == null) {
-                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.not.mapped.to.iso.code.message", [addressView.countryCode]))
-                }
+        if (addressView.countryCode) {
+            isoCountryCode = Nation.findByCode(addressView.countryCode).scodIso
+            if (isoCountryCode == null) {
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.not.mapped.to.iso.code.message", [addressView.countryCode]))
             }
         }
 
@@ -192,20 +185,16 @@ class AddressCompositeService extends LdmService {
 
     private boolean isISOCodeAvailableForState(AddressView addressView) {
         boolean available = true
-        if (addressView.sourceTable != COLLEGE_ADDRESS) {
-            if (addressView.stateCode != null && addressView.countryRegionCode == null) {
-                available = false
-            }
+        if (addressView.stateCode != null && addressView.countryRegionCode == null) {
+            available = false
         }
         return available
     }
 
     private boolean isISOCodeAvailableForCounty(AddressView addressView) {
         boolean available = true
-        if (addressView.sourceTable != COLLEGE_ADDRESS) {
-            if (addressView.countyCode != null && addressView.countrySubRegionCode == null) {
-                available = false
-            }
+        if (addressView.countyCode != null && addressView.countrySubRegionCode == null) {
+            available = false
         }
         return available
     }
