@@ -5,6 +5,7 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.NonPersonDecorator
 import net.hedtech.banner.general.person.*
@@ -29,6 +30,8 @@ import java.sql.Timestamp
 @Transactional
 class NonPersonCompositeService extends LdmService {
 
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V1, GeneralValidationCommonConstants.VERSION_V6]
+
     NonPersonPersonViewService nonPersonPersonViewService
     PersonCredentialCompositeService personCredentialCompositeService
     EmailTypeCompositeService emailTypeCompositeService
@@ -50,6 +53,8 @@ class NonPersonCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def get(id) {
         log.trace "getById:Begin:$id"
+        String acceptVersion = getAcceptVersion(VERSIONS)
+
         if (!id) {
             throw new ApplicationException("organization", new NotFoundException())
         }
@@ -70,6 +75,8 @@ class NonPersonCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def list(Map params) {
         log.trace "list:Begin:$params"
+        String acceptVersion = getAcceptVersion(VERSIONS)
+        
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max = params.max.trim().toInteger()
         int offset = params.offset?.trim()?.toInteger() ?: 0
