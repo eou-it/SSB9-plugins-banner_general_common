@@ -5,8 +5,6 @@ package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryType
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -17,9 +15,6 @@ import org.quartz.TriggerKey
 import org.quartz.impl.matchers.GroupMatcher
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-
-import javax.mail.internet.MimeMessage
-import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
@@ -80,7 +75,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 //        assertEquals( populationQuery.id, association.populationQuery.id )
 //        assertNull( association.populationQueryVersion )
 //
-//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
 //        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
 //        def isAvailable = {
 //            def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -117,7 +112,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertEquals( populationQuery.id, association.populationQuery.id )
         assertNull( association.populationQueryVersion )
 
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
@@ -162,7 +157,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 //        assertEquals( populationQuery.id, association.populationQuery.id )
 //        assertNull( association.populationQueryVersion )
 //
-//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
 //        def isAvailable = {
 //            def theCalculation = CommunicationPopulationCalculation.get( it )
 //            theCalculation.refresh()

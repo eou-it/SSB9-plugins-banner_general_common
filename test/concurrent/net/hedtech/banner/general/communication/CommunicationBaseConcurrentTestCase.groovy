@@ -36,7 +36,6 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryCompositeService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
@@ -279,7 +278,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testDeleteGroupSend Population" )
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
             theCalculation.refresh()

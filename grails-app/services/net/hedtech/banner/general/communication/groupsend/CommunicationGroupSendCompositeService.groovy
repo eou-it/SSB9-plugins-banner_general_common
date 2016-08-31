@@ -76,7 +76,7 @@ class CommunicationGroupSendCompositeService {
 
         if(!groupSend.recalculateOnSend || !request.scheduledStartDate) {
             // May want to have UI pass the current calculation as part of the request so there is no chance of picking the wrong one.
-            CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( groupSend.getPopulationId(), bannerUser )
+            CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( groupSend.getPopulationId(), bannerUser )
             if (!calculation || !calculation.status.equals( CommunicationPopulationCalculationStatus.AVAILABLE )) {
                 throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser" )
             }
@@ -138,7 +138,7 @@ class CommunicationGroupSendCompositeService {
                 communicationPopulationCompositeService.deletePopulationCalculation( groupSend.populationCalculationId )
             } else {
                 CommunicationPopulationCalculation latestCalculation =
-                        CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCreatedBy( calculation.populationVersion.id, calculation.createdBy )
+                        CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCalculatedBy( calculation.populationVersion.id, calculation.createdBy )
                 if (calculation.id != latestCalculation.id) {
                     communicationPopulationCompositeService.deletePopulationCalculation( latestCalculation )
                 }

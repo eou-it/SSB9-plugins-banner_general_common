@@ -23,12 +23,12 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationPopulationCalculation.findByPopulationVersionId",
                 query = """ FROM CommunicationPopulationCalculation calculation
                 WHERE calculation.populationVersion.id = :populationVersionId order by calculation.createDate DESC"""),
-        @NamedQuery(name = "CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy",
+        @NamedQuery(name = "CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy",
                 query = """ FROM CommunicationPopulationCalculation calculation
-                WHERE calculation.populationVersion.population.id = :populationId and calculation.createdBy = upper( :userId ) order by calculation.createDate DESC"""),
-        @NamedQuery(name = "CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCreatedBy",
+                WHERE calculation.populationVersion.population.id = :populationId and calculation.calculatedBy = upper( :calculatedBy ) order by calculation.createDate DESC"""),
+        @NamedQuery(name = "CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCalculatedBy",
                 query = """ FROM CommunicationPopulationCalculation calculation
-                WHERE calculation.populationVersion.id = :populationVersionId and calculation.createdBy = upper( :userId ) order by calculation.createDate DESC""")
+                WHERE calculation.populationVersion.id = :populationVersionId and calculation.calculatedBy = upper( :calculatedBy ) order by calculation.createDate DESC""")
 ])
 class CommunicationPopulationCalculation implements Serializable {
 
@@ -186,20 +186,20 @@ class CommunicationPopulationCalculation implements Serializable {
         return calculation
     }
 
-    public static CommunicationPopulationCalculation findLatestByPopulationIdAndCreatedBy( Long populationId, String userId ) {
+    public static CommunicationPopulationCalculation findLatestByPopulationIdAndCalculatedBy( Long populationId, String calculatedBy ) {
         CommunicationPopulationCalculation calculation = null
         CommunicationPopulationCalculation.withSession { session ->
-            calculation = session.getNamedQuery('CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy').
-                    setLong( 'populationId', populationId ).setString( 'userId', userId ).list()[0]
+            calculation = session.getNamedQuery('CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy').
+                    setLong( 'populationId', populationId ).setString( 'calculatedBy', calculatedBy ).list()[0]
         }
         return calculation
     }
 
-    public static CommunicationPopulationCalculation findLatestByPopulationVersionIdAndCreatedBy( Long populationVersionId, String userId ) {
+    public static CommunicationPopulationCalculation findLatestByPopulationVersionIdAndCalculatedBy( Long populationVersionId, String calculatedBy ) {
         CommunicationPopulationCalculation calculation = null
         CommunicationPopulationCalculation.withSession { session ->
-            calculation = session.getNamedQuery('CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCreatedBy').
-                setLong( 'populationVersionId', populationVersionId ).setString( 'userId', userId ).list()[0]
+            calculation = session.getNamedQuery('CommunicationPopulationCalculation.findLatestByPopulationVersionIdAndCalculatedBy').
+                setLong( 'populationVersionId', populationVersionId ).setString( 'calculatedBy', calculatedBy ).list()[0]
         }
         return calculation
     }

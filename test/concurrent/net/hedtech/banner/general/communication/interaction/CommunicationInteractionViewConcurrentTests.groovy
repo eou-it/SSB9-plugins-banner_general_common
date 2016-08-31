@@ -13,7 +13,6 @@ import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
@@ -67,7 +66,7 @@ class CommunicationInteractionViewConcurrentTests extends CommunicationBaseConcu
         populationQuery = queryVersion.query
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery(populationQuery, "testPopulation")
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCreatedBy( population.id, 'BCMADMIN' )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
         assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
         def isAvailable = {
             def theCalculation = CommunicationPopulationCalculation.get( it )
