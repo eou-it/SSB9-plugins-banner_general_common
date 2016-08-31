@@ -306,9 +306,7 @@ class CommunicationPopulationCompositeService {
             }
 
             if (selectionList) {
-                deleteSelectionListEntries( selectionList )
-                selectionList.refresh()
-                communicationPopulationSelectionListService.delete( selectionList )
+                selectionList.delete()
             }
         }
 
@@ -426,13 +424,6 @@ class CommunicationPopulationCompositeService {
             creatorId = config?.bannerSsbDataSource?.username
         }
         return creatorId.toUpperCase()
-    }
-
-    private void deleteSelectionListEntries(CommunicationPopulationSelectionList selectionList) {
-        CommunicationPopulationSelectionListEntry.executeUpdate(
-                "delete CommunicationPopulationSelectionListEntry where populationSelectionList = :selectionList",
-                [selectionList: selectionList]
-        )
     }
 
     private CommunicationPopulationQueryVersion getQueryVersionForNewCalculation(CommunicationPopulationVersion populationVersion) {
