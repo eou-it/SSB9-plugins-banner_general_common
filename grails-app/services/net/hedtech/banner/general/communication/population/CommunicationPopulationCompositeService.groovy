@@ -328,7 +328,7 @@ class CommunicationPopulationCompositeService {
     }
 
     public CommunicationPopulationCalculation processPendingPopulationCalculationFailed( SchedulerErrorContext errorContext ) {
-        Long populationCalculationId = parameters.get( "populationCalculationId" )
+        Long populationCalculationId = errorContext.jobContext.getParameter( "populationCalculationId" )
         if (log.isDebugEnabled()) {
             log.debug("${errorContext.jobContext.errorHandle} called for groupSendId = ${groupSendId} with message = ${errorContext?.cause?.message}")
         }
