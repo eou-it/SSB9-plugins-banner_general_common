@@ -92,14 +92,12 @@ class CommunicationTemplateService extends ServiceBase {
     protected void stampAndValidate( template ) {
         stamp( template )
         validateTemplate( template )
-println "IN THE STAMPT"
+
         // This is a work around an issue in ServiceBase where any validation errors get erroneously rethrown
         // as optimistic lock exceptions. 10/9/2015
         try {
-            println "INSIDE TH ETRYE"
             validate( template )
         } catch( ValidationException e ) {
-            println "VALIDATE "+e.getMessage()
             throw new ApplicationException( getDomainClass(), e )
         }
     }
