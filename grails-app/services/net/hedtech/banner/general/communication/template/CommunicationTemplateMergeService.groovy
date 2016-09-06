@@ -185,19 +185,23 @@ class CommunicationTemplateMergeService {
  * @return
  */
     Map<String, String> renderPreviewValues( String templateString ) {
-        if (log.isDebugEnabled())
-            log.debug( "Extracting preview values from template string." )
-        List<String> templateVariables = extractTemplateVariables( templateString )
-        def renderedCommunicationFields = [:]
+        try {
+            if (log.isDebugEnabled())
+                log.debug("Extracting preview values from template string.")
+            List<String> templateVariables = extractTemplateVariables(templateString)
+            def renderedCommunicationFields = [:]
 
-        if (templateVariables.size() > 0) {
-            templateVariables.each { fieldName ->
-                CommunicationField communicationField = CommunicationField.findByName( fieldName )
-                String previewString = (communicationField && communicationField.previewValue && communicationField.previewValue.size() > 0) ? communicationField.previewValue : "\$${fieldName}\$"
-                renderedCommunicationFields.put( fieldName, previewString )
+            if (templateVariables.size() > 0) {
+                templateVariables.each { fieldName ->
+                    CommunicationField communicationField = CommunicationField.findByName(fieldName)
+                    String previewString = (communicationField && communicationField.previewValue && communicationField.previewValue.size() > 0) ? communicationField.previewValue : "\$${fieldName}\$"
+                    renderedCommunicationFields.put(fieldName, previewString)
+                }
             }
+            return renderedCommunicationFields
+        } catch (Exception e) {
+            return ["templateString":templateString]
         }
-        return renderedCommunicationFields
     }
 
     /**
@@ -208,34 +212,34 @@ class CommunicationTemplateMergeService {
     CommunicationMergedEmailTemplate renderMergedEmailTemplate( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationEmailTemplate with preview values only." )
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
-        communicationMergedEmailTemplate.toList = merge( communicationEmailTemplate.toList ?: "", renderPreviewValues( communicationEmailTemplate.toList ?: "" ) )
-        communicationMergedEmailTemplate.subject = merge( communicationEmailTemplate.subject ?: "", renderPreviewValues( communicationEmailTemplate.subject ?: "" ) )
-        communicationMergedEmailTemplate.content = merge( communicationEmailTemplate.content ?: "", renderPreviewValues( communicationEmailTemplate.content ?: "" ) )
+        communicationMergedEmailTemplate.toList = mergeForPreview( communicationEmailTemplate.toList ?: "", renderPreviewValues( communicationEmailTemplate.toList ?: "" ) )
+        communicationMergedEmailTemplate.subject = mergeForPreview( communicationEmailTemplate.subject ?: "", renderPreviewValues( communicationEmailTemplate.subject ?: "" ) )
+        communicationMergedEmailTemplate.content = mergeForPreview( communicationEmailTemplate.content ?: "", renderPreviewValues( communicationEmailTemplate.content ?: "" ) )
         communicationMergedEmailTemplate
     }
 
     CommunicationMergedLetterTemplate renderMergedLetterTemplate( CommunicationLetterTemplate communicationLetterTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationLetterTemplate with preview values only." )
         CommunicationMergedLetterTemplate communicationMergedLetterTemplate = new CommunicationMergedLetterTemplate()
-        communicationMergedLetterTemplate.toAddress = merge( communicationLetterTemplate.toAddress ?: "", renderPreviewValues( communicationLetterTemplate.toAddress ?: "" ) )
-        communicationMergedLetterTemplate.content = merge( communicationLetterTemplate.content ?: "", renderPreviewValues( communicationLetterTemplate.content ?: "" ) )
+        communicationMergedLetterTemplate.toAddress = mergeForPreview( communicationLetterTemplate.toAddress ?: "", renderPreviewValues( communicationLetterTemplate.toAddress ?: "" ) )
+        communicationMergedLetterTemplate.content = mergeForPreview( communicationLetterTemplate.content ?: "", renderPreviewValues( communicationLetterTemplate.content ?: "" ) )
         return communicationMergedLetterTemplate
     }
 
     CommunicationMergedMobileNotificationTemplate renderMergedMobileNotificationTemplate( CommunicationMobileNotificationTemplate communicationMobileNotificationTemplate ) {
         if (log.isDebugEnabled()) log.debug( "Rendering CommunicationMobileNotificationTemplate with preview values only." )
         CommunicationMergedMobileNotificationTemplate mergedTemplate = new CommunicationMergedMobileNotificationTemplate()
-        mergedTemplate.mobileHeadline = merge( communicationMobileNotificationTemplate.mobileHeadline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.mobileHeadline ?: "" ) )
-        mergedTemplate.headline = merge( communicationMobileNotificationTemplate.headline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.headline ?: "" ) )
-        mergedTemplate.messageDescription = merge( communicationMobileNotificationTemplate.messageDescription ?: "", renderPreviewValues( communicationMobileNotificationTemplate.messageDescription ?: "" ) )
-        mergedTemplate.destinationLink = merge( communicationMobileNotificationTemplate.destinationLink ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLink ?: "" ) )
-        mergedTemplate.destinationLabel = merge( communicationMobileNotificationTemplate.destinationLabel ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLabel ?: "" ) )
+        mergedTemplate.mobileHeadline = mergeForPreview( communicationMobileNotificationTemplate.mobileHeadline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.mobileHeadline ?: "" ) )
+        mergedTemplate.headline = mergeForPreview( communicationMobileNotificationTemplate.headline ?: "", renderPreviewValues( communicationMobileNotificationTemplate.headline ?: "" ) )
+        mergedTemplate.messageDescription = mergeForPreview( communicationMobileNotificationTemplate.messageDescription ?: "", renderPreviewValues( communicationMobileNotificationTemplate.messageDescription ?: "" ) )
+        mergedTemplate.destinationLink = mergeForPreview( communicationMobileNotificationTemplate.destinationLink ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLink ?: "" ) )
+        mergedTemplate.destinationLabel = mergeForPreview( communicationMobileNotificationTemplate.destinationLabel ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLabel ?: "" ) )
         return mergedTemplate
     }
 
     /**
      * Merges the data from the parameter map into the string template
-     * @param stringTemplate A stcring containing delimited token fields
+     * @param stringTemplate A string containing delimited token fields
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */
@@ -255,6 +259,20 @@ class CommunicationTemplateMergeService {
             return st.render()
         } else {
             return ""
+        }
+    }
+
+    /**
+     * Merges the data from the parameter map into the string template for rendering preview
+     * @param stringTemplate A string containing delimited token fields
+     * @param parameters Map of name value pairs representing tokens in the template and their values
+     * @return A fully rendered String or just the template in case of error
+     */
+    String mergeForPreview(String stringTemplate, Map<String, Object> parameters ) {
+        try {
+            merge( stringTemplate, parameters )
+        } catch (Exception e) {
+            return stringTemplate
         }
     }
 
