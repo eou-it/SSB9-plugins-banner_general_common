@@ -40,6 +40,8 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
                 quartzScheduler.deleteJob( jobKey )
             }
         }
+
+        SchedulerTestOperation.reset()
     }
 
 
@@ -47,6 +49,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
     public void tearDown() {
         FormContext.clear()
         SecurityContextHolder.getContext().setAuthentication( null )
+        SchedulerTestOperation.reset()
     }
 
 
@@ -62,7 +65,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
         .setScheduledStartDate( requestedRunTime )
         .setBannerUser( 'BCMADMIN' )
-        .setJobHandle( "schedulerJobService", "logDateTime" )
+        .setJobHandle( "schedulerJobService", "testOperationFired" )
         .setMepCode( mepCode )
         SchedulerJobReceipt receipt = schedulerJobService.scheduleServiceMethod( jobContext )
 
@@ -90,6 +93,10 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         assertNull( jobDetail )
         trigger = quartzScheduler.getTrigger( triggerKey )
         assertNull( trigger )
+
+        assertTrue( SchedulerTestOperation.didOperationFire() )
+        assertTrue( SchedulerTestOperation.didOperationComplete() )
+        assertFalse( SchedulerTestOperation.didOperationFail() )
     }
 
 
@@ -101,7 +108,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
         SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
                 .setBannerUser( 'BCMADMIN' )
-                .setJobHandle( "schedulerJobService", "logDateTime" )
+                .setJobHandle( "schedulerJobService", "testOperationFired" )
                 .setMepCode( mepCode )
         SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
 
@@ -129,7 +136,54 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         assertNull( jobDetail )
         trigger = quartzScheduler.getTrigger( triggerKey )
         assertNull( trigger )
+
+        assertTrue( SchedulerTestOperation.didOperationFire() )
+        assertTrue( SchedulerTestOperation.didOperationComplete() )
+        assertFalse( SchedulerTestOperation.didOperationFail() )
     }
 
+    @Test
+    public void testScheduleNowServiceMethodErrorHandling() {
+        String jobId = "testScheduleTestJob-" + UUID.randomUUID().toString()
+
+        String mepCode = null
+
+        SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
+                .setBannerUser( 'BCMADMIN' )
+                .setJobHandle( "schedulerJobService", "testOperationFired" )
+                .setErrorHandle( "schedulerJobService", "testOperationFailed" )
+                .setMepCode( mepCode )
+                .setParameter( "simulateError", Boolean.TRUE )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
+
+        JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
+
+        JobDetail jobDetail = quartzScheduler.getJobDetail( jobKey ) // JobDetailImpl
+        assertNotNull( jobDetail )
+
+        TriggerKey triggerKey = new TriggerKey( receipt.jobId, receipt.groupId )
+        Trigger trigger = quartzScheduler.getTrigger( triggerKey ) // SimpleTriggerImpl
+        assertNotNull( trigger )
+
+        int retries = 15
+        while (retries > 0) {
+            retries--;
+            TimeUnit.SECONDS.sleep( 5 );
+
+            jobDetail = quartzScheduler.getJobDetail( jobKey )
+
+            if (!jobDetail) {
+                break;
+            }
+        }
+
+        assertNull( jobDetail )
+        trigger = quartzScheduler.getTrigger( triggerKey )
+        assertNull( trigger )
+
+        assertTrue( SchedulerTestOperation.didOperationFire() )
+        assertFalse( SchedulerTestOperation.didOperationComplete() )
+        assertTrue( SchedulerTestOperation.didOperationFail() )
+    }
 
 }

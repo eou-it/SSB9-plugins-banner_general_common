@@ -94,8 +94,23 @@ class SchedulerJobService {
     /**
      * Simple method that logs the current server date time provided for test purposes.
      */
-    public void logDateTime( SchedulerJobContext jobContext ) {
-        log.info( "logDateTime at " + new Date() )
+    public void testOperationFired( SchedulerJobContext jobContext ) {
+        log.info( "testOperationFired at " + new Date() )
+        SchedulerTestOperation.markOperationFired()
+
+        if (jobContext.getParameter( "simulateError" )) {
+            throw new RuntimeException( "Simulated Error" )
+        } else {
+            SchedulerTestOperation.markOperationCompleted()
+        }
+    }
+
+    /**
+     * Simple method that logs the current server date time provided for test purposes.
+     */
+    public void testOperationFailed( SchedulerErrorContext errorContext ) {
+        log.info( "testOperationFailed at " + new Date() )
+        SchedulerTestOperation.markOperationFailed()
     }
 
 
