@@ -59,7 +59,12 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         Date requestedRunTime = calendar.getTime()
         String mepCode = null
 
-        SchedulerJobReceipt receipt = schedulerJobService.scheduleServiceMethod( requestedRunTime, jobId, 'BCMADMIN', mepCode, "schedulerJobService", "logDateTime" )
+        SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
+        .setScheduledStartDate( requestedRunTime )
+        .setBannerUser( 'BCMADMIN' )
+        .setJobHandle( "schedulerJobService", "logDateTime" )
+        .setMepCode( mepCode )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleServiceMethod( jobContext )
 
         JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
 
@@ -94,7 +99,11 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
         String mepCode = null
 
-        SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod( jobId, 'BCMADMIN', mepCode, "schedulerJobService", "logDateTime" )
+        SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
+                .setBannerUser( 'BCMADMIN' )
+                .setJobHandle( "schedulerJobService", "logDateTime" )
+                .setMepCode( mepCode )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
 
         JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
 

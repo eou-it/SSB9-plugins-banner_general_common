@@ -15,6 +15,8 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
+import net.hedtech.banner.general.scheduler.SchedulerErrorContext
+import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
@@ -191,11 +193,49 @@ class CommunicationGroupSendCompositeService {
     // Scheduling service callback job methods
     //////////////////////////////////////////////////////////////////////////////////////
 
+    public CommunicationGroupSend calculatePopulationVersionForGroupSendFired( SchedulerJobContext jobContext ) {
+        calculatePopulationVersionForGroupSend( jobContext.parameters )
+    }
+
+    public CommunicationGroupSend calculatePopulationVersionForGroupSendFailed( SchedulerErrorContext errorContext ) {
+        return scheduledGroupSendCallbackFailed( errorContext )
+    }
+
+    public CommunicationGroupSend generateGroupSendItemsFired( SchedulerJobContext jobContext ) {
+        return generateGroupSendItems( jobContext.parameters )
+    }
+
+    public CommunicationGroupSend generateGroupSendItemsFailed( SchedulerErrorContext errorContext ) {
+        return scheduledGroupSendCallbackFailed( errorContext )
+    }
+
+    private CommunicationGroupSend scheduledGroupSendCallbackFailed( SchedulerErrorContext errorContext ) {
+        Long groupSendId = errorContext.jobContext.getParameter("groupSendId") as Long
+        if (log.isDebugEnabled()) {
+            log.debug("${errorContext.jobContext.errorHandle} called for groupSendId = ${groupSendId} with message = ${errorContext?.cause?.message}")
+        }
+
+        CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
+        if (!groupSend) {
+            throw new ApplicationException("groupSend", new NotFoundException())
+        }
+
+        groupSend.setCurrentExecutionState(CommunicationGroupSendExecutionState.Error)
+        if (errorContext.cause) {
+            groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+            groupSend.errorText = errorContext.cause.message
+        } else {
+            groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+        }
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+        return groupSend
+    }
+
     /**
      * This method is called by the scheduler to regenerate a population list specifically for the group send
      * and change the state of the group send to next state.
      */
-    public CommunicationGroupSend calculatePopulationVersionForGroupSend( Map parameters ) {
+    private CommunicationGroupSend calculatePopulationVersionForGroupSend( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         assert( groupSendId )
         if (log.isDebugEnabled()) {
@@ -235,7 +275,7 @@ class CommunicationGroupSendCompositeService {
      * This method is called by the scheduler to create the group send items and move the state of
      * the group send to processing.
      */
-    public CommunicationGroupSend generateGroupSendItems( Map parameters ) {
+    private CommunicationGroupSend generateGroupSendItems( Map parameters ) {
         Long groupSendId = parameters.get( "groupSendId" ) as Long
         assert( groupSendId )
 
@@ -262,14 +302,14 @@ class CommunicationGroupSendCompositeService {
     private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser ) {
         assert( groupSend.populationCalculationId != null )
 
-        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod(
-                groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString(),
-                bannerUser,
-                groupSend.mepCode,
-                "communicationGroupSendCompositeService",
-                "generateGroupSendItems",
-                ["groupSendId": groupSend.id]
-        )
+        SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString() )
+            .setBannerUser( bannerUser )
+            .setMepCode( groupSend.mepCode )
+            .setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
+            .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
+            .setParameter( "groupSendId", groupSend.id )
+
+        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
         groupSend.markQueued( jobReceipt.jobId, jobReceipt.groupId )
         groupSend = communicationGroupSendService.update(groupSend)
         return groupSend
@@ -281,15 +321,24 @@ class CommunicationGroupSendCompositeService {
         if (now.after(groupSend.scheduledStartDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidScheduledDate")
         }
-        SchedulerJobReceipt jobReceipt
+
+        SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId )
+            .setBannerUser( bannerUser )
+            .setMepCode( groupSend.mepCode )
+            .setScheduledStartDate( groupSend.scheduledStartDate )
+            .setParameter( "groupSendId", groupSend.id )
+
         if(groupSend.recalculateOnSend) {
-            jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSend", ["groupSendId": groupSend.id])
+            jobContext.setJobHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFired" )
+                .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
         } else {
-            jobReceipt = schedulerJobService.scheduleServiceMethod(groupSend.scheduledStartDate, groupSend.jobId, bannerUser, groupSend.mepCode, "communicationGroupSendCompositeService", "generateGroupSendItems", ["groupSendId": groupSend.id])
+            jobContext.setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
+                .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
         }
 
+        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleServiceMethod( jobContext )
         groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
-        groupSend = communicationGroupSendService.update(groupSend)
+        groupSend = communicationGroupSendService.update( groupSend )
         return groupSend
     }
 

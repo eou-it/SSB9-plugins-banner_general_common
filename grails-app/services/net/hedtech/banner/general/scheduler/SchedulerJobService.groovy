@@ -40,47 +40,40 @@ class SchedulerJobService {
      * @param parameters an optional map to pass to to the service method
      * @return a scheduler job receipt with the jobId and the a groupId consisting of the service and method named concatenated together
      */
-    public SchedulerJobReceipt scheduleServiceMethod( Date runTime, String jobId, String bannerUser, String mepCode, String service, String method, Map parameters = null ) {
-        String groupId = service + "." + method
-        JobDetail jobDetail = createJobDetail(jobId, groupId, bannerUser, mepCode, service, method, parameters )
+    public SchedulerJobReceipt scheduleServiceMethod( SchedulerJobContext jobContext ) {
+        JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobId, groupId ).
+        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
             withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
-            startAt( evenMinuteDate( runTime ) ).build()
+            startAt( evenMinuteDate( jobContext.scheduledStartDate ) ).build()
         scheduleJob( jobDetail, trigger )
 
-        return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
+        return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
     /**
      * Schedules calling a service method using the quartz scheduler to run immediately.
      * The service method invoked should take a single map as a parameter.
      *
-     * @param jobId a job identifier; a uuid is one way to go
-     * @param bannerUser a banner id to proxy as before invoking the method
-     * @param mepCode mep or vpdi code, may be null if the db is not a mep database
-     * @param service the name of the service to call
-     * @param method the method of the service to invoke
-     * @param parameters an optional map to pass to to the service method
+     * @param jobContext a schedule job context with the information needed to set the schedule and parameters for invoking the scheduled callback method
      * @return a scheduler job receipt with the jobId and the a groupId consisting of the service and method named concatenated together
      */
-    public SchedulerJobReceipt scheduleNowServiceMethod( String jobId, String bannerUser, String mepCode, String service, String method, Map parameters = null ) {
-        String groupId = service + "." + method
-        JobDetail jobDetail = createJobDetail(jobId, groupId, bannerUser, mepCode, service, method, parameters )
+    public SchedulerJobReceipt scheduleNowServiceMethod( SchedulerJobContext jobContext ) {
+        JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobId, groupId ).
+        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
             withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
             startNow().build()
         scheduleJob( jobDetail, trigger )
 
-        return new SchedulerJobReceipt( groupId: groupId, jobId: jobId )
+        return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
 
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
-    public Object invokeServiceMethodInNewTransaction( String serviceName, String method, Map parameters ) {
+    public Object invokeServiceMethodInNewTransaction( String serviceName, String method, context ) {
         def serviceReference = Holders.applicationContext.getBean( serviceName )
-        return serviceReference.invokeMethod( method, parameters )
+        return serviceReference.invokeMethod( method, context )
     }
 
     public boolean deleteScheduledJob(String jobId, String service, String method) {
@@ -101,7 +94,7 @@ class SchedulerJobService {
     /**
      * Simple method that logs the current server date time provided for test purposes.
      */
-    public void logDateTime( Map parameters ) {
+    public void logDateTime( SchedulerJobContext jobContext ) {
         log.info( "logDateTime at " + new Date() )
     }
 
@@ -129,13 +122,20 @@ class SchedulerJobService {
         }
     }
 
-    private JobDetail createJobDetail(String jobId, String groupId, String bannerUser, String mepCode, String service, String method, Map parameters) {
-        JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity(jobId, groupId).requestRecovery().build();
-        jobDetail.getJobDataMap().put("bannerUser", bannerUser)
-        jobDetail.getJobDataMap().put("mepCode", mepCode)
-        jobDetail.getJobDataMap().put("service", service)
-        jobDetail.getJobDataMap().put("method", method)
-        assignParameters( jobDetail, parameters )
+    private JobDetail createJobDetail( SchedulerJobContext jobContext ) {
+        JobDetail jobDetail = newJob(BannerServiceMethodJob.class).withIdentity(jobContext.jobId, jobContext.groupId).requestRecovery().build();
+        jobDetail.getJobDataMap().put("jobId", jobContext.jobId)
+        jobDetail.getJobDataMap().put("groupId", jobContext.groupId)
+        jobDetail.getJobDataMap().put("bannerUser", jobContext.bannerUser)
+        jobDetail.getJobDataMap().put("mepCode", jobContext.mepCode)
+        jobDetail.getJobDataMap().put("service", jobContext.jobHandle.service)
+        jobDetail.getJobDataMap().put("method", jobContext.jobHandle.method)
+        if (jobContext.errorHandle) {
+            jobDetail.getJobDataMap().put("errorService", jobContext.errorHandle.service)
+            jobDetail.getJobDataMap().put("errorMethod", jobContext.errorHandle.method)
+        }
+        jobDetail.getJobDataMap().put( "scheduledStartDate", jobContext.scheduledStartDate)
+        assignParameters( jobDetail, jobContext.parameters )
         return jobDetail
     }
 

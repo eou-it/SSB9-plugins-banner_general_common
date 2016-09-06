@@ -21,6 +21,8 @@ import net.hedtech.banner.general.communication.population.selectionlist.Communi
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntryService
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
+import net.hedtech.banner.general.scheduler.SchedulerErrorContext
+import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
@@ -196,7 +198,7 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation updatePopulation( Map populationAsMap) {
+    public CommunicationPopulation updatePopulation(Map populationAsMap) {
         log.trace( "updatePopulation called" )
         assert( populationAsMap.id != null )
         assert( populationAsMap.version != null ) // optimistic lock counter
@@ -262,21 +264,21 @@ class CommunicationPopulationCompositeService {
             removeObsoleteCalculationIfNecessaryForUser( populationVersion, oracleName )
             CommunicationPopulationCalculation populationCalculation = createNewCalculation( populationVersion, oracleName, true )
 
-            SchedulerJobReceipt receipt = schedulerJobService.scheduleNowServiceMethod(
-                populationCalculation.jobId,
-                oracleName,
-                populationCalculation.mepCode,
-                "communicationPopulationCompositeService",
-                "processPendingPopulationCalculation",
-                [ "populationCalculationId" : populationCalculation.id ]
-            )
+            SchedulerJobContext jobContext = new SchedulerJobContext( populationCalculation.jobId )
+                    .setBannerUser( oracleName )
+                    .setMepCode( populationCalculation.mepCode )
+                    .setJobHandle( "communicationPopulationCompositeService", "processPendingPopulationCalculationFired" )
+                    .setErrorHandle( "communicationPopulationCompositeService", "processPendingPopulationCalculationFailed" )
+                    .setParameter( "populationCalculationId", populationCalculation.id )
+
+            SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
             return populationCalculation
         } finally {
             log.trace( "exiting calculatePopulationVersionForUser( population )")
         }
     }
 
-    public CommunicationPopulationCalculation calculatePopulationVersionForGroupSend( CommunicationPopulationVersion populationVersion) {
+    public CommunicationPopulationCalculation calculatePopulationVersionForGroupSend(CommunicationPopulationVersion populationVersion) {
         assert( populationVersion )
         CommunicationPopulationCalculation populationCalculation = createNewCalculation( populationVersion, AsynchronousBannerAuthenticationSpoofer.monitorOracleUserName, false )
         return processPendingPopulationCalculation(["populationCalculationId": populationCalculation.id])
@@ -293,7 +295,7 @@ class CommunicationPopulationCompositeService {
             calculation.refresh()
             CommunicationPopulationSelectionList selectionList = calculation.selectionList
             if (calculation.status == CommunicationPopulationCalculationStatus.PENDING_EXECUTION) {
-                schedulerJobService.deleteScheduledJob( calculation.jobId, "communicationPopulationCompositeService", "processPendingPopulationCalculation" )
+                schedulerJobService.deleteScheduledJob( calculation.jobId, "communicationPopulationCompositeService", "processPendingPopulationCalculationFired" )
             }
             try {
                 communicationPopulationCalculationService.delete( calculation )
@@ -321,13 +323,39 @@ class CommunicationPopulationCompositeService {
         communicationPopulationVersionService.delete( populationVersion )
     }
 
+    public CommunicationPopulationCalculation processPendingPopulationCalculationFired( SchedulerJobContext jobContext ) {
+        return processPendingPopulationCalculation( jobContext.parameters )
+    }
+
+    public CommunicationPopulationCalculation processPendingPopulationCalculationFailed( SchedulerErrorContext errorContext ) {
+        Long populationCalculationId = parameters.get( "populationCalculationId" )
+        if (log.isDebugEnabled()) {
+            log.debug("${errorContext.jobContext.errorHandle} called for groupSendId = ${groupSendId} with message = ${errorContext?.cause?.message}")
+        }
+
+        CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.fetchById( populationCalculationId )
+        if (!calculation) {
+            // Calculation may have been deleted in which case silently return
+            return null
+        }
+
+        calculation.status = CommunicationPopulationCalculationStatus.ERROR
+        if (errorContext.cause) {
+            calculation.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+            calculation.errorText = errorContext.cause.message
+        } else {
+            calculation.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
+        }
+        calculation.save( failOnError: true, flush: true )
+        return calculation
+    }
 
     /**
      * This method is meant to be called from a quartz service to complete
      * the calculation request of a population version.
      * @param parameters a set of parameters passed from the original request through the quartz job detail data map
      */
-    public CommunicationPopulationCalculation processPendingPopulationCalculation( Map parameters ) {
+    private CommunicationPopulationCalculation processPendingPopulationCalculation( Map parameters ) {
         if (log.isDebugEnabled()) {
             log.debug( "calculatePendingPopulationVersion with " + parameters )
         }
