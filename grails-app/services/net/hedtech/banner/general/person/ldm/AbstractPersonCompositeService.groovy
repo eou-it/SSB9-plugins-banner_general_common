@@ -483,7 +483,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     private void fetchPersonsRaceDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get GORPRAC records for persons
-        Map pidmToRacesMap = getPidmToRacesMap()
+        Map pidmToRacesMap = getPidmToRacesMap(pidms)
 
         // Get GUID for each race
         Set<String> raceCodes = pidmToRacesMap?.values().race.flatten() as Set
