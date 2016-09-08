@@ -60,7 +60,10 @@ class CommunicationFieldService extends ServiceBase {
         if (communicationField.name.contains( " " ))
             throw new ApplicationException( CommunicationField, "@@r1:space.not.allowed@@" )
 
-        if (CommunicationField.fetchByName( communicationField.name ))
+        if (communicationField.name.contains( "\$" ))
+            throw new ApplicationException( CommunicationField, "@@r1:dollarCharacter.not.allowed@@" )
+
+        if (CommunicationField.fetchByNameForFGAC( communicationField.name ))
             throw new ApplicationException( CommunicationField, "@@r1:fieldNameAlreadyExists@@" )
 
         if (communicationField.immutableId == null)
@@ -119,6 +122,9 @@ class CommunicationFieldService extends ServiceBase {
 
         if (communicationField.name.contains( " " ))
             throw new ApplicationException( CommunicationField, "@@r1:space.not.allowed@@" )
+
+        if (communicationField.name.contains( "\$" ))
+            throw new ApplicationException( CommunicationField, "@@r1:dollarCharacter.not.allowed@@" )
 
         if (CommunicationField.existsAnotherName( communicationField.id, communicationField.name ))
             throw new ApplicationException( CommunicationField, "@@r1:fieldNameAlreadyExists@@" )

@@ -24,8 +24,11 @@ import javax.persistence.*
         @NamedQuery(name = "CommunicationField.fetchByName",
                 query = """ FROM CommunicationField a
                     WHERE upper(a.name) = upper(:fieldName)"""),
+        @NamedQuery(name = "CommunicationField.fetchByNameForFGAC",
+                query = """ select a.name FROM CommunicationField a
+                    WHERE upper(a.name) = upper(:fieldName)"""),
         @NamedQuery(name = "CommunicationField.existsAnotherName",
-                query = """ FROM CommunicationField a
+                query = """select a.name  FROM CommunicationField a
                     WHERE  upper(a.name) = upper(:fieldName)
                     AND   a.id <> :id""")
 ])
@@ -58,7 +61,7 @@ class CommunicationField implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "GCRCFLD_FOLDER_ID", referencedColumnName = "GCRFLDR_SURROGATE_ID")
-    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBTMPL_INV_GCRFLDR_KEY")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCRCFLD_INV_GCRFLDR_KEY")
     CommunicationFolder folder
 
     /**
@@ -230,6 +233,17 @@ class CommunicationField implements Serializable {
                     .list()[0]
         }
         return query
+    }
+
+    public static Boolean fetchByNameForFGAC(String fieldName) {
+
+        def query
+        CommunicationField.withSession { session ->
+            query = session.getNamedQuery('CommunicationField.fetchByNameForFGAC')
+                    .setString('fieldName', fieldName)
+                    .list()[0]
+        }
+        return (query != null)
     }
 
 
