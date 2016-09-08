@@ -24,7 +24,7 @@ class CommunicationManualInteractionService extends ServiceBase {
         manualInteraction.organization = (manualInteraction.organization ?: domainModelOrMap.organization)
         manualInteraction.interactionType = (manualInteraction.interactionType ?: domainModelOrMap.interactionType)
 
-        if (manualInteraction.getSubject() == null || manualInteraction.getSubject().trim() == "")
+        if (manualInteraction.getaSubject() == null || manualInteraction.getaSubject().trim() == "")
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:subjectCannotBeNull@@")
 
         if (manualInteraction.getOrganization() == null)
@@ -81,7 +81,7 @@ class CommunicationManualInteractionService extends ServiceBase {
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:operation.not.authorized@@")
         }
 
-        if (manualInteraction.getSubject() == null || manualInteraction.getSubject().trim() == "")
+        if (manualInteraction.getaSubject() == null || manualInteraction.getaSubject().trim() == "")
             throw new ApplicationException(CommunicationManualInteraction, "@@r1:subjectCannotBeNull@@")
 
         if (manualInteraction.getOrganization() == null)

@@ -116,7 +116,7 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
                 constituentPidm: 1353L,
                 organization: organization,
                 interactionType: interactionType,
-                subject: "Class Schedule",
+                aSubject: "Class Schedule",
                 // Nullable fields
                 description: "Tom stopped by today to have a discussion on his electives class schedule",
                 interactorPidm: 30078L,

@@ -70,7 +70,7 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
                 constituentPidm: 2L,
                 organization: organization,
                 interactionType: interactionType,
-                subject: "Class Schedule",
+                aSubject: "Class Schedule",
                 // Nullable fields
                 description: "Tom stopped by today to have a discussion on his electives class schedule",
                 interactorPidm: 3L,

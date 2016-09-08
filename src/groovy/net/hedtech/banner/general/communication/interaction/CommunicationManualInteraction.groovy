@@ -76,7 +76,7 @@ class CommunicationManualInteraction implements Serializable {
      * NAME: Descriptive name of the interaction type.
      */
     @Column(name = "GCRMINT_SUBJECT")
-    String subject
+    String aSubject
 
     /**
      * DESCRIPTION: Long description.
@@ -139,7 +139,7 @@ class CommunicationManualInteraction implements Serializable {
 
     static constraints = {
         constituentPidm(nullable:false)
-        subject(nullable: false, maxSize: 2000)
+        aSubject(nullable: false, maxSize: 2000)
         description(nullable:true)
         organization(nullable:false)
         interactionType(nullable:false)

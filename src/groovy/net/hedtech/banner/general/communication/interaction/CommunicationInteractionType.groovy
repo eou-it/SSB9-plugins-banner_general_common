@@ -188,6 +188,7 @@ class CommunicationInteractionType implements Serializable {
             ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
             eq("isAvailable", true)
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+            order((descdir ? Order.desc("name") : Order.asc("name")).ignoreCase())
         }
         return results
     }
