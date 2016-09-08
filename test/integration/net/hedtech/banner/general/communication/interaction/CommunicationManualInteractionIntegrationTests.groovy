@@ -53,7 +53,7 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
         // Assert domain values
         assertNotNull manualInteraction?.id
         assertEquals(1353L, manualInteraction.constituentPidm)
-        assertEquals "Class Schedule", manualInteraction.subject
+        assertEquals "Class Schedule", manualInteraction.aSubject
         assertEquals "Tom stopped by today to have a discussion on his electives class schedule", manualInteraction.description
         assertEquals organization.name, manualInteraction.organization.name
         assertEquals interactionType.name, manualInteraction.interactionType.name
@@ -75,7 +75,7 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
         assertErrorsFor manualInteraction, 'nullable',
                 [
                         'constituentPidm',
-                        'subject',
+                        'aSubject',
                         'organization',
                         'interactionType',
                         'interactorPidm',

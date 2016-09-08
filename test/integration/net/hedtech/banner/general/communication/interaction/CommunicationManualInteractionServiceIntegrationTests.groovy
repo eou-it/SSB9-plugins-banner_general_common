@@ -59,7 +59,7 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
         // Assert domain values
         assertNotNull manualInteraction?.id
         assertEquals(1353L, manualInteraction.constituentPidm)
-        assertEquals "Class Schedule", manualInteraction.subject
+        assertEquals "Class Schedule", manualInteraction.aSubject
         assertEquals "Tom stopped by today to have a discussion on his electives class schedule", manualInteraction.description
         assertEquals validOrganization.name, manualInteraction.organization.name
         assertEquals validInteractionType.name, manualInteraction.interactionType.name
@@ -72,7 +72,7 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
     @Test
     void testCreateEmptySubjectCommunicationManualInteraction() {
         def newManualInteraction = newCommunicationManualInteraction()
-        newManualInteraction.subject = "   "
+        newManualInteraction.aSubject = "   "
         def message = shouldFail( ApplicationException ) {
             communicationManualInteractionService.create( [domainModel: newManualInteraction] )
         }
@@ -89,13 +89,13 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
         def savedInteractionType = communicationManualInteractionService.get( id )
         assertNotNull savedInteractionType?.id
         // Update domain values
-        savedInteractionType.subject = "Updated subject"
+        savedInteractionType.aSubject = "Updated subject"
         def updatedInteractionType = communicationManualInteractionService.update( [domainModel: savedInteractionType] )
         // Find the updated domain
         def manualInteraction = communicationManualInteractionService.get( updatedInteractionType.id )
         // Assert updated domain values
         assertNotNull manualInteraction
-        assertEquals "Updated subject", manualInteraction.subject
+        assertEquals "Updated subject", manualInteraction.aSubject
 
     }
 
