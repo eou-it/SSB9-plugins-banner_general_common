@@ -10,7 +10,7 @@ import net.hedtech.banner.general.system.Campus
  * Decorator for Site LDM (/base/domain/site/v1/site.json-schema)
  *
  */
-@EqualsAndHashCode(includeFields = true)
+//@EqualsAndHashCode(includeFields = true, excludes = 'metadata,campus,buildings')
 class SiteDetail {
 
     @Delegate
@@ -32,6 +32,31 @@ class SiteDetail {
         this.campus = campus
         this.buildings = buildings
         this.metadata = metadata
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof SiteDetail)) return false
+
+        SiteDetail that = (SiteDetail) o
+
+        if (buildings != that.buildings) return false
+        if (campus != that.campus) return false
+        if (guid != that.guid) return false
+        if (metadata != that.metadata) return false
+        if (type != that.type) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = campus.hashCode()
+        result = 31 * result + metadata.hashCode()
+        result = 31 * result + guid.hashCode()
+        result = 31 * result + buildings.hashCode()
+        result = 31 * result + type.hashCode()
+        return result
     }
 
     @Override
