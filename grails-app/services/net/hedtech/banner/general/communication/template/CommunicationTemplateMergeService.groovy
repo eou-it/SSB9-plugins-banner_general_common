@@ -90,7 +90,7 @@ class CommunicationTemplateMergeService {
             Long pidm = (Long) parameters.get( 'pidm' )
             log.debug( "Calculating recipient data for pidm ${pidm}." )
             communicationFieldNames.each {
-                communicationField = CommunicationField.findByName( it )
+                communicationField = CommunicationField.fetchByName( it )
                 if (!(communicationField == null)) {
                     def fieldResult = communicationFieldCalculationService.calculateFieldByPidm(
                         communicationField.getRuleContent(),
@@ -193,7 +193,7 @@ class CommunicationTemplateMergeService {
 
             if (templateVariables.size() > 0) {
                 templateVariables.each { fieldName ->
-                    CommunicationField communicationField = CommunicationField.findByName(fieldName)
+                    CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
                     String previewString = (communicationField && communicationField.previewValue && communicationField.previewValue.size() > 0) ? communicationField.previewValue : "\$${fieldName}\$"
                     renderedCommunicationFields.put(fieldName, previewString)
                 }
