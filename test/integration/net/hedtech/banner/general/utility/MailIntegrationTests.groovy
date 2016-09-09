@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.utility
 import org.junit.Before
@@ -29,7 +29,7 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     def i_success_systemIndicator = "TT"
     def i_success_module = "#"
     def i_success_adminIdentifier = 1
-    def i_success_materialMod = "TTTT"
+    def i_success_materialMod = "RITK"
     def i_success_dateInitial = new Date()
     def i_success_datePrinted = new Date()
     def i_success_userData = "TTTTT"
@@ -75,7 +75,7 @@ class MailIntegrationTests extends BaseIntegrationTestCase {
     def u_success_systemIndicator = "WW"
     def u_success_module = "#"
     def u_success_adminIdentifier = 1
-    def u_success_materialMod = "TTTT"
+    def u_success_materialMod = "ADPK"
     def u_success_dateInitial = new Date()
     def u_success_datePrinted = new Date()
     def u_success_userData = "TTTTT"

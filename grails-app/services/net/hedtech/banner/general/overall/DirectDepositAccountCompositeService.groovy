@@ -1,3 +1,6 @@
+/********************************************************************************
+  Copyright 2016 Ellucian Company L.P. and its affiliates.
+********************************************************************************/
 package net.hedtech.banner.general.overall
 
 import grails.converters.JSON
@@ -377,6 +380,8 @@ class DirectDepositAccountCompositeService {
                     model.docAccts[i].net = acct.phrdocm_net
 
                     model.totalNet += acct.phrdocm_net
+
+                    model.docAccts[i].net = formatCurrency(model.docAccts[i].net)
                 }
             } else {
 

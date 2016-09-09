@@ -87,14 +87,14 @@ class SourceBackgroundInstitutionTestScore implements Serializable {
 
     public String toString() {
         """SourceBackgroundInstitutionTestScore[
-					id=$id, 
-					version=$version, 
-					demographicYear=$demographicYear, 
+					id=$id,
+					version=$version,
+					demographicYear=$demographicYear,
 					meanTestScore=$meanTestScore,
-					lastModified=$lastModified, 
-					lastModifiedBy=$lastModifiedBy, 
-					dataOrigin=$dataOrigin, 
-					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution, 
+					lastModified=$lastModified,
+					lastModifiedBy=$lastModifiedBy,
+					dataOrigin=$dataOrigin,
+					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution,
 					testScore=$testScore]"""
     }
 
@@ -133,7 +133,7 @@ class SourceBackgroundInstitutionTestScore implements Serializable {
 
     static constraints = {
         demographicYear(nullable: false, min: -9999, max: 9999)
-        meanTestScore(nullable: false, maxSize: 5)
+        meanTestScore(nullable: false, maxSize: 15)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
