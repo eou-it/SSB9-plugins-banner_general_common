@@ -73,7 +73,7 @@ class BuildingCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testGetInvalidNonExistentHousingLocationBuildingDescription() {
-        HousingLocationBuildingDescription housingLocationBuildingDescription = HousingLocationBuildingDescription.findByBuilding( net.hedtech.banner.general.system.Building.findByCode( 'NORTH' ) )
+        HousingLocationBuildingDescription housingLocationBuildingDescription = HousingLocationBuildingDescription.findByBuilding( net.hedtech.banner.general.system.Building.findByCode( 'BROWN' ) )
         assertNotNull housingLocationBuildingDescription.id
         def id = housingLocationBuildingDescription.id
         String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainId( 'buildings', id ).guid

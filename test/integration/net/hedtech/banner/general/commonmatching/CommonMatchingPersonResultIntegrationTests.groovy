@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.commonmatching
@@ -257,7 +257,7 @@ class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase
                       p_match_pidm_out   => new_pidm);
 
                 end;
-             """, ["Smith", "John"]) { output_info ->
+             """, ["Lincoln", "Abraham"]) { output_info ->
                 result = output_info
             }
         }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.commonmatching
 import org.junit.Before
@@ -16,7 +16,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
 
     //Test data for creating new domain instance
     //Valid test data (For success tests)
-    def i_success_commonMatchingSource = "TT"
+    def i_success_commonMatchingSource = "HEDM_LASTNAME_MATCH"
     def i_success_objectName = "SPAIDEN"
     def i_success_sequenceNumber = 1
     //Invalid test data (For failure tests)
@@ -157,7 +157,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
 
 
     private def newValidForCreateCommonMatchingDisplayOption() {
-        def commonMatchingSource = new CommonMatchingSource(code: i_success_commonMatchingSource, description: 'test')
+        def commonMatchingSource = CommonMatchingSource.findByCode(i_success_commonMatchingSource)
         commonMatchingSource.save(failOnError: true, flush: true)
         def commonMatchingDisplayOption = new CommonMatchingDisplayOption(
                 objectName: i_success_objectName,
