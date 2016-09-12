@@ -250,8 +250,8 @@ class CommunicationPopulationListView implements Serializable {
             gt("lastCalculatedCount",0L)
             and {
                 or {
-                    ilike("queryName", searchName)
-                    ilike("queryFolder", searchName)
+                    ilike("name", searchName)
+                    ilike("populationFolderName", searchName)
                 }
             }
         }
