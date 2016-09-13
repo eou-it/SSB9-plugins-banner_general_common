@@ -194,7 +194,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testGetLastPayDistribution() {
-        def pidm = PersonUtility.getPerson("HOP510001").pidm
+        def pidm = PersonUtility.getPerson("HOP510006").pidm
 
         def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
 
