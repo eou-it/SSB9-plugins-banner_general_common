@@ -914,6 +914,94 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-external-education-hs" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-hs</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SORHSCH</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-education-pc" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-pc</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SORPCOL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-education-trit" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-trit</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SHRTRIT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-education-degr" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-degr</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SORDEGR</value>
+                <value>EEDM.ExternalEducations.SORMAJR</value>
+                <value>EEDM.ExternalEducations.SORMINR</value>
+                <value>EEDM.ExternalEducations.SORCONC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+      
+    <bean id="ar-external-education-tram" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-tram</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SHRTRAM</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -968,6 +1056,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-gradechangereasons"/>
                 <ref bean="ar-citizenshipstatuses"/>
                 <ref bean="ar-visatypes"/>
+                <ref bean="ar-external-education-hs"/>
+                <ref bean="ar-external-education-pc"/>
+                <ref bean="ar-external-education-trit"/>
+                <ref bean="ar-external-education-degr"/>
+                <ref bean="ar-external-education-tram"/>
             </list>
         </property>
     </bean>
@@ -1026,6 +1119,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-gradechangereasons"/>
                 <ref bean="ar-citizenshipstatuses"/>
                 <ref bean="ar-visatypes"/>
+                <ref bean="ar-external-education-hs"/>
+                <ref bean="ar-external-education-pc"/>
+                <ref bean="ar-external-education-trit"/>
+                <ref bean="ar-external-education-degr"/>
+                <ref bean="ar-external-education-tram"/>
             </list>
         </property>
     </bean>
