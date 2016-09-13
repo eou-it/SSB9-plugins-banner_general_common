@@ -49,7 +49,7 @@ class PersonFilterCompositeServiceIntegrationTests extends BaseIntegrationTestCa
         user = "GRAILS_USER"
         selection = "SAT_TEST"
         selection1 = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        key = "30000"
+        key = "1"
     }
 
 
