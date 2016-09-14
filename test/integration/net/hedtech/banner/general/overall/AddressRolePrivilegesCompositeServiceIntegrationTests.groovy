@@ -1,6 +1,7 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.overall.AddressRolePrivileges
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -43,6 +44,16 @@ class AddressRolePrivilegesCompositeServiceIntegrationTests extends BaseIntegrat
         catch (ApplicationException ae) {
             assertApplicationException ae, "noPrivilegesAvailable"
         }
+    }
+
+    @Test
+    void testGetUpdateableAddressTypesWithMultipleRoles() {
+        def roles = ['STUDENT', 'EMPLOYEE']
+        def entityResult = AddressRolePrivileges.fetchUpdatePrivsByRoleList(roles)
+        def serviceResult = addressRolePrivilegesCompositeService.getUpdateableAddressTypes(roles)
+
+        assertTrue "Number of results from service should be less than that returned by entity method",
+                   serviceResult.size() < entityResult.size()
     }
 
     //TODO fix tests, need seed data
