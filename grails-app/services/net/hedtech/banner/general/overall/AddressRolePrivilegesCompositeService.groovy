@@ -14,7 +14,7 @@ class AddressRolePrivilegesCompositeService {
             throw new ApplicationException(AddressRolePrivileges, "@@r1:noPrivilegesAvailable@@")
         }
 
-        addressTypeList
+        addressTypeList.unique()  // If multiple roles are used above, duplicate types can be returned
     }
 
     def fetchUpdateableAddressTypeList(roles, int max = 10, int offset = 0, String searchString = '') {
