@@ -42,6 +42,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     NationCompositeService nationCompositeService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
+    MaritalStatusCompositeService maritalStatusCompositeService
     def crossReferenceRuleService
 
 
@@ -429,6 +430,22 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     String usEthnicCodeGuid = dataMapForPerson["usEthnicCodeGuid"]
                     decorator.ethnicity = ethnicityCompositeService.createEthnicityV6(usEthnicCodeGuid, null, personBase.ethnic)
                 }
+                //dateOfBirth
+                if (personBase.birthDate) {
+                    decorator.dateOfBirth = personBase.birthDate
+                }
+                //dateDeceased
+                if (personBase.deadDate) {
+                    decorator.dateDeceased = personBase.deadDate
+                }
+                //gender
+                if (personBase.sex) {
+                    decorator.gender = personBase.sex
+                }
+                //maritialStatus
+                if (personBase.maritalStatus?.code) {
+                    decorator.maritialStatus = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
+                }
             }
 
             // Names
@@ -531,6 +548,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 Map codeToNationMap = dataMapForPerson["codeToNationMap"]
                 decorator.identityDocuments = []
                 decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForPerson.get("isInstitutionUsingISO2CountryCodes"))
+
+                //countryOfBirth
+                if (visaIntlInformation.nationBirth) {
+                    decorator.countryOfBirth = isoCodeService.getISO3CountryCode(codeToNationMap.get(visaIntlInformation.nationBirth).scodIso)
+                }
+
+                //citizenshipCountry
+                if (visaIntlInformation.nationLegal) {
+                    decorator.citizenshipCountry = isoCodeService.getISO3CountryCode(codeToNationMap.get(visaIntlInformation.nationLegal).scodIso)
+                }
             }
 
             // languages
@@ -615,6 +642,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         Set<String> issuingNationCodes = pidmToPassportMap?.values().nationIssue.flatten().unique()
+        issuingNationCodes.addAll(pidmToPassportMap?.values().nationBirth.flatten().unique())
+        issuingNationCodes.addAll(pidmToPassportMap?.values().nationLegal.flatten().unique())
         // Get STVNATN records for country information
         Map codeToNationMap = [:]
         if (issuingNationCodes) {
