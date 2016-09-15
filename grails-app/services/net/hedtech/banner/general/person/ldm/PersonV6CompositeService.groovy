@@ -397,6 +397,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         if (dataMap.pidmToLanguageCodeMap.containsKey(personIdentificationNameCurrent.pidm)) {
             dataMapForPerson << ["iso3LanguageCode": dataMap.stvlangCodeToISO3LangCodeMap.get(dataMap.pidmToLanguageCodeMap.get(personIdentificationNameCurrent.pidm))]
         }
+
+        //countryBirth and countryLegal
+        VisaInternationalInformation visaIntlInformation1 = dataMap.pidmToOriginCountryMap.get(personIdentificationNameCurrent.pidm)
+        if (visaIntlInformation1) {
+            dataMapForPerson << ["pidmToOriginCountryMap": visaIntlInformation1]
+            dataMapForPerson << ["codeToNationMap": dataMap.codeToNationMap]
+        }
     }
 
 
@@ -548,22 +555,28 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 Map codeToNationMap = dataMapForPerson["codeToNationMap"]
                 decorator.identityDocuments = []
                 decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForPerson.get("isInstitutionUsingISO2CountryCodes"))
-
-                //countryOfBirth
-                if (visaIntlInformation.nationBirth) {
-                    decorator.countryOfBirth = isoCodeService.getISO3CountryCode(codeToNationMap.get(visaIntlInformation.nationBirth).scodIso)
-                }
-
-                //citizenshipCountry
-                if (visaIntlInformation.nationLegal) {
-                    decorator.citizenshipCountry = isoCodeService.getISO3CountryCode(codeToNationMap.get(visaIntlInformation.nationLegal).scodIso)
-                }
             }
 
             // languages
             if (dataMapForPerson["iso3LanguageCode"]) {
                 decorator.languages = []
                 decorator.languages << ["code": dataMapForPerson["iso3LanguageCode"]]
+            }
+
+            //countryBirth & citizenshipCountry
+            VisaInternationalInformation visaIntlInformation1 = dataMapForPerson["pidmToOriginCountryMap"]
+            if (visaIntlInformation1) {
+                Map codeToNationMap = dataMapForPerson["codeToNationMap"]
+
+                //countryOfBirth
+                if (visaIntlInformation1.nationBirth) {
+                    decorator.countryOfBirth = isoCodeService.getISO3CountryCode(codeToNationMap.get(visaIntlInformation1.nationBirth).scodIso)
+                }
+
+                //citizenshipCountry
+                if (visaIntlInformation1.nationLegal) {
+                    decorator.citizenshipCountry = isoCodeService.getISO3CountryCode(codeToNationMap.get(visaIntlInformation1.nationLegal).scodIso)
+                }
             }
         }
         return decorator
@@ -632,6 +645,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         // Passport
         Map pidmToPassportMap = [:]
         Map pidmToLanguageCodeMap = [:]
+        Map pidmToOriginCountryMap = [:]
         entities?.each {
             if (it.passportId) {
                 pidmToPassportMap.put(it.pidm, it)
@@ -639,11 +653,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             if (it.language?.code) {
                 pidmToLanguageCodeMap.put(it.pidm, it.language.code)
             }
+            if (it.nationBirth || it.nationLegal) {
+                pidmToOriginCountryMap.put(it.pidm, it)
+            }
         }
 
         Set<String> issuingNationCodes = pidmToPassportMap?.values().nationIssue.flatten().unique()
-        issuingNationCodes.addAll(pidmToPassportMap?.values().nationBirth.flatten().unique())
-        issuingNationCodes.addAll(pidmToPassportMap?.values().nationLegal.flatten().unique())
+        issuingNationCodes.addAll(pidmToOriginCountryMap?.values().nationBirth.flatten().unique())
+        issuingNationCodes.addAll(pidmToOriginCountryMap?.values().nationLegal.flatten().unique())
         // Get STVNATN records for country information
         Map codeToNationMap = [:]
         if (issuingNationCodes) {
@@ -664,6 +681,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("codeToNationMap", codeToNationMap)
         dataMap.put("pidmToLanguageCodeMap", pidmToLanguageCodeMap)
         dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
+        dataMap.put("pidmToOriginCountryMap", pidmToOriginCountryMap)
     }
 
 
