@@ -101,7 +101,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
                     value: value,
                     renderAsHtml: communicationField.renderAsHtml
                 )
-                nameToValueMap.put(communicationField.name, communicationFieldValue)
+                nameToValueMap.put( fieldName, communicationFieldValue )
             }
         }
 
