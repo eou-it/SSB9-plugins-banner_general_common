@@ -145,7 +145,6 @@ class CommunicationCommonUtility {
 //get the oracle userid associated with the login banner id.  If there is a gobeacc record, that oracle user will be
 //returned. If no gobeacc record then the username associated with the bannerSsbDataSource will be returned
             map.put("userId", (SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: Holders.config?.bannerSsbDataSource?.username)?.toUpperCase())
-            map.put("bannerId", (SecurityContextHolder?.context?.authentication?.principal?.getUsername()?.toUpperCase()))
 
             return map
         } catch (Exception it) {
