@@ -6,11 +6,9 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.general.overall.*
-import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
 import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.general.system.InstitutionalDescriptionService
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.*
@@ -32,10 +30,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     def outsideInterestService
     def interestCompositeService
-    InstitutionalDescriptionService institutionalDescriptionService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
-    VisaInformationService visaInformationService
-    VisaTypeCompositeService visaTypeCompositeService
     ReligionCompositeService religionCompositeService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
     VisaInternationalInformationService visaInternationalInformationService
@@ -228,7 +223,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         fetchPersonsPhoneDataAndPutInMap_VersionSpecific(pidms, dataMap)
         fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
-        fetchPersonsVisaDataAndPutInMap(pidms, dataMap)
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
     }
@@ -371,12 +365,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             dataMapForPerson << ["emailTypeCodeToGuidMap": dataMap.emailTypeCodeToGuidMap]
         }
 
-        // visaStatus
-        VisaInformation visaInfo = dataMap.pidmToVisaInfoMap.get(personIdentificationNameCurrent.pidm)
-        if (visaInfo) {
-            dataMapForPerson << ["visaInformation": visaInfo]
-            dataMapForPerson << ["visaTypeGuid": dataMap.vtCodeToGuidMap.get(visaInfo.visaType.code)]
-        }
 
         // interests
         List personInterests = dataMap.pidmToInterestsMap.get(personIdentificationNameCurrent.pidm)
@@ -450,12 +438,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
                 // Add SPBPERS_LEGAL_NAME as "legal"
                 decorator.names << legalNameAlternateV6
-            }
-
-            // visaStatus
-            VisaInformation visaInfo = dataMapForPerson["visaInformation"]
-            if (visaInfo) {
-                decorator.visaStatus = createVisaStatusV6(visaInfo, dataMapForPerson["visaTypeGuid"])
             }
 
             // Roles
@@ -543,25 +525,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsVisaDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        // Get GORVISA records for persons
-        def pidmToVisaInfoMap = fetchVisaInformationByPIDMs(pidms)
-        // Get GUIDs for visa types
-        List<String> visaTypeCodes = pidmToVisaInfoMap?.values()?.findResults {
-            it.visaType?.code
-        }.unique()
-        Map<String, String> vtCodeToGuidMap = [:]
-        if (visaTypeCodes) {
-            log.debug "Getting GUIDs for VisaType codes $visaTypeCodes..."
-            vtCodeToGuidMap = visaTypeCompositeService.getVisaTypeCodeToGuidMap(visaTypeCodes)
-            log.debug "Got ${vtCodeToGuidMap?.size() ?: 0} GUIDs for given VisaType codes"
-        }
-        // Put in Map
-        dataMap.put("pidmToVisaInfoMap", pidmToVisaInfoMap)
-        dataMap.put("vtCodeToGuidMap", vtCodeToGuidMap)
-    }
-
-
     private void fetchPersonsInterestDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         if (!outsideInterestService) {
             // Test mode
@@ -635,23 +598,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("codeToNationMap", codeToNationMap)
         dataMap.put("pidmToLanguageCodeMap", pidmToLanguageCodeMap)
         dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
-    }
-
-
-    private def fetchVisaInformationByPIDMs(List<Integer> pidms) {
-        log.debug "The visa status of the person with regards to the country where a given institution is located"
-        InstitutionalDescription institutionalDescription = institutionalDescriptionService.findByKey()
-        log.debug "Institution is located in nation ${institutionalDescription?.natnCode}"
-        def pidmToVisaInfoMap = [:]
-        if (pidms) {
-            log.debug "Getting GORVISA records for ${pidms?.size()} PIDMs..."
-            List<VisaInformation> entities = visaInformationService.fetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList(pidms, institutionalDescription?.natnCode)
-            log.debug "Got ${entities?.size()} GORVISA records"
-            entities?.each {
-                pidmToVisaInfoMap.put(it.pidm, it)
-            }
-        }
-        return pidmToVisaInfoMap
     }
 
 
@@ -748,46 +694,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private VisaStatusV6 createVisaStatusV6(VisaInformation visaInfo, String visaTypeGuid) {
-        VisaStatusV6 decorator
-        if (visaInfo) {
-            decorator = new VisaStatusV6()
-            decorator.category = visaTypeCompositeService.getVisaTypeCategory(visaInfo.visaType?.nonResIndicator)
-            if (visaTypeGuid) {
-                decorator.detail = ["id": visaTypeGuid]
-            }
-            decorator.status = getVisaStatus(visaInfo)
-            if (visaInfo.visaIssueDate) {
-                decorator.startOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaIssueDate)
-            }
-            if (visaInfo.visaExpireDate) {
-                decorator.endOn = DateConvertHelperService.convertDateIntoUTCFormat(visaInfo.visaExpireDate)
-            }
-        }
-        return decorator
-    }
-
-    /**
-     * There is no status field on visa information in Banner.
-     * If the current date is greater than GORVISA_VISA_EXPIRE_DATE then the status should be set to 'expired'
-     * otherwise, the status should be set to 'current'
-     *
-     * @param visaInfo VisaInformation
-     * @return
-     */
-    private String getVisaStatus(VisaInformation visaInfo) {
-        String status = "current"
-        if (visaInfo && visaInfo.visaExpireDate) {
-            String currentDate = new Date().format("yyyyMMdd")
-            String visaExpireDate = visaInfo.visaExpireDate.format("yyyyMMdd")
-            if (currentDate > visaExpireDate) {
-                status = "expired"
-            }
-        }
-        return status
-    }
-
-
     private RoleV6 createRoleV6(RoleName roleName, Timestamp startDate, Timestamp endDate) {
         RoleV6 decorator
         if (roleName) {
@@ -809,7 +715,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         emailV6.address = it.emailAddress
         emailV6.type = new EmailTypeDetails(code, null, guid, emailType)
         if (it.preferredIndicator) {
-            emailV6.preference = 'primaryOverall'
+            emailV6.preference = 'primary'
         }
         return emailV6
     }

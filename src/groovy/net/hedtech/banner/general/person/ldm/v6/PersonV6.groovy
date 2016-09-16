@@ -21,7 +21,6 @@ class PersonV6 {
     def privacyStatus
     List<NameV6> names
     CitizenshipStatusV6 citizenshipStatus
-    VisaStatusV6 visaStatus
     def religion
     List<RoleV6> roles
     List<PersonCredential> credentials
