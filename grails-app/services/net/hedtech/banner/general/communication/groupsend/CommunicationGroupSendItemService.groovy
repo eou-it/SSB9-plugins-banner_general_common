@@ -21,8 +21,9 @@ class CommunicationGroupSendItemService extends ServiceBase {
     public def fetchRunningGroupSendItemCount( Long groupSendId ) {
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
         def count = 0
+        def readyvar = 'Ready'
         try {
-            sql.eachRow("select count(*) as totalCount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ? and GCRGSIM_CURRENT_STATE = 'Ready'", [groupSendId]) { row ->
+            sql.eachRow("select count(*) as totalCount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ? and GCRGSIM_CURRENT_STATE = ?", [groupSendId, readyvar]) { row ->
                 count = row.totalCount
             }
         } finally {
