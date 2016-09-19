@@ -913,6 +913,45 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    -- Course / Section Begin
+    <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>courses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/courses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Courses.SCBCGID</value>
+                <value>EEDM.Courses.SCBCRSE</value>
+                <value>EEDM.Courses.SCRGMOD</value>
+                <value>EEDM.Courses.SCRGSID</value>
+                <value>EEDM.Courses.SCRLEVL</value>
+                <value>EEDM.Courses.SCRSCHD</value>
+                <value>EEDM.Courses.SCRSYLN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>sections</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/sections/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Sections.SCBCGID</value>
+                <value>EEDM.Sections.SSRGSID</value>
+                <value>EEDM.Sections.SSBSGID</value>
+                <value>EEDM.Sections.SSBSECT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+    -- Course / Section End
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -967,6 +1006,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-gradechangereasons"/>
                 <ref bean="ar-citizenshipstatuses"/>
                 <ref bean="ar-visatypes"/>
+                <ref bean="ar-courses"/>
+                <ref bean="ar-sections"/>
             </list>
         </property>
     </bean>
@@ -1025,6 +1066,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-gradechangereasons"/>
                 <ref bean="ar-citizenshipstatuses"/>
                 <ref bean="ar-visatypes"/>
+                <ref bean="ar-courses"/>
+                <ref bean="ar-sections"/>
             </list>
         </property>
     </bean>
