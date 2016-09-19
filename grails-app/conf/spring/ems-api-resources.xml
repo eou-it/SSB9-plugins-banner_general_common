@@ -227,7 +227,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>HEDM.Person.SPRIDEN</value>
-                <value>HEDM.Person.GORVISA</value>
                 <value>HEDM.Person.GOBINTL</value>
                 <value>HEDM.Person.SORINTS</value>
                 <value>HEDM.Person.GOREMAL</value>
