@@ -163,7 +163,7 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
                 assertEquals emailV6.type.emailType, bannerEmailTypeToHedmEmailTypeMap.get(personEmail.emailType.code)
                 assertEquals emailV6.type.detail.id, emailTypeCodeToGuidMap.get(personEmail.emailType.code)
                 if (emailV6.preference) {
-                    assertEquals emailV6.preference, 'primaryOverall'
+                    assertEquals emailV6.preference, 'primary'
                 }
             }
         }

@@ -390,7 +390,7 @@ class NonPersonCompositeService extends LdmService {
         emailV6.address = it.emailAddress
         emailV6.type = new EmailTypeDetails(code, null, guid, emailType)
         if (it.preferredIndicator) {
-            emailV6.preference = 'primaryOverall'
+            emailV6.preference = 'primary'
         }
         return emailV6
     }

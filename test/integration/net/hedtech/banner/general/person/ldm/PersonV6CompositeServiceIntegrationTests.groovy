@@ -34,7 +34,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     NameTypeService nameTypeService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
-    static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24789'
+    static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24787'
     String i_succes_person_banner_id = 'HOSFE2000'
     GlobalUniqueIdentifier personGlobalUniqueIdentifier
     PersonIdentificationName personIdentificationName
@@ -404,9 +404,25 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         PersonIdentificationNameCurrent personCurrent = PersonIdentificationNameCurrent.fetchByBannerId(BANNER_ID_WITH_TYPE_BIRTH)
         assertNotNull personCurrent
         assertEquals 'P', personCurrent.entityIndicator
+
+        def personIdentificationNameAlternate = new PersonIdentificationNameAlternate(
+                pidm: personCurrent.pidm,
+                bannerId: BANNER_ID_WITH_TYPE_BIRTH,
+                changeIndicator: "N",
+                lastName: personCurrent.lastName,
+                firstName: personCurrent.firstName,
+                middleName: personCurrent.middleName,
+                entityIndicator: personCurrent.entityIndicator,
+                nameType: personCurrent.nameType,
+                lastModifiedBy: "grails"
+        )
+
+
+        personIdentificationNameAlternate.save(flush: true, failOnError: true)
+
         GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(personCurrent.pidm.toString(), GeneralCommonConstants.PERSONS_LDM_NAME)
         assertNotNull globalUniqueIdentifier
-        PersonIdentificationNameAlternate personAlternate = PersonIdentificationNameAlternate.findByPidmAndNameType(personCurrent.pidm, NameType.findByCode("BRTH"))
+        PersonIdentificationNameAlternate personAlternate = PersonIdentificationNameAlternate.fetchAllByPidm(personCurrent.pidm).get(0)
         assertNotNull personAlternate
         Map content = [
                 action: [POST: "list"],
