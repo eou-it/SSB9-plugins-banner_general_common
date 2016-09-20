@@ -60,21 +60,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>courses</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/courses/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <null/>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-    </bean>
-
     <bean id="ar-gradeModes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>grade-modes</value>
@@ -312,21 +297,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>HEDM.Room.SLBRDEF</value>
             </list>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>sections</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/sections/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <null/>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
@@ -846,20 +816,20 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
     </bean>
 
     <bean id="ar-sec-reg-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-            <constructor-arg name="resource">
-                <value>section-registration-statuses</value>
-            </constructor-arg>
-            <constructor-arg name="path">
-                <value>/section-registration-statuses/</value>
-            </constructor-arg>
-            <constructor-arg name="events">
-                <list>
-                    <value>EEDM.SectionRegistrationStatuses.STVRSTS</value>
-                </list>
-            </constructor-arg>
-            <constructor-arg name="apiDeployment">
-                <value>Student</value>
-            </constructor-arg>
+        <constructor-arg name="resource">
+            <value>section-registration-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/section-registration-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.SectionRegistrationStatuses.STVRSTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-gradechangereasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -913,7 +883,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    -- Course / Section Begin
     <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>courses</value>
@@ -932,6 +901,9 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>EEDM.Courses.SCRSYLN</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -949,8 +921,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>EEDM.Sections.SSBSECT</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
     </bean>
-    -- Course / Section End
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -958,7 +932,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-acadlevels"/>
                 <ref bean="ar-acadperiods"/>
                 <ref bean="ar-buildings"/>
-                <ref bean="ar-courses"/>
                 <ref bean="ar-instmethods"/>
                 <ref bean="ar-instplatforms"/>
                 <ref bean="ar-maritalstatuses"/>
@@ -967,7 +940,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-races"/>
                 <ref bean="ar-restritypes"/>
                 <ref bean="ar-rooms"/>
-                <ref bean="ar-sections"/>
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
                 <ref bean="ar-subjects"/>
@@ -1018,7 +990,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-acadlevels"/>
                 <ref bean="ar-acadperiods"/>
                 <ref bean="ar-buildings"/>
-                <ref bean="ar-courses"/>
                 <ref bean="ar-instmethods"/>
                 <ref bean="ar-instplatforms"/>
                 <ref bean="ar-maritalstatuses"/>
@@ -1027,7 +998,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-races"/>
                 <ref bean="ar-restritypes"/>
                 <ref bean="ar-rooms"/>
-                <ref bean="ar-sections"/>
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
                 <ref bean="ar-subjects"/>
