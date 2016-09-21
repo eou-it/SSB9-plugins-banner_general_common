@@ -9,19 +9,21 @@ class PersonalInformationCompositeService {
     def countyService
     def stateService
     def nationService
+    def relationshipService
 
-    def getAddressValidationObjects(roles, map){
-        def newAddress = map
-
+    def getPersonValidationObjects(roles, map){
         // inner entities need to be actual domain objects
-        newAddress.addressType = addressRolePrivilegesCompositeService.fetchAddressType(roles, map.addressType.code)
+        if(map.addressType?.code)
+            map.addressType = addressRolePrivilegesCompositeService.fetchAddressType(roles, map.addressType.code)
         if(map.county?.code)
-            newAddress.county = countyService.fetchCounty(map.county.code)
+            map.county = countyService.fetchCounty(map.county.code)
         if(map.state?.code)
-            newAddress.state = stateService.fetchState(map.state.code)
+            map.state = stateService.fetchState(map.state.code)
         if(map.nation?.code)
-            newAddress.nation = nationService.fetchNation(map.nation.code)
+            map.nation = nationService.fetchNation(map.nation.code)
+        if(map.relationship?.code)
+            map.relationship = relationshipService.fetchRelationship(map.relationship.code)
 
-        newAddress
+        map
     }
 }
