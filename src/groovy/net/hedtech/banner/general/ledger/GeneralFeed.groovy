@@ -166,7 +166,7 @@ class GeneralFeed implements Serializable{
         programCode(nullable: true, maxSize: 6)
         activityCode(nullable: true, maxSize: 6)
         locationCode(nullable: true, maxSize: 6)
-        projectCode(nullable: true, maxSize: 6)
+        projectCode(nullable: true, maxSize: 8)
         bankCode(nullable: true, maxSize: 2)
         ruleClassCode(nullable: true, maxSize: 4)
         description(nullable: true, maxSize: 35)
