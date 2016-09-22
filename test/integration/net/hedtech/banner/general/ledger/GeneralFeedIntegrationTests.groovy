@@ -322,7 +322,7 @@ class GeneralFeedIntegrationTests extends BaseIntegrationTestCase {
         generalFeed.validate()
         assertFalse(generalFeed.hasErrors())
         //max size for projectCode is 6
-        GeneralFeed generalFeed1 = createNewGenerealFeed([projectCode: "PROJ_C1"])
+        GeneralFeed generalFeed1 = createNewGenerealFeed([projectCode: "PROJ_C123"])
         generalFeed1.validate()
         assertTrue(generalFeed1.hasErrors())
         assertEquals(1, generalFeed1.errors.errorCount)
