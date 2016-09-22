@@ -306,7 +306,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListAlumniPersonsGivenPidms() {
         def pidmList = []
-        ["A00000613", "A00000614", "A00000615", "A00000616"].each {
+        ["510000001", "510000000", "510000002", "520000000"].each {
             def person = PersonUtility.getPerson(it)
             pidmList << person.pidm
         }
@@ -321,7 +321,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListEmployeePersonsGivenPidms() {
         def pidmList = []
-        ["FICA00001", "FLACC0002", "FLACC0003", "FLACS0001"].each {
+        ["207000001", "710000001", "710000002", "710000003"].each {
             def person = PersonUtility.getPerson(it)
             pidmList << person.pidm
         }
@@ -350,10 +350,10 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListVendorPersonsWithPagination() {
         def results1 = userRoleCompositeService.fetchVendors("firstName", "asc", 0, 0)
-        assertTrue results1.totalCount > 10
-        def results = userRoleCompositeService.fetchVendors("firstName", "asc", 10, 50)
+        assertTrue results1.totalCount > 0
+        def results = userRoleCompositeService.fetchVendors("firstName", "asc", 7, 0)
         // expect to get rows 50-59 back
-        assertEquals 10, results?.pidms?.size()
+        assertEquals 7, results?.pidms?.size()
         results.pidms?.find { pidm ->
             assertNotNull PersonUtility.getPerson(pidm)
         }
@@ -394,7 +394,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testListVendorPersonsGivenPidms() {
         def pidmList = []
-        ["A00010104", "A00010107", "A00010100", "A00010210"].each {
+        ["711000005", "300000119", "711100002", "711100001"].each {
             def person = PersonUtility.getPerson(it)
             pidmList << person.pidm
         }

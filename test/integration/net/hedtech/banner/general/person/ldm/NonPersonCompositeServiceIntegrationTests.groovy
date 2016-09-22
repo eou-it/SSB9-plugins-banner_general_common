@@ -45,13 +45,8 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        initializeDataReferences()
     }
 
-    private void initializeDataReferences() {
-        person = PersonIdentificationNameCurrent.fetchByBannerId("A00010018")
-        guid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(person?.pidm?.toString(), GeneralCommonConstants.NON_PERSONS_LDM_NAME)?.guid
-    }
 
     @Test
     void testList_NonPersons_v6() {
@@ -88,6 +83,9 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     @Test
     void testGet_NonPersons_v6() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
+        def nonPersons = nonPersonCompositeService.list(params)
+        assertFalse nonPersons.isEmpty()
+        String guid = nonPersons[0].guid
         NonPersonDecorator decorator = nonPersonCompositeService.get(guid)
         assertNotNull decorator
         assertEquals guid, decorator.guid
