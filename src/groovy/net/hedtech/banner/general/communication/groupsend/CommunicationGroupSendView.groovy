@@ -151,13 +151,6 @@ class CommunicationGroupSendView implements Serializable {
         return query
     }
 
-    static mapping = {
-        cache usage: "read-only"
-    }
-
-    def beforeUpdate() {
-        return false
-    }
 //    Commented out for performance reason in calling a very complex view. Instead of paging through this view directly,
 //    the controller fetches from the main entity GroupSend and then does a CommunicationGroupSendView#fetchById on each
 //    found object for the current page it is returning back.
