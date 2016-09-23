@@ -65,18 +65,18 @@ class AddressRolePrivilegesCompositeServiceIntegrationTests extends BaseIntegrat
        //assertEquals 50, addressTypeList.size()
         assertTrue addressTypeList.size() >= 1
         assertEquals 'Billing', addressTypeList[0].description
-        assertEquals 'Permanent', addressTypeList[12].description
+        assertEquals 'Permanent', addressTypeList[9].description
     }
 
     //TODO fix tests, need seed data
     @Test
     void testFetchUpdateableAddressTypeListMidList() {
         def roles = ['STUDENT', 'EMPLOYEE']
-        def addressTypeList = addressRolePrivilegesCompositeService.fetchUpdateableAddressTypeList(roles, 10, 10)
+        def addressTypeList = addressRolePrivilegesCompositeService.fetchUpdateableAddressTypeList(roles, 10, 5)
 
        // assertEquals 12, addressTypeList.size()
         assertTrue addressTypeList.size() >= 1
-        assertEquals 'Parents', addressTypeList[0].description
+        assertEquals 'Other', addressTypeList[0].description
     }
 
     //TODO fix tests, need seed data

@@ -38,7 +38,7 @@ class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestC
      */
     @Test
     void testFetchExternalLoginIdByPidm() {
-        ThirdPartyAccess thirdPartyAccess = ThirdPartyAccess.findByExternalUser( "dpatrick" )
+        ThirdPartyAccess thirdPartyAccess = ThirdPartyAccess.findByExternalUser( "bbery" )
         assertNotNull( thirdPartyAccess )
         assertNotNull( thirdPartyAccess.pidm )
         assertNotNull( thirdPartyAccess.externalUser )
