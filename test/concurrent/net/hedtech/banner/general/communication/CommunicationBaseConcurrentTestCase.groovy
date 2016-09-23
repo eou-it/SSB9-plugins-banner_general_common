@@ -228,12 +228,6 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRITPE")
-//Adding the following 3 tables because of addition of AIP tables in the banner baseline
-//these tables also use the folder table and have foreign key constraints
-                sql.executeUpdate("Delete from GCRACNT")
-                sql.executeUpdate("Delete from GCRAACT")
-                sql.executeUpdate("Delete from GCBACTM")
-
                 sql.executeUpdate("Delete from GCRFLDR")
                 sql.executeUpdate("Delete from GCRORAN")
                 sql.executeUpdate("Delete from GCBSPRP")
