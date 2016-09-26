@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.communication.merge
 
@@ -101,7 +101,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
                     value: value,
                     renderAsHtml: communicationField.renderAsHtml
                 )
-                nameToValueMap.put(communicationField.name, communicationFieldValue)
+                nameToValueMap.put( fieldName, communicationFieldValue )
             }
         }
 

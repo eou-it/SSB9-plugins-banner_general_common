@@ -197,12 +197,16 @@ class CommunicationGroupSend implements Serializable {
 
     public void markProcessing() {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Processing )
+        if (this.startedDate == null) {
+            this.startedDate = new Date()
+        }
     }
 
     public void markError( CommunicationErrorCode errorCode, String errorText ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Error )
         this.errorCode = errorCode
         this.errorText = errorText
+        this.stopDate = stopDate
     }
 
     private void assignGroupSendExecutionState( CommunicationGroupSendExecutionState executionState, String jobId = null, String groupId = null ) {

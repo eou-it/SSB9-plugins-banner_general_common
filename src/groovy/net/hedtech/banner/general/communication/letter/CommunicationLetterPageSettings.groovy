@@ -11,6 +11,10 @@ import org.apache.log4j.Logger
 class CommunicationLetterPageSettings {
     def log = Logger.getLogger(this.getClass())
     private Map queryMap = createDefaultQueryMap()
+    private final float minimumMarginInches = 0
+    private final float maximumMarginInches = 22
+    private final float minimumMarginMillimeters = 0
+    private final float maximumMarginMillimeters = 600
 
     public String toJson() {
         return JsonOutput.toJson( queryMap )
@@ -97,17 +101,15 @@ class CommunicationLetterPageSettings {
     public void validate() {
         validateNotMissing( getUnitOfMeasure(), "missingUnitOfMeasure" )
 
-        validateNotMissing( getTopMargin(), "missingTopMargin" )
-        validateNumberFormat( getTopMargin(), "invalidTopMargin" )
-
-        validateNotMissing( getLeftMargin(), "missingLeftMargin" )
-        validateNumberFormat( getLeftMargin(), "invalidLeftMargin" )
-
-        validateNotMissing( getBottomMargin(), "missingBottomMargin" )
-        validateNumberFormat( getBottomMargin(), "invalidBottomMargin" )
-
-        validateNotMissing( getRightMargin(), "missingRightMargin" )
-        validateNumberFormat( getRightMargin(), "invalidRightMargin" )
+        CommunicationLetterUnitOfMeasure unitOfMeasure = null
+        try {
+            unitOfMeasure = CommunicationLetterUnitOfMeasure.valueOf( getUnitOfMeasure() )
+        } catch (Throwable t) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, "invalidUnitOfMeasure" )
+        }
+        if (unitOfMeasure == null) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, "invalidUnitOfMeasure" )
+        }
 
         validateNotMissing( getPageSize(), "missingPageSize" )
 
@@ -117,11 +119,17 @@ class CommunicationLetterPageSettings {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, "invalidPageSize" )
         }
 
-        try {
-            CommunicationLetterUnitOfMeasure.valueOf( getUnitOfMeasure() )
-        } catch (Exception e) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, "invalidUnitOfMeasure" )
-        }
+        validateNotMissing( getTopMargin(), "missingTopMargin" )
+        validateMargin( unitOfMeasure, getTopMargin(), "invalidTopMargin" )
+
+        validateNotMissing( getLeftMargin(), "missingLeftMargin" )
+        validateMargin( unitOfMeasure, getLeftMargin(), "invalidLeftMargin" )
+
+        validateNotMissing( getBottomMargin(), "missingBottomMargin" )
+        validateMargin( unitOfMeasure, getBottomMargin(), "invalidBottomMargin" )
+
+        validateNotMissing( getRightMargin(), "missingRightMargin" )
+        validateMargin( unitOfMeasure, getRightMargin(), "invalidRightMargin" )
     }
 
     private void validateNotMissing( String keyValue, String missingResourceId ) {
@@ -130,9 +138,21 @@ class CommunicationLetterPageSettings {
         }
     }
 
-    private void validateNumberFormat( String value, String invalidResourceId ) {
+    private void validateMargin( CommunicationLetterUnitOfMeasure unitOfMeasure, String value, String invalidResourceId ) {
         try {
-            Float.parseFloat( value )
+            float margin = Float.parseFloat( value )
+
+            if (unitOfMeasure == CommunicationLetterUnitOfMeasure.INCH) {
+                if ((margin < this.minimumMarginInches) || (margin > this.maximumMarginInches)) {
+                    throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, invalidResourceId )
+                }
+            } else if (unitOfMeasure == CommunicationLetterUnitOfMeasure.MILLIMETER) {
+                if ((margin < this.minimumMarginMillimeters) || (margin > this.maximumMarginMillimeters)) {
+                    throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, invalidResourceId )
+                }
+            } else {
+                throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, "invalidUnitOfMeasure" )
+            }
         } catch (NumberFormatException e ) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationLetterPageSettings.class, invalidResourceId )
         }
