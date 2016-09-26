@@ -116,11 +116,38 @@ log4j = {
     }
 }
 
+//Default communications config
+ssbEnabled = true
+ssbOracleUsersProxied = true
+
+communication {
+    weblogicDeployment = false
+    engine {
+        isEnabled = true
+        groupSendEngine {
+            maxThreads = 1
+            maxQueueSize = 5000
+            continuousPolling = true
+            pollingInterval = 500
+            deleteSuccessfullyCompleted = false
+        }
+        communicationJobEngine {
+            maxThreads = 2
+            maxQueueSize = 5000
+            continuousPolling = true
+            pollingInterval = 500
+            deleteSuccessfullyCompleted = false
+        }
+    }
+}
+// encKey must be exactly 32 chars
+communication.security.password.encKey = '772F9958BA824FCC861EBF7031EABB70'
+
 seedDataTarget =  ['bgc': ['/src/groovy/net/hedtech/banner/seeddata/Data/banner_general_common.xml']]
 
 // Uncomment and edit the following lines to start using Grails encoding & escaping improvements
 
-/* remove this line 
+/* remove this line
 // GSP settings
 grails {
     views {

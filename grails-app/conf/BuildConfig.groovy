@@ -16,6 +16,7 @@ grails.project.dependency.resolution = {
     inherits("global") {
         // uncomment to disable ehcache
         // excludes 'ehcache'
+        excludes "grails-docs"
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 
@@ -31,12 +32,24 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
+        compile "org.grails.plugins:quartz:1.0.2"
     }
 
     dependencies {
+        build('org.grails:grails-docs:2.5.0') {
+            excludes 'itext', 'core-renderer'
+        }
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-
         // runtime 'mysql:mysql-connector-java:5.1.5'
+        compile 'org.xhtmlrenderer:flying-saucer-core:9.0.8'
+        compile 'org.xhtmlrenderer:flying-saucer-pdf:9.0.8'
+        compile 'com.lowagie:itext:2.1.7'
+        compile 'org.antlr:ST4:4.0.8'
+        compile "javax.mail:javax.mail-api:1.5.5"
+        runtime "com.sun.mail:javax.mail:1.5.5"
+        compile 'com.icegreen:greenmail:1.5.0'
+        compile 'org.apache.commons:commons-email:1.3.1'
+        compile 'org.quartz-scheduler:quartz:2.2.1'
     }
 
 
