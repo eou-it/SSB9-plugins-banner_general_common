@@ -34,7 +34,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         person.nation = [code: '155', description: 'United Arab Emirates']
         person.relationship = [code: 'P', description: 'Spouse']
 
-        def result = personalInformationCompositeService.getPersonValidationObjects(roles, person)
+        def result = personalInformationCompositeService.getPersonValidationObjects(person, roles)
 
         assertNotNull result.addressType.id
         assertNotNull result.nation.id
@@ -49,7 +49,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         address.nation = [code: '155', description: 'United Arab Emirates']
 
         try{
-            def result = personalInformationCompositeService.getPersonValidationObjects(roles, address)
+            def result = personalInformationCompositeService.getPersonValidationObjects(address, roles)
             fail("I should have received an error but it passed; @@r1:invalidAddressType@@ ")
         }
         catch (ApplicationException ae) {
@@ -65,7 +65,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         address.county = [code: 'Z989', description: 'fail']
 
         try{
-            def result = personalInformationCompositeService.getPersonValidationObjects(roles, address)
+            def result = personalInformationCompositeService.getPersonValidationObjects(address, roles)
             fail("I should have received an error but it passed; @@r1:invalidCounty@@ ")
         }
         catch (ApplicationException ae) {
@@ -82,7 +82,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         address.county = [code: '251', description: 'Los Angeles County']
 
         try{
-            def result = personalInformationCompositeService.getPersonValidationObjects(roles, address)
+            def result = personalInformationCompositeService.getPersonValidationObjects(address, roles)
             fail("I should have received an error but it passed; @@r1:invalidState@@ ")
         }
         catch (ApplicationException ae) {
@@ -100,7 +100,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         address.county = [code: '251', description: 'Los Angeles County']
 
         try{
-            def result = personalInformationCompositeService.getPersonValidationObjects(roles, address)
+            def result = personalInformationCompositeService.getPersonValidationObjects(address, roles)
             fail("I should have received an error but it passed; @@r1:invalidNation@@ ")
         }
         catch (ApplicationException ae) {
@@ -118,7 +118,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         person.relationship = [code: 'Z', description: 'fail']
 
         try{
-            def result = personalInformationCompositeService.getPersonValidationObjects(roles, person)
+            def result = personalInformationCompositeService.getPersonValidationObjects(person, roles)
             fail("I should have received an error but it passed; @@r1:invalidRelationship@@ ")
         }
         catch (ApplicationException ae) {
