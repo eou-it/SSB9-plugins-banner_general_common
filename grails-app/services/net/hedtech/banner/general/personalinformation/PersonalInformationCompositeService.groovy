@@ -11,7 +11,7 @@ class PersonalInformationCompositeService {
     def nationService
     def relationshipService
 
-    def getPersonValidationObjects(roles, map){
+    def getPersonValidationObjects(map, roles = null){
         // inner entities need to be actual domain objects
         if(map.addressType?.code)
             map.addressType = addressRolePrivilegesCompositeService.fetchAddressType(roles, map.addressType.code)
