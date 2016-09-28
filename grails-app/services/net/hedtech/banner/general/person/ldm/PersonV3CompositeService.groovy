@@ -234,6 +234,10 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
         return emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
     }
 
+    @Override
+    protected extractDataFromRequestBody(Map content) {
+        return null
+    }
 
     private void fetchPersonsEmailDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
         Set<Long> personEmailSurrogateIds = dataMap.pidmToEmailsMap?.values().id.flatten().unique()
@@ -248,6 +252,10 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
                                                                  final Map dataMap, Map dataMapForPerson) {
     }
 
+    @Override
+    protected createPersonDataModel(Map dataMapForPerson) {
+        return null
+    }
 
     protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
                                         final Map dataMapForPerson) {
