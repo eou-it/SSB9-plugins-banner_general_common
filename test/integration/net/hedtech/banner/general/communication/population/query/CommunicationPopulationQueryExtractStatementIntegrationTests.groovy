@@ -19,10 +19,10 @@ class CommunicationPopulationQueryExtractStatementIntegrationTests extends BaseI
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
+        super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        super.setUp()
         bannerUser = SecurityContextHolder?.context?.authentication?.principal as BannerUser;
     }
 

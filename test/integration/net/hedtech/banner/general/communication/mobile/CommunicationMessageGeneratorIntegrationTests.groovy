@@ -19,10 +19,11 @@ class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestC
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
+        super.setUp()
         def authentication = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( authentication )
-        super.setUp()
+
     }
 
 

@@ -48,7 +48,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
         super.setUp()
         folder = newValidForCreateFolder()
         folder.save(failOnError: true, flush: true)
