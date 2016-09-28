@@ -277,6 +277,11 @@ class PersonCompositeService extends LdmService {
 
 
     def create(Map person) {
+        String version = LdmService.getAcceptVersion(VERSIONS)
+        if ("v6".equalsIgnoreCase(version)) {
+            def dataMapForCourse = personV6CompositeService.create(person)
+            return personV6CompositeService.createPersonDataModel(dataMapForCourse)
+        }
         Map<Integer, Person> persons = [:]
         def newPersonIdentification
         PersonIdentificationNameCurrent newPersonIdentificationName
@@ -411,6 +416,12 @@ class PersonCompositeService extends LdmService {
      * @return person
      */
     def update(Map person) {
+        String version = LdmService.getAcceptVersion(VERSIONS)
+        if ("v6".equalsIgnoreCase(version)) {
+            def dataMapForCourse = personV6CompositeService.update(person)
+            return personV6CompositeService.createPersonDataModel(dataMapForCourse)
+        }
+
         String personGuid = person?.id?.trim()?.toLowerCase()
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(ldmName, personGuid)
 
@@ -673,20 +684,20 @@ class PersonCompositeService extends LdmService {
 
 
     private PersonBasicPersonBase createPersonBasicPersonBase(person, newPersonIdentificationName, newPersonIdentification) {
-        PersonBasicPersonBase newPersonBase
-        if (person.guid) {
-            updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
-        } else {
-            def entity = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
-            person.put('guid', entity)
-        }
-        if (person?.credentials instanceof List) {
-            person?.credentials?.each { it ->
-                if (it instanceof Map) {
-                    person = createSSN(it.credentialType, it.credentialId, person)
+            PersonBasicPersonBase newPersonBase
+            if (person.guid) {
+                updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
+            } else {
+                def entity = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
+                person.put('guid', entity)
+            }
+            if (person?.credentials instanceof List) {
+                person?.credentials?.each { it ->
+                    if (it instanceof Map) {
+                        person = createSSN(it.credentialType, it.credentialId, person)
+                    }
                 }
             }
-        }
 
         //Copy personBase attributes into person map from Primary names object.
         person.put('dataOrigin', person?.metadata?.dataOrigin)

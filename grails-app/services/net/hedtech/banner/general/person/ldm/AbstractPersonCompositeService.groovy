@@ -4,12 +4,16 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
+import net.hedtech.banner.general.system.NameType
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
@@ -21,6 +25,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     private static final int MAX_DEFAULT = 500
     private static final int MAX_UPPER_LIMIT = 500
+    static final String ldmName = 'persons'
+
+    private static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
 
     private static final ThreadLocal<Map> threadLocal =
             new ThreadLocal<Map>() {
@@ -47,6 +54,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonTelephoneService personTelephoneService
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
+    PersonBasicPersonBaseService personBasicPersonBaseService
 
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
@@ -75,14 +83,15 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     abstract protected def getBannerEmailTypeToHedmEmailTypeMap()
 
+    abstract protected def extractDataFromRequestBody(Map content)
+
 
     abstract
     protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
                                                                  final Map dataMap, Map dataMapForPerson)
 
 
-    abstract protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                 final Map dataMapForPerson)
+    abstract protected def createPersonDataModel(final Map dataMapForPerson)
 
     /**
      * POST /qapi/persons
@@ -157,6 +166,295 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return createPersonDataModels([row.personIdentificationNameCurrent], getPidmToGuidMap([row]))[0]
     }
 
+    /**
+     * POST /api/persons
+     *
+     * @param content Request body
+     */
+    def create(Map person) {
+        Map requestData = extractDataFromRequestBody(person)
+        def newPersonIdentification = [:]
+        PersonIdentificationNameCurrent newPersonIdentificationName
+        PersonIdentificationNameAlternate personIdentificationNameAlternate
+        String dataOrigin
+
+        String personGuid
+        if (requestData.containsKey("personGuid") && requestData.get("personGuid").length() > 0) {
+            personGuid = requestData.get('personGuid')
+        }
+
+        if ((requestData.containsKey("firstName") && requestData.get("firstName")?.length() > 0) && (requestData.containsKey("lastName") && requestData.get("lastName")?.length() > 0)) {
+            newPersonIdentification.put('firstName', requestData.get("firstName"))
+            newPersonIdentification.put('lastName', requestData.get("lastName"))
+            newPersonIdentification.put('bannerId', 'GENERATED')
+            newPersonIdentification.put('entityIndicator', 'P')
+            newPersonIdentification.put('bannerId', 'GENERATED')
+            newPersonIdentification.put('entityIndicator', 'P')
+            newPersonIdentification.put('changeIndicator', null)
+
+            if (requestData.containsKey("middleName") && requestData.get("middleName")?.length() > 0) {
+                newPersonIdentification.put('middleName', requestData.get("middleName"))
+            }
+            if (requestData.containsKey("surnamePrefix") && requestData.get("surnamePrefix")?.length() > 0) {
+                newPersonIdentification.put('surnamePrefix', requestData.get("surnamePrefix"))
+            }
+            if (requestData.containsKey("dataOrigin") && requestData.get("dataOrigin")?.length() > 0) {
+                dataOrigin = requestData.get("dataOrigin")
+            }
+            if (dataOrigin) {
+                newPersonIdentification.put('dataOrigin', dataOrigin)
+            }
+
+            newPersonIdentification.remove('nameType') // ID won't generate if this is set.
+            //Create the new PersonIdentification record
+            newPersonIdentificationName = personIdentificationNameCurrentService.create(newPersonIdentification)
+
+        }
+
+        if ((requestData.containsKey("alternateNames") && requestData.get("alternateNames").size() > 0)) {
+            def alternateNames = requestData.get("alternateNames")
+            alternateNames.each { nameRecord ->
+                personIdentificationNameAlternate = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName,
+                        nameRecord,
+                        dataOrigin)
+            }
+        }
+
+        //Fix the GUID if provided as DB will assign one
+        if (personGuid && personGuid != GeneralValidationCommonConstants.NIL_GUID) {
+            // Overwrite the GUID created by DB insert trigger, with the one provided in the request body
+            updateGuidValue(newPersonIdentificationName.id, personGuid, ldmName)
+        } else {
+            GlobalUniqueIdentifier entity = GlobalUniqueIdentifier.findByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
+            personGuid = entity.guid
+        }
+        log.debug("GUID: ${personGuid}")
+
+        //Copy personBase attributes into person map from Primary names object.
+        Map personBase = [:]
+        personBase.put('dataOrigin', dataOrigin)
+        if (requestData.containsKey("namePrefix") && requestData.get("namePrefix").length() > 0) {
+            personBase.put('namePrefix', requestData.get("namePrefix"))
+        }
+        if (requestData.containsKey("nameSuffix") && requestData.get("nameSuffix").length() > 0) {
+            personBase.put('nameSuffix', requestData.get("nameSuffix"))
+        }
+        personBase.put('armedServiceMedalVetIndicator', false)
+        personBase.put('pidm', newPersonIdentificationName?.pidm)
+        PersonBasicPersonBase newPersonBase = personBasicPersonBaseService.create(personBase)
+        Map pidmToGuidMap = [:]
+        pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
+
+        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid)
+
+    }
+
+    /**
+     * PUT /api/persons/<guid>
+     *
+     * @param content Request body
+     */
+    def update(Map person) {
+        Map requestData = extractDataFromRequestBody(person)
+
+        String personGuid
+        if (requestData.containsKey("personGuid") && requestData.get("personGuid").length() > 0) {
+            personGuid = requestData.get('personGuid')
+        }
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(ldmName, personGuid)
+        if (!globalUniqueIdentifier) {
+            return create(person)
+        }
+        String dataOrigin
+        if (requestData.containsKey("dataOrigin") && requestData.get("dataOrigin")?.length() > 0) {
+            dataOrigin = requestData.get("dataOrigin")
+        }
+
+        def pidm = globalUniqueIdentifier.domainKey?.toInteger()
+        List<PersonIdentificationNameCurrent> personIdentificationList = PersonIdentificationNameCurrent.findAllByPidmInList([pidm])
+
+        PersonIdentificationNameCurrent personIdentification
+        personIdentificationList.each { identification ->
+            if (identification.changeIndicator == null) {
+                personIdentification = identification
+            }
+        }
+
+        //update PersonIdentificationNameCurrent
+        PersonIdentificationNameCurrent newPersonIdentificationName
+        PersonIdentificationNameCurrent oldPersonIdentificationName = new PersonIdentificationNameCurrent(personIdentification.properties)
+        if ((requestData.containsKey("firstName") && requestData.get("firstName")?.length() > 0) && (requestData.containsKey("lastName") && requestData.get("lastName")?.length() > 0)) {
+            personIdentification.firstName = requestData.get("firstName")
+            personIdentification.lastName = requestData.get("lastName")
+            if (requestData.containsKey('middleName')) {
+                personIdentification.middleName = requestData.get("middleName")
+            }
+            if (requestData.containsKey('surnamePrefix')) {
+                personIdentification.surnamePrefix = requestData.get("surnamePrefix")
+            }
+            if (!personIdentification.equals(oldPersonIdentificationName)) {
+                PersonIdentificationNameAlternate.findAllByPidm(oldPersonIdentificationName.pidm).each { oldRecord ->
+                    if (oldPersonIdentificationName.firstName == oldRecord.firstName &&
+                            oldPersonIdentificationName.lastName == oldRecord.lastName &&
+                            oldPersonIdentificationName.middleName == oldRecord.middleName &&
+                            oldPersonIdentificationName.surnamePrefix == oldRecord.surnamePrefix &&
+                            oldPersonIdentificationName.bannerId == oldRecord.bannerId &&
+                            oldPersonIdentificationName.nameType == oldRecord.nameType &&
+                            oldRecord.changeIndicator == 'N'
+                    ) {
+                        //Can't get around this, Hibernate updates before it deletes, triggering table-api errors.
+                        PersonIdentificationNameAlternate.executeUpdate("delete from PersonIdentificationNameAlternate where id = :id", [id: oldRecord.id])
+                    }
+                }
+                newPersonIdentificationName = personIdentificationNameCurrentService.update(personIdentification)
+            }
+        }
+        if (!newPersonIdentificationName) {
+            newPersonIdentificationName = personIdentification
+        }
+
+        def alternateNames
+        if ((requestData.containsKey("alternateNames") && requestData.get("alternateNames").size() > 0)) {
+            alternateNames = requestData.get("alternateNames")
+            alternateNames.each { nameRecord ->
+                PersonIdentificationNameAlternate existingPersonRecord = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm, nameRecord.type)
+                PersonIdentificationNameAlternate newPersonBirthRecord = null
+                if (!isNamesElementSameAsExisting(nameRecord.firstName, nameRecord.middleName, nameRecord.lastName, nameRecord.surnamePrefix, existingPersonRecord)) {
+                    newPersonBirthRecord = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName,
+                            nameRecord,
+                            dataOrigin)
+                }
+            }
+        }
+
+        //update PersonBasicPersonBase
+        PersonBasicPersonBase newPersonBase = updatePersonBasicPersonBase(pidm, newPersonIdentificationName, requestData.get('namePrefix'),
+                requestData.get('nameSuffix'),
+                requestData.get('preferenceFirstName'),
+                alternateNames,
+                dataOrigin)
+
+        Map pidmToGuidMap = [:]
+        pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
+
+        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid)
+    }
+
+
+    private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, alternateNames, dataOrigin) {
+        List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList([pidm])
+        PersonBasicPersonBase newPersonBase
+
+        if (personBaseList.size() == 0) {
+            //if there is no person base then create new PersonBase
+            newPersonBase = createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, dataOrigin)
+        } else {
+            personBaseList.each { personBase ->
+                //Copy personBase attributes into person map from Primary names object.
+                if (namePrefix != null) {
+                    personBase.namePrefix = namePrefix
+                }
+                if (nameSuffix != null) {
+                    personBase.nameSuffix = nameSuffix
+                }
+                if (preferenceFirstName != null) {
+                    personBase.preferenceFirstName = preferenceFirstName
+                }
+
+                def legalName = alternateNames?.find { it.type == "LEGL" }
+                if (legalName) {
+                    String legalFullName
+                    if (personBase.legalName) {
+                        legalFullName = legalName.firstName
+                        if (legalName.middleName && legalName.middleName?.length() > 0) {
+                            legalFullName = legalFullName.concat(" " + legalName.middleName)
+                        }
+                        legalFullName = legalFullName.concat(" " + legalName.lastName)
+                        if (!(personBase.legalName.equals(legalFullName))) {
+                            personBase.legalName = legalFullName
+                        }
+                    }
+                }
+                newPersonBase = personBasicPersonBaseService.update(personBase)
+            }
+
+        }
+        return newPersonBase
+    }
+
+
+    private PersonBasicPersonBase createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, dataOrigin) {
+        Map person = [:]
+        PersonBasicPersonBase newPersonBase
+
+        //Copy personBase attributes into person map from Primary names object.
+        person.put('dataOrigin', dataOrigin)
+        if (namePrefix && namePrefix.length() > 0) {
+            person.namePrefix = namePrefix
+        }
+        if (nameSuffix && nameSuffix.length() > 0) {
+            person.nameSuffix = nameSuffix
+        }
+        if (preferenceFirstName && preferenceFirstName.length() > 0) {
+            person.preferenceFirstName = preferenceFirstName
+        }
+        person.put('pidm', newPersonIdentificationName?.pidm)
+        person.put('armedServiceMedalVetIndicator', false)
+        newPersonBase = personBasicPersonBaseService.create(person)
+        newPersonBase
+    }
+
+
+    private boolean isNamesElementSameAsExisting(String firstName, String lastName, String middleName, String surnamePrefix, PersonIdentificationNameAlternate existingPersonRecord) {
+        boolean exists = true
+        if (!existingPersonRecord || !(existingPersonRecord?.firstName == firstName) || !(existingPersonRecord?.lastName == lastName) || !(existingPersonRecord?.middleName == middleName) || !(existingPersonRecord?.surnamePrefix == surnamePrefix)) {
+            exists = false
+        }
+
+        return exists
+    }
+
+
+    private PersonIdentificationNameAlternate getPersonIdentificationNameAlternateByNameType(Integer pidm, String nameTypeCode) {
+        return personIdentificationNameAlternateService.fetchAllMostRecentlyCreated([pidm], [nameTypeCode])[0]
+    }
+
+
+    private PersonIdentificationNameAlternate createPersonIdentificationNameAlternateByNameType(PersonIdentificationNameCurrent currentPerson,
+                                                                                                Map nameRecord, String dataOrigin) {
+        PersonIdentificationNameAlternate personIdentificationNameAlternate
+        NameType nameTypeObj = NameType.findByCode(nameRecord.type)
+
+        PersonIdentificationNameAlternate newPersonIdentificationNameAlternate = new PersonIdentificationNameAlternate(
+                pidm: currentPerson.pidm,
+                bannerId: currentPerson.bannerId,
+                lastName: nameRecord.lastName,
+                firstName: nameRecord.firstName,
+                middleName: nameRecord.middleName,
+                surnamePrefix: nameRecord.surnamePrefix,
+                changeIndicator: 'N',
+                entityIndicator: 'P',
+                nameType: nameTypeObj,
+                dataOrigin: dataOrigin
+        )
+        personIdentificationNameAlternate = personIdentificationNameAlternateService.create(newPersonIdentificationNameAlternate)
+
+        return personIdentificationNameAlternate
+    }
+
+    private NameType getBannerNameTypeFromHEDMNameType(def nameTypeInRequest) {
+        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HEDM', PERSON_NAME_TYPE, nameTypeInRequest)[0]
+        if (!rule) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.not.found.message', [PERSON_NAME_TYPE]))
+        }
+        NameType nameType = NameType.findByCode(rule.value)
+        if (!nameType) {
+            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.invalid.value.message', [PERSON_NAME_TYPE]))
+        }
+
+        return nameType
+    }
+
 
     protected def createPersonDataModels(final Map requestParams, final Map requestProcessingResult) {
         List<PersonIdentificationNameCurrent> personCurrentEntities = []
@@ -188,6 +486,32 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
         return decorators
+    }
+
+    protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                        def dataMapForPerson) {
+        dataMapForPerson.put('personIdentificationNameCurrent', personIdentificationNameCurrent)
+        createPersonDataModel(dataMapForPerson)
+    }
+
+
+    protected def createPersonDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                     PersonBasicPersonBase personBase, String personGuid) {
+        def dataMapForPerson = [:]
+        dataMapForPerson.put('personGuid', personGuid)
+        if (personIdentificationNameCurrent) {
+
+            def bannerNameTypeToHedmNameTypeMap = getBannerNameTypeToHedmNameTypeMap()
+            def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(bannerNameTypeToHedmNameTypeMap.keySet())
+            List<PersonIdentificationNameAlternate> personAlternateNames = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated([personIdentificationNameCurrent?.pidm], bannerNameTypeToHedmNameTypeMap?.keySet()?.toList())
+            dataMapForPerson.put('personIdentificationNameCurrent', personIdentificationNameCurrent)
+            dataMapForPerson.put('personBase', personBase)
+            dataMapForPerson.put('bannerNameTypeToHedmNameTypeMap', bannerNameTypeToHedmNameTypeMap)
+            dataMapForPerson.put('nameTypeCodeToGuidMap', nameTypeCodeToGuidMap)
+            dataMapForPerson.put('personAlternateNames', personAlternateNames)
+
+        }
+        return dataMapForPerson
     }
 
 

@@ -5,13 +5,17 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import net.hedtech.banner.general.overall.*
+import net.hedtech.banner.general.overall.IntegrationConfigurationService
+import net.hedtech.banner.general.overall.VisaInternationalInformation
+import net.hedtech.banner.general.overall.VisaInternationalInformationService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
 import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.InstitutionalDescriptionService
 import net.hedtech.banner.general.system.Nation
-import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.NameTypeCategory
+import net.hedtech.banner.general.system.ldm.NationCompositeService
+import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
@@ -365,7 +369,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             dataMapForPerson << ["emailTypeCodeToGuidMap": dataMap.emailTypeCodeToGuidMap]
         }
 
-
         // interests
         List personInterests = dataMap.pidmToInterestsMap.get(personIdentificationNameCurrent.pidm)
         if (personInterests) {
@@ -387,9 +390,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                        final Map dataMapForPerson) {
+    protected def createPersonDataModel(final Map dataMapForPerson) {
         PersonV6 decorator
+        def personIdentificationNameCurrent = dataMapForPerson["personIdentificationNameCurrent"]
         if (personIdentificationNameCurrent) {
             decorator = new PersonV6()
 
@@ -745,6 +748,94 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             decorator.countryCode = iso3CountryCode
         }
         return decorator
+    }
+
+
+    protected Map extractDataFromRequestBody(Map person) {
+        def requestData = [:]
+
+        /* Required in DataModel - Required in Banner */
+        String personGuidInPayload
+        if (person.containsKey("guid") && person.get("guid") instanceof String) {
+            personGuidInPayload = person?.guid?.trim()?.toLowerCase()
+            requestData.put('personGuid', personGuidInPayload)
+        }
+
+        // UPDATE operation - API SHOULD prefer the resource identifier on the URI, over the payload.
+        String personGuidInURI = person?.id?.trim()?.toLowerCase()
+        if (personGuidInURI && !personGuidInURI.equals(personGuidInPayload)) {
+            person.put('guid', personGuidInURI)
+            requestData.put('personGuid', personGuidInURI)
+        }
+
+        if (person.containsKey("names") && person.get("names") instanceof List) {
+            Map personalName = person.names.find { it.type.category == "personal" && it.firstName && it.lastName }
+            if (personalName) {
+                requestData.put('firstName', personalName.firstName?.trim())
+                requestData.put('middleName', personalName.middleName?.trim())
+                requestData.put('lastName', personalName.lastName?.trim())
+                if (personalName.containsKey("surnamePrefix") && personalName.get("surnamePrefix") instanceof String) {
+                    requestData.put('surnamePrefix', personalName?.surnamePrefix?.trim())
+                }
+                if (personalName.containsKey("namePrefix") && personalName.get("namePrefix") instanceof String) {
+                    requestData.put('namePrefix', personalName?.namePrefix?.trim())
+                }
+                if (personalName.containsKey("nameSuffix") && personalName.get("nameSuffix") instanceof String) {
+                    requestData.put('nameSuffix', personalName?.nameSuffix?.trim())
+                }
+            } else {
+                throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("names.required.message", []))
+            }
+
+            Map<String, String> bannerNameTypeToHedmV6NameTypeMap = getBannerNameTypeToHedmNameTypeMap()
+            def alternateNames = []
+
+            Map birthName = person.names.find { it.type.category == "birth" }
+            if (birthName) {
+                def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == birthName.type.category }
+                if (mapEntry) {
+                    if (birthName.firstName && birthName.firstName?.length() > 0 && birthName.lastName && birthName.lastName?.length() > 0) {
+                        def record = [type: mapEntry.key, firstName: birthName.firstName?.trim(), lastName: birthName.lastName?.trim()]
+                        if (birthName.middleName?.trim()) {
+                            record.put("middleName", birthName.middleName?.trim())
+                        }
+                        if (birthName.containsKey("surnamePrefix") && birthName.get("surnamePrefix") instanceof String) {
+                            record.put("surnamePrefix", birthName?.surnamePrefix?.trim())
+                        }
+                        alternateNames << record
+                    } else {
+                        throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("firstName.lastName.required.message", []))
+                    }
+                } else {
+                    throw new ApplicationException('PersonV6CompositeService', new BusinessLogicValidationException('goriccr.not.found.message', []))
+                }
+            }
+
+            Map legalName = person.names.find { it.type.category == "legal" }
+            if (legalName) {
+                def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == legalName.type.category }
+                if (mapEntry) {
+                    if (legalName.firstName && legalName.firstName?.length() > 0 && legalName.lastName && legalName.lastName?.length() > 0) {
+                        def record = [type: mapEntry.key, firstName: legalName.firstName?.trim(), lastName: legalName.lastName?.trim()]
+                        if (legalName.middleName?.trim()) {
+                            record.put("middleName", legalName.middleName?.trim())
+                        }
+                        if (legalName.containsKey("surnamePrefix") && legalName.get("surnamePrefix") instanceof String) {
+                            record.put("surnamePrefix", legalName?.surnamePrefix?.trim())
+                        }
+                        alternateNames << record
+                    } else {
+                        throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("firstName.lastName.required.message", []))
+                    }
+                } else {
+                    throw new ApplicationException('PersonV6CompositeService', new BusinessLogicValidationException('goriccr.not.found.message', []))
+                }
+            }
+            requestData.put("alternateNames", alternateNames)
+        } else {
+            throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("names.required.message", []))
+        }
+        return requestData
     }
 
 }
