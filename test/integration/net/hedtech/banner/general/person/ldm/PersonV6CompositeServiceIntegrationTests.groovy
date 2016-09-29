@@ -26,6 +26,7 @@ import org.junit.Test
 class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     PersonV6CompositeService personV6CompositeService
+    PersonCompositeService personCompositeService
     UserRoleCompositeService userRoleCompositeService
     GlobalUniqueIdentifierService globalUniqueIdentifierService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
@@ -40,6 +41,25 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonIdentificationName personIdentificationName
     PersonAddressService personAddressService
     PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
+
+
+
+    def i_success_first_name = "Mark"
+    def i_success_middle_name = "TR"
+    def i_success_last_name = "Mccallon"
+    def i_success_primary_name_type = "personal"
+    def i_success_namePrefix = "TTTTT"
+    def i_success_nameSuffix = "TTTTT"
+    def i_success_birth_first_name = "John"
+    def i_success_birth_middle_name = "A"
+    def i_success_birth_last_name = "Jorden"
+    def i_success_birth_name_type = "birth"
+    def i_success_legal_first_name = "marry"
+    def i_success_legal_middle_name = "A"
+    def i_success_legal_last_name = "Jorden"
+    def i_success_legal_name_type = "legal"
+    def i_success_full_name = "Test"
+    def i_success_surnamePrefix = "Van"
 
 
     @Before
@@ -614,6 +634,56 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     private void setContentTypeHeader(String mediaType) {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
         request.addHeader("Content-Type", mediaType)
+    }
+
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithAlternateNameHavingBirthNameType() {
+        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v6+json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v6+json")
+
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+
+        def o_success_person_create = personCompositeService.create(content)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals 3, o_success_person_create.names?.size()
+
+        def o_primary_name_create = o_success_person_create.names.find { it.type.category == "personal" }
+        def o_birth_name_create = o_success_person_create.names.find { it.type.category == "birth" }
+        def o_legal_name_create = o_success_person_create.names.find { it.type.category == "legal" }
+
+        assertNotNull o_primary_name_create
+        assertEquals i_success_first_name, o_primary_name_create.firstName
+        assertEquals i_success_middle_name, o_primary_name_create.middleName
+        assertEquals i_success_last_name, o_primary_name_create.lastName
+        assertEquals i_success_primary_name_type, o_primary_name_create.type.category
+        assertEquals i_success_namePrefix, o_primary_name_create.title
+        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertNotNull o_birth_name_create
+        assertEquals i_success_birth_first_name, o_birth_name_create.firstName
+        assertEquals i_success_birth_middle_name, o_birth_name_create.middleName
+        assertEquals i_success_birth_last_name, o_birth_name_create.lastName
+        assertEquals i_success_birth_name_type, o_birth_name_create.type.category
+
+        assertEquals i_success_legal_first_name, o_legal_name_create.firstName
+        assertEquals i_success_legal_middle_name, o_legal_name_create.middleName
+        assertEquals i_success_legal_last_name, o_legal_name_create.lastName
+        assertEquals i_success_legal_name_type, o_legal_name_create.type.category
+
+    }
+
+    private Map newPersonWithAlternateNameHavingBirthNameType() {
+        Map params = [names: [
+                     [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix],
+                     [lastName: i_success_birth_last_name, middleName: i_success_birth_middle_name, firstName: i_success_birth_first_name,fullName: i_success_full_name, type:[category:i_success_birth_name_type]],
+                     [lastName: i_success_legal_last_name, middleName: i_success_legal_middle_name, firstName: i_success_legal_first_name,fullName: i_success_full_name, type:[category:i_success_legal_name_type]]
+        ]
+        ]
+        return params
     }
 
 }

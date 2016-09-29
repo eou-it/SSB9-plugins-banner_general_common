@@ -769,7 +769,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         if (person.containsKey("names") && person.get("names") instanceof List) {
-            Map personalName = person.names.find { it.type.category == "personal" && it.firstName && it.lastName }
+            Map personalName = person.names.find { it?.type?.category == "personal" && it?.firstName && it?.lastName }
             if (personalName) {
                 requestData.put('firstName', personalName.firstName?.trim())
                 requestData.put('middleName', personalName.middleName?.trim())
@@ -790,7 +790,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             Map<String, String> bannerNameTypeToHedmV6NameTypeMap = getBannerNameTypeToHedmNameTypeMap()
             def alternateNames = []
 
-            Map birthName = person.names.find { it.type.category == "birth" }
+            Map birthName = person.names.find { it.type?.category == "birth" }
             if (birthName) {
                 def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == birthName.type.category }
                 if (mapEntry) {
@@ -811,7 +811,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
             }
 
-            Map legalName = person.names.find { it.type.category == "legal" }
+            Map legalName = person.names.find { it.type?.category == "legal" }
             if (legalName) {
                 def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == legalName.type.category }
                 if (mapEntry) {

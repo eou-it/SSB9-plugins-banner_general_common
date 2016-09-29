@@ -442,19 +442,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return personIdentificationNameAlternate
     }
 
-    private NameType getBannerNameTypeFromHEDMNameType(def nameTypeInRequest) {
-        IntegrationConfiguration rule = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue('HEDM', PERSON_NAME_TYPE, nameTypeInRequest)[0]
-        if (!rule) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.not.found.message', [PERSON_NAME_TYPE]))
-        }
-        NameType nameType = NameType.findByCode(rule.value)
-        if (!nameType) {
-            throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException('goriccr.invalid.value.message', [PERSON_NAME_TYPE]))
-        }
-
-        return nameType
-    }
-
 
     protected def createPersonDataModels(final Map requestParams, final Map requestProcessingResult) {
         List<PersonIdentificationNameCurrent> personCurrentEntities = []
