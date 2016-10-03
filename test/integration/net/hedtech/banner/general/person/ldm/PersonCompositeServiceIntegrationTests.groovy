@@ -159,7 +159,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListQapiWithValidFirstAndLastNameV3() {
         //we will forcefully set the content type so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         Map params = getParamsWithReqiuredFields()
@@ -185,7 +185,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListQapiWithInValidFirstAndLastName() {
         //we will forcefully set the content type so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         Map params = getParamsWithReqiuredFields()
@@ -202,7 +202,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testListQapiWithInValidDateOfBirthV3() {
         //we will forcefully set the content type so that the tests go through all possible code flows
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         Map params = getParamsWithReqiuredFields()
@@ -224,51 +224,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             assertApplicationException ae, 'date.invalid.format.message'
         }
     }
-
-
-    @Test
-    void testListQapiWithInvalidPersonfilter() {
-
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.person-filter.v2+json")
-
-        //String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
-
-        Map params = getParamsForPersonFilter()
-
-        params.put("personFilter", "xxxx")
-
-        try {
-            personCompositeService.list(params)
-            fail('This should have failed as person filter GUID is invalid')
-        } catch (ApplicationException ae) {
-            assertApplicationException ae, 'not.found.message'
-        }
-    }
-
-
-    @Test
-    void testListQapiWithPersonfilterNull() {
-
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.person-filter.v2+json")
-
-        //String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
-
-        Map params = getParamsForPersonFilter()
-
-        params.put("personFilter", "")
-
-        try {
-            personCompositeService.list(params)
-            fail('This should have failed as person filter GUID is null')
-        } catch (ApplicationException ae) {
-            assertApplicationException ae, 'not.found.message'
-        }
-    }
-
 
     @Test
     void testListPersonQapiWithBirthNameTypeV3() {
@@ -302,7 +257,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals i_success_alternate_birth_name_type, o_birth_name_create.nameType
 
         request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         Map params = getPersonBirthNameTypeFields()
@@ -323,7 +278,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithMultipleEmailsV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         def person = PersonUtility.getPerson('HOSFE2020')
@@ -364,7 +319,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithMultipleEmailsSomeNotMatchingV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         def person = PersonUtility.getPerson('HOSFE2020')
@@ -405,7 +360,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithMultipleEmailsNoneMatching() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -462,7 +417,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithBirthDateV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -499,7 +454,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithDifferentBirthDate() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -535,7 +490,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithSsnV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -573,7 +528,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithDifferentSsn() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -610,7 +565,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithGenderV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -648,7 +603,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithDifferentGender() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -684,7 +639,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithBannerIdV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -718,7 +673,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithDifferentBannerId() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -751,7 +706,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCMSearchWithNameV3() {
         GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.duplicate-check.v3+json")
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v3+json")
         request.addHeader("Accept", "application/vnd.hedtech.integration.v3+json")
 
         IntegrationConfiguration personMatchRule = IntegrationConfiguration.findByProcessCodeAndSettingName(personCompositeService.PROCESS_CODE, personCompositeService.PERSON_MATCH_RULE)
@@ -778,25 +733,6 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         def matched_persons = personCompositeService.list(params)
         // assert that only one match comes back
         assertTrue matched_persons.size() > 0
-    }
-
-
-    @Test
-    void testListQapiWithValidPersonfilter() {
-        GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.person-filter.v2+json")
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v2+json")
-
-        def persons = [:]
-
-        String guid = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('person-filters', 'GENERAL-^ALL-^BANNER-^GRAILS')?.guid
-
-        Map params = getParamsForPersonFilter()
-
-        params.put("personFilter", guid)
-
-        persons = personCompositeService.list(params)
-        assertNotNull persons
     }
 
 

@@ -356,7 +356,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testList_DuplicateCheck_PersonalLastNameSearch() {
-        setContentTypeHeader("application/vnd.hedtech.integration.duplicate-check.v6+json")
+        setContentTypeHeader("application/vnd.hedtech.integration.v6+json")
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         // Common Matching Rule
@@ -403,7 +403,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testList_DuplicateCheck_BirthLastNameSearch() {
-        setContentTypeHeader("application/vnd.hedtech.integration.duplicate-check.v6+json")
+        setContentTypeHeader("application/vnd.hedtech.integration.v6+json")
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         // Common Matching Rule
@@ -468,7 +468,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testList_DuplicateCheck_BannerIdSsnSearch() {
-        setContentTypeHeader("application/vnd.hedtech.integration.duplicate-check.v6+json")
+        setContentTypeHeader("application/vnd.hedtech.integration.v6+json")
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
 
         // Common Matching Rule

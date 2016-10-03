@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
@@ -82,6 +81,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected def getBannerEmailTypeToHedmEmailTypeMap()
+
 
     abstract protected def extractDataFromRequestBody(Map content)
 
@@ -475,6 +475,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return decorators
     }
 
+
     protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
                                         def dataMapForPerson) {
         dataMapForPerson.put('personIdentificationNameCurrent', personIdentificationNameCurrent)
@@ -506,13 +507,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
         Map requestProcessingResult
         String contentType = getRequestRepresentation()
         log.debug "Content-Type: ${contentType}"
-        if (contentType?.contains('person-filter')) {
-            log.debug "PopSel"
-            requestProcessingResult = getPidmsOfPopulationExtract(requestParams)
-        } else if (contentType?.contains("duplicate-check")) {
-            log.debug("Duplicate Check")
-            requestProcessingResult = searchForMatchingPersons(requestParams)
-        }
+        log.debug("Duplicate Check")
+        requestProcessingResult = searchForMatchingPersons(requestParams)
         return requestProcessingResult
     }
 
