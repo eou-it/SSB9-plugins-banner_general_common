@@ -40,7 +40,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     GlobalUniqueIdentifier personGlobalUniqueIdentifier
     PersonIdentificationName personIdentificationName
     PersonAddressService personAddressService
-    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
+    PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
 
 
 
@@ -526,7 +526,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals personGlobalUniqueIdentifier.guid, getPersonV6.guid
         PersonAddress getPersonAddress = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([personIdentificationName.pidm], ['MA'])[0]
         assertNotNull getPersonAddress
-        PersonAddressExtendedProperties getPersonAddressExtendedProperties = personAddressExtendedPropertiesService.fetchAllBySurrogateIds([getPersonAddress.id])[0]
+        PersonAddressAdditionalProperty getPersonAddressExtendedProperties = personAddressAdditionalPropertyService.fetchAllBySurrogateIds([getPersonAddress.id])[0]
         assertNotNull getPersonAddressExtendedProperties
         PersonAddressDecorator getPersonAddressDecorator = getPersonV6.addresses.find {
             it.addressGuid == getPersonAddressExtendedProperties.addressGuid

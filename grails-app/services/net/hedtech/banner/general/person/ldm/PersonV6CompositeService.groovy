@@ -11,8 +11,10 @@ import net.hedtech.banner.general.overall.VisaInternationalInformationService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
 import net.hedtech.banner.general.system.CitizenType
+import net.hedtech.banner.general.system.County
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.HedmAddressType
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 import net.hedtech.banner.general.system.ldm.NationCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
@@ -36,12 +38,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     def interestCompositeService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
     ReligionCompositeService religionCompositeService
-    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
     def crossReferenceRuleService
+
 
 
     @Override
@@ -608,7 +610,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Map personAddressSurrogateIdToGuidMap = [:]
         if (personAddressSurrogateIds) {
             log.debug "Getting SPRADDR records for ${personAddressSurrogateIds?.size()} PIDMs..."
-            List<PersonAddressExtendedProperties> entities = personAddressExtendedPropertiesService.fetchAllBySurrogateIds(personAddressSurrogateIds)
+            List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddressSurrogateIds)
             log.debug "Got ${entities?.size()} SPRADDR records"
             entities?.each {
                 personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
@@ -835,7 +837,245 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         } else {
             throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("names.required.message", []))
         }
+
+        if(person.containsKey("addresses") && person.get("addresses") instanceof List){
+            requestData.put("addresses", extractAddressesFromRequest(person.get("addresses")))
+        }
         return requestData
     }
+
+    private def extractAddressesFromRequest(final List addressesInRequest) {
+        List personAddressMapList = []
+
+        if(addressesInRequest) {
+            List addressTypes = addressesInRequest?.type?.addressType
+
+            if (addressTypes && addressTypes.size() != (addressTypes as Set).size()) {
+                //throw an exception
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.duplicate.", []))
+            }
+
+            Map bannerAddressTypeToHedmV6AddressTypeMap = addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
+
+            addressesInRequest.each { requestAddress ->
+                Map personAddressMap = [:]
+                if (requestAddress instanceof Map) {
+                    if (requestAddress.containsKey('type') && requestAddress.get('type') instanceof Map) {
+                        Map type = requestAddress.get('type')
+                        if (type.containsKey('addressType') && type.get('addressType') instanceof String && HedmAddressType.getByString(type.get("addressType"), "v6")) {
+                            def mapEntry = bannerAddressTypeToHedmV6AddressTypeMap.find { key, value -> value == type.get('addressType') }
+                            if (mapEntry) {
+                                personAddressMap.bannerAddressType = mapEntry.key
+                            } else {
+                                //throw an exception
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.invalid", []))
+                            }
+                        }
+                    } else {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.required", []))
+                    }
+
+                    Date fromDate = new Date()
+                    //set fromDate and toDate
+                    if (requestAddress.containsKey('fromDate') && requestAddress.get('fromDate') instanceof String) {
+                        String fromDateStr = requestAddress.get('fromDate')
+                        if (fromDateStr.length() > 0) {
+                            fromDate = DateConvertHelperService.convertUTCStringToServerDate(fromDateStr)
+                        }
+                    }
+
+                    personAddressMap.fromDate = fromDate
+
+                    if (personAddressMap.fromDate > new Date()) {
+                        //throw an exception
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("fromDate.future", []))
+                    }
+
+                    if (requestAddress.containsKey('toDate') && requestAddress.get('toDate') instanceof String) {
+                        String toDateStr = requestAddress.toDate
+                        if (toDateStr.length() > 0) {
+                            personAddressMap.toDate = DateConvertHelperService.convertUTCStringToServerDate(toDateStr)
+                        }
+                    }
+
+                    if (personAddressMap.toDate && personAddressMap.toDate < new Date()) {
+                        //throw an exception
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("toDate.past", []))
+                    }
+
+                    if (personAddressMap.fromDate && personAddressMap.toDate && personAddressMap.fromDate > personAddressMap.toDate) {
+                        //throw an exception
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("fromDate.greater.toDate", []))
+                    }
+
+                    if (requestAddress.containsKey("address") && requestAddress.get("address") instanceof Map) {
+                        Map address = requestAddress.get("address")
+                        setAddressDetails(address, personAddressMap)
+
+                    } else {
+                        //throw an excepiton
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("address.requried", []))
+                    }
+
+                    //add to person address list
+                    personAddressMapList.add(personAddressMap)
+                }
+            }
+        }
+        return personAddressMapList
+    }
+
+    private void setAddressDetails(Map address, Map personAddressMap) {
+
+        if (address.containsKey("addressLines") && address.get("addressLines") instanceof List && address.get("addressLines").size() > 0) {
+
+            //set streetLine1 , streetLine2, streetLine3, streetLine4
+            List addressLines = address.get("addressLines")
+            if(addressLines.size()>0){
+                personAddressMap.streetLine1 = addressLines[0]
+            }
+            if(addressLines.size()>1){
+                personAddressMap.streetLine2 = addressLines[1]
+            }
+            if(addressLines.size()>2){
+                personAddressMap.streetLine3 = addressLines[2]
+            }
+            if(addressLines.size()>3){
+                personAddressMap.streetLine4 = addressLines[3]
+            }
+
+        } else {
+            //throw an exception
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressLines.requried", []))
+        }
+
+        if (address.containsKey('place') && address.get('place') instanceof Map) {
+            Map place = address.get('place')
+
+            if (place.containsKey('country') && place.get("country") instanceof Map) {
+
+                Map country = place.get("country")
+
+                //Nation
+                String countryCode
+                if (country.containsKey('code') && country.get('code') instanceof String) {
+                    countryCode = country.get('code')
+                }
+
+                if (countryCode) {
+                    if (integrationConfigurationService.isInstitutionUsingISO2CountryCodes()) {
+                        countryCode = isoCodeService.getISO2CountryCode(countryCode)
+                    }
+                    personAddressMap.nationISOCode = countryCode
+                }
+
+                //City
+                String locality = '.'
+                if (country.containsKey('locality') && country.get("locality") instanceof String) {
+                    if (country.get("locality").length() > 0) {
+                        locality = country.get("locality")
+                    }
+                }
+                personAddressMap.city = locality
+
+                //State And Zip
+                if (country.containsKey('region') && country.get("region") instanceof Map) {
+
+                    Map region = country.get("region")
+
+                    //State Code
+                    if (region.containsKey('code') && region.get("code") instanceof String && region.get("code").length() > 0) {
+                        String regionCode = region.get("code")
+                        String stateCode = crossReferenceRuleService.getStateCodeByRegionCode(regionCode)
+                        if (!stateCode) {
+                            // throw an exception
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("region.not.found", []))
+                        }
+                        personAddressMap.stateCode = stateCode
+                    } else if (region.containsKey('title') && region.get("title") instanceof String && region.get("title").length() > 0) {
+                        personAddressMap.stateDescription = region.get("title")
+                    }
+                }
+
+                //zip code
+                String postalCode
+                if (country.containsKey('postalCode') && country.get("postalCode") instanceof String && country.get("postalCode").length() > 0) {
+                    postalCode = country.get("postalCode")
+                } else {
+                    postalCode = getDefalutZipCode()
+                }
+
+                if(personAddressMap.stateCode || personAddressMap.stateDescription) {
+                    personAddressMap.zip = postalCode
+                }
+
+                //county
+                if (country.containsKey('subRegion') && country.get('subRegion') instanceof Map) {
+                    Map subRegion = country.get('subRegion')
+                    County county
+
+                    if (subRegion.containsKey('code') && subRegion.get('code') instanceof String && subRegion.get('code').length() > 0) {
+                        String subRegionCode = subRegion.get('code')
+                        //get the banner value of sub region code
+                        String countyCode = crossReferenceRuleService.getCountyCodeBySubRegionCode(subRegionCode)
+                        if (countyCode) {
+                            county = County.findByCode(countyCode)
+                        }
+                        //set to new banner column code
+                        personAddressMap.countyISOCode = subRegionCode
+                    }
+
+                    if (subRegion.containsKey('title') && subRegion.get('title') instanceof String && subRegion.get('title').length() > 0) {
+                        String subRegionTitle = subRegion.get('title')
+                        if (!county) {
+                            county = County.findByDescription(subRegionTitle)
+                        }
+                        //set to new banner column titile
+                        personAddressMap.countyDescription = subRegionTitle
+                    }
+
+                    if (county) {
+                        personAddressMap.county = county
+                    }
+                }
+
+                //Additional fields for USA country
+                if(country.code == "USA") {
+                    if (country.containsKey('deliveryPoint') && country.get('deliveryPoint') instanceof String && country.get('deliveryPoint').length() > 0) {
+                        // set deliveryPoint
+                        personAddressMap.deliveryPoint = country.get('deliveryPoint')
+                    }
+                    if (country.containsKey('carrierRoute') && country.get('carrierRoute') instanceof String && country.get('carrierRoute').length() > 0) {
+                        //set carrierRoute
+                        personAddressMap.carrierRoute = country.get('carrierRoute')
+                    }
+                    if (country.containsKey('correctionDigit') && country.get('correctionDigit') instanceof String && country.get('correctionDigit').length() > 0) {
+                        //set correctionDigit
+                        personAddressMap.correctionDigit = country.get('correctionDigit')
+                    }
+                }
+
+            } else {
+                //throw an exceptoin
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.requried", []))
+            }
+
+        } else {
+
+            //set Default Nation code
+            String countryCode = integrationConfigurationService.getDefaultISOCountryCodeForAddress()
+            personAddressMap.nationISOCode = countryCode
+
+            //set City as '.'
+            personAddressMap.city = '.'
+        }
+
+        if(address.containsKey("geographicAreas") &&  address.get("geographicAreas") instanceof List){
+            def listOfMaps = getListOfMaps(address.get("geographicAreas"))
+            personAddressMap.put("geographicAreaGuids", listOfMaps?.id?.unique())
+        }
+
+    }
+
 
 }

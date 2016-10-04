@@ -4,15 +4,18 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
 import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
 import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.PersonGeographicAreaAddress
+import net.hedtech.banner.general.overall.PersonGeographicAreaAddressService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
-import net.hedtech.banner.general.system.NameType
+import net.hedtech.banner.general.system.*
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
@@ -27,6 +30,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     static final String ldmName = 'persons'
 
     private static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
+    static final String ZIP_DEFAULT = "PERSON.ADDRESSES.POSTAL.CODE"
+
 
     private static final ThreadLocal<Map> threadLocal =
             new ThreadLocal<Map>() {
@@ -54,7 +59,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonRaceService personRaceService
     RaceCompositeService raceCompositeService
     PersonBasicPersonBaseService personBasicPersonBaseService
-
+    PersonGeographicAreaAddressService personGeographicAreaAddressService
+    GeographicAreaCompositeService geographicAreaCompositeService
+    PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
 
@@ -242,10 +249,17 @@ abstract class AbstractPersonCompositeService extends LdmService {
         personBase.put('armedServiceMedalVetIndicator', false)
         personBase.put('pidm', newPersonIdentificationName?.pidm)
         PersonBasicPersonBase newPersonBase = personBasicPersonBaseService.create(personBase)
+
+        //person Address
+        List<PersonAddress> personAddresses = []
+        if (requestData.containsKey("addresses") && requestData.get("addresses") instanceof List && requestData.get("addresses").size() > 0) {
+            List addresses = requestData.get("addresses")
+            personAddresses = createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
+        }
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
 
-        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid)
+        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses)
 
     }
 
@@ -334,12 +348,144 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 alternateNames,
                 dataOrigin)
 
+        //person Address
+        List<PersonAddress> personAddresses = []
+        if(requestData.containsKey("addresses") && requestData.get("addresses") instanceof List){
+            List addresses = requestData.get("addresses")
+            //Update : Make it inactive , if exist person address have any updates
+            addresses = getActiveAddresses(pidm, addresses)
+            if(addresses) {
+                personAddresses = createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
+            }
+        }
+
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
 
-        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid)
+        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses)
     }
 
+    private def getActiveAddresses(def pidm, List<Map> newAddresses) {
+        Map addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
+        List<PersonAddress> personAddresses = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([pidm], addressTypeToHedmAddressTypeMap.keySet())
+        List<PersonGeographicAreaAddress> geographicAreaAddresses = personGeographicAreaAddressService.fetchActivePersonGeographicAreaAddress(pidm)
+        personAddresses.each { personAddress ->
+
+            def activeRequestAddresses = newAddresses.findAll { it ->
+                it.bannerAddressType == personAddress.addressType.code
+            }
+
+            if (activeRequestAddresses.size() > 0) {
+                activeRequestAddresses.each {
+                    PersonAddress activeRequestAddress = personAddressService.getDomainClass().newInstance()
+                    bindPersonAddress(activeRequestAddress, it, pidm)
+
+                    Boolean changeToInactiveStatus = false
+                    switch (activeRequestAddress.addressType) {
+                        default:
+                            if (activeRequestAddress.state != personAddress.state) {
+                                changeToInactiveStatus = true
+                            }
+                            if (activeRequestAddress.zip != personAddress.zip) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (activeRequestAddress.nation != personAddress.nation) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (activeRequestAddress.county != personAddress.county) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (activeRequestAddress.streetLine1 != personAddress.streetLine1) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (activeRequestAddress.streetLine2 != personAddress.streetLine2) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (activeRequestAddress.streetLine3 != personAddress.streetLine3) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            break;
+                    }
+                    if (changeToInactiveStatus) {
+                        personAddress.statusIndicator = 'I'
+                        log.debug "Inactivating address:" + personAddress.toString()
+                        personAddressService.update(personAddress)
+                        List<PersonGeographicAreaAddress> personGeographicAreaAddresses = geographicAreaAddresses.findAll {
+                            it.addressType.code == personAddress.addressType.code
+                        }
+                        personGeographicAreaAddresses.each { personGeographicAreaAddress ->
+                            personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                            personGeographicAreaAddressService.update(personGeographicAreaAddress)
+                        }
+                    } else {
+                        List<PersonGeographicAreaAddress> personGeographicAreaAddresses = geographicAreaAddresses.findAll {
+                            it.addressType.code == personAddress.addressType.code
+                        }
+
+                        if(it.containsKey("geographicAreaGuids") && it.get("geographicAreaGuids") instanceof List) {
+                            List geographicAreaGuids = it.get("geographicAreaGuids")
+                            if(personGeographicAreaAddresses.isEmpty()){
+                               createOrUpdateGeographicAddress(it, personAddress)
+                            }else {
+
+                                if(geographicAreaGuids.isEmpty()){
+                                    // Inactive geographic area address
+                                    personGeographicAreaAddresses.each { personGeographicAreaAddress ->
+                                        personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                                        personGeographicAreaAddressService.update(personGeographicAreaAddress)
+                                    }
+
+                                }else{
+                                    // compare geographic area address
+                                    Map geographicAreaGuidToGeographicAreaRuleMap = geographicAreaCompositeService.getGeographicAreaGuidToGeographicAreaRuleMap(geographicAreaGuids)
+
+                                    personGeographicAreaAddresses.each{ personGeographicAreaAddress ->
+
+                                      def geographicAreaMapEntry = geographicAreaGuidToGeographicAreaRuleMap.find { key, value ->
+                                          personGeographicAreaAddress.division.code == value.division.code && personGeographicAreaAddress.region.code == value.region.code
+                                      }
+
+                                        if(geographicAreaMapEntry){
+                                            geographicAreaGuids.remove(geographicAreaMapEntry.key)
+                                        }else{
+                                            personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                                            personGeographicAreaAddressService.update(personGeographicAreaAddress)
+                                        }
+                                    }
+
+                                    it.put("geographicAreaGuids", geographicAreaGuids)
+                                    createOrUpdateGeographicAddress(it, personAddress)
+
+                                }
+
+                            }
+                        }
+                            // remove from the list, if there is no changes of address
+                            newAddresses.remove(it)
+                    }
+                }
+            } else {
+                personAddress.statusIndicator = 'I'
+                log.debug "Inactivating address:" + personAddress.toString()
+                personAddressService.update(personAddress)
+                List<PersonGeographicAreaAddress> personGeographicAreaAddresses = geographicAreaAddresses.findAll {
+                    it.addressType.code == personAddress.addressType.code
+                }
+                personGeographicAreaAddresses.each { personGeographicAreaAddress ->
+                    personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                    personGeographicAreaAddressService.update(personGeographicAreaAddress)
+                }
+            }
+        }
+
+        return newAddresses
+    }
 
     private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, alternateNames, dataOrigin) {
         List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList([pidm])
@@ -484,7 +630,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     protected def createPersonDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                     PersonBasicPersonBase personBase, String personGuid) {
+                                                     PersonBasicPersonBase personBase, String personGuid, List<PersonAddress> personAddresses) {
         def dataMapForPerson = [:]
         dataMapForPerson.put('personGuid', personGuid)
         if (personIdentificationNameCurrent) {
@@ -499,6 +645,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson.put('personAlternateNames', personAlternateNames)
 
         }
+
+        // addresses
+        if (personAddresses) {
+            Map addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(personAddresses.addressType.code.unique())
+
+            Map bannerAddressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
+
+            Map personAddressSurrogateIdToGuidMap = [:]
+            List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddresses.id)
+            entities?.each {
+                personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
+            }
+
+            dataMapForPerson.put("personAddresses", personAddresses)
+            dataMapForPerson.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
+            dataMapForPerson.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
+            dataMapForPerson.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
+
+        }
+
         return dataMapForPerson
     }
 
@@ -518,6 +684,110 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort?.trim(), requestParams.order?.trim(), requestParams.max?.trim()?.toInteger() ?: 0, requestParams.offset?.trim()?.toInteger() ?: 0)
     }
 
+    protected def createOrUpdateAddress(List domainPropertiesMapList, Integer pidm){
+
+        List<PersonAddress> personAddresses = []
+        domainPropertiesMapList.each{
+            //Person Address
+            PersonAddress personAddress = personAddressService.getDomainClass().newInstance()
+            bindPersonAddress(personAddress, it, pidm)
+            personAddress = personAddressService.create(personAddress)
+
+            if(it.countyISOCode || it.countyDescription){
+                PersonAddressAdditionalProperty addressAdditionalProperty =  personAddressAdditionalPropertyService.get(personAddress.id)
+                addressAdditionalProperty.countyISOCode = it.countyISOCode
+                addressAdditionalProperty.countyDescription = it.countyDescription
+                 personAddressAdditionalPropertyService.update(addressAdditionalProperty)
+            }
+
+            //Geographic Address
+            createOrUpdateGeographicAddress(it, personAddress)
+            personAddresses.add(personAddress)
+        }
+
+        return personAddresses
+    }
+
+    protected def createOrUpdateGeographicAddress(Map addressMap, PersonAddress personAddress){
+
+        if(addressMap.containsKey("geographicAreaGuids") && addressMap.get("geographicAreaGuids") instanceof List){
+            List geographicAreaGuids = addressMap.get("geographicAreaGuids")
+            if(geographicAreaGuids) {
+                Map geographicAreaGuidToGeographicAreaRuleMap = geographicAreaCompositeService.getGeographicAreaGuidToGeographicAreaRuleMap(geographicAreaGuids)
+                geographicAreaGuids.each {
+                    PersonGeographicAreaAddress personGeographicAreaAddress = personGeographicAreaAddressService.getDomainClass().newInstance()
+                    bindPersonGeographicAreaAddress(personGeographicAreaAddress, it, geographicAreaGuidToGeographicAreaRuleMap, personAddress)
+                    personGeographicAreaAddressService.create(personGeographicAreaAddress)
+                }
+            }
+        }
+    }
+
+    protected void bindPersonGeographicAreaAddress(PersonGeographicAreaAddress personGeographicAreaAddress, String guid, Map guidToGeogrphicAreasMap, PersonAddress personAddress){
+         if(guidToGeogrphicAreasMap.containsKey(guid)){
+           GeographicRegionRule geographicRegionRule = guidToGeogrphicAreasMap.get(guid)
+             personGeographicAreaAddress.division = geographicRegionRule.division
+             personGeographicAreaAddress.region = geographicRegionRule.region
+         }else{
+             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("geographicArea.not.found", []))
+         }
+        personGeographicAreaAddress.pidm = personAddress.pidm
+        personGeographicAreaAddress.addressType = personAddress.addressType
+        personGeographicAreaAddress.sequenceNumber = personAddress.sequenceNumber
+        personGeographicAreaAddress.toDate = personAddress.toDate
+        personGeographicAreaAddress.fromDate = personAddress.fromDate
+        personGeographicAreaAddress.sourceIndicator = 'S'
+        personGeographicAreaAddress.userData = personAddress.userData
+    }
+
+    private void bindPersonAddress(PersonAddress personAddress, Map domainPropertiesMap, Integer pidm){
+        personAddress.pidm = pidm
+        if(domainPropertiesMap.containsKey('bannerAddressType')){
+          AddressType addressType = AddressType.findByCode(domainPropertiesMap.bannerAddressType)
+            if(addressType) {
+                personAddress.addressType = addressType
+            }else {
+                //throw an exception
+                throw new ApplicationException("Person", new BusinessLogicValidationException("addressType.not.found.message", []))
+            }
+        }
+
+        if(domainPropertiesMap.containsKey('nationISOCode')){
+            Nation nation = Nation.findByScodIso(domainPropertiesMap.nationISOCode)
+            if (nation) {
+                personAddress.nation = nation
+            } else {
+                log.error "Nation not found for code: ${domainPropertiesMap.nationISOCode}"
+                throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
+            }
+        }
+
+        if(domainPropertiesMap.containsKey('stateCode')){
+           State state = State.findByCode(domainPropertiesMap.stateCode)
+            if(state){
+                personAddress.state = state
+            }else {
+                throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
+            }
+        }else if(domainPropertiesMap.containsKey('stateDescription')){
+           State state = State.findByDescription(domainPropertiesMap.stateDescription)
+            if(state){
+                personAddress.state = state
+            }else {
+                throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
+            }
+        }
+
+        bindData(personAddress, domainPropertiesMap,[:])
+    }
+
+    protected def getDefalutZipCode(){
+        IntegrationConfiguration intConfig = super.findAllByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, ZIP_DEFAULT)[0]
+        if (!intConfig) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("goriccr.not.found.message", [ZIP_DEFAULT]))
+        }
+        return intConfig.value
+    }
 
     private def searchForMatchingPersons(final Map content) {
         def cmRequest = prepareCommonMatchingRequest(content)
@@ -1044,6 +1314,24 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
     }
 
+    /**
+     * JSON Array with JSON object elements will be converted to list of maps by RESTful API controller
+     * (Each JSON object inside array is represented as Map).
+     *
+     * @param list
+     * @return
+     */
+    protected def getListOfMaps(final def list) {
+        def listOfMaps = []
+        if (list instanceof List) {
+            for (elem in list) {
+                if (elem instanceof Map) {
+                    listOfMaps << elem
+                }
+            }
+        }
+        return listOfMaps
+    }
 
     private void injectTotalCountIntoParams(Map requestParams, Map requestProcessingResult) {
         if (requestProcessingResult.containsKey("totalCount")) {

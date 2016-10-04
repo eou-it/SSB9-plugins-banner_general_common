@@ -19,7 +19,6 @@ import net.hedtech.banner.general.system.ldm.AddressTypeCompositeService
 import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.PhoneTypeCompositeService
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
-import net.hedtech.banner.general.system.ldm.v4.PhoneTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
@@ -40,7 +39,7 @@ class NonPersonCompositeService extends LdmService {
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
     PersonAddressService personAddressService
-    PersonAddressExtendedPropertiesService personAddressExtendedPropertiesService
+    PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
     AddressTypeCompositeService addressTypeCompositeService
 
 
@@ -353,7 +352,7 @@ class NonPersonCompositeService extends LdmService {
         Map personAddressSurrogateIdToGuidMap = [:]
         if (personAddressSurrogateIds) {
             log.debug "Getting SPRADDR records for ${personAddressSurrogateIds?.size()} PIDMs..."
-            List<PersonAddressExtendedProperties> entities = personAddressExtendedPropertiesService.fetchAllBySurrogateIds(personAddressSurrogateIds)
+            List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddressSurrogateIds)
             log.debug "Got ${entities?.size()} SPRADDR records"
             entities?.each {
                 personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
