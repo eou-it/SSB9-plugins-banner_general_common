@@ -7,6 +7,8 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.overall.ldm.v6.VisaStatusV6
+import net.hedtech.banner.general.system.MaritalStatus
+import net.hedtech.banner.general.system.ldm.v1.MaritalStatusDetail
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
 import net.hedtech.banner.general.system.ldm.v6.EthnicityDecorator
 
@@ -32,5 +34,24 @@ class PersonV6 {
     List<PersonAddressDecorator> addresses
     def identityDocuments
     def languages
+    Date dateOfBirth
+    Date dateDeceased
+    String gender
+    MaritalStatusDetail maritialStatus
+    String countryOfBirth
+    String citizenshipCountry
+
+    def getGender() {
+        switch (gender) {
+            case 'M':
+                return 'Male'
+            case 'F':
+                return 'Female'
+            case 'N':
+                return 'Unknown'
+            default:
+                return gender
+        }
+    }
 
 }
