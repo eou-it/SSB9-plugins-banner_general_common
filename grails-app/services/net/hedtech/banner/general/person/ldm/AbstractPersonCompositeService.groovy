@@ -252,14 +252,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //person Address
         List<PersonAddress> personAddresses = []
+        Map addressTypeToHedmAddressTypeMap = [:]
         if (requestData.containsKey("addresses") && requestData.get("addresses") instanceof List && requestData.get("addresses").size() > 0) {
             List addresses = requestData.get("addresses")
             personAddresses = createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
+            addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
         }
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
 
-        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses)
+        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses, addressTypeToHedmAddressTypeMap)
 
     }
 
@@ -355,14 +357,17 @@ abstract class AbstractPersonCompositeService extends LdmService {
             //Update : Make it inactive , if exist person address have any updates
             addresses = getActiveAddresses(pidm, addresses)
             if(addresses) {
-                personAddresses = createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
+                createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
             }
         }
+
+        Map addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
+        personAddresses = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([pidm], addressTypeToHedmAddressTypeMap.keySet())
 
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
 
-        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses)
+        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses, addressTypeToHedmAddressTypeMap)
     }
 
     private def getActiveAddresses(def pidm, List<Map> newAddresses) {
@@ -447,12 +452,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
                                     personGeographicAreaAddresses.each{ personGeographicAreaAddress ->
 
-                                      def geographicAreaMapEntry = geographicAreaGuidToGeographicAreaRuleMap.find { key, value ->
+                                      def exitGeographicAreaMap = geographicAreaGuidToGeographicAreaRuleMap.find { key, value ->
                                           personGeographicAreaAddress.division.code == value.division.code && personGeographicAreaAddress.region.code == value.region.code
                                       }
 
-                                        if(geographicAreaMapEntry){
-                                            geographicAreaGuids.remove(geographicAreaMapEntry.key)
+                                        if(exitGeographicAreaMap){
+                                            geographicAreaGuids.remove(exitGeographicAreaMap.key)
                                         }else{
                                             personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
                                             personGeographicAreaAddressService.update(personGeographicAreaAddress)
@@ -630,7 +635,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     protected def createPersonDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                     PersonBasicPersonBase personBase, String personGuid, List<PersonAddress> personAddresses) {
+                                                     PersonBasicPersonBase personBase, String personGuid, List<PersonAddress> personAddresses, Map bannerAddressTypeToHedmAddressTypeMap) {
         def dataMapForPerson = [:]
         dataMapForPerson.put('personGuid', personGuid)
         if (personIdentificationNameCurrent) {
@@ -649,9 +654,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // addresses
         if (personAddresses) {
             Map addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(personAddresses.addressType.code.unique())
-
-            Map bannerAddressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
-
             Map personAddressSurrogateIdToGuidMap = [:]
             List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddresses.id)
             entities?.each {
