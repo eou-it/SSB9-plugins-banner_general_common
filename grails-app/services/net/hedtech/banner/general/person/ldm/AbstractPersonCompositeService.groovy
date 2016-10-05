@@ -246,6 +246,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (requestData.containsKey("nameSuffix") && requestData.get("nameSuffix").length() > 0) {
             personBase.put('nameSuffix', requestData.get("nameSuffix"))
         }
+        if (requestData.containsKey("birthDate") && requestData.get("birthDate") instanceof Date) {
+            personBase.put('birthDate', requestData.get("birthDate"))
+        }
+        if (requestData.containsKey("deadDate") && requestData.get("deadDate") instanceof Date) {
+            personBase.put('deadDate', requestData.get("deadDate"))
+        }
+        if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
+        }
+        person.put('deadIndicator', requestData.get("deadDate") ? 'Y' : null)
         personBase.put('armedServiceMedalVetIndicator', false)
         personBase.put('pidm', newPersonIdentificationName?.pidm)
         PersonBasicPersonBase newPersonBase = personBasicPersonBaseService.create(personBase)
@@ -335,7 +345,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             alternateNames.each { nameRecord ->
                 PersonIdentificationNameAlternate existingPersonRecord = getPersonIdentificationNameAlternateByNameType(newPersonIdentificationName?.pidm, nameRecord.type)
                 PersonIdentificationNameAlternate newPersonBirthRecord = null
-                if (!isNamesElementSameAsExisting(nameRecord.firstName, nameRecord.middleName, nameRecord.lastName, nameRecord.surnamePrefix, existingPersonRecord)) {
+                if (!(isNamesElementSameAsExisting(nameRecord.firstName, nameRecord.lastName, nameRecord.middleName, nameRecord.surnamePrefix, existingPersonRecord))) {
                     newPersonBirthRecord = createPersonIdentificationNameAlternateByNameType(newPersonIdentificationName,
                             nameRecord,
                             dataOrigin)
@@ -347,6 +357,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
         PersonBasicPersonBase newPersonBase = updatePersonBasicPersonBase(pidm, newPersonIdentificationName, requestData.get('namePrefix'),
                 requestData.get('nameSuffix'),
                 requestData.get('preferenceFirstName'),
+                requestData.get('birthDate'),
+                requestData.get('deadDate'),
                 alternateNames,
                 dataOrigin)
 
@@ -492,13 +504,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return newAddresses
     }
 
-    private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, alternateNames, dataOrigin) {
+    private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, birthDate, deadDate, alternateNames, dataOrigin) {
         List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList([pidm])
         PersonBasicPersonBase newPersonBase
 
         if (personBaseList.size() == 0) {
             //if there is no person base then create new PersonBase
-            newPersonBase = createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, dataOrigin)
+            newPersonBase = createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, birthDate, deadDate, preferenceFirstName, dataOrigin)
         } else {
             personBaseList.each { personBase ->
                 //Copy personBase attributes into person map from Primary names object.
@@ -526,6 +538,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         }
                     }
                 }
+                if (birthDate != null) {
+                    personBase.birthDate = birthDate
+                }
+                if (deadDate) {
+                    personBase.deadIndicator = deadDate != null ? 'Y' : null
+                    personBase.deadDate = deadDate
+                    if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
+                    }
+                }
                 newPersonBase = personBasicPersonBaseService.update(personBase)
             }
 
@@ -534,7 +556,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    private PersonBasicPersonBase createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, dataOrigin) {
+    private PersonBasicPersonBase createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, birthDate,deadDate, preferenceFirstName, dataOrigin) {
         Map person = [:]
         PersonBasicPersonBase newPersonBase
 
@@ -549,6 +571,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (preferenceFirstName && preferenceFirstName.length() > 0) {
             person.preferenceFirstName = preferenceFirstName
         }
+        if (birthDate) {
+            person.birthDate = birthDate
+        }
+        if (deadDate) {
+            person.birthDate = deadDate
+        }
+        if (deadDate != null && birthDate != null && deadDate.before(birthDate)) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
+        }
+        person.put('deadIndicator', deadDate ? 'Y' : null)
         person.put('pidm', newPersonIdentificationName?.pidm)
         person.put('armedServiceMedalVetIndicator', false)
         newPersonBase = personBasicPersonBaseService.create(person)

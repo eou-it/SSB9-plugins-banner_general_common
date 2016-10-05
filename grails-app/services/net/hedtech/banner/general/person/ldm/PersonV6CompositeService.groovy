@@ -5,6 +5,7 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.VisaInternationalInformation
 import net.hedtech.banner.general.overall.VisaInternationalInformationService
@@ -15,6 +16,7 @@ import net.hedtech.banner.general.system.County
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
 import net.hedtech.banner.general.system.ldm.HedmAddressType
+import net.hedtech.banner.general.system.ldm.MaritalStatusCompositeService
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 import net.hedtech.banner.general.system.ldm.NationCompositeService
 import net.hedtech.banner.general.system.ldm.ReligionCompositeService
@@ -818,66 +820,57 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         if (person.containsKey("names") && person.get("names") instanceof List) {
-            Map personalName = person.names.find { it?.type?.category == "personal" && it?.firstName && it?.lastName }
+
+            Map personalName = person.names.find { it?.type?.category == NameTypeCategory.PERSONAL.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6]  }
             if (personalName) {
-                requestData.put('firstName', personalName.firstName?.trim())
-                requestData.put('middleName', personalName.middleName?.trim())
-                requestData.put('lastName', personalName.lastName?.trim())
-                if (personalName.containsKey("surnamePrefix") && personalName.get("surnamePrefix") instanceof String) {
-                    requestData.put('surnamePrefix', personalName?.surnamePrefix?.trim())
+                extractNameFieldsAndPutInMap(personalName, requestData)
+
+                if(!requestData.containsKey("firstName") || !requestData.containsKey("lastName")) {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("names.required.message", null))
                 }
+
                 if (personalName.containsKey("namePrefix") && personalName.get("namePrefix") instanceof String) {
                     requestData.put('namePrefix', personalName?.namePrefix?.trim())
                 }
+
                 if (personalName.containsKey("nameSuffix") && personalName.get("nameSuffix") instanceof String) {
                     requestData.put('nameSuffix', personalName?.nameSuffix?.trim())
                 }
             } else {
-                throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("names.required.message", []))
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("names.required.message", null))
             }
 
             Map<String, String> bannerNameTypeToHedmV6NameTypeMap = getBannerNameTypeToHedmNameTypeMap()
             def alternateNames = []
 
-            Map birthName = person.names.find { it.type?.category == "birth" }
+            Map birthName = person.names.find { it.type?.category == NameTypeCategory.BIRTH.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6] }
             if (birthName) {
                 def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == birthName.type.category }
                 if (mapEntry) {
-                    if (birthName.firstName && birthName.firstName?.length() > 0 && birthName.lastName && birthName.lastName?.length() > 0) {
-                        def record = [type: mapEntry.key, firstName: birthName.firstName?.trim(), lastName: birthName.lastName?.trim()]
-                        if (birthName.middleName?.trim()) {
-                            record.put("middleName", birthName.middleName?.trim())
-                        }
-                        if (birthName.containsKey("surnamePrefix") && birthName.get("surnamePrefix") instanceof String) {
-                            record.put("surnamePrefix", birthName?.surnamePrefix?.trim())
-                        }
-                        alternateNames << record
-                    } else {
-                        throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("firstName.lastName.required.message", []))
+                    def record = [type: mapEntry.key]
+
+                    extractNameFieldsAndPutInMap(birthName, record)
+
+                    if(!record.containsKey("firstName") || !record.containsKey("lastName")) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("firstName.lastName.required.message", null))
                     }
-                } else {
-                    throw new ApplicationException('PersonV6CompositeService', new BusinessLogicValidationException('goriccr.not.found.message', []))
+
+                    alternateNames << record
                 }
             }
-
-            Map legalName = person.names.find { it.type?.category == "legal" }
+            Map legalName = person.names.find { it.type?.category == NameTypeCategory.LEGAL.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6] }
             if (legalName) {
                 def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == legalName.type.category }
                 if (mapEntry) {
-                    if (legalName.firstName && legalName.firstName?.length() > 0 && legalName.lastName && legalName.lastName?.length() > 0) {
-                        def record = [type: mapEntry.key, firstName: legalName.firstName?.trim(), lastName: legalName.lastName?.trim()]
-                        if (legalName.middleName?.trim()) {
-                            record.put("middleName", legalName.middleName?.trim())
-                        }
-                        if (legalName.containsKey("surnamePrefix") && legalName.get("surnamePrefix") instanceof String) {
-                            record.put("surnamePrefix", legalName?.surnamePrefix?.trim())
-                        }
-                        alternateNames << record
-                    } else {
-                        throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("firstName.lastName.required.message", []))
+                    def record = [type: mapEntry.key]
+
+                    extractNameFieldsAndPutInMap(legalName, record)
+
+                    if(!record.containsKey("firstName") || !record.containsKey("lastName")) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("firstName.lastName.required.message", null))
                     }
-                } else {
-                    throw new ApplicationException('PersonV6CompositeService', new BusinessLogicValidationException('goriccr.not.found.message', []))
+
+                    alternateNames << record
                 }
             }
             requestData.put("alternateNames", alternateNames)
@@ -885,10 +878,46 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("names.required.message", []))
         }
 
+        /* Optional in DataModel - Optional in Banner */
+
+        if (person.containsKey("birthDate") && person.get("birthDate") instanceof String) {
+            Date birthDate = DateConvertHelperService.convertUTCStringToServerDate(person?.birthDate)
+            requestData.put('birthDate', birthDate)
+        }
+
+        if (person.containsKey("deadDate") && person.get("deadDate") instanceof String) {
+            Date deadDate = DateConvertHelperService.convertUTCStringToServerDate(person?.deadDate)
+            requestData.put('deadDate', deadDate)
+        }
+
         if(person.containsKey("addresses") && person.get("addresses") instanceof List){
             requestData.put("addresses", extractAddressesFromRequest(person.get("addresses")))
         }
         return requestData
+    }
+
+    private void extractNameFieldsAndPutInMap(Map nameObj, Map requestData) {
+        if (nameObj.containsKey("firstName") && nameObj.get("firstName") instanceof String) {
+            String firstName = nameObj.get("firstName").trim()
+            if (firstName) {
+                requestData.put('firstName', firstName)
+            }
+        }
+
+        if (nameObj.containsKey("lastName") && nameObj.get("lastName") instanceof String) {
+            String lastName = nameObj.get("lastName").trim()
+            if (lastName) {
+                requestData.put('lastName', lastName)
+            }
+        }
+
+        if (nameObj.containsKey("middleName") && nameObj.get("middleName") instanceof String) {
+            requestData.put('middleName', nameObj.get("middleName").trim())
+        }
+
+        if (nameObj.containsKey("surnamePrefix") && nameObj.get("surnamePrefix") instanceof String) {
+            requestData.put('surnamePrefix', nameObj?.surnamePrefix?.trim())
+        }
     }
 
     private def extractAddressesFromRequest(final List addressesInRequest) {
