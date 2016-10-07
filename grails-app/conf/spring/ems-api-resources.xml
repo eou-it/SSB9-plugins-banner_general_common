@@ -1015,6 +1015,142 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-academic-standings" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-standings</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-standings/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AcademicStandings.STVASTD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-classifications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-classifications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ClassCodes.STVCLAS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-cohorts" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-cohorts</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-cohorts/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Cohorts.STVCHRT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-academic-period-enrollment-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-period-enrollment-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-period-enrollment-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.EnrollmentStatuss.STVESTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-residency-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>residency-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/residency-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Residencys.STVRESD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-tags" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-tags</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-tags/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentAttributes.STVATTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentStatuss.STVSTST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentTypes.STVSTYP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -1075,6 +1211,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-external-educations-trit"/>
                 <ref bean="ar-external-educations-degr"/>
                 <ref bean="ar-external-educations-tram"/>
+                <ref bean="ar-academic-standings"/>
+                <ref bean="ar-student-classifications"/>
+                <ref bean="ar-student-cohorts"/>
+                <ref bean="ar-academic-period-enrollment-statuses"/>
+                <ref bean="ar-residency-types"/>
+                <ref bean="ar-student-tags"/>
+                <ref bean="ar-student-statuses"/>
+                <ref bean="ar-student-types"/>
             </list>
         </property>
     </bean>
@@ -1138,6 +1282,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-external-educations-trit"/>
                 <ref bean="ar-external-educations-degr"/>
                 <ref bean="ar-external-educations-tram"/>
+                <ref bean="ar-academic-standings"/>
+                <ref bean="ar-student-classifications"/>
+                <ref bean="ar-student-cohorts"/>
+                <ref bean="ar-academic-period-enrollment-statuses"/>
+                <ref bean="ar-residency-types"/>
+                <ref bean="ar-student-tags"/>
+                <ref bean="ar-student-statuses"/>
+                <ref bean="ar-student-types"/>
             </list>
         </property>
     </bean>
