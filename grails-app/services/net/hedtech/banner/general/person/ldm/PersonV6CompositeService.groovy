@@ -928,7 +928,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             if (addressTypes && addressTypes.size() != (addressTypes as Set).size()) {
                 //throw an exception
-                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.duplicate.", []))
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.duplicate", []))
             }
 
             Map bannerAddressTypeToHedmV6AddressTypeMap = addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
@@ -942,10 +942,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                             def mapEntry = bannerAddressTypeToHedmV6AddressTypeMap.find { key, value -> value == type.get('addressType') }
                             if (mapEntry) {
                                 personAddressMap.bannerAddressType = mapEntry.key
-                            } else {
-                                //throw an exception
-                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.invalid", []))
                             }
+                        }
+                        if (personAddressMap.bannerAddressType == null) {
+                            //throw an exception
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.invalid", []))
                         }
                     } else {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.required", []))
