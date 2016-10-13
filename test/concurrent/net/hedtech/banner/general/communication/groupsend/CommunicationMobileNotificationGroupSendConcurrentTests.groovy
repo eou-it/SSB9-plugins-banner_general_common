@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.json.JsonSlurper
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
@@ -148,11 +149,15 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
     @Test
     public void testPersonalization() {
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is not null and rownum = 1" )[0]
+        String testExternalUser = row.GOBTPAC_EXTERNAL_USER
+
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testPersonalizationQuery",
                 description: "test description",
-                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
+                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = '${testExternalUser}'"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -179,7 +184,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 renderAsHtml: false,
                 status: CommunicationFieldStatus.DEVELOPMENT,
                 statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
-                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = 'cbeaver' and :pidm = :pidm"
+                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = '${testExternalUser}' and :pidm = :pidm"
         )
         communicationField = communicationFieldService.create( [domainModel: communicationField] )
         communicationField = communicationFieldService.publishDataField( [id: communicationField.id] )
@@ -229,7 +234,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
         assert serverResponseMap instanceof Map
         assertEquals( "testPersonalization from BCM", serverResponseMap.mobileHeadline )
-        assertEquals( "name = cbeaver", serverResponseMap.headline )
+        assertEquals( "name = ${testExternalUser}".toString(), serverResponseMap.headline )
         assertEquals( "test description", serverResponseMap.description )
         assertEquals( "http://www.amazon.com", serverResponseMap.destination )
         assertEquals( "Amazon", serverResponseMap.destinationLabel )

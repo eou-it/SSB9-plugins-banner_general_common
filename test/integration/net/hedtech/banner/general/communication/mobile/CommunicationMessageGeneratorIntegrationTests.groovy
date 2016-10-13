@@ -3,6 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.mobile
 
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -38,18 +39,22 @@ class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestC
      */
     @Test
     void testFetchExternalLoginIdByPidm() {
-        ThirdPartyAccess thirdPartyAccess = ThirdPartyAccess.findByExternalUser( "dpatrick" )
-        assertNotNull( thirdPartyAccess )
-        assertNotNull( thirdPartyAccess.pidm )
-        assertNotNull( thirdPartyAccess.externalUser )
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is not null and rownum = 1" )[0]
+        Long testPidm = row.GOBTPAC_PIDM
+        String testExternalUser = row.GOBTPAC_EXTERNAL_USER
 
         // tests a valid pidm set up with an external user
-        String externalLoginId = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( thirdPartyAccess.pidm )
+        String externalLoginId = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( testPidm )
         assertNotNull( externalLoginId )
-        assertEquals( thirdPartyAccess.externalUser, externalLoginId )
+        assertEquals( testExternalUser, externalLoginId )
 
         // tests a valid pidm with no external user set up
-        String externalLoginId2 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( 1252 )
+        row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is null and rownum = 1" )[0]
+        testPidm = row.GOBTPAC_PIDM
+        testExternalUser = row.GOBTPAC_EXTERNAL_USER
+
+        String externalLoginId2 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( testPidm )
         assertNull( externalLoginId2 )
 
         // tests if pidm does not exist

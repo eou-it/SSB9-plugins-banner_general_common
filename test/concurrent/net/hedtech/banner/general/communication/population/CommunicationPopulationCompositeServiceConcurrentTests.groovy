@@ -56,36 +56,6 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
     }
 
 
-//    @Test
-//    public void testCreatePopulationFromQuery() {
-//        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery( "testQuery" ) )
-//        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
-//        assertFalse( populationQuery.changesPending )
-//
-//        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
-//        assertNotNull( population.id )
-//        assertEquals( "testPopulation", population.name )
-//        assertEquals( "testPopulationDescription", population.description )
-//
-//        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
-//        assertEquals( 1, associations.size() )
-//        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
-//        assertNotNull( association.id )
-//        assertEquals( population.id, association.population.id )
-//        assertEquals( populationQuery.id, association.populationQuery.id )
-//        assertNull( association.populationQueryVersion )
-//
-//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
-//        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
-//        def isAvailable = {
-//            def theCalculation = CommunicationPopulationCalculation.get( it )
-//            theCalculation.refresh()
-//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
-//        }
-//        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
-//    }
-
-
     @Test
     public void testAllSpridenPopulationFromQuery() {
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
@@ -120,7 +90,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
         assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
-        assertTrue( populationCalculation.calculatedCount >= 10000 )
+        assertTrue( populationCalculation.calculatedCount >= 1000 )
     }
 
 //    @Test

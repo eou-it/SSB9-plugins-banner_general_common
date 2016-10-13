@@ -482,8 +482,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         // 0) Test parameters
         String testName = "testMediumPopulationAndDelete"
         String testUserId = 'BCMADMIN'
-        int lowerPopulationSizeRange = 2000
-        int upperPopulationSizeRange = 4000
+        int lowerPopulationSizeRange = 500
+        int upperPopulationSizeRange = 1000
 
         // 1)Generate such a population which will fetch large number of people from the system (in the range 2000-4000 etc.)
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
