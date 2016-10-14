@@ -3,23 +3,18 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import com.sun.xml.internal.bind.v2.TODO
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.VisaInternationalInformation
 import net.hedtech.banner.general.overall.VisaInternationalInformationService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
-import net.hedtech.banner.general.system.CitizenType
-import net.hedtech.banner.general.system.County
-import net.hedtech.banner.general.system.Nation
-import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
-import net.hedtech.banner.general.system.ldm.HedmAddressType
-import net.hedtech.banner.general.system.ldm.MaritalStatusCompositeService
-import net.hedtech.banner.general.system.ldm.NameTypeCategory
-import net.hedtech.banner.general.system.ldm.NationCompositeService
-import net.hedtech.banner.general.system.ldm.ReligionCompositeService
+import net.hedtech.banner.general.system.*
+import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.system.ldm.v4.EmailTypeDetails
 import net.hedtech.banner.general.system.ldm.v6.AddressTypeDecorator
 import net.hedtech.banner.general.system.ldm.v6.CitizenshipStatusV6
@@ -36,6 +31,8 @@ import java.sql.Timestamp
 class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
+    def settingNameSSN = 'PERSON.UPDATESSN'
+
     def outsideInterestService
     def interestCompositeService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
@@ -44,9 +41,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     NationCompositeService nationCompositeService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
-    MaritalStatusCompositeService maritalStatusCompositeService
     def crossReferenceRuleService
-
+    EmailTypeService emailTypeService
 
 
     @Override
@@ -234,6 +230,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
+        fetchPersonsMaritalStatusDataAndPutInMap(dataMap)
     }
 
 
@@ -305,9 +302,23 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
     }
 
+    private void fetchPersonsMaritalStatusDataAndPutInMap(Map dataMap) {
+        maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
+        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
+        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
+
+        // Put in Map
+        dataMap.put("bannerMaritalStatusToHedmMaritalStatusMap", bannerMaritalStatusToHedmMaritalStatusMap)
+        dataMap.put("maritalStatusCodeToGuidMap", maritalStatusCodeToGuidMap)
+    }
+
 
     protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
         return phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
+    }
+
+    protected def getBannerMaritalStatusToHedmMaritalStatusMap() {
+        return maritalStatusCompositeService.getBannerMaritalStatusToHedmV4MaritalStatusMap()
     }
 
 
@@ -442,11 +453,15 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
                 //gender
                 if (personBase.sex) {
-                    decorator.gender = personBase.sex
+                    decorator.gender = Gender.getByBannerValue(personBase.sex).versionToEnumMap["v6"]
                 }
                 //maritialStatus
-                if (personBase.maritalStatus?.code) {
-                    decorator.maritialStatus = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
+                if (personBase.maritalStatus) {
+                    def bannerMaritalStatusToHedmMaritalStatusMap = dataMapForPerson["bannerMaritalStatusToHedmMaritalStatusMap"]
+                    def maritalStatusCodeToGuidMap = dataMapForPerson["maritalStatusCodeToGuidMap"]
+                    if (bannerMaritalStatusToHedmMaritalStatusMap.containsKey(personBase.maritalStatus.code)) {
+                        decorator.maritialStatus = maritalStatusCompositeService.createMaritalStatusDataModelV4(maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code), personBase.maritalStatus, bannerMaritalStatusToHedmMaritalStatusMap)
+                    }
                 }
             }
 
@@ -482,7 +497,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             // Credentials
             def personCredentials = dataMapForPerson["personCredentials"]
-            decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
+            if (personCredentials) {
+                decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
+            }
 
             // Addresses
             List<PersonAddress> personAddresses = dataMapForPerson["personAddresses"]
@@ -821,11 +838,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
         if (person.containsKey("names") && person.get("names") instanceof List) {
 
-            Map personalName = person.names.find { it?.type?.category == NameTypeCategory.PERSONAL.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6]  }
+            Map personalName = person.names.find {
+                it?.type?.category == NameTypeCategory.PERSONAL.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6]
+            }
             if (personalName) {
                 extractNameFieldsAndPutInMap(personalName, requestData)
 
-                if(!requestData.containsKey("firstName") || !requestData.containsKey("lastName")) {
+                if (!requestData.containsKey("firstName") || !requestData.containsKey("lastName")) {
                     throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("names.required.message", null))
                 }
 
@@ -843,33 +862,31 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             Map<String, String> bannerNameTypeToHedmV6NameTypeMap = getBannerNameTypeToHedmNameTypeMap()
             def alternateNames = []
 
-            Map birthName = person.names.find { it.type?.category == NameTypeCategory.BIRTH.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6] }
+            Map birthName = person.names.find {
+                it.type?.category == NameTypeCategory.BIRTH.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6]
+            }
             if (birthName) {
                 def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == birthName.type.category }
                 if (mapEntry) {
                     def record = [type: mapEntry.key]
-
                     extractNameFieldsAndPutInMap(birthName, record)
-
-                    if(!record.containsKey("firstName") || !record.containsKey("lastName")) {
+                    if (!record.containsKey("firstName") || !record.containsKey("lastName")) {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("firstName.lastName.required.message", null))
                     }
-
                     alternateNames << record
                 }
             }
-            Map legalName = person.names.find { it.type?.category == NameTypeCategory.LEGAL.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6] }
+            Map legalName = person.names.find {
+                it.type?.category == NameTypeCategory.LEGAL.versionToEnumMap[GeneralValidationCommonConstants.VERSION_V6]
+            }
             if (legalName) {
                 def mapEntry = bannerNameTypeToHedmV6NameTypeMap.find { key, value -> value == legalName.type.category }
                 if (mapEntry) {
                     def record = [type: mapEntry.key]
-
                     extractNameFieldsAndPutInMap(legalName, record)
-
-                    if(!record.containsKey("firstName") || !record.containsKey("lastName")) {
+                    if (!record.containsKey("firstName") || !record.containsKey("lastName")) {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("firstName.lastName.required.message", null))
                     }
-
                     alternateNames << record
                 }
             }
@@ -880,20 +897,218 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
         /* Optional in DataModel - Optional in Banner */
 
-        if (person.containsKey("birthDate") && person.get("birthDate") instanceof String) {
-            Date birthDate = DateConvertHelperService.convertUTCStringToServerDate(person?.birthDate)
+        if (person.containsKey("birthDate") && person.get("birthDate") instanceof String && person.get("birthDate")?.trim()?.length() > 0) {
+            Date birthDate = DateConvertHelperService.convertDateStringToServerDate(person?.birthDate)
             requestData.put('birthDate', birthDate)
+        }else if (person.containsKey("birthDate") && person.get("birthDate") instanceof String && person.get("birthDate")?.trim()?.length() == 0) {
+            requestData.put('birthDate', null)
         }
 
-        if (person.containsKey("deadDate") && person.get("deadDate") instanceof String) {
-            Date deadDate = DateConvertHelperService.convertUTCStringToServerDate(person?.deadDate)
+        if (person.containsKey("deadDate") && person.get("deadDate") instanceof String && person.get("deadDate")?.trim()?.length() > 0) {
+            Date deadDate = DateConvertHelperService.convertDateStringToServerDate(person?.deadDate)
             requestData.put('deadDate', deadDate)
+        }else if (person.containsKey("deadDate") && person.get("deadDate") instanceof String && person.get("deadDate")?.trim()?.length() == 0) {
+            requestData.put('deadDate', null)
         }
 
-        if(person.containsKey("addresses") && person.get("addresses") instanceof List){
+        if (person.containsKey("privacyStatus") && person.get("privacyStatus") instanceof Map) {
+            requestData.put("confidIndicator", extractPrivacyStatusFromRequest(person.get("privacyStatus")))
+        }
+
+        if (person.containsKey("gender") && person.get("gender") instanceof String) {
+            requestData.put("sex", extractGenderFromRequest(person.get("gender")))
+        }
+
+        if (person.containsKey("religion") && person.get("religion") instanceof Map) {
+            requestData.put("religion", extractReligionFromRequest(person.get("religion")))
+            requestData.put("religionGuid", person.get("religion")?.id)
+        }
+
+        if (person.containsKey("races") && person.get("races") instanceof List) {
+            requestData.put("raceCodes", extractRacesFromRequest(person.get("races")))
+        }
+
+        if (person.containsKey("ethnicity") && person.get("ethnicity") instanceof Map) {
+            requestData.put("ethnicity", extractEthnicityFromRequest(person.get("ethnicity")))
+        }
+
+        if (person.containsKey("maritalStatus") && person.get("maritalStatus") instanceof Map) {
+            requestData.put("maritalStatus", extractMaritialStatusFromRequest(person.get("maritalStatus")))
+        }
+
+        if (person.containsKey("emails") && person.get("emails") instanceof List) {
+            requestData.put("emails", extractEmailsFromRequest(person.get("emails")))
+        }
+
+
+        if (person.containsKey("addresses") && person.get("addresses") instanceof List) {
             requestData.put("addresses", extractAddressesFromRequest(person.get("addresses")))
         }
+
+        if (person.containsKey("credentials") && person.get("credentials") instanceof List) {
+            def updateSSN = checkSSNUpdate()
+            requestData.put("credentials", extractCredentialsFromRequest(person.get("credentials")))
+            requestData.put("updateSSN", updateSSN)
+        }
         return requestData
+    }
+
+
+
+    private def extractEmailsFromRequest(List emailsInRequest) {
+        List personEmailMapList = []
+        String preference
+        Map<String, String> bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
+        if(emailsInRequest){
+            emailsInRequest.each { requestEmail ->
+                Map personEmailMap = [:]
+                if (requestEmail instanceof Map) {
+                    if (requestEmail.containsKey('type') && requestEmail.get('type') instanceof Map) {
+                        Map type = requestEmail.get('type')
+                        if (type.containsKey('emailType') && type.get('emailType') instanceof String && HedmEmailType.getByString(type.get("emailType"), "v6")) {
+                            def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == type.get('emailType') }
+                            if (mapEntry) {
+                                EmailType emailType = emailTypeService.fetchByCode(mapEntry.key)
+                                personEmailMap.put("bannerEmailType",emailType)
+                            } else {
+                                //throw an exception
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.invalid", null))
+                            }
+                        }
+                    } else {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.required", null))
+                    }
+                    if (requestEmail.containsKey('address') && requestEmail.get('address') instanceof String) {
+                        personEmailMap.put("emailAddress",requestEmail.get('address'))
+                    }
+                    if (requestEmail.containsKey('preference') && requestEmail.get('preference') instanceof String) {
+                        if(preference != 'primary' && requestEmail.get('preference') == 'primary'){
+                            preference = 'primary'
+                            personEmailMap.put("preference",'Y')
+                        }else{
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("multiple.primaryemail.invalid", null))
+                        }
+                    }
+                }
+                personEmailMapList << personEmailMap
+            }
+        }
+        return personEmailMapList
+    }
+
+
+    private def extractMaritialStatusFromRequest(Map maritialStatusMap) {
+        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
+        MaritalStatus maritalStatus
+        if (maritialStatusMap.containsKey("maritalCategory") && maritialStatusMap.get("maritalCategory") instanceof String && maritialStatusMap.get("maritalCategory")?.length() > 0) {
+            def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritialStatusMap.get("maritalCategory") }
+            if (mapEntry) {
+                String maritalCategory = mapEntry.key
+                maritalStatus = maritalStatusService.fetchByCode(maritalCategory)
+            }else{
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.notfound.message", null))
+            }
+        }
+        return maritalStatus
+    }
+
+
+    private def extractEthnicityFromRequest(Map ethnicityMap) {
+        Ethnicity ethnicity
+        if (ethnicityMap.get("ethnicGroup") instanceof Map) {
+            ethnicity = ethnicityCompositeService.fetchByGuid(ethnicityMap.get("ethnicGroup").get("id"))
+        }
+        return ethnicity?.code
+    }
+
+
+    private def extractRacesFromRequest(List races) {
+        List raceCodes = []
+        races.each { raceMap ->
+            if (raceMap.get("race") instanceof Map) {
+                Race race = raceCompositeService.fetchByGuid(raceMap.get("race").get("id"))
+                if (race) {
+                    raceCodes << race.race
+                } else {
+                    throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("race.not.found.message", []))
+                }
+            }
+        }
+        return raceCodes
+    }
+
+    private def extractReligionFromRequest(Map religion) {
+        if (religion.get("id") instanceof String) {
+            Religion religionObj = religionCompositeService.fetchByGuid(religion.get("id"))
+            if (religionObj) {
+                return religionObj
+            } else {
+                throw new ApplicationException("PersonV6CompositeService", new BusinessLogicValidationException("religon.not.found.message", []))
+            }
+        }
+    }
+
+    private def extractPrivacyStatusFromRequest(Map privacyStatus) {
+        if (privacyStatus.get("privacyCategory") instanceof String) {
+            if (privacyStatus.get("privacyCategory") == 'restricted') {
+                return 'Y'
+            } else {
+                return 'N'
+            }
+        }
+    }
+
+    private def extractGenderFromRequest(String gender) {
+        if (gender instanceof String) {
+            if (gender == Gender.MALE.versionToEnumMap["v6"]) {
+                return 'M'
+            } else if (gender == Gender.FEMALE.versionToEnumMap["v6"]) {
+                return 'F'
+            } else if (gender == Gender.UNKNOWN.versionToEnumMap["v6"]) {
+                return 'N'
+            }
+        }
+        return null
+    }
+
+
+    private def checkSSNUpdate() {
+        IntegrationConfiguration intConfs = findAllByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, settingNameSSN)[0]
+        if (intConfs.value == 'Y') {
+            return 'Y'
+        } else {
+            return 'N'
+        }
+    }
+
+    private def extractCredentialsFromRequest(final List credentialsInRequest) {
+        List personCredentialList = []
+
+        if (credentialsInRequest.getAt("type").contains(CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]) && credentialsInRequest.getAt("type").contains(CredentialType.SOCIAL_INSURANCE_NUMBER.versionToEnumMap["v6"])) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("", null))
+        }
+        credentialsInRequest.each { requestCredential ->
+            // Need to check format of credential type
+            if (requestCredential instanceof Map) {
+                CredentialType type
+                String value
+                if (requestCredential.containsKey("type") && requestCredential.get("type") instanceof String && CredentialType.getByString(requestCredential.get("type"), "v6")) {
+                    type = CredentialType.getByString(requestCredential.get("type"), "v6")
+                } else {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.code.message:credentialType", null))
+                }
+                if (requestCredential.containsKey("value") && requestCredential.get("value") instanceof String) {
+                    value = requestCredential.get("value")
+                    if (requestCredential.containsKey("type") == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("credentialId.length.message", null))
+                    }
+                } else {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("ssn.credentialId.null.message", null))
+                }
+                personCredentialList << [type: type, value: value]
+            }
+        }
+        return personCredentialList
     }
 
     private void extractNameFieldsAndPutInMap(Map nameObj, Map requestData) {
@@ -923,7 +1138,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     private def extractAddressesFromRequest(final List addressesInRequest) {
         List personAddressMapList = []
 
-        if(addressesInRequest) {
+        if (addressesInRequest) {
             List addressTypes = addressesInRequest?.type?.addressType
 
             if (addressTypes && addressTypes.size() != (addressTypes as Set).size()) {
@@ -1008,16 +1223,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             //set streetLine1 , streetLine2, streetLine3, streetLine4
             List addressLines = address.get("addressLines")
-            if(addressLines.size()>0){
+            if (addressLines.size() > 0) {
                 personAddressMap.streetLine1 = addressLines[0]
             }
-            if(addressLines.size()>1){
+            if (addressLines.size() > 1) {
                 personAddressMap.streetLine2 = addressLines[1]
             }
-            if(addressLines.size()>2){
+            if (addressLines.size() > 2) {
                 personAddressMap.streetLine3 = addressLines[2]
             }
-            if(addressLines.size()>3){
+            if (addressLines.size() > 3) {
                 personAddressMap.streetLine4 = addressLines[3]
             }
 
@@ -1082,7 +1297,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     postalCode = getDefalutZipCode()
                 }
 
-                if(personAddressMap.stateCode || personAddressMap.stateDescription) {
+                if (personAddressMap.stateCode || personAddressMap.stateDescription) {
                     personAddressMap.zip = postalCode
                 }
 
@@ -1117,7 +1332,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
 
                 //Additional fields for USA country
-                if(country.code == "USA") {
+                if (country.code == "USA") {
                     if (country.containsKey('deliveryPoint') && country.get('deliveryPoint') instanceof String && country.get('deliveryPoint').length() > 0) {
                         // set deliveryPoint
                         personAddressMap.deliveryPoint = country.get('deliveryPoint')
@@ -1147,7 +1362,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             personAddressMap.city = '.'
         }
 
-        if(address.containsKey("geographicAreas") &&  address.get("geographicAreas") instanceof List){
+        if (address.containsKey("geographicAreas") && address.get("geographicAreas") instanceof List) {
             def listOfMaps = getListOfMaps(address.get("geographicAreas"))
             personAddressMap.put("geographicAreaGuids", listOfMaps?.id?.unique())
         }

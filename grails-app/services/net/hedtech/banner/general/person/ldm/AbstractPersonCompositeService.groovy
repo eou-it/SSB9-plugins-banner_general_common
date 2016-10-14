@@ -62,6 +62,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonGeographicAreaAddressService personGeographicAreaAddressService
     GeographicAreaCompositeService geographicAreaCompositeService
     PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
+    MaritalStatusCompositeService maritalStatusCompositeService
+    MaritalStatusService maritalStatusService
+    def additionalIDService
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
 
@@ -86,6 +89,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     abstract protected def getBannerPhoneTypeToHedmPhoneTypeMap()
 
+    abstract protected def getBannerMaritalStatusToHedmMaritalStatusMap()
 
     abstract protected def getBannerEmailTypeToHedmEmailTypeMap()
 
@@ -215,7 +219,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
             newPersonIdentification.remove('nameType') // ID won't generate if this is set.
             //Create the new PersonIdentification record
             newPersonIdentificationName = personIdentificationNameCurrentService.create(newPersonIdentification)
-
         }
 
         if ((requestData.containsKey("alternateNames") && requestData.get("alternateNames").size() > 0)) {
@@ -246,19 +249,66 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (requestData.containsKey("nameSuffix") && requestData.get("nameSuffix").length() > 0) {
             personBase.put('nameSuffix', requestData.get("nameSuffix"))
         }
-        if (requestData.containsKey("birthDate") && requestData.get("birthDate") instanceof Date) {
+        if (requestData.containsKey("birthDate") && requestData.get("birthDate")) {
             personBase.put('birthDate', requestData.get("birthDate"))
         }
-        if (requestData.containsKey("deadDate") && requestData.get("deadDate") instanceof Date) {
+        if (requestData.containsKey("deadDate") && requestData.get("deadDate")) {
             personBase.put('deadDate', requestData.get("deadDate"))
+        }
+        if (requestData.containsKey("confidIndicator") && requestData.get("confidIndicator") instanceof String) {
+            personBase.put('confidIndicator', requestData.get("confidIndicator"))
+        }
+        if (requestData.containsKey("ethnicity") && requestData.get("ethnicity") instanceof String) {
+            personBase.put('ethnic', requestData.get("ethnicity"))
+        }
+
+        if (requestData.containsKey("maritalStatus") && requestData.get("maritalStatus") instanceof MaritalStatus) {
+            personBase.put('maritalStatus', requestData.get("maritalStatus"))
+        }
+
+        if (requestData.containsKey("sex") && requestData.get("sex") instanceof String) {
+            personBase.put('sex', requestData.get("sex"))
+        }
+
+        String religionGuid
+        if (requestData.containsKey("religion") && requestData.get("religion") instanceof Religion) {
+            personBase.put('religion', requestData.get("religion"))
+            religionGuid = requestData.get("religionGuid")
         }
         if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
         }
+
+        // person credentials
+        def additionalIds = []
+        if (requestData.containsKey("credentials") && requestData.get("credentials")?.size() > 0) {
+            def personCredentials = requestData.get("credentials")
+            personCredentials.each { credential ->
+                if (CredentialType.SOCIAL_SECURITY_NUMBER == credential.type) {
+                    personBase.put('ssn', credential.value)
+                }
+                if (CredentialType.ELEVATE_ID == credential.type) {
+                    additionalIds << createOrUpdateAdditionalId(newPersonIdentificationName, credential, dataOrigin)
+                }
+            }
+        }
+
         person.put('deadIndicator', requestData.get("deadDate") ? 'Y' : null)
         personBase.put('armedServiceMedalVetIndicator', false)
         personBase.put('pidm', newPersonIdentificationName?.pidm)
         PersonBasicPersonBase newPersonBase = personBasicPersonBaseService.create(personBase)
+
+        // person Race
+        List<PersonRace> personRaces
+        if (requestData.containsKey("raceCodes") && requestData.get("raceCodes") instanceof List) {
+            personRaces = createOrUpdatePersonRace(requestData.get("raceCodes"), newPersonIdentificationName.pidm, personRaces, dataOrigin)
+        }
+
+        //person emails
+        List<PersonEmail> personEmails
+        if (requestData.containsKey("emails") && requestData.get("emails") instanceof List) {
+            personEmails = createOrUpdatePersonEmails(requestData.get("emails"), newPersonIdentificationName.pidm, personEmails, dataOrigin)
+        }
 
         //person Address
         List<PersonAddress> personAddresses = []
@@ -271,7 +321,20 @@ abstract class AbstractPersonCompositeService extends LdmService {
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
 
-        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses, addressTypeToHedmAddressTypeMap)
+        Map dataMapForPerson = [:]
+        dataMapForPerson.put("personIdentificationNameCurrent", newPersonIdentificationName)
+        dataMapForPerson.put("personBase", newPersonBase)
+        dataMapForPerson.put("personGuid", personGuid)
+        dataMapForPerson.put("personAddresses", personAddresses)
+        dataMapForPerson.put("addressTypeToHedmAddressTypeMap", addressTypeToHedmAddressTypeMap)
+        dataMapForPerson.put("additionalIds", additionalIds)
+        dataMapForPerson.put("religionGuid", religionGuid)
+        dataMapForPerson.put("personRaces", personRaces)
+        dataMapForPerson.put("personEmails", personEmails)
+
+
+
+        return createPersonDataMapForSinglePerson(dataMapForPerson)
 
     }
 
@@ -353,22 +416,63 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
 
+        //personBasicPersonBase
+        List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList([pidm])
+
+        // person redentials
+        String ssn
+        def additionalIds = []
+        if (requestData.containsKey("credentials") && requestData.get("credentials")?.size() > 0) {
+            def personCredentials = requestData.get("credentials")
+            personCredentials.each { credential ->
+                if (CredentialType.SOCIAL_SECURITY_NUMBER == credential.type || CredentialType.SOCIAL_INSURANCE_NUMBER == credential.type) {
+                    if (requestData.containsKey('updateSSN') && personBaseList?.size() > 0) {
+                        if (requestData.get('updateSSN') == 'Y' && personBaseList.get(0).ssn) {
+                            ssn = credential.value
+                        }
+                        if (personBaseList.get(0).ssn == null) {
+                            ssn = credential.value
+                        }
+                    }
+                }
+                if (CredentialType.ELEVATE_ID == credential.type) {
+                    additionalIds << createOrUpdateAdditionalId(newPersonIdentificationName, credential, dataOrigin)
+                }
+                if (CredentialType.BANNER_ID == credential.type) {
+                    PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.fetchByBannerId(credential.value)
+                    if (!personIdentificationNameCurrent) {
+                        newPersonIdentificationName.bannerId = credential.value
+                        personIdentificationNameCurrentService.update(newPersonIdentificationName)
+                    }
+                }
+            }
+        }
+
         //update PersonBasicPersonBase
-        PersonBasicPersonBase newPersonBase = updatePersonBasicPersonBase(pidm, newPersonIdentificationName, requestData.get('namePrefix'),
-                requestData.get('nameSuffix'),
-                requestData.get('preferenceFirstName'),
-                requestData.get('birthDate'),
-                requestData.get('deadDate'),
-                alternateNames,
-                dataOrigin)
+        PersonBasicPersonBase newPersonBase = updatePersonBasicPersonBase(pidm, personBaseList, newPersonIdentificationName, requestData, alternateNames, ssn, dataOrigin)
+
+        // person Race
+        List<PersonRace> personRaces = personRaceService.fetchRaceByPidmList([pidm])
+        if (requestData.containsKey("raceCodes") && requestData.get("raceCodes") instanceof List) {
+            personRaces = createOrUpdatePersonRace(requestData.get("raceCodes"), newPersonIdentificationName.pidm, personRaces, dataOrigin)
+        }
+
+        //person emails
+        Map bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
+        List<PersonEmail> personEmails = personEmailService.fetchAllEmails(pidm, bannerEmailTypeToHedmEmailTypeMap.keySet())
+        if (requestData.containsKey("emails") && requestData.get("emails") instanceof List) {
+            personEmails = createOrUpdatePersonEmails(requestData.get("emails"), newPersonIdentificationName.pidm, personEmails, dataOrigin)
+        } else {
+            personEmails = personEmailService.fetchAllActiveEmails(pidm, bannerEmailTypeToHedmEmailTypeMap.keySet())
+        }
 
         //person Address
         List<PersonAddress> personAddresses = []
-        if(requestData.containsKey("addresses") && requestData.get("addresses") instanceof List){
+        if (requestData.containsKey("addresses") && requestData.get("addresses") instanceof List) {
             List addresses = requestData.get("addresses")
             //Update : Make it inactive , if exist person address have any updates
             addresses = getActiveAddresses(pidm, addresses)
-            if(addresses) {
+            if (addresses) {
                 createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
             }
         }
@@ -378,9 +482,96 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
+        String religionGuid
+        if (requestData.get("religion")) {
+            religionGuid = requestData.get("religionGuid")
+        }
 
-        return createPersonDataMapForSinglePerson(newPersonIdentificationName, newPersonBase, personGuid, personAddresses, addressTypeToHedmAddressTypeMap)
+        Map dataMapForPerson = [:]
+        dataMapForPerson.put("personIdentificationNameCurrent", newPersonIdentificationName)
+        dataMapForPerson.put("personBase", newPersonBase)
+        dataMapForPerson.put("personGuid", personGuid)
+        dataMapForPerson.put("personAddresses", personAddresses)
+        dataMapForPerson.put("addressTypeToHedmAddressTypeMap", addressTypeToHedmAddressTypeMap)
+        dataMapForPerson.put("additionalIds", additionalIds)
+        dataMapForPerson.put("religionGuid", religionGuid)
+        dataMapForPerson.put("personRaces", personRaces)
+        dataMapForPerson.put("personEmails", personEmails)
+
+
+        return createPersonDataMapForSinglePerson(dataMapForPerson)
+
     }
+
+    private
+    def createOrUpdatePersonEmails(List emailListInRequest, Integer pidm, List<PersonEmail> existingPersonEmails, String dataOrigin) {
+        List<PersonEmail> personEmails = []
+
+        emailListInRequest.each { emailMapInRequest ->
+            EmailType emailTypeInRequest = emailMapInRequest.bannerEmailType
+            String emailAddressInRequest = emailMapInRequest.emailAddress
+            PersonEmail existingPersonEmail = existingPersonEmails.find {
+                it.pidm == pidm && it.emailType.code == emailTypeInRequest.code && it.emailAddress == emailAddressInRequest
+            }
+            PersonEmail existingPersonEmailWithDiffrentCase
+            if(!existingPersonEmail){
+                existingPersonEmailWithDiffrentCase = existingPersonEmails.find {
+                    it.pidm == pidm && it.emailType.code == emailTypeInRequest.code && it.emailAddress.toLowerCase() == emailAddressInRequest.toLowerCase()
+                }
+            }
+            if(existingPersonEmailWithDiffrentCase && !existingPersonEmail){
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("existing.email.message", [existingPersonEmailWithDiffrentCase.emailAddress]))
+            }
+            if (existingPersonEmail) {
+                existingPersonEmail.preferredIndicator = emailMapInRequest.preference == 'Y' ? true : false
+                if (existingPersonEmail.statusIndicator == 'I') {
+                    existingPersonEmail.statusIndicator = 'A'
+                }
+                personEmailService.update([domainModel: existingPersonEmail])
+                personEmails << existingPersonEmail
+                existingPersonEmails.remove(existingPersonEmail)
+            } else {
+                // Create
+                PersonEmail personEmail = new PersonEmail(pidm: pidm, emailAddress: emailAddressInRequest, statusIndicator: "A", emailType: emailTypeInRequest, dataOrigin: dataOrigin)
+                if (emailMapInRequest.preference == 'Y') {
+                    personEmail.preferredIndicator = true
+                }
+                personEmail = personEmailService.create([domainModel: personEmail])
+                personEmails << personEmail
+            }
+
+        }
+        existingPersonEmails.each {
+            it.statusIndicator = "I"
+            it.preferredIndicator = false
+            personEmailService.update([domainModel: it])
+        }
+        return personEmails
+    }
+
+    private
+    def createOrUpdatePersonRace(List raceCodes, Integer pidm, List<PersonRace> existingPersonRaces, String dataOrigin) {
+        List<PersonRace> personRaces = []
+        raceCodes.each { raceCode ->
+            def existingPersonRace = existingPersonRaces.find { it.race == raceCode && it.pidm == pidm }
+            if (existingPersonRace) {
+                personRaces << existingPersonRace
+                existingPersonRaces.remove(existingPersonRace)
+            } else {
+                def personRace = [pidm: pidm]
+                personRace.put("race", raceCode)
+                personRace.put("dataOrigin", dataOrigin)
+                PersonRace newPersonRace = personRaceService.create(personRace)
+                personRaces << newPersonRace
+            }
+        }
+        existingPersonRaces.each { personRace ->
+            //Can't get around this, Hibernate updates before it deletes, triggering table-api errors.
+            PersonRace.executeUpdate("delete from PersonRace where race = :race and pidm = :pidm", [race: personRace.race, pidm: pidm])
+        }
+        return personRaces
+    }
+
 
     private def getActiveAddresses(def pidm, List<Map> newAddresses) {
         Map addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
@@ -445,32 +636,32 @@ abstract class AbstractPersonCompositeService extends LdmService {
                             it.addressType.code == personAddress.addressType.code
                         }
 
-                        if(it.containsKey("geographicAreaGuids") && it.get("geographicAreaGuids") instanceof List) {
+                        if (it.containsKey("geographicAreaGuids") && it.get("geographicAreaGuids") instanceof List) {
                             List geographicAreaGuids = it.get("geographicAreaGuids")
-                            if(personGeographicAreaAddresses.isEmpty()){
-                               createOrUpdateGeographicAddress(it, personAddress)
-                            }else {
+                            if (personGeographicAreaAddresses.isEmpty()) {
+                                createOrUpdateGeographicAddress(it, personAddress)
+                            } else {
 
-                                if(geographicAreaGuids.isEmpty()){
+                                if (geographicAreaGuids.isEmpty()) {
                                     // Inactive geographic area address
                                     personGeographicAreaAddresses.each { personGeographicAreaAddress ->
                                         personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
                                         personGeographicAreaAddressService.update(personGeographicAreaAddress)
                                     }
 
-                                }else{
+                                } else {
                                     // compare geographic area address
                                     Map geographicAreaGuidToGeographicAreaRuleMap = geographicAreaCompositeService.getGeographicAreaGuidToGeographicAreaRuleMap(geographicAreaGuids)
 
-                                    personGeographicAreaAddresses.each{ personGeographicAreaAddress ->
+                                    personGeographicAreaAddresses.each { personGeographicAreaAddress ->
 
-                                      def exitGeographicAreaMap = geographicAreaGuidToGeographicAreaRuleMap.find { key, value ->
-                                          personGeographicAreaAddress.division.code == value.division.code && personGeographicAreaAddress.region.code == value.region.code
-                                      }
+                                        def exitGeographicAreaMap = geographicAreaGuidToGeographicAreaRuleMap.find { key, value ->
+                                            personGeographicAreaAddress.division.code == value.division.code && personGeographicAreaAddress.region.code == value.region.code
+                                        }
 
-                                        if(exitGeographicAreaMap){
+                                        if (exitGeographicAreaMap) {
                                             geographicAreaGuids.remove(exitGeographicAreaMap.key)
-                                        }else{
+                                        } else {
                                             personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
                                             personGeographicAreaAddressService.update(personGeographicAreaAddress)
                                         }
@@ -483,8 +674,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
                             }
                         }
-                            // remove from the list, if there is no changes of address
-                            newAddresses.remove(it)
+                        // remove from the list, if there is no changes of address
+                        newAddresses.remove(it)
                     }
                 }
             } else {
@@ -504,24 +695,58 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return newAddresses
     }
 
-    private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, newPersonIdentificationName, namePrefix, nameSuffix, preferenceFirstName, birthDate, deadDate, alternateNames, dataOrigin) {
-        List<PersonBasicPersonBase> personBaseList = PersonBasicPersonBase.findAllByPidmInList([pidm])
+    def createOrUpdateAdditionalId(PersonIdentificationNameCurrent personIdentification, Map credential, String dataOrigin) {
+        def idType = AdditionalIdentificationType.findByCode("ELV8")
+        List<AdditionalID> existingIds = AdditionalID.fetchByPidmInListAndAdditionalIdentificationTypeInList([personIdentification.pidm], ["ELV8"])
+        AdditionalID existingId
+        if (existingIds.size() > 0) {
+            existingId = existingIds.get(0)
+            existingId.additionalId = credential?.value
+        } else
+            existingId = new AdditionalID(pidm: personIdentification.pidm,
+                    additionalIdentificationType: idType,
+                    additionalId: credential?.value,
+                    dataOrigin: dataOrigin)
+        additionalIDService.createOrUpdate(existingId)
+    }
+
+    private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, personBaseList, newPersonIdentificationName, personBaseData, alternateNames, ssn, dataOrigin) {
         PersonBasicPersonBase newPersonBase
 
         if (personBaseList.size() == 0) {
             //if there is no person base then create new PersonBase
-            newPersonBase = createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, birthDate, deadDate, preferenceFirstName, dataOrigin)
+            newPersonBase = createPersonBasicPersonBase(newPersonIdentificationName, personBaseData, dataOrigin)
         } else {
             personBaseList.each { personBase ->
                 //Copy personBase attributes into person map from Primary names object.
-                if (namePrefix != null) {
-                    personBase.namePrefix = namePrefix
+                if (personBaseData.get("namePrefix")) {
+                    personBase.namePrefix = personBaseData.get("namePrefix")
                 }
-                if (nameSuffix != null) {
-                    personBase.nameSuffix = nameSuffix
+                if (personBaseData.get("nameSuffix")) {
+                    personBase.nameSuffix = personBaseData.get("nameSuffix")
                 }
-                if (preferenceFirstName != null) {
-                    personBase.preferenceFirstName = preferenceFirstName
+                if (personBaseData.get("ssn")) {
+                    personBase.ssn = ssn
+                }
+                if (personBaseData.get("sex")) {
+                    personBase.sex = personBaseData.get("sex")
+                }
+                if (personBaseData.get("religion")) {
+                    personBase.religion = personBaseData.get("religion")
+                }
+                if (personBaseData.containsKey("ethnicity")) {
+                    if (personBaseData.get("ethnicity") instanceof String) {
+                        personBase.ethnic = personBaseData.get("ethnicity")
+                    } else {
+                        personBase.ethnic = null
+                    }
+                }
+                if (personBaseData.containsKey("maritalStatus")) {
+                    if (personBaseData.get("maritalStatus") instanceof MaritalStatus) {
+                        personBase.maritalStatus = personBaseData.get("maritalStatus")
+                    } else {
+                        personBase.maritalStatus = null
+                    }
                 }
 
                 def legalName = alternateNames?.find { it.type == "LEGL" }
@@ -538,15 +763,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         }
                     }
                 }
-                if (birthDate != null) {
-                    personBase.birthDate = birthDate
+                if (personBaseData.containsKey("birthDate") && personBaseData.get("birthDate")) {
+                    personBase.birthDate = personBaseData.get("birthDate")
+                }else if (personBaseData.containsKey("birthDate") && personBaseData.get("birthDate") == null) {
+                    personBase.birthDate = personBaseData.get("birthDate")
                 }
-                if (deadDate) {
-                    personBase.deadIndicator = deadDate != null ? 'Y' : null
-                    personBase.deadDate = deadDate
+
+
+                if (personBaseData.containsKey("deadDate") && personBaseData.get("deadDate") ) {
+                    personBase.deadIndicator = personBaseData.get("deadDate") != null ? 'Y' : null
+                    personBase.deadDate = personBaseData.get("deadDate")
                     if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
                     }
+                }else if (personBaseData.containsKey("deadDate")&& personBaseData.get("deadDate") == null) {
+                    personBase.deadDate = personBaseData.get("deadDate")
+                }
+
+
+                if (personBaseData.get("confidIndicator")) {
+                    personBase.confidIndicator = personBaseData.get("confidIndicator")
                 }
                 newPersonBase = personBasicPersonBaseService.update(personBase)
             }
@@ -556,31 +792,40 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    private PersonBasicPersonBase createPersonBasicPersonBase(newPersonIdentificationName, namePrefix, nameSuffix, birthDate,deadDate, preferenceFirstName, dataOrigin) {
+    private PersonBasicPersonBase createPersonBasicPersonBase(
+            def newPersonIdentificationName, Map personBaseData, String dataOrigin) {
         Map person = [:]
         PersonBasicPersonBase newPersonBase
 
         //Copy personBase attributes into person map from Primary names object.
         person.put('dataOrigin', dataOrigin)
-        if (namePrefix && namePrefix.length() > 0) {
-            person.namePrefix = namePrefix
+        if (personBaseData.containsKey("namePrefix")) {
+            person.namePrefix = personBaseData.get("namePrefix")
         }
-        if (nameSuffix && nameSuffix.length() > 0) {
-            person.nameSuffix = nameSuffix
+        if (personBaseData.containsKey("nameSuffix")) {
+            person.nameSuffix = personBaseData.get("nameSuffix")
         }
-        if (preferenceFirstName && preferenceFirstName.length() > 0) {
-            person.preferenceFirstName = preferenceFirstName
+        if (personBaseData.containsKey("birthDate")) {
+            person.birthDate = personBaseData.get("birthDate")
         }
-        if (birthDate) {
-            person.birthDate = birthDate
+        if (personBaseData.containsKey("deadDate")) {
+            person.birthDate = personBaseData.get("deadDate")
         }
-        if (deadDate) {
-            person.birthDate = deadDate
+        if (personBaseData.containsKey("confidIndicator")) {
+            person.confidIndicator = personBaseData.get("confidIndicator")
         }
-        if (deadDate != null && birthDate != null && deadDate.before(birthDate)) {
+        if (personBaseData.containsKey("sex")) {
+            person.sex = personBaseData.get("sex")
+        }
+        if (personBaseData.containsKey("religion")) {
+            person.sex = personBaseData.get("religion")
+        }
+
+
+        if (personBaseData.containsKey("deadDate") && personBaseData.containsKey("birthDate") && personBaseData.get("deadDate")?.before(personBaseData.get("birthDate"))) {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
         }
-        person.put('deadIndicator', deadDate ? 'Y' : null)
+        person.put('deadIndicator', personBaseData.get("deadDate") ? 'Y' : null)
         person.put('pidm', newPersonIdentificationName?.pidm)
         person.put('armedServiceMedalVetIndicator', false)
         newPersonBase = personBasicPersonBaseService.create(person)
@@ -666,25 +911,57 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def createPersonDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                     PersonBasicPersonBase personBase, String personGuid, List<PersonAddress> personAddresses, Map bannerAddressTypeToHedmAddressTypeMap) {
-        def dataMapForPerson = [:]
-        dataMapForPerson.put('personGuid', personGuid)
-        if (personIdentificationNameCurrent) {
-
+    protected def createPersonDataMapForSinglePerson(Map dataMapForPerson) {
+        if (dataMapForPerson.containsKey("personIdentificationNameCurrent")) {
+            PersonIdentificationNameCurrent personIdentificationNameCurrent = dataMapForPerson.get("personIdentificationNameCurrent")
             def bannerNameTypeToHedmNameTypeMap = getBannerNameTypeToHedmNameTypeMap()
             def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(bannerNameTypeToHedmNameTypeMap.keySet())
             List<PersonIdentificationNameAlternate> personAlternateNames = personIdentificationNameAlternateService.fetchAllMostRecentlyCreated([personIdentificationNameCurrent?.pidm], bannerNameTypeToHedmNameTypeMap?.keySet()?.toList())
-            dataMapForPerson.put('personIdentificationNameCurrent', personIdentificationNameCurrent)
-            dataMapForPerson.put('personBase', personBase)
             dataMapForPerson.put('bannerNameTypeToHedmNameTypeMap', bannerNameTypeToHedmNameTypeMap)
             dataMapForPerson.put('nameTypeCodeToGuidMap', nameTypeCodeToGuidMap)
             dataMapForPerson.put('personAlternateNames', personAlternateNames)
 
+            def personCredentials
+            personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap([personIdentificationNameCurrent.pidm], dataMapForPerson)
+            if (dataMapForPerson.pidmToCredentialsMap.containsKey(personIdentificationNameCurrent.pidm)) {
+                personCredentials = dataMapForPerson.pidmToCredentialsMap.get(personIdentificationNameCurrent.pidm)
+            }
+            personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
+            if (dataMapForPerson.get("personBase")?.ssn) {
+                personCredentials << [type: CredentialType.SOCIAL_SECURITY_NUMBER, value: dataMapForPerson.get("personBase").ssn]
+            }
+            dataMapForPerson.get("additionalIds")?.each {
+                personCredentials << [type: CredentialType.ELEVATE_ID, value: it.additionalId]
+            }
+            dataMapForPerson << ["personCredentials": personCredentials]
+        }
+
+        //maritalStatus
+        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
+        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
+        dataMapForPerson << ["bannerMaritalStatusToHedmMaritalStatusMap": bannerMaritalStatusToHedmMaritalStatusMap]
+        dataMapForPerson << ["maritalStatusCodeToGuidMap": maritalStatusCodeToGuidMap]
+
+        //maritalStatus
+        Map<String, String> bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
+        def emailTypeCodeToGuidMap = emailTypeCompositeService.getEmailTypeCodeToGuidMap(bannerEmailTypeToHedmEmailTypeMap.keySet())
+        dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": bannerEmailTypeToHedmEmailTypeMap]
+        dataMapForPerson << ["emailTypeCodeToGuidMap": emailTypeCodeToGuidMap]
+
+        //Ethnicity
+        Map usEthnicCodeGuidMap = ethnicityCompositeService.fetchGUIDsForUnitedStatesEthnicCodes()
+        dataMapForPerson << ["usEthnicCodeGuid": usEthnicCodeGuidMap.get(dataMapForPerson.get("personBase")?.ethnic)]
+
+        //Races
+        if (dataMapForPerson.get("personRaces")) {
+            List<PersonRace> personRaces = dataMapForPerson.get("personRaces")
+            Map raceCodeToGuidMap = raceCompositeService.getRaceCodeToGuidMap(personRaces.race.flatten() as Set)
+            dataMapForPerson << ["raceCodeToGuidMap": raceCodeToGuidMap]
         }
 
         // addresses
-        if (personAddresses) {
+        if (dataMapForPerson.containsKey("personAddresses")) {
+            def personAddresses = dataMapForPerson.get("personAddresses")
             Map addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(personAddresses.addressType.code.unique())
             Map personAddressSurrogateIdToGuidMap = [:]
             List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddresses.id)
@@ -692,7 +969,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
             }
 
-            dataMapForPerson.put("personAddresses", personAddresses)
+            dataMapForPerson.put("personAddresses", dataMapForPerson.get("personAddresses"))
             dataMapForPerson.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
             dataMapForPerson.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
             dataMapForPerson.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
@@ -718,20 +995,20 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort?.trim(), requestParams.order?.trim(), requestParams.max?.trim()?.toInteger() ?: 0, requestParams.offset?.trim()?.toInteger() ?: 0)
     }
 
-    protected def createOrUpdateAddress(List domainPropertiesMapList, Integer pidm){
+    protected def createOrUpdateAddress(List domainPropertiesMapList, Integer pidm) {
 
         List<PersonAddress> personAddresses = []
-        domainPropertiesMapList.each{
+        domainPropertiesMapList.each {
             //Person Address
             PersonAddress personAddress = personAddressService.getDomainClass().newInstance()
             bindPersonAddress(personAddress, it, pidm)
             personAddress = personAddressService.create(personAddress)
 
-            if(it.countyISOCode || it.countyDescription){
-                PersonAddressAdditionalProperty addressAdditionalProperty =  personAddressAdditionalPropertyService.get(personAddress.id)
+            if (it.countyISOCode || it.countyDescription) {
+                PersonAddressAdditionalProperty addressAdditionalProperty = personAddressAdditionalPropertyService.get(personAddress.id)
                 addressAdditionalProperty.countyISOCode = it.countyISOCode
                 addressAdditionalProperty.countyDescription = it.countyDescription
-                 personAddressAdditionalPropertyService.update(addressAdditionalProperty)
+                personAddressAdditionalPropertyService.update(addressAdditionalProperty)
             }
 
             //Geographic Address
@@ -742,11 +1019,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return personAddresses
     }
 
-    protected def createOrUpdateGeographicAddress(Map addressMap, PersonAddress personAddress){
+    protected def createOrUpdateGeographicAddress(Map addressMap, PersonAddress personAddress) {
 
-        if(addressMap.containsKey("geographicAreaGuids") && addressMap.get("geographicAreaGuids") instanceof List){
+        if (addressMap.containsKey("geographicAreaGuids") && addressMap.get("geographicAreaGuids") instanceof List) {
             List geographicAreaGuids = addressMap.get("geographicAreaGuids")
-            if(geographicAreaGuids) {
+            if (geographicAreaGuids) {
                 Map geographicAreaGuidToGeographicAreaRuleMap = geographicAreaCompositeService.getGeographicAreaGuidToGeographicAreaRuleMap(geographicAreaGuids)
                 geographicAreaGuids.each {
                     PersonGeographicAreaAddress personGeographicAreaAddress = personGeographicAreaAddressService.getDomainClass().newInstance()
@@ -757,14 +1034,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
     }
 
-    protected void bindPersonGeographicAreaAddress(PersonGeographicAreaAddress personGeographicAreaAddress, String guid, Map guidToGeogrphicAreasMap, PersonAddress personAddress){
-         if(guidToGeogrphicAreasMap.containsKey(guid)){
-           GeographicRegionRule geographicRegionRule = guidToGeogrphicAreasMap.get(guid)
-             personGeographicAreaAddress.division = geographicRegionRule.division
-             personGeographicAreaAddress.region = geographicRegionRule.region
-         }else{
-             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("geographicArea.not.found", []))
-         }
+    protected void bindPersonGeographicAreaAddress(PersonGeographicAreaAddress personGeographicAreaAddress, String guid, Map guidToGeogrphicAreasMap, PersonAddress personAddress) {
+        if (guidToGeogrphicAreasMap.containsKey(guid)) {
+            GeographicRegionRule geographicRegionRule = guidToGeogrphicAreasMap.get(guid)
+            personGeographicAreaAddress.division = geographicRegionRule.division
+            personGeographicAreaAddress.region = geographicRegionRule.region
+        } else {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("geographicArea.not.found", []))
+        }
         personGeographicAreaAddress.pidm = personAddress.pidm
         personGeographicAreaAddress.addressType = personAddress.addressType
         personGeographicAreaAddress.sequenceNumber = personAddress.sequenceNumber
@@ -774,19 +1051,19 @@ abstract class AbstractPersonCompositeService extends LdmService {
         personGeographicAreaAddress.userData = personAddress.userData
     }
 
-    private void bindPersonAddress(PersonAddress personAddress, Map domainPropertiesMap, Integer pidm){
+    private void bindPersonAddress(PersonAddress personAddress, Map domainPropertiesMap, Integer pidm) {
         personAddress.pidm = pidm
-        if(domainPropertiesMap.containsKey('bannerAddressType')){
-          AddressType addressType = AddressType.findByCode(domainPropertiesMap.bannerAddressType)
-            if(addressType) {
+        if (domainPropertiesMap.containsKey('bannerAddressType')) {
+            AddressType addressType = AddressType.findByCode(domainPropertiesMap.bannerAddressType)
+            if (addressType) {
                 personAddress.addressType = addressType
-            }else {
+            } else {
                 //throw an exception
                 throw new ApplicationException("Person", new BusinessLogicValidationException("addressType.not.found.message", []))
             }
         }
 
-        if(domainPropertiesMap.containsKey('nationISOCode')){
+        if (domainPropertiesMap.containsKey('nationISOCode')) {
             Nation nation = Nation.findByScodIso(domainPropertiesMap.nationISOCode)
             if (nation) {
                 personAddress.nation = nation
@@ -796,26 +1073,26 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
 
-        if(domainPropertiesMap.containsKey('stateCode')){
-           State state = State.findByCode(domainPropertiesMap.stateCode)
-            if(state){
+        if (domainPropertiesMap.containsKey('stateCode')) {
+            State state = State.findByCode(domainPropertiesMap.stateCode)
+            if (state) {
                 personAddress.state = state
-            }else {
+            } else {
                 throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
             }
-        }else if(domainPropertiesMap.containsKey('stateDescription')){
-           State state = State.findByDescription(domainPropertiesMap.stateDescription)
-            if(state){
+        } else if (domainPropertiesMap.containsKey('stateDescription')) {
+            State state = State.findByDescription(domainPropertiesMap.stateDescription)
+            if (state) {
                 personAddress.state = state
-            }else {
+            } else {
                 throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
             }
         }
 
-        bindData(personAddress, domainPropertiesMap,[:])
+        bindData(personAddress, domainPropertiesMap, [:])
     }
 
-    protected def getDefalutZipCode(){
+    protected def getDefalutZipCode() {
         IntegrationConfiguration intConfig = super.findAllByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, ZIP_DEFAULT)[0]
         if (!intConfig) {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("goriccr.not.found.message", [ZIP_DEFAULT]))
@@ -935,6 +1212,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson << ["personPhones": personTelephoneList]
             dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
         }
+
+        // maritalStatus
+        dataMapForPerson << ["bannerMaritalStatusToHedmMaritalStatusMap": dataMap.bannerMaritalStatusToHedmMaritalStatusMap]
+        dataMapForPerson << ["maritalStatusCodeToGuidMap": dataMap.maritalStatusCodeToGuidMap]
 
         // emails
         List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)

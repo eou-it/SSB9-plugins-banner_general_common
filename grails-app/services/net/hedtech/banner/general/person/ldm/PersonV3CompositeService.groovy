@@ -199,6 +199,17 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
         fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
         fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
+        fetchPersonsMaritalStatusDataAndPutInMap(dataMap)
+    }
+
+    private void fetchPersonsMaritalStatusDataAndPutInMap(Map dataMap) {
+        maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
+        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
+        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
+
+        // Put in Map
+        dataMap.put("bannerMaritalStatusToHedmMaritalStatusMap", bannerMaritalStatusToHedmMaritalStatusMap)
+        dataMap.put("maritalStatusCodeToGuidMap", maritalStatusCodeToGuidMap)
     }
 
 
@@ -234,6 +245,10 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
         return emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
     }
 
+    protected def getBannerMaritalStatusToHedmMaritalStatusMap() {
+        return maritalStatusCompositeService.getBannerMaritalStatusToHedmV4MaritalStatusMap()
+    }
+
     @Override
     protected extractDataFromRequestBody(Map content) {
         return null
@@ -256,11 +271,6 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     protected createPersonDataModel(Map dataMapForPerson) {
         return null
     }
-
-    protected def createPersonDataModel(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                        final Map dataMapForPerson) {
-    }
-
 
     private def getPersonEmailSurrogateIdToGuidMap(Collection<String> personEmailSurrogateIds) {
         def personEmailSurrogateIdToGuidMap = [:]
