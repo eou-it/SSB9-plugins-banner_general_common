@@ -455,12 +455,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (personBase.sex) {
                     decorator.gender = Gender.getByBannerValue(personBase.sex).versionToEnumMap["v6"]
                 }
-                //maritialStatus
+                //maritalStatus
                 if (personBase.maritalStatus) {
                     def bannerMaritalStatusToHedmMaritalStatusMap = dataMapForPerson["bannerMaritalStatusToHedmMaritalStatusMap"]
                     def maritalStatusCodeToGuidMap = dataMapForPerson["maritalStatusCodeToGuidMap"]
                     if (bannerMaritalStatusToHedmMaritalStatusMap.containsKey(personBase.maritalStatus.code)) {
-                        decorator.maritialStatus = maritalStatusCompositeService.createMaritalStatusDataModelV4(maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code), personBase.maritalStatus, bannerMaritalStatusToHedmMaritalStatusMap)
+                        decorator.maritalStatus = maritalStatusCompositeService.createMaritalStatusDataModelV4(maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code), personBase.maritalStatus, bannerMaritalStatusToHedmMaritalStatusMap)
                     }
                 }
             }
@@ -933,7 +933,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         if (person.containsKey("maritalStatus") && person.get("maritalStatus") instanceof Map) {
-            requestData.put("maritalStatus", extractMaritialStatusFromRequest(person.get("maritalStatus")))
+            requestData.put("maritalStatus", extractMaritalStatusFromRequest(person.get("maritalStatus")))
         }
 
         if (person.containsKey("emails") && person.get("emails") instanceof List) {
@@ -997,11 +997,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private def extractMaritialStatusFromRequest(Map maritialStatusMap) {
+    private def extractMaritalStatusFromRequest(Map maritalStatusMap) {
         Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
         MaritalStatus maritalStatus
-        if (maritialStatusMap.containsKey("maritalCategory") && maritialStatusMap.get("maritalCategory") instanceof String && maritialStatusMap.get("maritalCategory")?.length() > 0) {
-            def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritialStatusMap.get("maritalCategory") }
+        if (maritalStatusMap.containsKey("maritalCategory") && maritalStatusMap.get("maritalCategory") instanceof String && maritalStatusMap.get("maritalCategory")?.length() > 0) {
+            def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritalStatusMap.get("maritalCategory") }
             if (mapEntry) {
                 String maritalCategory = mapEntry.key
                 maritalStatus = maritalStatusService.fetchByCode(maritalCategory)
