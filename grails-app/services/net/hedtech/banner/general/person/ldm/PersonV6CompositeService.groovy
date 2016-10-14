@@ -9,6 +9,7 @@ import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
+import net.hedtech.banner.general.overall.ThirdPartyAccessService
 import net.hedtech.banner.general.overall.VisaInternationalInformation
 import net.hedtech.banner.general.overall.VisaInternationalInformationService
 import net.hedtech.banner.general.person.*
@@ -43,7 +44,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     IsoCodeService isoCodeService
     def crossReferenceRuleService
     EmailTypeService emailTypeService
-
+    ThirdPartyAccessService thirdPartyAccessService
 
     @Override
     protected String getPopSelGuidOrDomainKey(final Map requestParams) {
@@ -182,14 +183,21 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             String credentialType = requestParams.get("credential.type")?.trim()
             String credentialValue = requestParams.get("credential.value")?.trim()
 
-            if (credentialType != CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
+            def entities
+            def mapForSearch
+            if(credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]){
+                mapForSearch = [bannerId: credentialValue]
+                entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
+                totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
+            }else if(credentialType == CredentialType.BANNER_USER_NAME.versionToEnumMap["v6"]){
+                mapForSearch = [externalUser: credentialValue]
+                entities = thirdPartyAccessService.fetchAllByCriteria(mapForSearch, max, offset)
+                totalCount = thirdPartyAccessService.countByCriteria(mapForSearch)
+            }else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", null))
             }
 
-            def mapForSearch = [bannerId: credentialValue]
-            def entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
             pidms = entities?.collect { it.pidm }
-            totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
         } else if (requestParams.containsKey("lastName") || requestParams.containsKey("firstName") || requestParams.containsKey("middleName") || requestParams.containsKey("lastNamePrefix") || requestParams.containsKey("title") || requestParams.containsKey("pedigree")) {
             def mapForSearch = [:]
             if (requestParams.containsKey("lastName")) {
