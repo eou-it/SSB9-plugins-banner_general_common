@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
-import com.sun.xml.internal.bind.v2.TODO
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
@@ -11,7 +10,6 @@ import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ThirdPartyAccessService
 import net.hedtech.banner.general.overall.VisaInternationalInformation
-import net.hedtech.banner.general.overall.VisaInternationalInformationService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v6.*
 import net.hedtech.banner.general.system.*
@@ -34,15 +32,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     def settingNameSSN = 'PERSON.UPDATESSN'
 
-    def outsideInterestService
-    def interestCompositeService
+
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
-    ReligionCompositeService religionCompositeService
-    VisaInternationalInformationService visaInternationalInformationService
-    NationCompositeService nationCompositeService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
-    def crossReferenceRuleService
     EmailTypeService emailTypeService
     ThirdPartyAccessService thirdPartyAccessService
 
@@ -908,14 +901,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         if (person.containsKey("birthDate") && person.get("birthDate") instanceof String && person.get("birthDate")?.trim()?.length() > 0) {
             Date birthDate = DateConvertHelperService.convertDateStringToServerDate(person?.birthDate)
             requestData.put('birthDate', birthDate)
-        }else if (person.containsKey("birthDate") && person.get("birthDate") instanceof String && person.get("birthDate")?.trim()?.length() == 0) {
+        } else if (person.containsKey("birthDate") && person.get("birthDate") instanceof String && person.get("birthDate")?.trim()?.length() == 0) {
             requestData.put('birthDate', null)
         }
 
         if (person.containsKey("deadDate") && person.get("deadDate") instanceof String && person.get("deadDate")?.trim()?.length() > 0) {
             Date deadDate = DateConvertHelperService.convertDateStringToServerDate(person?.deadDate)
             requestData.put('deadDate', deadDate)
-        }else if (person.containsKey("deadDate") && person.get("deadDate") instanceof String && person.get("deadDate")?.trim()?.length() == 0) {
+        } else if (person.containsKey("deadDate") && person.get("deadDate") instanceof String && person.get("deadDate")?.trim()?.length() == 0) {
             requestData.put('deadDate', null)
         }
 
@@ -948,6 +941,21 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             requestData.put("emails", extractEmailsFromRequest(person.get("emails")))
         }
 
+        if (person.containsKey("nationBirth") && person.get("nationBirth") instanceof String) {
+            requestData.put("nationBirth", extractCountryCodeFromRequest(person.get("nationBirth")))
+        }
+
+        if (person.containsKey("nationLegal") && person.get("nationLegal") instanceof String) {
+            requestData.put("nationLegal", extractCountryCodeFromRequest(person.get("nationLegal")))
+        }
+
+        if (person.containsKey("interests") && person.get("interests") instanceof List) {
+            requestData.put("interests", extractInterestsFromRequest(person.get("interests")))
+        }
+
+        if (person.containsKey("languages") && person.get("languages") instanceof List) {
+            requestData.put("language", extractLanguageCodeFromRequest(person.get("languages")))
+        }
 
         if (person.containsKey("addresses") && person.get("addresses") instanceof List) {
             requestData.put("addresses", extractAddressesFromRequest(person.get("addresses")))
@@ -962,12 +970,67 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
+    private def extractLanguageCodeFromRequest(List languageCodesInRequest) {
+        Language language
+        if (languageCodesInRequest.size() > 1) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("multiple.lang.code", null))
+        }
+        if (languageCodesInRequest.size() == 0) {
+            return language
+        }
+        Map languageCodeMap = languageCodesInRequest?.get(0)
+        List crossReferenceRules = crossReferenceRuleService.fetchAllByISOLanguageCode(languageCodeMap.get("code"))
+        if (crossReferenceRules?.size() > 0) {
+            language = Language.findByCode(crossReferenceRules?.get(0)?.bannerValue)
+        } else {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
+        }
+        return language
+    }
+
+
+    private def extractInterestsFromRequest(List interestsInRequest) {
+        List interests = []
+        interestsInRequest.each { interestMap ->
+            if (interestMap instanceof Map && interestMap.get("id") instanceof String) {
+                def interest = interestCompositeService.fetchByGuid(interestMap.get("id"))
+                if (interest) {
+                    interests << interest
+                } else {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("interests.not.found", null))
+                }
+            }
+        }
+        return interests
+    }
+
+
+    private def extractCountryCodeFromRequest(String countryCodeISO) {
+        //Nation
+        String countryCode
+        if (countryCodeISO && countryCodeISO instanceof String && countryCodeISO.trim().length() == 0) {
+            return ""
+        }
+        if (countryCodeISO && countryCodeISO instanceof String && countryCodeISO?.length() > 0) {
+            countryCode = countryCodeISO
+            if (integrationConfigurationService.isInstitutionUsingISO2CountryCodes()) {
+                countryCode = isoCodeService.getISO2CountryCode(countryCode)
+            }
+        }
+        Nation nation = Nation.findByScodIso(countryCode)
+        if (nation) {
+            return nation?.code
+        } else {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.not.found", null))
+        }
+    }
+
 
     private def extractEmailsFromRequest(List emailsInRequest) {
         List personEmailMapList = []
         String preference
         Map<String, String> bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
-        if(emailsInRequest){
+        if (emailsInRequest) {
             emailsInRequest.each { requestEmail ->
                 Map personEmailMap = [:]
                 if (requestEmail instanceof Map) {
@@ -977,7 +1040,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                             def mapEntry = bannerEmailTypeToHedmEmailTypeMap.find { key, value -> value == type.get('emailType') }
                             if (mapEntry) {
                                 EmailType emailType = emailTypeService.fetchByCode(mapEntry.key)
-                                personEmailMap.put("bannerEmailType",emailType)
+                                personEmailMap.put("bannerEmailType", emailType)
                             } else {
                                 //throw an exception
                                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.invalid", null))
@@ -987,13 +1050,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.required", null))
                     }
                     if (requestEmail.containsKey('address') && requestEmail.get('address') instanceof String) {
-                        personEmailMap.put("emailAddress",requestEmail.get('address'))
+                        personEmailMap.put("emailAddress", requestEmail.get('address'))
                     }
                     if (requestEmail.containsKey('preference') && requestEmail.get('preference') instanceof String) {
-                        if(preference != 'primary' && requestEmail.get('preference') == 'primary'){
+                        if (preference != 'primary' && requestEmail.get('preference') == 'primary') {
                             preference = 'primary'
-                            personEmailMap.put("preference",'Y')
-                        }else{
+                            personEmailMap.put("preference", 'Y')
+                        } else {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("multiple.primaryemail.invalid", null))
                         }
                     }
@@ -1013,7 +1076,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             if (mapEntry) {
                 String maritalCategory = mapEntry.key
                 maritalStatus = maritalStatusService.fetchByCode(maritalCategory)
-            }else{
+            } else {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.notfound.message", null))
             }
         }
