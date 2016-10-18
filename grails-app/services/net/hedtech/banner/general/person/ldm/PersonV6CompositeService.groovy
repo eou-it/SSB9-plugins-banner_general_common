@@ -33,11 +33,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     def settingNameSSN = 'PERSON.UPDATESSN'
 
 
-    CitizenshipStatusCompositeService citizenshipStatusCompositeService
+
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
     EmailTypeService emailTypeService
     ThirdPartyAccessService thirdPartyAccessService
+    CitizenTypeService citizenTypeService
 
     @Override
     protected String getPopSelGuidOrDomainKey(final Map requestParams) {
@@ -295,7 +296,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         log.debug "GUIDs for ${addressTypeCodeToGuidMap.keySet()} are ${addressTypeCodeToGuidMap.values()}"
 
         // Get GUID for each PersonAddress
-        Set<Long> personAddressSurrogateIds = dataMap.pidmToAddressesMap?.values().id.flatten().unique()
+        List<Long> personAddressSurrogateIds = dataMap.pidmToAddressesMap?.values().id.flatten().unique()
         Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
 
         // Put in Map
@@ -957,6 +958,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             requestData.put("language", extractLanguageCodeFromRequest(person.get("languages")))
         }
 
+        if (person.containsKey("citizenshipStatus") && person.get("citizenshipStatus") instanceof Map) {
+            requestData.put("citizenType", extractCitizenshipStatusFromRequest(person.get("citizenshipStatus")))
+        }
+
         if (person.containsKey("addresses") && person.get("addresses") instanceof List) {
             requestData.put("addresses", extractAddressesFromRequest(person.get("addresses")))
         }
@@ -967,6 +972,34 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             requestData.put("updateSSN", updateSSN)
         }
         return requestData
+    }
+
+
+    private def extractCitizenshipStatusFromRequest(Map citizenshipTypeMap) {
+        CitizenType citizenType
+        Map citizenshipDetail = citizenshipTypeMap.get("detail")
+        String citizenshipCategory = citizenshipTypeMap.get("category")
+        if(citizenshipDetail && citizenshipDetail instanceof Map){
+            CitizenType
+        }
+        if (citizenshipDetail instanceof Map && citizenshipDetail.get("id") instanceof String && citizenshipCategory?.length() > 0) {
+            citizenType = citizenTypeService.fetchByGuid(citizenshipDetail.get("id"))
+            if (citizenType) {
+                return citizenType
+            } else {
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("citizenshipstatus.not.found", null))
+            }
+        }else if(citizenshipCategory instanceof String && citizenshipCategory?.length() > 0){
+            boolean citizenIndicator
+            if(citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_CITIZEN)) {
+                citizenIndicator = true
+            }
+            if(citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
+                citizenIndicator = false
+            }
+            return citizenTypeService.fetchByCitizenIndicator(citizenIndicator)
+        }
+        return citizenType
     }
 
 

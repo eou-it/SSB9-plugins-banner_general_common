@@ -65,6 +65,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
     ReligionCompositeService religionCompositeService
+    CitizenshipStatusCompositeService citizenshipStatusCompositeService
     def additionalIDService
     def outsideInterestService
     def interestCompositeService
@@ -272,6 +273,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         if (requestData.containsKey("sex") && requestData.get("sex") instanceof String) {
             personBase.put('sex', requestData.get("sex"))
+        }
+
+        if (requestData.containsKey("citizenType") && requestData.get("citizenType") instanceof CitizenType) {
+            personBase.put('citizenType', requestData.get("citizenType"))
         }
 
         String religionGuid
@@ -845,6 +850,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         personBase.maritalStatus = null
                     }
                 }
+                if (personBaseData.containsKey("citizenType")) {
+                    if (personBaseData.get("citizenType") instanceof CitizenType) {
+                        personBase.citizenType = personBaseData.get("citizenType")
+                    } else {
+                        personBase.citizenType = null
+                    }
+                }
 
                 def legalName = alternateNames?.find { it.type == "LEGL" }
                 if (legalName) {
@@ -916,6 +928,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
         if (personBaseData.containsKey("religion")) {
             person.sex = personBaseData.get("religion")
+        }
+        if (personBaseData.containsKey("citizenType")) {
+            if (personBaseData.get("citizenType") instanceof CitizenType) {
+                person.citizenType = personBaseData.get("citizenType")
+            }
         }
 
 
@@ -1010,6 +1027,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     protected def createPersonDataMapForSinglePerson(Map dataMapForPerson) {
         PersonIdentificationNameCurrent personIdentificationNameCurrent
+        PersonBasicPersonBase personBase = dataMapForPerson.get("personBase")
         if (dataMapForPerson.containsKey("personIdentificationNameCurrent")) {
             personIdentificationNameCurrent = dataMapForPerson.get("personIdentificationNameCurrent")
             def bannerNameTypeToHedmNameTypeMap = getBannerNameTypeToHedmNameTypeMap()
@@ -1025,7 +1043,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 personCredentials = dataMapForPerson.pidmToCredentialsMap.get(personIdentificationNameCurrent.pidm)
             }
             personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
-            if (dataMapForPerson.get("personBase")?.ssn) {
+            if (personBase?.ssn) {
                 personCredentials << [type: CredentialType.SOCIAL_SECURITY_NUMBER, value: dataMapForPerson.get("personBase").ssn]
             }
             dataMapForPerson.get("additionalIds")?.each {
@@ -1034,11 +1052,17 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson << ["personCredentials": personCredentials]
 
             //religion
-            PersonBasicPersonBase personBase = dataMapForPerson.get("personBase")
             Map relCodeToGuidMap = [:]
             if (personBase?.religion) {
                 relCodeToGuidMap = religionCompositeService.fetchGUIDs([personBase?.religion.code])
                 dataMapForPerson << ["religionGuid": relCodeToGuidMap.get(personBase?.religion.code)]
+            }
+
+            //citizenship Statuses
+            Map<String, String> ctCodeToGuidMap = [:]
+            if (personBase?.citizenType) {
+                ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs([personBase.citizenType.code])
+                dataMapForPerson << ["citizenTypeGuid": ctCodeToGuidMap.get(personBase.citizenType.code)]
             }
         }
 
@@ -1067,9 +1091,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //countryBirth
         VisaInternationalInformation visaInternationalInformation = dataMapForPerson.get("visaInternationalInformation")
-        dataMapForPerson << ["pidmToOriginCountryMap": visaInternationalInformation]
-        Map codeToNationMap = nationCompositeService.fetchAllByCodesInList([visaInternationalInformation.nationBirth, visaInternationalInformation.nationLegal])
-        dataMapForPerson << ["codeToNationMap": codeToNationMap]
+        if (visaInternationalInformation) {
+            dataMapForPerson << ["pidmToOriginCountryMap": visaInternationalInformation]
+            Map codeToNationMap = nationCompositeService.fetchAllByCodesInList([visaInternationalInformation.nationBirth, visaInternationalInformation.nationLegal])
+            dataMapForPerson << ["codeToNationMap": codeToNationMap]
+        }
 
         //personInterest
         def personInterests = dataMapForPerson.get("personInterests")
@@ -1081,7 +1107,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         //person LangCode
         Map pidmToLanguageCodeMap = [:]
         Map stvlangCodeToISO3LangCodeMap = [:]
-        if (visaInternationalInformation.language) {
+        if (visaInternationalInformation?.language) {
             pidmToLanguageCodeMap.put(personIdentificationNameCurrent.pidm, visaInternationalInformation.language.code)
             stvlangCodeToISO3LangCodeMap = crossReferenceRuleService.getISO3LanguageCodes([visaInternationalInformation.language.code])
             dataMapForPerson << ["iso3LanguageCode": stvlangCodeToISO3LangCodeMap.get(pidmToLanguageCodeMap.get(personIdentificationNameCurrent.pidm))]
