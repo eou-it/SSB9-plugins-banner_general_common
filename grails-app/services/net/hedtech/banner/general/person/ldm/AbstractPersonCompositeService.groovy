@@ -354,10 +354,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         dataMapForPerson.put("visaInternationalInformation", visaInternationalInformation)
         dataMapForPerson.put("personInterests", personInterests)
 
-
-
         return createPersonDataMapForSinglePerson(dataMapForPerson)
-
     }
 
     /**
@@ -952,7 +949,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (!existingPersonRecord || !(existingPersonRecord?.firstName == firstName) || !(existingPersonRecord?.lastName == lastName) || !(existingPersonRecord?.middleName == middleName) || !(existingPersonRecord?.surnamePrefix == surnamePrefix)) {
             exists = false
         }
-
         return exists
     }
 

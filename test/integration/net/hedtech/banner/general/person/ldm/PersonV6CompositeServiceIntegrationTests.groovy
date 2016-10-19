@@ -61,6 +61,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_full_name = "Test"
     def i_success_surnamePrefix = "Van"
 
+    def i_success_bannerId = "TestBannerID"
+    def i_success_ssn = "1234"
+    def i_success_sin = "1111"
+    def i_success_elevateId = "12345"
+
 
     @Before
     public void setUp() {
@@ -646,33 +651,35 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         Map content = newPersonWithAlternateNameHavingBirthNameType()
 
-        def o_success_person_create = personCompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.create(content)
 
         assertNotNull o_success_person_create
-        assertNotNull o_success_person_create.guid
-        assertEquals 3, o_success_person_create.names?.size()
+        assertNotNull o_success_person_create.personGuid
+        assertEquals 2, o_success_person_create.personAlternateNames?.size()
 
-        def o_primary_name_create = o_success_person_create.names.find { it.type.category == "personal" }
-        def o_birth_name_create = o_success_person_create.names.find { it.type.category == "birth" }
-        def o_legal_name_create = o_success_person_create.names.find { it.type.category == "legal" }
+        def o_primary_name_create = o_success_person_create.personIdentificationNameCurrent
+        def o_birth_name_create = o_success_person_create.personAlternateNames.get(0)
+        def o_legal_name_create = o_success_person_create.personAlternateNames.get(1)
+        def o_person_base = o_success_person_create.personBase
+
 
         assertNotNull o_primary_name_create
         assertEquals i_success_first_name, o_primary_name_create.firstName
         assertEquals i_success_middle_name, o_primary_name_create.middleName
         assertEquals i_success_last_name, o_primary_name_create.lastName
-        assertEquals i_success_primary_name_type, o_primary_name_create.type.category
-        assertEquals i_success_namePrefix, o_primary_name_create.title
-        assertEquals i_success_nameSuffix, o_primary_name_create.pedigree
+        assertEquals i_success_namePrefix, o_person_base.namePrefix
+        assertEquals i_success_nameSuffix, o_person_base.nameSuffix
+        assertEquals i_success_surnamePrefix, o_primary_name_create.surnamePrefix
         assertNotNull o_birth_name_create
         assertEquals i_success_birth_first_name, o_birth_name_create.firstName
         assertEquals i_success_birth_middle_name, o_birth_name_create.middleName
         assertEquals i_success_birth_last_name, o_birth_name_create.lastName
-        assertEquals i_success_birth_name_type, o_birth_name_create.type.category
+        assertEquals "BRTH", o_birth_name_create.nameType.code
 
         assertEquals i_success_legal_first_name, o_legal_name_create.firstName
         assertEquals i_success_legal_middle_name, o_legal_name_create.middleName
         assertEquals i_success_legal_last_name, o_legal_name_create.lastName
-        assertEquals i_success_legal_name_type, o_legal_name_create.type.category
+        assertEquals "LEGL", o_legal_name_create.nameType.code
 
     }
 
@@ -685,5 +692,61 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
         return params
     }
+
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithCredetials() {
+        Map content = newPersonWithCredentials()
+        def o_success_person_create = personV6CompositeService.create(content)
+        def o_person_base = o_success_person_create.personBase
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+
+        assertEquals i_success_ssn,o_person_base.ssn
+        assertEquals  i_success_elevateId ,o_success_person_create.additionalIds[0].additionalId
+        assertNotEquals i_success_bannerId , o_success_person_create.personIdentificationNameCurrent.bannerId
+    }
+
+    private Map newPersonWithCredentials() {
+        Map params = [names: [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        ],
+        credentials: [
+                [type:"bannerId",value:i_success_bannerId ],
+                [type:"ssn",value:i_success_ssn ],
+                [type:"elevateId",value:i_success_elevateId ]
+        ]
+        ]
+        return params
+    }
+
+
+    //POST- Person Create API
+    @Test
+    void testCreatePersonWithCredetialsSSNandSIN() {
+        Map content = newPersonWithCredentialsSSNandSIN()
+        def exceptionMessage = shouldFail(ApplicationException) {
+             personV6CompositeService.create(content)
+        }
+        assertEquals "ssn.sin.both.not.valid", exceptionMessage
+    }
+
+    private Map newPersonWithCredentialsSSNandSIN() {
+        Map params = [names: [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+                 ],
+                      credentials: [
+                              [type:"bannerId",value:i_success_bannerId ],
+                              [type:"sin",value:i_success_sin ],
+                              [type:"ssn",value:i_success_ssn ],
+                              [type:"elevateId",value:i_success_elevateId ]
+                      ]
+                ]
+        return params
+    }
+
+
 
 }

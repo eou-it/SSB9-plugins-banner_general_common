@@ -1189,7 +1189,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         List personCredentialList = []
 
         if (credentialsInRequest.getAt("type").contains(CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"]) && credentialsInRequest.getAt("type").contains(CredentialType.SOCIAL_INSURANCE_NUMBER.versionToEnumMap["v6"])) {
-            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("", null))
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("ssn.sin.both.not.valid", null))
         }
         credentialsInRequest.each { requestCredential ->
             // Need to check format of credential type
