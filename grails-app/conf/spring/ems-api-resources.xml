@@ -53,6 +53,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>HEDM.Building.SLBBLDG</value>
                 <value>HEDM.Building.SLBRDEF</value>
+                <value>EEDM.Building.STVBLDG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
