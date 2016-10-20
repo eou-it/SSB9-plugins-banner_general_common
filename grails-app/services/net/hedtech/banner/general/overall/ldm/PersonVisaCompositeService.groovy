@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall.ldm
 import grails.transaction.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.v6.PersonVisaCategory
 import net.hedtech.banner.general.overall.ldm.v6.PersonVisaDecorator
 import net.hedtech.banner.general.overall.ldm.v6.PersonVisaStatus
@@ -17,9 +18,11 @@ public class PersonVisaCompositeService extends LdmService {
     PersonVisaService personVisaService
     private final List<String> allowedSearchFields = ['person']
     private final Map<String, String> ldmToDomainMap = ['person': 'personGuid']
+    private final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
 
     @Transactional(readOnly = true)
     List<PersonVisaDecorator> list(Map params) {
+        getAcceptVersion(VERSIONS)
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         Map queryParams = [:]
         List criteria = []
@@ -47,7 +50,12 @@ public class PersonVisaCompositeService extends LdmService {
 
     @Transactional(readOnly = true)
     PersonVisaDecorator get(String id) {
-        PersonVisa personVisa = personVisaService.read(id)
+        getAcceptVersion(VERSIONS)
+        Map queryParams = [:]
+        List criteria = []
+        queryParams.put("id", id)
+        criteria.add([key: "id", binding: "id", operator: Operators.EQUALS])
+        PersonVisa personVisa = personVisaService.fetchByCriteria(queryParams, criteria, [:])[0]
         if (personVisa) {
             return decorate([personVisa])[0]
         } else {

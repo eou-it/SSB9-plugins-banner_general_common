@@ -53,14 +53,14 @@ public class PersonVisaDecorator {
     String visaId
     PersonVisaStatus status
 
-    String getStatus2() {
+    String getStatus() {
         return status ? status.value : null
     }
 
-    void setStatus2(String status) {
+    void setStatus(String status) {
         this.status = PersonVisaStatus.getByValue(status)
         if (!this.status) {
-            throw new ApplicationException("<ClassName>", "<Error>")
+            throw new ApplicationException("personvisa", "invalid.status")
         }
     }
     Date requestedOn
