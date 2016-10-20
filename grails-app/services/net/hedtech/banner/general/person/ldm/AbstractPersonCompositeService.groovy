@@ -818,19 +818,19 @@ abstract class AbstractPersonCompositeService extends LdmService {
         } else {
             personBaseList.each { personBase ->
                 //Copy personBase attributes into person map from Primary names object.
-                if (personBaseData.get("namePrefix")) {
+                if (personBaseData.containsKey("namePrefix")) {
                     personBase.namePrefix = personBaseData.get("namePrefix")
                 }
-                if (personBaseData.get("nameSuffix")) {
+                if (personBaseData.containsKey("nameSuffix")) {
                     personBase.nameSuffix = personBaseData.get("nameSuffix")
                 }
-                if (personBaseData.get("ssn")) {
+                if (personBaseData.containsKey("ssn")) {
                     personBase.ssn = ssn
                 }
-                if (personBaseData.get("sex")) {
+                if (personBaseData.containsKey("sex")) {
                     personBase.sex = personBaseData.get("sex")
                 }
-                if (personBaseData.get("religion")) {
+                if (personBaseData.containsKey("religion")) {
                     personBase.religion = personBaseData.get("religion")
                 }
                 if (personBaseData.containsKey("ethnicity")) {

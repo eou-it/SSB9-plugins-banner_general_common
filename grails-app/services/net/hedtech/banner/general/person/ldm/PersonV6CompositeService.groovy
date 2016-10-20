@@ -1230,13 +1230,25 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
         }
 
-        if (nameObj.containsKey("middleName") && nameObj.get("middleName") instanceof String) {
-            requestData.put('middleName', nameObj.get("middleName").trim())
+        if(nameObj.containsKey("middleName")){
+            if ( nameObj.get("middleName") instanceof String && nameObj.get("middleName")?.trim().length() > 0) {
+                requestData.put('middleName', nameObj.get("middleName").trim())
+            }
+            if ( nameObj.get("middleName") instanceof String &&  nameObj.get("middleName")?.trim().length() == 0) {
+                requestData.put('middleName', null)
+            }
         }
 
-        if (nameObj.containsKey("surnamePrefix") && nameObj.get("surnamePrefix") instanceof String) {
-            requestData.put('surnamePrefix', nameObj?.surnamePrefix?.trim())
+        if (nameObj.containsKey("surnamePrefix")){
+            if ( nameObj.get("surnamePrefix") instanceof String && nameObj.get("surnamePrefix")?.trim().length() > 0) {
+                requestData.put('surnamePrefix', nameObj?.surnamePrefix?.trim())
+            }
+            if ( nameObj.get("surnamePrefix") instanceof String && nameObj.get("surnamePrefix")?.trim().length() == 0) {
+                requestData.put('surnamePrefix', null)
+            }
+
         }
+
     }
 
     private def extractAddressesFromRequest(final List addressesInRequest) {
