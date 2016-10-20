@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 0-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall.ldm;
 
@@ -42,14 +42,14 @@ public class PersonVisaIntegrationTests extends BaseIntegrationTestCase {
     @Test
     public void testRead() {
         PersonVisa personVisa = PersonVisa.findAll()[0]
-        assertNotNull(personVisa.guid)
-        assertNotNull(PersonVisa.get(personVisa.guid))
+        assertNotNull(personVisa.id)
+        assertNotNull(PersonVisa.get(personVisa.id))
     }
 
     @Test
     public void testDelete() {
         PersonVisa personVisa = PersonVisa.findAll()[0]
-        assertNotNull(personVisa.guid)
+        assertNotNull(personVisa.id)
         shouldFail(InvalidDataAccessResourceUsageException) {
             personVisa.delete(flush: true, failOnError: true)
         }
@@ -58,7 +58,7 @@ public class PersonVisaIntegrationTests extends BaseIntegrationTestCase {
 
     private PersonVisa createNew() {
         PersonVisa personVisa = new PersonVisa()
-        personVisa.guid = 'A' * 36
+        personVisa.id = 'A' * 36
         personVisa.personGuid = 'A' * 36
         personVisa.nonResInd = 'A' * 1
         personVisa.visaTypeGuid = 'A' * 36
