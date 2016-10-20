@@ -72,9 +72,15 @@ class SiteDetailCompositeService {
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.validateSortField(map.sort, allowedSortFields)
-        RestfulApiValidationUtility.validateSortOrder(map.order)
         map.sort = LdmService.fetchBannerDomainPropertyForLdmField(map.sort)
-        map.order= map.order?map?.order:'ASC'
+
+        if (map.containsKey("order")) {
+            RestfulApiValidationUtility.validateSortOrder(map.order?.trim())
+        } else {
+            map.put('order', "asc")
+        }
+
+        map.order = map.order?map?.order:'ASC'
         def filters = QueryBuilder.createFilters(map)
         def allowedSearchFields = [CODE, DESCRIPTION]
         def allowedOperators = [Operators.EQUALS, Operators.EQUALS_IGNORE_CASE, Operators.CONTAINS, Operators.STARTS_WITH]
@@ -91,9 +97,13 @@ class SiteDetailCompositeService {
             if(map?.sort) {
                 if (map?.sort?.equalsIgnoreCase('description') && ("v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)))) {
                     order('description', map?.order)
+                    order('id', map?.order)
                 } else {
                     order(map?.sort, map?.order)
+                    order('id', map?.order)
                 }
+            } else {
+                order('id', map?.order)
             }
         }
 
