@@ -1110,7 +1110,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 String maritalCategory = mapEntry.key
                 maritalStatus = maritalStatusService.fetchByCode(maritalCategory)
             } else {
-                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.notfound.message", null))
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.mapping.not.present", null))
             }
         }
         return maritalStatus

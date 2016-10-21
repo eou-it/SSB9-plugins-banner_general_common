@@ -41,6 +41,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonIdentificationName personIdentificationName
     PersonAddressService personAddressService
     PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
+    PersonBasicPersonBaseService personBasicPersonBaseService
 
 
 
@@ -61,10 +62,101 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_full_name = "Test"
     def i_success_surnamePrefix = "Van"
 
-    def i_success_bannerId = "TestBannerID"
+    def i_success_bannerId = "TestBann"
     def i_success_ssn = "1234"
     def i_success_sin = "1111"
     def i_success_elevateId = "12345"
+
+    def i_success_privacy_satus = "unrestricted"
+    def i_success_update_privacy_satus = "restricted"
+
+    def i_success_legacy
+    def i_success_ethnicity
+    def i_success_maritalStatus
+    def i_success_religion
+    def i_success_citizenType
+    def i_success_stateBirth
+    def i_success_stateDriver
+    def i_success_nationDriver
+    def i_success_pidm
+    def i_success_birthDate = new Date()
+    def i_success_sex = "M"
+    def i_success_confidIndicator = "Y"
+    def i_success_deadIndicator = "Y"
+    def i_success_vetcFileNumber = "TTTTT"
+    def i_success_legalName = "Levitch"
+    def i_success_preferenceFirstName = "Happy"
+    def i_success_veraIndicator = "V"
+    def i_success_citizenshipIndicator = "U"
+    def i_success_deadDate = new Date()
+    def i_success_hair = "TT"
+    def i_success_eyeColor = "TT"
+    def i_success_cityBirth = "TTTTT"
+    def i_success_driverLicense = "TTTTT"
+    def i_success_height = 1
+    def i_success_weight = 1
+    def i_success_sdvetIndicator = "Y"
+    def i_success_licenseIssuedDate = new Date()
+    def i_success_licenseExpiresDate = new Date()
+    def i_success_incarcerationIndicator = "#"
+    def i_success_itin = 1L
+    def i_success_activeDutySeprDate = new Date()
+    def i_success_ethnic = "1"
+    def i_success_confirmedRe = "Y"
+    def i_success_confirmedReDate = new Date()
+    def i_success_armedServiceMedalVetIndicator = true
+    def i_success_guid_personal = "abcd1234ttyy222223s"
+    def i_success_emailAddress_personal = "xyz@ellucian.com"
+    def i_success_emailType_personal = "Personal"
+    def i_success_guid_institution = "xyzqweqw32312321zczx"
+    def i_success_emailAddress_institution = "abc@ellucian.com"
+    def i_success_emailType_institution = "Institution"
+    def i_success_guid_work = "323123sdsdds3123asdasd123"
+    def i_success_emailAddress_work = "123@ellucian.com"
+    def i_success_emailType_work = "Work"
+    def i_success_emailType_preferred = "Preferred"
+    def i_success_address_type_1 = "Mailing"
+    def i_success_address_type_2 = "Home"
+    def i_success_city = "Pavo"
+    def i_success_state = "GA"
+    def i_success_zip = "31778"
+    def i_success_state_goriccr_data = "UNK"
+    def i_success_zip_goriccr_data = "UNKNOWN"
+    def i_success_street_line1 = "123 Main Line"
+    def i_success_credential_id1 = "Elevate0001"
+    def i_success_credential_type1 = "Banner Sourced ID"
+    def i_success_credential_id2 = "sjorden"
+    def i_success_credential_type2 = "Banner User Name"
+    def i_success_credential_id3 = "DSTERLIN"
+    def i_success_credential_type3 = "Banner UDC ID"
+    def i_success_credential_id4 = "HOSP0001"
+    def i_success_credential_type4 = "Banner ID"
+    def i_update_credential_id = "TTTT"
+    def i_update_credential_type = "Social Security Number"
+    def i_success_alternate_first_name = "John"
+    def i_success_alternate_middle_name = "A"
+    def i_success_alternate_last_name = "Jorden"
+    def i_success_alternate_birth_name_type = "Birth"
+    def i_success_phone_type_work = "Work"
+    def i_success_phone_type_mobile = "Mobile"
+    def i_success_phone_type_home = "Home"
+    def i_success_phone_type_residence = "Residence"
+    def i_success_phone_extension = "2341643"
+    def i_succes_invalid_phone_number_short1 = "12345678"
+    def i_succes_invalid_phone_number_short2 = "+91-234-5678"
+    def i_succes_invalid_phone_number_short3 = "123 456 78"
+    def i_succes_invalid_phone_number_short4 = "+91 234 5678"
+    def i_succes_invalid_phone_number_long1 = "+4412345678901235624351345314654756835651324135234647"
+    def i_succes_invalid_phone_number_long2 = "+01-123-456-7890"
+    def i_succes_invalid_phone_number_long3 = "123 456 7890123"
+    def i_succes_invalid_phone_number_long4 = "+01 123 456 7890"
+    static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
+    static final String PROCESS_CODE = "HEDM"
+
+    def i_success_credential_type4_filter="Banner ID"
+    def i_failure_credential_type4_filter="BannerId"
+    def i_success_credential_filter="ADVAF0021"
+    def i_failure_credential_filter="HOSP00"
 
 
     @Before
@@ -709,6 +801,21 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotEquals i_success_bannerId , o_success_person_create.personIdentificationNameCurrent.bannerId
     }
 
+
+    @Test
+    void testCreatePersonWithPrivacyStatus() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.privacyStatus = [privacyCategory: i_success_privacy_satus]
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
+    }
+
+
+
     private Map newPersonWithCredentials() {
         Map params = [names: [
                 [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
@@ -720,6 +827,30 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
         ]
         return params
+    }
+
+
+    //POST- Person Create API
+    @Test
+    void testUpdatePersonWithCredetials() {
+        Map content = newPersonWithCredentials()
+        def o_success_person_create = personV6CompositeService.create(content)
+        def o_person_base = o_success_person_create.personBase
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+
+        assertEquals i_success_ssn,o_person_base.ssn
+        assertEquals  i_success_elevateId ,o_success_person_create.additionalIds[0].additionalId
+        assertNotEquals i_success_bannerId , o_success_person_create.personIdentificationNameCurrent.bannerId
+
+        Map updateContent = newPersonWithCredentials()
+        updateContent.id = o_success_person_create.personGuid
+        def o_success_person_update = personV6CompositeService.update(updateContent)
+
+        assertEquals i_success_ssn,o_person_base.ssn
+        assertEquals  i_success_elevateId ,o_success_person_update.additionalIds[0].additionalId
+        assertEquals i_success_bannerId , o_success_person_update.personIdentificationNameCurrent.bannerId
     }
 
 
@@ -747,7 +878,125 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         return params
     }
 
+    @Test
+    void testUpdatePersonWithPrivacyStatus() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.privacyStatus = [privacyCategory: i_success_privacy_satus]
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
 
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
+
+
+        Map updateContent = newPersonWithCredentials()
+        updateContent.id = o_success_person_create.guid
+        updateContent.privacyStatus = [privacyCategory: i_success_update_privacy_satus]
+        dataMap = personV6CompositeService.update(updateContent)
+        def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  i_success_update_privacy_satus ,o_success_person_update.privacyStatus.privacyCategory
+    }
+
+    @Test
+    void testUpdatePersonPersonBasicPersonBase() {
+       /* GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v1+json")
+        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")*/
+
+        PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
+        PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.findAllByPidmInList([personBasicPersonBase.pidm]).get(0)
+        GlobalUniqueIdentifier uniqueIdentifier = GlobalUniqueIdentifier.findByLdmNameAndDomainKey("persons", personIdentificationNameCurrent.pidm)
+        Map params = getPersonWithPersonBasicPersonBaseChangeRequest(personIdentificationNameCurrent, uniqueIdentifier.guid);
+
+        //update PersonBasicPersonBase info
+        personV6CompositeService.update(params)
+        PersonBasicPersonBase newPersonBasicPersonBase = PersonBasicPersonBase.fetchByPidmList([personBasicPersonBase.pidm]).get(0)
+
+        assertEquals 'F', newPersonBasicPersonBase.sex
+        assertEquals 'CCCCC', newPersonBasicPersonBase.namePrefix
+        assertEquals 'CCCCC', newPersonBasicPersonBase.nameSuffix
+    }
+
+    private def createPersonBasicPersonBase() {
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        String idSql = """select gb_common.f_generate_id bannerId, gb_common.f_generate_pidm pidm from dual """
+        def bannerValues = sql.firstRow(idSql)
+        def ibannerId = bannerValues.bannerId
+        def ipidm = bannerValues.pidm
+        def person = new PersonIdentificationName(
+                pidm: ipidm,
+                bannerId: ibannerId,
+                lastName: "TTTTT",
+                firstName: "TTTTT",
+                middleName: "TTTTT",
+                changeIndicator: null,
+                entityIndicator: "P"
+        )
+        person.save(flush: true, failOnError: true)
+        assert person.id
+
+        def personBasicPersonBase = new PersonBasicPersonBase(
+                pidm: ipidm,
+                ssn: i_success_ssn,
+                birthDate: i_success_birthDate,
+                sex: i_success_sex,
+                confidIndicator: i_success_confidIndicator,
+                deadIndicator: i_success_deadIndicator,
+                vetcFileNumber: i_success_vetcFileNumber,
+                legalName: i_success_legalName,
+                preferenceFirstName: i_success_preferenceFirstName,
+                namePrefix: i_success_namePrefix,
+                nameSuffix: i_success_nameSuffix,
+                veraIndicator: i_success_veraIndicator,
+                citizenshipIndicator: i_success_citizenshipIndicator,
+                deadDate: i_success_deadDate,
+                hair: i_success_hair,
+                eyeColor: i_success_eyeColor,
+                cityBirth: i_success_cityBirth,
+                driverLicense: i_success_driverLicense,
+                height: i_success_height,
+                weight: i_success_weight,
+                sdvetIndicator: i_success_sdvetIndicator,
+                licenseIssuedDate: i_success_licenseIssuedDate,
+                licenseExpiresDate: i_success_licenseExpiresDate,
+                incarcerationIndicator: i_success_incarcerationIndicator,
+                itin: i_success_itin,
+                activeDutySeprDate: i_success_activeDutySeprDate,
+                ethnic: i_success_ethnic,
+                confirmedRe: i_success_confirmedRe,
+                confirmedReDate: i_success_confirmedReDate,
+                armedServiceMedalVetIndicator: i_success_armedServiceMedalVetIndicator,
+                legacy: i_success_legacy,
+                ethnicity: i_success_ethnicity,
+                maritalStatus: i_success_maritalStatus,
+                religion: i_success_religion,
+                citizenType: i_success_citizenType,
+                stateBirth: i_success_stateBirth,
+                stateDriver: i_success_stateDriver,
+                nationDriver: i_success_nationDriver,
+                unitOfMeasureHeight: UnitOfMeasure.findByCode("LB"),
+                unitOfMeasureWeight: UnitOfMeasure.findByCode("LB")
+        )
+
+        def map = [domainModel: personBasicPersonBase]
+        personBasicPersonBase = personBasicPersonBaseService.create(map)
+        return personBasicPersonBase
+    }
+
+    private Map getPersonWithPersonBasicPersonBaseChangeRequest(personIdentificationNameCurrent, guid) {
+        Map params = [id   : guid,
+                      names: [
+                              [lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix:  'CCCCC', nameSuffix: 'CCCCC', surnamePrefix: i_success_surnamePrefix]
+                      ],
+                      gender  : 'female'
+
+        ]
+        return params
+    }
 
 
 

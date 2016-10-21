@@ -486,7 +486,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
 
         //person interests
-        List personInterests = outsideInterestService.fetchAllByPidmInList([pidm])
+        List personInterests = outsideInterestService?.fetchAllByPidmInList([pidm])
         if (requestData.containsKey("interests")) {
             personInterests = createOrUpdatePersonInterests(newPersonIdentificationName.pidm, requestData.get("interests"), personInterests, dataOrigin)
         }
