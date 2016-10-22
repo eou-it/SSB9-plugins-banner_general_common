@@ -424,8 +424,13 @@ class RoomCompositeService extends LdmService {
 
         params.put(GeneralCommonConstants.END_DATE, new Date())
 
-        String sortField = queryParams.sort?.trim()
-        String sortOrder = queryParams.order?.trim() ?: 'asc'
+        String sortField
+        String sortOrder
+
+        if (queryParams?.containsKey('sort'))
+            sortField = queryParams.sort?.trim()
+        if (queryParams?.containsKey('order'))
+            sortOrder = queryParams.order?.trim() ?: 'asc'
 
         if (pagingAndSortParams) {
             if (sortField) {
