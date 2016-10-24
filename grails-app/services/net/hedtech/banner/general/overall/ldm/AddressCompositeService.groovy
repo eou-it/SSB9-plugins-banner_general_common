@@ -130,7 +130,7 @@ class AddressCompositeService extends LdmService {
             iso3CountryCode = defaultISO3CountryCode
         }
 
-        validateRegion(addressView)
+        //validateRegion(addressView)
 
         if (iso3CountryCode?.equals(HedmCountry.GBR.toString())) {
             validateSubRegion(addressView)
