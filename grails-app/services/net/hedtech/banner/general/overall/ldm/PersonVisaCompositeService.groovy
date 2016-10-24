@@ -89,7 +89,7 @@ public class PersonVisaCompositeService extends LdmService {
 
             //status
             if (it.visaExpireDate) {
-                personVisaDecorator.status = new Date().after(it.visaExpireDate) ? PersonVisaStatus.EXPIRED : PersonVisaStatus.CURRENT
+                personVisaDecorator.status = new Date().after(it.visaExpireDate) ? PersonVisaStatus.EXPIRED.value : PersonVisaStatus.CURRENT.value
             }
 
             //requested on
