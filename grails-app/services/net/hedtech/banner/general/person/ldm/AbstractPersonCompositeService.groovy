@@ -70,6 +70,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     def outsideInterestService
     def interestCompositeService
     def crossReferenceRuleService
+    IntegrationConfigurationService integrationConfigurationService
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
 
@@ -321,7 +322,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //person birthCountry
         VisaInternationalInformation visaInternationalInformation
-        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language")) {
+        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language") || requestData.containsKey("identityDocuments")) {
             visaInternationalInformation = createOrUpdateVisaInternationalInformation(newPersonIdentificationName.pidm, requestData, dataOrigin)
         }
 
@@ -507,7 +508,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //person birthCountry
         VisaInternationalInformation visaInternationalInformation
-        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language")) {
+        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language") || requestData.containsKey("identityDocuments")) {
             visaInternationalInformation = createOrUpdateVisaInternationalInformation(newPersonIdentificationName.pidm, requestData, dataOrigin)
         } else {
             visaInternationalInformation = visaInternationalInformationService.fetchAllByPidmInList([newPersonIdentificationName.pidm])[0]
@@ -574,7 +575,20 @@ abstract class AbstractPersonCompositeService extends LdmService {
             if (requestData.containsKey("language")) {
                 personVisaInternationalInformation.language = requestData.get("language")
             }
-            personVisaInternationalInformation = visaInternationalInformationService.update(domainModel: personVisaInternationalInformation)
+            if(requestData.containsKey("identityDocuments") &&  requestData.get("identityDocuments") instanceof List && requestData.get("identityDocuments").size() > 0){
+
+                    Map identityDocumentMap = requestData.get("identityDocuments")[0]
+
+                    if (identityDocumentMap.containsKey('nationIssue') && identityDocumentMap.get('nationIssue') instanceof String) {
+                        identityDocumentMap.nationIssue = fetchNationByScondISO(identityDocumentMap.get('nationIssue'))?.code
+                    }
+                    bindData(personVisaInternationalInformation, identityDocumentMap, [:])
+                }else{
+                    personVisaInternationalInformation.nationIssue = null
+                    personVisaInternationalInformation.passportExpenditureDate = null
+                    personVisaInternationalInformation.passportId = null
+                }
+            personVisaInternationalInformation = visaInternationalInformationService.update(domainModel:personVisaInternationalInformation)
         }
         return personVisaInternationalInformation
     }
@@ -599,9 +613,32 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (dataOrigin && dataOrigin?.length() > 0) {
             visaInfoMap.put("dataOrigin", dataOrigin)
         }
+        if(requestData.containsKey("identityDocuments") &&  requestData.get("identityDocuments") instanceof List && requestData.get("identityDocuments").size() > 0){
+           Map identityDocumentMap = requestData.get("identityDocuments")[0]
+
+            if (identityDocumentMap.containsKey('nationIssue') && identityDocumentMap.get('nationIssue') instanceof String) {
+                identityDocumentMap.nationIssue = fetchNationByScondISO(identityDocumentMap.get('nationIssue'))?.code
+            }
+
+            visaInfoMap.putAll(identityDocumentMap)
+        }
         personVisaInternationalInformation = visaInternationalInformationService.create(visaInfoMap)
         return personVisaInternationalInformation
     }
+
+   private def fetchNationByScondISO(String nationISOCode){
+       if(!nationISOCode){
+           return null
+       }
+
+       Nation nation = Nation.findByScodIso(nationISOCode)
+       if (nation) {
+           return nation
+       } else {
+           throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
+       }
+
+   }
 
     private
     def createOrUpdatePersonEmails(List emailListInRequest, Integer pidm, List<PersonEmail> existingPersonEmails, String dataOrigin) {
@@ -1089,7 +1126,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
         VisaInternationalInformation visaInternationalInformation = dataMapForPerson.get("visaInternationalInformation")
         if (visaInternationalInformation) {
             dataMapForPerson << ["pidmToOriginCountryMap": visaInternationalInformation]
-            Map codeToNationMap = nationCompositeService.fetchAllByCodesInList([visaInternationalInformation.nationBirth, visaInternationalInformation.nationLegal])
+            if(visaInternationalInformation.passportId){
+                dataMapForPerson  << ["passport" : visaInternationalInformation]
+                dataMapForPerson << ["isInstitutionUsingISO2CountryCodes" :integrationConfigurationService.isInstitutionUsingISO2CountryCodes()]
+            }
+            Map codeToNationMap = nationCompositeService.fetchAllByCodesInList([visaInternationalInformation.nationBirth,
+                                                                                visaInternationalInformation.nationLegal,
+                                                                                visaInternationalInformation.nationIssue])
             dataMapForPerson << ["codeToNationMap": codeToNationMap]
         }
 
@@ -1214,12 +1257,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
 
         if (domainPropertiesMap.containsKey('nationISOCode')) {
-            Nation nation = Nation.findByScodIso(domainPropertiesMap.nationISOCode)
+
+            Nation nation = fetchNationByScondISO(domainPropertiesMap.nationISOCode)
             if (nation) {
                 personAddress.nation = nation
-            } else {
-                log.error "Nation not found for code: ${domainPropertiesMap.nationISOCode}"
-                throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
             }
         }
 

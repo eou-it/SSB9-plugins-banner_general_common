@@ -34,7 +34,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
 
-    IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
     EmailTypeService emailTypeService
     ThirdPartyAccessService thirdPartyAccessService
@@ -810,7 +809,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             decorator = new IdentityDocumentV6()
             decorator.documentId = visaIntlInformation.passportId
             decorator.expiresOn = visaIntlInformation.passportExpenditureDate
-            decorator.issuingAuthority = nation.nation
             String iso3CountryCode = nation.scodIso
             if (isInstitutionUsingISO2CountryCodes) {
                 iso3CountryCode = isoCodeService.getISO3CountryCode(nation.scodIso)
@@ -970,6 +968,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             def updateSSN = checkSSNUpdate()
             requestData.put("credentials", extractCredentialsFromRequest(person.get("credentials")))
             requestData.put("updateSSN", updateSSN)
+        }
+
+        if(person.containsKey("identityDocuments") && person.get("identityDocuments") instanceof List){
+            requestData.put("identityDocuments", extractIdentityDocumentsFromRequest(person.get("identityDocuments")))
         }
         return requestData
     }
@@ -1485,5 +1487,66 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     }
 
+    private def extractIdentityDocumentsFromRequest(final List identityDocumentsRequest) {
+        List identityDocumentMapList = []
+        if (identityDocumentsRequest) {
+            identityDocumentsRequest.each { identityDocument ->
+                if (identityDocument instanceof Map) {
+                    Map identityDocumentMap = [:]
+                    String category
+                    if (identityDocument.containsKey("type") && identityDocument.get("type") instanceof Map) {
+                        Map type = identityDocument.get("type")
+                        if (type.containsKey("category") && type.get("category") instanceof String) {
+                            category = type.get("category")
+                        } else {
+                            // throw an exception
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("identityDocument.type.category.required", []))
+                        }
+                    } else {
+                        // throw an exception
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("identityDocument.type.required", []))
+                    }
+                    if (category && category.equals("passport")) {
+
+                        if (identityDocument.containsKey("documentId") && identityDocument.get("documentId") instanceof String && identityDocument.get("documentId").length() > 0) {
+                            identityDocumentMap.put("passportId", identityDocument.get("documentId"))
+                        } else {
+                            // throw an exception
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("identityDocument.documentId.required", []))
+                        }
+
+                        if (identityDocument.containsKey("expiresOn") && identityDocument.get("expiresOn") instanceof String) {
+                            identityDocumentMap.put("passportExpenditureDate", DateConvertHelperService.convertDateStringToServerDate(identityDocument.get("expiresOn")))
+                        }
+
+                        if (identityDocument.containsKey("country") && identityDocument.get("country") instanceof Map) {
+                            Map country = identityDocument.get("country")
+                            if (country.containsKey("code") && country.get("code") instanceof String) {
+                                String countryCode = country.get("code")
+                                if (countryCode && integrationConfigurationService.isInstitutionUsingISO2CountryCodes()) {
+                                    countryCode = isoCodeService.getISO2CountryCode(countryCode)
+                                }
+                                identityDocumentMap.nationIssue = countryCode
+                            }
+                        } else {
+                            //set Default Nation code
+                            String countryCode = integrationConfigurationService.getDefaultISOCountryCodeForAddress()
+                            identityDocumentMap.nationIssue = countryCode
+                        }
+                        identityDocumentMapList.add(identityDocumentMap)
+                    }else {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("identityDocument.type.category.invalid", []))
+                    }
+                }
+            }
+
+            if (identityDocumentMapList.size() > 1) {
+                // throw an exception
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("identityDocument.duplicate", []))
+            }
+
+            return identityDocumentMapList
+        }
+    }
 
 }
