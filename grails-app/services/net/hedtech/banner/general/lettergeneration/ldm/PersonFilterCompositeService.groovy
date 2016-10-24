@@ -119,7 +119,7 @@ class PersonFilterCompositeService {
         if (count) {
             query = "select count(a) from PopulationSelectionExtractReadonly a where 1=1 "
         } else {
-            query = "select a.application, a.selection, a.creatorId, a.lastModifiedBy from PopulationSelectionExtractReadonly a where 1=1"
+            query = "select a.application, a.selection, a.creatorId, a.lastModifiedBy from PopulationSelectionExtractReadonly a where 1=1 order by a.id"
         }
 
         Map namedParams = [:]

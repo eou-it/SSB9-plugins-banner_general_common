@@ -11,7 +11,6 @@ class IdentityDocumentV6 {
 
     String countryCode
     String documentId
-    String issuingAuthority
     String expiresOn
 
     Map getType() {
