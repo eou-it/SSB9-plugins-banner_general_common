@@ -336,7 +336,7 @@ class NonPersonCompositeService extends LdmService {
         // Get SPRADDR records for persons
         Map pidmToAddressesMap = fetchPersonAddressByPIDMs(pidms, addressTypeCodeToGuidMap.keySet())
 
-        Set<Long> personAddressSurrogateIds = pidmToAddressesMap?.values().id.flatten() as Set
+        List<Long> personAddressSurrogateIds = pidmToAddressesMap?.values().id.flatten().unique()
 
         Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
 
