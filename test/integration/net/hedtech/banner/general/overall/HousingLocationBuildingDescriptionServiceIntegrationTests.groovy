@@ -30,7 +30,7 @@ class HousingLocationBuildingDescriptionServiceIntegrationTests extends BaseInte
 
     @Before
     public void setUp() {
-        formContext = ["SSASECT"]
+        formContext = ["GUAGMNU","SSASECT"]
         super.setUp()
     }
 

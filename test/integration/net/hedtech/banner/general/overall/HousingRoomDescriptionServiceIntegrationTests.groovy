@@ -24,7 +24,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
 
     @Before
     public void setUp() {
-        formContext = ["SSASECT"]
+        formContext = ["GUAGMNU","SSASECT"]
         super.setUp()
     }
 
