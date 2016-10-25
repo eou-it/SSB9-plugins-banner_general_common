@@ -130,7 +130,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
 
     @Before
     public void setUp() {
-        formContext = ["SSASECT"] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ["GUAGMNU","SSASECT"] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
         initializeTestDataForReferences()
     }
