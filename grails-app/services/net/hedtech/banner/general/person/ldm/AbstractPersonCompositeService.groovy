@@ -15,6 +15,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -71,6 +72,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     def interestCompositeService
     def crossReferenceRuleService
     IntegrationConfigurationService integrationConfigurationService
+
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
 
@@ -713,6 +715,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         Map addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
         List<PersonAddress> personAddresses = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([pidm], addressTypeToHedmAddressTypeMap.keySet())
         List<PersonGeographicAreaAddress> geographicAreaAddresses = personGeographicAreaAddressService.fetchActivePersonGeographicAreaAddress(pidm)
+        List<PersonAddressAdditionalProperty>  additionalProperties = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddresses.id)
         personAddresses.each { personAddress ->
 
             def activeRequestAddresses = newAddresses.findAll { it ->
@@ -721,36 +724,71 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
             if (activeRequestAddresses.size() > 0) {
                 activeRequestAddresses.each {
-                    PersonAddress activeRequestAddress = personAddressService.getDomainClass().newInstance()
-                    bindPersonAddress(activeRequestAddress, it, pidm)
-
+                    PersonAddressAdditionalProperty additionalProperty = additionalProperties.find {it.id == personAddress.id}
                     Boolean changeToInactiveStatus = false
-                    switch (activeRequestAddress.addressType) {
+                    switch (it.bannerAddressType) {
                         default:
-                            if (activeRequestAddress.state != personAddress.state) {
-                                changeToInactiveStatus = true
-                            }
-                            if (activeRequestAddress.zip != personAddress.zip) {
+                            if (it.streetLine1?.trim() != personAddress.streetLine1) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.nation != personAddress.nation) {
+                            if (it.containsKey("streetLine2") && it.streetLine2?.trim() != personAddress.streetLine2) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.county != personAddress.county) {
+                            if (it.containsKey("streetLine3") && it.streetLine3?.trim() != personAddress.streetLine3) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.streetLine1 != personAddress.streetLine1) {
+                            if (it.containsKey("streetLine4") && it.streetLine4?.trim() != personAddress.streetLine4) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.streetLine2 != personAddress.streetLine2) {
+                            if (it.containsKey("toDate") && it.toDate?.clearTime() != personAddress.toDate?.clearTime()) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.streetLine3 != personAddress.streetLine3) {
+                            if (!it.containsKey("fromDateUpdate") && it.fromDate?.clearTime() != personAddress.fromDate?.clearTime()) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (!it.containsKey("nationISOCodeUpdate") && it.nationISOCode != personAddress.nation?.scodIso) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (!it.containsKey("cityUpdate") && it.city?.trim() != personAddress.city) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if ((it.containsKey("stateCode") || it.containsKey("stateDescription"))
+                                    && (it.state?.trim() != personAddress.state.code || it.stateDescription?.trim() != personAddress.state?.description)) {
+                                changeToInactiveStatus = true
+                            }
+                            if (!it.containsKey("postalCodeUpdate") && it.zip?.trim() != personAddress.zip) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (it.containsKey("county") && it.county?.trim() != personAddress.county) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("countyISOCode") &&  additionalProperty.countyISOCode != it.countyISOCode){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("countyDescription") && additionalProperty.countyDescription != it.countyDescription){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("deliveryPoint") &&  personAddress.deliveryPoint != Integer.valueOf(it.deliveryPoint)){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("carrierRoute") && personAddress.carrierRoute != it.carrierRoute){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("correctionDigit") && personAddress.correctionDigit != Integer.valueOf(it.correctionDigit)){
                                 changeToInactiveStatus = true
                                 break;
                             }
@@ -771,13 +809,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         List<PersonGeographicAreaAddress> personGeographicAreaAddresses = geographicAreaAddresses.findAll {
                             it.addressType.code == personAddress.addressType.code
                         }
-
                         if (it.containsKey("geographicAreaGuids") && it.get("geographicAreaGuids") instanceof List) {
                             List geographicAreaGuids = it.get("geographicAreaGuids")
                             if (personGeographicAreaAddresses.isEmpty()) {
                                 createOrUpdateGeographicAddress(it, personAddress)
                             } else {
-
                                 if (geographicAreaGuids.isEmpty()) {
                                     // Inactive geographic area address
                                     personGeographicAreaAddresses.each { personGeographicAreaAddress ->
