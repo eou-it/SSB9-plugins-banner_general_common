@@ -76,7 +76,7 @@ public class PersonVisaCompositeService extends LdmService {
             personVisaDecorator.person = person
 
             //visa type
-            PersonVisaCategory category = it.nonResInd?.toUpperCase() == 'Y' ? PersonVisaCategory.IMMIGRANT : PersonVisaCategory.NONIMMIGRANT
+            PersonVisaCategory category = it.nonResInd?.toUpperCase() == 'Y' ? PersonVisaCategory.NONIMMIGRANT : PersonVisaCategory.IMMIGRANT
             PersonVisaDecorator.VisaType.Detail visaTypeDetail = new PersonVisaDecorator.VisaType.Detail()
             visaTypeDetail.id = it.visaTypeGuid
             PersonVisaDecorator.VisaType visaType = new PersonVisaDecorator.VisaType()

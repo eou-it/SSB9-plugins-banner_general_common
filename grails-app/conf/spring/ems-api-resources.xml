@@ -1132,6 +1132,22 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-person-visas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-visas</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-visas/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PersonVisas.GORVISA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -1201,6 +1217,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-student-statuses"/>
                 <ref bean="ar-student-types"/>
                 <ref bean="ar-instructional-events"/>
+                <ref bean="ar-person-visas"/>
             </list>
         </property>
     </bean>
@@ -1273,6 +1290,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-student-statuses"/>
                 <ref bean="ar-student-types"/>
                 <ref bean="ar-instructional-events"/>
+                <ref bean="ar-person-visas"/>
             </list>
         </property>
     </bean>
