@@ -1106,6 +1106,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
         MaritalStatus maritalStatus
         if (maritalStatusMap.containsKey("maritalCategory") && maritalStatusMap.get("maritalCategory") instanceof String && maritalStatusMap.get("maritalCategory")?.length() > 0) {
+            if(!MaritalStatusCategory.getByString(it.translationValue, "v6")){
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.not.found", null))
+            }
             def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritalStatusMap.get("maritalCategory") }
             if (mapEntry) {
                 String maritalCategory = mapEntry.key
@@ -1273,7 +1276,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (requestAddress instanceof Map) {
                     if (requestAddress.containsKey('type') && requestAddress.get('type') instanceof Map) {
                         Map type = requestAddress.get('type')
-                        if (type.containsKey('addressType') && type.get('addressType') instanceof String && HedmAddressType.getByString(type.get("addressType"), "v6") && type.get('addressType').length() > 0 ) {
+                        if (type.containsKey('addressType') && type.get('addressType') instanceof String && type.get('addressType').length() > 0 ) {
+                            if(!HedmAddressType.getByString(type.get("addressType"), "v6")){
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.inValid", []))
+                            }
                             def mapEntry = bannerAddressTypeToHedmV6AddressTypeMap.find { key, value -> value == type.get('addressType') }
                             if (mapEntry) {
                                 personAddressMap.bannerAddressType = mapEntry.key
