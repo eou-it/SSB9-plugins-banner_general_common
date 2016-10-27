@@ -760,27 +760,30 @@ abstract class AbstractPersonCompositeService extends LdmService {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if ((it.containsKey("stateCode") || it.containsKey("stateDescription"))
-                                    && (it.state?.trim() != personAddress.state.code || it.stateDescription?.trim() != personAddress.state?.description)) {
+                            if (it.containsKey("stateCode") && it.stateCode?.trim() != personAddress.state.code ) {
                                 changeToInactiveStatus = true
                             }
+                            if (it.containsKey("stateDescription") && it.stateDescription?.trim() != personAddress.state?.description) {
+                                changeToInactiveStatus = true
+                            }
+
                             if (!it.containsKey("postalCodeUpdate") && it.zip?.trim() != personAddress.zip) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (it.containsKey("county") && it.county?.trim() != personAddress.county) {
+                            if (!it.containsKey("countyUpdate") && it.containsKey("county") && it.county != personAddress.county) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if(it.containsKey("countyISOCode") &&  additionalProperty.countyISOCode != it.countyISOCode){
+                            if(!it.containsKey("countyUpdate") && it.containsKey("countyISOCode") &&  additionalProperty.countyISOCode != it.countyISOCode){
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if(it.containsKey("countyDescription") && additionalProperty.countyDescription != it.countyDescription){
+                            if(!it.containsKey("countyUpdate") && it.containsKey("countyDescription") && additionalProperty.countyDescription != it.countyDescription){
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if(it.containsKey("deliveryPoint") &&  personAddress.deliveryPoint != Integer.valueOf(it.deliveryPoint)){
+                            if(it.containsKey("deliveryPoint") &&  personAddress.deliveryPoint != it.deliveryPoint){
                                 changeToInactiveStatus = true
                                 break;
                             }
@@ -788,7 +791,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if(it.containsKey("correctionDigit") && personAddress.correctionDigit != Integer.valueOf(it.correctionDigit)){
+                            if(it.containsKey("correctionDigit") && personAddress.correctionDigit != it.correctionDigit){
                                 changeToInactiveStatus = true
                                 break;
                             }
@@ -817,7 +820,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                                 if (geographicAreaGuids.isEmpty()) {
                                     // Inactive geographic area address
                                     personGeographicAreaAddresses.each { personGeographicAreaAddress ->
-                                        personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                                        personGeographicAreaAddress.statusIndicator = 'I'
                                         personGeographicAreaAddressService.update(personGeographicAreaAddress)
                                     }
 
@@ -834,7 +837,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                                         if (exitGeographicAreaMap) {
                                             geographicAreaGuids.remove(exitGeographicAreaMap.key)
                                         } else {
-                                            personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                                            personGeographicAreaAddress.statusIndicator = 'I'
                                             personGeographicAreaAddressService.update(personGeographicAreaAddress)
                                         }
                                     }
@@ -1300,14 +1303,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
 
-        if (domainPropertiesMap.containsKey('stateCode')) {
+        if (domainPropertiesMap.containsKey('stateCode') && domainPropertiesMap.stateCode) {
             State state = State.findByCode(domainPropertiesMap.stateCode)
             if (state) {
                 personAddress.state = state
             } else {
                 throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
             }
-        } else if (domainPropertiesMap.containsKey('stateDescription')) {
+        } else if (domainPropertiesMap.containsKey('stateDescription') && domainPropertiesMap.stateDescription) {
             State state = State.findByDescription(domainPropertiesMap.stateDescription)
             if (state) {
                 personAddress.state = state

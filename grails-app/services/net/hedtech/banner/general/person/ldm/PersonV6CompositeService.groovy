@@ -1384,18 +1384,18 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         countryCode = isoCodeService.getISO2CountryCode(countryCode)
                         if(!countryCode){
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.invalid.message", []))
-
                         }
                     }
                     personAddressMap.nationISOCode = countryCode
                 }else{
                     //throw an exception
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.requried", []))
                 }
 
                 //City
                 String locality = '.'
                 if (country.containsKey('locality') && country.get("locality") instanceof String) {
-                    if (country.get("locality").length() > 0) {
+                    if (country.get("locality") && country.get("locality").length() > 0) {
                         locality = country.get("locality")
                     }
                 }else{
@@ -1410,15 +1410,20 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     Map region = country.get("region")
 
                     //State Code
-                    if (region.containsKey('code') && region.get("code") instanceof String && region.get("code").length() > 0) {
+                    if (region.containsKey('code') && region.get("code") instanceof String) {
                         String regionCode = region.get("code")
-                        String stateCode = crossReferenceRuleService.getStateCodeByRegionCode(regionCode)
-                        if (!stateCode) {
-                            // throw an exception
-                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("region.not.found", []))
+                        if(regionCode && regionCode.length() > 0){
+                            String stateCode = crossReferenceRuleService.getStateCodeByRegionCode(regionCode)
+                            if (!stateCode) {
+                                // throw an exception
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("region.not.found", []))
+                            }
+                            personAddressMap.stateCode = stateCode
+                        }else{
+                            personAddressMap.stateCode = regionCode
                         }
-                        personAddressMap.stateCode = stateCode
-                    } else if (region.containsKey('title') && region.get("title") instanceof String && region.get("title").length() > 0) {
+
+                    } else if (region.containsKey('title') && region.get("title") instanceof String) {
                         personAddressMap.stateDescription = region.get("title")
                     }
                 }
@@ -1432,61 +1437,76 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     personAddressMap.postalCodeUpdate = 'false'
                 }
 
-                if(!postalCode){
-                    postalCode = getDefalutZipCode()
-                }
-
                 if (personAddressMap.stateCode || personAddressMap.stateDescription) {
-                    personAddressMap.zip = postalCode
+                    if(!postalCode){
+                        postalCode = getDefalutZipCode()
+                    }
                 }
+                personAddressMap.zip = postalCode
+
 
                 //county
                 if (country.containsKey('subRegion') && country.get('subRegion') instanceof Map) {
                     Map subRegion = country.get('subRegion')
                     County county
-
-                    if (subRegion.containsKey('code') && subRegion.get('code') instanceof String && subRegion.get('code').length() > 0) {
-                        String subRegionCode = subRegion.get('code')
-                        //get the banner value of sub region code
-                        String countyCode = crossReferenceRuleService.getCountyCodeBySubRegionCode(subRegionCode)
-                        if (countyCode) {
-                            county = County.findByCode(countyCode)
+                    String subRegionCode
+                    String subRegionTitle
+                    if (subRegion.containsKey('code') && subRegion.get('code') instanceof String) {
+                        subRegionCode = subRegion.get('code')
+                        if(subRegionCode && subRegionCode.length() > 0) {
+                            //get the banner value of sub region code
+                            String countyCode = crossReferenceRuleService.getCountyCodeBySubRegionCode(subRegionCode)
+                            if (countyCode) {
+                                county = County.findByCode(countyCode)
+                            }
                         }
-                        if(!countyCode || !county) {
-                            //set to new banner column code
-                            personAddressMap.countyISOCode = subRegionCode
-                        }
+                    }else{
+                        personAddressMap.put("countyUpdate", false)
                     }
 
-                    if (subRegion.containsKey('title') && subRegion.get('title') instanceof String && subRegion.get('title').length() > 0) {
-                        String subRegionTitle = subRegion.get('title')
-                        if (!county) {
+                    if (subRegion.containsKey('title') && subRegion.get('title') instanceof String) {
+                        subRegionTitle = subRegion.get('title')
+                        if (!county && subRegionTitle && subRegionTitle.length() > 0) {
                             county = County.findByDescription(subRegionTitle)
                         }
-                        if(subRegionTitle || !county ) {
-                            //set to new banner column titile
-                            personAddressMap.countyDescription = subRegionTitle
-                        }
+                    }else{
+                        personAddressMap.put("countyUpdate", false)
                     }
 
                     if (county) {
                         personAddressMap.county = county
+                    }else{
+                        personAddressMap.county = null
+                        //set to new banner column code
+                        personAddressMap.countyISOCode = subRegionCode
+                        //set to new banner column titile
+                        personAddressMap.countyDescription = subRegionTitle
                     }
                 }
 
                 //Additional fields for USA country
                 if (country.code == "USA") {
-                    if (country.containsKey('deliveryPoint') && country.get('deliveryPoint') instanceof String && country.get('deliveryPoint').length() > 0) {
+                    if (country.containsKey('deliveryPoint') && country.get('deliveryPoint') instanceof String) {
                         // set deliveryPoint
-                        personAddressMap.deliveryPoint = country.get('deliveryPoint')
+                        String deliveryPoint = country.get('deliveryPoint')
+                        if(deliveryPoint && deliveryPoint.length() > 0) {
+                            personAddressMap.deliveryPoint = Integer.valueOf(deliveryPoint)
+                        }else{
+                            personAddressMap.deliveryPoint = null
+                        }
                     }
-                    if (country.containsKey('carrierRoute') && country.get('carrierRoute') instanceof String && country.get('carrierRoute').length() > 0) {
+                    if (country.containsKey('carrierRoute') && country.get('carrierRoute') instanceof String) {
                         //set carrierRoute
                         personAddressMap.carrierRoute = country.get('carrierRoute')
                     }
-                    if (country.containsKey('correctionDigit') && country.get('correctionDigit') instanceof String && country.get('correctionDigit').length() > 0) {
+                    if (country.containsKey('correctionDigit') && country.get('correctionDigit') instanceof String) {
                         //set correctionDigit
-                        personAddressMap.correctionDigit = country.get('correctionDigit')
+                        String correctionDigit = country.get('correctionDigit')
+                        if(correctionDigit && correctionDigit.length() > 0) {
+                            personAddressMap.correctionDigit = Integer.valueOf(correctionDigit)
+                        }else{
+                            personAddressMap.correctionDigit = null
+                        }
                     }
                 }
 
