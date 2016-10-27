@@ -21,7 +21,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
 
     @Before
     public void setUp() {
-        formContext = ['SSAXLST', 'SSAXLSQ']
+        formContext = ['GUAGMNU','SSAXLST', 'SSAXLSQ']
         super.setUp()
     }
 

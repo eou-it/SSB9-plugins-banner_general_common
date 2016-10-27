@@ -26,7 +26,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU','SELFSERVICE']
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
         super.setUp()

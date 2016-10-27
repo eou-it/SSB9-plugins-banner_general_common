@@ -14,7 +14,7 @@ class SectionMeetingTimeViewIntegrationTests extends net.hedtech.banner.testing.
 
     @Before
     public void setUp() {
-        formContext = ['SSAMATX']
+        formContext = ['GUAGMNU','SSAMATX']
         super.setUp()
     }
 

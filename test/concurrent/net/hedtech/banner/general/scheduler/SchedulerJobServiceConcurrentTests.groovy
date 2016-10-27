@@ -30,7 +30,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
     @Before
     public void setUp() {
-        FormContext.set( ['SELFSERVICE'] )
+        FormContext.set( ['GUAGMNU','SELFSERVICE'] )
         Authentication authentication = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( authentication )
 

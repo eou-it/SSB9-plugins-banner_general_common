@@ -41,7 +41,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['GUAGMNU','SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 

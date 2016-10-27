@@ -51,7 +51,7 @@ class HousingRoomCatagoryDefinitionServiceIntegrationTests extends BaseIntegrati
 
     @Before
     public void setUp() {
-        formContext = ['SSASECT']
+        formContext = ['GUAGMNU','SSASECT']
         super.setUp()
         initializeTestDataForReferences()
     }

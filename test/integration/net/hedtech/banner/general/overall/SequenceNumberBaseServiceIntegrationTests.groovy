@@ -47,7 +47,7 @@ class SequenceNumberBaseServiceIntegrationTests extends BaseIntegrationTestCase 
 
     @Before
     public void setUp() {
-        formContext = ['SCACRSE']
+        formContext = ['GUAGMNU','SCACRSE']
         super.setUp()
     }
 
