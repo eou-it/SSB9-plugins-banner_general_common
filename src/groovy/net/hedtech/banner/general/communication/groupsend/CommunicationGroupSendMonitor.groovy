@@ -20,8 +20,16 @@ class CommunicationGroupSendMonitor implements DisposableBean {
     private CommunicationGroupSendItemService communicationGroupSendItemService
     private CommunicationGroupSendCompositeService communicationGroupSendCompositeService
     private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
-    public int monitorIntervalInSeconds = 10
+    private int monitorIntervalInSeconds = 10
 
+    @Required
+    void setMonitorIntervalInSeconds(int monitorIntervalInSeconds) {
+        this.monitorIntervalInSeconds = monitorIntervalInSeconds
+    }
+
+    int getMonitorIntervalInSeconds() {
+        return monitorIntervalInSeconds
+    }
 
     @Required
     void setAsynchronousBannerAuthenticationSpoofer(AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer) {
