@@ -914,8 +914,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             requestData.put("confidIndicator", extractPrivacyStatusFromRequest(person.get("privacyStatus")))
         }
 
-        if (person.containsKey("gender") && person.get("gender") instanceof String) {
-            requestData.put("sex", extractGenderFromRequest(person.get("gender")))
+        if (person.containsKey("gender") && person.get("gender") instanceof String && person.get("gender").length() > 0) {
+            String gender = person.get("gender")
+            if(Gender.getByDataModelValue(gender, "v6")){
+               Gender genderEnum = Gender.getByDataModelValue(gender, "v6")
+                requestData.put("sex", genderEnum.bannerValue)
+            }else{
+                // throw an exception
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.gender", null))
+            }
+        }else  if (person.containsKey("gender") && person.get("gender") instanceof String && person.get("gender").length() == 0) {
+            requestData.put("sex", null)
         }
 
         if (person.containsKey("religion") && person.get("religion") instanceof Map) {

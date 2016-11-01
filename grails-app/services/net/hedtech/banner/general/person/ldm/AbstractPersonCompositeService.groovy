@@ -305,7 +305,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
 
-        person.put('deadIndicator', requestData.get("deadDate") ? 'Y' : null)
+        personBase.put('deadIndicator', requestData.get("deadDate") ? 'Y' : null)
         personBase.put('armedServiceMedalVetIndicator', false)
         personBase.put('pidm', newPersonIdentificationName?.pidm)
         PersonBasicPersonBase newPersonBase = personBasicPersonBaseService.create(personBase)
@@ -945,24 +945,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         }
                     }
                 }
-                if (personBaseData.containsKey("birthDate") && personBaseData.get("birthDate")) {
-                    personBase.birthDate = personBaseData.get("birthDate")
-                } else if (personBaseData.containsKey("birthDate") && personBaseData.get("birthDate") == null) {
+                if (personBaseData.containsKey("birthDate")) {
                     personBase.birthDate = personBaseData.get("birthDate")
                 }
-
-
-                if (personBaseData.containsKey("deadDate") && personBaseData.get("deadDate")) {
-                    personBase.deadIndicator = personBaseData.get("deadDate") != null ? 'Y' : null
-                    personBase.deadDate = personBaseData.get("deadDate")
-                    if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
-                    }
-                } else if (personBaseData.containsKey("deadDate") && personBaseData.get("deadDate") == null) {
+                if (personBaseData.containsKey("deadDate")) {
+                    personBase.deadIndicator = personBaseData.get("deadDate") ? 'Y' : null
                     personBase.deadDate = personBaseData.get("deadDate")
                 }
-
-
+                if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
+                }
                 if (personBaseData.get("confidIndicator")) {
                     personBase.confidIndicator = personBaseData.get("confidIndicator")
                 }
