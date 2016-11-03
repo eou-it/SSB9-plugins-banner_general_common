@@ -50,7 +50,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.Building.SLBBLDG</value>
-                <value>EEDM.Building.STVBLDG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
