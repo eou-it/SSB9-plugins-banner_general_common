@@ -1115,7 +1115,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
         MaritalStatus maritalStatus
         if (maritalStatusMap.containsKey("maritalCategory") && maritalStatusMap.get("maritalCategory") instanceof String && maritalStatusMap.get("maritalCategory")?.length() > 0) {
-            if(!MaritalStatusCategory.getByString(it.translationValue, "v6")){
+            if(!MaritalStatusCategory.getByString(maritalStatusMap.get("maritalCategory"), "v4")){
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.not.found", null))
             }
             def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritalStatusMap.get("maritalCategory") }
