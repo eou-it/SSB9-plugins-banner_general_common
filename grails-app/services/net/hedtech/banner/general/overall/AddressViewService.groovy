@@ -28,7 +28,8 @@ class AddressViewService extends ServiceBase {
 
     public List<AddressView> fetchAll(int max = 0, int offset = -1) {
         return AddressView.withSession { session ->
-            def query = session.createQuery('''from AddressView''')
+            def orderBy = " order by id"
+            def query = session.createQuery('''from AddressView''' + orderBy)
             if (max > 0) {
                 query.setMaxResults(max)
             }
