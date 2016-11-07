@@ -76,7 +76,7 @@ public class PersonVisaCompositeService extends LdmService {
             personVisaDecorator.person = person
 
             //visa type
-            PersonVisaCategory category = it.nonResInd?.toUpperCase() == 'Y' ? PersonVisaCategory.IMMIGRANT : PersonVisaCategory.NONIMMIGRANT
+            PersonVisaCategory category = it.nonResInd?.toUpperCase() == 'Y' ? PersonVisaCategory.NONIMMIGRANT : PersonVisaCategory.IMMIGRANT
             PersonVisaDecorator.VisaType.Detail visaTypeDetail = new PersonVisaDecorator.VisaType.Detail()
             visaTypeDetail.id = it.visaTypeGuid
             PersonVisaDecorator.VisaType visaType = new PersonVisaDecorator.VisaType()
@@ -89,7 +89,7 @@ public class PersonVisaCompositeService extends LdmService {
 
             //status
             if (it.visaExpireDate) {
-                personVisaDecorator.status = new Date().after(it.visaExpireDate) ? PersonVisaStatus.EXPIRED : PersonVisaStatus.CURRENT
+                personVisaDecorator.status = new Date().after(it.visaExpireDate) ? PersonVisaStatus.EXPIRED.value : PersonVisaStatus.CURRENT.value
             }
 
             //requested on

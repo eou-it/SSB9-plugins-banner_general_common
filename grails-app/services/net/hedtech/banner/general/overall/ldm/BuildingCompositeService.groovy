@@ -46,7 +46,7 @@ class BuildingCompositeService extends  LdmService{
         List allowedSortFields = (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))? [GeneralCommonConstants.CODE, GeneralCommonConstants.TITLE]:[GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.TITLE])
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
 
-        if (params.containsKey("sort")) {
+        if (params.containsKey("sort") && !params.sort.equals(BUILDING_SURROGATE_ID)) {
             RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
             params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
         }
@@ -57,9 +57,8 @@ class BuildingCompositeService extends  LdmService{
             params.put('order', "asc")
         }
 
-        if (!params.sort) {
-            params.sort = BUILDING_SURROGATE_ID
-        }
+        params.sort = params.sort ?: BUILDING_SURROGATE_ID
+
         fetchBuildingDetails(params).each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = new SiteDetail(globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(housingLocationBuildingDescription.campus?.code, SiteDetailCompositeService.LDM_NAME)?.guid )
             List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription.building)

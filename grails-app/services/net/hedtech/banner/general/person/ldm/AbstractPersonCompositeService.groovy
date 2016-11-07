@@ -15,6 +15,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -70,6 +71,8 @@ abstract class AbstractPersonCompositeService extends LdmService {
     def outsideInterestService
     def interestCompositeService
     def crossReferenceRuleService
+    IntegrationConfigurationService integrationConfigurationService
+
 
     abstract protected String getPopSelGuidOrDomainKey(final Map requestParams)
 
@@ -302,7 +305,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
 
-        person.put('deadIndicator', requestData.get("deadDate") ? 'Y' : null)
+        personBase.put('deadIndicator', requestData.get("deadDate") ? 'Y' : null)
         personBase.put('armedServiceMedalVetIndicator', false)
         personBase.put('pidm', newPersonIdentificationName?.pidm)
         PersonBasicPersonBase newPersonBase = personBasicPersonBaseService.create(personBase)
@@ -321,7 +324,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //person birthCountry
         VisaInternationalInformation visaInternationalInformation
-        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language")) {
+        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language") || requestData.containsKey("identityDocuments")) {
             visaInternationalInformation = createOrUpdateVisaInternationalInformation(newPersonIdentificationName.pidm, requestData, dataOrigin)
         }
 
@@ -507,7 +510,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //person birthCountry
         VisaInternationalInformation visaInternationalInformation
-        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language")) {
+        if (requestData.containsKey("nationBirth") || requestData.containsKey("nationLegal") || requestData.containsKey("language") || requestData.containsKey("identityDocuments")) {
             visaInternationalInformation = createOrUpdateVisaInternationalInformation(newPersonIdentificationName.pidm, requestData, dataOrigin)
         } else {
             visaInternationalInformation = visaInternationalInformationService.fetchAllByPidmInList([newPersonIdentificationName.pidm])[0]
@@ -574,7 +577,20 @@ abstract class AbstractPersonCompositeService extends LdmService {
             if (requestData.containsKey("language")) {
                 personVisaInternationalInformation.language = requestData.get("language")
             }
-            personVisaInternationalInformation = visaInternationalInformationService.update(domainModel: personVisaInternationalInformation)
+            if(requestData.containsKey("identityDocuments") &&  requestData.get("identityDocuments") instanceof List && requestData.get("identityDocuments").size() > 0){
+
+                    Map identityDocumentMap = requestData.get("identityDocuments")[0]
+
+                    if (identityDocumentMap.containsKey('nationIssue') && identityDocumentMap.get('nationIssue') instanceof String) {
+                        identityDocumentMap.nationIssue = fetchNationByScondISO(identityDocumentMap.get('nationIssue'))?.code
+                    }
+                    bindData(personVisaInternationalInformation, identityDocumentMap, [:])
+                }else{
+                    personVisaInternationalInformation.nationIssue = null
+                    personVisaInternationalInformation.passportExpenditureDate = null
+                    personVisaInternationalInformation.passportId = null
+                }
+            personVisaInternationalInformation = visaInternationalInformationService.update(domainModel:personVisaInternationalInformation)
         }
         return personVisaInternationalInformation
     }
@@ -599,9 +615,32 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (dataOrigin && dataOrigin?.length() > 0) {
             visaInfoMap.put("dataOrigin", dataOrigin)
         }
+        if(requestData.containsKey("identityDocuments") &&  requestData.get("identityDocuments") instanceof List && requestData.get("identityDocuments").size() > 0){
+           Map identityDocumentMap = requestData.get("identityDocuments")[0]
+
+            if (identityDocumentMap.containsKey('nationIssue') && identityDocumentMap.get('nationIssue') instanceof String) {
+                identityDocumentMap.nationIssue = fetchNationByScondISO(identityDocumentMap.get('nationIssue'))?.code
+            }
+
+            visaInfoMap.putAll(identityDocumentMap)
+        }
         personVisaInternationalInformation = visaInternationalInformationService.create(visaInfoMap)
         return personVisaInternationalInformation
     }
+
+   private def fetchNationByScondISO(String nationISOCode){
+       if(!nationISOCode){
+           return null
+       }
+
+       Nation nation = Nation.findByScodIso(nationISOCode)
+       if (nation) {
+           return nation
+       } else {
+           throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
+       }
+
+   }
 
     private
     def createOrUpdatePersonEmails(List emailListInRequest, Integer pidm, List<PersonEmail> existingPersonEmails, String dataOrigin) {
@@ -676,6 +715,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         Map addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
         List<PersonAddress> personAddresses = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([pidm], addressTypeToHedmAddressTypeMap.keySet())
         List<PersonGeographicAreaAddress> geographicAreaAddresses = personGeographicAreaAddressService.fetchActivePersonGeographicAreaAddress(pidm)
+        List<PersonAddressAdditionalProperty>  additionalProperties = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddresses.id)
         personAddresses.each { personAddress ->
 
             def activeRequestAddresses = newAddresses.findAll { it ->
@@ -684,36 +724,74 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
             if (activeRequestAddresses.size() > 0) {
                 activeRequestAddresses.each {
-                    PersonAddress activeRequestAddress = personAddressService.getDomainClass().newInstance()
-                    bindPersonAddress(activeRequestAddress, it, pidm)
-
+                    PersonAddressAdditionalProperty additionalProperty = additionalProperties.find {it.id == personAddress.id}
                     Boolean changeToInactiveStatus = false
-                    switch (activeRequestAddress.addressType) {
+                    switch (it.bannerAddressType) {
                         default:
-                            if (activeRequestAddress.state != personAddress.state) {
-                                changeToInactiveStatus = true
-                            }
-                            if (activeRequestAddress.zip != personAddress.zip) {
+                            if (it.streetLine1?.trim() != personAddress.streetLine1) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.nation != personAddress.nation) {
+                            if (it.containsKey("streetLine2") && it.streetLine2?.trim() != personAddress.streetLine2) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.county != personAddress.county) {
+                            if (it.containsKey("streetLine3") && it.streetLine3?.trim() != personAddress.streetLine3) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.streetLine1 != personAddress.streetLine1) {
+                            if (it.containsKey("streetLine4") && it.streetLine4?.trim() != personAddress.streetLine4) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.streetLine2 != personAddress.streetLine2) {
+                            if (it.containsKey("toDate") && it.toDate?.clearTime() != personAddress.toDate?.clearTime()) {
                                 changeToInactiveStatus = true
                                 break;
                             }
-                            if (activeRequestAddress.streetLine3 != personAddress.streetLine3) {
+                            if (!it.containsKey("fromDateUpdate") && it.fromDate?.clearTime() != personAddress.fromDate?.clearTime()) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (!it.containsKey("nationISOCodeUpdate") && it.nationISOCode != personAddress.nation?.scodIso) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (!it.containsKey("cityUpdate") && it.city?.trim() != personAddress.city) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (it.containsKey("stateCode") && it.stateCode?.trim() != personAddress.state.code ) {
+                                changeToInactiveStatus = true
+                            }
+                            if (it.containsKey("stateDescription") && it.stateDescription?.trim() != personAddress.state?.description) {
+                                changeToInactiveStatus = true
+                            }
+
+                            if (!it.containsKey("postalCodeUpdate") && it.zip?.trim() != personAddress.zip) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (!it.containsKey("countyUpdate") && it.containsKey("county") && it.county != personAddress.county) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(!it.containsKey("countyUpdate") && it.containsKey("countyISOCode") &&  additionalProperty.countyISOCode != it.countyISOCode){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(!it.containsKey("countyUpdate") && it.containsKey("countyDescription") && additionalProperty.countyDescription != it.countyDescription){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("deliveryPoint") &&  personAddress.deliveryPoint != it.deliveryPoint){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("carrierRoute") && personAddress.carrierRoute != it.carrierRoute){
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if(it.containsKey("correctionDigit") && personAddress.correctionDigit != it.correctionDigit){
                                 changeToInactiveStatus = true
                                 break;
                             }
@@ -734,17 +812,15 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         List<PersonGeographicAreaAddress> personGeographicAreaAddresses = geographicAreaAddresses.findAll {
                             it.addressType.code == personAddress.addressType.code
                         }
-
                         if (it.containsKey("geographicAreaGuids") && it.get("geographicAreaGuids") instanceof List) {
                             List geographicAreaGuids = it.get("geographicAreaGuids")
                             if (personGeographicAreaAddresses.isEmpty()) {
                                 createOrUpdateGeographicAddress(it, personAddress)
                             } else {
-
                                 if (geographicAreaGuids.isEmpty()) {
                                     // Inactive geographic area address
                                     personGeographicAreaAddresses.each { personGeographicAreaAddress ->
-                                        personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                                        personGeographicAreaAddress.statusIndicator = 'I'
                                         personGeographicAreaAddressService.update(personGeographicAreaAddress)
                                     }
 
@@ -761,7 +837,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                                         if (exitGeographicAreaMap) {
                                             geographicAreaGuids.remove(exitGeographicAreaMap.key)
                                         } else {
-                                            personGeographicAreaAddress.statusIndicator = personAddress.statusIndicator
+                                            personGeographicAreaAddress.statusIndicator = 'I'
                                             personGeographicAreaAddressService.update(personGeographicAreaAddress)
                                         }
                                     }
@@ -869,24 +945,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
                         }
                     }
                 }
-                if (personBaseData.containsKey("birthDate") && personBaseData.get("birthDate")) {
-                    personBase.birthDate = personBaseData.get("birthDate")
-                } else if (personBaseData.containsKey("birthDate") && personBaseData.get("birthDate") == null) {
+                if (personBaseData.containsKey("birthDate")) {
                     personBase.birthDate = personBaseData.get("birthDate")
                 }
-
-
-                if (personBaseData.containsKey("deadDate") && personBaseData.get("deadDate")) {
-                    personBase.deadIndicator = personBaseData.get("deadDate") != null ? 'Y' : null
-                    personBase.deadDate = personBaseData.get("deadDate")
-                    if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
-                    }
-                } else if (personBaseData.containsKey("deadDate") && personBaseData.get("deadDate") == null) {
+                if (personBaseData.containsKey("deadDate")) {
+                    personBase.deadIndicator = personBaseData.get("deadDate") ? 'Y' : null
                     personBase.deadDate = personBaseData.get("deadDate")
                 }
-
-
+                if (personBase.deadDate != null && personBase.birthDate != null && personBase.deadDate.before(personBase.birthDate)) {
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException('dateDeceased.invalid', null))
+                }
                 if (personBaseData.get("confidIndicator")) {
                     personBase.confidIndicator = personBaseData.get("confidIndicator")
                 }
@@ -1089,7 +1157,13 @@ abstract class AbstractPersonCompositeService extends LdmService {
         VisaInternationalInformation visaInternationalInformation = dataMapForPerson.get("visaInternationalInformation")
         if (visaInternationalInformation) {
             dataMapForPerson << ["pidmToOriginCountryMap": visaInternationalInformation]
-            Map codeToNationMap = nationCompositeService.fetchAllByCodesInList([visaInternationalInformation.nationBirth, visaInternationalInformation.nationLegal])
+            if(visaInternationalInformation.passportId){
+                dataMapForPerson  << ["passport" : visaInternationalInformation]
+                dataMapForPerson << ["isInstitutionUsingISO2CountryCodes" :integrationConfigurationService.isInstitutionUsingISO2CountryCodes()]
+            }
+            Map codeToNationMap = nationCompositeService.fetchAllByCodesInList([visaInternationalInformation.nationBirth,
+                                                                                visaInternationalInformation.nationLegal,
+                                                                                visaInternationalInformation.nationIssue])
             dataMapForPerson << ["codeToNationMap": codeToNationMap]
         }
 
@@ -1214,23 +1288,21 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
 
         if (domainPropertiesMap.containsKey('nationISOCode')) {
-            Nation nation = Nation.findByScodIso(domainPropertiesMap.nationISOCode)
+
+            Nation nation = fetchNationByScondISO(domainPropertiesMap.nationISOCode)
             if (nation) {
                 personAddress.nation = nation
-            } else {
-                log.error "Nation not found for code: ${domainPropertiesMap.nationISOCode}"
-                throw new ApplicationException("Person", new BusinessLogicValidationException("country.not.found.message", []))
             }
         }
 
-        if (domainPropertiesMap.containsKey('stateCode')) {
+        if (domainPropertiesMap.containsKey('stateCode') && domainPropertiesMap.stateCode) {
             State state = State.findByCode(domainPropertiesMap.stateCode)
             if (state) {
                 personAddress.state = state
             } else {
                 throw new ApplicationException("Person", new BusinessLogicValidationException("state.not.found.message", []))
             }
-        } else if (domainPropertiesMap.containsKey('stateDescription')) {
+        } else if (domainPropertiesMap.containsKey('stateDescription') && domainPropertiesMap.stateDescription) {
             State state = State.findByDescription(domainPropertiesMap.stateDescription)
             if (state) {
                 personAddress.state = state
