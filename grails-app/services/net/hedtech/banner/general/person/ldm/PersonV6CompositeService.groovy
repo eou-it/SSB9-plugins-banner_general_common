@@ -1012,9 +1012,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             return language
         }
         Map languageCodeMap = languageCodesInRequest?.get(0)
-        List crossReferenceRules = crossReferenceRuleService.fetchAllByISOLanguageCode(languageCodeMap.get("code"))
-        if (crossReferenceRules?.size() > 0) {
-            language = Language.findByCode(crossReferenceRules?.get(0)?.bannerValue)
+        def crossReferenceRules = crossReferenceRuleService.fetchAllByISOLanguageCode(languageCodeMap.get("code"))?.get(0)
+        if (crossReferenceRules?.bannerValue) {
+            language = Language.findByCode(crossReferenceRules.bannerValue)
         } else {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
         }
