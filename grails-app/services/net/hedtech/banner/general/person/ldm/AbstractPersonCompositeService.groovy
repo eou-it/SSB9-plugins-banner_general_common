@@ -568,10 +568,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (!personVisaInternationalInformation) {
             personVisaInternationalInformation = creatNewPersonVisaInternationalInformation(pidm, requestData, dataOrigin)
         } else {
-            if (requestData.containsKey("nationBirth") && requestData.get("nationBirth")?.length() > 0) {
+            if (requestData.containsKey("nationBirth")) {
                 personVisaInternationalInformation.nationBirth = requestData.get("nationBirth")
             }
-            if (requestData.containsKey("nationLegal") && requestData.get("nationLegal")?.length() > 0) {
+            if (requestData.containsKey("nationLegal")) {
                 personVisaInternationalInformation.nationLegal = requestData.get("nationLegal")
             }
             if (requestData.containsKey("language")) {

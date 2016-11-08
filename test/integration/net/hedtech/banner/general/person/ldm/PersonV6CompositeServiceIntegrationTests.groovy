@@ -38,6 +38,19 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24787'
     String i_succes_person_banner_id = 'HOSFE2000'
     GlobalUniqueIdentifier personGlobalUniqueIdentifier
+    String raceGlobalUniqueIdentifier1
+    String raceGlobalUniqueIdentifier2
+    String religionGlobalUniqueIdentifier1
+    String religionGlobalUniqueIdentifier2
+    String ethnicityGlobalUniqueIdentifier1
+    String ethnicityGlobalUniqueIdentifier2
+    String citizenshipStatusGlobalUniqueIdentifier1
+    String citizenshipStatusGlobalUniqueIdentifier2
+    String citizenshipStatusCategory1 = 'citizen'
+    String citizenshipStatusCategory2 = 'nonCitizen'
+    String countryOfBirth1 = 'GBR'
+    String countryOfBirth2 = 'USA'
+
     PersonIdentificationName personIdentificationName
     PersonAddressService personAddressService
     PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
@@ -70,6 +83,9 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_privacy_satus = "unrestricted"
     def i_success_update_privacy_satus = "restricted"
 
+    def i_success_maritalStatus1 = "single"
+    def i_success_maritalStatus2 = "married"
+
     def i_success_legacy
     def i_success_ethnicity
     def i_success_maritalStatus
@@ -80,6 +96,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_success_nationDriver
     def i_success_pidm
     def i_success_birthDate = new Date()
+    def i_success_birthDate_String = "1972-12-10"
     def i_success_sex = "M"
     def i_success_confidIndicator = "Y"
     def i_success_deadIndicator = "Y"
@@ -170,6 +187,17 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void initializeTestDataForReferences() {
         personIdentificationName = PersonUtility.getPerson(i_succes_person_banner_id)
         personGlobalUniqueIdentifier = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(personIdentificationName.pidm.toString(), 'persons')
+        raceGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('races', 'ASI')?.guid
+        raceGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('races', 'WHT')?.guid
+        religionGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('religions', 'CH')?.guid
+        religionGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('religions', 'CA')?.guid
+        ethnicityGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us',1)?.guid
+        ethnicityGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us',2)?.guid
+        citizenshipStatusGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('citizenship-statuses','Y')?.guid
+        citizenshipStatusGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('citizenship-statuses','CH')?.guid
+
+       // countryBirth = Nation.
+
     }
 
 
@@ -786,6 +814,15 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
 
+    private Map newPersonWithAlternateNameHavingAdditionProperties() {
+        Map params = [names: [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        ]
+        ]
+        return params
+    }
+
+
     //POST- Person Create API
     @Test
     void testCreatePersonWithCredetials() {
@@ -806,6 +843,18 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testCreatePersonWithPrivacyStatus() {
         Map content = newPersonWithAlternateNameHavingBirthNameType()
         content.privacyStatus = [privacyCategory: i_success_privacy_satus]
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
+    }
+
+    @Test
+    void testCreatePersonWithAdditionProperties() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.birthDate = i_success_birthDate_String
         def dataMap = personV6CompositeService.create(content)
         def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
 
@@ -997,6 +1046,100 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         ]
         return params
     }
+
+
+    @Test
+    void testCreatePersonWithRacesGender() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.races = []
+        content.races << [race:[id: raceGlobalUniqueIdentifier1]]
+        content.gender =  'male'
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  raceGlobalUniqueIdentifier1 ,o_success_person_create.races[0].race.id
+        assertEquals  'male' ,o_success_person_create.gender
+    }
+
+
+    @Test
+    void testUpdatePersonWithRacesGenderReligionMaritalStatusEthnicityCitizenshipStatus() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.races = []
+        content.races << [race:[id: raceGlobalUniqueIdentifier1]]
+        content.gender =  'male'
+        content.religion = [id: religionGlobalUniqueIdentifier1]
+        content.maritalStatus = [maritalCategory: i_success_maritalStatus1]
+        content.ethnicity = [ethnicGroup:[id: ethnicityGlobalUniqueIdentifier1]]
+        content.citizenshipStatus = [detail:[id: citizenshipStatusGlobalUniqueIdentifier1],category:citizenshipStatusCategory1]
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
+
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  raceGlobalUniqueIdentifier1 ,o_success_person_create.races[0].race.id
+        assertEquals  'male' ,o_success_person_create.gender
+        assertEquals  religionGlobalUniqueIdentifier1 ,o_success_person_create.religion.id
+        assertEquals  i_success_maritalStatus1 ,o_success_person_create.maritalStatus.parentCategory
+        assertEquals  ethnicityGlobalUniqueIdentifier1 ,o_success_person_create.ethnicity.id
+        assertEquals  citizenshipStatusGlobalUniqueIdentifier1 ,o_success_person_create.citizenshipStatus.detail.id
+
+
+        Map updateContent = newPersonWithCredentials()
+        updateContent.id = o_success_person_create.guid
+        updateContent.races = []
+        updateContent.races << [race:[id: raceGlobalUniqueIdentifier2]]
+        updateContent.gender =  'female'
+        updateContent.religion = [id: religionGlobalUniqueIdentifier2]
+        updateContent.maritalStatus = [maritalCategory: i_success_maritalStatus2]
+        updateContent.ethnicity = [ethnicGroup:[id: ethnicityGlobalUniqueIdentifier2]]
+        updateContent.citizenshipStatus = [detail:[id: citizenshipStatusGlobalUniqueIdentifier2],category:citizenshipStatusCategory2]
+        dataMap = personV6CompositeService.update(updateContent)
+        def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals  raceGlobalUniqueIdentifier2 ,o_success_person_update.races[0].race.id
+        assertEquals  'female' ,o_success_person_update.gender
+        assertEquals  religionGlobalUniqueIdentifier2 ,o_success_person_update.religion.id
+        assertEquals  i_success_maritalStatus2 ,o_success_person_update.maritalStatus.parentCategory
+        assertEquals  ethnicityGlobalUniqueIdentifier2 ,o_success_person_update.ethnicity.id
+        assertEquals  citizenshipStatusGlobalUniqueIdentifier2 ,o_success_person_update.citizenshipStatus.detail.id
+    }
+
+
+
+    @Test
+    void testUpdatePersonCitizenshipStatusCountryOfBirth() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.citizenshipStatus = [category:citizenshipStatusCategory1]
+        //content.nationBirth = countryOfBirth1
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
+
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  citizenshipStatusCategory1 ,o_success_person_create.citizenshipStatus.category
+        //assertEquals  countryOfBirth1 ,o_success_person_create.countryOfBirth
+
+
+        Map updateContent = newPersonWithCredentials()
+        updateContent.id = o_success_person_create.guid
+        updateContent.citizenshipStatus = [category:citizenshipStatusCategory2]
+        //updateContent.nationBirth = countryOfBirth2
+        dataMap = personV6CompositeService.update(updateContent)
+        def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals  citizenshipStatusCategory2 ,o_success_person_update.citizenshipStatus.category
+        //assertEquals  countryOfBirth2 ,o_success_person_update.countryOfBirth
+    }
+
 
 
 

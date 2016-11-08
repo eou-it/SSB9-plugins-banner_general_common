@@ -1051,7 +1051,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     private def extractCountryCodeFromRequest(String countryCodeISO) {
         //Nation
         String countryCode
-        if (countryCodeISO && countryCodeISO instanceof String && countryCodeISO.trim().length() == 0) {
+        if (countryCodeISO instanceof String && countryCodeISO.trim().length() == 0) {
             return ""
         }
         if (countryCodeISO && countryCodeISO instanceof String && countryCodeISO?.length() > 0) {
