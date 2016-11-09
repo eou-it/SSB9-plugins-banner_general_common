@@ -1022,9 +1022,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             return language
         }
         Map languageCodeMap = languageCodesInRequest?.get(0)
-        def crossReferenceRules = crossReferenceRuleService.fetchAllByISOLanguageCode(languageCodeMap.get("code"))?.get(0)
-        if (crossReferenceRules?.bannerValue) {
+        def crossReferenceRule
+        def crossReferenceRules = crossReferenceRuleService.fetchAllByISOLanguageCode(languageCodeMap.get("code"))
+        if(crossReferenceRules && crossReferenceRules?.size() > 0){
+           crossReferenceRule = crossReferenceRules?.get(0)
+        if (crossReferenceRule?.bannerValue) {
             language = Language.findByCode(crossReferenceRules.bannerValue)
+        }
         } else {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
         }
@@ -1051,6 +1055,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     private def extractCountryCodeFromRequest(String countryCodeISO) {
         //Nation
         String countryCode
+        Nation nation
         if (countryCodeISO instanceof String && countryCodeISO.trim().length() == 0) {
             return ""
         }
@@ -1060,8 +1065,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 countryCode = isoCodeService.getISO2CountryCode(countryCode)
             }
         }
-        Nation nation = Nation.findByScodIso(countryCode)
-        if (nation) {
+        if (countryCode){
+            nation = Nation.findByScodIso(countryCode)
+        }
+        if (nation){
             return nation?.code
         } else {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.not.found", null))
@@ -1086,8 +1093,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                                 personEmailMap.put("bannerEmailType", emailType)
                             } else {
                                 //throw an exception
-                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.invalid", null))
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailMapping.not.found", null))
                             }
+                        }else{
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.type", null))
                         }
                     } else {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.required", null))
@@ -1096,7 +1105,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         personEmailMap.put("emailAddress", requestEmail.get('address'))
                     }
                     if (requestEmail.containsKey('preference') && requestEmail.get('preference') instanceof String) {
-                        if (preference != 'primary' && requestEmail.get('preference') == 'primary') {
+                        if (preference != 'primary' && requestEmail.get('preference') == 'primary' && requestEmail.get('preference').length() > 0) {
                             preference = 'primary'
                             personEmailMap.put("preference", 'Y')
                         } else {
@@ -1104,7 +1113,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         }
                     }
                 }
-                personEmailMapList << personEmailMap
+                def duplicateEmailInRequest = personEmailMapList.find { it.emailAddress == personEmailMap.emailAddress && it.bannerEmailType == personEmailMap.bannerEmailType}
+                if(duplicateEmailInRequest){
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("duplicate.email.request", null))
+                }else{
+                    personEmailMapList << personEmailMap
+                }
             }
         }
         return personEmailMapList
@@ -1215,11 +1229,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (requestCredential.containsKey("type") && requestCredential.get("type") instanceof String && CredentialType.getByString(requestCredential.get("type"), "v6")) {
                     type = CredentialType.getByString(requestCredential.get("type"), "v6")
                 } else {
-                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.code.message:credentialType", null))
+                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.credentialType", null))
                 }
                 if (requestCredential.containsKey("value") && requestCredential.get("value") instanceof String) {
                     value = requestCredential.get("value")
                     if (requestCredential.containsKey("type") == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("credentialId.length.message", null))
+                    }
+                    if (requestCredential.containsKey("type") == CredentialType.SOCIAL_INSURANCE_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("credentialId.length.message", null))
                     }
                 } else {
