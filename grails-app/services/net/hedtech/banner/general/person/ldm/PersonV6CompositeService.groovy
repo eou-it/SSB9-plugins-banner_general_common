@@ -1027,6 +1027,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             crossReferenceRule = crossReferenceRules?.get(0)
             if (crossReferenceRule?.bannerValue) {
                 language = Language.findByCode(crossReferenceRules.bannerValue)
+            }else {
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
             }
         } else {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
@@ -1117,6 +1119,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         if (preference != 'primary' && requestEmail.get('preference') == 'primary' && requestEmail.get('preference').length() > 0) {
                             preference = 'primary'
                             personEmailMap.put("preference", 'Y')
+                        }
+                        else if (requestEmail.get('preference').length() == 0) {
+                            personEmailMap.put("preference", 'N')
                         } else {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("multiple.primaryemail.invalid", null))
                         }
@@ -1244,11 +1249,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
                 if (requestCredential.containsKey("value") && requestCredential.get("value") instanceof String) {
                     value = requestCredential.get("value")
-                    if (requestCredential.containsKey("type") == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("credentialId.length.message", null))
+                    if (requestCredential.get("type") == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("ssn.length.message", null))
                     }
-                    if (requestCredential.containsKey("type") == CredentialType.SOCIAL_INSURANCE_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("credentialId.length.message", null))
+                    if (requestCredential.get("type") == CredentialType.SOCIAL_INSURANCE_NUMBER.versionToEnumMap["v6"] && value.length() > 9) {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("ssn.length.message", null))
                     }
                 } else {
                     throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("ssn.credentialId.null.message", null))
