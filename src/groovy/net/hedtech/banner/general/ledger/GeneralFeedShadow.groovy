@@ -78,6 +78,13 @@ class GeneralFeedShadow implements Serializable {
     @Column(name = "GURTRNH_CURR_CODE")
     String currencyCode
 
+    @Column(name = "GURTRNH_USER_ID")
+    String userId
+
+    @Type(type = "yes_no")
+    @Column(name = "GURTRNH_ABAL_OVERRIDE")
+    Boolean budgetOverride
+
     @Column(name = "GURTRNH_SYSTEM_TIME_STAMP")
     String systemTimestamp
 
@@ -103,7 +110,7 @@ class GeneralFeedShadow implements Serializable {
         description(nullable: false, maxSize: 35)
         type(nullable: false, maxSize: 1,
                 validator: { val, obj ->
-                    if ((val && val != "C" && val != "D")) {
+                    if ((val && val != "C" && val != "D" && val != "-" && val != "+")) {
                         return "invalid.type"
                     }
                 }
@@ -112,6 +119,8 @@ class GeneralFeedShadow implements Serializable {
         currencyCode(nullable: false, maxSize: 4)
         systemTimestamp(nullable: false, maxSize: 14)
         activityDate(nullable: false)
+        userId(nullable: false, maxSize: 30)
+        budgetOverride(nullable: true)
         dataOrigin(nullable: true)
     }
 

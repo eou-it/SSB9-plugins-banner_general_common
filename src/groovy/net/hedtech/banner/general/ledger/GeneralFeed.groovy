@@ -145,6 +145,12 @@ class GeneralFeed implements Serializable{
     @Column(name = "GURFEED_DATA_ORIGIN")
     String dataOrigin
 
+    @Column(name = "GURFEED_ENCB_TYPE")
+    String encumbranceType
+
+    @Column(name = "GURFEED_ENCD_ACTION_IND")
+    String encumbranceActionIndicator
+
     static constraints = {
         referenceNumber(nullable: true, maxSize: 8)
         transactionNumber(nullable: false, maxSize: 8)
@@ -172,7 +178,7 @@ class GeneralFeed implements Serializable{
         description(nullable: true, maxSize: 35)
         type(nullable: true, maxSize: 1,
                 validator: {val, obj ->
-                    if ((val && val != "C" && val != "D")) {
+                    if ((val && val != "C" && val != "D" && val != "-" && val != "+")) {
                         return "invalid.type"
                     }
                 }
@@ -192,6 +198,8 @@ class GeneralFeed implements Serializable{
         userId(nullable: false, maxSize: 30)
         depositNumber(nullable: true, maxSize: 8)
         dataOrigin(nullable: true)
+        encumbranceType(nullable: true, maxSize: 1)
+        encumbranceActionIndicator(nullable: true, maxSize: 1)
     }
 
 
