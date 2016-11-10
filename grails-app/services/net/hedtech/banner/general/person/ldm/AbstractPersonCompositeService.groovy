@@ -642,6 +642,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
     private
     def createOrUpdatePersonEmails(List emailListInRequest, Integer pidm, List<PersonEmail> existingPersonEmails, String dataOrigin) {
         List<PersonEmail> personEmails = []
+        existingPersonEmails.each {
+            it.statusIndicator = "I"
+            it.preferredIndicator = false
+            personEmailService.update([domainModel: it])
+        }
         emailListInRequest.each { emailMapInRequest ->
             EmailType emailTypeInRequest = emailMapInRequest.bannerEmailType
             String emailAddressInRequest = emailMapInRequest.emailAddress
@@ -674,12 +679,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 personEmail = personEmailService.create([domainModel: personEmail])
                 personEmails << personEmail
             }
-
-        }
-        existingPersonEmails.each {
-            it.statusIndicator = "I"
-            it.preferredIndicator = false
-            personEmailService.update([domainModel: it])
         }
         return personEmails
     }
@@ -1129,6 +1128,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs([personBase.citizenType.code])
                 dataMapForPerson << ["citizenTypeGuid": ctCodeToGuidMap.get(personBase.citizenType.code)]
             }
+
+            //roles
+            List personRoles
+            fetchPersonsRoleDataAndPutInMap([personIdentificationNameCurrent.pidm], dataMapForPerson)
+            if (dataMapForPerson.pidmToRolesMap.containsKey(personIdentificationNameCurrent.pidm)) {
+                personRoles = dataMapForPerson.pidmToRolesMap.get(personIdentificationNameCurrent.pidm)
+            }
+            dataMapForPerson << ["personRoles": personRoles]
         }
 
         //maritalStatus
@@ -1200,6 +1207,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
 
         }
+
 
         return dataMapForPerson
     }

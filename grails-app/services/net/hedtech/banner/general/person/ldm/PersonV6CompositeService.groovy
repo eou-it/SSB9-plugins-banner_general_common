@@ -7,7 +7,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ThirdPartyAccessService
 import net.hedtech.banner.general.overall.VisaInternationalInformation
 import net.hedtech.banner.general.person.*
@@ -177,15 +176,15 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             def entities
             def mapForSearch
-            if(credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]){
+            if (credentialType == CredentialType.BANNER_ID.versionToEnumMap["v6"]) {
                 mapForSearch = [bannerId: credentialValue]
                 entities = personAdvancedSearchViewService.fetchAllByCriteria(mapForSearch, sortField, sortOrder, max, offset)
                 totalCount = personAdvancedSearchViewService.countByCriteria(mapForSearch)
-            }else if(credentialType == CredentialType.BANNER_USER_NAME.versionToEnumMap["v6"]){
+            } else if (credentialType == CredentialType.BANNER_USER_NAME.versionToEnumMap["v6"]) {
                 mapForSearch = [externalUser: credentialValue]
                 entities = thirdPartyAccessService.fetchAllByCriteria(mapForSearch, max, offset)
                 totalCount = thirdPartyAccessService.countByCriteria(mapForSearch)
-            }else {
+            } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("creadential.type.invalid", null))
             }
 
@@ -916,14 +915,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
         if (person.containsKey("gender") && person.get("gender") instanceof String && person.get("gender").length() > 0) {
             String gender = person.get("gender")
-            if(Gender.getByDataModelValue(gender, "v6")){
-               Gender genderEnum = Gender.getByDataModelValue(gender, "v6")
+            if (Gender.getByDataModelValue(gender, "v6")) {
+                Gender genderEnum = Gender.getByDataModelValue(gender, "v6")
                 requestData.put("sex", genderEnum.bannerValue)
-            }else{
+            } else {
                 // throw an exception
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.gender", null))
             }
-        }else  if (person.containsKey("gender") && person.get("gender") instanceof String && person.get("gender").length() == 0) {
+        } else if (person.containsKey("gender") && person.get("gender") instanceof String && person.get("gender").length() == 0) {
             requestData.put("sex", null)
         }
 
@@ -978,7 +977,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             requestData.put("updateSSN", updateSSN)
         }
 
-        if(person.containsKey("identityDocuments") && person.get("identityDocuments") instanceof List){
+        if (person.containsKey("identityDocuments") && person.get("identityDocuments") instanceof List) {
             requestData.put("identityDocuments", extractIdentityDocumentsFromRequest(person.get("identityDocuments")))
         }
         return requestData
@@ -989,7 +988,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         CitizenType citizenType
         Map citizenshipDetail = citizenshipTypeMap.get("detail")
         String citizenshipCategory = citizenshipTypeMap.get("category")
-        if(citizenshipDetail && citizenshipDetail instanceof Map){
+        if (citizenshipDetail && citizenshipDetail instanceof Map) {
             CitizenType
         }
         if (citizenshipDetail instanceof Map && citizenshipDetail.get("id") instanceof String && citizenshipCategory?.length() > 0) {
@@ -999,12 +998,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             } else {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("citizenshipstatus.not.found", null))
             }
-        }else if(citizenshipCategory instanceof String && citizenshipCategory?.length() > 0){
+        } else if (citizenshipCategory instanceof String && citizenshipCategory?.length() > 0) {
             boolean citizenIndicator
-            if(citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_CITIZEN)) {
+            if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_CITIZEN)) {
                 citizenIndicator = true
             }
-            if(citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
+            if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
                 citizenIndicator = false
             }
             return citizenTypeService.fetchByCitizenIndicator(citizenIndicator)
@@ -1024,11 +1023,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Map languageCodeMap = languageCodesInRequest?.get(0)
         def crossReferenceRule
         def crossReferenceRules = crossReferenceRuleService.fetchAllByISOLanguageCode(languageCodeMap.get("code"))
-        if(crossReferenceRules && crossReferenceRules?.size() > 0){
-           crossReferenceRule = crossReferenceRules?.get(0)
-        if (crossReferenceRule?.bannerValue) {
-            language = Language.findByCode(crossReferenceRules.bannerValue)
-        }
+        if (crossReferenceRules && crossReferenceRules?.size() > 0) {
+            crossReferenceRule = crossReferenceRules?.get(0)
+            if (crossReferenceRule?.bannerValue) {
+                language = Language.findByCode(crossReferenceRules.bannerValue)
+            }
         } else {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
         }
@@ -1065,10 +1064,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 countryCode = isoCodeService.getISO2CountryCode(countryCode)
             }
         }
-        if (countryCode){
+        if (countryCode) {
             nation = Nation.findByScodIso(countryCode)
         }
-        if (nation){
+        if (nation) {
             return nation?.code
         } else {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.not.found", null))
@@ -1095,14 +1094,24 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                                 //throw an exception
                                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailMapping.not.found", null))
                             }
-                        }else{
+                        } else {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.type", null))
                         }
                     } else {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("emailType.required", null))
                     }
                     if (requestEmail.containsKey('address') && requestEmail.get('address') instanceof String) {
-                        personEmailMap.put("emailAddress", requestEmail.get('address'))
+                        if (requestEmail.containsKey('address') && requestEmail.get('address') instanceof String && requestEmail.get('address').length() > 0) {
+                            String emailAddress = requestEmail.get('address')
+                            String pattern = '^[a-zA-Z0-9.!#$%&' + "/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*" + '$'
+
+                            if (!emailAddress.matches(pattern)) {
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("email.address.invalid", null))
+                            }
+                            personEmailMap.put("emailAddress", emailAddress)
+                        } else {
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("email.address.required", null))
+                        }
                     }
                     if (requestEmail.containsKey('preference') && requestEmail.get('preference') instanceof String) {
                         if (preference != 'primary' && requestEmail.get('preference') == 'primary' && requestEmail.get('preference').length() > 0) {
@@ -1113,10 +1122,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         }
                     }
                 }
-                def duplicateEmailInRequest = personEmailMapList.find { it.emailAddress == personEmailMap.emailAddress && it.bannerEmailType == personEmailMap.bannerEmailType}
-                if(duplicateEmailInRequest){
+                def duplicateEmailInRequest = personEmailMapList.find {
+                    it.emailAddress == personEmailMap.emailAddress && it.bannerEmailType == personEmailMap.bannerEmailType
+                }
+                if (duplicateEmailInRequest) {
                     throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("duplicate.email.request", null))
-                }else{
+                } else {
                     personEmailMapList << personEmailMap
                 }
             }
@@ -1129,7 +1140,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
         MaritalStatus maritalStatus
         if (maritalStatusMap.containsKey("maritalCategory") && maritalStatusMap.get("maritalCategory") instanceof String && maritalStatusMap.get("maritalCategory")?.length() > 0) {
-            if(!MaritalStatusCategory.getByString(maritalStatusMap.get("maritalCategory"), "v4")){
+            if (!MaritalStatusCategory.getByString(maritalStatusMap.get("maritalCategory"), "v4")) {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.not.found", null))
             }
             def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritalStatusMap.get("maritalCategory") }
@@ -1148,7 +1159,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         Ethnicity ethnicity
         if (ethnicityMap.get("ethnicGroup") instanceof Map) {
             ethnicity = ethnicityCompositeService.fetchByGuid(ethnicityMap.get("ethnicGroup").get("id"))
-            if(!ethnicity){
+            if (!ethnicity) {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("ethnicity.not.found.message", []))
             }
         }
@@ -1263,20 +1274,20 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
         }
 
-        if(nameObj.containsKey("middleName")){
-            if ( nameObj.get("middleName") instanceof String && nameObj.get("middleName")?.trim().length() > 0) {
+        if (nameObj.containsKey("middleName")) {
+            if (nameObj.get("middleName") instanceof String && nameObj.get("middleName")?.trim().length() > 0) {
                 requestData.put('middleName', nameObj.get("middleName").trim())
             }
-            if ( nameObj.get("middleName") instanceof String &&  nameObj.get("middleName")?.trim().length() == 0) {
+            if (nameObj.get("middleName") instanceof String && nameObj.get("middleName")?.trim().length() == 0) {
                 requestData.put('middleName', null)
             }
         }
 
-        if (nameObj.containsKey("surnamePrefix")){
-            if ( nameObj.get("surnamePrefix") instanceof String && nameObj.get("surnamePrefix")?.trim().length() > 0) {
+        if (nameObj.containsKey("surnamePrefix")) {
+            if (nameObj.get("surnamePrefix") instanceof String && nameObj.get("surnamePrefix")?.trim().length() > 0) {
                 requestData.put('surnamePrefix', nameObj?.surnamePrefix?.trim())
             }
-            if ( nameObj.get("surnamePrefix") instanceof String && nameObj.get("surnamePrefix")?.trim().length() == 0) {
+            if (nameObj.get("surnamePrefix") instanceof String && nameObj.get("surnamePrefix")?.trim().length() == 0) {
                 requestData.put('surnamePrefix', null)
             }
 
@@ -1302,17 +1313,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (requestAddress instanceof Map) {
                     if (requestAddress.containsKey('type') && requestAddress.get('type') instanceof Map) {
                         Map type = requestAddress.get('type')
-                        if (type.containsKey('addressType') && type.get('addressType') instanceof String && type.get('addressType').length() > 0 ) {
-                            if(!HedmAddressType.getByString(type.get("addressType"), "v6")){
+                        if (type.containsKey('addressType') && type.get('addressType') instanceof String && type.get('addressType').length() > 0) {
+                            if (!HedmAddressType.getByString(type.get("addressType"), "v6")) {
                                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.inValid", []))
                             }
                             def mapEntry = bannerAddressTypeToHedmV6AddressTypeMap.find { key, value -> value == type.get('addressType') }
                             if (mapEntry) {
                                 personAddressMap.bannerAddressType = mapEntry.key
-                            }else{
+                            } else {
                                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.not.found", []))
                             }
-                        }else{
+                        } else {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.required", []))
                         }
                     } else {
@@ -1326,7 +1337,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         if (fromDateStr.length() > 0) {
                             fromDate = DateConvertHelperService.convertUTCStringToServerDate(fromDateStr)
                         }
-                    }else{
+                    } else {
                         //this field will be used in update case
                         personAddressMap.fromDateUpdate = 'false'
                     }
@@ -1342,7 +1353,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         String toDateStr = requestAddress.toDate
                         if (toDateStr.length() > 0) {
                             personAddressMap.toDate = DateConvertHelperService.convertUTCStringToServerDate(toDateStr)
-                        }else{
+                        } else {
                             personAddressMap.toDate = toDateStr
                         }
                     }
@@ -1414,12 +1425,12 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 if (countryCode) {
                     if (integrationConfigurationService.isInstitutionUsingISO2CountryCodes()) {
                         countryCode = isoCodeService.getISO2CountryCode(countryCode)
-                        if(!countryCode){
+                        if (!countryCode) {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.invalid.message", []))
                         }
                     }
                     personAddressMap.nationISOCode = countryCode
-                }else{
+                } else {
                     //throw an exception
                     throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.requried", []))
                 }
@@ -1430,7 +1441,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     if (country.get("locality") && country.get("locality").length() > 0) {
                         locality = country.get("locality")
                     }
-                }else{
+                } else {
                     //Restiction city update filed
                     personAddressMap.cityUpdate = 'false'
                 }
@@ -1444,14 +1455,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     //State Code
                     if (region.containsKey('code') && region.get("code") instanceof String) {
                         String regionCode = region.get("code")
-                        if(regionCode && regionCode.length() > 0){
+                        if (regionCode && regionCode.length() > 0) {
                             String stateCode = crossReferenceRuleService.getStateCodeByRegionCode(regionCode)
                             if (!stateCode) {
                                 // throw an exception
                                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("region.not.found", []))
                             }
                             personAddressMap.stateCode = stateCode
-                        }else{
+                        } else {
                             personAddressMap.stateCode = regionCode
                         }
 
@@ -1462,7 +1473,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
                 //zip code
                 String postalCode
-                if (country.containsKey('postalCode') && country.get("postalCode") instanceof String ) {
+                if (country.containsKey('postalCode') && country.get("postalCode") instanceof String) {
                     postalCode = country.get("postalCode")
                 } else {
                     // Restrict postal update field
@@ -1470,12 +1481,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
 
                 if (personAddressMap.stateCode || personAddressMap.stateDescription) {
-                    if(!postalCode){
+                    if (!postalCode) {
                         postalCode = getDefalutZipCode()
                     }
                 }
                 personAddressMap.zip = postalCode
-
 
                 //county
                 if (country.containsKey('subRegion') && country.get('subRegion') instanceof Map) {
@@ -1485,14 +1495,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     String subRegionTitle
                     if (subRegion.containsKey('code') && subRegion.get('code') instanceof String) {
                         subRegionCode = subRegion.get('code')
-                        if(subRegionCode && subRegionCode.length() > 0) {
+                        if (subRegionCode && subRegionCode.length() > 0) {
                             //get the banner value of sub region code
                             String countyCode = crossReferenceRuleService.getCountyCodeBySubRegionCode(subRegionCode)
                             if (countyCode) {
                                 county = County.findByCode(countyCode)
                             }
                         }
-                    }else{
+                    } else {
                         personAddressMap.put("countyUpdate", false)
                     }
 
@@ -1501,13 +1511,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         if (!county && subRegionTitle && subRegionTitle.length() > 0) {
                             county = County.findByDescription(subRegionTitle)
                         }
-                    }else{
+                    } else {
                         personAddressMap.put("countyUpdate", false)
                     }
 
                     if (county) {
                         personAddressMap.county = county
-                    }else{
+                    } else {
                         personAddressMap.county = null
                         //set to new banner column code
                         personAddressMap.countyISOCode = subRegionCode
@@ -1521,9 +1531,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     if (country.containsKey('deliveryPoint') && country.get('deliveryPoint') instanceof String) {
                         // set deliveryPoint
                         String deliveryPoint = country.get('deliveryPoint')
-                        if(deliveryPoint && deliveryPoint.length() > 0) {
+                        if (deliveryPoint && deliveryPoint.length() > 0) {
                             personAddressMap.deliveryPoint = Integer.valueOf(deliveryPoint)
-                        }else{
+                        } else {
                             personAddressMap.deliveryPoint = null
                         }
                     }
@@ -1534,9 +1544,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                     if (country.containsKey('correctionDigit') && country.get('correctionDigit') instanceof String) {
                         //set correctionDigit
                         String correctionDigit = country.get('correctionDigit')
-                        if(correctionDigit && correctionDigit.length() > 0) {
+                        if (correctionDigit && correctionDigit.length() > 0) {
                             personAddressMap.correctionDigit = Integer.valueOf(correctionDigit)
-                        }else{
+                        } else {
                             personAddressMap.correctionDigit = null
                         }
                     }
@@ -1607,7 +1617,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                                 String countryCode = country.get("code")
                                 if (countryCode && integrationConfigurationService.isInstitutionUsingISO2CountryCodes()) {
                                     countryCode = isoCodeService.getISO2CountryCode(countryCode)
-                                    if(!countryCode){
+                                    if (!countryCode) {
                                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("country.code.invalid.message", []))
                                     }
                                 }
@@ -1619,7 +1629,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                             identityDocumentMap.nationIssue = countryCode
                         }
                         identityDocumentMapList.add(identityDocumentMap)
-                    }else {
+                    } else {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("identityDocument.type.category.invalid", []))
                     }
                 }
