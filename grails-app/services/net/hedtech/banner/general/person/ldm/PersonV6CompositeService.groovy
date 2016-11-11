@@ -3,8 +3,10 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
+import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ThirdPartyAccessService
@@ -980,6 +982,11 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         if (person.containsKey("identityDocuments") && person.get("identityDocuments") instanceof List) {
             requestData.put("identityDocuments", extractIdentityDocumentsFromRequest(person.get("identityDocuments")))
         }
+
+        if(person.containsKey("phones") && person.get("phones") instanceof List){
+            requestData.put("phones", extractPhonesFromRequest(person.get("phones")))
+        }
+
         return requestData
     }
 
@@ -1311,7 +1318,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("addressType.duplicate", []))
             }
 
-            Map bannerAddressTypeToHedmV6AddressTypeMap = addressTypeCompositeService.getBannerAddressTypeToHedmV6AddressTypeMap()
+            Map bannerAddressTypeToHedmV6AddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
 
             addressesInRequest.each { requestAddress ->
                 Map personAddressMap = [:]
@@ -1649,4 +1656,137 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
     }
 
+    private def extractPhonesFromRequest(final List phoneInRequest) {
+        List personPhoneMapList = []
+
+        if (phoneInRequest) {
+            List phoneTypes = phoneInRequest?.type?.phoneType
+
+            if (phoneTypes && phoneTypes.size() != (phoneTypes as Set).size()) {
+                //throw an exception
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.duplicate", []))
+            }
+
+            List preferences = phoneInRequest?.preference
+            if(preferences && preferences.size() != (preferences as Set).size()){
+                //throw an exception
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("preferences.duplicate", []))
+            }
+
+            Map bannerPhoneTypeToHedmV6PhoneTypeMap = getBannerPhoneTypeToHedmPhoneTypeMap()
+
+            phoneInRequest.each { requestPhone ->
+                Map personPhoneMap = [:]
+                if (requestPhone instanceof Map) {
+                    if (requestPhone.containsKey('type') && requestPhone.get('type') instanceof Map) {
+                        Map type = requestPhone.get('type')
+                        if (type.containsKey('phoneType') && type.get('phoneType') instanceof String && type.get('phoneType').length() > 0) {
+                            if (!HedmPhoneType.getByString(type.get("phoneType"), "v6")) {
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.inValid", []))
+                            }
+                            def mapEntry = bannerPhoneTypeToHedmV6PhoneTypeMap.find { key, value -> value == type.get('phoneType') }
+                            if (mapEntry) {
+                                personPhoneMap.bannerPhoneType = mapEntry.key
+                            } else {
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.not.found", []))
+                            }
+                        } else {
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.required", []))
+                        }
+                    } else {
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("type.required", []))
+                    }
+
+                    if (requestPhone.containsKey('number') && requestPhone.get('number') instanceof String && requestPhone.get('number').length() > 0) {
+                        personPhoneMap.phoneNumber = requestPhone.get('number')
+                    } else {
+                        // throw an exception
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("number.required", []))
+                    }
+
+                    if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode').length() > 0){
+                      String  countryCallingCode = requestPhone.get('countryCallingCode')
+                      String  pattern = "^\\+?[1-9][0-9]{0,3}"+'$'
+                        if (!countryCallingCode.matches(pattern)){
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.countryCallingCode.format", []))
+                        }
+                        personPhoneMap.countryPhone = countryCallingCode
+
+                    }else if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode').length() == 0){
+                        personPhoneMap.countryPhone = null
+                    }
+
+                    if(requestPhone.containsKey('extension') && requestPhone.get('extension') instanceof String && requestPhone.get('extension').length() > 0){
+                        personPhoneMap.phoneExtension = requestPhone.get('extension')
+                    }else if(requestPhone.containsKey('extension') && requestPhone.get('extension') instanceof String && requestPhone.get('extension').length() == 0){
+                        personPhoneMap.phoneExtension = null
+                    }
+
+                    if(requestPhone.containsKey('preference') && requestPhone.get('preference') instanceof String && requestPhone.get('preference').length() > 0){
+                        String preference = requestPhone.get('preference')
+                        if('primary'.equals(preference)){
+                            personPhoneMap.preference = 'Y'
+                        }
+                    }else if(requestPhone.containsKey('preference') && requestPhone.get('preference') instanceof String && requestPhone.get('preference').length() == 0){
+                        personPhoneMap.preference = null
+                    }
+                }
+
+                personPhoneMapList.add(parseAndBuildPersonTelephoneMap(personPhoneMap))
+            }
+        }
+
+        return personPhoneMapList
+    }
+
+
+
+    protected Map parseAndBuildPersonTelephoneMap(final Map requestPhone) {
+        String countryRegionCode
+        if(requestPhone.containsKey("countryPhone") && requestPhone.get("countryPhone").length() > 0){
+          String countryPhone = requestPhone.get("countryPhone")
+            if(countryPhone.getAt(0) == '+'){
+                countryPhone = new StringBuilder(countryPhone).deleteCharAt(0).toString()
+            }
+            countryRegionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(Integer.valueOf(countryPhone))
+        }else{
+            countryRegionCode = getDefault2CharISOCountryCode()
+        }
+        def parts = PhoneNumberUtility.parsePhoneNumber(requestPhone.phoneNumber, countryRegionCode)
+        if (parts.size() == 0) {
+            // Parsing is not succesful so we go with split
+            parts = splitPhoneNumber(requestPhone.phoneNumber)
+        }
+        def personTelephoneMap = [:]
+
+        TelephoneType telephoneType = TelephoneType.findByCode(requestPhone.bannerPhoneType)
+        if(!telephoneType){
+            throw new ApplicationException(GeneralValidationCommonConstants.PHONE_ENTITY_TYPE, new NotFoundException())
+        }
+
+        personTelephoneMap.put("countryPhone", requestPhone.get("countryPhone"))
+        personTelephoneMap.put("phoneArea", parts["phoneArea"])
+        personTelephoneMap.put("phoneNumber", parts["phoneNumber"])
+        personTelephoneMap.put("phoneExtension", requestPhone.phoneExtension)
+        personTelephoneMap.put("primaryIndicator", requestPhone.preference)
+        personTelephoneMap.put("telephoneType", telephoneType)
+
+        return personTelephoneMap
+    }
+
+    protected def splitPhoneNumber(String requestPhoneNumber) {
+        def parts = [:]
+        if (requestPhoneNumber.length() <= 12) {
+            parts.put('phoneNumber', requestPhoneNumber)
+        } else {
+            parts.put('phoneArea', requestPhoneNumber.substring(0, 6))
+            String number = requestPhoneNumber.substring(6, requestPhoneNumber.length())
+            if (number.length() > 12) {
+                number = number.substring(0, 12)
+            }
+            parts.put('phoneNumber', number)
+        }
+
+        return parts
+    }
 }

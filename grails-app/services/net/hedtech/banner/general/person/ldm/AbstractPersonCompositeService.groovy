@@ -28,7 +28,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
     static final String ldmName = 'persons'
 
     private static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
-    static final String ZIP_DEFAULT = "PERSON.ADDRESSES.POSTAL.CODE"
+    private static final String ZIP_DEFAULT = "PERSON.ADDRESSES.POSTAL.CODE"
+    private static final String PERSON_PHONES_COUNTRY_DEFAULT = "PERSON.PHONES.COUNTRY.DEFAULT"
+    private static final String PROCESS_CODE = "HEDM"
 
 
     private static final ThreadLocal<Map> threadLocal =
@@ -338,12 +340,19 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
         //person Address
         List<PersonAddress> personAddresses = []
-        Map addressTypeToHedmAddressTypeMap = [:]
         if (requestData.containsKey("addresses") && requestData.get("addresses") instanceof List && requestData.get("addresses").size() > 0) {
             List addresses = requestData.get("addresses")
             personAddresses = createOrUpdateAddress(addresses, newPersonIdentificationName.pidm)
-            addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
         }
+
+        //person Phones
+        List<PersonTelephone> personTelephones = []
+        if (requestData.containsKey("phones") && requestData.get("phones") instanceof List && requestData.get("phones").size() > 0) {
+            List phones = requestData.get("phones")
+            personTelephones = createPhones(phones, newPersonIdentificationName.pidm)
+        }
+
+
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
 
@@ -352,13 +361,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
         dataMapForPerson.put("personBase", newPersonBase)
         dataMapForPerson.put("personGuid", personGuid)
         dataMapForPerson.put("personAddresses", personAddresses)
-        dataMapForPerson.put("addressTypeToHedmAddressTypeMap", addressTypeToHedmAddressTypeMap)
         dataMapForPerson.put("additionalIds", additionalIds)
         dataMapForPerson.put("personRaces", personRaces)
         dataMapForPerson.put("personEmails", personEmails)
         dataMapForPerson.put("visaInternationalInformation", visaInternationalInformation)
         dataMapForPerson.put("personInterests", personInterests)
-
+        dataMapForPerson.put("personPhones", personTelephones)
         return createPersonDataMapForSinglePerson(dataMapForPerson)
     }
 
@@ -502,8 +510,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
 
-        Map addressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
-        personAddresses = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([pidm], addressTypeToHedmAddressTypeMap.keySet())
+        personAddresses = personAddressService.fetchAllByActiveStatusPidmsAndAddressTypes([pidm], getBannerAddressTypeToHedmAddressTypeMap().keySet())
 
         //person birthCountry
         VisaInternationalInformation visaInternationalInformation
@@ -512,6 +519,17 @@ abstract class AbstractPersonCompositeService extends LdmService {
         } else {
             visaInternationalInformation = visaInternationalInformationService.fetchAllByPidmInList([newPersonIdentificationName.pidm])[0]
         }
+
+        //person Phones
+        List<PersonTelephone> personTelephones = []
+        if (requestData.containsKey("phones") && requestData.get("phones") instanceof List) {
+            List phones = requestData.get("phones")
+            phones = getActivePhones(newPersonIdentificationName.pidm, phones)
+            if(phones){
+                createPhones(phones, newPersonIdentificationName.pidm)
+            }
+        }
+        personTelephones = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList([pidm], getBannerPhoneTypeToHedmPhoneTypeMap().keySet())
 
         Map pidmToGuidMap = [:]
         pidmToGuidMap.put(newPersonIdentificationName.pidm, personGuid)
@@ -522,12 +540,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
         dataMapForPerson.put("personBase", newPersonBase)
         dataMapForPerson.put("personGuid", personGuid)
         dataMapForPerson.put("personAddresses", personAddresses)
-        dataMapForPerson.put("addressTypeToHedmAddressTypeMap", addressTypeToHedmAddressTypeMap)
         dataMapForPerson.put("additionalIds", additionalIds)
         dataMapForPerson.put("personRaces", personRaces)
         dataMapForPerson.put("personEmails", personEmails)
         dataMapForPerson.put("visaInternationalInformation", visaInternationalInformation)
         dataMapForPerson.put("personInterests", personInterests)
+        dataMapForPerson.put("personPhones", personTelephones)
 
         return createPersonDataMapForSinglePerson(dataMapForPerson)
 
@@ -1192,9 +1210,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
 
         // addresses
-        if (dataMapForPerson.containsKey("personAddresses")) {
+        if (dataMapForPerson.containsKey("personAddresses") && dataMapForPerson.get("personAddresses").size() > 0) {
             def personAddresses = dataMapForPerson.get("personAddresses")
-            Map addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(personAddresses.addressType.code.unique())
+            dataMapForPerson.put("bannerAddressTypeToHedmAddressTypeMap", getBannerAddressTypeToHedmAddressTypeMap())
+            Map addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(dataMapForPerson.bannerAddressTypeToHedmAddressTypeMap?.keySet())
             Map personAddressSurrogateIdToGuidMap = [:]
             List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddresses.id)
             entities?.each {
@@ -1203,11 +1222,19 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
             dataMapForPerson.put("personAddresses", dataMapForPerson.get("personAddresses"))
             dataMapForPerson.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
-            dataMapForPerson.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
             dataMapForPerson.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
 
         }
 
+        // phones
+        if(dataMapForPerson.containsKey("personPhones") && dataMapForPerson.get("personPhones").size() > 0){
+            dataMapForPerson.put("bannerPhoneTypeToHedmPhoneTypeMap", getBannerPhoneTypeToHedmPhoneTypeMap())
+            dataMapForPerson.put("personPhones", dataMapForPerson.get("personPhones"))
+            // Get GUID for each PhoneType
+            Map phoneTypeCodeToGuidMap = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(dataMapForPerson.bannerPhoneTypeToHedmPhoneTypeMap?.keySet())
+            // Put in Map
+            dataMapForPerson.put("phoneTypeCodeToGuidMap", phoneTypeCodeToGuidMap)
+        }
 
         return dataMapForPerson
     }
@@ -1226,6 +1253,78 @@ abstract class AbstractPersonCompositeService extends LdmService {
     protected getPidmsOfPopulationExtract(final Map requestParams) {
         String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
         return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort?.trim(), requestParams.order?.trim(), requestParams.max?.trim()?.toInteger() ?: 0, requestParams.offset?.trim()?.toInteger() ?: 0)
+    }
+
+
+    private def getActivePhones(Integer pidm, List phones) {
+        Map bannerPhoneTypeToHedmPhoneTypeMap = getBannerPhoneTypeToHedmPhoneTypeMap()
+
+        List<PersonTelephone> personTelephones = personTelephoneService.fetchAllActiveByPidmInListAndTelephoneTypeCodeInList([pidm], bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+
+        personTelephones.each { personPhone ->
+
+            def activeRequestPhones = phones.findAll { it ->
+                it.telephoneType?.code == personPhone.telephoneType.code
+            }
+
+            if (activeRequestPhones.size() > 0) {
+                activeRequestPhones.each {
+                    Boolean changeToInactiveStatus = false
+                    switch (it.telephoneType?.code) {
+                        default:
+
+                            if (it.containsKey("phoneArea") && it.phoneArea != personPhone.phoneArea) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (it.containsKey("countryPhone") && it.countryPhone != personPhone.countryPhone) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (it.containsKey("phoneNumber") && it.phoneNumber != personPhone.phoneNumber) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (it.containsKey("phoneExtension") && it.phoneExtension != personPhone.phoneExtension) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+                            if (it.containsKey("primaryIndicator") && it.primaryIndicator != personPhone.primaryIndicator) {
+                                changeToInactiveStatus = true
+                                break;
+                            }
+
+                            break;
+                    }
+                    if (changeToInactiveStatus) {
+                        personPhone.statusIndicator = 'I'
+                        log.debug "Inactivating address:" + personPhone.toString()
+                        personTelephoneService.update(personPhone)
+
+                    } else {
+
+                        // remove from the list, if there is no changes of address
+                        phones.remove(it)
+                    }
+                }
+            } else {
+                personPhone.statusIndicator = 'I'
+                log.debug "Inactivating address:" + personPhone.toString()
+                personTelephoneService.update(personPhone)
+
+            }
+        }
+
+        return phones
+    }
+
+    private def createPhones(List phones, Integer pidm){
+        phones.each{ phoneMap ->
+            phoneMap.put("pidm", pidm)
+        }
+
+       return personTelephoneService.create(phones)
+
     }
 
     protected def createOrUpdateAddress(List domainPropertiesMapList, Integer pidm) {
@@ -1877,6 +1976,22 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
         return listOfMaps
+    }
+
+    protected String getDefault2CharISOCountryCode() {
+        IntegrationConfiguration intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_PHONES_COUNTRY_DEFAULT)
+        if (intConf.value.length() > 2) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_PHONES_COUNTRY_DEFAULT]))
+        }
+        return intConf.value
+    }
+
+    private IntegrationConfiguration getIntegrationConfiguration(processCode, settingName) {
+        IntegrationConfiguration intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(processCode, settingName)
+        if (!intConf) {
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("goriccr.not.found.message", [settingName]))
+        }
+        return intConf
     }
 
     private void injectTotalCountIntoParams(Map requestParams, Map requestProcessingResult) {
