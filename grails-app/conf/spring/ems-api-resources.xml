@@ -1038,7 +1038,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.EnrollmentStatuss.STVESTS</value>
+                <value>EEDM.AcademicPeriodEnrollmentStatuses.STVESTS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1055,7 +1055,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Residencys.STVRESD</value>
+                <value>EEDM.ResidencyTypes.STVRESD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1089,7 +1089,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentStatuss.STVSTST</value>
+                <value>EEDM.StudentStatuses.STVSTST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
