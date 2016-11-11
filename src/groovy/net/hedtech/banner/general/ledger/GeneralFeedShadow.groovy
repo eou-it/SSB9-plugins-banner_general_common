@@ -81,6 +81,9 @@ class GeneralFeedShadow implements Serializable {
     @Column(name = "GURTRNH_USER_ID")
     String userId
 
+    @Column(name = "GURTRNH_SUBMITTED_BY")
+    String submittedBy
+
     @Type(type = "yes_no")
     @Column(name = "GURTRNH_ABAL_OVERRIDE")
     Boolean budgetOverride
@@ -119,8 +122,9 @@ class GeneralFeedShadow implements Serializable {
         currencyCode(nullable: false, maxSize: 4)
         systemTimestamp(nullable: false, maxSize: 14)
         activityDate(nullable: false)
-        userId(nullable: false, maxSize: 30)
-        budgetOverride(nullable: true)
+        userId(nullable: true, maxSize: 30)
+        submittedBy(nullable: true, maxSize: 30)
+        budgetOverride(nullable: true, maxSize: 1)
         dataOrigin(nullable: true)
     }
 
