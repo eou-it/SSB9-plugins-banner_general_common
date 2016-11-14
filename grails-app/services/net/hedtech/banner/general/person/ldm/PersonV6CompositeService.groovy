@@ -1684,33 +1684,33 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         Map type = requestPhone.get('type')
                         if (type.containsKey('phoneType') && type.get('phoneType') instanceof String && type.get('phoneType').length() > 0) {
                             if (!HedmPhoneType.getByString(type.get("phoneType"), "v6")) {
-                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.inValid", []))
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.phoneType.inValid", []))
                             }
                             def mapEntry = bannerPhoneTypeToHedmV6PhoneTypeMap.find { key, value -> value == type.get('phoneType') }
                             if (mapEntry) {
                                 personPhoneMap.bannerPhoneType = mapEntry.key
                             } else {
-                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.not.found", []))
+                                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.phoneType.not.found", []))
                             }
                         } else {
-                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.required", []))
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.phoneType.required", []))
                         }
                     } else {
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("type.required", []))
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.type.required", []))
                     }
 
                     if (requestPhone.containsKey('number') && requestPhone.get('number') instanceof String && requestPhone.get('number').length() > 0) {
                         personPhoneMap.phoneNumber = requestPhone.get('number')
                     } else {
                         // throw an exception
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("number.required", []))
+                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.number.required", []))
                     }
 
                     if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode').length() > 0){
                       String  countryCallingCode = requestPhone.get('countryCallingCode')
                       String  pattern = "^\\+?[1-9][0-9]{0,3}"+'$'
                         if (!countryCallingCode.matches(pattern)){
-                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.countryCallingCode.format", []))
+                            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.invalid.countryCallingCode.format", []))
                         }
                         personPhoneMap.countryPhone = countryCallingCode
 
