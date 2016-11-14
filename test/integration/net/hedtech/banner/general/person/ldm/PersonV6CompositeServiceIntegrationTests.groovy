@@ -47,6 +47,8 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     String citizenshipStatusGlobalUniqueIdentifier1
     String citizenshipStatusGlobalUniqueIdentifier2
     String citizenshipStatusCategory1 = 'citizen'
+    String emailAddress1 = 'john@gmail.com'
+    String emailAddress2 = 'john1@gmail.com'
     String citizenshipStatusCategory2 = 'nonCitizen'
     String countryOfBirth1 = 'GBR'
     String countryOfBirth2 = 'USA'
@@ -1138,6 +1140,33 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_success_person_update.guid
         assertEquals  citizenshipStatusCategory2 ,o_success_person_update.citizenshipStatus.category
         //assertEquals  countryOfBirth2 ,o_success_person_update.countryOfBirth
+    }
+
+
+    @Test
+    void testUpdatePersonEmails() {
+        Map content = newPersonWithAlternateNameHavingBirthNameType()
+        content.emails = []
+        content.emails << [address:emailAddress1,preference:"primary",type:[emailType:"personal"]]
+        def dataMap = personV6CompositeService.create(content)
+        def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
+
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.guid
+        assertEquals  emailAddress1 ,o_success_person_create.emails.address.get(0)
+
+
+        Map updateContent = newPersonWithCredentials()
+        updateContent.id = o_success_person_create.guid
+        updateContent.emails = []
+        updateContent.emails << [address:emailAddress2,preference:"primary",type:[emailType:"personal"]]
+        dataMap = personV6CompositeService.update(updateContent)
+        def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
+
+        assertNotNull o_success_person_update
+        assertNotNull o_success_person_update.guid
+        assertEquals  emailAddress2 ,o_success_person_update.emails.address.get(0)
     }
 
 

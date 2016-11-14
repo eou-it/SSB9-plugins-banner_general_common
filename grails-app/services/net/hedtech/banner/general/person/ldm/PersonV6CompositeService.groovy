@@ -1010,8 +1010,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_CITIZEN)) {
                 citizenIndicator = true
             }
-            if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
+            else if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
                 citizenIndicator = false
+            }else {
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("citizenshipstatus.not.found", null))
             }
             return citizenTypeService.fetchByCitizenIndicator(citizenIndicator)
         }
