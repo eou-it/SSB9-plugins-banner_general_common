@@ -1666,13 +1666,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             if (phoneTypes && phoneTypes.size() != (phoneTypes as Set).size()) {
                 //throw an exception
-                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phoneType.duplicate", []))
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.phoneType.duplicate", []))
             }
 
             List preferences = phoneInRequest?.preference
             if(preferences && preferences.size() != (preferences as Set).size()){
                 //throw an exception
-                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("preferences.duplicate", []))
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.preferences.duplicate", []))
             }
 
             Map bannerPhoneTypeToHedmV6PhoneTypeMap = getBannerPhoneTypeToHedmPhoneTypeMap()
