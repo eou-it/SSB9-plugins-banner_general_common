@@ -1706,7 +1706,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.number.required", []))
                     }
 
-                    if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode').length() > 0){
+                    if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode')?.length() > 0){
                       String  countryCallingCode = requestPhone.get('countryCallingCode')
                       String  pattern = "^\\+?[1-9][0-9]{0,3}"+'$'
                         if (!countryCallingCode.matches(pattern)){
@@ -1714,7 +1714,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         }
                         personPhoneMap.countryPhone = countryCallingCode
 
-                    }else if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode').length() == 0){
+                    }else if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode')?.length() == 0){
                         personPhoneMap.countryPhone = null
                     }
 
@@ -1745,7 +1745,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     protected Map parseAndBuildPersonTelephoneMap(final Map requestPhone) {
         String countryRegionCode
-        if(requestPhone.containsKey("countryPhone") && requestPhone.get("countryPhone").length() > 0){
+        if(requestPhone.containsKey("countryPhone") && requestPhone.get("countryPhone")?.length() > 0){
           String countryPhone = requestPhone.get("countryPhone")
             if(countryPhone.getAt(0) == '+'){
                 countryPhone = new StringBuilder(countryPhone).deleteCharAt(0).toString()
