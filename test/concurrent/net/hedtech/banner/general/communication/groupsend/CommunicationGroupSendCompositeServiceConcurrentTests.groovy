@@ -271,11 +271,11 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         CommunicationGroupSend groupSendC = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning3" ))
         assertNotNull(groupSendC)
 
-        List runningList = communicationGroupSendService.findRunning()
+        List runningList = CommunicationGroupSend.findRunning()
         assertEquals( 3, runningList.size() )
 
         def allDone = {
-            return communicationGroupSendService.findRunning().size() == 0
+            return CommunicationGroupSend.findRunning().size() == 0
         }
         assertTrueWithRetry( allDone, null, 10, 10 )
     }
@@ -290,7 +290,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
         assertTrue( groupSend.currentExecutionState.isTerminal() )
 
-        List runningList = communicationGroupSendService.findRunning()
+        List runningList = CommunicationGroupSend.findRunning()
         assertEquals( 0, runningList.size() )
 
         try{
@@ -312,7 +312,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         groupSend = completeGroupSend(groupSend.id)
         assertTrue( groupSend.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
 
-        List runningList = communicationGroupSendService.findRunning()
+        List runningList = CommunicationGroupSend.findRunning()
         assertEquals(0, runningList.size())
 
         try {

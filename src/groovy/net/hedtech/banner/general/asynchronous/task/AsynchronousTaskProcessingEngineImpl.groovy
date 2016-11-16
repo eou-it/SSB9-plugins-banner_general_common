@@ -48,6 +48,8 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      */
     private boolean continuousPolling = false;
 
+    private boolean enabled = false
+
     /**
      * Maximum queue size.
      */
@@ -111,7 +113,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Initializes the job processing engine.  This method starts the polling process.
      */
     public void init() {
-        log.info("Initialized with backgroundProcessingEnabled = ${Holders.config?.communication?.backgroundProcessingEnabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
+        log.info("Initialized with enabled = ${enabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
     }
 
     /**
@@ -253,6 +255,10 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
     public void setContinuousPolling(boolean continuousPolling) {
         this.continuousPolling = continuousPolling
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled
     }
 
 

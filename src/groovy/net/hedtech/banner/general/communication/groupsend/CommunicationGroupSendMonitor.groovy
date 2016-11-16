@@ -97,7 +97,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
         // begin setup
         asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
         try {
-            List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
+            List<CommunicationGroupSend> groupSendList = CommunicationGroupSend.findRunning()
             if (log.isDebugEnabled()) log.debug("Running group send count = " + groupSendList.size() + ".");
 
             for (CommunicationGroupSend groupSend : groupSendList) {
@@ -112,36 +112,6 @@ class CommunicationGroupSendMonitor implements DisposableBean {
             t.printStackTrace()
             log.error(t)
         }
-
-//            List<CommunicationGroupSend> groupSendList = communicationGroupSendService.findRunning()
-//            if (log.isDebugEnabled()) log.debug( "Group Send Monitor found " + records.size() + " records" );
-
-//                for(CommunicationGroupSendMonitorRecord record:records) {
-//                    if (record.getCurrentState().equals( GroupSendExecutionState.CalculatingSnapshot)) {
-//                        if (log.isDebugEnabled()) log.debug( "Monitor picked up 'calculating snapshot' group send with key = " + record.getGroupSendKey().getKeyValue() + "." );
-//                        checkGroupSendPopulationSnapshotCompleted( record.getGroupSendKey() );
-//                    } else if (record.getCurrentState().equals( GroupSendExecutionState.Processing ) ) {
-//                        if (log.isDebugEnabled()) log.debug( "Monitor picked up 'processing' group send with key = " + record.getGroupSendKey().getKeyValue() + "." );
-//                        checkGroupSendCompleted( record.getGroupSendKey() );
-//                    } else if (record.getCurrentState().isTerminal() && record.getPopulationSnapshotKey() != null) {
-//                        if (log.isDebugEnabled()) {
-//                            log.debug( "Monitor picked up 'terminal' group send with key = " + record.getGroupSendKey().getKeyValue() +
-//                                " and population snapshot key = " + record.getPopulationSnapshotKey().getKeyValue() + "." );
-//                        }
-//                        checkTerminalGroupSendForPruning( record.getGroupSendKey() );
-//                    } else {
-//                        if (log.isDebugEnabled()) log.debug( "Monitor ignored group send with key = " + record.getGroupSendKey().getKeyValue() + "." );
-//                    }
-//                }
-//            } catch (GroupSendLockNoWaitException e) {
-//                if (log.isDebugEnabled()) log.debug( "Captured pessimistic lock exception (GroupSendLockNoWaitException), will try again on next poll cycle.");
-//            } catch (OptimisticLockException e) {
-//                //
-//            } catch (Throwable t) {
-//                t.printStackTrace()
-//                log.error( t )
-//            }
-//        } as Callable )
     }
 
     /**

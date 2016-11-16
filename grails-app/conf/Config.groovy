@@ -122,13 +122,14 @@ ssbOracleUsersProxied = true
 
 communication {
     weblogicDeployment = false
-    backgroundProcessingEnabled = true
 
     communicationGroupSendMonitor {
+        enabled = true
         monitorIntervalInSeconds = 10
     }
 
     communicationGroupSendItemProcessingEngine {
+        enabled = true
         maxThreads = 1
         maxQueueSize = 5000
         continuousPolling = true
@@ -137,6 +138,7 @@ communication {
     }
 
     communicationJobProcessingEngine {
+        enabled = true
         maxThreads = 2
         maxQueueSize = 5000
         continuousPolling = true

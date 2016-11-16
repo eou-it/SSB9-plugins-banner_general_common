@@ -34,6 +34,7 @@ beans = {
         maxThreads = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.maxThreads ?: 1
         maxQueueSize = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.maxQueueSize ?: 5000
         continuousPolling = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.continuousPolling ?: true
+        enabled = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.enabled ?: true
         pollingInterval = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.pollingInterval ?: 2000
         deleteSuccessfullyCompleted = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.deleteSuccessfullyCompleted ?: false
     }
@@ -46,6 +47,7 @@ beans = {
         maxThreads = Holders.config.communication?.communicationJobProcessingEngine?.maxThreads ?: 1
         maxQueueSize = Holders.config.communication?.communicationJobProcessingEngine?.maxQueueSize ?: 5000
         continuousPolling = Holders.config.communication?.communicationJobProcessingEngine?.continuousPolling ?: true
+        enabled = Holders.config.communication?.communicationJobProcessingEngine?.enabled ?: true
         pollingInterval = Holders.config.communication?.communicationJobProcessingEngine?.pollingInterval ?: 2000
         deleteSuccessfullyCompleted = Holders.config.communication?.communicationJobProcessingEngine?.deleteSuccessfullyCompleted ?: false
     }
