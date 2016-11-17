@@ -51,6 +51,8 @@ class InstructionalPlatformCompositeService {
 
     @Transactional(readOnly = true)
     InstructionalPlatform get(String guid) {
+        LdmService.getAcceptVersion(VERSIONS)
+
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
 
         if (!globalUniqueIdentifier) {

@@ -102,6 +102,8 @@ class BuildingCompositeService extends  LdmService{
      * @return BuildingDetail
      */
     BuildingDetail get( String guid ) {
+        getAcceptVersion(VERSIONS)
+
         GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByLdmNameAndGuid( LDM_NAME, guid )
         if (!globalUniqueIdentifier) {
             throw new ApplicationException("building", new NotFoundException())
