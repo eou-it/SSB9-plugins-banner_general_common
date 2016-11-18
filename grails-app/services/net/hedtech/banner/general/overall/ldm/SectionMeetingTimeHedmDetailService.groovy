@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm
 
@@ -53,7 +53,7 @@ class SectionMeetingTimeHedmDetailService extends ServiceBase {
         throw new ApplicationException(SectionMeetingTimeHedmDetail.class, "unsupported.operation")
     }
 
-    public List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(List guids){
+    public List<SectionMeetingTimeHedmDetail> fetchAllByGuidInList(Collection<String> guids){
         List<SectionMeetingTimeHedmDetail> sectionMeetingTimeHedmDetails = []
         sectionMeetingTimeHedmDetails = SectionMeetingTimeHedmDetail.fetchAllByGuidInList(guids)
         return sectionMeetingTimeHedmDetails

@@ -10,16 +10,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>academic-levels</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/academic-levels/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Level.STVLEVL</value>
+                <value>EEDM.Level.STVLEVL</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -27,18 +27,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>academic-periods</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>3</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/academic-periods/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.AcademicPeriods.STVACYR</value>
-                <value>HEDM.AcademicPeriods.SOBTERM</value>
-                <value>HEDM.AcademicPeriods.SOBPTRM</value>
+                <value>EEDM.AcademicPeriods.STVACYR</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -46,32 +44,50 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>buildings</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/buildings/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Building.SLBBLDG</value>
-                <value>HEDM.Building.SLBRDEF</value>
+                <value>EEDM.Building.SLBBLDG</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
-    <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-gradeModes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>courses</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
+            <value>grade-modes</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/courses/</value>
+            <value>/grade-modes/</value>
         </constructor-arg>
         <constructor-arg name="events">
-            <null/>
+            <list>
+                <value>EEDM.GradeMode.STVGMOD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-gradeDefinitions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>grade-definitions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/grade-definitions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.GradeDefinition.SHRGDID</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -79,16 +95,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>grade-schemes</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/grade-schemes/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.GradeMode.STVGMOD</value>
+                <value>EEDM.GradeScheme.SHRGSCH</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -96,16 +112,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>instructional-methods</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/instructional-methods/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.ScheduleType.STVSCHD</value>
+                <value>EEDM.ScheduleType.STVSCHD</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -113,16 +129,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>instructional-platforms</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>3</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/instructional-platforms/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.InstructionalPlatforms.GORINTG</value>
+                <value>EEDM.InstructionalPlatforms.GORINTG</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -130,16 +146,35 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>marital-statuses</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/marital-statuses/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.MaritalStatus.STVMRTL</value>
+                <value>EEDM.MaritalStatus.STVMRTL</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-educationalinstitutionunits" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>educational-institution-units</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/educational-institution-units/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.College.STVCOLL</value>
+                <value>EEDM.Department.STVDEPT</value>
+                <value>EEDM.Division.STVDIVS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -147,16 +182,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>organizations</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/organizations/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.College.STVCOLL</value>
+                <value>EEDM.Organization.SPRIDEN</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -164,22 +199,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>persons</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>3</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/persons/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Person.GOREMAL</value>
-                <value>HEDM.Person.GORPRAC</value>
-                <value>HEDM.Person.SPBPERS</value>
-                <value>HEDM.Person.SPRADDR</value>
-                <value>HEDM.Person.SPRIDEN</value>
-                <value>HEDM.Person.SPRTELE</value>
-                <value>HEDM.Faculty.SIBINST</value>
+                <value>EEDM.Person.SPRIDEN</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -187,16 +216,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>person-filters</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>3</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/person-filters/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.PersonFilters.GLBSLCT</value>
+                <value>EEDM.PersonFilters.GLBSLCT</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -204,16 +233,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>races</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/races/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Race.GORRACE</value>
+                <value>EEDM.Race.GORRACE</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -221,16 +250,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>restriction-types</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/restriction-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.HoldType.STVHLDD</value>
+                <value>EEDM.HoldType.STVHLDD</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -238,31 +267,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>rooms</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/rooms/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Room.SLBRDEF</value>
+                <value>EEDM.Room.SLBRDEF</value>
             </list>
         </constructor-arg>
-    </bean>
-
-    <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>sections</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/sections/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <null/>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -270,16 +284,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>section-registrations</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>3</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/section-registrations/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.SectionRegistration.SFRSTCR</value>
+                <value>EEDM.SectionRegistration.SFRSTCR</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -287,17 +301,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>sites</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/sites/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Campus.STVCAMP</value>
-                <value>HEDM.Campus.SLBBLDG</value>
+                <value>EEDM.Campus.STVCAMP</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -305,50 +318,50 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>subjects</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>1</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/subjects/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Subject.STVSUBJ</value>
+                <value>EEDM.Subject.STVSUBJ</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
-    <bean id="ar-email-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-emailTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>email-types</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
         </constructor-arg>
         <constructor-arg name="path">
             <value>/email-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.EmailType.GTVEMAL</value>
+                <value>EEDM.EmailType.GTVEMAL</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
-    <bean id="ar-location-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-addressTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>location-types</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
+            <value>address-types</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/location-types/</value>
+            <value>/address-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.AddressType.STVATYP</value>
+                <value>EEDM.AddressType.STVATYP</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -356,33 +369,33 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>academic-credentials</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/academic-credentials/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.Degree.STVDEGC</value>
+                <value>EEDM.Degree.STVDEGC</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
-    <bean id="ar-phone-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-phoneTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>phone-types</value>
-        </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
         </constructor-arg>
         <constructor-arg name="path">
             <value>/phone-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.TelephoneType.STVTELE</value>
+                <value>EEDM.TelephoneType.STVTELE</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -390,21 +403,18 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>academic-disciplines</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/academic-disciplines/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.MajorMinorConcentration.STVMAJR.MAJOR</value>
-                <value>HEDM.MajorMinorConcentration.STVMAJR.MINOR</value>
-                <value>HEDM.MajorMinorConcentration.STVMAJR.CONCENTRATION</value>
-                <value>HEDM.MajorMinorConcentration.STVMAJR.UMAJOR</value>
-                <value>HEDM.MajorMinorConcentration.STVMAJR.UMINOR</value>
-                <value>HEDM.MajorMinorConcentration.STVMAJR.UCONCENTRATION</value>
+                <value>EEDM.MajorMinorConcentration.STVMAJR.MAJOR</value>
+                <value>EEDM.MajorMinorConcentration.STVMAJR.MINOR</value>
+                <value>EEDM.MajorMinorConcentration.STVMAJR.CONCENTRATION</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -412,17 +422,86 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>section-crosslists</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>5</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/section-crosslists/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.SectionCrossListEnrollmentInformationBase.SSBXLST</value>
-                <value>HEDM.SectionCrossListSection.SSRXLST</value>
+                <value>EEDM.SectionCrossListEnrollmentInformationBase.SSBXLST</value>
+                <value>EEDM.SectionCrossListSection.SSRXLST</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-religions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>religions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/religions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Religion.STVRELG</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personHolds" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-holds</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-holds/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PersonHold.SPRHOLD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-geographicAreas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>geographic-areas</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/geographic-areas/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.GeoArea.SORGEOR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-geographicAreaTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>geographic-area-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/geographic-area-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.GeoRegion.STVGEOR</value>
+                <value>EEDM.GeoDivision.STVGEOD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -430,16 +509,663 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="resource">
             <value>enrollment-statuses</value>
         </constructor-arg>
-        <constructor-arg name="version">
-            <value>4</value>
-        </constructor-arg>
         <constructor-arg name="path">
             <value>/enrollment-statuses/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>HEDM.EnrollmentStatuses.STVCACT</value>
+                <value>EEDM.EnrollmentStatuses.STVCACT</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personNameTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-name-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-name-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.NameType.GTVNTYP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personHoldTypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-hold-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-hold-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HoldType.STVHLDD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-academicHonors" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-honors</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-honors/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.DepartmentalHonor.STVHOND</value>
+                <value>EEDM.InstitutionalHonor.STVHONR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-interests" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>interests</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/interests/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Interest.STVINTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-educationalinstitutions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>educational-institutions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/educational-institutions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.SourceBackgroundInstitution.STVSBGI</value>
+                <value>EEDM.SourceBackgroundInstBase.SOBSBGI</value>
+                <value>EEDM.InstitutionalDescription.GUBINST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-addresses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>addresses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/addresses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Addresses.SPRADDR</value>
+                <value>EEDM.Addresses.SOBSBGI</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-campus-involvement-roles" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-involvement-roles</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-involvement-roles/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CampusInvolvementsRoles.STVCOMF</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-campus-organization-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-organization-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-organization-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CampusOrganizationsTypes.STVACTP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-campus-organizations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-organizations</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-organizations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentActivity.STVACTC</value>
+                <value>EEDM.CommitteeType.STVCOMT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personguardians" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-guardians</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-guardians/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PersonGuardian.SORFOLK</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personcontacts" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-contacts</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-contacts/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PersonContact.SPREMRG</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-studentacademicprograms" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-academic-programs</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-academic-programs/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentAcademicProgram.SORLCUR</value>
+                <value>EEDM.StudentAcademicProgram.SHRDGMR</value>
+                <value>EEDM.StudentAcademicProgram.SORLFOS</value>
+                <value>EEDM.StudentAcademicProgram.SHRDGDH</value>
+                <value>EEDM.StudentAcademicProgram.SHRDGIH</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-academicprograms" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-programs</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-programs/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AcademicProgram.SMRPRLE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-campus-involvements" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>campus-involvements</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/campus-involvements/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CampusInvolvements.SGRSACT</value>
+                <value>EEDM.CampusInvolvements.SGRSPRT</value>
+                <value>EEDM.CampusInvolvements.SHRCOMM</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-personal-relationship-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>personal-relationship-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/personal-relationship-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PersonalRelationshipTypes.STVRELT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-sec-reg-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>section-registration-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/section-registration-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.SectionRegistrationStatuses.STVRSTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-gradechangereasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>grade-change-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/grade-change-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.GradeChangeReason.STVGCHG</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-citizenshipstatuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>citizenship-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/citizenship-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CitizenshipStatus.STVCITZ</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-visatypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>visa-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/visa-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.VisaType.STVVTYP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>courses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/courses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Courses.SCBCRSE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>sections</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/sections/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Sections.SCBCGID</value>
+                <value>EEDM.Sections.SSRGSID</value>
+                <value>EEDM.Sections.SSBSGID</value>
+                <value>EEDM.Sections.SSBSECT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-educations-hs" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-hs</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SORHSCH</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-educations-pc" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-pc</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SORPCOL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-educations-trit" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-trit</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SHRTRIT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-educations-degr" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-degr</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.Degree</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-external-educations-tram" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-educations-tram</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducations.SHRTRAM</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-academic-standings" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-standings</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-standings/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AcademicStandings.STVASTD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-classifications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-classifications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ClassCodes.STVCLAS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-cohorts" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-cohorts</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-cohorts/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Cohorts.STVCHRT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-academic-period-enrollment-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>academic-period-enrollment-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/academic-period-enrollment-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AcademicPeriodEnrollmentStatuses.STVESTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-residency-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>residency-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/residency-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ResidencyTypes.STVRESD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-tags" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-tags</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-tags/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentAttributes.STVATTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentStatuses.STVSTST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentTypes.STVSTYP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-instructional-events" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>instructional-events</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructional-events/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.InstructionalEvents.SSRMEET</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-person-visas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-visas</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-visas/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PersonVisas.GORVISA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-academic-period-profiles" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-academic-period-profiles</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-academic-period-profiles/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentAcademicPeriodProfiles.SFBETRM</value>
+                <value>EEDM.StudentAcademicPeriodProfiles.SGBSTDN</value>
+                <value>EEDM.StudentAcademicPeriodProfiles.SGRSATT</value>
+                <value>EEDM.StudentAcademicPeriodProfiles.SHRTGPA</value>
+                <value>EEDM.StudentAcademicPeriodProfiles.SORLCUR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
         </constructor-arg>
     </bean>
 
@@ -450,12 +1176,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-acadperiods"/>
                 <ref bean="ar-buildings"/>
                 <ref bean="ar-courses"/>
-                <ref bean="ar-gradeschemes"/>
                 <ref bean="ar-instmethods"/>
                 <ref bean="ar-instplatforms"/>
                 <ref bean="ar-maritalstatuses"/>
-                <ref bean="ar-organizations"/>
-                <ref bean="ar-persons"/>
+                <ref bean="ar-educationalinstitutionunits"/>
                 <ref bean="ar-personfilters"/>
                 <ref bean="ar-races"/>
                 <ref bean="ar-restritypes"/>
@@ -464,13 +1188,57 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
                 <ref bean="ar-subjects"/>
-                <ref bean="ar-email-types"/>
-                <ref bean="ar-location-types"/>
-                <ref bean="ar-phone-types"/>
+                <ref bean="ar-emailTypes"/>
+                <ref bean="ar-addressTypes"/>
+                <ref bean="ar-phoneTypes"/>
                 <ref bean="ar-academic-disciplines"/>
                 <ref bean="ar-section-crosslist"/>
+                <ref bean="ar-religions"/>
+                <ref bean="ar-personHolds"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
+                <ref bean="ar-gradeschemes"/>
+                <ref bean="ar-gradeDefinitions"/>
+                <ref bean="ar-gradeModes"/>
+                <ref bean="ar-geographicAreas"/>
+                <ref bean="ar-geographicAreaTypes"/>
+                <ref bean="ar-personNameTypes"/>
+                <ref bean="ar-personHoldTypes"/>
+                <ref bean="ar-academicHonors"/>
+                <ref bean="ar-interests"/>
+                <ref bean="ar-persons"/>
+                <ref bean="ar-educationalinstitutions"/>
+                <ref bean="ar-organizations"/>
+                <ref bean="ar-addresses"/>
+                <ref bean="ar-campus-involvement-roles"/>
+                <ref bean="ar-campus-organization-types"/>
+                <ref bean="ar-campus-organizations"/>
+                <ref bean="ar-personguardians"/>
+                <ref bean="ar-personcontacts"/>
+                <ref bean="ar-studentacademicprograms"/>
+                <ref bean="ar-academicprograms"/>
+                <ref bean="ar-campus-involvements"/>
+                <ref bean="ar-personal-relationship-types"/>
+                <ref bean="ar-sec-reg-statuses"/>
+                <ref bean="ar-gradechangereasons"/>
+                <ref bean="ar-citizenshipstatuses"/>
+                <ref bean="ar-visatypes"/>
+                <ref bean="ar-external-educations-hs"/>
+                <ref bean="ar-external-educations-pc"/>
+                <ref bean="ar-external-educations-trit"/>
+                <ref bean="ar-external-educations-degr"/>
+                <ref bean="ar-external-educations-tram"/>
+                <ref bean="ar-academic-standings"/>
+                <ref bean="ar-student-classifications"/>
+                <ref bean="ar-student-cohorts"/>
+                <ref bean="ar-academic-period-enrollment-statuses"/>
+                <ref bean="ar-residency-types"/>
+                <ref bean="ar-student-tags"/>
+                <ref bean="ar-student-statuses"/>
+                <ref bean="ar-student-types"/>
+                <ref bean="ar-instructional-events"/>
+                <ref bean="ar-person-visas"/>
+                <ref bean="ar-student-academic-period-profiles"/>
             </list>
         </property>
     </bean>
@@ -482,12 +1250,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-acadperiods"/>
                 <ref bean="ar-buildings"/>
                 <ref bean="ar-courses"/>
-                <ref bean="ar-gradeschemes"/>
                 <ref bean="ar-instmethods"/>
                 <ref bean="ar-instplatforms"/>
                 <ref bean="ar-maritalstatuses"/>
-                <ref bean="ar-organizations"/>
-                <ref bean="ar-persons"/>
+                <ref bean="ar-educationalinstitutionunits"/>
                 <ref bean="ar-personfilters"/>
                 <ref bean="ar-races"/>
                 <ref bean="ar-restritypes"/>
@@ -496,13 +1262,57 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-secregistrations"/>
                 <ref bean="ar-sites"/>
                 <ref bean="ar-subjects"/>
-                <ref bean="ar-email-types"/>
-                <ref bean="ar-location-types"/>
-                <ref bean="ar-phone-types"/>
+                <ref bean="ar-emailTypes"/>
+                <ref bean="ar-addressTypes"/>
+                <ref bean="ar-phoneTypes"/>
                 <ref bean="ar-academic-disciplines"/>
                 <ref bean="ar-section-crosslist"/>
+                <ref bean="ar-religions"/>
+                <ref bean="ar-personHolds"/>
                 <ref bean="ar-academic-credentials"/>
                 <ref bean="ar-enrollmentstatus"/>
+                <ref bean="ar-gradeschemes"/>
+                <ref bean="ar-gradeDefinitions"/>
+                <ref bean="ar-gradeModes"/>
+                <ref bean="ar-geographicAreas"/>
+                <ref bean="ar-geographicAreaTypes"/>
+                <ref bean="ar-personNameTypes"/>
+                <ref bean="ar-personHoldTypes"/>
+                <ref bean="ar-academicHonors"/>
+                <ref bean="ar-interests"/>
+                <ref bean="ar-persons"/>
+                <ref bean="ar-educationalinstitutions"/>
+                <ref bean="ar-organizations"/>
+                <ref bean="ar-addresses"/>
+                <ref bean="ar-campus-involvement-roles"/>
+                <ref bean="ar-campus-organization-types"/>
+                <ref bean="ar-campus-organizations"/>
+                <ref bean="ar-personguardians"/>
+                <ref bean="ar-personcontacts"/>
+                <ref bean="ar-studentacademicprograms"/>
+                <ref bean="ar-academicprograms"/>
+                <ref bean="ar-campus-involvements"/>
+                <ref bean="ar-personal-relationship-types"/>
+                <ref bean="ar-sec-reg-statuses"/>
+                <ref bean="ar-gradechangereasons"/>
+                <ref bean="ar-citizenshipstatuses"/>
+                <ref bean="ar-visatypes"/>
+                <ref bean="ar-external-educations-hs"/>
+                <ref bean="ar-external-educations-pc"/>
+                <ref bean="ar-external-educations-trit"/>
+                <ref bean="ar-external-educations-degr"/>
+                <ref bean="ar-external-educations-tram"/>
+                <ref bean="ar-academic-standings"/>
+                <ref bean="ar-student-classifications"/>
+                <ref bean="ar-student-cohorts"/>
+                <ref bean="ar-academic-period-enrollment-statuses"/>
+                <ref bean="ar-residency-types"/>
+                <ref bean="ar-student-tags"/>
+                <ref bean="ar-student-statuses"/>
+                <ref bean="ar-student-types"/>
+                <ref bean="ar-instructional-events"/>
+                <ref bean="ar-person-visas"/>
+                <ref bean="ar-student-academic-period-profiles"/>
             </list>
         </property>
     </bean>

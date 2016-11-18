@@ -52,11 +52,9 @@ class RoomCompositeService extends LdmService {
     List<AvailableRoom> list(Map params) {
         log.debug( "Start of List()" )
         def entities
-        RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List allowedSortFields = ['number', 'title']
-        RestfulApiValidationUtility.validateSortField(params.sort?.trim(), allowedSortFields)
-        RestfulApiValidationUtility.validateSortOrder(params.order?.trim())
-        params.sort = fetchBannerDomainPropertyForLdmField(params.sort?.trim())
+        setPagingParams(params)
+        setSortingParams(params)
+
         if (RestfulApiValidationUtility.isQApiRequest(params)) {
             if(GeneralCommonConstants.VERSION_V4.equals( LdmService.getAcceptVersion(VERSIONS))){
                 prepareQapiV4Request(params)
@@ -90,6 +88,23 @@ class RoomCompositeService extends LdmService {
             }
         }
         return getAvailableRooms(entities)
+    }
+
+    protected void setPagingParams(Map requestParams) {
+        RestfulApiValidationUtility.correctMaxAndOffset(requestParams, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
+    }
+
+    protected void setSortingParams(Map requestParams) {
+        if (requestParams.containsKey("sort")) {
+            RestfulApiValidationUtility.validateSortField(requestParams.sort?.trim(), ['number', 'title'])
+            requestParams.sort = fetchBannerDomainPropertyForLdmField(requestParams.sort?.trim())
+        }
+
+        if (requestParams.containsKey("order")) {
+            RestfulApiValidationUtility.validateSortOrder(requestParams.order?.trim())
+        } else {
+            requestParams.put('order', "asc")
+        }
     }
 
     Long count(Map params) {
@@ -189,11 +204,19 @@ class RoomCompositeService extends LdmService {
         }
         noOfDays += 1
         if (noOfDays == 1) {
-            validDays.add(days.find { it.number == startDate.getDay().toString() }?.description)
+            int day =  startDate.getDay()
+            if(day == 0){
+                day += 7
+            }
+            validDays.add(days.find { it.number == day.toString() }?.description)
         } else if (noOfDays <= 7) {
             for (int i = 0; i < noOfDays; i++) {
                 Date calculatedDate = startDate + i
-                validDays.add(days.find { it.number == calculatedDate.getDay().toString() }?.description)
+                int day =  calculatedDate.getDay()
+                if(day == 0){
+                    day += 7
+                }
+                validDays.add(days.find { it.number == day.toString() }?.description)
             }
         } else if (noOfDays > 7) {
             validDays = days.description
@@ -203,7 +226,6 @@ class RoomCompositeService extends LdmService {
             throw new ApplicationException(RoomCompositeService, new BusinessLogicValidationException("invalid.recurrence.byDay", []))
         }
     }
-
 
     private void validateOccupancies(Map params) {
         if (!params.occupancies) {
@@ -401,6 +423,28 @@ class RoomCompositeService extends LdmService {
         //criteria.add([key: "roomTypes", binding: "roomType", operator: Operators.IN])
 
         params.put(GeneralCommonConstants.END_DATE, new Date())
+
+        String sortField
+        String sortOrder
+
+        if (queryParams?.containsKey('sort'))
+            sortField = queryParams.sort?.trim()
+        if (queryParams?.containsKey('order'))
+            sortOrder = queryParams.order?.trim() ?: 'asc'
+
+        if (pagingAndSortParams) {
+            if (sortField) {
+                pagingAndSortParams.sortCriteria = [
+                        ["sortColumn": sortField, "sortDirection": sortOrder],
+                        ["sortColumn": "id", "sortDirection": "asc"]
+                ]
+                pagingAndSortParams.remove('sortColumn')
+                pagingAndSortParams.remove('sortDirection')
+            } else {
+                pagingAndSortParams.sortColumn = "id"
+                pagingAndSortParams.sortDirection = sortOrder
+            }
+        }
 
         def query = """
                        from HousingRoomDescriptionReadOnly a

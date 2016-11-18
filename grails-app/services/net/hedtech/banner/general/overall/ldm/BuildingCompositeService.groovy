@@ -34,6 +34,7 @@ class BuildingCompositeService extends  LdmService{
             code        : 'building.code'
     ]
     private static final String SITE_FILTER_NAME = 'site.id'
+    private static final String BUILDING_SURROGATE_ID = 'building.id'
 
     /**
      * GET /api/buildings
@@ -44,9 +45,20 @@ class BuildingCompositeService extends  LdmService{
         List buildings = []
         List allowedSortFields = (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))? [GeneralCommonConstants.CODE, GeneralCommonConstants.TITLE]:[GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.TITLE])
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
-        RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
-        RestfulApiValidationUtility.validateSortOrder(params.order)
-        params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
+
+        if (params.containsKey("sort") && !params.sort.equals(BUILDING_SURROGATE_ID)) {
+            RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
+            params.sort = ldmFieldToBannerDomainPropertyMap[params.sort]
+        }
+
+        if (params.containsKey("order")) {
+            RestfulApiValidationUtility.validateSortOrder(params.order)
+        } else {
+            params.put('order', "asc")
+        }
+
+        params.sort = params.sort ?: BUILDING_SURROGATE_ID
+
         fetchBuildingDetails(params).each {housingLocationBuildingDescription ->
             SiteDetail siteDetail = new SiteDetail(globalUniqueIdentifierService.fetchByDomainKeyAndLdmName(housingLocationBuildingDescription.campus?.code, SiteDetailCompositeService.LDM_NAME)?.guid )
             List<AvailableRoom> rooms = getRooms(housingLocationBuildingDescription.building)
@@ -90,6 +102,8 @@ class BuildingCompositeService extends  LdmService{
      * @return BuildingDetail
      */
     BuildingDetail get( String guid ) {
+        getAcceptVersion(VERSIONS)
+
         GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByLdmNameAndGuid( LDM_NAME, guid )
         if (!globalUniqueIdentifier) {
             throw new ApplicationException("building", new NotFoundException())

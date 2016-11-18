@@ -11,4 +11,21 @@ class PriorCollegeConcentrationAreaService extends ServiceBase {
     def preUpdate(map) {
         throw new ApplicationException(PriorCollegeConcentrationArea, "@@r1:unsupported.operation@@")
     }
+
+    List<PriorCollegeConcentrationArea> fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+            List<Integer> pidmList, List<String> priorCollegeCodeList, List<Integer> degreeSequenceNumberList, List<String> degreeCodeList){
+        List<PriorCollegeConcentrationArea> priorCollegeConcentrationAreaList = []
+        if(pidmList&&priorCollegeCodeList&&degreeSequenceNumberList&&degreeCodeList){
+            PriorCollegeConcentrationArea.withSession{ session ->
+                priorCollegeConcentrationAreaList = session.getNamedQuery("PriorCollegeConcentrationArea.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree")
+                        .setParameterList("pidmList", pidmList)
+                        .setParameterList("sourceAndBackgroundInstitutionCodeList", priorCollegeCodeList)
+                        .setParameterList("degreeSequenceNumberList", degreeSequenceNumberList)
+                        .setParameterList("degreeCodeList", degreeCodeList)
+                        .list()
+
+            }
+        }
+        return priorCollegeConcentrationAreaList
+    }
 }

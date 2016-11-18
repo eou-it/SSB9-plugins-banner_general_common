@@ -31,7 +31,17 @@ import javax.persistence.*
 @NamedQuery(name = "VisaInformation.fetchByPidmListAndDateCompare",
 query = """FROM VisaInformation a
           WHERE a.pidm IN :pidm
-            AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(NVL(a.visaExpireDate,:compareDate))""")
+            AND TRUNC(:compareDate) BETWEEN TRUNC(a.visaStartDate) AND TRUNC(NVL(a.visaExpireDate,:compareDate))"""),
+@NamedQuery(name = "VisaInformation.fetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList",
+                query = """ FROM VisaInformation a
+                           WHERE a.pidm in :pidms
+                             AND a.nationIssue = :issuingNationCode
+                             AND TRUNC(SYSDATE) BETWEEN TRUNC(NVL(visaIssueDate,SYSDATE-1)) AND TRUNC(visaExpireDate)
+                             AND (a.pidm, a.sequenceNumber) IN (SELECT pidm,MAX(sequenceNumber) FROM VisaInformation b
+                                                                 WHERE b.nationIssue = :issuingNationCode
+                                                                   AND TRUNC(SYSDATE) BETWEEN TRUNC(NVL(visaIssueDate,SYSDATE-1)) AND TRUNC(visaExpireDate)
+                                                                 GROUP BY pidm) """)
+
 ])
 
 @Entity
@@ -313,4 +323,5 @@ class VisaInformation implements Serializable {
                     """
         return new DynamicFinder(VisaInformation.class, query, "a")
     }
+
 }
