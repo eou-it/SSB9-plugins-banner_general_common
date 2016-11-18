@@ -1281,15 +1281,10 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals testPerson.person.id, perbio.id
         assertEquals "MA", testPerson.addresses[0].address.addressType.code
         assertEquals perAddr[0].id, testPerson.addresses[0].address.id
-<<<<<<< HEAD
-        assertEquals "CELL", testPerson.phones[0].phone.telephoneType.code
-        assertEquals perTel[1].id, testPerson.phones[0].phone.id
-=======
         def phone = testPerson.phones.find {it.phone.telephoneType.code = "CELL"}?.phone
         assertNotNull phone
         assertEquals "CELL", phone.telephoneType.code
         assertEquals personTelephone.id, phone.id
->>>>>>> master
         assertEquals "HOME", testPerson.emails[0].email.emailType.code
         assertEquals perEmail[0].id, testPerson.emails[0].email.id
         assertEquals perRace.race, testPerson.races[0].raceDecorator.race
