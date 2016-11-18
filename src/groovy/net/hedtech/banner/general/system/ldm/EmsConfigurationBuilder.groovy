@@ -17,7 +17,7 @@ import net.hedtech.banner.general.system.ldm.v1.MessageConfig
  */
 class EmsConfigurationBuilder {
 
-    private static List<String> BEP_ROUTING_KEYS = ["HEDM.#"]
+    private static List<String> BEP_ROUTING_KEYS = ["EEDM.#"]
     private static List<String> MESSAGE_IN_ROUTING_KEYS = ['#']
 
     private static final String BANNER_ELEVATE = "BANNER-ELEVATE"
