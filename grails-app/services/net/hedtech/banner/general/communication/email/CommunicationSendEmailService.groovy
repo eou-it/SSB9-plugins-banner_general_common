@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
+import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
@@ -34,6 +36,11 @@ class CommunicationSendEmailService {
 
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode)
         CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
+
+        if(!organization?.senderMailboxAccount) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Sender mailbox account settings are not available for the chosen organization"), CommunicationErrorCode.UNKNOWN_ERROR.name())
+        }
+
         if (organization?.senderMailboxAccount.encryptedPassword != null) {
             organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
         }
