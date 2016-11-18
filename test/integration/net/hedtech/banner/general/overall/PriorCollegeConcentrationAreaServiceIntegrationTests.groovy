@@ -117,6 +117,61 @@ class PriorCollegeConcentrationAreaServiceIntegrationTests extends BaseIntegrati
         }
     }
 
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullPidmList() {
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(null, [], [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyPidmList() {
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree([], [], [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullPrioirCollegeList() {
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(PriorCollegeConcentrationArea.findAll().pidm, null, [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyPrioirCollegeList() {
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(PriorCollegeConcentrationArea.findAll().pidm, [], [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullDegSeqNoList() {
+        List<PriorCollegeConcentrationArea> priorCollegeConcentrationAreaList = PriorCollegeConcentrationArea.findAll()
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeConcentrationAreaList.pidm, priorCollegeConcentrationAreaList.sourceAndBackgroundInstitution, null, []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyDegSeqNoList() {
+        List<PriorCollegeConcentrationArea> priorCollegeConcentrationAreaList = PriorCollegeConcentrationArea.findAll()
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeConcentrationAreaList.pidm, priorCollegeConcentrationAreaList.sourceAndBackgroundInstitution, [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullDegCodeList() {
+        List<PriorCollegeConcentrationArea> priorCollegeConcentrationAreaList = PriorCollegeConcentrationArea.findAll()
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeConcentrationAreaList.pidm, priorCollegeConcentrationAreaList.sourceAndBackgroundInstitution, priorCollegeConcentrationAreaList.degreeSequenceNumber, null))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyDegCodeList() {
+        List<PriorCollegeConcentrationArea> priorCollegeConcentrationAreaList = PriorCollegeConcentrationArea.findAll()
+        assertEquals([], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeConcentrationAreaList.pidm, priorCollegeConcentrationAreaList.sourceAndBackgroundInstitution, priorCollegeConcentrationAreaList.degreeSequenceNumber, []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree() {
+        List<PriorCollegeConcentrationArea> priorCollegeConcentrationAreaList = PriorCollegeConcentrationArea.findAll()
+        assertEquals([priorCollegeConcentrationAreaList[0]], priorCollegeConcentrationAreaService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                [priorCollegeConcentrationAreaList[0].pidm], [priorCollegeConcentrationAreaList[0].sourceAndBackgroundInstitution.code], [priorCollegeConcentrationAreaList[0].degreeSequenceNumber],
+                [priorCollegeConcentrationAreaList[0].degree.code]))
+    }
 
     private def newValidForCreatePriorCollegeConcentrationArea() {
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()

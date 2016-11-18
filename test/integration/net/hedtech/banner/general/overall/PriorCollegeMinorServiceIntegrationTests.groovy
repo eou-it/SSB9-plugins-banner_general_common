@@ -1,18 +1,18 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 /*******************************************************************************
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
-import org.junit.Before
-import org.junit.Test
-import org.junit.After
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
 class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -118,6 +118,62 @@ class PriorCollegeMinorServiceIntegrationTests extends BaseIntegrationTestCase {
         catch (ApplicationException ae) {
             assertApplicationException ae, "readonlyFieldsCannotBeModified"
         }
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullPidmList() {
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(null, [], [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyPidmList() {
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree([], [], [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullPrioirCollegeList() {
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(PriorCollegeMinor.findAll().pidm, null, [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyPrioirCollegeList() {
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(PriorCollegeMinor.findAll().pidm, [], [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullDegSeqNoList() {
+        List<PriorCollegeMinor> priorCollegeMinorList = PriorCollegeMinor.findAll()
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeMinorList.pidm, priorCollegeMinorList.sourceAndBackgroundInstitution, null, []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyDegSeqNoList() {
+        List<PriorCollegeMinor> priorCollegeMinorList = PriorCollegeMinor.findAll()
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeMinorList.pidm, priorCollegeMinorList.sourceAndBackgroundInstitution, [], []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeNullDegCodeList() {
+        List<PriorCollegeMinor> priorCollegeMinorList = PriorCollegeMinor.findAll()
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeMinorList.pidm, priorCollegeMinorList.sourceAndBackgroundInstitution, priorCollegeMinorList.degreeSequenceNumber, null))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegreeEmptyDegCodeList() {
+        List<PriorCollegeMinor> priorCollegeMinorList = PriorCollegeMinor.findAll()
+        assertEquals([], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                priorCollegeMinorList.pidm, priorCollegeMinorList.sourceAndBackgroundInstitution, priorCollegeMinorList.degreeSequenceNumber, []))
+    }
+
+    @Test
+    void testFetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree() {
+        List<PriorCollegeMinor> priorCollegeMinorList = PriorCollegeMinor.findAll()
+        assertEquals([priorCollegeMinorList[0]], priorCollegeMinorService.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree(
+                [priorCollegeMinorList[0].pidm], [priorCollegeMinorList[0].sourceAndBackgroundInstitution.code], [priorCollegeMinorList[0].degreeSequenceNumber],
+                [priorCollegeMinorList[0].degree.code]))
     }
 
 

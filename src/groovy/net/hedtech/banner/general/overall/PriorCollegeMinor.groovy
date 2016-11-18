@@ -19,7 +19,14 @@ import javax.persistence.*
                     WHERE a.pidm = :pidm
                       AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
                       AND a.degreeSequenceNumber = :degreeSequenceNumber
-                      AND a.degree.code = :degreeCode""")
+                      AND a.degree.code = :degreeCode"""),
+        @NamedQuery(
+                name = "PriorCollegeMinor.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree",
+                query = """  FROM PriorCollegeMinor a
+                    WHERE a.pidm in (:pidmList)
+                      AND a.sourceAndBackgroundInstitution.code in (:sourceAndBackgroundInstitutionCodeList)
+                      AND a.degreeSequenceNumber in (:degreeSequenceNumberList)
+                      AND a.degree.code in (:degreeCodeList)""")
 ])
 
 @Entity
