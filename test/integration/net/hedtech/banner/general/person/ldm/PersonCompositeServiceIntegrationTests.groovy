@@ -1110,19 +1110,11 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 1, perAddr.size()
         assertNotNull perAddr[0]
         assertEquals "MA", perAddr[0].addressType.code
-<<<<<<< HEAD
-        def perTel = PersonTelephone.findAllByPidm(perId.pidm)
-       // assertEquals 1, perTel.size()
-        assertTrue perTel.size() >= 1
-        assertNotNull perTel[0]
-        assertEquals "BI", perTel[0].telephoneType.code
-=======
         def personTelephones = PersonTelephone.findAllByPidm(perId.pidm)
         assertEquals 2, personTelephones.size()
         def personTelephone = personTelephones.find {it.telephoneType.code = "CELL"}
         assertNotNull personTelephone
         assertEquals "CELL", personTelephone.telephoneType.code
->>>>>>> master
         def perEmail = PersonEmail.findAllByPidm(perId.pidm)
         assertEquals 1, perEmail.size()
         assertNotNull perEmail[0]
