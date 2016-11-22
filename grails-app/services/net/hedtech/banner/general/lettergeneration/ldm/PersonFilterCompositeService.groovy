@@ -119,7 +119,7 @@ class PersonFilterCompositeService {
         if (count) {
             query = "select count(a) from PopulationSelectionExtractReadonly a where 1=1 "
         } else {
-            query = "select a.application, a.selection, a.creatorId, a.lastModifiedBy from PopulationSelectionExtractReadonly a where 1=1 order by a.id"
+            query = "select a.application, a.selection, a.creatorId, a.lastModifiedBy from PopulationSelectionExtractReadonly a where 1=1 "
         }
 
         Map namedParams = [:]
@@ -134,7 +134,7 @@ class PersonFilterCompositeService {
             query += """ and  a.selection like  :selection  """
             namedParams.put("selection", (!content.get(sortField).trim().contains("%")) ? "%${content.get(sortField).trim().toUpperCase()}%" : content.get(sortField).trim().toUpperCase())
         }
-        query += "group by a.application, a.selection, a.creatorId, a.lastModifiedBy"
+        query += " group by a.application, a.selection, a.creatorId, a.lastModifiedBy "
         if (count) {
             result = PopulationSelectionExtract.executeQuery(query, namedParams)?.size()
         } else {
