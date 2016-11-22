@@ -1203,6 +1203,23 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-general-ledger-transactions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>general-ledger-transactions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/general-ledger-transactions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.GeneralLedgerTransactions.GURTRNH</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -1275,6 +1292,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-student-academic-period-profiles"/>
                 <ref bean="ar-accounting-string-components"/>
                 <ref bean="ar-accounting-string-formats"/>
+                <ref bean="ar-general-ledger-transactions"/>
             </list>
         </property>
     </bean>
@@ -1351,6 +1369,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-student-academic-period-profiles"/>
                 <ref bean="ar-accounting-string-components"/>
                 <ref bean="ar-accounting-string-formats"/>
+                <ref bean="ar-general-ledger-transactions"/>
             </list>
         </property>
     </bean>
