@@ -8,6 +8,7 @@ package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.EntriesForSql
 import net.hedtech.banner.general.system.EntriesForSqlProcesss
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -254,6 +255,41 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         params = [sqlCode: "INTEGRATION_TEST", sqlProcessCode: "INTEGRATION_TEST", TERM: testData[2]]
         results = sqlProcessCompositeService.getSqlProcessResultsFromHierarchy(params)
         assertNull results
+    }
+
+    @Test
+    void testGetSsbRule() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def params = [
+                TELEPHONE_TYPE: 'HO',
+                PIDM: pidm,
+                ROLE_EMPLOYEE: 'Y',
+                ROLE_STUDENT: 'Y'
+        ]
+        assertTrue sqlProcessCompositeService.getSsbRuleResult('SSB_TELEPHONE_UPDATE', params)
+    }
+
+    @Test
+    void testGetSsbRuleReject() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def params = [
+                TELEPHONE_TYPE: 'HO',
+                PIDM: pidm,
+                ROLE_EMPLOYEE: 'Y',
+                ROLE_STUDENT: 'N'
+        ]
+        assertFalse sqlProcessCompositeService.getSsbRuleResult('SSB_TELEPHONE_UPDATE', params)
+    }
+
+    @Test
+    void testGetSsbRuleNoneActive() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def params = [EMAIL_TYPE: 'PR',
+                      PIDM: pidm,
+                      ROLE_EMPLOYEE: 'Y',
+                      ROLE_STUDENT: 'Y'
+        ]
+        assertTrue sqlProcessCompositeService.getSsbRuleResult('SSB_EMAIL_UPDATE', params)
     }
 
 
