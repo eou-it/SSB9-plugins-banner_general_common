@@ -1670,7 +1670,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             List preferences = phoneInRequest?.preference
-            if(preferences && preferences.size() != (preferences as Set).size()){
+            preferences?.removeAll(Collections.singleton(null))
+            if(preferences && preferences.size() != preferences.unique().size()){
                 //throw an exception
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.preferences.duplicate", []))
             }
