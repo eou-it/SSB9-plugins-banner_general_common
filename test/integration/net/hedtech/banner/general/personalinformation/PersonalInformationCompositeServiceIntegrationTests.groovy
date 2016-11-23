@@ -4,6 +4,10 @@
 package net.hedtech.banner.general.personalinformation
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.overall.SqlProcess
+import net.hedtech.banner.general.person.PersonUtility
+import net.hedtech.banner.general.system.EntriesForSql
+import net.hedtech.banner.general.system.EntriesForSqlProcesss
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -124,6 +128,79 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         catch (ApplicationException ae) {
             assertApplicationException ae, "invalidRelationship"
         }
+    }
+
+    @Test
+    void testValidateTelephoneTypeRule() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def phoneType = [code: 'T2']
+        personalInformationCompositeService.validateTelephoneTypeRule(phoneType, pidm, roles)
+    }
+
+    @Test
+    void testValidateTelephoneTypeRuleInvalid() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+
+        def roles = ['EMPLOYEE']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def phoneType = [code: 'T2']
+        try {
+            personalInformationCompositeService.validateTelephoneTypeRule(phoneType, pidm, roles)
+            fail("I should have received an error but it passed; @@r1:invalidTelephoneType@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidTelephoneType"
+        }
+    }
+
+    @Test
+    void testFetchUpdateableTelephoneTypeList() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def phoneTypeList = personalInformationCompositeService.fetchUpdateableTelephoneTypeList(pidm, roles)
+
+        assertLength 2, phoneTypeList
+        assertTrue phoneTypeList.code.contains('T2')
+        assertTrue phoneTypeList.code.contains('T3')
+    }
+
+    @Test
+    void testFetchUpdateableTelephoneTypeListSearch() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def phoneTypeList = personalInformationCompositeService.fetchUpdateableTelephoneTypeList(pidm, roles, 10, 0, 's')
+
+        assertLength 0, phoneTypeList
+    }
+
+    private def newSsbRuleSqlProcess(def startDate) {
+        def sqlString = "SELECT 'Y' FROM DUAL WHERE ( :ROLE_STUDENT = 'Y' OR :ROLE_FINAID = 'Y') AND :TELEPHONE_TYPE IN ('T2', 'T3')"
+        def sqlProcess = new SqlProcess(
+                sequenceNumber: 6,
+                activeIndicator: true,
+                validatedIndicator: true,
+                startDate: startDate,
+                selectFrom: "FROM",
+                selectValue: null,
+                whereClause: sqlString,
+                endDate: startDate + 2,
+                parsedSql: sqlString,
+                systemRequiredIndicator: false,
+                entriesForSqlProcess: EntriesForSqlProcesss.findByCode('SSB_TELEPHONE_UPDATE'),
+                entriesForSql: EntriesForSql.findByCode('SSB_TELEPHONE_UPDATE')
+        )
+        return sqlProcess
     }
 
 }

@@ -259,9 +259,11 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testGetSsbRule() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def params = [
-                TELEPHONE_TYPE: 'HO',
+                TELEPHONE_TYPE: 'T2',
                 PIDM: pidm,
                 ROLE_EMPLOYEE: 'Y',
                 ROLE_STUDENT: 'Y'
@@ -271,9 +273,11 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testGetSsbRuleReject() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def params = [
-                TELEPHONE_TYPE: 'HO',
+                TELEPHONE_TYPE: 'T2',
                 PIDM: pidm,
                 ROLE_EMPLOYEE: 'Y',
                 ROLE_STUDENT: 'N'
@@ -283,6 +287,8 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testGetSsbRuleNoneActive() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def params = [EMAIL_TYPE: 'PR',
                       PIDM: pidm,
@@ -329,6 +335,25 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
                 systemRequiredIndicator: true,
                 entriesForSqlProcess: entriesForSqlProcess,
                 entriesForSql: entriesForSql,
+        )
+        return sqlProcess
+    }
+
+    private def newSsbRuleSqlProcess(def startDate) {
+        def sqlString = "SELECT 'Y' FROM DUAL WHERE ( :ROLE_STUDENT = 'Y' OR :ROLE_FINAID = 'Y') AND :TELEPHONE_TYPE IN ('T2', 'T3')"
+        def sqlProcess = new SqlProcess(
+                sequenceNumber: 6,
+                activeIndicator: true,
+                validatedIndicator: true,
+                startDate: startDate,
+                selectFrom: "FROM",
+                selectValue: null,
+                whereClause: sqlString,
+                endDate: startDate + 2,
+                parsedSql: sqlString,
+                systemRequiredIndicator: false,
+                entriesForSqlProcess: EntriesForSqlProcesss.findByCode('SSB_TELEPHONE_UPDATE'),
+                entriesForSql: EntriesForSql.findByCode('SSB_TELEPHONE_UPDATE')
         )
         return sqlProcess
     }
