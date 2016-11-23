@@ -132,8 +132,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testValidateTelephoneTypeRule() {
-        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
-        ssbRule.save(failOnError: true, flush: true)
+        setupTelephoneRule()
 
         def roles = ['EMPLOYEE', 'STUDENT']
         def pidm = PersonUtility.getPerson("GDP000005").pidm
@@ -143,25 +142,23 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testValidateTelephoneTypeRuleInvalid() {
-        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
-        ssbRule.save(failOnError: true, flush: true)
+        setupTelephoneRule()
 
         def roles = ['EMPLOYEE']
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def phoneType = [code: 'T2']
         try {
             personalInformationCompositeService.validateTelephoneTypeRule(phoneType, pidm, roles)
-            fail("I should have received an error but it passed; @@r1:invalidTelephoneType@@ ")
+            fail("I should have received an error but it passed; @@r1:invalidTelephoneTypeUpdate@@ ")
         }
         catch (ApplicationException ae) {
-            assertApplicationException ae, "invalidTelephoneType"
+            assertApplicationException ae, "invalidTelephoneTypeUpdate"
         }
     }
 
     @Test
     void testFetchUpdateableTelephoneTypeList() {
-        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
-        ssbRule.save(failOnError: true, flush: true)
+        setupTelephoneRule()
 
         def roles = ['EMPLOYEE', 'STUDENT']
         def pidm = PersonUtility.getPerson("GDP000005").pidm
@@ -174,8 +171,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testFetchUpdateableTelephoneTypeListSearch() {
-        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
-        ssbRule.save(failOnError: true, flush: true)
+        setupTelephoneRule()
 
         def roles = ['EMPLOYEE', 'STUDENT']
         def pidm = PersonUtility.getPerson("GDP000005").pidm
@@ -184,8 +180,94 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         assertLength 0, phoneTypeList
     }
 
-    private def newSsbRuleSqlProcess(def startDate) {
-        def sqlString = "SELECT 'Y' FROM DUAL WHERE ( :ROLE_STUDENT = 'Y' OR :ROLE_FINAID = 'Y') AND :TELEPHONE_TYPE IN ('T2', 'T3')"
+    @Test
+    void testValidateEmailTypeRule() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def emailType = [code: 'PERS']
+        personalInformationCompositeService.validateEmailTypeRule(emailType, pidm, roles)
+    }
+
+    @Test
+    void testValidateEmailTypeRuleInvalid() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def emailType = [code: 'HOME']
+        try {
+            personalInformationCompositeService.validateEmailTypeRule(emailType, pidm, roles)
+            fail("I should have received an error but it passed; @@r1:invalidEmailTypeUpdate@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "invalidEmailTypeUpdate"
+        }
+    }
+
+    @Test
+    void testFetchUpdateableEmailTypeList() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def phoneTypeList = personalInformationCompositeService.fetchUpdateableEmailTypeList(pidm, roles)
+
+        assertLength 10, phoneTypeList
+        assertFalse phoneTypeList.code.contains('BI')
+    }
+
+    @Test
+    void testFetchUpdateableEmailTypeListSearch() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def emailTypeList = personalInformationCompositeService.fetchUpdateableEmailTypeList(pidm, roles, 10, 0, 's')
+
+        assertLength 10, emailTypeList
+        assertFalse emailTypeList.code.contains('CAMP')
+    }
+
+    @Test
+    void testFetchUpdateableEmailTypeListSearchAndFind() {
+        setupEmailRules()
+
+        def roles = ['STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def phoneTypeList = personalInformationCompositeService.fetchUpdateableEmailTypeList(pidm, roles, 10, 0, 's')
+
+        assertLength 10, phoneTypeList
+        assertTrue phoneTypeList.code.contains('CAMP')
+    }
+
+    private def setupTelephoneRule() {
+        def ssbRule = newSsbRuleSqlProcess(
+                new Date()-1,
+                "SELECT 'Y' FROM DUAL WHERE ( :ROLE_STUDENT = 'Y' OR :ROLE_FINAID = 'Y') AND :TELEPHONE_TYPE IN ('T2', 'T3')",
+                'SSB_TELEPHONE_UPDATE'
+        )
+        ssbRule.save(failOnError: true, flush: true)
+    }
+
+    private def setupEmailRules() {
+        def ssbRule1 = newSsbRuleSqlProcess(
+                new Date()-1,
+                "SELECT 'N' FROM DUAL WHERE ( :ROLE_EMPLOYEE = 'Y' OR :ROLE_FINAID = 'Y') AND :EMAIL_TYPE IN ('BI', 'CAMP', 'HOME')",
+                'SSB_EMAIL_UPDATE'
+        )
+        ssbRule1.save(failOnError: true, flush: true)
+        def ssbRule2 = newSsbRuleSqlProcess(
+                new Date()-1,
+                "SELECT 'Y' FROM DUAL",
+                'SSB_EMAIL_UPDATE'
+        )
+        ssbRule2.sequenceNumber = 7
+        ssbRule2.save(failOnError: true, flush: true)
+    }
+
+    private def newSsbRuleSqlProcess(def startDate, def sqlString, def rule) {
         def sqlProcess = new SqlProcess(
                 sequenceNumber: 6,
                 activeIndicator: true,
@@ -197,8 +279,8 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
                 endDate: startDate + 2,
                 parsedSql: sqlString,
                 systemRequiredIndicator: false,
-                entriesForSqlProcess: EntriesForSqlProcesss.findByCode('SSB_TELEPHONE_UPDATE'),
-                entriesForSql: EntriesForSql.findByCode('SSB_TELEPHONE_UPDATE')
+                entriesForSqlProcess: EntriesForSqlProcesss.findByCode(rule),
+                entriesForSql: EntriesForSql.findByCode(rule)
         )
         return sqlProcess
     }
