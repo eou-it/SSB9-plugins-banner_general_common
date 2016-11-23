@@ -114,6 +114,37 @@ class SqlProcessCompositeService {
 
     }
 
+    /**
+     * The GORRSQL rules will allow checking using the standard SSB roles, the pidm, and the telephone type
+     * or email type.
+     * The first GORRSQL rule that passes back a Y or N will be the one that determines whether or not
+     * the telephone type is valid for insertion. If no active rules are found, then it is assumed that all
+     * the types are valid. If there is at least one rule active, but no rule ever passes back an N or Y,
+     * then it is assumed that the type is invalid.
+     * @param rule - the SSB rule to be executed, 'SSB_TELEPHONE_UPDATE' or 'SSB_EMAIL_UPDATE'
+     * @param params A map of the following:
+     *      PIDM - the user's pidm
+     *      ROLE_<standard SSB role> - set to 'Y' to indicate the user's role
+     *      TELEPHONE_TYPE - the telephone type code from STVTELE that will be validated when rule is set to
+     *      'SSB_TELEPHONE_UPDATE'
+     *      EMAIL_TYPE - the email type code from GTVEMAL that will be validated when rule is set to
+     *      'SSB_EMAIL_UPDATE'
+     * @return boolean - true if no rules are active, or if the rules hierarchy returns 'Y'. false if no active
+     * rule returns 'Y'
+     */
+    boolean getSsbRuleResult(rule, params) {
+        params.sqlCode = rule
+        params.sqlProcessCode = rule
+
+        if(SqlProcess.fetchAllActiveValidatedPriorityProcessSql(rule, rule).size() == 0){
+            return true;
+        }
+
+        def result = getSqlProcessResultsFromHierarchy(params)
+
+        return (result != null && result[0][0] == 'Y') as boolean
+    }
+
 
     private def getParameterValue(def key, def fromThis) {
         def value = fromThis[key.toUpperCase()]
