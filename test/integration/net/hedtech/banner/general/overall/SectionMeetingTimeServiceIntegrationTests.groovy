@@ -21,7 +21,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
 
     @Before
     public void setUp() {
-        formContext = ['GEIFUNC', 'GEAFUNC', 'SLAEVNT', 'SSAMATX', 'SFQSECT', 'SSASECT']// Since we are not testing a controller, we need to explicitly set this
+        formContext = ['GUAGMNU', 'GEIFUNC', 'GEAFUNC', 'SLAEVNT', 'SSAMATX', 'SFQSECT', 'SSASECT']// Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 

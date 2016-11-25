@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -24,7 +24,7 @@ class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestC
 
     @Before
     public void setUp() {
-        formContext = ["SSASECT"]
+        formContext = ["GUAGMNU", "SSASECT"]
         super.setUp()
     }
 

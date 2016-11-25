@@ -18,7 +18,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['SSAXLST', 'SSAXLSQ'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['GUAGMNU', 'SSAXLST', 'SSAXLSQ'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 
