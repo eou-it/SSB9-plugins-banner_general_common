@@ -152,7 +152,7 @@ communication {
     }
 
     email {
-        senderAuthenticationEnabled = false
+        senderAuthenticationEnabled = true
     }
 }
 // encKey must be exactly 32 chars
