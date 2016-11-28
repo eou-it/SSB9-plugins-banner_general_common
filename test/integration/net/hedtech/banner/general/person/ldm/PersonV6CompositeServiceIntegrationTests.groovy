@@ -3,21 +3,27 @@
  **********************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.commonmatching.CommonMatchingSourceRule
 import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifierService
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v1.RoleDetail
+import net.hedtech.banner.general.person.ldm.v6.IdentityDocumentV6
 import net.hedtech.banner.general.person.ldm.v6.PersonAddressDecorator
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
+import net.hedtech.banner.general.person.ldm.v6.PhoneV6
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.general.system.ldm.*
 import net.hedtech.banner.general.utility.DateConvertHelperService
+import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
@@ -35,6 +41,9 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     NameTypeService nameTypeService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
+    IntegrationConfigurationService integrationConfigurationService
+    IsoCodeService isoCodeService
+
     static final String BANNER_ID_WITH_TYPE_BIRTH = 'HOSR24787'
     String i_succes_person_banner_id = 'HOSFE2000'
     GlobalUniqueIdentifier personGlobalUniqueIdentifier
@@ -865,8 +874,6 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
     }
 
-
-
     private Map newPersonWithCredentials() {
         Map params = [names: [
                 [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
@@ -1169,7 +1176,662 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals  emailAddress2 ,o_success_person_update.emails.address.get(0)
     }
 
+    // presons post and put phones
+    @Test
+    void testCreatePersonWithPhones() {
+        Map content = newPersonWithPhones()
+        def o_success_person_create = personV6CompositeService.create(content)
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+        assertNotNull o_success_person_create.personPhones
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
+        assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
+
+        String phoneNumber = content.phones.number[0]
+        String countryCallingCode = content.phones.countryCallingCode[0]
+        String countryRegionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(Integer.valueOf(countryCallingCode))
+        def parts = PhoneNumberUtility.parsePhoneNumber(phoneNumber, countryRegionCode)
+        assertEquals parts.phoneArea, o_success_person_create.personPhones.phoneArea[0]
+        assertEquals parts.phoneNumber, o_success_person_create.personPhones.phoneNumber[0]
+        assertEquals o_success_person_create.personPhones.countryPhone[0], countryCallingCode
+        assertEquals o_success_person_create.personPhones.phoneExtension[0], content.phones.extension[0]
+        assertEquals o_success_person_create.personPhones.primaryIndicator[0], 'Y'
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals content.phones.type[0].phoneType, o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+    }
+
+    @Test
+    void testCreatePersonWithPhonesDuplicatePhoneType() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "16194448989", countryCallingCode: "1", type:[phoneType: "home"]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.phoneType.duplicate", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithPhonesDuplicatePreference() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "16194448989", countryCallingCode: "1", preference: "primary",type:[phoneType: "business"]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.preferences.duplicate", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithPhonesPhoneTypeInValid() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "16194448989", countryCallingCode: "1",type:[phoneType: "Business"]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.phoneType.inValid", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithPhonesPhoneTypeNotFound() {
+        Map content = newPersonWithPhones()
+        IntegrationConfiguration integrationConfiguration = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(GeneralValidationCommonConstants.PROCESS_CODE, GeneralValidationCommonConstants.PHONE_TYPE_SETTING_NAME_V6, 'business')[0]
+        assertNotNull integrationConfiguration
+        integrationConfiguration.delete( failOnError:true, flush: true )
+        content.phones.add([number: "16194448989", countryCallingCode: "1",type:[phoneType: "business"]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.phoneType.not.found", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithPhonesPhoneTypeRequired() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "16194448989", countryCallingCode: "1",type:[:]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.phoneType.required", exceptionMessage
+    }
 
 
+    @Test
+    void testCreatePersonWithPhonesTypeRequired() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "16194448989", countryCallingCode: "1"])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.type.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithPhoneNumberRequired() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "", countryCallingCode: "1",type:[phoneType: "business"]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.number.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithPhonescountryCallingCodeInValid() {
+        Map content = newPersonWithPhones()
+        content.phones.add([number: "16194448989", countryCallingCode: "+a1",type:[phoneType: "business"]])
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "phone.invalid.countryCallingCode.format", exceptionMessage
+    }
+
+    @Test
+    void testUpdatePersonWithPhones() {
+        Map content = newPersonWithPhones()
+        def o_success_person_create = personV6CompositeService.create(content)
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(o_success_person_create)
+        assertNotNull personV6
+        assertNotNull personV6.guid
+        assertNotNull personV6.phones
+        assertFalse personV6.phones.isEmpty()
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+        assertNotNull o_success_person_create.personPhones
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
+        assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
+
+        PhoneV6 phoneV6 = personV6.phones[0]
+
+        String phoneNumber = content.phones.number[0]
+        String countryCallingCode = content.phones.countryCallingCode[0]
+        String countryRegionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(Integer.valueOf(countryCallingCode))
+        def parts = PhoneNumberUtility.parsePhoneNumber(phoneNumber, countryRegionCode)
+        assertEquals parts.phoneArea + parts.phoneNumber, phoneV6.number
+        assertEquals phoneV6.countryCallingCode, countryCallingCode
+        assertEquals phoneV6.extension, content.phones.extension[0]
+        assertEquals phoneV6.preference, content.phones.preference[0]
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
+
+        content.phones = [
+                [number: "6194448989", countryCallingCode: "", preference: "", extension: "", type: [phoneType: "home"]],
+                [number: "61948989654378964398765432356765", countryCallingCode: "145", extension: "", type: [phoneType: "business"]]
+        ]
+
+        content.id = personV6.guid
+
+        o_success_person_create = personV6CompositeService.update(content)
+        personV6 = personV6CompositeService.createPersonDataModel(o_success_person_create)
+        assertNotNull personV6
+        assertNotNull personV6.guid
+        assertNotNull personV6.phones
+        assertFalse personV6.phones.isEmpty()
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+        assertNotNull o_success_person_create.personPhones
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
+        assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
+
+        phoneV6 = personV6.phones.find {it.type.phoneType == 'home'}
+
+        assertEquals content.phones.number[0], phoneV6.number
+        assertNull phoneV6.countryCallingCode
+        assertNull phoneV6.extension
+        assertNull phoneV6.preference
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(phoneV6.type.code)
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(phoneV6.type.code)
+        assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
+
+        phoneV6 = personV6.phones.find {it.type.phoneType == 'business'}
+
+        Map phoneDetails = personV6CompositeService.splitPhoneNumber(content.phones.number[1])
+
+        assertEquals phoneDetails.phoneArea + phoneDetails.phoneNumber, phoneV6.number
+        assertEquals phoneV6.countryCallingCode, content.phones.countryCallingCode[1]
+        assertNull phoneV6.extension
+        assertNull phoneV6.preference
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(phoneV6.type.code)
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(phoneV6.type.code)
+        assertEquals content.phones.type[1].phoneType, phoneV6.type.phoneType
+
+    }
+
+    @Test
+    void testUpdatePersonWithNewPhones() {
+        Map content = newPersonWithPhones()
+        def o_success_person_create = personV6CompositeService.create(content)
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(o_success_person_create)
+        assertNotNull personV6
+        assertNotNull personV6.guid
+        assertNotNull personV6.phones
+        assertFalse personV6.phones.isEmpty()
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+        assertNotNull o_success_person_create.personPhones
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
+        assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
+
+        PhoneV6 phoneV6 = personV6.phones[0]
+
+        String phoneNumber = content.phones.number[0]
+        String countryCallingCode = content.phones.countryCallingCode[0]
+        String countryRegionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(Integer.valueOf(countryCallingCode))
+        def parts = PhoneNumberUtility.parsePhoneNumber(phoneNumber, countryRegionCode)
+        assertEquals parts.phoneArea + parts.phoneNumber, phoneV6.number
+        assertEquals phoneV6.countryCallingCode, countryCallingCode
+        assertEquals phoneV6.extension, content.phones.extension[0]
+        assertEquals phoneV6.preference, content.phones.preference[0]
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
+
+        content.phones << [number: "16194448989", countryCallingCode: "145", preference: "", extension: "", type: [phoneType: "business"]]
+
+        content.id = personV6.guid
+
+        o_success_person_create = personV6CompositeService.update(content)
+        personV6 = personV6CompositeService.createPersonDataModel(o_success_person_create)
+        assertNotNull personV6
+        assertNotNull personV6.guid
+        assertNotNull personV6.phones
+        assertFalse personV6.phones.isEmpty()
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+        assertNotNull o_success_person_create.personPhones
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
+        assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
+
+        phoneV6 = personV6.phones.find {it.type.phoneType == 'home'}
+
+        assertEquals content.phones.number[0], phoneV6.number
+        assertEquals phoneV6.countryCallingCode, countryCallingCode
+        assertEquals phoneV6.extension, content.phones.extension[0]
+        assertEquals phoneV6.preference, content.phones.preference[0]
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(phoneV6.type.code)
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(phoneV6.type.code)
+        assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
+
+        phoneV6 = personV6.phones.find {it.type.phoneType == 'business'}
+
+        assertEquals content.phones.number[1], phoneV6.number
+        assertEquals phoneV6.countryCallingCode, content.phones.countryCallingCode[1]
+        assertNull phoneV6.extension
+        assertNull phoneV6.preference
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(phoneV6.type.code)
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(phoneV6.type.code)
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(phoneV6.type.code)
+        assertEquals content.phones.type[1].phoneType, phoneV6.type.phoneType
+
+    }
+
+    @Test
+    void testUpdatePersonWithUnsetPhones() {
+        Map content = newPersonWithPhones()
+        def o_success_person_create = personV6CompositeService.create(content)
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(o_success_person_create)
+        assertNotNull personV6
+        assertNotNull personV6.guid
+        assertNotNull personV6.phones
+        assertFalse personV6.phones.isEmpty()
+
+        assertNotNull o_success_person_create
+        assertNotNull o_success_person_create.personGuid
+        assertNotNull o_success_person_create.personPhones
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
+        assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
+
+        PhoneV6 phoneV6 = personV6.phones[0]
+
+        String phoneNumber = content.phones.number[0]
+        String countryCallingCode = content.phones.countryCallingCode[0]
+        String countryRegionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(Integer.valueOf(countryCallingCode))
+        def parts = PhoneNumberUtility.parsePhoneNumber(phoneNumber, countryRegionCode)
+        assertEquals parts.phoneArea + parts.phoneNumber, phoneV6.number
+        assertEquals phoneV6.countryCallingCode, countryCallingCode
+        assertEquals phoneV6.extension, content.phones.extension[0]
+        assertEquals phoneV6.preference, content.phones.preference[0]
+        assertTrue o_success_person_create.phoneTypeCodeToGuidMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertNotNull o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals phoneV6.type.detail.id, o_success_person_create.phoneTypeCodeToGuidMap.get(o_success_person_create.personPhones.telephoneType.code[0])
+        assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(o_success_person_create.personPhones.telephoneType.code[0])
+        assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
+
+        content.phones = []
+
+        content.id = personV6.guid
+
+        o_success_person_create = personV6CompositeService.update(content)
+        personV6 = personV6CompositeService.createPersonDataModel(o_success_person_create)
+        assertNotNull personV6
+        assertNotNull personV6.guid
+        assertNull personV6.phones
+    }
+
+    //person identity document post and put
+    @Test
+    void testCreatePersonWithIdentityDocumentsTypeRequired() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments = [[:]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "identityDocument.type.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocumentsdocumentIdRequired() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments = [[type:[category:"passport"]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "identityDocument.documentId.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocumentsTypeCategoryInvalid() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments = [[type:[category:"test"]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "identityDocument.type.category.invalid", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocumentsTypeCategoryRequired() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments = [[type:[:]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "identityDocument.type.category.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocumentsDuplicate() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments << [documentId: "123456", country: [code:"USA"], expiresOn:"2016-11-11", type:[category: "passport"]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "identityDocument.duplicate", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocumentsInvalidCountryCode() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments << [documentId: "123456", country: [code:"test"], expiresOn:"2016-11-11", type:[category: "passport"]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "country.code.invalid.message", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocuments() {
+        Map content = newPersonWithIdentityDocument()
+        Map s_person_data = personV6CompositeService.create(content)
+        assertNotNull s_person_data
+        assertFalse s_person_data.isEmpty()
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(s_person_data)
+        assertNotNull personV6
+        assertFalse personV6.identityDocuments.isEmpty()
+        IdentityDocumentV6 identityDocumentV6 = personV6.identityDocuments[0]
+        assertNotNull identityDocumentV6
+        assertEquals identityDocumentV6.type.category , content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId , content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.expiresOn , DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
+        assertEquals identityDocumentV6.country.code , content.identityDocuments[0].country.code
+    }
+
+    @Test
+    void testCreatePersonWithIdentityDocumentsWithDefalutCountryCode() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments.getAt(0).remove("country")
+        Map s_person_data = personV6CompositeService.create(content)
+        assertNotNull s_person_data
+        assertFalse s_person_data.isEmpty()
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(s_person_data)
+        assertNotNull personV6
+        assertFalse personV6.identityDocuments.isEmpty()
+        IdentityDocumentV6 identityDocumentV6 = personV6.identityDocuments[0]
+        assertNotNull identityDocumentV6
+        assertEquals identityDocumentV6.type.category , content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId , content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.expiresOn , DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
+        assertEquals identityDocumentV6.country.code, isoCodeService.getISO3CountryCode(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
+
+    }
+
+    @Test
+    void testUpdatePersonWithIdentityDocumentsUnsetAllFields() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments.getAt(0).remove("country")
+        Map s_person_data = personV6CompositeService.create(content)
+        assertNotNull s_person_data
+        assertFalse s_person_data.isEmpty()
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(s_person_data)
+        assertNotNull personV6
+        assertFalse personV6.identityDocuments.isEmpty()
+        IdentityDocumentV6 identityDocumentV6 = personV6.identityDocuments[0]
+        assertNotNull identityDocumentV6
+        assertEquals identityDocumentV6.type.category, content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId, content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.expiresOn, DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
+        assertEquals identityDocumentV6.country.code, isoCodeService.getISO3CountryCode(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
+
+        content.identityDocuments = []
+        content.id = personV6.guid
+        s_person_data = personV6CompositeService.update(content)
+        assertNotNull s_person_data
+        assertFalse s_person_data.isEmpty()
+        personV6 = personV6CompositeService.createPersonDataModel(s_person_data)
+        assertNull personV6.identityDocuments
+
+    }
+
+    @Test
+    void testUpdatePersonWithIdentityDocuments() {
+        Map content = newPersonWithIdentityDocument()
+        content.identityDocuments.getAt(0).remove("country")
+        Map s_person_data = personV6CompositeService.create(content)
+        assertNotNull s_person_data
+        assertFalse s_person_data.isEmpty()
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(s_person_data)
+        assertNotNull personV6
+        assertFalse personV6.identityDocuments.isEmpty()
+        IdentityDocumentV6 identityDocumentV6 = personV6.identityDocuments[0]
+        assertNotNull identityDocumentV6
+        assertEquals identityDocumentV6.type.category, content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId, content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.expiresOn, DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
+        assertEquals identityDocumentV6.country.code, isoCodeService.getISO3CountryCode(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
+
+        content.identityDocuments = [ [documentId: "1234567", country: [code:"USA"], expiresOn:"", type:[category: "passport"]]]
+        content.id = personV6.guid
+        s_person_data = personV6CompositeService.update(content)
+        assertNotNull s_person_data
+        assertFalse s_person_data.isEmpty()
+        personV6 = personV6CompositeService.createPersonDataModel(s_person_data)
+        assertNotNull personV6
+        assertFalse personV6.identityDocuments.isEmpty()
+        identityDocumentV6 = personV6.identityDocuments[0]
+        assertNotNull identityDocumentV6
+        assertEquals identityDocumentV6.type.category , content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId , content.identityDocuments[0].documentId
+        assertNull identityDocumentV6.expiresOn
+        assertEquals identityDocumentV6.country.code , content.identityDocuments[0].country.code
+
+    }
+
+    // person address post and put
+    @Test
+    void testCreatePersonWithAddressTypeDuplicate() {
+        Map content = newPersonWithAddress()
+        content.addresses << [address: [addressLines:[ "10243 Stratford Avenuem "]],type: [addressType:"home"]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "addressType.duplicate", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressTypeRequired() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "type.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressAddressTypeRequired() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]],type: [:]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "addressType.required", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressAddressTypeInvalid() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]],type: [addressType:"test"]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "addressType.inValid", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressAddressTypeNotFound() {
+        IntegrationConfiguration integrationConfiguration = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(GeneralValidationCommonConstants.PROCESS_CODE, GeneralValidationCommonConstants.ADDRESS_TYPE_SETTING_NAME_V6, 'home')[0]
+        assertNotNull integrationConfiguration
+        integrationConfiguration.delete( failOnError:true, flush: true )
+
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]],type: [addressType:"home"]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "addressType.not.found", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressAddressRequried() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[type: [addressType:"home"]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "address.requried", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressAddressLinesRequried() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines:[]],type: [addressType:"home"]]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "addressLines.requried", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressMandatoryFileds() {
+        Map content = newPersonWithAddress()
+        Map o_sucess_person_address = personV6CompositeService.create(content)
+        assertNotNull o_sucess_person_address
+        assertFalse o_sucess_person_address.isEmpty()
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(o_sucess_person_address)
+        assertNotNull personV6
+        List<PersonAddressDecorator> personAddressDecorators = personV6.addresses
+        assertNotNull personAddressDecorators
+        assertFalse personAddressDecorators.isEmpty()
+        assertNotNull personAddressDecorators[0].addressGuid
+        assertEquals personAddressDecorators[0].type.addressType,content.addresses[0].type.addressType
+    }
+
+    @Test
+    void testCreatePersonWithAddressToDatePast() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines   : ["10243 Stratford Avenuem "]],
+                             type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()),
+                              toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()-2)]]
+
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "toDate.past", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressFromDateFuture() {
+        Map content = newPersonWithAddress()
+        content.addresses = [[address: [addressLines   : ["10243 Stratford Avenuem "]],
+                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()+1),
+                              toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()+2)]]
+
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            personV6CompositeService.create(content)
+        }
+        assertEquals "fromDate.future", exceptionMessage
+    }
+
+    @Test
+    void testCreatePersonWithAddressAllFileds() {
+        GeographicRegionRule geographicRegionRule = GeographicRegionRule.list([max:1])[0]
+        assertNotNull geographicRegionRule
+        def guid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(geographicRegionRule.region.code + '-^' + geographicRegionRule.division.code, GeneralValidationCommonConstants.GEOGRAPHIC_AREA_LDM_NAME).guid
+        assertNotNull guid
+
+        Map content = newPersonWithAddress()
+        content.addresses << [address: [addressLines   : ["10243 Stratford Avenuem ", "10244 Stratford Avenuem ", "10245 Stratford Avenuem ", "10246 Stratford Avenuem "],
+                                        place          : [country: [code         : "USA", locality: "South Australia", postalCode: "2620"],
+                                                                    deliveryPoint: "01", carrierRoute: "C039", correctionDigit: "1"],
+                                        geographicAreas: [[id: "$guid" as String]]
+                                        ],
+                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()), toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()+1)]
+
+        Map o_sucess_person_address = personV6CompositeService.create(content)
+        assertNotNull o_sucess_person_address
+        assertFalse o_sucess_person_address.isEmpty()
+        PersonV6 personV6 = personV6CompositeService.createPersonDataModel(o_sucess_person_address)
+        assertNotNull personV6
+        List<PersonAddressDecorator> personAddressDecorators = personV6.addresses
+        assertNotNull personAddressDecorators
+        assertFalse personAddressDecorators.isEmpty()
+        assertNotNull personAddressDecorators[0].addressGuid
+        assertEquals personAddressDecorators[0].type.addressType,content.addresses[0].type.addressType
+    }
+
+    private Map newPersonWithPhones() {
+        Map params = [names : [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        ],
+                      phones: [
+                              [number: "6194448989", countryCallingCode: "+1", preference: "primary",extension:"123", type:[phoneType: "home"]]
+                      ]
+        ]
+        return params
+    }
+
+    private Map newPersonWithIdentityDocument() {
+        Map params = [names : [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        ],
+                      identityDocuments: [
+                              [documentId: "123456", country: [code:"USA"], expiresOn:"2016-11-11", type:[category: "passport"]]
+                      ]
+        ]
+        return params
+    }
+
+    private Map newPersonWithAddress() {
+        Map params = [names : [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        ],
+                      addresses: [
+                              [address: [addressLines:[ "10243 Stratford Avenuem ", "10244 Stratford Avenuem ", "10245 Stratford Avenuem ", "10246 Stratford Avenuem "]],
+                               type: [addressType:"home"]]
+                      ]
+        ]
+        return params
+    }
 
 }
