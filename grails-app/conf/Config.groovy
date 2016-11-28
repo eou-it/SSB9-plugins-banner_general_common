@@ -150,6 +150,10 @@ communication {
         enabled = true
         idleWaitTime = 30000
     }
+
+    email {
+        senderAuthenticationEnabled = false
+    }
 }
 // encKey must be exactly 32 chars
 communication.security.password.encKey = '772F9958BA824FCC861EBF7031EABB70'
