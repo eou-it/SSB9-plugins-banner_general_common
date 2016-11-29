@@ -528,7 +528,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         Map filterData = [params: ["jobId": groupSend.id, "name": '%', "status": CommunicationGroupSendItemExecutionState.Complete.toString()]]
         def isProcessingAndAFewItemsCompleted = {
             PagedResultList results = CommunicationGroupSendItemView.findByNameWithPagingAndSortParams(filterData, pagingAndSortParams)
-            println "total count = ${results.totalCount} + return = " + (results.totalCount >= 3)
+//            println "total count = ${results.totalCount} + return = " + (results.totalCount >= 3)
             return results.totalCount >= 3
         }
         assertTrueWithRetry( isProcessingAndAFewItemsCompleted, null, 30, 2 )

@@ -102,7 +102,6 @@ public class BannerDataSourceJobStoreCMT extends JobStoreCMT {
 
                     public Connection getConnection() throws SQLException {
                         // Return a transactional Connection, if any.
-                        println "BannerDataSourceJobStoreCMT.getConnection at " + new Date()
                         asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
                         return DataSourceUtils.doGetConnection(Holders.grailsApplication.mainContext.getBean('dataSource'));
                     }

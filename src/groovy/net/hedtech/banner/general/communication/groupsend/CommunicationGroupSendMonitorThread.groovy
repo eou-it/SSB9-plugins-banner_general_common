@@ -39,7 +39,6 @@ class CommunicationGroupSendMonitorThread extends Thread {
 
     private void monitorGroupSends() {
         log.trace( "monitorGroupSends() begin" )
-        println "monitorGroupSends() begin at " + new Date()
         try {
             if (keepRunning) {
                 try {
