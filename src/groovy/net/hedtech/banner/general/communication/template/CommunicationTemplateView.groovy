@@ -128,6 +128,7 @@ public class CommunicationTemplateView implements Serializable {
                     ilike("folderName", searchName)
                 }
             }
+            order(Order.asc("folderName").ignoreCase())
             order(Order.asc("name").ignoreCase())
         }
         return results

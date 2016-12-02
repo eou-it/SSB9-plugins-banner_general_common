@@ -91,14 +91,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         for (String name:fieldNames) {
             CommunicationField communicationField = CommunicationField.fetchByName( name )
             if (communicationField) {
-                String value = calculateFieldByPidm(
-                    communicationField.ruleContent,
-                    communicationField.returnsArrayArguments,
-                    communicationField.formatString,
-                    pidm,
-                    mepCode
-                )
-
+                String value = calculateSingleFieldByPidm(communicationField, pidm, mepCode)
                 CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
                 nameValueMap.put( name, communicationFieldValue )
             } else {
@@ -108,6 +101,19 @@ class CommunicationFieldCalculationService extends ServiceBase {
         }
 
         return nameValueMap
+    }
+
+    public String calculateSingleFieldByPidm( CommunicationField communicationField, Long pidm, String mepCode=null ) {
+
+        String value = calculateFieldByPidm(
+                communicationField.ruleContent,
+                communicationField.returnsArrayArguments,
+                communicationField.formatString,
+                pidm,
+                mepCode
+        )
+
+        return value
     }
 
     public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
