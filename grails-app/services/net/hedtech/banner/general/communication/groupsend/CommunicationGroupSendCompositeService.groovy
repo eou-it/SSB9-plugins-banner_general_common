@@ -172,6 +172,7 @@ class CommunicationGroupSendCompositeService {
 
         // fetch any communication jobs for this group send and marked as stopped
         stopPendingCommunicationJobs( groupSend.id )
+        stopPendingGroupSendItems( groupSend.id )
 
         return groupSend
     }
@@ -422,6 +423,23 @@ class CommunicationGroupSendCompositeService {
             sql?.close()
         }
     }
+
+    private void stopPendingGroupSendItems( Long groupSendId ) {
+        def Sql sql
+        try {
+            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
+            sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+            int rowsUpdated = sql.executeUpdate( "update GCRGSIM set GCRGSIM_CURRENT_STATE='Stopped', GCRGSIM_ACTIVITY_DATE = SYSDATE, GCRGSIM_STOP_DATE = SYSDATE where " +
+                    "GCRGSIM_CURRENT_STATE in ('Ready') and GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
+        } catch (SQLException e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
+        } catch (Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
+        } finally {
+            sql?.close()
+        }
+    }
+
 
     private void createGroupSendItems( CommunicationGroupSend groupSend ) {
         if (log.isDebugEnabled()) log.debug( "Generating group send item records for group send with id = " + groupSend?.id );
