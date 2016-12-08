@@ -8,7 +8,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
-import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ThirdPartyAccessService
 import net.hedtech.banner.general.overall.VisaInternationalInformation
 import net.hedtech.banner.general.person.*
@@ -30,14 +29,11 @@ import java.sql.Timestamp
 @Transactional
 class PersonV6CompositeService extends AbstractPersonCompositeService {
 
-
-    def settingNameSSN = 'PERSON.UPDATESSN'
-
-
     IsoCodeService isoCodeService
     EmailTypeService emailTypeService
     ThirdPartyAccessService thirdPartyAccessService
     CitizenTypeService citizenTypeService
+
 
     @Override
     protected String getPopSelGuidOrDomainKey(final Map requestParams) {
@@ -303,6 +299,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
     }
 
+
     private void fetchPersonsMaritalStatusDataAndPutInMap(Map dataMap) {
         maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
         Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
@@ -317,6 +314,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
         return phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
     }
+
 
     protected def getBannerMaritalStatusToHedmMaritalStatusMap() {
         return maritalStatusCompositeService.getBannerMaritalStatusToHedmV4MaritalStatusMap()
@@ -974,16 +972,14 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
         if (person.containsKey("credentials") && person.get("credentials") instanceof List) {
-            def updateSSN = checkSSNUpdate()
             requestData.put("credentials", extractCredentialsFromRequest(person.get("credentials")))
-            requestData.put("updateSSN", updateSSN)
         }
 
         if (person.containsKey("identityDocuments") && person.get("identityDocuments") instanceof List) {
             requestData.put("identityDocuments", extractIdentityDocumentsFromRequest(person.get("identityDocuments")))
         }
 
-        if(person.containsKey("phones") && person.get("phones") instanceof List){
+        if (person.containsKey("phones") && person.get("phones") instanceof List) {
             requestData.put("phones", extractPhonesFromRequest(person.get("phones")))
         }
 
@@ -1009,10 +1005,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             boolean citizenIndicator
             if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_CITIZEN)) {
                 citizenIndicator = true
-            }
-            else if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
+            } else if (citizenshipCategory.equalsIgnoreCase(GeneralValidationCommonConstants.CITIZENSHIP_STATUSES_CATEGORY_NON_CITIZEN)) {
                 citizenIndicator = false
-            }else {
+            } else {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("citizenshipstatus.not.found", null))
             }
             return citizenTypeService.fetchByCitizenIndicator(citizenIndicator)
@@ -1036,7 +1031,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             crossReferenceRule = crossReferenceRules?.get(0)
             if (crossReferenceRule?.bannerValue) {
                 language = Language.findByCode(crossReferenceRules.bannerValue)
-            }else {
+            } else {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("mapping.not.found", null))
             }
         } else {
@@ -1128,8 +1123,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         if (preference != 'primary' && requestEmail.get('preference') == 'primary' && requestEmail.get('preference').length() > 0) {
                             preference = 'primary'
                             personEmailMap.put("preference", 'Y')
-                        }
-                        else if (requestEmail.get('preference').length() == 0) {
+                        } else if (requestEmail.get('preference').length() == 0) {
                             personEmailMap.put("preference", 'N')
                         } else {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("multiple.primaryemail.invalid", null))
@@ -1196,6 +1190,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         return raceCodes
     }
 
+
     private def extractReligionFromRequest(Map religion) {
         if (religion.get("id") instanceof String) {
             Religion religionObj = religionCompositeService.fetchByGuid(religion.get("id"))
@@ -1207,6 +1202,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
     }
 
+
     private def extractPrivacyStatusFromRequest(Map privacyStatus) {
         if (privacyStatus.get("privacyCategory") instanceof String) {
             if (privacyStatus.get("privacyCategory") == 'restricted') {
@@ -1217,28 +1213,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
     }
 
-    private def extractGenderFromRequest(String gender) {
-        if (gender instanceof String) {
-            if (gender == Gender.MALE.versionToEnumMap["v6"]) {
-                return 'M'
-            } else if (gender == Gender.FEMALE.versionToEnumMap["v6"]) {
-                return 'F'
-            } else if (gender == Gender.UNKNOWN.versionToEnumMap["v6"]) {
-                return 'N'
-            }
-        }
-        return null
-    }
-
-
-    private def checkSSNUpdate() {
-        IntegrationConfiguration intConfs = findAllByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, settingNameSSN)[0]
-        if (intConfs.value == 'Y') {
-            return 'Y'
-        } else {
-            return 'N'
-        }
-    }
 
     private def extractCredentialsFromRequest(final List credentialsInRequest) {
         List personCredentialList = []
@@ -1272,6 +1246,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
         return personCredentialList
     }
+
 
     private void extractNameFieldsAndPutInMap(Map nameObj, Map requestData) {
         if (nameObj.containsKey("firstName") && nameObj.get("firstName") instanceof String) {
@@ -1308,6 +1283,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
 
     }
+
 
     private def extractAddressesFromRequest(final List addressesInRequest) {
         List personAddressMapList = []
@@ -1398,6 +1374,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
         return personAddressMapList
     }
+
 
     private void setAddressDetails(Map address, Map personAddressMap) {
 
@@ -1593,6 +1570,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     }
 
+
     private def extractIdentityDocumentsFromRequest(final List identityDocumentsRequest) {
         List identityDocumentMapList = []
         if (identityDocumentsRequest) {
@@ -1658,6 +1636,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         }
     }
 
+
     private def extractPhonesFromRequest(final List phoneInRequest) {
         List personPhoneMapList = []
 
@@ -1671,7 +1650,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
             List preferences = phoneInRequest?.preference
             preferences?.removeAll(Collections.singleton(null))
-            if(preferences && preferences.size() != preferences.unique().size()){
+            if (preferences && preferences.size() != preferences.unique().size()) {
                 //throw an exception
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.preferences.duplicate", []))
             }
@@ -1707,30 +1686,30 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                         throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.number.required", []))
                     }
 
-                    if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode')?.length() > 0){
-                      String  countryCallingCode = requestPhone.get('countryCallingCode')
-                      String  pattern = "^\\+?[1-9][0-9]{0,3}"+'$'
-                        if (!countryCallingCode.matches(pattern)){
+                    if (requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode')?.length() > 0) {
+                        String countryCallingCode = requestPhone.get('countryCallingCode')
+                        String pattern = "^\\+?[1-9][0-9]{0,3}" + '$'
+                        if (!countryCallingCode.matches(pattern)) {
                             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.invalid.countryCallingCode.format", []))
                         }
                         personPhoneMap.countryPhone = countryCallingCode
 
-                    }else if(requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode')?.length() == 0){
+                    } else if (requestPhone.containsKey('countryCallingCode') && requestPhone.get('countryCallingCode') instanceof String && requestPhone.get('countryCallingCode')?.length() == 0) {
                         personPhoneMap.countryPhone = null
                     }
 
-                    if(requestPhone.containsKey('extension') && requestPhone.get('extension') instanceof String && requestPhone.get('extension').length() > 0){
+                    if (requestPhone.containsKey('extension') && requestPhone.get('extension') instanceof String && requestPhone.get('extension').length() > 0) {
                         personPhoneMap.phoneExtension = requestPhone.get('extension')
-                    }else if(requestPhone.containsKey('extension') && requestPhone.get('extension') instanceof String && requestPhone.get('extension').length() == 0){
+                    } else if (requestPhone.containsKey('extension') && requestPhone.get('extension') instanceof String && requestPhone.get('extension').length() == 0) {
                         personPhoneMap.phoneExtension = null
                     }
 
-                    if(requestPhone.containsKey('preference') && requestPhone.get('preference') instanceof String && requestPhone.get('preference').length() > 0){
+                    if (requestPhone.containsKey('preference') && requestPhone.get('preference') instanceof String && requestPhone.get('preference').length() > 0) {
                         String preference = requestPhone.get('preference')
-                        if('primary'.equals(preference)){
+                        if ('primary'.equals(preference)) {
                             personPhoneMap.preference = 'Y'
                         }
-                    }else if(requestPhone.containsKey('preference') && requestPhone.get('preference') instanceof String && requestPhone.get('preference').length() == 0){
+                    } else if (requestPhone.containsKey('preference') && requestPhone.get('preference') instanceof String && requestPhone.get('preference').length() == 0) {
                         personPhoneMap.preference = null
                     }
                 }
@@ -1743,17 +1722,16 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-
     protected Map parseAndBuildPersonTelephoneMap(final Map requestPhone) {
         String countryRegionCode
-        if(requestPhone.containsKey("countryPhone") && requestPhone.get("countryPhone")?.length() > 0){
-          String countryPhone = requestPhone.get("countryPhone")
-            if(countryPhone.getAt(0) == '+'){
+        if (requestPhone.containsKey("countryPhone") && requestPhone.get("countryPhone")?.length() > 0) {
+            String countryPhone = requestPhone.get("countryPhone")
+            if (countryPhone.getAt(0) == '+') {
                 countryPhone = new StringBuilder(countryPhone).deleteCharAt(0).toString()
             }
             countryRegionCode = PhoneNumberUtil.getInstance().getRegionCodeForCountryCode(Integer.valueOf(countryPhone))
-        }else{
-            countryRegionCode = getDefault2CharISOCountryCode()
+        } else {
+            countryRegionCode = integrationConfigurationService.getDefaultISO2CountryCodeForPhoneNumberParsing()
         }
         def parts = PhoneNumberUtility.parsePhoneNumber(requestPhone.phoneNumber, countryRegionCode)
         if (parts.size() == 0) {
@@ -1763,7 +1741,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         def personTelephoneMap = [:]
 
         TelephoneType telephoneType = TelephoneType.findByCode(requestPhone.bannerPhoneType)
-        if(!telephoneType){
+        if (!telephoneType) {
             throw new ApplicationException(GeneralValidationCommonConstants.PHONE_ENTITY_TYPE, new NotFoundException())
         }
 
@@ -1776,6 +1754,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
         return personTelephoneMap
     }
+
 
     protected def splitPhoneNumber(String requestPhoneNumber) {
         def parts = [:]

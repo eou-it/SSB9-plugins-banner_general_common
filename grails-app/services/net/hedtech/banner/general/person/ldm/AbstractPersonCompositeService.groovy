@@ -25,12 +25,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     private static final int MAX_DEFAULT = 500
     private static final int MAX_UPPER_LIMIT = 500
-    static final String ldmName = 'persons'
 
-    private static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
+    private static final String ldmName = 'persons'
+
     private static final String ZIP_DEFAULT = "PERSON.ADDRESSES.POSTAL.CODE"
-    private static final String PERSON_PHONES_COUNTRY_DEFAULT = "PERSON.PHONES.COUNTRY.DEFAULT"
-    private static final String PROCESS_CODE = "HEDM"
 
 
     private static final ThreadLocal<Map> threadLocal =
@@ -98,7 +96,9 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
     abstract protected def getBannerPhoneTypeToHedmPhoneTypeMap()
 
+
     abstract protected def getBannerMaritalStatusToHedmMaritalStatusMap()
+
 
     abstract protected def getBannerEmailTypeToHedmEmailTypeMap()
 
@@ -525,7 +525,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         if (requestData.containsKey("phones") && requestData.get("phones") instanceof List) {
             List phones = requestData.get("phones")
             phones = getActivePhones(newPersonIdentificationName.pidm, phones)
-            if(phones){
+            if (phones) {
                 createPhones(phones, newPersonIdentificationName.pidm)
             }
         }
@@ -643,6 +643,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return personVisaInternationalInformation
     }
 
+
     private def fetchNationByScondISO(String nationISOCode) {
         if (!nationISOCode) {
             return null
@@ -656,6 +657,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
 
     }
+
 
     private
     def createOrUpdatePersonEmails(List emailListInRequest, Integer pidm, List<PersonEmail> existingPersonEmails, String dataOrigin) {
@@ -700,6 +702,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
         return personEmails
     }
+
 
     private
     def createOrUpdatePersonRace(List raceCodes, Integer pidm, List<PersonRace> existingPersonRaces, String dataOrigin) {
@@ -886,6 +889,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return newAddresses
     }
 
+
     def createOrUpdateAdditionalId(PersonIdentificationNameCurrent personIdentification, Map credential, String dataOrigin) {
         def idType = AdditionalIdentificationType.findByCode("ELV8")
         List<AdditionalID> existingIds = AdditionalID.fetchByPidmInListAndAdditionalIdentificationTypeInList([personIdentification.pidm], ["ELV8"])
@@ -900,6 +904,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                     dataOrigin: dataOrigin)
         additionalIDService.createOrUpdate(existingId)
     }
+
 
     private PersonBasicPersonBase updatePersonBasicPersonBase(pidm, personBaseList, newPersonIdentificationName, personBaseData, alternateNames, ssn, dataOrigin) {
         PersonBasicPersonBase newPersonBase
@@ -916,10 +921,11 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 if (personBaseData.containsKey("nameSuffix")) {
                     personBase.nameSuffix = personBaseData.get("nameSuffix")
                 }
-                if (personBaseData.get('updateSSN') == 'Y' && personBase.ssn) {
-                    personBase.ssn = ssn
-                }
-                if (!personBase.ssn) {
+                if (personBase.ssn) {
+                    if (integrationConfigurationService.canUpdatePersonSSN()) {
+                        personBase.ssn = ssn
+                    }
+                } else {
                     personBase.ssn = ssn
                 }
                 if (personBaseData.containsKey("sex")) {
@@ -1227,7 +1233,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
 
         // phones
-        if(dataMapForPerson.containsKey("personPhones") && dataMapForPerson.get("personPhones").size() > 0){
+        if (dataMapForPerson.containsKey("personPhones") && dataMapForPerson.get("personPhones").size() > 0) {
             dataMapForPerson.put("bannerPhoneTypeToHedmPhoneTypeMap", getBannerPhoneTypeToHedmPhoneTypeMap())
             dataMapForPerson.put("personPhones", dataMapForPerson.get("personPhones"))
             // Get GUID for each PhoneType
@@ -1318,14 +1324,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return phones
     }
 
-    private def createPhones(List phones, Integer pidm){
-        phones.each{ phoneMap ->
+
+    private def createPhones(List phones, Integer pidm) {
+        phones.each { phoneMap ->
             phoneMap.put("pidm", pidm)
         }
 
-       return personTelephoneService.create(phones)
+        return personTelephoneService.create(phones)
 
     }
+
 
     protected def createOrUpdateAddress(List domainPropertiesMapList, Integer pidm) {
 
@@ -1351,6 +1359,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return personAddresses
     }
 
+
     protected def createOrUpdateGeographicAddress(Map addressMap, PersonAddress personAddress) {
 
         if (addressMap.containsKey("geographicAreaGuids") && addressMap.get("geographicAreaGuids") instanceof List) {
@@ -1365,6 +1374,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
     }
+
 
     protected void bindPersonGeographicAreaAddress(PersonGeographicAreaAddress personGeographicAreaAddress, String guid, Map guidToGeogrphicAreasMap, PersonAddress personAddress) {
         if (guidToGeogrphicAreasMap.containsKey(guid)) {
@@ -1382,6 +1392,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         personGeographicAreaAddress.sourceIndicator = 'S'
         personGeographicAreaAddress.userData = personAddress.userData
     }
+
 
     private void bindPersonAddress(PersonAddress personAddress, Map domainPropertiesMap, Integer pidm) {
         personAddress.pidm = pidm
@@ -1422,6 +1433,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         bindData(personAddress, domainPropertiesMap, [:])
     }
 
+
     protected def getDefalutZipCode() {
         IntegrationConfiguration intConfig = super.findAllByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, ZIP_DEFAULT)[0]
         if (!intConfig) {
@@ -1429,6 +1441,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         }
         return intConfig.value
     }
+
 
     private def searchForMatchingPersons(final Map content) {
         def cmRequest = prepareCommonMatchingRequest(content)
@@ -1978,21 +1991,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
         return listOfMaps
     }
 
-    protected String getDefault2CharISOCountryCode() {
-        IntegrationConfiguration intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_PHONES_COUNTRY_DEFAULT)
-        if (intConf.value.length() > 2) {
-            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_PHONES_COUNTRY_DEFAULT]))
-        }
-        return intConf.value
-    }
-
-    private IntegrationConfiguration getIntegrationConfiguration(processCode, settingName) {
-        IntegrationConfiguration intConf = IntegrationConfiguration.findByProcessCodeAndSettingName(processCode, settingName)
-        if (!intConf) {
-            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("goriccr.not.found.message", [settingName]))
-        }
-        return intConf
-    }
 
     private void injectTotalCountIntoParams(Map requestParams, Map requestProcessingResult) {
         if (requestProcessingResult.containsKey("totalCount")) {

@@ -7,10 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
-import net.hedtech.banner.general.overall.ImsSourcedIdBase
-import net.hedtech.banner.general.overall.IntegrationConfiguration
-import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
-import net.hedtech.banner.general.overall.ThirdPartyAccess
+import net.hedtech.banner.general.overall.*
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
@@ -40,8 +37,6 @@ class PersonCompositeService extends LdmService {
     private static final String PERSON_POSTAL_CODE = "PERSON.ADDRESSES.POSTAL.CODE"
     private static final String PERSON_PHONE_TYPE = "PERSON.PHONES.PHONETYPE"
     private static final String PERSON_NAME_TYPE = "PERSON.NAMES.NAMETYPE"
-    private static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
-    private static final String PERSON_PHONES_COUNTRY_DEFAULT = "PERSON.PHONES.COUNTRY.DEFAULT"
     private static final String DOMAIN_KEY_DELIMITER = '-^'
     private static final String PERSON_EMAILS_LDM_NAME = "person-emails"
     private static final String PERSON_EMAIL_TYPE_PREFERRED = "Preferred"
@@ -62,6 +57,7 @@ class PersonCompositeService extends LdmService {
     def personFilterCompositeService
     def personIdentificationNameAlternateService
     def commonMatchingCompositeService
+    IntegrationConfigurationService integrationConfigurationService
 
     List<GlobalUniqueIdentifier> allEthnicities
 
@@ -684,20 +680,20 @@ class PersonCompositeService extends LdmService {
 
 
     private PersonBasicPersonBase createPersonBasicPersonBase(person, newPersonIdentificationName, newPersonIdentification) {
-            PersonBasicPersonBase newPersonBase
-            if (person.guid) {
-                updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
-            } else {
-                def entity = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
-                person.put('guid', entity)
-            }
-            if (person?.credentials instanceof List) {
-                person?.credentials?.each { it ->
-                    if (it instanceof Map) {
-                        person = createSSN(it.credentialType, it.credentialId, person)
-                    }
+        PersonBasicPersonBase newPersonBase
+        if (person.guid) {
+            updateGuidValue(newPersonIdentificationName.id, person.guid, ldmName)
+        } else {
+            def entity = GlobalUniqueIdentifier.fetchByLdmNameAndDomainId(ldmName, newPersonIdentificationName.id)
+            person.put('guid', entity)
+        }
+        if (person?.credentials instanceof List) {
+            person?.credentials?.each { it ->
+                if (it instanceof Map) {
+                    person = createSSN(it.credentialType, it.credentialId, person)
                 }
             }
+        }
 
         //Copy personBase attributes into person map from Primary names object.
         person.put('dataOrigin', person?.metadata?.dataOrigin)
@@ -835,7 +831,7 @@ class PersonCompositeService extends LdmService {
 
     private PersonTelephone parseAndCreatePersonTelephone(Integer pidm, Map metadata, TelephoneType telephoneType, Map requestPhone) {
         validatePhoneRequiredFields(requestPhone)
-        def parts = PhoneNumberUtility.parsePhoneNumber(requestPhone.phoneNumber, getDefault2CharISOCountryCode())
+        def parts = PhoneNumberUtility.parsePhoneNumber(requestPhone.phoneNumber, integrationConfigurationService.getDefaultISO2CountryCodeForPhoneNumberParsing())
         if (parts.size() == 0) {
             // Parsing is not succesful so we go with split
             parts = splitPhoneNumber(requestPhone.phoneNumber)
@@ -849,15 +845,6 @@ class PersonCompositeService extends LdmService {
         personTelephoneMap.put("phoneNumber", parts["phoneNumber"])
         personTelephoneMap.put("phoneExtension", requestPhone.phoneExtension)
         return createPersonTelephone(personTelephoneMap)
-    }
-
-
-    private String getDefault2CharISOCountryCode() {
-        IntegrationConfiguration intConf = getIntegrationConfiguration(PROCESS_CODE, PERSON_PHONES_COUNTRY_DEFAULT)
-        if (intConf.value.length() > 2) {
-            throw new ApplicationException(Person, new BusinessLogicValidationException("goriccr.invalid.value.message", [PERSON_PHONES_COUNTRY_DEFAULT]))
-        }
-        return intConf.value
     }
 
 
@@ -1682,13 +1669,12 @@ class PersonCompositeService extends LdmService {
 
     private def updateSSN(String inputCredentialType, String credentialId, def personBase) {
         if (inputCredentialType == 'Social Security Number' || inputCredentialType == 'Social Insurance Number') {
-            if (personBase.ssn == null) {
-                personBase.ssn = credentialId
-            } else {
-                IntegrationConfiguration personSSN = IntegrationConfiguration.fetchByProcessCodeAndSettingName(PROCESS_CODE, PERSON_UPDATESSN)
-                if (personSSN?.value == 'Y') {
+            if (personBase.ssn) {
+                if (integrationConfigurationService.canUpdatePersonSSN()) {
                     personBase.ssn = credentialId
                 }
+            } else {
+                personBase.ssn = credentialId
             }
         }
         return personBase
