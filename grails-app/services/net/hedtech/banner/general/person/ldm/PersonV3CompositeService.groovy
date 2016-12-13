@@ -5,7 +5,6 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 
@@ -197,26 +196,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
 
 
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
-        fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsMaritalStatusDataAndPutInMap(dataMap)
-    }
 
-    private void fetchPersonsMaritalStatusDataAndPutInMap(Map dataMap) {
-        maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
-        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-
-        // Put in Map
-        dataMap.put("bannerMaritalStatusToHedmMaritalStatusMap", bannerMaritalStatusToHedmMaritalStatusMap)
-        dataMap.put("maritalStatusCodeToGuidMap", maritalStatusCodeToGuidMap)
-    }
-
-
-    private void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        Set<String> maritalStatusCodes = dataMap.pidmToPersonBaseMap?.values().maritalStatus.code.flatten().unique()
-        // MaritalStatus.fetchAllWithGuidByCodeInList
-        // MaritalStatusCompositeService.getMaritalStatusCodeToGuidMap
     }
 
 
@@ -245,21 +225,9 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
         return emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
     }
 
-    protected def getBannerMaritalStatusToHedmMaritalStatusMap() {
-        return maritalStatusCompositeService.getBannerMaritalStatusToHedmV4MaritalStatusMap()
-    }
 
-    @Override
-    protected extractDataFromRequestBody(Map content) {
+    protected def extractDataFromRequestBody(Map content) {
         return null
-    }
-
-    private void fetchPersonsEmailDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        Set<Long> personEmailSurrogateIds = dataMap.pidmToEmailsMap?.values().id.flatten().unique()
-        Map<Long, String> personEmailSurrogateIdToGuidMap = getPersonEmailSurrogateIdToGuidMap(personEmailSurrogateIds)
-
-        // Put in Map
-        dataMap.put("personEmailSurrogateIdToGuidMap", personEmailSurrogateIdToGuidMap)
     }
 
 
@@ -267,20 +235,9 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
                                                                  final Map dataMap, Map dataMapForPerson) {
     }
 
-    @Override
-    protected createPersonDataModel(Map dataMapForPerson) {
-        return null
-    }
 
-    private def getPersonEmailSurrogateIdToGuidMap(Collection<String> personEmailSurrogateIds) {
-        def personEmailSurrogateIdToGuidMap = [:]
-        if (personEmailSurrogateIds) {
-            List<GlobalUniqueIdentifier> entities = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds("person-emails", personEmailSurrogateIds)
-            entities?.each {
-                personEmailSurrogateIdToGuidMap.put(it.domainId, it.guid)
-            }
-        }
-        return personEmailSurrogateIdToGuidMap
+    protected def createPersonDataModel(Map dataMapForPerson) {
+        return null
     }
 
 }

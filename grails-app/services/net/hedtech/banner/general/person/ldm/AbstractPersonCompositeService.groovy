@@ -60,7 +60,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
     PersonGeographicAreaAddressService personGeographicAreaAddressService
     GeographicAreaCompositeService geographicAreaCompositeService
     PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
-    MaritalStatusCompositeService maritalStatusCompositeService
     MaritalStatusService maritalStatusService
     VisaInternationalInformationService visaInternationalInformationService
     NationCompositeService nationCompositeService
@@ -95,9 +94,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     abstract protected def getBannerPhoneTypeToHedmPhoneTypeMap()
-
-
-    abstract protected def getBannerMaritalStatusToHedmMaritalStatusMap()
 
 
     abstract protected def getBannerEmailTypeToHedmEmailTypeMap()
@@ -367,7 +363,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         dataMapForPerson.put("visaInternationalInformation", visaInternationalInformation)
         dataMapForPerson.put("personInterests", personInterests)
         dataMapForPerson.put("personPhones", personTelephones)
-        return createPersonDataMapForSinglePerson(dataMapForPerson)
+        return prepareDataMapForSinglePerson(dataMapForPerson)
     }
 
     /**
@@ -547,7 +543,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
         dataMapForPerson.put("personInterests", personInterests)
         dataMapForPerson.put("personPhones", personTelephones)
 
-        return createPersonDataMapForSinglePerson(dataMapForPerson)
+        return prepareDataMapForSinglePerson(dataMapForPerson)
 
     }
 
@@ -1113,7 +1109,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    protected def createPersonDataMapForSinglePerson(Map dataMapForPerson) {
+    private def prepareDataMapForSinglePerson(Map dataMapForPerson) {
         PersonIdentificationNameCurrent personIdentificationNameCurrent
         PersonBasicPersonBase personBase = dataMapForPerson.get("personBase")
         if (dataMapForPerson.containsKey("personIdentificationNameCurrent")) {
@@ -1162,13 +1158,12 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson << ["personRoles": personRoles]
         }
 
-        //maritalStatus
-        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
-        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-        dataMapForPerson << ["bannerMaritalStatusToHedmMaritalStatusMap": bannerMaritalStatusToHedmMaritalStatusMap]
-        dataMapForPerson << ["maritalStatusCodeToGuidMap": maritalStatusCodeToGuidMap]
+        // maritalStatus
+        if (personBase.maritalStatus) {
+            dataMapForPerson << ["maritalStatusGuid": getMaritalStatusCodeToGuidMap([personBase.maritalStatus.code]).get(personBase.maritalStatus.code)]
+        }
 
-        //maritalStatus
+        // Emails
         Map<String, String> bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
         def emailTypeCodeToGuidMap = emailTypeCompositeService.getEmailTypeCodeToGuidMap(bannerEmailTypeToHedmEmailTypeMap.keySet())
         dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": bannerEmailTypeToHedmEmailTypeMap]
@@ -1518,6 +1513,10 @@ abstract class AbstractPersonCompositeService extends LdmService {
             if (personBase.ethnic) {
                 dataMapForPerson << ["usEthnicCodeGuid": dataMap.usEthnicCodeToGuidMap.get(personBase.ethnic)]
             }
+
+            if (personBase.maritalStatus) {
+                dataMapForPerson << ["maritalStatusGuid": dataMap.maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code)]
+            }
         }
 
         // names
@@ -1556,10 +1555,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
             dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
         }
 
-        // maritalStatus
-        dataMapForPerson << ["bannerMaritalStatusToHedmMaritalStatusMap": dataMap.bannerMaritalStatusToHedmMaritalStatusMap]
-        dataMapForPerson << ["maritalStatusCodeToGuidMap": dataMap.maritalStatusCodeToGuidMap]
-
         // emails
         List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)
         if (personEmailList) {
@@ -1584,11 +1579,16 @@ abstract class AbstractPersonCompositeService extends LdmService {
         // Get SPBPERS records for persons
         def pidmToPersonBaseMap = getPidmToPersonBaseMap(pidms)
 
+        // Get GUID for each MaritalStatus
+        Set<String> msCodes = pidmToPersonBaseMap?.values().maritalStatus?.code?.flatten()?.unique()
+        def maritalStatusCodeToGuidMap = getMaritalStatusCodeToGuidMap(msCodes)
+
         // Get GUIDs for US ethnic codes (SPBPERS_ETHN_CDE)
         Map<String, String> usEthnicCodeToGuidMap = ethnicityCompositeService.fetchGUIDsForUnitedStatesEthnicCodes()
 
         // Put in Map
         dataMap.put("pidmToPersonBaseMap", pidmToPersonBaseMap)
+        dataMap.put("maritalStatusCodeToGuidMap", maritalStatusCodeToGuidMap)
         dataMap.put("usEthnicCodeToGuidMap", usEthnicCodeToGuidMap)
     }
 
@@ -1944,6 +1944,20 @@ abstract class AbstractPersonCompositeService extends LdmService {
             }
         }
         return pidmToRacesMap
+    }
+
+
+    private def getMaritalStatusCodeToGuidMap(Collection<String> codes) {
+        Map<String, String> codeToGuidMap = [:]
+        if (codes) {
+            def rows = maritalStatusService.fetchAllWithGuidByCodeInList(codes)
+            rows?.each {
+                MaritalStatus nameType = it.maritalStatus
+                GlobalUniqueIdentifier globalUniqueIdentifier = it.globalUniqueIdentifier
+                codeToGuidMap.put(nameType.code, globalUniqueIdentifier.guid)
+            }
+        }
+        return codeToGuidMap
     }
 
 

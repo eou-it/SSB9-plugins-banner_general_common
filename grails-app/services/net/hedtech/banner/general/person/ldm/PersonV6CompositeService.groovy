@@ -33,6 +33,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     EmailTypeService emailTypeService
     ThirdPartyAccessService thirdPartyAccessService
     CitizenTypeService citizenTypeService
+    MaritalStatusV4CompositeService maritalStatusV4CompositeService
 
 
     @Override
@@ -227,7 +228,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
-        fetchPersonsMaritalStatusDataAndPutInMap(dataMap)
+        dataMap.put("bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap", maritalStatusV4CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap())
     }
 
 
@@ -300,24 +301,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsMaritalStatusDataAndPutInMap(Map dataMap) {
-        maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
-        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-
-        // Put in Map
-        dataMap.put("bannerMaritalStatusToHedmMaritalStatusMap", bannerMaritalStatusToHedmMaritalStatusMap)
-        dataMap.put("maritalStatusCodeToGuidMap", maritalStatusCodeToGuidMap)
-    }
-
-
     protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
         return phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
-    }
-
-
-    protected def getBannerMaritalStatusToHedmMaritalStatusMap() {
-        return maritalStatusCompositeService.getBannerMaritalStatusToHedmV4MaritalStatusMap()
     }
 
 
@@ -356,6 +341,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
             if (personBase.religion) {
                 dataMapForPerson << ["religionGuid": dataMap.relCodeToGuidMap.get(personBase.religion.code)]
+            }
+            if (personBase.maritalStatus) {
+                dataMapForPerson << ["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap": dataMap.bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap]
             }
         }
 
@@ -456,10 +444,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
                 //maritalStatus
                 if (personBase.maritalStatus) {
-                    def bannerMaritalStatusToHedmMaritalStatusMap = dataMapForPerson["bannerMaritalStatusToHedmMaritalStatusMap"]
-                    def maritalStatusCodeToGuidMap = dataMapForPerson["maritalStatusCodeToGuidMap"]
-                    if (bannerMaritalStatusToHedmMaritalStatusMap.containsKey(personBase.maritalStatus.code)) {
-                        decorator.maritalStatus = maritalStatusCompositeService.createMaritalStatusDataModelV4(maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code), personBase.maritalStatus, bannerMaritalStatusToHedmMaritalStatusMap)
+                    String maritalStatusGuid = dataMapForPerson["maritalStatusGuid"]
+                    def bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap = dataMapForPerson["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap"]
+                    if (!bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap) {
+                        bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap = maritalStatusV4CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap()
+                    }
+                    if (bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap.containsKey(personBase.maritalStatus.code)) {
+                        decorator.maritalStatus = maritalStatusV4CompositeService.createMaritalStatusDataModel(maritalStatusGuid, personBase.maritalStatus, bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap)
                     }
                 }
             }
@@ -1145,10 +1136,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
 
     private def extractMaritalStatusFromRequest(Map maritalStatusMap) {
-        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
+        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = maritalStatusV4CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap()
         MaritalStatus maritalStatus
         if (maritalStatusMap.containsKey("maritalCategory") && maritalStatusMap.get("maritalCategory") instanceof String && maritalStatusMap.get("maritalCategory")?.length() > 0) {
-            if (!MaritalStatusCategory.getByString(maritalStatusMap.get("maritalCategory"), "v4")) {
+            if (!MaritalStatusCategory.getByDataModelValue(maritalStatusMap.get("maritalCategory"), "v4")) {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("marital.status.not.found", null))
             }
             def mapEntry = bannerMaritalStatusToHedmMaritalStatusMap.find { key, value -> value == maritalStatusMap.get("maritalCategory") }

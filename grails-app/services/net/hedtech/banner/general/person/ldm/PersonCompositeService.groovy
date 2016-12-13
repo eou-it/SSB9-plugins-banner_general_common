@@ -13,6 +13,7 @@ import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.*
 import net.hedtech.banner.general.person.ldm.v1.*
 import net.hedtech.banner.general.system.*
+import net.hedtech.banner.general.system.ldm.MaritalStatusV1CompositeService
 import net.hedtech.banner.general.system.ldm.v1.MaritalStatusDetail
 import net.hedtech.banner.general.system.ldm.v1.Metadata
 import net.hedtech.banner.general.system.ldm.v1.RaceDetail
@@ -48,7 +49,8 @@ class PersonCompositeService extends LdmService {
     def personAddressService
     def personTelephoneService
     def personEmailService
-    def maritalStatusCompositeService
+    MaritalStatusV1CompositeService maritalStatusV1CompositeService
+    MaritalStatusService maritalStatusService
     def ethnicityCompositeService
     def raceCompositeService
     def personRaceService
@@ -347,7 +349,7 @@ class PersonCompositeService extends LdmService {
                 throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("marital.status.guid.required.message", []))
             }
             try {
-                maritalStatusDetail = maritalStatusCompositeService.get(maritalStatusGuid)
+                maritalStatusDetail = maritalStatusV1CompositeService.get(maritalStatusGuid)
             } catch (ApplicationException ae) {
                 LdmService.throwBusinessLogicValidationException(ae)
             }
@@ -539,7 +541,12 @@ class PersonCompositeService extends LdmService {
 
         def ethnicityDetail = buildPersonEthnicity(newPersonBase)
 
-        def maritalStatusDetail = newPersonBase.maritalStatus ? maritalStatusCompositeService.fetchByMaritalStatusCode(newPersonBase.maritalStatus?.code) : null
+        def maritalStatusDetail
+        if(newPersonBase.maritalStatus) {
+            String maritalStatusGuid =  maritalStatusService.fetchAllWithGuidByCodeInList([newPersonBase.maritalStatus?.code])[0].globalUniqueIdentifier.guid
+            maritalStatusDetail = maritalStatusV1CompositeService.createMaritalStatusDataModel(maritalStatusGuid, newPersonBase.maritalStatus, maritalStatusV1CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap())
+        }
+
         //update Address
         def addresses = []
 
@@ -718,7 +725,7 @@ class PersonCompositeService extends LdmService {
                 throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("marital.status.guid.required.message", []))
             }
             try {
-                maritalStatusDetail = maritalStatusCompositeService.get(maritalStatusGuid)
+                maritalStatusDetail = maritalStatusV1CompositeService.get(maritalStatusGuid)
             } catch (ApplicationException ae) {
                 LdmService.throwBusinessLogicValidationException(ae)
             }
@@ -1016,7 +1023,10 @@ class PersonCompositeService extends LdmService {
         }
         personBaseList.each { personBase ->
             Person currentRecord = new Person(personBase)
-            currentRecord.maritalStatusDetail = maritalStatusCompositeService.fetchByMaritalStatusCode(personBase.maritalStatus?.code)
+            if(personBase.maritalStatus) {
+                String maritalStatusGuid =  maritalStatusService.fetchAllWithGuidByCodeInList([personBase.maritalStatus?.code])[0].globalUniqueIdentifier.guid
+                currentRecord.maritalStatusDetail = maritalStatusV1CompositeService.createMaritalStatusDataModel(maritalStatusGuid, personBase.maritalStatus, maritalStatusV1CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap())
+            }
             currentRecord.ethnicityDetail = buildPersonEthnicity(personBase, allEthnicities)
 
             persons.put(currentRecord.pidm, currentRecord)
@@ -1257,7 +1267,7 @@ class PersonCompositeService extends LdmService {
                         throw new ApplicationException("PersonCompositeService", new BusinessLogicValidationException("marital.status.guid.required.message", []))
                     }
                     try {
-                        maritalStatusDetail = maritalStatusCompositeService.get(maritalStatusGuid)
+                        maritalStatusDetail = maritalStatusV1CompositeService.get(maritalStatusGuid)
                     } catch (ApplicationException ae) {
                         LdmService.throwBusinessLogicValidationException(ae)
                     }
