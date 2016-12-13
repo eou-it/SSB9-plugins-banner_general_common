@@ -221,10 +221,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
     protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
         fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsAddressDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsPhoneDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
         dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
         fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
         fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
@@ -266,15 +262,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsAlternateNameDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(dataMap.bannerNameTypeToHedmNameTypeMap.keySet())
-        log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
-
-        // Put in Map
-        dataMap.put("nameTypeCodeToGuidMap", nameTypeCodeToGuidMap)
-    }
-
-
     @Override
     protected List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
@@ -286,46 +273,13 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    private void fetchPersonsAddressDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        // Get GUID for each AddressType
-        Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(dataMap.bannerAddressTypeToHedmAddressTypeMap.keySet())
-        log.debug "GUIDs for ${addressTypeCodeToGuidMap.keySet()} are ${addressTypeCodeToGuidMap.values()}"
-
-        // Get GUID for each PersonAddress
-        List<Long> personAddressSurrogateIds = dataMap.pidmToAddressesMap?.values().id.flatten().unique()
-        Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
-
-        // Put in Map
-        dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
-        dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
-    }
-
-
     protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
         return phoneTypeCompositeService.getBannerPhoneTypeToHedmV6PhoneTypeMap()
     }
 
 
-    private void fetchPersonsPhoneDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        // Get GUID for each PhoneType
-        Map phoneTypeCodeToGuidMap = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(dataMap.bannerPhoneTypeToHedmPhoneTypeMap.keySet())
-
-        // Put in Map
-        dataMap.put("phoneTypeCodeToGuidMap", phoneTypeCodeToGuidMap)
-    }
-
-
     protected def getBannerEmailTypeToHedmEmailTypeMap() {
         return emailTypeCompositeService.getBannerEmailTypeToHedmV6EmailTypeMap()
-    }
-
-
-    private void fetchPersonsEmailDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        // Get GUIDs for each EmailType
-        Map<String, String> emailTypeCodeToGuidMap = emailTypeCompositeService.getEmailTypeCodeToGuidMap(dataMap.bannerEmailTypeToHedmEmailTypeMap.keySet())
-
-        // Put in Map
-        dataMap.put("emailTypeCodeToGuidMap", emailTypeCodeToGuidMap)
     }
 
 
@@ -345,31 +299,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             if (personBase.maritalStatus) {
                 dataMapForPerson << ["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap": dataMap.bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap]
             }
-        }
-
-        // names
-        List<PersonIdentificationNameAlternate> personAlternateNames = dataMap.pidmToAlternateNamesMap.get(personIdentificationNameCurrent.pidm)
-        if (personAlternateNames) {
-            dataMapForPerson << ["nameTypeCodeToGuidMap": dataMap.nameTypeCodeToGuidMap]
-        }
-
-        // addresses
-        List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(personIdentificationNameCurrent.pidm)
-        if (personAddresses) {
-            dataMapForPerson << ["addressTypeCodeToGuidMap": dataMap.addressTypeCodeToGuidMap]
-            dataMapForPerson << ["personAddressSurrogateIdToGuidMap": dataMap.personAddressSurrogateIdToGuidMap]
-        }
-
-        // phones
-        List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(personIdentificationNameCurrent.pidm)
-        if (personTelephoneList) {
-            dataMapForPerson << ["phoneTypeCodeToGuidMap": dataMap.phoneTypeCodeToGuidMap]
-        }
-
-        // emails
-        List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)
-        if (personEmailList) {
-            dataMapForPerson << ["emailTypeCodeToGuidMap": dataMap.emailTypeCodeToGuidMap]
         }
 
         // interests
@@ -659,20 +588,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
         dataMap.put("pidmToLanguageCodeMap", pidmToLanguageCodeMap)
         dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
         dataMap.put("pidmToOriginCountryMap", pidmToOriginCountryMap)
-    }
-
-
-    private Map getPersonAddressSurrogateIdToGuidMap(Collection<String> personAddressSurrogateIds) {
-        Map personAddressSurrogateIdToGuidMap = [:]
-        if (personAddressSurrogateIds) {
-            log.debug "Getting SPRADDR records for ${personAddressSurrogateIds?.size()} PIDMs..."
-            List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddressSurrogateIds)
-            log.debug "Got ${entities?.size()} SPRADDR records"
-            entities?.each {
-                personAddressSurrogateIdToGuidMap.put(it.id, it.addressGuid)
-            }
-        }
-        return personAddressSurrogateIdToGuidMap
     }
 
 

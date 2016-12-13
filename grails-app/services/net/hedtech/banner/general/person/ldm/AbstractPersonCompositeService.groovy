@@ -917,11 +917,7 @@ abstract class AbstractPersonCompositeService extends LdmService {
                 if (personBaseData.containsKey("nameSuffix")) {
                     personBase.nameSuffix = personBaseData.get("nameSuffix")
                 }
-                if (personBase.ssn) {
-                    if (integrationConfigurationService.canUpdatePersonSSN()) {
-                        personBase.ssn = ssn
-                    }
-                } else {
+                if (personBase.ssn == null || integrationConfigurationService.canUpdatePersonSSN()) {
                     personBase.ssn = ssn
                 }
                 if (personBaseData.containsKey("sex")) {
@@ -1106,6 +1102,101 @@ abstract class AbstractPersonCompositeService extends LdmService {
                                         def dataMapForPerson) {
         dataMapForPerson.put('personIdentificationNameCurrent', personIdentificationNameCurrent)
         createPersonDataModel(dataMapForPerson)
+    }
+
+
+    private void fetchDataAndPutInMap(List<Integer> pidms, Map dataMap) {
+        fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
+        fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
+        fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
+        personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
+        fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
+        fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
+        fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
+        fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
+
+        fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
+    }
+
+
+    private def prepareDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                              final Map dataMap) {
+        Map dataMapForPerson = [:]
+
+        dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(personIdentificationNameCurrent.pidm)]
+
+        // Biographical
+        PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
+        if (personBase) {
+            dataMapForPerson << ["personBase": personBase]
+
+            if (personBase.ethnic) {
+                dataMapForPerson << ["usEthnicCodeGuid": dataMap.usEthnicCodeToGuidMap.get(personBase.ethnic)]
+            }
+
+            if (personBase.maritalStatus) {
+                dataMapForPerson << ["maritalStatusGuid": dataMap.maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code)]
+            }
+        }
+
+        // names
+        List<PersonIdentificationNameAlternate> personAlternateNames = dataMap.pidmToAlternateNamesMap.get(personIdentificationNameCurrent.pidm)
+        if (personAlternateNames) {
+            dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
+            dataMapForPerson << ["nameTypeCodeToGuidMap": dataMap.nameTypeCodeToGuidMap]
+            dataMapForPerson << ["personAlternateNames": personAlternateNames]
+        }
+
+        // roles
+        def personRoles = []
+        if (dataMap.pidmToRolesMap.containsKey(personIdentificationNameCurrent.pidm)) {
+            personRoles = dataMap.pidmToRolesMap.get(personIdentificationNameCurrent.pidm)
+        }
+        dataMapForPerson << ["personRoles": personRoles]
+
+        // credentials
+        def personCredentials = []
+        if (dataMap.pidmToCredentialsMap.containsKey(personIdentificationNameCurrent.pidm)) {
+            personCredentials = dataMap.pidmToCredentialsMap.get(personIdentificationNameCurrent.pidm)
+        }
+        personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
+        dataMapForPerson << ["personCredentials": personCredentials]
+
+        // addresses
+        List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(personIdentificationNameCurrent.pidm)
+        if (personAddresses) {
+            dataMapForPerson << ["personAddresses": personAddresses]
+            dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
+            dataMapForPerson << ["addressTypeCodeToGuidMap": dataMap.addressTypeCodeToGuidMap]
+            dataMapForPerson << ["personAddressSurrogateIdToGuidMap": dataMap.personAddressSurrogateIdToGuidMap]
+        }
+
+        // phones
+        List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(personIdentificationNameCurrent.pidm)
+        if (personTelephoneList) {
+            dataMapForPerson << ["personPhones": personTelephoneList]
+            dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
+            dataMapForPerson << ["phoneTypeCodeToGuidMap": dataMap.phoneTypeCodeToGuidMap]
+        }
+
+        // emails
+        List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)
+        if (personEmailList) {
+            dataMapForPerson << ["personEmails": personEmailList]
+            dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": dataMap.bannerEmailTypeToHedmEmailTypeMap]
+            dataMapForPerson << ["emailTypeCodeToGuidMap": dataMap.emailTypeCodeToGuidMap]
+        }
+
+        // races
+        List<PersonRace> personRaces = dataMap.pidmToRacesMap.get(personIdentificationNameCurrent.pidm)
+        if (personRaces) {
+            dataMapForPerson << ["personRaces": personRaces]
+            dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
+        }
+
+        prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
+
+        return dataMapForPerson
     }
 
 
@@ -1485,96 +1576,6 @@ abstract class AbstractPersonCompositeService extends LdmService {
     }
 
 
-    private void fetchDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        fetchPersonsBiographicalDataAndPutInMap(pidms, dataMap)
-        fetchPersonsAlternateNameDataAndPutInMap(pidms, dataMap)
-        fetchPersonsRoleDataAndPutInMap(pidms, dataMap)
-        personCredentialCompositeService.fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
-        fetchPersonsAddressDataAndPutInMap(pidms, dataMap)
-        fetchPersonsPhoneDataAndPutInMap(pidms, dataMap)
-        fetchPersonsEmailDataAndPutInMap(pidms, dataMap)
-        fetchPersonsRaceDataAndPutInMap(pidms, dataMap)
-
-        fetchDataAndPutInMap_VersonSpecific(pidms, dataMap)
-    }
-
-
-    private def prepareDataMapForSinglePerson(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                              final Map dataMap) {
-        Map dataMapForPerson = [:]
-
-        dataMapForPerson << ["personGuid": dataMap.pidmToGuidMap.get(personIdentificationNameCurrent.pidm)]
-
-        // Biographical
-        PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
-        if (personBase) {
-            dataMapForPerson << ["personBase": personBase]
-
-            if (personBase.ethnic) {
-                dataMapForPerson << ["usEthnicCodeGuid": dataMap.usEthnicCodeToGuidMap.get(personBase.ethnic)]
-            }
-
-            if (personBase.maritalStatus) {
-                dataMapForPerson << ["maritalStatusGuid": dataMap.maritalStatusCodeToGuidMap.get(personBase.maritalStatus.code)]
-            }
-        }
-
-        // names
-        List<PersonIdentificationNameAlternate> personAlternateNames = dataMap.pidmToAlternateNamesMap.get(personIdentificationNameCurrent.pidm)
-        if (personAlternateNames) {
-            dataMapForPerson << ["bannerNameTypeToHedmNameTypeMap": dataMap.bannerNameTypeToHedmNameTypeMap]
-            dataMapForPerson << ["personAlternateNames": personAlternateNames]
-        }
-
-        // roles
-        def personRoles = []
-        if (dataMap.pidmToRolesMap.containsKey(personIdentificationNameCurrent.pidm)) {
-            personRoles = dataMap.pidmToRolesMap.get(personIdentificationNameCurrent.pidm)
-        }
-        dataMapForPerson << ["personRoles": personRoles]
-
-        // credentials
-        def personCredentials = []
-        if (dataMap.pidmToCredentialsMap.containsKey(personIdentificationNameCurrent.pidm)) {
-            personCredentials = dataMap.pidmToCredentialsMap.get(personIdentificationNameCurrent.pidm)
-        }
-        personCredentials << [type: CredentialType.BANNER_ID, value: personIdentificationNameCurrent.bannerId]
-        dataMapForPerson << ["personCredentials": personCredentials]
-
-        // addresses
-        List<PersonAddress> personAddresses = dataMap.pidmToAddressesMap.get(personIdentificationNameCurrent.pidm)
-        if (personAddresses) {
-            dataMapForPerson << ["personAddresses": personAddresses]
-            dataMapForPerson << ["bannerAddressTypeToHedmAddressTypeMap": dataMap.bannerAddressTypeToHedmAddressTypeMap]
-        }
-
-        // phones
-        List<PersonTelephone> personTelephoneList = dataMap.pidmToPhonesMap.get(personIdentificationNameCurrent.pidm)
-        if (personTelephoneList) {
-            dataMapForPerson << ["personPhones": personTelephoneList]
-            dataMapForPerson << ["bannerPhoneTypeToHedmPhoneTypeMap": dataMap.bannerPhoneTypeToHedmPhoneTypeMap]
-        }
-
-        // emails
-        List<PersonEmail> personEmailList = dataMap.pidmToEmailsMap.get(personIdentificationNameCurrent.pidm)
-        if (personEmailList) {
-            dataMapForPerson << ["personEmails": personEmailList]
-            dataMapForPerson << ["bannerEmailTypeToHedmEmailTypeMap": dataMap.bannerEmailTypeToHedmEmailTypeMap]
-        }
-
-        // races
-        List<PersonRace> personRaces = dataMap.pidmToRacesMap.get(personIdentificationNameCurrent.pidm)
-        if (personRaces) {
-            dataMapForPerson << ["personRaces": personRaces]
-            dataMapForPerson << ["raceCodeToGuidMap": dataMap.raceCodeToGuidMap]
-        }
-
-        prepareDataMapForSinglePerson_VersionSpecific(personIdentificationNameCurrent, dataMap, dataMapForPerson)
-
-        return dataMapForPerson
-    }
-
-
     private void fetchPersonsBiographicalDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Get SPBPERS records for persons
         def pidmToPersonBaseMap = getPidmToPersonBaseMap(pidms)
@@ -1597,10 +1598,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
         def bannerNameTypeToHedmNameTypeMap = getBannerNameTypeToHedmNameTypeMap()
         log.debug "Banner NameType to HEDM NameType mapping = ${bannerNameTypeToHedmNameTypeMap}"
 
+        def nameTypeCodeToGuidMap = personNameTypeCompositeService.getNameTypeCodeToGuidMap(bannerNameTypeToHedmNameTypeMap.keySet())
+        log.debug "GUIDs for ${nameTypeCodeToGuidMap.keySet()} are ${nameTypeCodeToGuidMap.values()}"
+
         def pidmToAlternateNamesMap = getPidmToAlternateNamesMap(pidms, bannerNameTypeToHedmNameTypeMap.keySet().toList())
 
         // Put in Map
         dataMap.put("bannerNameTypeToHedmNameTypeMap", bannerNameTypeToHedmNameTypeMap)
+        dataMap.put("nameTypeCodeToGuidMap", nameTypeCodeToGuidMap)
         dataMap.put("pidmToAlternateNamesMap", pidmToAlternateNamesMap)
     }
 
@@ -1686,21 +1691,35 @@ abstract class AbstractPersonCompositeService extends LdmService {
     private void fetchPersonsAddressDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         Map<String, String> bannerAddressTypeToHedmAddressTypeMap = getBannerAddressTypeToHedmAddressTypeMap()
 
+        // Get GUID for each AddressType
+        Map<String, String> addressTypeCodeToGuidMap = addressTypeCompositeService.getAddressTypeCodeToGuidMap(bannerAddressTypeToHedmAddressTypeMap.keySet())
+        log.debug "GUIDs for ${addressTypeCodeToGuidMap.keySet()} are ${addressTypeCodeToGuidMap.values()}"
+
         Map pidmToAddressesMap = getPidmToAddressesMap(pidms, bannerAddressTypeToHedmAddressTypeMap.keySet())
+
+        // Get GUID for each PersonAddress
+        List<Long> personAddressSurrogateIds = pidmToAddressesMap?.values().id.flatten().unique()
+        Map<Long, String> personAddressSurrogateIdToGuidMap = getPersonAddressSurrogateIdToGuidMap(personAddressSurrogateIds)
 
         // Put in Map
         dataMap.put("bannerAddressTypeToHedmAddressTypeMap", bannerAddressTypeToHedmAddressTypeMap)
+        dataMap.put("addressTypeCodeToGuidMap", addressTypeCodeToGuidMap)
         dataMap.put("pidmToAddressesMap", pidmToAddressesMap)
+        dataMap.put("personAddressSurrogateIdToGuidMap", personAddressSurrogateIdToGuidMap)
     }
 
 
     private void fetchPersonsPhoneDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         Map<String, String> bannerPhoneTypeToHedmPhoneTypeMap = getBannerPhoneTypeToHedmPhoneTypeMap()
 
+        // Get GUID for each PhoneType
+        Map phoneTypeCodeToGuidMap = phoneTypeCompositeService.getPhoneTypeCodeToGuidMap(bannerPhoneTypeToHedmPhoneTypeMap.keySet())
+
         Map pidmToPhonesMap = getPidmToPhonesMap(pidms, bannerPhoneTypeToHedmPhoneTypeMap.keySet())
 
         // Put in Map
         dataMap.put("bannerPhoneTypeToHedmPhoneTypeMap", bannerPhoneTypeToHedmPhoneTypeMap)
+        dataMap.put("phoneTypeCodeToGuidMap", phoneTypeCodeToGuidMap)
         dataMap.put("pidmToPhonesMap", pidmToPhonesMap)
     }
 
@@ -1708,10 +1727,14 @@ abstract class AbstractPersonCompositeService extends LdmService {
     private void fetchPersonsEmailDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         Map<String, String> bannerEmailTypeToHedmEmailTypeMap = getBannerEmailTypeToHedmEmailTypeMap()
 
+        // Get GUIDs for each EmailType
+        Map<String, String> emailTypeCodeToGuidMap = emailTypeCompositeService.getEmailTypeCodeToGuidMap(bannerEmailTypeToHedmEmailTypeMap.keySet())
+
         Map pidmToEmailsMap = getPidmToEmailsMap(pidms, bannerEmailTypeToHedmEmailTypeMap.keySet())
 
         // Put in Map
         dataMap.put("bannerEmailTypeToHedmEmailTypeMap", bannerEmailTypeToHedmEmailTypeMap)
+        dataMap.put("emailTypeCodeToGuidMap", emailTypeCodeToGuidMap)
         dataMap.put("pidmToEmailsMap", pidmToEmailsMap)
     }
 
@@ -1948,16 +1971,30 @@ abstract class AbstractPersonCompositeService extends LdmService {
 
 
     private def getMaritalStatusCodeToGuidMap(Collection<String> codes) {
-        Map<String, String> codeToGuidMap = [:]
+        def codeToGuidMap = [:]
         if (codes) {
             def rows = maritalStatusService.fetchAllWithGuidByCodeInList(codes)
             rows?.each {
-                MaritalStatus nameType = it.maritalStatus
+                MaritalStatus maritalStatus = it.maritalStatus
                 GlobalUniqueIdentifier globalUniqueIdentifier = it.globalUniqueIdentifier
-                codeToGuidMap.put(nameType.code, globalUniqueIdentifier.guid)
+                codeToGuidMap.put(maritalStatus.code, globalUniqueIdentifier.guid)
             }
         }
         return codeToGuidMap
+    }
+
+
+    private def getPersonAddressSurrogateIdToGuidMap(Collection<String> personAddressSurrogateIds) {
+        def surrogateIdToGuidMap = [:]
+        if (personAddressSurrogateIds) {
+            log.debug "Getting SPRADDR records for ${personAddressSurrogateIds?.size()} PIDMs..."
+            List<PersonAddressAdditionalProperty> entities = personAddressAdditionalPropertyService.fetchAllBySurrogateIds(personAddressSurrogateIds)
+            log.debug "Got ${entities?.size()} SPRADDR records"
+            entities?.each {
+                surrogateIdToGuidMap.put(it.id, it.addressGuid)
+            }
+        }
+        return surrogateIdToGuidMap
     }
 
 

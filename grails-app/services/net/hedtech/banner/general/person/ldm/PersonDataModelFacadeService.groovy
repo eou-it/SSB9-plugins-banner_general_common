@@ -92,9 +92,9 @@ class PersonDataModelFacadeService {
         }
 
         AbstractPersonCompositeService requestProcessingService = getServiceUsingContentTypeHeader()
-        def dataMapForPerson = requestProcessingService.create(content)
+        def dataMapForSingle = requestProcessingService.create(content)
         AbstractPersonCompositeService responseRenderingService = getServiceUsingAcceptHeader()
-        return responseRenderingService.createPersonDataModel(dataMapForPerson)
+        return responseRenderingService.createPersonDataModel(dataMapForSingle)
     }
 
     /**
@@ -108,9 +108,9 @@ class PersonDataModelFacadeService {
         }
 
         AbstractPersonCompositeService requestProcessingService = getServiceUsingContentTypeHeader()
-        def dataMapForPerson = requestProcessingService.update(content)
+        def dataMapForSingle = requestProcessingService.update(content)
         AbstractPersonCompositeService responseRenderingService = getServiceUsingAcceptHeader()
-        return responseRenderingService.createPersonDataModel(dataMapForPerson)
+        return responseRenderingService.createPersonDataModel(dataMapForSingle)
     }
 
 
