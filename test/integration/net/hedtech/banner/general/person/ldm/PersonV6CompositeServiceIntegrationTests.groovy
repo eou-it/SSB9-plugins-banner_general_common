@@ -21,7 +21,10 @@ import net.hedtech.banner.general.person.ldm.v6.PersonAddressDecorator
 import net.hedtech.banner.general.person.ldm.v6.PersonV6
 import net.hedtech.banner.general.person.ldm.v6.PhoneV6
 import net.hedtech.banner.general.system.*
-import net.hedtech.banner.general.system.ldm.*
+import net.hedtech.banner.general.system.ldm.CitizenshipStatusCompositeService
+import net.hedtech.banner.general.system.ldm.NameTypeCategory
+import net.hedtech.banner.general.system.ldm.PersonNameTypeCompositeService
+import net.hedtech.banner.general.system.ldm.ReligionCompositeService
 import net.hedtech.banner.general.utility.DateConvertHelperService
 import net.hedtech.banner.general.utility.IsoCodeService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -32,13 +35,12 @@ import org.junit.Test
 class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     PersonV6CompositeService personV6CompositeService
-    PersonCompositeService personCompositeService
     UserRoleCompositeService userRoleCompositeService
     GlobalUniqueIdentifierService globalUniqueIdentifierService
     CitizenshipStatusCompositeService citizenshipStatusCompositeService
-    VisaTypeCompositeService visaTypeCompositeService
+    CitizenTypeService citizenTypeService
     ReligionCompositeService religionCompositeService
-    NameTypeService nameTypeService
+    ReligionService religionService
     PersonNameTypeCompositeService personNameTypeCompositeService
     PersonIdentificationNameAlternateService personIdentificationNameAlternateService
     IntegrationConfigurationService integrationConfigurationService
@@ -66,7 +68,6 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     PersonAddressService personAddressService
     PersonAddressAdditionalPropertyService personAddressAdditionalPropertyService
     PersonBasicPersonBaseService personBasicPersonBaseService
-
 
 
     def i_success_first_name = "Mark"
@@ -181,10 +182,10 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     static final String PERSON_UPDATESSN = "PERSON.UPDATESSN"
     static final String PROCESS_CODE = "HEDM"
 
-    def i_success_credential_type4_filter="Banner ID"
-    def i_failure_credential_type4_filter="BannerId"
-    def i_success_credential_filter="ADVAF0021"
-    def i_failure_credential_filter="HOSP00"
+    def i_success_credential_type4_filter = "Banner ID"
+    def i_failure_credential_type4_filter = "BannerId"
+    def i_success_credential_filter = "ADVAF0021"
+    def i_failure_credential_filter = "HOSP00"
 
 
     @Before
@@ -202,12 +203,12 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         raceGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('races', 'WHT')?.guid
         religionGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('religions', 'CH')?.guid
         religionGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('religions', 'CA')?.guid
-        ethnicityGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us',1)?.guid
-        ethnicityGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us',2)?.guid
-        citizenshipStatusGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('citizenship-statuses','Y')?.guid
-        citizenshipStatusGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('citizenship-statuses','CH')?.guid
+        ethnicityGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us', 1)?.guid
+        ethnicityGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainId('ethnicities-us', 2)?.guid
+        citizenshipStatusGlobalUniqueIdentifier1 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('citizenship-statuses', 'Y')?.guid
+        citizenshipStatusGlobalUniqueIdentifier2 = GlobalUniqueIdentifier.findByLdmNameAndDomainKey('citizenship-statuses', 'CH')?.guid
 
-       // countryBirth = Nation.
+        // countryBirth = Nation.
 
     }
 
@@ -420,7 +421,9 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             person = personV6CompositeService.get(persons[0].guid)
         }
 
-        def guids1 = citizenshipStatusCompositeService.fetchGUIDs([personBase.citizenType.code])
+        def guids1 = citizenTypeService.fetchAllWithGuidByCodeInList([personBase.citizenType.code]).collectEntries {
+            [it.citizenType.code, it.globalUniqueIdentifier.guid]
+        }
         def citizenShipStatus = citizenshipStatusCompositeService.get(guids1.values()[0])
         assertEquals guids1.values()[0], person.citizenshipStatus.detail.id
         assertEquals citizenShipStatus.category, person.citizenshipStatus.category
@@ -431,7 +434,9 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             person = personV6CompositeService.get(persons[0].guid)
         }
 
-        def religionGuids = religionCompositeService.fetchGUIDs([personBase.religion.code])
+        def religionGuids = religionService.fetchAllWithGuidByCodeInList([personBase.religion.code]).collectEntries {
+                    [it.religion.code, it.globalUniqueIdentifier.guid]
+                }
         def religion = religionCompositeService.get(religionGuids.values()[0])
         assertEquals religionGuids.values()[0], person.religion.id
         assertEquals religion.id, person.religion.id
@@ -772,7 +777,6 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         request.addHeader("Content-Type", mediaType)
     }
 
-
     //POST- Person Create API
     @Test
     void testCreatePersonWithAlternateNameHavingBirthNameType() {
@@ -814,11 +818,12 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     private Map newPersonWithAlternateNameHavingBirthNameType() {
         Map params = [names: [
-                     [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix],
-                     [lastName: i_success_birth_last_name, middleName: i_success_birth_middle_name, firstName: i_success_birth_first_name,fullName: i_success_full_name, type:[category:i_success_birth_name_type]],
-                     [lastName: i_success_legal_last_name, middleName: i_success_legal_middle_name, firstName: i_success_legal_first_name,fullName: i_success_full_name, type:[category:i_success_legal_name_type]]
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix],
+                [lastName: i_success_birth_last_name, middleName: i_success_birth_middle_name, firstName: i_success_birth_first_name, fullName: i_success_full_name, type: [category: i_success_birth_name_type]],
+                [lastName: i_success_legal_last_name, middleName: i_success_legal_middle_name, firstName: i_success_legal_first_name, fullName: i_success_full_name, type: [category: i_success_legal_name_type]]
         ]
         ]
         return params
@@ -827,12 +832,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private Map newPersonWithAlternateNameHavingAdditionProperties() {
         Map params = [names: [
-                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
         ]
         ]
         return params
     }
-
 
     //POST- Person Create API
     @Test
@@ -844,9 +848,9 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.personGuid
 
-        assertEquals i_success_ssn,o_person_base.ssn
-        assertEquals  i_success_elevateId ,o_success_person_create.additionalIds[0].additionalId
-        assertNotEquals i_success_bannerId , o_success_person_create.personIdentificationNameCurrent.bannerId
+        assertEquals i_success_ssn, o_person_base.ssn
+        assertEquals i_success_elevateId, o_success_person_create.additionalIds[0].additionalId
+        assertNotEquals i_success_bannerId, o_success_person_create.personIdentificationNameCurrent.bannerId
     }
 
 
@@ -859,8 +863,9 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
+        assertEquals i_success_privacy_satus, o_success_person_create.privacyStatus.privacyCategory
     }
+
 
     @Test
     void testCreatePersonWithAdditionProperties() {
@@ -871,22 +876,22 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
+        assertEquals i_success_privacy_satus, o_success_person_create.privacyStatus.privacyCategory
     }
 
+
     private Map newPersonWithCredentials() {
-        Map params = [names: [
-                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        Map params = [names      : [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
         ],
-        credentials: [
-                [type:"bannerId",value:i_success_bannerId ],
-                [type:"ssn",value:i_success_ssn ],
-                [type:"elevateId",value:i_success_elevateId ]
-        ]
+                      credentials: [
+                              [type: "bannerId", value: i_success_bannerId],
+                              [type: "ssn", value: i_success_ssn],
+                              [type: "elevateId", value: i_success_elevateId]
+                      ]
         ]
         return params
     }
-
 
     //POST- Person Create API
     @Test
@@ -898,43 +903,44 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.personGuid
 
-        assertEquals i_success_ssn,o_person_base.ssn
-        assertEquals  i_success_elevateId ,o_success_person_create.additionalIds[0].additionalId
-        assertNotEquals i_success_bannerId , o_success_person_create.personIdentificationNameCurrent.bannerId
+        assertEquals i_success_ssn, o_person_base.ssn
+        assertEquals i_success_elevateId, o_success_person_create.additionalIds[0].additionalId
+        assertNotEquals i_success_bannerId, o_success_person_create.personIdentificationNameCurrent.bannerId
 
         Map updateContent = newPersonWithCredentials()
         updateContent.id = o_success_person_create.personGuid
         def o_success_person_update = personV6CompositeService.update(updateContent)
 
-        assertEquals i_success_ssn,o_person_base.ssn
-        assertEquals  i_success_elevateId ,o_success_person_update.additionalIds[0].additionalId
-        assertEquals i_success_bannerId , o_success_person_update.personIdentificationNameCurrent.bannerId
+        assertEquals i_success_ssn, o_person_base.ssn
+        assertEquals i_success_elevateId, o_success_person_update.additionalIds[0].additionalId
+        assertEquals i_success_bannerId, o_success_person_update.personIdentificationNameCurrent.bannerId
     }
-
 
     //POST- Person Create API
     @Test
     void testCreatePersonWithCredetialsSSNandSIN() {
         Map content = newPersonWithCredentialsSSNandSIN()
         def exceptionMessage = shouldFail(ApplicationException) {
-             personV6CompositeService.create(content)
+            personV6CompositeService.create(content)
         }
         assertEquals "ssn.sin.both.not.valid", exceptionMessage
     }
 
+
     private Map newPersonWithCredentialsSSNandSIN() {
-        Map params = [names: [
-                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
-                 ],
+        Map params = [names      : [
+                [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
+        ],
                       credentials: [
-                              [type:"bannerId",value:i_success_bannerId ],
-                              [type:"sin",value:i_success_sin ],
-                              [type:"ssn",value:i_success_ssn ],
-                              [type:"elevateId",value:i_success_elevateId ]
+                              [type: "bannerId", value: i_success_bannerId],
+                              [type: "sin", value: i_success_sin],
+                              [type: "ssn", value: i_success_ssn],
+                              [type: "elevateId", value: i_success_elevateId]
                       ]
-                ]
+        ]
         return params
     }
+
 
     @Test
     void testUpdatePersonWithPrivacyStatus() {
@@ -945,7 +951,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  i_success_privacy_satus ,o_success_person_create.privacyStatus.privacyCategory
+        assertEquals i_success_privacy_satus, o_success_person_create.privacyStatus.privacyCategory
 
 
         Map updateContent = newPersonWithCredentials()
@@ -956,14 +962,15 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  i_success_update_privacy_satus ,o_success_person_update.privacyStatus.privacyCategory
+        assertEquals i_success_update_privacy_satus, o_success_person_update.privacyStatus.privacyCategory
     }
+
 
     @Test
     void testUpdatePersonPersonBasicPersonBase() {
-       /* GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
-        request.addHeader("Content-Type", "application/vnd.hedtech.integration.v1+json")
-        request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")*/
+        /* GrailsMockHttpServletRequest request = LdmService.getHttpServletRequest()
+         request.addHeader("Content-Type", "application/vnd.hedtech.integration.v1+json")
+         request.addHeader("Accept", "application/vnd.hedtech.integration.v1+json")*/
 
         PersonBasicPersonBase personBasicPersonBase = createPersonBasicPersonBase()
         PersonIdentificationNameCurrent personIdentificationNameCurrent = PersonIdentificationNameCurrent.findAllByPidmInList([personBasicPersonBase.pidm]).get(0)
@@ -978,6 +985,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals 'CCCCC', newPersonBasicPersonBase.namePrefix
         assertEquals 'CCCCC', newPersonBasicPersonBase.nameSuffix
     }
+
 
     private def createPersonBasicPersonBase() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
@@ -1045,12 +1053,13 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         return personBasicPersonBase
     }
 
+
     private Map getPersonWithPersonBasicPersonBaseChangeRequest(personIdentificationNameCurrent, guid) {
-        Map params = [id   : guid,
-                      names: [
-                              [lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName,fullName: i_success_full_name, type:[category:i_success_primary_name_type], namePrefix:  'CCCCC', nameSuffix: 'CCCCC', surnamePrefix: i_success_surnamePrefix]
+        Map params = [id    : guid,
+                      names : [
+                              [lastName: personIdentificationNameCurrent.lastName, middleName: personIdentificationNameCurrent.middleName, firstName: personIdentificationNameCurrent.firstName, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: 'CCCCC', nameSuffix: 'CCCCC', surnamePrefix: i_success_surnamePrefix]
                       ],
-                      gender  : 'female'
+                      gender: 'female'
 
         ]
         return params
@@ -1061,15 +1070,15 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testCreatePersonWithRacesGender() {
         Map content = newPersonWithAlternateNameHavingBirthNameType()
         content.races = []
-        content.races << [race:[id: raceGlobalUniqueIdentifier1]]
-        content.gender =  'male'
+        content.races << [race: [id: raceGlobalUniqueIdentifier1]]
+        content.gender = 'male'
         def dataMap = personV6CompositeService.create(content)
         def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  raceGlobalUniqueIdentifier1 ,o_success_person_create.races[0].race.id
-        assertEquals  'male' ,o_success_person_create.gender
+        assertEquals raceGlobalUniqueIdentifier1, o_success_person_create.races[0].race.id
+        assertEquals 'male', o_success_person_create.gender
     }
 
 
@@ -1077,54 +1086,53 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testUpdatePersonWithRacesGenderReligionMaritalStatusEthnicityCitizenshipStatus() {
         Map content = newPersonWithAlternateNameHavingBirthNameType()
         content.races = []
-        content.races << [race:[id: raceGlobalUniqueIdentifier1]]
-        content.gender =  'male'
+        content.races << [race: [id: raceGlobalUniqueIdentifier1]]
+        content.gender = 'male'
         content.religion = [id: religionGlobalUniqueIdentifier1]
         content.maritalStatus = [maritalCategory: i_success_maritalStatus1]
-        content.ethnicity = [ethnicGroup:[id: ethnicityGlobalUniqueIdentifier1]]
-        content.citizenshipStatus = [detail:[id: citizenshipStatusGlobalUniqueIdentifier1],category:citizenshipStatusCategory1]
+        content.ethnicity = [ethnicGroup: [id: ethnicityGlobalUniqueIdentifier1]]
+        content.citizenshipStatus = [detail: [id: citizenshipStatusGlobalUniqueIdentifier1], category: citizenshipStatusCategory1]
         def dataMap = personV6CompositeService.create(content)
         def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
 
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  raceGlobalUniqueIdentifier1 ,o_success_person_create.races[0].race.id
-        assertEquals  'male' ,o_success_person_create.gender
-        assertEquals  religionGlobalUniqueIdentifier1 ,o_success_person_create.religion.id
-        assertEquals  i_success_maritalStatus1 ,o_success_person_create.maritalStatus.parentCategory
-        assertEquals  ethnicityGlobalUniqueIdentifier1 ,o_success_person_create.ethnicity.id
-        assertEquals  citizenshipStatusGlobalUniqueIdentifier1 ,o_success_person_create.citizenshipStatus.detail.id
+        assertEquals raceGlobalUniqueIdentifier1, o_success_person_create.races[0].race.id
+        assertEquals 'male', o_success_person_create.gender
+        assertEquals religionGlobalUniqueIdentifier1, o_success_person_create.religion.id
+        assertEquals i_success_maritalStatus1, o_success_person_create.maritalStatus.parentCategory
+        assertEquals ethnicityGlobalUniqueIdentifier1, o_success_person_create.ethnicity.id
+        assertEquals citizenshipStatusGlobalUniqueIdentifier1, o_success_person_create.citizenshipStatus.detail.id
 
 
         Map updateContent = newPersonWithCredentials()
         updateContent.id = o_success_person_create.guid
         updateContent.races = []
-        updateContent.races << [race:[id: raceGlobalUniqueIdentifier2]]
-        updateContent.gender =  'female'
+        updateContent.races << [race: [id: raceGlobalUniqueIdentifier2]]
+        updateContent.gender = 'female'
         updateContent.religion = [id: religionGlobalUniqueIdentifier2]
         updateContent.maritalStatus = [maritalCategory: i_success_maritalStatus2]
-        updateContent.ethnicity = [ethnicGroup:[id: ethnicityGlobalUniqueIdentifier2]]
-        updateContent.citizenshipStatus = [detail:[id: citizenshipStatusGlobalUniqueIdentifier2],category:citizenshipStatusCategory2]
+        updateContent.ethnicity = [ethnicGroup: [id: ethnicityGlobalUniqueIdentifier2]]
+        updateContent.citizenshipStatus = [detail: [id: citizenshipStatusGlobalUniqueIdentifier2], category: citizenshipStatusCategory2]
         dataMap = personV6CompositeService.update(updateContent)
         def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
 
         assertNotNull o_success_person_update
         assertNotNull o_success_person_update.guid
-        assertEquals  raceGlobalUniqueIdentifier2 ,o_success_person_update.races[0].race.id
-        assertEquals  'female' ,o_success_person_update.gender
-        assertEquals  religionGlobalUniqueIdentifier2 ,o_success_person_update.religion.id
-        assertEquals  i_success_maritalStatus2 ,o_success_person_update.maritalStatus.parentCategory
-        assertEquals  ethnicityGlobalUniqueIdentifier2 ,o_success_person_update.ethnicity.id
-        assertEquals  citizenshipStatusGlobalUniqueIdentifier2 ,o_success_person_update.citizenshipStatus.detail.id
+        assertEquals raceGlobalUniqueIdentifier2, o_success_person_update.races[0].race.id
+        assertEquals 'female', o_success_person_update.gender
+        assertEquals religionGlobalUniqueIdentifier2, o_success_person_update.religion.id
+        assertEquals i_success_maritalStatus2, o_success_person_update.maritalStatus.parentCategory
+        assertEquals ethnicityGlobalUniqueIdentifier2, o_success_person_update.ethnicity.id
+        assertEquals citizenshipStatusGlobalUniqueIdentifier2, o_success_person_update.citizenshipStatus.detail.id
     }
-
 
 
     @Test
     void testUpdatePersonCitizenshipStatusCountryOfBirth() {
         Map content = newPersonWithAlternateNameHavingBirthNameType()
-        content.citizenshipStatus = [category:citizenshipStatusCategory1]
+        content.citizenshipStatus = [category: citizenshipStatusCategory1]
         //content.nationBirth = countryOfBirth1
         def dataMap = personV6CompositeService.create(content)
         def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
@@ -1132,20 +1140,20 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  citizenshipStatusCategory1 ,o_success_person_create.citizenshipStatus.category
+        assertEquals citizenshipStatusCategory1, o_success_person_create.citizenshipStatus.category
         //assertEquals  countryOfBirth1 ,o_success_person_create.countryOfBirth
 
 
         Map updateContent = newPersonWithCredentials()
         updateContent.id = o_success_person_create.guid
-        updateContent.citizenshipStatus = [category:citizenshipStatusCategory2]
+        updateContent.citizenshipStatus = [category: citizenshipStatusCategory2]
         //updateContent.nationBirth = countryOfBirth2
         dataMap = personV6CompositeService.update(updateContent)
         def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
 
         assertNotNull o_success_person_update
         assertNotNull o_success_person_update.guid
-        assertEquals  citizenshipStatusCategory2 ,o_success_person_update.citizenshipStatus.category
+        assertEquals citizenshipStatusCategory2, o_success_person_update.citizenshipStatus.category
         //assertEquals  countryOfBirth2 ,o_success_person_update.countryOfBirth
     }
 
@@ -1154,26 +1162,26 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     void testUpdatePersonEmails() {
         Map content = newPersonWithAlternateNameHavingBirthNameType()
         content.emails = []
-        content.emails << [address:emailAddress1,preference:"primary",type:[emailType:"personal"]]
+        content.emails << [address: emailAddress1, preference: "primary", type: [emailType: "personal"]]
         def dataMap = personV6CompositeService.create(content)
         def o_success_person_create = personV6CompositeService.createPersonDataModel(dataMap)
 
 
         assertNotNull o_success_person_create
         assertNotNull o_success_person_create.guid
-        assertEquals  emailAddress1 ,o_success_person_create.emails.address.get(0)
+        assertEquals emailAddress1, o_success_person_create.emails.address.get(0)
 
 
         Map updateContent = newPersonWithCredentials()
         updateContent.id = o_success_person_create.guid
         updateContent.emails = []
-        updateContent.emails << [address:emailAddress2,preference:"primary",type:[emailType:"personal"]]
+        updateContent.emails << [address: emailAddress2, preference: "primary", type: [emailType: "personal"]]
         dataMap = personV6CompositeService.update(updateContent)
         def o_success_person_update = personV6CompositeService.createPersonDataModel(dataMap)
 
         assertNotNull o_success_person_update
         assertNotNull o_success_person_update.guid
-        assertEquals  emailAddress2 ,o_success_person_update.emails.address.get(0)
+        assertEquals emailAddress2, o_success_person_update.emails.address.get(0)
     }
 
     // presons post and put phones
@@ -1202,53 +1210,58 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals content.phones.type[0].phoneType, o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.get(o_success_person_create.personPhones.telephoneType.code[0])
     }
 
+
     @Test
     void testCreatePersonWithPhonesDuplicatePhoneType() {
         Map content = newPersonWithPhones()
-        content.phones.add([number: "16194448989", countryCallingCode: "1", type:[phoneType: "home"]])
+        content.phones.add([number: "16194448989", countryCallingCode: "1", type: [phoneType: "home"]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "phone.phoneType.duplicate", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithPhonesDuplicatePreference() {
         Map content = newPersonWithPhones()
-        content.phones.add([number: "16194448989", countryCallingCode: "1", preference: "primary",type:[phoneType: "business"]])
+        content.phones.add([number: "16194448989", countryCallingCode: "1", preference: "primary", type: [phoneType: "business"]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "phone.preferences.duplicate", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithPhonesPhoneTypeInValid() {
         Map content = newPersonWithPhones()
-        content.phones.add([number: "16194448989", countryCallingCode: "1",type:[phoneType: "Business"]])
+        content.phones.add([number: "16194448989", countryCallingCode: "1", type: [phoneType: "Business"]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "phone.phoneType.inValid", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithPhonesPhoneTypeNotFound() {
         Map content = newPersonWithPhones()
         IntegrationConfiguration integrationConfiguration = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(GeneralValidationCommonConstants.PROCESS_CODE, GeneralValidationCommonConstants.PHONE_TYPE_SETTING_NAME_V6, 'business')[0]
         assertNotNull integrationConfiguration
-        integrationConfiguration.delete( failOnError:true, flush: true )
-        content.phones.add([number: "16194448989", countryCallingCode: "1",type:[phoneType: "business"]])
+        integrationConfiguration.delete(failOnError: true, flush: true)
+        content.phones.add([number: "16194448989", countryCallingCode: "1", type: [phoneType: "business"]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "phone.phoneType.not.found", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithPhonesPhoneTypeRequired() {
         Map content = newPersonWithPhones()
-        content.phones.add([number: "16194448989", countryCallingCode: "1",type:[:]])
+        content.phones.add([number: "16194448989", countryCallingCode: "1", type: [:]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
@@ -1266,25 +1279,28 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "phone.type.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithPhoneNumberRequired() {
         Map content = newPersonWithPhones()
-        content.phones.add([number: "", countryCallingCode: "1",type:[phoneType: "business"]])
+        content.phones.add([number: "", countryCallingCode: "1", type: [phoneType: "business"]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "phone.number.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithPhonescountryCallingCodeInValid() {
         Map content = newPersonWithPhones()
-        content.phones.add([number: "16194448989", countryCallingCode: "+a1",type:[phoneType: "business"]])
+        content.phones.add([number: "16194448989", countryCallingCode: "+a1", type: [phoneType: "business"]])
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "phone.invalid.countryCallingCode.format", exceptionMessage
     }
+
 
     @Test
     void testUpdatePersonWithPhones() {
@@ -1338,7 +1354,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
         assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
 
-        phoneV6 = personV6.phones.find {it.type.phoneType == 'home'}
+        phoneV6 = personV6.phones.find { it.type.phoneType == 'home' }
 
         assertEquals content.phones.number[0], phoneV6.number
         assertNull phoneV6.countryCallingCode
@@ -1350,7 +1366,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(phoneV6.type.code)
         assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
 
-        phoneV6 = personV6.phones.find {it.type.phoneType == 'business'}
+        phoneV6 = personV6.phones.find { it.type.phoneType == 'business' }
 
         Map phoneDetails = personV6CompositeService.splitPhoneNumber(content.phones.number[1])
 
@@ -1365,6 +1381,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals content.phones.type[1].phoneType, phoneV6.type.phoneType
 
     }
+
 
     @Test
     void testUpdatePersonWithNewPhones() {
@@ -1415,7 +1432,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull o_success_person_create.phoneTypeCodeToGuidMap
         assertNotNull o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap
 
-        phoneV6 = personV6.phones.find {it.type.phoneType == 'home'}
+        phoneV6 = personV6.phones.find { it.type.phoneType == 'home' }
 
         assertEquals content.phones.number[0], phoneV6.number
         assertEquals phoneV6.countryCallingCode, countryCallingCode
@@ -1427,7 +1444,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue o_success_person_create.bannerPhoneTypeToHedmPhoneTypeMap.containsKey(phoneV6.type.code)
         assertEquals content.phones.type[0].phoneType, phoneV6.type.phoneType
 
-        phoneV6 = personV6.phones.find {it.type.phoneType == 'business'}
+        phoneV6 = personV6.phones.find { it.type.phoneType == 'business' }
 
         assertEquals content.phones.number[1], phoneV6.number
         assertEquals phoneV6.countryCallingCode, content.phones.countryCallingCode[1]
@@ -1440,6 +1457,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals content.phones.type[1].phoneType, phoneV6.type.phoneType
 
     }
+
 
     @Test
     void testUpdatePersonWithUnsetPhones() {
@@ -1496,10 +1514,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "identityDocument.type.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithIdentityDocumentsdocumentIdRequired() {
         Map content = newPersonWithIdentityDocument()
-        content.identityDocuments = [[type:[category:"passport"]]]
+        content.identityDocuments = [[type: [category: "passport"]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1507,10 +1526,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "identityDocument.documentId.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithIdentityDocumentsTypeCategoryInvalid() {
         Map content = newPersonWithIdentityDocument()
-        content.identityDocuments = [[type:[category:"test"]]]
+        content.identityDocuments = [[type: [category: "test"]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1518,10 +1538,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "identityDocument.type.category.invalid", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithIdentityDocumentsTypeCategoryRequired() {
         Map content = newPersonWithIdentityDocument()
-        content.identityDocuments = [[type:[:]]]
+        content.identityDocuments = [[type: [:]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1529,10 +1550,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "identityDocument.type.category.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithIdentityDocumentsDuplicate() {
         Map content = newPersonWithIdentityDocument()
-        content.identityDocuments << [documentId: "123456", country: [code:"USA"], expiresOn:"2016-11-11", type:[category: "passport"]]
+        content.identityDocuments << [documentId: "123456", country: [code: "USA"], expiresOn: "2016-11-11", type: [category: "passport"]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1540,16 +1562,18 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "identityDocument.duplicate", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithIdentityDocumentsInvalidCountryCode() {
         Map content = newPersonWithIdentityDocument()
-        content.identityDocuments << [documentId: "123456", country: [code:"test"], expiresOn:"2016-11-11", type:[category: "passport"]]
+        content.identityDocuments << [documentId: "123456", country: [code: "test"], expiresOn: "2016-11-11", type: [category: "passport"]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "country.code.invalid.message", exceptionMessage
     }
+
 
     @Test
     void testCreatePersonWithIdentityDocuments() {
@@ -1562,11 +1586,12 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertFalse personV6.identityDocuments.isEmpty()
         IdentityDocumentV6 identityDocumentV6 = personV6.identityDocuments[0]
         assertNotNull identityDocumentV6
-        assertEquals identityDocumentV6.type.category , content.identityDocuments[0].type.category
-        assertEquals identityDocumentV6.documentId , content.identityDocuments[0].documentId
-        assertEquals identityDocumentV6.expiresOn , DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
-        assertEquals identityDocumentV6.country.code , content.identityDocuments[0].country.code
+        assertEquals identityDocumentV6.type.category, content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId, content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.expiresOn, DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
+        assertEquals identityDocumentV6.country.code, content.identityDocuments[0].country.code
     }
+
 
     @Test
     void testCreatePersonWithIdentityDocumentsWithDefalutCountryCode() {
@@ -1580,12 +1605,13 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertFalse personV6.identityDocuments.isEmpty()
         IdentityDocumentV6 identityDocumentV6 = personV6.identityDocuments[0]
         assertNotNull identityDocumentV6
-        assertEquals identityDocumentV6.type.category , content.identityDocuments[0].type.category
-        assertEquals identityDocumentV6.documentId , content.identityDocuments[0].documentId
-        assertEquals identityDocumentV6.expiresOn , DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
+        assertEquals identityDocumentV6.type.category, content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId, content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.expiresOn, DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
         assertEquals identityDocumentV6.country.code, isoCodeService.getISO3CountryCode(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
 
     }
+
 
     @Test
     void testUpdatePersonWithIdentityDocumentsUnsetAllFields() {
@@ -1614,6 +1640,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     }
 
+
     @Test
     void testUpdatePersonWithIdentityDocuments() {
         Map content = newPersonWithIdentityDocument()
@@ -1631,7 +1658,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals identityDocumentV6.expiresOn, DateConvertHelperService.convertDateStringToServerDate(content.identityDocuments[0].expiresOn).toString()
         assertEquals identityDocumentV6.country.code, isoCodeService.getISO3CountryCode(integrationConfigurationService.getDefaultISOCountryCodeForAddress())
 
-        content.identityDocuments = [ [documentId: "1234567", country: [code:"USA"], expiresOn:"", type:[category: "passport"]]]
+        content.identityDocuments = [[documentId: "1234567", country: [code: "USA"], expiresOn: "", type: [category: "passport"]]]
         content.id = personV6.guid
         s_person_data = personV6CompositeService.update(content)
         assertNotNull s_person_data
@@ -1641,10 +1668,10 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertFalse personV6.identityDocuments.isEmpty()
         identityDocumentV6 = personV6.identityDocuments[0]
         assertNotNull identityDocumentV6
-        assertEquals identityDocumentV6.type.category , content.identityDocuments[0].type.category
-        assertEquals identityDocumentV6.documentId , content.identityDocuments[0].documentId
+        assertEquals identityDocumentV6.type.category, content.identityDocuments[0].type.category
+        assertEquals identityDocumentV6.documentId, content.identityDocuments[0].documentId
         assertNull identityDocumentV6.expiresOn
-        assertEquals identityDocumentV6.country.code , content.identityDocuments[0].country.code
+        assertEquals identityDocumentV6.country.code, content.identityDocuments[0].country.code
 
     }
 
@@ -1652,7 +1679,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testCreatePersonWithAddressTypeDuplicate() {
         Map content = newPersonWithAddress()
-        content.addresses << [address: [addressLines:[ "10243 Stratford Avenuem "]],type: [addressType:"home"]]
+        content.addresses << [address: [addressLines: ["10243 Stratford Avenuem "]], type: [addressType: "home"]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1660,10 +1687,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "addressType.duplicate", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressTypeRequired() {
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]]]]
+        content.addresses = [[address: [addressLines: ["10243 Stratford Avenuem "]]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1671,10 +1699,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "type.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressAddressTypeRequired() {
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]],type: [:]]]
+        content.addresses = [[address: [addressLines: ["10243 Stratford Avenuem "]], type: [:]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1682,10 +1711,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "addressType.required", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressAddressTypeInvalid() {
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]],type: [addressType:"test"]]]
+        content.addresses = [[address: [addressLines: ["10243 Stratford Avenuem "]], type: [addressType: "test"]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1693,14 +1723,15 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "addressType.inValid", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressAddressTypeNotFound() {
         IntegrationConfiguration integrationConfiguration = IntegrationConfiguration.fetchAllByProcessCodeAndSettingNameAndTranslationValue(GeneralValidationCommonConstants.PROCESS_CODE, GeneralValidationCommonConstants.ADDRESS_TYPE_SETTING_NAME_V6, 'home')[0]
         assertNotNull integrationConfiguration
-        integrationConfiguration.delete( failOnError:true, flush: true )
+        integrationConfiguration.delete(failOnError: true, flush: true)
 
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines:[ "10243 Stratford Avenuem "]],type: [addressType:"home"]]]
+        content.addresses = [[address: [addressLines: ["10243 Stratford Avenuem "]], type: [addressType: "home"]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1708,10 +1739,11 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "addressType.not.found", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressAddressRequried() {
         Map content = newPersonWithAddress()
-        content.addresses = [[type: [addressType:"home"]]]
+        content.addresses = [[type: [addressType: "home"]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
@@ -1719,16 +1751,18 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "address.requried", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressAddressLinesRequried() {
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines:[]],type: [addressType:"home"]]]
+        content.addresses = [[address: [addressLines: []], type: [addressType: "home"]]]
 
         def exceptionMessage = shouldFail(ApplicationException) {
             personV6CompositeService.create(content)
         }
         assertEquals "addressLines.requried", exceptionMessage
     }
+
 
     @Test
     void testCreatePersonWithAddressMandatoryFileds() {
@@ -1742,15 +1776,16 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull personAddressDecorators
         assertFalse personAddressDecorators.isEmpty()
         assertNotNull personAddressDecorators[0].addressGuid
-        assertEquals personAddressDecorators[0].type.addressType,content.addresses[0].type.addressType
+        assertEquals personAddressDecorators[0].type.addressType, content.addresses[0].type.addressType
     }
+
 
     @Test
     void testCreatePersonWithAddressToDatePast() {
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines   : ["10243 Stratford Avenuem "]],
-                             type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()),
-                              toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()-2)]]
+        content.addresses = [[address: [addressLines: ["10243 Stratford Avenuem "]],
+                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()),
+                              toDate : DateConvertHelperService.convertDateIntoUTCFormat(new Date() - 2)]]
 
 
         def exceptionMessage = shouldFail(ApplicationException) {
@@ -1759,12 +1794,13 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "toDate.past", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressFromDateFuture() {
         Map content = newPersonWithAddress()
-        content.addresses = [[address: [addressLines   : ["10243 Stratford Avenuem "]],
-                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()+1),
-                              toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()+2)]]
+        content.addresses = [[address: [addressLines: ["10243 Stratford Avenuem "]],
+                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date() + 1),
+                              toDate : DateConvertHelperService.convertDateIntoUTCFormat(new Date() + 2)]]
 
 
         def exceptionMessage = shouldFail(ApplicationException) {
@@ -1773,20 +1809,21 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "fromDate.future", exceptionMessage
     }
 
+
     @Test
     void testCreatePersonWithAddressAllFileds() {
-        GeographicRegionRule geographicRegionRule = GeographicRegionRule.list([max:1])[0]
+        GeographicRegionRule geographicRegionRule = GeographicRegionRule.list([max: 1])[0]
         assertNotNull geographicRegionRule
         def guid = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName(geographicRegionRule.region.code + '-^' + geographicRegionRule.division.code, GeneralValidationCommonConstants.GEOGRAPHIC_AREA_LDM_NAME).guid
         assertNotNull guid
 
         Map content = newPersonWithAddress()
         content.addresses << [address: [addressLines   : ["10243 Stratford Avenuem ", "10244 Stratford Avenuem ", "10245 Stratford Avenuem ", "10246 Stratford Avenuem "],
-                                        place          : [country: [code         : "USA", locality: "South Australia", postalCode: "2620"],
-                                                                    deliveryPoint: "01", carrierRoute: "C039", correctionDigit: "1"],
+                                        place          : [country      : [code: "USA", locality: "South Australia", postalCode: "2620"],
+                                                          deliveryPoint: "01", carrierRoute: "C039", correctionDigit: "1"],
                                         geographicAreas: [[id: "$guid" as String]]
-                                        ],
-                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()), toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()+1)]
+        ],
+                              type   : [addressType: "business"], fromDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date()), toDate: DateConvertHelperService.convertDateIntoUTCFormat(new Date() + 1)]
 
         Map o_sucess_person_address = personV6CompositeService.create(content)
         assertNotNull o_sucess_person_address
@@ -1797,38 +1834,41 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertNotNull personAddressDecorators
         assertFalse personAddressDecorators.isEmpty()
         assertNotNull personAddressDecorators[0].addressGuid
-        assertEquals personAddressDecorators[0].type.addressType,content.addresses[0].type.addressType
+        assertEquals personAddressDecorators[0].type.addressType, content.addresses[0].type.addressType
     }
+
 
     private Map newPersonWithPhones() {
         Map params = [names : [
                 [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
         ],
                       phones: [
-                              [number: "6194448989", countryCallingCode: "+1", preference: "primary",extension:"123", type:[phoneType: "home"]]
+                              [number: "6194448989", countryCallingCode: "+1", preference: "primary", extension: "123", type: [phoneType: "home"]]
                       ]
         ]
         return params
     }
 
+
     private Map newPersonWithIdentityDocument() {
-        Map params = [names : [
+        Map params = [names            : [
                 [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
         ],
                       identityDocuments: [
-                              [documentId: "123456", country: [code:"USA"], expiresOn:"2016-11-11", type:[category: "passport"]]
+                              [documentId: "123456", country: [code: "USA"], expiresOn: "2016-11-11", type: [category: "passport"]]
                       ]
         ]
         return params
     }
 
+
     private Map newPersonWithAddress() {
-        Map params = [names : [
+        Map params = [names    : [
                 [lastName: i_success_last_name, middleName: i_success_middle_name, firstName: i_success_first_name, fullName: i_success_full_name, type: [category: i_success_primary_name_type], namePrefix: i_success_namePrefix, nameSuffix: i_success_nameSuffix, surnamePrefix: i_success_surnamePrefix]
         ],
                       addresses: [
-                              [address: [addressLines:[ "10243 Stratford Avenuem ", "10244 Stratford Avenuem ", "10245 Stratford Avenuem ", "10246 Stratford Avenuem "]],
-                               type: [addressType:"home"]]
+                              [address: [addressLines: ["10243 Stratford Avenuem ", "10244 Stratford Avenuem ", "10245 Stratford Avenuem ", "10246 Stratford Avenuem "]],
+                               type   : [addressType: "home"]]
                       ]
         ]
         return params

@@ -13,13 +13,11 @@ import net.hedtech.banner.general.system.ldm.NameTypeCategory
  */
 class PersonV3CompositeService extends AbstractPersonCompositeService {
 
-    @Override
     protected String getPopSelGuidOrDomainKey(Map requestParams) {
         return requestParams.get("personFilter")
     }
 
 
-    @Override
     protected def prepareCommonMatchingRequest(Map content) {
         def cmRequest = [:]
 
@@ -195,17 +193,16 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
+    protected void prepareDataMapForAll_ListExtension(List<Integer> pidms, Map dataMapForAll) {
 
     }
 
 
     protected def getBannerNameTypeToHedmNameTypeMap() {
-        return personNameTypeCompositeService.getBannerNameTypeToHedmV3NameTypeMap()
+        return null
     }
 
 
-    @Override
     protected List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR]
     }
@@ -231,12 +228,12 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                                 final Map dataMap, Map dataMapForPerson) {
+    protected void prepareDataMapForSingle_ListExtension(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                         final Map dataMapForAll, Map dataMapForSingle) {
     }
 
 
-    protected def createPersonDataModel(Map dataMapForPerson) {
+    protected def createPersonDataModel(final Map dataMapForSingle) {
         return null
     }
 

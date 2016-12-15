@@ -57,7 +57,6 @@ class PersonCompositeService extends LdmService {
     def additionalIDService
     def personFilterCompositeService
     def personIdentificationNameAlternateService
-    def commonMatchingCompositeService
     IntegrationConfigurationService integrationConfigurationService
 
     List<GlobalUniqueIdentifier> allEthnicities

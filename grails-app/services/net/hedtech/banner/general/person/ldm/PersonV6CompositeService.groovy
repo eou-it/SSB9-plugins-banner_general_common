@@ -32,17 +32,18 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     IsoCodeService isoCodeService
     EmailTypeService emailTypeService
     ThirdPartyAccessService thirdPartyAccessService
-    CitizenTypeService citizenTypeService
+    PersonNameTypeCompositeService personNameTypeCompositeService
     MaritalStatusV4CompositeService maritalStatusV4CompositeService
+    RaceCompositeService raceCompositeService
+    CitizenshipStatusCompositeService citizenshipStatusCompositeService
+    ReligionCompositeService religionCompositeService
 
 
-    @Override
     protected String getPopSelGuidOrDomainKey(final Map requestParams) {
         return requestParams.get("personFilter")
     }
 
 
-    @Override
     protected def prepareCommonMatchingRequest(final Map content) {
         def cmRequest = [:]
 
@@ -219,41 +220,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
-        fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        dataMap.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
-        fetchPersonsInterestDataAndPutInMap(pidms, dataMap)
-        fetchPersonsPassportDataAndPutInMap(pidms, dataMap)
-        dataMap.put("bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap", maritalStatusV4CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap())
-    }
+    protected void prepareDataMapForAll_ListExtension(List<Integer> pidms, Map dataMapForAll) {
+        dataMapForAll.put("isInstitutionUsingISO2CountryCodes", integrationConfigurationService.isInstitutionUsingISO2CountryCodes())
 
-
-    private void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        // Get GUIDs for CitizenTypes
-        List<String> citizenTypeCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
-            it.citizenType?.code
-        }.unique()
-        Map<String, String> ctCodeToGuidMap = [:]
-        if (citizenTypeCodes) {
-            log.debug "Getting GUIDs for CitizenType codes $citizenTypeCodes..."
-            ctCodeToGuidMap = citizenshipStatusCompositeService.fetchGUIDs(citizenTypeCodes)
-            log.debug "Got ${ctCodeToGuidMap?.size() ?: 0} GUIDs for given CitizenType codes"
-        }
-
-        // Get GUIDs for regligion codes
-        List<String> religionCodes = dataMap.pidmToPersonBaseMap?.values()?.findResults {
-            it.religion?.code
-        }.unique()
-        Map<String, String> relCodeToGuidMap = [:]
-        if (religionCodes) {
-            log.debug "Getting GUIDs for religion codes $religionCodes..."
-            relCodeToGuidMap = religionCompositeService.fetchGUIDs(religionCodes)
-            log.debug "Got ${relCodeToGuidMap?.size() ?: 0} GUIDs for given religion codes"
-        }
-
-        // Put in Map
-        dataMap.put("ctCodeToGuidMap", ctCodeToGuidMap)
-        dataMap.put("relCodeToGuidMap", relCodeToGuidMap)
+        dataMapForAll.put("bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap", maritalStatusV4CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap())
     }
 
 
@@ -262,7 +232,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    @Override
     protected List<RoleName> getRolesRequired() {
         return [RoleName.STUDENT, RoleName.INSTRUCTOR, RoleName.EMPLOYEE, RoleName.VENDOR, RoleName.ALUMNI, RoleName.PROSPECTIVE_STUDENT, RoleName.ADVISOR]
     }
@@ -283,62 +252,62 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                                 final Map dataMap, Map dataMapForPerson) {
-        dataMapForPerson.put("isInstitutionUsingISO2CountryCodes", dataMap.get("isInstitutionUsingISO2CountryCodes"))
+    protected void prepareDataMapForSingle_ListExtension(PersonIdentificationNameCurrent personIdentificationNameCurrent,
+                                                         final Map dataMapForAll, Map dataMapForSingle) {
+        dataMapForSingle.put("isInstitutionUsingISO2CountryCodes", dataMapForAll.get("isInstitutionUsingISO2CountryCodes"))
 
         // Biographical
-        PersonBasicPersonBase personBase = dataMap.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
+        PersonBasicPersonBase personBase = dataMapForAll.pidmToPersonBaseMap.get(personIdentificationNameCurrent.pidm)
         if (personBase) {
             if (personBase.citizenType) {
-                dataMapForPerson << ["citizenTypeGuid": dataMap.ctCodeToGuidMap.get(personBase.citizenType.code)]
+                dataMapForSingle << ["citizenTypeGuid": dataMapForAll.ctCodeToGuidMap.get(personBase.citizenType.code)]
             }
             if (personBase.religion) {
-                dataMapForPerson << ["religionGuid": dataMap.relCodeToGuidMap.get(personBase.religion.code)]
+                dataMapForSingle << ["religionGuid": dataMapForAll.relCodeToGuidMap.get(personBase.religion.code)]
             }
             if (personBase.maritalStatus) {
-                dataMapForPerson << ["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap": dataMap.bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap]
+                dataMapForSingle << ["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap": dataMapForAll.bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap]
             }
         }
 
         // interests
-        List personInterests = dataMap.pidmToInterestsMap.get(personIdentificationNameCurrent.pidm)
+        List personInterests = dataMapForAll.pidmToInterestsMap.get(personIdentificationNameCurrent.pidm)
         if (personInterests) {
-            dataMapForPerson << ["personInterests": personInterests]
-            dataMapForPerson << ["interestCodeToGuidMap": dataMap.interestCodeToGuidMap]
+            dataMapForSingle << ["personInterests": personInterests]
+            dataMapForSingle << ["interestCodeToGuidMap": dataMapForAll.interestCodeToGuidMap]
         }
 
         // identity Documents
-        VisaInternationalInformation visaIntlInformation = dataMap.pidmToPassportMap.get(personIdentificationNameCurrent.pidm)
+        VisaInternationalInformation visaIntlInformation = dataMapForAll.pidmToPassportMap.get(personIdentificationNameCurrent.pidm)
         if (visaIntlInformation) {
-            dataMapForPerson << ["passport": visaIntlInformation]
-            dataMapForPerson << ["codeToNationMap": dataMap.codeToNationMap]
+            dataMapForSingle << ["passport": visaIntlInformation]
+            dataMapForSingle << ["codeToNationMap": dataMapForAll.codeToNationMap]
         }
 
         // languages
-        if (dataMap.pidmToLanguageCodeMap.containsKey(personIdentificationNameCurrent.pidm)) {
-            dataMapForPerson << ["iso3LanguageCode": dataMap.stvlangCodeToISO3LangCodeMap.get(dataMap.pidmToLanguageCodeMap.get(personIdentificationNameCurrent.pidm))]
+        if (dataMapForAll.pidmToLanguageCodeMap.containsKey(personIdentificationNameCurrent.pidm)) {
+            dataMapForSingle << ["iso3LanguageCode": dataMapForAll.stvlangCodeToISO3LangCodeMap.get(dataMapForAll.pidmToLanguageCodeMap.get(personIdentificationNameCurrent.pidm))]
         }
 
         //countryBirth and countryLegal
-        VisaInternationalInformation visaIntlInformation1 = dataMap.pidmToOriginCountryMap.get(personIdentificationNameCurrent.pidm)
+        VisaInternationalInformation visaIntlInformation1 = dataMapForAll.pidmToOriginCountryMap.get(personIdentificationNameCurrent.pidm)
         if (visaIntlInformation1) {
-            dataMapForPerson << ["pidmToOriginCountryMap": visaIntlInformation1]
-            dataMapForPerson << ["codeToNationMap": dataMap.codeToNationMap]
+            dataMapForSingle << ["pidmToOriginCountryMap": visaIntlInformation1]
+            dataMapForSingle << ["codeToNationMap": dataMapForAll.codeToNationMap]
         }
     }
 
 
-    protected def createPersonDataModel(final Map dataMapForPerson) {
+    protected def createPersonDataModel(final Map dataMapForSingle) {
         PersonV6 decorator
-        def personIdentificationNameCurrent = dataMapForPerson["personIdentificationNameCurrent"]
+        def personIdentificationNameCurrent = dataMapForSingle["personIdentificationNameCurrent"]
         if (personIdentificationNameCurrent) {
             decorator = new PersonV6()
 
             // GUID
-            decorator.guid = dataMapForPerson["personGuid"]
+            decorator.guid = dataMapForSingle["personGuid"]
 
-            PersonBasicPersonBase personBase = dataMapForPerson["personBase"]
+            PersonBasicPersonBase personBase = dataMapForSingle["personBase"]
             if (personBase) {
                 // privacyStatus
                 if (personBase.confidIndicator == "Y") {
@@ -348,15 +317,15 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
                 // citizenshipStatus
                 if (personBase.citizenType) {
-                    decorator.citizenshipStatus = createCitizenshipStatusV6(personBase.citizenType, dataMapForPerson["citizenTypeGuid"])
+                    decorator.citizenshipStatus = createCitizenshipStatusV6(personBase.citizenType, dataMapForSingle["citizenTypeGuid"])
                 }
                 // religion
                 if (personBase.religion) {
-                    decorator.religion = ["id": dataMapForPerson["religionGuid"]]
+                    decorator.religion = ["id": dataMapForSingle["religionGuid"]]
                 }
                 // ethnicity
                 if (personBase.ethnic) {
-                    String usEthnicCodeGuid = dataMapForPerson["usEthnicCodeGuid"]
+                    String usEthnicCodeGuid = dataMapForSingle["usEthnicCodeGuid"]
                     decorator.ethnicity = ethnicityCompositeService.createEthnicityV6(usEthnicCodeGuid, null, personBase.ethnic)
                 }
                 //dateOfBirth
@@ -373,8 +342,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
                 }
                 //maritalStatus
                 if (personBase.maritalStatus) {
-                    String maritalStatusGuid = dataMapForPerson["maritalStatusGuid"]
-                    def bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap = dataMapForPerson["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap"]
+                    String maritalStatusGuid = dataMapForSingle["maritalStatusGuid"]
+                    def bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap = dataMapForSingle["bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap"]
                     if (!bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap) {
                         bannerMaritalStatusCodeToHedmMaritalStatusCategoryMap = maritalStatusV4CompositeService.getBannerMaritalStatusCodeToHedmMaritalStatusCategoryMap()
                     }
@@ -388,9 +357,9 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             decorator.names = []
             NameV6 nameV6 = createNameV6(personIdentificationNameCurrent, personBase)
             decorator.names << nameV6
-            def bannerNameTypeToHedmNameTypeMap = dataMapForPerson["bannerNameTypeToHedmNameTypeMap"]
-            def nameTypeCodeToGuidMap = dataMapForPerson["nameTypeCodeToGuidMap"]
-            List<PersonIdentificationNameAlternate> personAlternateNames = dataMapForPerson["personAlternateNames"]
+            def bannerNameTypeToHedmNameTypeMap = dataMapForSingle["bannerNameTypeToHedmNameTypeMap"]
+            def nameTypeCodeToGuidMap = dataMapForSingle["nameTypeCodeToGuidMap"]
+            List<PersonIdentificationNameAlternate> personAlternateNames = dataMapForSingle["personAlternateNames"]
             personAlternateNames?.each {
                 decorator.names << createNameAlternateV6(it, bannerNameTypeToHedmNameTypeMap.get(it.nameType.code), nameTypeCodeToGuidMap.get(it.nameType.code))
             }
@@ -406,7 +375,7 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // Roles
-            def personRoles = dataMapForPerson["personRoles"]
+            def personRoles = dataMapForSingle["personRoles"]
             if (personRoles) {
                 decorator.roles = []
                 personRoles.each {
@@ -415,17 +384,17 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // Credentials
-            def personCredentials = dataMapForPerson["personCredentials"]
+            def personCredentials = dataMapForSingle["personCredentials"]
             if (personCredentials) {
                 decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
             }
 
             // Addresses
-            List<PersonAddress> personAddresses = dataMapForPerson["personAddresses"]
+            List<PersonAddress> personAddresses = dataMapForSingle["personAddresses"]
             if (personAddresses) {
-                Map addressTypeCodeToGuidMap = dataMapForPerson["addressTypeCodeToGuidMap"]
-                Map bannerAddressTypeToHedmAddressTypeMap = dataMapForPerson["bannerAddressTypeToHedmAddressTypeMap"]
-                Map personAddressSurrogateIdToGuidMap = dataMapForPerson["personAddressSurrogateIdToGuidMap"]
+                Map addressTypeCodeToGuidMap = dataMapForSingle["addressTypeCodeToGuidMap"]
+                Map bannerAddressTypeToHedmAddressTypeMap = dataMapForSingle["bannerAddressTypeToHedmAddressTypeMap"]
+                Map personAddressSurrogateIdToGuidMap = dataMapForSingle["personAddressSurrogateIdToGuidMap"]
                 decorator.addresses = []
                 personAddresses.each {
                     decorator.addresses << createPersonAddressDecorator(it, personAddressSurrogateIdToGuidMap.get(it.id), addressTypeCodeToGuidMap.get(it.addressType.code), bannerAddressTypeToHedmAddressTypeMap.get(it.addressType.code))
@@ -433,10 +402,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // Phones
-            List<PersonTelephone> personTelephoneListList = dataMapForPerson["personPhones"]
+            List<PersonTelephone> personTelephoneListList = dataMapForSingle["personPhones"]
             if (personTelephoneListList) {
-                Map phoneTypeCodeToGuidMap = dataMapForPerson["phoneTypeCodeToGuidMap"]
-                Map bannerPhoneTypeToHedmPhoneTypeMap = dataMapForPerson["bannerPhoneTypeToHedmPhoneTypeMap"]
+                Map phoneTypeCodeToGuidMap = dataMapForSingle["phoneTypeCodeToGuidMap"]
+                Map bannerPhoneTypeToHedmPhoneTypeMap = dataMapForSingle["bannerPhoneTypeToHedmPhoneTypeMap"]
                 decorator.phones = []
                 personTelephoneListList.each {
                     decorator.phones << PhoneV6.createPhoneV6(it, phoneTypeCodeToGuidMap.get(it.telephoneType.code), bannerPhoneTypeToHedmPhoneTypeMap.get(it.telephoneType.code))
@@ -444,10 +413,10 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // Emails
-            List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]
+            List<PersonEmail> personEmailList = dataMapForSingle["personEmails"]
             if (personEmailList) {
-                Map emailTypeCodeToGuidMap = dataMapForPerson["emailTypeCodeToGuidMap"]
-                Map bannerEmailTypeToHedmEmailTypeMap = dataMapForPerson["bannerEmailTypeToHedmEmailTypeMap"]
+                Map emailTypeCodeToGuidMap = dataMapForSingle["emailTypeCodeToGuidMap"]
+                Map bannerEmailTypeToHedmEmailTypeMap = dataMapForSingle["bannerEmailTypeToHedmEmailTypeMap"]
                 decorator.emails = []
                 personEmailList.each {
                     decorator.emails << createEmailV6(it, it.emailType.code, emailTypeCodeToGuidMap.get(it.emailType.code), bannerEmailTypeToHedmEmailTypeMap.get(it.emailType.code))
@@ -455,8 +424,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // Races
-            List<PersonRace> personRaces = dataMapForPerson["personRaces"]
-            Map<String, String> raceCodeToGuidMap = dataMapForPerson["raceCodeToGuidMap"]
+            List<PersonRace> personRaces = dataMapForSingle["personRaces"]
+            Map<String, String> raceCodeToGuidMap = dataMapForSingle["raceCodeToGuidMap"]
             if (personRaces) {
                 decorator.races = []
                 personRaces.each {
@@ -465,8 +434,8 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // interests
-            List personInterests = dataMapForPerson["personInterests"]
-            Map<String, String> iterestCodeToGuidMap = dataMapForPerson["interestCodeToGuidMap"]
+            List personInterests = dataMapForSingle["personInterests"]
+            Map<String, String> iterestCodeToGuidMap = dataMapForSingle["interestCodeToGuidMap"]
             if (personInterests) {
                 decorator.interests = []
                 personInterests.each {
@@ -475,23 +444,23 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
 
             // indentityDocuments
-            VisaInternationalInformation visaIntlInformation = dataMapForPerson["passport"]
+            VisaInternationalInformation visaIntlInformation = dataMapForSingle["passport"]
             if (visaIntlInformation) {
-                Map codeToNationMap = dataMapForPerson["codeToNationMap"]
+                Map codeToNationMap = dataMapForSingle["codeToNationMap"]
                 decorator.identityDocuments = []
-                decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForPerson.get("isInstitutionUsingISO2CountryCodes"))
+                decorator.identityDocuments << createIdentityDocumentV6(visaIntlInformation, codeToNationMap.get(visaIntlInformation.nationIssue), dataMapForSingle.get("isInstitutionUsingISO2CountryCodes"))
             }
 
             // languages
-            if (dataMapForPerson["iso3LanguageCode"]) {
+            if (dataMapForSingle["iso3LanguageCode"]) {
                 decorator.languages = []
-                decorator.languages << ["code": dataMapForPerson["iso3LanguageCode"]]
+                decorator.languages << ["code": dataMapForSingle["iso3LanguageCode"]]
             }
 
             //countryBirth & citizenshipCountry
-            VisaInternationalInformation visaIntlInformation1 = dataMapForPerson["pidmToOriginCountryMap"]
+            VisaInternationalInformation visaIntlInformation1 = dataMapForSingle["pidmToOriginCountryMap"]
             if (visaIntlInformation1) {
-                Map codeToNationMap = dataMapForPerson["codeToNationMap"]
+                Map codeToNationMap = dataMapForSingle["codeToNationMap"]
 
                 //countryOfBirth
                 if (visaIntlInformation1.nationBirth) {
@@ -505,89 +474,6 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
             }
         }
         return decorator
-    }
-
-
-    private void fetchPersonsInterestDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        if (!outsideInterestService) {
-            // Test mode
-            dataMap.put("pidmToInterestsMap", [:])
-            dataMap.put("interestCodeToGuidMap", [:])
-            return
-        }
-        // Get SORINTS records for persons
-        Map pidmToInterestsMap = [:]
-        if (pidms) {
-            log.debug "Getting SORINTS records for ${pidms?.size()} PIDMs..."
-            List entities = outsideInterestService.fetchAllByPidmInList(pidms)
-            entities?.each {
-                List personInterests = []
-                if (pidmToInterestsMap.containsKey(it.pidm)) {
-                    personInterests = pidmToInterestsMap.get(it.pidm)
-                } else {
-                    pidmToInterestsMap.put(it.pidm, personInterests)
-                }
-                personInterests.add(it)
-            }
-        }
-        // Get GUIDs for interest codes
-        Set<String> interestCodes = pidmToInterestsMap?.values().interest.code.flatten() as Set
-        Map interestCodeToGuidMap = [:]
-        if (interestCodes) {
-            log.debug "Getting GUIDs for interest codes $interestCodes..."
-            interestCodeToGuidMap = interestCompositeService.getInterestCodeToGuidMap(interestCodes)
-            log.debug "Got ${interestCodeToGuidMap?.size() ?: 0} GUIDs for given interest codes"
-        }
-        // Put in Map
-        dataMap.put("pidmToInterestsMap", pidmToInterestsMap)
-        dataMap.put("interestCodeToGuidMap", interestCodeToGuidMap)
-    }
-
-
-    private void fetchPersonsPassportDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        // Get GOBINTL records for persons
-        List<VisaInternationalInformation> entities = visaInternationalInformationService.fetchAllByPidmInList(pidms)
-
-        // Passport
-        Map pidmToPassportMap = [:]
-        Map pidmToLanguageCodeMap = [:]
-        Map pidmToOriginCountryMap = [:]
-        entities?.each {
-            if (it.passportId) {
-                pidmToPassportMap.put(it.pidm, it)
-            }
-            if (it.language?.code) {
-                pidmToLanguageCodeMap.put(it.pidm, it.language.code)
-            }
-            if (it.nationBirth || it.nationLegal) {
-                pidmToOriginCountryMap.put(it.pidm, it)
-            }
-        }
-
-        Set<String> issuingNationCodes = pidmToPassportMap?.values().nationIssue.flatten().unique()
-        issuingNationCodes.addAll(pidmToOriginCountryMap?.values().nationBirth.flatten().unique())
-        issuingNationCodes.addAll(pidmToOriginCountryMap?.values().nationLegal.flatten().unique())
-        // Get STVNATN records for country information
-        Map codeToNationMap = [:]
-        if (issuingNationCodes) {
-            log.debug "Getting nations for country codes $issuingNationCodes..."
-            codeToNationMap = nationCompositeService.fetchAllByCodesInList(issuingNationCodes)
-            log.debug "Got ${codeToNationMap?.size() ?: 0} nations for given country codes"
-        }
-
-        // ISO3 language codes
-        Set<String> stvlangCodes = entities.language.code.flatten().unique()
-        Map<String, String> stvlangCodeToISO3LangCodeMap = [:]
-        if (crossReferenceRuleService) {
-            stvlangCodeToISO3LangCodeMap = crossReferenceRuleService.getISO3LanguageCodes(stvlangCodes)
-        }
-
-        // Put in Map
-        dataMap.put("pidmToPassportMap", pidmToPassportMap)
-        dataMap.put("codeToNationMap", codeToNationMap)
-        dataMap.put("pidmToLanguageCodeMap", pidmToLanguageCodeMap)
-        dataMap.put("stvlangCodeToISO3LangCodeMap", stvlangCodeToISO3LangCodeMap)
-        dataMap.put("pidmToOriginCountryMap", pidmToOriginCountryMap)
     }
 
 
@@ -1677,4 +1563,5 @@ class PersonV6CompositeService extends AbstractPersonCompositeService {
 
         return parts
     }
+
 }
