@@ -5,20 +5,78 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
+import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
+import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
+import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 
-/**
- * RESTful APIs for Ellucian Ethos Data Model "persons" V3.
- */
-class PersonV3CompositeService extends AbstractPersonCompositeService {
+import java.sql.Timestamp
 
-    protected String getPopSelGuidOrDomainKey(Map requestParams) {
-        return requestParams.get("personFilter")
+class PersonV3CompositeService {
+
+    CommonMatchingCompositeService commonMatchingCompositeService
+    PersonAdvancedSearchViewService personAdvancedSearchViewService
+    UserRoleCompositeService userRoleCompositeService
+    PersonFilterCompositeService personFilterCompositeService
+    EmailTypeCompositeService emailTypeCompositeService
+
+
+    def listQApi(Map requestParams) {
+        return searchForMatchingPersons(requestParams)
     }
 
 
-    protected def prepareCommonMatchingRequest(Map content) {
+    private def searchForMatchingPersons(final Map content) {
+        def cmRequest = prepareCommonMatchingRequest(content)
+
+        if (cmRequest?.dateOfBirth) {
+            Date dob = cmRequest.remove("dateOfBirth")
+            cmRequest << [birthDay: dob?.format("dd")]
+            cmRequest << [birthMonth: dob?.format("MM")]
+            cmRequest << [birthYear: dob?.format("yyyy")]
+        }
+
+        cmRequest << [max: content?.max]
+        cmRequest << [offset: content?.offset]
+        cmRequest << [sort: content?.sort]
+        cmRequest << [order: content?.order]
+
+        def personEmails = cmRequest.remove("personEmails")
+
+        // Common Matching Source Code
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        cmRequest << [source: intConf?.value]
+
+        // Call Common Matching Service
+        commonMatchingCompositeService.commonMatchingCleanup()
+
+        def cmResponse
+        if (personEmails) {
+            // Try with each email until you get match
+            for (def temp : personEmails) {
+                cmRequest << [emailType: temp.emailType]
+                cmRequest << [email: temp.email]
+                log.debug "Common matching request : ${cmRequest}"
+                cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+                if (cmResponse?.personList) break
+            }
+        } else {
+            // Try without email
+            log.debug "Common matching request : ${cmRequest}"
+            cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+        }
+        log.debug "Common matching returned ${cmResponse?.personList?.size()} records"
+        List<Integer> pidms = cmResponse?.personList?.collect { it.pidm }
+        def totalCount = cmResponse?.count
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    private def prepareCommonMatchingRequest(Map content) {
         def cmRequest = [:]
 
         // First name, middle name, last name
@@ -79,7 +137,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
         // Date of Birth
         Date dob
         if (content?.dateOfBirth) {
-            dob = convertString2Date(content?.dateOfBirth)
+            dob = LdmService.convertString2Date(content?.dateOfBirth)
             cmRequest << [dateOfBirth: dob]
         }
 
@@ -153,7 +211,6 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
                 returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
             } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
                 returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
-                setStudentPidmsInThreadLocal(returnMap?.pidms)
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
             }
@@ -193,48 +250,37 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void prepareDataMapForAll_ListExtension(List<Integer> pidms, Map dataMapForAll) {
-
+    private def getPidmToFacultyRoleMap(List<Integer> pidms) {
+        def pidmToFacultyRoleMap = [:]
+        List<Object[]> rows = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
+        rows?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            pidmToFacultyRoleMap.put(bdPidm.toInteger(), [role: RoleName.INSTRUCTOR, startDate: startDate, endDate: endDate])
+        }
+        return pidmToFacultyRoleMap
     }
 
 
-    protected def getBannerNameTypeToHedmNameTypeMap() {
-        return null
+    private def getPidmToStudentRoleMap(List<Integer> pidms) {
+        def pidmToStudentRoleMap = [:]
+        List<BigDecimal> rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
+        rows?.each {
+            pidmToStudentRoleMap.put(it.toInteger(), [role: RoleName.STUDENT])
+        }
+        return pidmToStudentRoleMap
     }
 
 
-    protected List<RoleName> getRolesRequired() {
-        return [RoleName.STUDENT, RoleName.INSTRUCTOR]
+    private getPidmsOfPopulationExtract(final Map requestParams) {
+        String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
+        return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort?.trim(), requestParams.order?.trim(), requestParams.max?.trim()?.toInteger() ?: 0, requestParams.offset?.trim()?.toInteger() ?: 0)
     }
 
 
-    protected def getBannerAddressTypeToHedmAddressTypeMap() {
-        return addressTypeCompositeService.getBannerAddressTypeToHedmV3AddressTypeMap()
-    }
-
-
-    protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
-        return phoneTypeCompositeService.getBannerPhoneTypeToHedmV3PhoneTypeMap()
-    }
-
-
-    protected def getBannerEmailTypeToHedmEmailTypeMap() {
-        return emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
-    }
-
-
-    protected def extractDataFromRequestBody(Map content) {
-        return null
-    }
-
-
-    protected void prepareDataMapForSingle_ListExtension(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                         final Map dataMapForAll, Map dataMapForSingle) {
-    }
-
-
-    protected def createPersonDataModel(final Map dataMapForSingle) {
-        return null
+    private String getPopSelGuidOrDomainKey(Map requestParams) {
+        return requestParams.get("personFilter")
     }
 
 }
