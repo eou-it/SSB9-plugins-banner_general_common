@@ -531,7 +531,7 @@ class PersonCompositeService extends LdmService {
         if (races.size() == 0)
             personMap = buildPersonRaces(PersonRace.findAllByPidmInList([pidmToUpdate]), personMap)
         def additionalIdTypes = Credential.additionalIdMap.keySet().asList()
-        personMap = buildPersonAdditionalIds(AdditionalID.fetchByPidmInListAndAdditionalIdentificationTypeInList([pidmToUpdate], additionalIdTypes), personMap)
+        personMap = buildPersonAdditionalIds(additionalIDService.fetchAllByPidmInListAndIdentificationTypeCodeInList([pidmToUpdate], additionalIdTypes), personMap)
         personDecorator = buildPersonRoles(personMap).get(pidmToUpdate)
     }
 
@@ -1385,7 +1385,7 @@ class PersonCompositeService extends LdmService {
             value == credential.credentialType
         }?.key
         def idType = AdditionalIdentificationType.findByCode(idCode)
-        List<AdditionalID> existingIds = AdditionalID.fetchByPidmInListAndAdditionalIdentificationTypeInList([personIdentification.pidm], [idCode])
+        List<AdditionalID> existingIds = additionalIDService.fetchAllByPidmInListAndIdentificationTypeCodeInList([personIdentification.pidm], [idCode])
         AdditionalID existingId
         if (existingIds.size() > 0) {
             existingId = existingIds.get(0)
