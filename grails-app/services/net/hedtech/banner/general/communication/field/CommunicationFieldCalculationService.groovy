@@ -12,9 +12,9 @@ package net.hedtech.banner.general.communication.field
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -42,7 +42,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         if (parameters == null) parameters = [:]
 
         ST st = newST( stringTemplate );
-        parameters.keySet().each { key ->
+        parameters.keySet().each { String key ->
             st.add( key, parameters[key] )
         }
         String firstPass = st.render()
@@ -86,8 +86,34 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public String calculateFieldByPidmWithNewTransaction( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
-        calculateFieldByPidm( sqlStatement, returnsArrayArguments, formatString, pidm, mepCode )
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Long pidm, String mepCode=null ) {
+        Map nameValueMap = [:]
+        for (String name:fieldNames) {
+            CommunicationField communicationField = CommunicationField.fetchByName( name )
+            if (communicationField) {
+                String value = calculateSingleFieldByPidm(communicationField, pidm, mepCode)
+                CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
+                nameValueMap.put( name, communicationFieldValue )
+            } else {
+              // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
+              // Will come back to this to figure out desired behavior.
+            }
+        }
+
+        return nameValueMap
+    }
+
+    public String calculateSingleFieldByPidm( CommunicationField communicationField, Long pidm, String mepCode=null ) {
+
+        String value = calculateFieldByPidm(
+                communicationField.ruleContent,
+                communicationField.returnsArrayArguments,
+                communicationField.formatString,
+                pidm,
+                mepCode
+        )
+
+        return value
     }
 
     public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
@@ -112,7 +138,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
      */
     private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters, String mepCode=null ) {
         def attributeMap = [:]
-        def Sql sql
+        def Sql sql = null
         try {
             if (sqlStatement && sqlStatement.trim().size() > 0) {
                 // ToDo: decide if the upper bound should be configurable

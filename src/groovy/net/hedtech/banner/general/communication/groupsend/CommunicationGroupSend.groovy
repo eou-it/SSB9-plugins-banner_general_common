@@ -215,7 +215,7 @@ class CommunicationGroupSend implements Serializable {
         this.groupId = groupId
     }
 
-    public static List findRunning() {
+    public static List findRunning( Integer max = Integer.MAX_VALUE ) {
         def query
         CommunicationGroupSend.withSession { session ->
             query = session.getNamedQuery('CommunicationGroupSend.findRunning')
@@ -224,11 +224,12 @@ class CommunicationGroupSend implements Serializable {
                     .setParameter('scheduled_', CommunicationGroupSendExecutionState.Scheduled)
                     .setParameter('queued_', CommunicationGroupSendExecutionState.Queued)
                     .setParameter('calculating_', CommunicationGroupSendExecutionState.Calculating)
+                    .setFirstResult( 0 )
+                    .setMaxResults( max )
                     .list()
         }
         return query
     }
-
 
     public static List fetchCompleted() {
         def results

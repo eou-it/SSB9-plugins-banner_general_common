@@ -122,22 +122,37 @@ ssbOracleUsersProxied = true
 
 communication {
     weblogicDeployment = false
-    engine {
-        isEnabled = true
-        groupSendEngine {
-            maxThreads = 1
-            maxQueueSize = 5000
-            continuousPolling = true
-            pollingInterval = 500
-            deleteSuccessfullyCompleted = false
-        }
-        communicationJobEngine {
-            maxThreads = 2
-            maxQueueSize = 5000
-            continuousPolling = true
-            pollingInterval = 500
-            deleteSuccessfullyCompleted = false
-        }
+
+    communicationGroupSendMonitor {
+        enabled = true
+        monitorIntervalInSeconds = 10
+    }
+
+    communicationGroupSendItemProcessingEngine {
+        enabled = true
+        maxThreads = 1
+        maxQueueSize = 5000
+        continuousPolling = true
+        pollingInterval = 2000
+        deleteSuccessfullyCompleted = false
+    }
+
+    communicationJobProcessingEngine {
+        enabled = true
+        maxThreads = 2
+        maxQueueSize = 5000
+        continuousPolling = true
+        pollingInterval = 2000
+        deleteSuccessfullyCompleted = false
+    }
+
+    scheduler {
+        enabled = true
+        idleWaitTime = 30000
+    }
+
+    email {
+        senderAuthenticationEnabled = true
     }
 }
 // encKey must be exactly 32 chars

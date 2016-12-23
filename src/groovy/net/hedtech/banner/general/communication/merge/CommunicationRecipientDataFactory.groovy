@@ -3,12 +3,13 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.merge
 
-import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
+import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
 import org.apache.log4j.Logger
 
@@ -18,9 +19,9 @@ import org.apache.log4j.Logger
 class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor {
     def log = Logger.getLogger(this.getClass())
 
-    def communicationTemplateMergeService
-    def communicationFieldCalculationService
-    def communicationRecipientDataService
+    CommunicationTemplateMergeService communicationTemplateMergeService
+    CommunicationFieldCalculationService communicationFieldCalculationService
+    CommunicationRecipientDataService communicationRecipientDataService
     def asynchronousBannerAuthenticationSpoofer
 
     CommunicationRecipientData recipientData
@@ -41,7 +42,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
         CommunicationTemplate thisTemplate = CommunicationTemplate.fetchByIdAndMepCode(groupSendItem.communicationGroupSend.templateId, groupSendItem.mepCode)
         thisTemplate.accept(this)
 
-        recipientData = communicationRecipientDataService.create( recipientData )
+        recipientData = (CommunicationRecipientData) communicationRecipientDataService.create( recipientData )
     }
 
     void visitEmail(CommunicationEmailTemplate template) {
@@ -90,20 +91,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
     }
 
     private CommunicationRecipientData createCommunicationRecipientData( CommunicationTemplate template, List<String> fieldNames ) {
-        def nameToValueMap = [:]
-        fieldNames.each { fieldName ->
-            CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
-            // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
-            // Will come back to this to figure out desired behavior.
-            if (communicationField) {
-                String value = calculateFieldForUser( communicationField )
-                CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue(
-                    value: value,
-                    renderAsHtml: communicationField.renderAsHtml
-                )
-                nameToValueMap.put( fieldName, communicationFieldValue )
-            }
-        }
+        Map nameToValueMap = calculateFieldsForUser( fieldNames )
 
         new CommunicationRecipientData(
             pidm: groupSendItem.recipientPidm,
@@ -117,16 +105,14 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
 
     }
 
-    private String calculateFieldForUser( CommunicationField communicationField ) {
+    private Map calculateFieldsForUser( List<String> fieldNames ) {
         def originalMap = null
         try {
             originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( groupSendItem.communicationGroupSend.createdBy, groupSendItem.communicationGroupSend.mepCode)
             // This method will start a nested transaction (see REQUIRES_NEW annotation) and
             // consequently pick up a new db connection with the current oracle user name.
-            return communicationFieldCalculationService.calculateFieldByPidmWithNewTransaction(
-                communicationField.getRuleContent(),
-                communicationField.returnsArrayArguments,
-                communicationField.getFormatString(),
+            return communicationFieldCalculationService.calculateFieldsByPidmWithNewTransaction(
+                fieldNames,
                 this.groupSendItem.recipientPidm,
                 this.groupSendItem.communicationGroupSend.mepCode
             )

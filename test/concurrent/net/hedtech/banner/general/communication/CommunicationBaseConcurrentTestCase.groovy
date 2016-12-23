@@ -578,7 +578,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         try {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
-            println( result.rowcount )
+//            println( result.rowcount )
         } finally {
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }

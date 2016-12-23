@@ -23,22 +23,20 @@ beans = {
         bean.autowire = 'byName'
         bean.initMethod = 'init'
         asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
+        monitorIntervalInSeconds =  Holders.config.communication?.communicationGroupSendMonitor?.monitorIntervalInSeconds ?: 10
     }
-
-    // BRM also injected a group send item monitor record dao for auditing
-    // the thread processing. Not implemented as to dubious need but we may
-    // inject this in the future if we find it useful for debugging.
 
     communicationGroupSendItemProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
         bean.autowire = 'byName'
         bean.initMethod = 'init'
         jobManager = ref('communicationGroupSendItemTaskManagerService')
         asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
-        maxThreads = Holders.config.communication?.groupSendEngine?.maxThreads ?: '1'
-        maxQueueSize = Holders.config.communication?.groupSendEngine?.maxQueueSize ?: '5000'
-        continuousPolling = Holders.config.communication?.groupSendEngine?.continuousPolling ?: 'true'
-        pollingInterval = Holders.config.communication?.groupSendEngine?.pollingInterval ?: '2000'
-        deleteSuccessfullyCompleted = Holders.config.communication?.groupSendEngine?.deleteSuccessfullyCompleted ?: 'false'
+        maxThreads = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.maxThreads ?: 1
+        maxQueueSize = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.maxQueueSize ?: 5000
+        continuousPolling = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.continuousPolling ?: true
+        enabled = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.enabled ?: true
+        pollingInterval = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.pollingInterval ?: 2000
+        deleteSuccessfullyCompleted = Holders.config.communication?.communicationGroupSendItemProcessingEngine?.deleteSuccessfullyCompleted ?: false
     }
 
     communicationJobProcessingEngine (AsynchronousTaskProcessingEngineImpl) { bean ->
@@ -46,12 +44,12 @@ beans = {
         bean.initMethod = 'init'
         jobManager = ref('communicationJobTaskManagerService')
         asynchronousBannerAuthenticationSpoofer = ref('asynchronousBannerAuthenticationSpoofer')
-        maxThreads = Holders.config.communication?.communicationJobEngine?.maxThreads ?: '1'
-        maxQueueSize = Holders.config.communication?.communicationJobEngine?.maxQueueSize ?: '5000'
-        continuousPolling = Holders.config.communication?.communicationJobEngine?.continuousPolling ?: 'true'
-        pollingInterval = Holders.config.communication?.communicationJobEngine?.pollingInterval ?: '2000'
-        deleteSuccessfullyCompleted = Holders.config.communication?.communicationJobEngine?.deleteSuccessfullyCompleted ?: 'false'
+        maxThreads = Holders.config.communication?.communicationJobProcessingEngine?.maxThreads ?: 1
+        maxQueueSize = Holders.config.communication?.communicationJobProcessingEngine?.maxQueueSize ?: 5000
+        continuousPolling = Holders.config.communication?.communicationJobProcessingEngine?.continuousPolling ?: true
+        enabled = Holders.config.communication?.communicationJobProcessingEngine?.enabled ?: true
+        pollingInterval = Holders.config.communication?.communicationJobProcessingEngine?.pollingInterval ?: 2000
+        deleteSuccessfullyCompleted = Holders.config.communication?.communicationJobProcessingEngine?.deleteSuccessfullyCompleted ?: false
     }
-    
 }
 

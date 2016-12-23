@@ -48,6 +48,8 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      */
     private boolean continuousPolling = false;
 
+    private boolean enabled = false
+
     /**
      * Maximum queue size.
      */
@@ -103,8 +105,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
     private int maxThreads
 
-    private boolean isDisabled = false
-
     private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
 
 //  ------------------------- Initialization Method(s) -------------------------
@@ -113,8 +113,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Initializes the job processing engine.  This method starts the polling process.
      */
     public void init() {
-        isDisabled = Holders.config.communication.engine.isEnabled ? false : true
-        log.info("Initialized with isDisabled = ${isDisabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
+        log.info("Initialized with enabled = ${enabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
     }
 
     /**
@@ -158,11 +157,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
 
     public void startRunning() {
-        if (isDisabled) {
-            log.warn("Asynchronous Task Processing engine disabled in configuration; will not start");
-            return;
-        }
-
         log.info("Asynchronous Task Processing engine starting.");
 
         if (!threadsRunning) {
@@ -261,6 +255,10 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
     public void setContinuousPolling(boolean continuousPolling) {
         this.continuousPolling = continuousPolling
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled
     }
 
 
