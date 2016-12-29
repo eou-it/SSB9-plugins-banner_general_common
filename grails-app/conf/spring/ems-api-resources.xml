@@ -1169,6 +1169,26 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-students" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>students</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/students/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Students.SGBSTDN</value>
+                <value>EEDM.Students.SGRCHRT</value>
+                <value>EEDM.Students.SGRSATT</value>
+                <value>EEDM.Students.SHRLGPA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
     <bean id="ar-accounting-string-components" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>accounting-string-components</value>
@@ -1317,6 +1337,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-instructional-events"/>
                 <ref bean="ar-person-visas"/>
                 <ref bean="ar-student-academic-period-profiles"/>
+                <ref bean="ar-students"/>
                 <ref bean="ar-accounting-string-components"/>
                 <ref bean="ar-accounting-string-formats"/>
                 <ref bean="ar-general-ledger-transactions"/>
@@ -1395,6 +1416,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-instructional-events"/>
                 <ref bean="ar-person-visas"/>
                 <ref bean="ar-student-academic-period-profiles"/>
+                <ref bean="ar-students"/>
                 <ref bean="ar-accounting-string-components"/>
                 <ref bean="ar-accounting-string-formats"/>
                 <ref bean="ar-general-ledger-transactions"/>
