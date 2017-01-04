@@ -21,6 +21,7 @@ class GeneralCommonConstants {
     final static String VERSION_V4 = 'v4'
     final static String VERSION_V1 = 'v1'
     final static String VERSION_V3 = 'v3'
+    final static String VERSION_V8 = 'v8'
     final static String TYPE = 'type'
     final static String HEDM = 'HEDM'
     final static String ALPHA_T = 'T'
