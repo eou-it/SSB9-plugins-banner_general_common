@@ -27,6 +27,8 @@ class RoomV8  {
     def roomTypes
     def roomDetails
 
+    def roomCharacterstics = new String[3]
+
     RoomV8(HousingRoomDescriptionReadOnly housingRoomDescription, BuildingDetail buildingDetail, SiteDetail siteDetail, List occupancies, String guid, RoomType roomType) {
 
         this.availableRoomDescription = housingRoomDescription
@@ -39,6 +41,7 @@ class RoomV8  {
         roomDetails.type = roomType.getType()
         roomDetails.detail= ["id": roomType.id]
         this.roomTypes << roomDetails
+        roomCharacterstics  = []
     }
 
 
@@ -49,4 +52,7 @@ class RoomV8  {
                 ", roomDetails=" + roomDetails +
                 '}';
     }
+
+
 }
+
