@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2016-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
@@ -7,9 +7,6 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
-import net.hedtech.banner.general.overall.ImsSourcedIdBase
-import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
-import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
@@ -22,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 class PersonCredentialCompositeService extends LdmService {
 
     private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
+
+    PersonCredentialService personCredentialService
 
     /**
      * GET /api/persons-credentials
@@ -135,70 +134,8 @@ class PersonCredentialCompositeService extends LdmService {
 
 
     void fetchPersonsCredentialDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        def pidmToCredentialsMap = [:]
-        if (pidms) {
-            def pidmToSourcedIdMap = fetchSourcedIds(pidms)
-            def pidmToPartnerSystemLoginIdMap = fetchThirdPartySystemLoginIds(pidms)
-            def pidmToUdcIdMap = fetchUdcIds(pidms)
-
-            pidms.each {
-                def credentials = []
-                pidmToCredentialsMap.put(it, credentials)
-                if (pidmToSourcedIdMap.containsKey(it) && pidmToSourcedIdMap.get(it)) {
-                    credentials << [type: CredentialType.BANNER_SOURCED_ID, value: pidmToSourcedIdMap.get(it)]
-                }
-                if (pidmToPartnerSystemLoginIdMap.containsKey(it) && pidmToPartnerSystemLoginIdMap.get(it)) {
-                    credentials << [type: CredentialType.BANNER_USER_NAME, value: pidmToPartnerSystemLoginIdMap.get(it)]
-                }
-                if (pidmToUdcIdMap.containsKey(it) && pidmToUdcIdMap.get(it)) {
-                    credentials << [type: CredentialType.BANNER_UDC_ID, value: pidmToUdcIdMap.get(it)]
-                }
-            }
-        }
         // Put in Map
-        dataMap.put("pidmToCredentialsMap", pidmToCredentialsMap)
-    }
-
-
-    private def fetchSourcedIds(List<Integer> pidms) {
-        def pidmToSourcedIdMap = [:]
-        if (pidms) {
-            log.debug "Getting GOBSRID records for ${pidms?.size()} PIDMs..."
-            List<ImsSourcedIdBase> entities = ImsSourcedIdBase.findAllByPidmInList(pidms)
-            log.debug "Got ${entities?.size()} GOBSRID records"
-            entities?.each {
-                pidmToSourcedIdMap.put(it.pidm, it.sourcedId)
-            }
-        }
-        return pidmToSourcedIdMap
-    }
-
-
-    private def fetchThirdPartySystemLoginIds(List<Integer> pidms) {
-        def pidmToPartnerSystemLoginIdMap = [:]
-        if (pidms) {
-            log.debug "Getting GOBTPAC records for ${pidms?.size()} PIDMs..."
-            List<ThirdPartyAccess> entities = ThirdPartyAccess.findAllByPidmInList(pidms)
-            log.debug "Got ${entities?.size()} GOBTPAC records"
-            entities?.each {
-                pidmToPartnerSystemLoginIdMap.put(it.pidm, it.externalUser)
-            }
-        }
-        return pidmToPartnerSystemLoginIdMap
-    }
-
-
-    private def fetchUdcIds(List<Integer> pidms) {
-        def pidmToUdcIdMap = [:]
-        if (pidms) {
-            log.debug "Getting GOBUMAP records for ${pidms?.size()} PIDMs..."
-            List<PidmAndUDCIdMapping> entities = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
-            log.debug "Got ${entities?.size()} GOBUMAP records"
-            entities?.each {
-                pidmToUdcIdMap.put(it.pidm, it.udcId)
-            }
-        }
-        return pidmToUdcIdMap
+        dataMap.put("pidmToCredentialsMap", personCredentialService.getPidmToCredentialsMap(pidms))
     }
 
 
