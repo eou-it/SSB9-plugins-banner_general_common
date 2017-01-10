@@ -88,6 +88,37 @@ class CommunicationInteractionView implements Serializable {
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
+    public static findByNameWithPagingAndSortParams(String constituentId, String subSearchString, pagingAndSortParams) {
+
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+
+        def queryCriteria = CommunicationInteractionView.createCriteria()
+        def results
+        if (subSearchString && subSearchString.trim().length() > 0) {
+            if (!subSearchString.contains( '%' )) {
+                subSearchString = '%' + subSearchString + '%'
+            }
+
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                eq("bannerId", constituentId)
+                or {
+                    ilike( "templateName", subSearchString )
+                    ilike( "folderName", subSearchString )
+                    ilike( "subject", subSearchString )
+                    ilike( "organizationName", subSearchString )
+                    ilike( "creatorId", subSearchString )
+                }
+                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            }
+        } else {
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                eq("bannerId", constituentId)
+                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            }
+        }
+
+        return results
+    }
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
