@@ -1,10 +1,16 @@
+/*********************************************************************************
+ Copyright 2017 Ellucian Company L.P. and its affiliates.
+ ********************************************************************************* */
 package net.hedtech.banner.general.communication.parameter
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
 
-
+/**
+ * Service for providing basic crud services on
+ * Parameter domain objects.
+ */
 class CommunicationParameterService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
@@ -25,6 +31,9 @@ class CommunicationParameterService extends ServiceBase {
 
         if (communicationParameter.name.contains( ":" ))
             throw new ApplicationException( CommunicationParameter, "@@r1:colonNotAllowedInParameterName@@" )
+
+        if (communicationParameter.name.equalsIgnoreCase( "pidm" ))
+            throw new ApplicationException( CommunicationParameter, "@@r1:pidmNotAllowedInParameterName@@" )
 
         if (CommunicationParameter.fetchByName( communicationParameter.name ))
             throw new ApplicationException( CommunicationParameter, "@@r1:parameterNameAlreadyExists@@" )
@@ -58,6 +67,9 @@ class CommunicationParameterService extends ServiceBase {
 
         if (communicationParameter.name.contains( ":" ))
             throw new ApplicationException( CommunicationParameter, "@@r1:colonNotAllowedInParameterName@@" )
+
+        if (communicationParameter.name.equalsIgnoreCase( "pidm" ))
+            throw new ApplicationException( CommunicationParameter, "@@r1:pidmNotAllowedInParameterName@@" )
 
         if (CommunicationParameter.existsAnotherName( communicationParameter.id, communicationParameter.name ))
             throw new ApplicationException( CommunicationParameter, "@@r1:parameterNameAlreadyExists@@" )

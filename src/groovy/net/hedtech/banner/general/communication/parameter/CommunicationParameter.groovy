@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.parameter
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.general.CommunicationCommonUtility
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -21,6 +22,7 @@ import javax.persistence.Temporal
 import javax.persistence.TemporalType
 import javax.persistence.Version
 import org.hibernate.FlushMode
+import org.hibernate.criterion.Order
 
 @Entity
 @EqualsAndHashCode
@@ -104,26 +106,37 @@ class CommunicationParameter implements Serializable {
     public static readonlyProperties = ['id']
 
     public static CommunicationParameter fetchByName(String parameterName) {
-        def query
+        def parameter
         CommunicationParameter.withSession { session ->
-            query = session.getNamedQuery('CommunicationParameter.fetchByName').setString('name', parameterName).list()[0]
+            parameter = session.getNamedQuery('CommunicationParameter.fetchByName').setString('name', parameterName).list()[0]
         }
-        return query
+        return parameter
     }
 
     public static Boolean existsAnotherName(Long parameterId, String parameterName) {
 
-        def query
+        def parameter
         CommunicationParameter.withSession { session ->
             session.setFlushMode(FlushMode.MANUAL);
             try {
-                query = session.getNamedQuery('CommunicationParameter.existsAnotherName')
+                parameter = session.getNamedQuery('CommunicationParameter.existsAnotherName')
                         .setString('name', parameterName)
                         .setLong('id', parameterId).list()[0]
             } finally {
                 session.setFlushMode(FlushMode.AUTO)
             }
         }
-        return (query != null)
+        return (parameter != null)
+    }
+
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+
+        def queryCriteria = CommunicationParameter.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        }
+        return results
     }
 }

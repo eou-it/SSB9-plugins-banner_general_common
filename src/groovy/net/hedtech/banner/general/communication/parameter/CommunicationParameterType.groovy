@@ -3,14 +3,16 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.parameter
 
+import net.hedtech.banner.general.communication.CommunicationEnum
+
 /**
  * An enumeration of types supported for communication parameters.
  * These values can never change.
  */
-enum CommunicationParameterType implements Serializable {
+enum CommunicationParameterType implements CommunicationEnum {
 
     TEXT,
     NUMBER,
-    DATE
+    DATE;
 
 }
