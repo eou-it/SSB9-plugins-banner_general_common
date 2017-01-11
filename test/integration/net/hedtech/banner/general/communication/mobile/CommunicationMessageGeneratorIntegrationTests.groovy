@@ -50,12 +50,13 @@ class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestC
         assertEquals( testExternalUser, externalLoginId )
 
         // tests a valid pidm with no external user set up
-        row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is null and rownum = 1" )[0]
-        testPidm = row.GOBTPAC_PIDM
-        testExternalUser = row.GOBTPAC_EXTERNAL_USER
-
-        String externalLoginId2 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( testPidm )
-        assertNull( externalLoginId2 )
+        // Disabled as seed data as of 01-10-2017 does not have a pidm with no external user set up.
+        //        row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is null and rownum = 1" )[0]
+        //        testPidm = row.GOBTPAC_PIDM
+        //        testExternalUser = row.GOBTPAC_EXTERNAL_USER
+        //
+        //        String externalLoginId2 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( testPidm )
+        //        assertNull( externalLoginId2 )
 
         // tests if pidm does not exist
         String externalLoginId3 = CommunicationMessageGenerator.fetchExternalLoginIdByPidm( -1 )

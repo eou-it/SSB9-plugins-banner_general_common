@@ -122,7 +122,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = new Date()
+        def today = getSystemDate()
 
         def pinQuestion = newValidForCreatePinQuestion()
 

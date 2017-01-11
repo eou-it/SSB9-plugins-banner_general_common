@@ -123,7 +123,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = new Date()
+        def today = getSystemDate()
 
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.createDate = new Date()

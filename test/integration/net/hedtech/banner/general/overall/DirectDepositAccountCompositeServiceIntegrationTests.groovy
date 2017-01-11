@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.sql.Sql
+import net.hedtech.banner.db.BannerDS
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
@@ -194,10 +196,21 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testGetLastPayDistribution() {
-        def pidm = PersonUtility.getPerson("HOP510006").pidm
+        String bannerId
+        def conn = (dataSource as BannerDS).getConnection()
+        def sql = new Sql(conn)
+        sql.eachRow(
+            "select SPRIDEN_ID from SV_SPRIDEN, PHRDOCM where SPRIDEN_PIDM = PHRDOCM_PIDM and PHRDOCM_DOC_TYPE = 'D' and rownum = 1",
+            {bannerId = it.SPRIDEN_ID}
+        )
+        if(sql) sql.close()
+        if(conn) conn.close()
+        assertNotNull( bannerId )
 
-        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
+        def person = PersonUtility.getPerson( bannerId )
+        assertNotNull( person )
 
+        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution( person.pidm )
         assertEquals true, lastPayDist.hasPayrollHist
     }
 
