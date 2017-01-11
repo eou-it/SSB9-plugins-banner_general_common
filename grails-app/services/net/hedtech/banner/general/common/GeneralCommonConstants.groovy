@@ -40,6 +40,7 @@ class GeneralCommonConstants {
     final static String START_TIME = 'startTime'
     final static String ROOM_LAYOUT_TYPE = 'roomLayoutType'
     final static String ROOM_TYPES = 'roomTypes'
+    final static String ROOM_CHARACTERISTICS = 'roomCharacteristics'
 
     public static final String PROCESS_CODE='HEDM'
     public static final String ROOM_TYPES_HEDM_NAME='room-types'
