@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -19,7 +19,14 @@ import javax.persistence.*
                     WHERE a.pidm = :pidm
                       AND a.sourceAndBackgroundInstitution.code = :sourceAndBackgroundInstitutionCode
                       AND a.degreeSequenceNumber = :degreeSequenceNumber
-                      AND a.degree.code = :degreeCode""")
+                      AND a.degree.code = :degreeCode"""),
+        @NamedQuery(
+                name = "PriorCollegeMajor.fetchAllByPidmAndSourceAndBackgroundInstitutionAndDegreeSequenceNumberAndDegree",
+                query = """  FROM PriorCollegeMajor a
+                    WHERE a.pidm in (:pidmList)
+                      AND a.sourceAndBackgroundInstitution.code in (:sourceAndBackgroundInstitutionCodeList)
+                      AND a.degreeSequenceNumber in (:degreeSequenceNumberList)
+                      AND a.degree.code in (:degreeCodeList)""")
 ])
 
 @Entity

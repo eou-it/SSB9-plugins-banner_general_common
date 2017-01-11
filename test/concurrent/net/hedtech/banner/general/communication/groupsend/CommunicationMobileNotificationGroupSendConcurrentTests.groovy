@@ -38,7 +38,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU','SELFSERVICE']
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
         super.setUp()

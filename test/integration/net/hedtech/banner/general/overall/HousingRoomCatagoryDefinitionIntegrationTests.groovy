@@ -1,6 +1,6 @@
 
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -43,7 +43,7 @@ class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestC
 
     @Before
     public void setUp() {
-		formContext = ['SSASECT'] // Since we are not testing a controller, we need to explicitly set this
+		formContext = ['GUAGMNU','SSASECT'] // Since we are not testing a controller, we need to explicitly set this
 		super.setUp()
 		initializeTestDataForReferences()
 	}

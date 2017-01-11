@@ -8,6 +8,7 @@ package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.EntriesForSql
 import net.hedtech.banner.general.system.EntriesForSqlProcesss
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -256,6 +257,47 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
         assertNull results
     }
 
+    @Test
+    void testGetSsbRule() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def params = [
+                TELEPHONE_TYPE: 'T2',
+                PIDM: pidm,
+                ROLE_EMPLOYEE: 'Y',
+                ROLE_STUDENT: 'Y'
+        ]
+        assertTrue sqlProcessCompositeService.getSsbRuleResult('SSB_TELEPHONE_UPDATE', params)
+    }
+
+    @Test
+    void testGetSsbRuleReject() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def params = [
+                TELEPHONE_TYPE: 'T2',
+                PIDM: pidm,
+                ROLE_EMPLOYEE: 'Y',
+                ROLE_STUDENT: 'N'
+        ]
+        assertFalse sqlProcessCompositeService.getSsbRuleResult('SSB_TELEPHONE_UPDATE', params)
+    }
+
+    @Test
+    void testGetSsbRuleNoneActive() {
+        def ssbRule = newSsbRuleSqlProcess(new Date()-1)
+        ssbRule.save(failOnError: true, flush: true)
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def params = [EMAIL_TYPE: 'PR',
+                      PIDM: pidm,
+                      ROLE_EMPLOYEE: 'Y',
+                      ROLE_STUDENT: 'Y'
+        ]
+        assertTrue sqlProcessCompositeService.getSsbRuleResult('SSB_EMAIL_UPDATE', params)
+    }
+
 
 
     private def newValidForCreateSqlProcess(def sequenceNumber, def bannerId, def entriesForSql, def entriesForSqlProcess, def startDate, def active) {
@@ -293,6 +335,25 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
                 systemRequiredIndicator: true,
                 entriesForSqlProcess: entriesForSqlProcess,
                 entriesForSql: entriesForSql,
+        )
+        return sqlProcess
+    }
+
+    private def newSsbRuleSqlProcess(def startDate) {
+        def sqlString = "SELECT 'Y' FROM DUAL WHERE ( :ROLE_STUDENT = 'Y' OR :ROLE_FINAID = 'Y') AND :TELEPHONE_TYPE IN ('T2', 'T3')"
+        def sqlProcess = new SqlProcess(
+                sequenceNumber: 6,
+                activeIndicator: true,
+                validatedIndicator: true,
+                startDate: startDate,
+                selectFrom: "FROM",
+                selectValue: null,
+                whereClause: sqlString,
+                endDate: startDate + 2,
+                parsedSql: sqlString,
+                systemRequiredIndicator: false,
+                entriesForSqlProcess: EntriesForSqlProcesss.findByCode('SSB_TELEPHONE_UPDATE'),
+                entriesForSql: EntriesForSql.findByCode('SSB_TELEPHONE_UPDATE')
         )
         return sqlProcess
     }

@@ -30,7 +30,7 @@ class CommunicationMobileNotificationItemServiceIntegrationTests extends BaseInt
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
         super.setUp()
 
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))

@@ -268,6 +268,8 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
 	}
 
 
+
+
     private def newValidForCreateVisaInformation() {
         def visaInformation = new VisaInformation(
                 pidm: PersonUtility.getPerson("HOR000008").pidm,

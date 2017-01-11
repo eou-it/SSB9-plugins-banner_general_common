@@ -25,7 +25,7 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
         super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)

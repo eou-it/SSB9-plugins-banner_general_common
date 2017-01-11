@@ -37,7 +37,7 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     @Before
     public void setUp() {
         super.setUseTransactions( false )
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU','SELFSERVICE']
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
         super.setUp()

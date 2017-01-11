@@ -250,6 +250,55 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
         assertEquals 1, myPrivs.size()
     }
 
+    @Test
+    void testFetchPrivilegedByRoleList() {
+        AddressRolePrivileges myPriv = newObject()
+        myPriv.role = "testrole1"
+        myPriv.dataOrigin = "testorigin1"
+        save myPriv
+
+        myPriv = newObject()
+        myPriv.role = "testrole1"
+        myPriv.addressType =  AddressType.findByCode("PO")
+        myPriv.dataOrigin = "testorigin2"
+        save myPriv
+
+        myPriv = newObject()
+        myPriv.role = "testrole2"
+        myPriv.addressType = AddressType.findByCode("PO")
+        myPriv.dataOrigin = "testorigin1"
+        save myPriv
+
+        def roleList = ['testrole1', 'testrole2']
+        def myPrivs = AddressRolePrivileges.fetchUpdatePrivsByRoleList(roleList)
+        assertEquals 3, myPrivs.size()
+    }
+
+    @Test
+    void testFetchUpdatePrivByCodeAndRoles() {
+        AddressRolePrivileges myPriv = newObject()
+        myPriv.role = "testrole1"
+        myPriv.dataOrigin = "testorigin1"
+        save myPriv
+
+        myPriv = newObject()
+        myPriv.role = "testrole1"
+        myPriv.addressType =  AddressType.findByCode("PO")
+        myPriv.dataOrigin = "testorigin2"
+        save myPriv
+
+        myPriv = newObject()
+        myPriv.role = "testrole2"
+        myPriv.addressType = AddressType.findByCode("PO")
+        myPriv.dataOrigin = "testorigin1"
+        save myPriv
+
+        def roleList = ['testrole1', 'testrole2']
+        def code = 'PO'
+        def myPrivs = AddressRolePrivileges.fetchUpdatePrivByCodeAndRoles(roleList, code)
+        assertEquals 'Purchase Order Address', myPrivs.addressType.description
+    }
+
 
     def newObject() {
         def addressType = AddressType.findByCode("MA")

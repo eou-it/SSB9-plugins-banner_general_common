@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -41,7 +41,7 @@ class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
+        formContext = ['GUAGMNU','SCACRSE'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
     }
 

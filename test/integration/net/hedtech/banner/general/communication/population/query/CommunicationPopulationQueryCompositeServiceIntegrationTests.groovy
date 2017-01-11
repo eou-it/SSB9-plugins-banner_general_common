@@ -25,7 +25,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
         super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken( getUser(), '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)

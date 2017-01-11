@@ -104,10 +104,11 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
 
     @Before
     public void setUp() {
-        formContext = ['SELFSERVICE']
+        formContext = ['GUAGMNU']
+        super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
-        super.setUp()
+
 
         /* Create folder to hold things */
         validFolder = newValidForCreateFolder( "Test Folder" )

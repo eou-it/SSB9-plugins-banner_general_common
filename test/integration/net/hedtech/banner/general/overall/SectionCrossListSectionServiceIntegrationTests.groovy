@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -21,7 +21,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
 
     @Before
     public void setUp() {
-        formContext = ['SSAXLST', 'SSAXLSQ']
+        formContext = ['GUAGMNU','SSAXLST', 'SSAXLSQ']
         super.setUp()
     }
 
