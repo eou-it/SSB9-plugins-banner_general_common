@@ -21,13 +21,15 @@ class RoomV8  {
     List occupancies
     String guid
     SiteDetail siteDetail
+    String roomNumber
+    String description
 
     final String type = "room"
 
     def roomTypes
     def roomDetails
 
-    def roomCharacterstics = new String[3]
+    def roomCharacteristics
 
     RoomV8(HousingRoomDescriptionReadOnly housingRoomDescription, BuildingDetail buildingDetail, SiteDetail siteDetail, List occupancies, String guid, RoomType roomType) {
 
@@ -41,7 +43,10 @@ class RoomV8  {
         roomDetails.type = roomType.getType()
         roomDetails.detail= ["id": roomType.id]
         this.roomTypes << roomDetails
-        roomCharacterstics  = []
+
+        this.roomNumber = housingRoomDescription.getRoomNumber()
+
+        this.roomDetails = housingRoomDescription.getDescription()
     }
 
 
