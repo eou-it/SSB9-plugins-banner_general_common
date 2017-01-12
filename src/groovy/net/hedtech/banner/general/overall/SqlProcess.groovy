@@ -65,7 +65,8 @@ import net.hedtech.banner.general.system.EntriesForSql
            AND   a.validatedIndicator = true
            AND   a.entriesForSqlProcess.code = :sqlProcess
            AND   a.entriesForSql.code = :sql
-           AND   current_date BETWEEN a.startDate AND coalesce(a.endDate, current_date + 1)
+           AND TRUNC(sysdate) BETWEEN TRUNC(a.startDate)
+                                  AND TRUNC(nvl(a.endDate,sysdate))
            ORDER BY a.sequenceNumber  """)
 ])
 class SqlProcess implements Serializable {
