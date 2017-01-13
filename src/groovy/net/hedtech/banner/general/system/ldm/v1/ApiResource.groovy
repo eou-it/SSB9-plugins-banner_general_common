@@ -8,11 +8,13 @@ class ApiResource {
     String path
     List<String> events
     String apiDeployment
+	List<String> rootEntityList
 
-    ApiResource(String resource, String path, List<String> events, String apiDeployment) {
+    ApiResource(String resource, String path, List<String> events, String apiDeployment, List<String> rootEntityList = null) {
         this.resource = resource
         this.path = path
         this.events = events
         this.apiDeployment = apiDeployment
+		this.rootEntityList = rootEntityList
     }
 }
