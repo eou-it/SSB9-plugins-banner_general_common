@@ -107,6 +107,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCBAGRP")
                 sql.executeUpdate("Delete from GCRAACT")
                 sql.executeUpdate("Delete from GCRAISR")
+                sql.executeUpdate("Delete from GCRABLK")
                 sql.executeUpdate("Delete from GCBACTM")
                 sql.executeUpdate("Delete from GCRFLDR")
                 sql.executeUpdate("Delete from GCRORAN")
