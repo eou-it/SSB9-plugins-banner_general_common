@@ -1424,6 +1424,23 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-room-characteristics" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/room-characteristics/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.RoomCharacteristics.STVRDEF</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -1500,6 +1517,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-general-ledger-transactions"/>
                 <ref bean="ar-accounting-string-component-values"/>
                 <ref bean="ar-student-academic-standings"/>
+                <ref bean="ar-room-characteristics"/>
             </list>
         </property>
     </bean>
@@ -1580,6 +1598,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-general-ledger-transactions"/>
                 <ref bean="ar-accounting-string-component-values"/>
                 <ref bean="ar-student-academic-standings"/>
+                <ref bean="ar-room-characteristics"/>
             </list>
         </property>
     </bean>
