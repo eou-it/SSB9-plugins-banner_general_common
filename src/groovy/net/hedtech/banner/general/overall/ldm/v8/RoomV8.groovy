@@ -3,6 +3,8 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall.ldm.v8
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.BuildingDetail
 import net.hedtech.banner.general.overall.ldm.v2.Room
@@ -14,7 +16,9 @@ import net.hedtech.banner.general.overall.ldm.v4.RoomType
  * Decorator for HeDM "rooms" (version 8)
  *
  */
-class RoomV8  {
+@ToString(includeFields = true, includeNames = true)
+@EqualsAndHashCode
+public class RoomV8  {
 
     protected final HousingRoomDescriptionReadOnly availableRoomDescription
     BuildingDetail buildingDetail
@@ -44,9 +48,8 @@ class RoomV8  {
         roomDetails.detail= ["id": roomType.id]
         this.roomTypes << roomDetails
 
-        this.roomNumber = housingRoomDescription.getRoomNumber()
-
-        this.roomDetails = housingRoomDescription.getDescription()
+        this.roomNumber = housingRoomDescription.roomNumber
+        this.description = housingRoomDescription.description
     }
 
 
