@@ -21,6 +21,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVLEVL</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-acadperiods" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -38,6 +44,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVACYR</value>
+                <value>SOBTERM</value>
+                <value>SOBPTRM</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-buildings" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -54,6 +68,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SLBBLDG</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -89,6 +109,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SHRGDID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-gradeschemes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -122,6 +147,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVSCHD</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -157,6 +188,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVMRTL</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-educationalinstitutionunits" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -175,6 +212,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVCOLL</value>
+                <value>STVDEPT</value>
+                <value>STVDIVS</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -210,6 +255,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SPRIDEN</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-personfilters" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -243,6 +294,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>GORRACE</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -278,6 +335,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SLBRDEF</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-secregistrations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -294,6 +357,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SFRSTCR</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -312,6 +380,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVCAMP</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-subjects" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -328,6 +402,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVSUBJ</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -362,6 +442,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVATYP</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -626,6 +712,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SPRADDR</value>
+                <value>SOBSBGI</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-campus-involvement-roles" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -803,6 +895,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVRSTS</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-gradechangereasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -819,6 +917,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVGCHG</value>
+                <value>GORGUID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -837,6 +941,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVCITZ</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-visatypes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -854,6 +964,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVVTYP</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-courses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -870,6 +986,13 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SCBCRSE</value>
+                <value>SCBCGID</value>
+                <value>SCRGSID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -890,6 +1013,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SSBSECT</value>
+                <value>SCBCGID</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -1129,6 +1258,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="apiDeployment">
             <value>Student</value>
         </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SSRMEET</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-person-visas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -1145,6 +1280,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="apiDeployment">
             <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>GORVISA</value>
+            </list>
         </constructor-arg>
     </bean>
 
