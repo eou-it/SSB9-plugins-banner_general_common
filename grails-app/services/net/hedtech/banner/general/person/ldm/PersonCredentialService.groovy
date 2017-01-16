@@ -8,6 +8,7 @@ import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.person.AdditionalID
 import net.hedtech.banner.general.person.AdditionalIDService
+import net.hedtech.banner.general.system.AdditionalIdentificationType
 
 
 class PersonCredentialService {
@@ -57,6 +58,34 @@ class PersonCredentialService {
             }
         }
         return pidmToAdditionalIDsMap
+    }
+
+
+    def createOrUpdateAdditionalIDs(Integer pidm, Map additionalIdTypeCodeToIdMap) {
+        Collection<AdditionalID> list = []
+        if (pidm && additionalIdTypeCodeToIdMap) {
+            additionalIdTypeCodeToIdMap.each { additionalIdTypeCode, additionalId ->
+                list << createOrUpdateAdditionalID(pidm, additionalIdTypeCode, additionalId)
+            }
+        }
+        return list
+    }
+
+
+    AdditionalID createOrUpdateAdditionalID(Integer pidm, String additionalIdTypeCode, String additionalId) {
+        AdditionalID additionalID
+        AdditionalIdentificationType additionalIdType = AdditionalIdentificationType.findByCode(additionalIdTypeCode)
+        if (pidm && additionalIdType) {
+            Collection<AdditionalID> entities = additionalIDService.fetchAllByPidmInListAndIdentificationTypeCodeInList([pidm], [additionalIdType.code])
+            additionalID = entities ? entities[0] : null
+            if (!additionalID) {
+                additionalID = new AdditionalID(pidm: pidm)
+            }
+            additionalID.additionalIdentificationType = additionalIdType
+            additionalID.additionalId = additionalId
+            additionalID = additionalIDService.createOrUpdate(additionalID)
+        }
+        return additionalID
     }
 
 
