@@ -65,7 +65,9 @@ class PersonCredentialService {
         Collection<AdditionalID> list = []
         if (pidm && additionalIdTypeCodeToIdMap) {
             additionalIdTypeCodeToIdMap.each { additionalIdTypeCode, additionalId ->
-                list << createOrUpdateAdditionalID(pidm, additionalIdTypeCode, additionalId)
+                if (additionalIdTypeCode && additionalId) {
+                    list << createOrUpdateAdditionalID(pidm, additionalIdTypeCode, additionalId)
+                }
             }
         }
         return list
@@ -73,19 +75,26 @@ class PersonCredentialService {
 
 
     AdditionalID createOrUpdateAdditionalID(Integer pidm, String additionalIdTypeCode, String additionalId) {
-        AdditionalID additionalID
+        AdditionalID entityAdditionalID
         AdditionalIdentificationType additionalIdType = AdditionalIdentificationType.findByCode(additionalIdTypeCode)
-        if (pidm && additionalIdType) {
+        if (pidm && additionalIdType && additionalId) {
             Collection<AdditionalID> entities = additionalIDService.fetchAllByPidmInListAndIdentificationTypeCodeInList([pidm], [additionalIdType.code])
-            additionalID = entities ? entities[0] : null
-            if (!additionalID) {
-                additionalID = new AdditionalID(pidm: pidm)
+            entityAdditionalID = entities ? entities[0] : null
+            if (!entityAdditionalID) {
+                entityAdditionalID = new AdditionalID(pidm: pidm, additionalIdentificationType: additionalIdType)
             }
-            additionalID.additionalIdentificationType = additionalIdType
-            additionalID.additionalId = additionalId
-            additionalID = additionalIDService.createOrUpdate(additionalID)
+            entityAdditionalID.additionalId = additionalId
+            entityAdditionalID = additionalIDService.createOrUpdate(entityAdditionalID)
         }
-        return additionalID
+        return entityAdditionalID
+    }
+
+
+    void deleteAdditionalIDs(Integer pidm, Collection<String> additionalIdTypeCodes) {
+        if (pidm && additionalIdTypeCodes) {
+            Collection<AdditionalID> entities = additionalIDService.fetchAllByPidmInListAndIdentificationTypeCodeInList([pidm], additionalIdTypeCodes)
+            additionalIDService.delete(entities)
+        }
     }
 
 
