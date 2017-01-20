@@ -289,10 +289,15 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testGetCurrencySymbolPostDigits() {
+        Locale originalLocale = LocaleContextHolder.getLocale()
         LocaleContextHolder.setLocale(new Locale("fr-CA"))
-        def symbol = directDepositAccountCompositeService.getCurrencySymbol()
+        try {
+            def symbol = directDepositAccountCompositeService.getCurrencySymbol()
 
-        assertEquals '\u00A0$US', symbol
+            assertEquals '\u00A0$US', symbol
+        } finally {
+            LocaleContextHolder.setLocale( originalLocale )
+        }
     }
 
     @Test

@@ -174,7 +174,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
             (String) communicationField.formatString,
-            (Long) pidm
+            (Long) pidm, null
         )
         assertEquals( "Hello Robert Jones", result )
 
@@ -184,7 +184,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
             (String) communicationField.formatString,
-            (Long) pidm
+            (Long) pidm, null
         )
         assertEquals( "Robert", result )
 
@@ -194,7 +194,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
             (String) communicationField.formatString,
-            (Long) pidm
+            (Long) pidm, null
         )
         assertEquals( "", result )
 
@@ -204,7 +204,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
             (String) communicationField.formatString,
-            (Long) pidm
+            (Long) pidm, null
         )
         assertEquals( "", result )
 
@@ -215,7 +215,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
             (String) communicationField.formatString,
-            (Long) pidm
+            (Long) pidm, null
         )
         assertEquals( "", result )
 
@@ -227,7 +227,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
                 (String) communicationField.ruleContent,
                 (Boolean) communicationField.returnsArrayArguments,
                 (String) communicationField.formatString,
-                (Long) pidm
+                (Long) pidm, null
             )
             fail( "compileErrorDuringParsing" )
         } catch (ApplicationException ae ) {

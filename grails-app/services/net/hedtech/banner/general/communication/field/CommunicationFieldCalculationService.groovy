@@ -103,24 +103,29 @@ class CommunicationFieldCalculationService extends ServiceBase {
         return nameValueMap
     }
 
-    public String calculateSingleFieldByPidm( CommunicationField communicationField, Long pidm, String mepCode=null ) {
+    public String calculateSingleFieldByPidm( CommunicationField communicationField, Long pidm, List parameters, String mepCode=null ) {
 
         String value = calculateFieldByPidm(
                 communicationField.ruleContent,
                 communicationField.returnsArrayArguments,
                 communicationField.formatString,
                 pidm,
+                parameters,
                 mepCode
         )
 
         return value
     }
 
-    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, List parameters, String mepCode=null ) {
         boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
         if (sqlStatement?.contains(":pidm")) {
             sqlParams << ['pidm': pidm]
+        }
+        for (Object parameter: parameters)
+        {
+            sqlParams << [ (parameter.name) : (parameter.answer) ]
         }
         calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
