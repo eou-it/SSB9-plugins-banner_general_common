@@ -803,14 +803,12 @@ class UserRoleCompositeService extends LdmService {
                       and d.stvterm_code = b.sibinst_term_code_eff
                       and f.stvterm_code = b.end_term
                       and b.stvfcst_active_ind = 'A'
-                      and b.sibinst_schd_ind = 'Y'
                       and b.SIBINST_ADVR_IND = 'Y'
                       and b.sibinst_term_code_eff = (select min(c.sibinst_term_code_eff)
                                                      from svq_sibinst_access c, stvterm e
                                                      where c.sibinst_pidm = b.sibinst_pidm
                                                      and c.end_term = e.stvterm_code
                                                      and c.stvfcst_active_ind = 'A'
-                                                     and c.sibinst_schd_ind = 'Y'
                                                      and c.SIBINST_ADVR_IND = 'Y'
                                                      and sysdate < e.stvterm_end_date)
                       and a.spriden_change_ind is null

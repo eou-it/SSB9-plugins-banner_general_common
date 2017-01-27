@@ -5,23 +5,78 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
-import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.commonmatching.CommonMatchingCompositeService
+import net.hedtech.banner.general.lettergeneration.ldm.PersonFilterCompositeService
+import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
+import net.hedtech.banner.general.system.ldm.EmailTypeCompositeService
 import net.hedtech.banner.general.system.ldm.NameTypeCategory
 
-/**
- * RESTful APIs for Ellucian Ethos Data Model "persons" V3.
- */
-class PersonV3CompositeService extends AbstractPersonCompositeService {
+import java.sql.Timestamp
 
-    @Override
-    protected String getPopSelGuidOrDomainKey(Map requestParams) {
-        return requestParams.get("personFilter")
+class PersonV3CompositeService {
+
+    CommonMatchingCompositeService commonMatchingCompositeService
+    PersonAdvancedSearchViewService personAdvancedSearchViewService
+    UserRoleCompositeService userRoleCompositeService
+    PersonFilterCompositeService personFilterCompositeService
+    EmailTypeCompositeService emailTypeCompositeService
+
+
+    def listQApi(Map requestParams) {
+        return searchForMatchingPersons(requestParams)
     }
 
 
-    @Override
-    protected def prepareCommonMatchingRequest(Map content) {
+    private def searchForMatchingPersons(final Map content) {
+        def cmRequest = prepareCommonMatchingRequest(content)
+
+        if (cmRequest?.dateOfBirth) {
+            Date dob = cmRequest.remove("dateOfBirth")
+            cmRequest << [birthDay: dob?.format("dd")]
+            cmRequest << [birthMonth: dob?.format("MM")]
+            cmRequest << [birthYear: dob?.format("yyyy")]
+        }
+
+        cmRequest << [max: content?.max]
+        cmRequest << [offset: content?.offset]
+        cmRequest << [sort: content?.sort]
+        cmRequest << [order: content?.order]
+
+        def personEmails = cmRequest.remove("personEmails")
+
+        // Common Matching Source Code
+        IntegrationConfiguration intConf = IntegrationConfiguration.fetchByProcessCodeAndSettingName("HEDM", "PERSON.MATCHRULE")
+        cmRequest << [source: intConf?.value]
+
+        // Call Common Matching Service
+        commonMatchingCompositeService.commonMatchingCleanup()
+
+        def cmResponse
+        if (personEmails) {
+            // Try with each email until you get match
+            for (def temp : personEmails) {
+                cmRequest << [emailType: temp.emailType]
+                cmRequest << [email: temp.email]
+                log.debug "Common matching request : ${cmRequest}"
+                cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+                if (cmResponse?.personList) break
+            }
+        } else {
+            // Try without email
+            log.debug "Common matching request : ${cmRequest}"
+            cmResponse = commonMatchingCompositeService.commonMatching(cmRequest)
+        }
+        log.debug "Common matching returned ${cmResponse?.personList?.size()} records"
+        List<Integer> pidms = cmResponse?.personList?.collect { it.pidm }
+        def totalCount = cmResponse?.count
+
+        return [pidms: pidms, totalCount: totalCount]
+    }
+
+
+    private def prepareCommonMatchingRequest(Map content) {
         def cmRequest = [:]
 
         // First name, middle name, last name
@@ -82,7 +137,7 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
         // Date of Birth
         Date dob
         if (content?.dateOfBirth) {
-            dob = convertString2Date(content?.dateOfBirth)
+            dob = LdmService.convertString2Date(content?.dateOfBirth)
             cmRequest << [dateOfBirth: dob]
         }
 
@@ -156,7 +211,6 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
                 returnMap = userRoleCompositeService.fetchFaculties(sortField, sortOrder, max, offset)
             } else if (role == RoleName.STUDENT.versionToEnumMap["v3"]) {
                 returnMap = userRoleCompositeService.fetchStudents(sortField, sortOrder, max, offset)
-                setStudentPidmsInThreadLocal(returnMap?.pidms)
             } else {
                 throw new ApplicationException('PersonCompositeService', new BusinessLogicValidationException("role.supported", null))
             }
@@ -196,91 +250,37 @@ class PersonV3CompositeService extends AbstractPersonCompositeService {
     }
 
 
-    protected void fetchDataAndPutInMap_VersonSpecific(List<Integer> pidms, Map dataMap) {
-        fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsEmailDataAndPutInMap_VersionSpecific(pidms, dataMap)
-        fetchPersonsMaritalStatusDataAndPutInMap(dataMap)
-    }
-
-    private void fetchPersonsMaritalStatusDataAndPutInMap(Map dataMap) {
-        maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-        Map<String, String> bannerMaritalStatusToHedmMaritalStatusMap = getBannerMaritalStatusToHedmMaritalStatusMap()
-        def maritalStatusCodeToGuidMap = maritalStatusCompositeService.getMaritalStatusCodeToGuidMap(bannerMaritalStatusToHedmMaritalStatusMap.keySet())
-
-        // Put in Map
-        dataMap.put("bannerMaritalStatusToHedmMaritalStatusMap", bannerMaritalStatusToHedmMaritalStatusMap)
-        dataMap.put("maritalStatusCodeToGuidMap", maritalStatusCodeToGuidMap)
-    }
-
-
-    private void fetchPersonsBiographicalDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        Set<String> maritalStatusCodes = dataMap.pidmToPersonBaseMap?.values().maritalStatus.code.flatten().unique()
-        // MaritalStatus.fetchAllWithGuidByCodeInList
-        // MaritalStatusCompositeService.getMaritalStatusCodeToGuidMap
-    }
-
-
-    protected def getBannerNameTypeToHedmNameTypeMap() {
-        return personNameTypeCompositeService.getBannerNameTypeToHedmV3NameTypeMap()
-    }
-
-
-    @Override
-    protected List<RoleName> getRolesRequired() {
-        return [RoleName.STUDENT, RoleName.INSTRUCTOR]
-    }
-
-
-    protected def getBannerAddressTypeToHedmAddressTypeMap() {
-        return addressTypeCompositeService.getBannerAddressTypeToHedmV3AddressTypeMap()
-    }
-
-
-    protected def getBannerPhoneTypeToHedmPhoneTypeMap() {
-        return phoneTypeCompositeService.getBannerPhoneTypeToHedmV3PhoneTypeMap()
-    }
-
-
-    protected def getBannerEmailTypeToHedmEmailTypeMap() {
-        return emailTypeCompositeService.getBannerEmailTypeToHedmV3EmailTypeMap()
-    }
-
-    protected def getBannerMaritalStatusToHedmMaritalStatusMap() {
-        return maritalStatusCompositeService.getBannerMaritalStatusToHedmV4MaritalStatusMap()
-    }
-
-    @Override
-    protected extractDataFromRequestBody(Map content) {
-        return null
-    }
-
-    private void fetchPersonsEmailDataAndPutInMap_VersionSpecific(List<Integer> pidms, Map dataMap) {
-        Set<Long> personEmailSurrogateIds = dataMap.pidmToEmailsMap?.values().id.flatten().unique()
-        Map<Long, String> personEmailSurrogateIdToGuidMap = getPersonEmailSurrogateIdToGuidMap(personEmailSurrogateIds)
-
-        // Put in Map
-        dataMap.put("personEmailSurrogateIdToGuidMap", personEmailSurrogateIdToGuidMap)
-    }
-
-
-    protected void prepareDataMapForSinglePerson_VersionSpecific(PersonIdentificationNameCurrent personIdentificationNameCurrent,
-                                                                 final Map dataMap, Map dataMapForPerson) {
-    }
-
-    @Override
-    protected createPersonDataModel(Map dataMapForPerson) {
-        return null
-    }
-
-    private def getPersonEmailSurrogateIdToGuidMap(Collection<String> personEmailSurrogateIds) {
-        def personEmailSurrogateIdToGuidMap = [:]
-        if (personEmailSurrogateIds) {
-            List<GlobalUniqueIdentifier> entities = GlobalUniqueIdentifier.fetchByLdmNameAndDomainSurrogateIds("person-emails", personEmailSurrogateIds)
-            entities?.each {
-                personEmailSurrogateIdToGuidMap.put(it.domainId, it.guid)
-            }
+    private def getPidmToFacultyRoleMap(List<Integer> pidms) {
+        def pidmToFacultyRoleMap = [:]
+        List<Object[]> rows = userRoleCompositeService.fetchFacultiesByPIDMs(pidms)
+        rows?.each {
+            BigDecimal bdPidm = it[0]
+            Timestamp startDate = it[1]
+            Timestamp endDate = it[2]
+            pidmToFacultyRoleMap.put(bdPidm.toInteger(), [role: RoleName.INSTRUCTOR, startDate: startDate, endDate: endDate])
         }
-        return personEmailSurrogateIdToGuidMap
+        return pidmToFacultyRoleMap
+    }
+
+
+    private def getPidmToStudentRoleMap(List<Integer> pidms) {
+        def pidmToStudentRoleMap = [:]
+        List<BigDecimal> rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
+        rows?.each {
+            pidmToStudentRoleMap.put(it.toInteger(), [role: RoleName.STUDENT])
+        }
+        return pidmToStudentRoleMap
+    }
+
+
+    private getPidmsOfPopulationExtract(final Map requestParams) {
+        String guidOrDomainKey = getPopSelGuidOrDomainKey(requestParams)
+        return personFilterCompositeService.fetchPidmsOfPopulationExtract(guidOrDomainKey, requestParams.sort?.trim(), requestParams.order?.trim(), requestParams.max?.trim()?.toInteger() ?: 0, requestParams.offset?.trim()?.toInteger() ?: 0)
+    }
+
+
+    private String getPopSelGuidOrDomainKey(Map requestParams) {
+        return requestParams.get("personFilter")
     }
 
 }

@@ -1,26 +1,12 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.BuildingAndRoomAttribute
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.JoinColumns
-import javax.persistence.ManyToOne
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
-import org.hibernate.annotations.Type
-import javax.persistence.Version
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
+
+import javax.persistence.*
 
 /**
  * Room Attributes Definition Table
@@ -28,10 +14,14 @@ import javax.persistence.TemporalType
 @Entity
 @Table(name = "SLRRDEF")
 @NamedQueries(value = [
-@NamedQuery(name = "HousingRoomAttributesDefinition.fetchByBuildingRoomNumberAndTermEffective",
-query = """FROM HousingRoomAttributesDefinition hrad WHERE
+        @NamedQuery(name = "HousingRoomAttributesDefinition.fetchByBuildingRoomNumberAndTermEffective",
+                query = """FROM HousingRoomAttributesDefinition hrad WHERE
                  hrad.building.code = :buildingCode and
-                  hrad.roomNumber = :roomNumber and hrad.termEffective = :termEffective""")
+                  hrad.roomNumber = :roomNumber and hrad.termEffective = :termEffective"""),
+        @NamedQuery(name = "HousingRoomAttributesDefinition.fetchByBuildingCodeList",
+                query = """FROM HousingRoomAttributesDefinition hrad WHERE
+                 hrad.building.code in :buildingCodeList """),
+
 ])
 class HousingRoomAttributesDefinition implements Serializable {
 
@@ -93,7 +83,7 @@ class HousingRoomAttributesDefinition implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "SLRRDEF_BLDG_CODE", referencedColumnName = "STVBLDG_CODE")
+            @JoinColumn(name = "SLRRDEF_BLDG_CODE", referencedColumnName = "STVBLDG_CODE")
     ])
     Building building
 
@@ -102,7 +92,7 @@ class HousingRoomAttributesDefinition implements Serializable {
      */
     @ManyToOne
     @JoinColumns([
-    @JoinColumn(name = "SLRRDEF_RDEF_CODE", referencedColumnName = "STVRDEF_CODE")
+            @JoinColumn(name = "SLRRDEF_RDEF_CODE", referencedColumnName = "STVRDEF_CODE")
     ])
     BuildingAndRoomAttribute buildingAndRoomAttribute
 
@@ -171,10 +161,13 @@ class HousingRoomAttributesDefinition implements Serializable {
     public static readonlyProperties = ['roomNumber', 'termEffective', 'building', 'buildingAndRoomAttribute']
 
 
-    public static List fetchByBuildingRoomNumberAndTermEffective(String buildingCode, String roomNumber, String termEffective) {
+    public
+    static List fetchByBuildingRoomNumberAndTermEffective(String buildingCode, String roomNumber, String termEffective) {
         def lst = HousingRoomAttributesDefinition.withSession { session ->
             session.getNamedQuery('HousingRoomAttributesDefinition.fetchByBuildingRoomNumberAndTermEffective').setString('buildingCode', buildingCode).setString('roomNumber', roomNumber).setString('termEffective', termEffective).list()
         }
         return lst
     }
+
+
 }
