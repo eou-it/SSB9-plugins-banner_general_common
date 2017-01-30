@@ -3,6 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import net.hedtech.banner.general.GeneralCommonUtility
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -138,7 +139,7 @@ class PriorCollegeDegreeIntegrationTests extends BaseIntegrationTestCase {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = getSystemDate()
+        def today = GeneralCommonUtility.getSystemDate()
 
         def priorCollegeDegree = newValidForCreatePriorCollegeDegree()
 

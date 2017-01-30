@@ -93,6 +93,24 @@ class GeneralCommonUtility {
         return isValidPin
     }
 
+    public static Date getSystemDate() {
+        Date systemDate
+        def ctx = SCH.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT )
+        def sessionFactory = ctx.sessionFactory
+        def connection
+        def Sql sql
+        try {
+            connection = sessionFactory.currentSession.connection()
+            sql = new Sql(connection)
+            sql.eachRow("select sysdate from dual", { systemDate = it.sysdate })
+        } finally {
+            if (sql) sql.close()
+            if (connection) connection.close()
+        }
+
+        return systemDate
+    }
+
     /**
      * Store the gtvsdax values used by an App in a list that gets passed and stored in the app session
      * @param pin

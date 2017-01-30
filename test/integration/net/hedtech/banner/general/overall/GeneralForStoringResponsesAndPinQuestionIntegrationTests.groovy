@@ -14,6 +14,7 @@ import org.junit.After
 import grails.validation.ValidationException
 import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonUtility
+import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
@@ -162,7 +163,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = this.getSystemDate()
+        def today = GeneralCommonUtility.getSystemDate()
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
 
 

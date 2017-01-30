@@ -2,6 +2,8 @@
  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+
+import net.hedtech.banner.general.GeneralCommonUtility
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -406,8 +408,8 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
 		sqlProcess.parsedSql = sqlStatement
 
 		// update SQL statement where start date not yet met and re-test retrieval
-		sqlProcess.startDate = new Date() + 1
-		sqlProcess.endDate = new Date() + 7
+		sqlProcess.startDate = GeneralCommonUtility.getSystemDate() + 1
+		sqlProcess.endDate = GeneralCommonUtility.getSystemDate() + 7
 		sqlProcess.save(failOnError: true, flush: true)
 		sqlStatements = SqlProcess.fetchActiveValidatedPriorityProcessSql('INTEGRATION_TEST_RULE', 'INTEGRATION_TEST_PROCESS')
 		assertEquals 0, sqlStatements.size()
@@ -446,11 +448,11 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
     @Test
     void testFetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode() {
         // setup test data
-        def entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST_PROCESS', description: 'INTEGRATION_TEST', startDate: getSystemDate(), endDate: getSystemDate() + 1, systemRequiredIndicator: false)
+        def entriesForSqlProcesss = new EntriesForSqlProcesss(code: 'INTEGRATION_TEST_PROCESS', description: 'INTEGRATION_TEST', startDate: GeneralCommonUtility.getSystemDate(), endDate: GeneralCommonUtility.getSystemDate() + 1, systemRequiredIndicator: false)
         entriesForSqlProcesss.save(failOnError: true, flush: true)
-        def entriesForSql = new EntriesForSql(code: 'INTEGRATION_TEST_RULE', description: 'INTEGRATION_TEST', startDate: getSystemDate(), endDate: getSystemDate() + 1, systemRequiredIndicator: false)
+        def entriesForSql = new EntriesForSql(code: 'INTEGRATION_TEST_RULE', description: 'INTEGRATION_TEST', startDate: GeneralCommonUtility.getSystemDate(), endDate: GeneralCommonUtility.getSystemDate() + 1, systemRequiredIndicator: false)
         entriesForSql.save(failOnError: true, flush: true)
-        def sqlProcessParameter = new SqlProcessParameter(code: 'INTEGRATION_TEST_PARAM', description: 'INTEGRATION_TEST_PARAM', dataType: 'N', startDate: getSystemDate(), endDate: getSystemDate() + 1)
+        def sqlProcessParameter = new SqlProcessParameter(code: 'INTEGRATION_TEST_PARAM', description: 'INTEGRATION_TEST_PARAM', dataType: 'N', startDate: GeneralCommonUtility.getSystemDate(), endDate: GeneralCommonUtility.getSystemDate() + 1)
         sqlProcessParameter.save(failOnError: true, flush: true)
         def sqlProcessParameterByProcess = new SqlProcessParameterByProcess(systemRequiredIndicator: true, entriesForSqlProcess: entriesForSqlProcesss.code, parameterForSqlProcess: sqlProcessParameter.code)
         sqlProcessParameterByProcess.save(failOnError: true, flush: true)
@@ -486,7 +488,7 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
                 sequenceNumber: 1,
                 activeIndicator: true,
                 validatedIndicator: true,
-                startDate: getSystemDate(),
+                startDate: GeneralCommonUtility.getSystemDate(),
                 selectFrom: 'FROM',
                 whereClause: sqlStatement,
                 endDate: null,
@@ -522,21 +524,21 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
         sqlProcess.parsedSql = sqlStatement
 
         // update SQL statement where start date not yet met and re-test retrieval
-        sqlProcess.startDate = getSystemDate() + 1
-        sqlProcess.endDate = getSystemDate() + 7
+        sqlProcess.startDate = GeneralCommonUtility.getSystemDate() + 1
+        sqlProcess.endDate = GeneralCommonUtility.getSystemDate() + 7
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 0, sqlStatements.size()
 
         // update SQL statement where end date is passed and re-test retrieval
-        sqlProcess.startDate = getSystemDate() - 7
-        sqlProcess.endDate = getSystemDate() - 1
+        sqlProcess.startDate = GeneralCommonUtility.getSystemDate() - 7
+        sqlProcess.endDate = GeneralCommonUtility.getSystemDate() - 1
         sqlProcess.save(failOnError: true, flush: true)
         sqlStatements = SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode('INTEGRATION_TEST_PROCESS', 'INTEGRATION_TEST_RULE')
         assertEquals 0, sqlStatements.size()
 
         // revert the original sql statement
-        sqlProcess.startDate = getSystemDate()
+        sqlProcess.startDate = GeneralCommonUtility.getSystemDate()
         sqlProcess.endDate = null
         sqlProcess.save(failOnError: true, flush: true)
 
@@ -545,10 +547,10 @@ end;""", ['INTEGRATION_TEST_PROCESS', sqlStatement])
                 sequenceNumber: 2,
                 activeIndicator: true,
                 validatedIndicator: true,
-                startDate: getSystemDate(),
+                startDate: GeneralCommonUtility.getSystemDate(),
                 selectFrom: 'FROM',
                 whereClause: sqlStatement,
-                endDate: getSystemDate(),
+                endDate: GeneralCommonUtility.getSystemDate(),
                 parsedSql: sqlStatement,
                 systemRequiredIndicator: true,
                 entriesForSqlProcess: entriesForSqlProcesss,

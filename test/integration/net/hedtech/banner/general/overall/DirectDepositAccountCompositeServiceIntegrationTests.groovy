@@ -294,7 +294,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         try {
             def symbol = directDepositAccountCompositeService.getCurrencySymbol()
 
-            assertEquals '\u00A0$US', symbol
+        assertEquals '\u00A0$\u00A0US', symbol
         } finally {
             LocaleContextHolder.setLocale( originalLocale )
         }

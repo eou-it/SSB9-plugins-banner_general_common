@@ -2,6 +2,8 @@
  Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import net.hedtech.banner.general.GeneralCommonUtility
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -117,7 +119,7 @@ class VisaInformationIntegrationTests extends BaseIntegrationTestCase {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = getSystemDate()
+        def today = GeneralCommonUtility.getSystemDate()
 
         def visaInformation = newValidForCreateVisaInformation()
 

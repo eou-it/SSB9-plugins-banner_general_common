@@ -13,6 +13,7 @@ import org.junit.After
 
 import grails.validation.ValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import net.hedtech.banner.general.GeneralCommonUtility
 import groovy.sql.Sql
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
@@ -122,7 +123,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
     void testDates() {
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = getSystemDate()
+        def today = GeneralCommonUtility.getSystemDate()
 
         def pinQuestion = newValidForCreatePinQuestion()
 
