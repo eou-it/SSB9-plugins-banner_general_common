@@ -7,18 +7,21 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonAddress
 import net.hedtech.banner.general.person.PersonAddressUtility
 import net.hedtech.banner.general.person.PersonTelephone
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.DirectoryOption
 import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.person.PersonTelephoneDecorator
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
+import org.springframework.web.context.request.RequestContextHolder
 
 class DirectoryProfileCompositeService {
 
     boolean transactional = true
 
-    private collegeDescription
-    private jobDescription
-    private static validationTagLib = new ValidationTagLib()
+    private static final String DIRECTORY_PROFILE_SESSION_CACHE_NAME = 'directoryProfileSessionCache'
+    private static final String COLLEGE_DESCRIPTION = 'collegeDescription'
+    private static final String JOB_DESCRIPTION = 'jobDescription'
+
 
     def sessionFactory
     def preferredNameService
@@ -26,9 +29,6 @@ class DirectoryProfileCompositeService {
 
 
     def fetchDirectoryProfileItemsForUser(pidm, addrMaskingRule = null) {
-        collegeDescription = null // Reset for current call
-        jobDescription = null     // Reset for current call
-
         def userDirProfileList = []
         def fullDirProfileList = DirectoryProfileView.fetchAll()
 
@@ -166,7 +166,9 @@ class DirectoryProfileCompositeService {
         }
 
         if (!resultStringList) {
-            def notReportedStr = validationTagLib.message([code: 'net.hedtech.banner.general.overall.DirectoryProfileCompositeService.notReported', default: 'Not Reported'])
+            def notReportedStr = new ValidationTagLib().message(
+                    [code: 'net.hedtech.banner.general.overall.DirectoryProfileCompositeService.notReported', default: 'Not Reported']
+            )
             resultStringList.push([notReportedStr])
         }
 
@@ -237,8 +239,11 @@ class DirectoryProfileCompositeService {
 
     private Map fetchCollegeDescription(pidm) {
         // The query below retrieves BOTH the college description AND expected graduation date.  Doing it this way
-        // saves an additional query.  After the query is executed, both values are stored in the collegeDescription
-        // member variable, which is what's returned by this method.
+        // saves an additional query.  After the query is executed, both values are stored in a map which in turn is
+        // stored in a cache in the session.  This map is what's returned by this method.
+        def sessionCache = getDirectoryProfileSessionCache();
+        def collegeDescription = sessionCache[COLLEGE_DESCRIPTION]
+
         if (collegeDescription == null && InstitutionalDescription.fetchByKey()?.studentInstalled) {
             collegeDescription = [:]
 
@@ -267,6 +272,8 @@ class DirectoryProfileCompositeService {
                     sql?.close()
                 }
             }
+
+            sessionCache[COLLEGE_DESCRIPTION] = collegeDescription
         }
 
         collegeDescription
@@ -296,8 +303,11 @@ class DirectoryProfileCompositeService {
 
     private Map fetchJobDescription(pidm) {
         // The query below retrieves BOTH the job title AND department.  Doing it this way
-        // saves an additional query.  After the query is executed, both values are stored in the jobDescription
-        // member variable, which is what's returned by this method.
+        // saves an additional query.  After the query is executed, both values are stored in a map which in turn is
+        // stored in a cache in the session.  This map is what's returned by this method.
+        def sessionCache = getDirectoryProfileSessionCache();
+        def jobDescription = sessionCache[JOB_DESCRIPTION]
+
         if (jobDescription == null && InstitutionalDescription.fetchByKey()?.posnctlInstalled) {
             jobDescription = [:]
 
@@ -363,6 +373,8 @@ class DirectoryProfileCompositeService {
                     sql?.close()
                 }
             }
+
+            sessionCache[JOB_DESCRIPTION] = jobDescription
         }
 
         jobDescription
@@ -539,7 +551,9 @@ class DirectoryProfileCompositeService {
         def decorator
 
         if (phone.unlistIndicator == 'Y') {
-            phoneStr = validationTagLib.message([code: 'net.hedtech.banner.general.overall.DirectoryProfileCompositeService.phoneUnlisted', default: 'Unlisted'])
+            phoneStr = new ValidationTagLib().message(
+                    [code: 'net.hedtech.banner.general.overall.DirectoryProfileCompositeService.phoneUnlisted', default: 'Unlisted']
+            )
         } else {
             decorator = new PersonTelephoneDecorator(phone)
             phoneStr = decorator.displayPhone
@@ -564,6 +578,23 @@ class DirectoryProfileCompositeService {
         }
 
         result != null
+    }
+
+    private getDirectoryProfileSessionCache() {
+        def session = RequestContextHolder.currentRequestAttributes().request.session
+
+        def dirProfileSessionCache = session.getAttribute(DIRECTORY_PROFILE_SESSION_CACHE_NAME)
+
+        if (!dirProfileSessionCache) {
+            dirProfileSessionCache = [
+                    (COLLEGE_DESCRIPTION): null,
+                    (JOB_DESCRIPTION): null
+            ]
+
+            session.setAttribute(DIRECTORY_PROFILE_SESSION_CACHE_NAME, dirProfileSessionCache)
+        }
+
+        dirProfileSessionCache
     }
 
     /**
