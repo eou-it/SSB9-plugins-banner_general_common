@@ -5,6 +5,8 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import net.hedtech.banner.general.GeneralCommonUtility
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -100,7 +102,7 @@ class PriorCollegeIntegrationTests extends BaseIntegrationTestCase {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = new Date()
+        def today = GeneralCommonUtility.getSystemDate()
 
         def priorCollege = newValidForCreatePriorCollege()
 
