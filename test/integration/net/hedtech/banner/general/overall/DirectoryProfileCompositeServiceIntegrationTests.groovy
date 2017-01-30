@@ -26,15 +26,16 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
     }
 
 
-    @Test
-    void testFetchDirectoryProfileItemsForUser() {
-        def pidm = PersonUtility.getPerson("GDP000005").pidm
-
-        def result = directoryProfileCompositeService.fetchDirectoryProfileItemsForUser(pidm)
-
-        // TODO: finish this test.  Jim Caley
-        assertNull result
-    }
+    // TODO: uncomment when implementation of test is completed.  Jim Caley
+//    @Test
+//    void testFetchDirectoryProfileItemsForUser() {
+//        def pidm = PersonUtility.getPerson("GDP000005").pidm
+//
+//        def result = directoryProfileCompositeService.fetchDirectoryProfileItemsForUser(pidm)
+//
+//        // TODO: finish this test.  Jim Caley
+//        assertNull result
+//    }
 
     @Test
     void testIsMatchingRoleForDirectoryTypeAndIsMatch() {
