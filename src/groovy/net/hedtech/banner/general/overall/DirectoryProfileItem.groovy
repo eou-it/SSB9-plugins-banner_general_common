@@ -11,98 +11,89 @@ import org.hibernate.annotations.Type
 import javax.persistence.*
 
 /**
- * Represents a Directory Profile item customized for a user
+ * Represents a Directory Profile item
  */
 @EqualsAndHashCode(includeFields = true)
 @ToString(includeNames = true, includeFields = true)
 @Entity
-@Table(name = "GV_GORDPRF")
+@Table(name = "GVQ_GOBDIRO")
 @NamedQueries(value = [
-        @NamedQuery(name = "DirectoryProfileItem.fetchByPidmAndCode",
+        @NamedQuery(name = "DirectoryProfileItem.fetchAllOrderBySeqNo",
                 query = """FROM DirectoryProfileItem a
-    WHERE a.pidm = :pidm
-    AND a.code = :code
+    ORDER BY a.sequenceNumber
 """)
 ])
-class DirectoryProfileItem implements Serializable {
-    static def log = Logger.getLogger('net.hedtech.banner.general.person.DirectoryProfileItem')
+class DirectoryProfileItem {
+    static def log = Logger.getLogger('net.hedtech.banner.general.person.view.DirectoryProfileItem')
 
     /**
-     * Surrogate ID for GORDPRF
+     * Surrogate ID for GOBDIRO
      */
     @Id
-    @Column(name = "GORDPRF_SURROGATE_ID")
-    @SequenceGenerator(name = "GORDPRF_SEQ_GEN", allocationSize = 1, sequenceName = "GORDPRF_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GORDPRF_SEQ_GEN")
+    @Column(name = "GOBDIRO_SURROGATE_ID")
+    @SequenceGenerator(name = "GOBDIRO_SEQ_GEN", allocationSize = 1, sequenceName = "GOBDIRO_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GOBDIRO_SEQ_GEN")
     Long id
 
     /**
-     * Optimistic lock token for GORDPRF
+     * Optimistic lock token for GOBDIRO
      */
     @Version
-    @Column(name = "GORDPRF_VERSION")
+    @Column(name = "GOBDIRO_VERSION")
     Long version
-
-    /**
-     * The pidm of the entity who owns this Directory Profile information
-     */
-    @Column(name = "GORDPRF_PIDM")
-    Integer pidm
 
     /**
      * The Directory Profile item code
      */
-    @Column(name = "GORDPRF_DIRO_CODE")
+    @Column(name = "GOBDIRO_DIRO_CODE")
     String code
 
     /**
-     * The Directory Profile indicator showing whether this item should be displayed
+     * The Directory Profile directory type
+     */
+    @Column(name = "GOBDIRO_DIRECTORY_TYPE")
+    String directoryType
+
+    /**
+     * The Directory Profile item type
+     */
+    @Column(name = "GOBDIRO_ITEM_TYPE")
+    String itemType
+
+    /**
+     * The Directory Profile display profile indicator
      */
     @Type(type = "yes_no")
-    @Column(name = "GORDPRF_DISP_DIRECTORY_IND")
-    Boolean displayInDirectoryIndicator
+    @Column(name = "GOBDIRO_DISP_PROFILE_IND")
+    Boolean displayProfileIndicator
 
     /**
-     * The user id when the row was added or modified.
+     * The Directory Profile update profile indicator
      */
-    @Column(name = "GORDPRF_USER_ID")
-    String lastModifiedBy
+    @Type(type = "yes_no")
+    @Column(name = "GOBDIRO_UPD_PROFILE_IND")
+    Boolean updateProfileIndicator
 
     /**
-     * The date on which the row was added or modified.
+     * The Directory Profile default indicator
+     * Indicates if the item should be defaulted TRUE if the user profile does
+     * not currently have a definition for that item.
      */
-    @Column(name = "GORDPRF_ACTIVITY_DATE")
-    @Temporal(TemporalType.TIMESTAMP)
-    Date lastModified
+    @Type(type = "yes_no")
+    @Column(name = "GOBDIRO_NON_PROFILE_DEF_IND")
+    Boolean nonProfileDefaultIndicator
 
     /**
-     * DATA ORIGIN: Source system that created or updated the row
+     * The Directory Profile System Required Indicator.
      */
-    @Column(name = "GORDPRF_DATA_ORIGIN")
-    String dataOrigin
+    @Type(type = "yes_no")
+    @Column(name = "GOBDIRO_SYSTEM_REQ_IND")
+    Boolean systemRequiredIndicator
 
-
-    static constraints = {
-        pidm(nullable: false, min: -99999999, max: 99999999)
-        code(nullable: false, maxSize: 8)
-        displayInDirectoryIndicator(nullable: false, maxSize: 1)
-        lastModifiedBy(nullable: true, maxSize: 30)
-        lastModified(nullable: true)
-        dataOrigin(nullable: true, maxSize: 30)
-
-    }
-
-    //Read Only fields that should be protected against update
-    public static readonlyProperties = ['pidm']
-
-
-    public static List fetchByPidmAndCode(Integer pidm, String code) {
-
-        def directoryProfileItem = DirectoryProfileItem.withSession { session ->
-            session.getNamedQuery('DirectoryProfileItem.fetchByPidmAndCode').setInteger('pidm', pidm).setString('code', code).list()
-        }
-
-        return directoryProfileItem
-    }
+    /**
+     * The Directory Profile system sequence number
+     */
+    @Column(name = "GOBDIRO_SEQ_NO")
+    Integer sequenceNumber
 
 }

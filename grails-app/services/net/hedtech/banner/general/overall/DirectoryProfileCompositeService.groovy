@@ -7,7 +7,6 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonAddress
 import net.hedtech.banner.general.person.PersonAddressUtility
 import net.hedtech.banner.general.person.PersonTelephone
-import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.DirectoryOption
 import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.person.PersonTelephoneDecorator
@@ -30,7 +29,7 @@ class DirectoryProfileCompositeService {
 
     def fetchDirectoryProfileItemsForUser(pidm, addrMaskingRule = null) {
         def userDirProfileList = []
-        def fullDirProfileList = DirectoryProfileView.fetchAll()
+        def fullDirProfileList = fetchAllDirectoryProfileItems()
 
         fullDirProfileList.each { item ->
             if (item.displayProfileIndicator && isMatchingRoleForDirectoryType(pidm, item.directoryType)) {
@@ -39,6 +38,16 @@ class DirectoryProfileCompositeService {
         }
 
         userDirProfileList
+    }
+
+    def static List fetchAllDirectoryProfileItems() {
+        def directoryProfileItems
+
+        DirectoryProfileItem.withSession { session ->
+            directoryProfileItems = session.getNamedQuery('DirectoryProfileItem.fetchAllOrderBySeqNo').list()
+        }
+
+        return directoryProfileItems
     }
 
     def isMatchingRoleForDirectoryType(pidm, directoryType) {
@@ -65,10 +74,10 @@ class DirectoryProfileCompositeService {
         return isMatchingRole
     }
 
-    def getItemProperties(pidm, DirectoryProfileView profileItem, addrMaskingRule = null) {
+    def getItemProperties(pidm, DirectoryProfileItem profileItem, addrMaskingRule = null) {
         def allItemProperties = []
-        def description = fetchDirectoryOptionByCode(profileItem.code)?.description?.find{true}
-        def userItem = DirectoryProfileItem.fetchByPidmAndCode(pidm, profileItem.code)
+        def description = fetchDirectoryOptionItem(profileItem.code)?.description?.find{true}
+        def userItem = fetchDirectoryProfilePreference(pidm, profileItem.code)
         def checked = userItem ? userItem.displayInDirectoryIndicator : profileItem.nonProfileDefaultIndicator
         def changeable = profileItem.updateProfileIndicator
 
@@ -90,13 +99,22 @@ class DirectoryProfileCompositeService {
         allItemProperties
     }
 
-    public static List fetchDirectoryOptionByCode(String code) {
+    def static List fetchDirectoryOptionItem(String code) {
 
         def directoryOptionsValidationItem = DirectoryOption.withSession { session ->
             session.getNamedQuery('DirectoryOption.fetchByCode').setString('code', code).list()
         }
 
         return directoryOptionsValidationItem
+    }
+
+    def static List fetchDirectoryProfilePreference(Integer pidm, String code) {
+
+        def directoryProfilePref = DirectoryProfilePreference.withSession { session ->
+            session.getNamedQuery('DirectoryProfilePreference.fetchByPidmAndCode').setInteger('pidm', pidm).setString('code', code).list()
+        }
+
+        return directoryProfilePref
     }
 
     def getCurrentListingForDirectoryItem(pidm, item, addrMaskingRule = null) {
