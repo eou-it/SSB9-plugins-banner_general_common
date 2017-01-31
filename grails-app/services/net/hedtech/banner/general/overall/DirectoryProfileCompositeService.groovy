@@ -67,7 +67,7 @@ class DirectoryProfileCompositeService {
 
     def getItemProperties(pidm, DirectoryProfileView profileItem, addrMaskingRule = null) {
         def allItemProperties = []
-        def description = DirectoryOption.fetchByCode(profileItem.code)?.description?.find{true}
+        def description = fetchDirectoryOptionByCode(profileItem.code)?.description?.find{true}
         def userItem = DirectoryProfileItem.fetchByPidmAndCode(pidm, profileItem.code)
         def checked = userItem ? userItem.displayInDirectoryIndicator : profileItem.nonProfileDefaultIndicator
         def changeable = profileItem.updateProfileIndicator
@@ -88,6 +88,15 @@ class DirectoryProfileCompositeService {
         }
 
         allItemProperties
+    }
+
+    public static List fetchDirectoryOptionByCode(String code) {
+
+        def directoryOptionsValidationItem = DirectoryOption.withSession { session ->
+            session.getNamedQuery('DirectoryOption.fetchByCode').setString('code', code).list()
+        }
+
+        return directoryOptionsValidationItem
     }
 
     def getCurrentListingForDirectoryItem(pidm, item, addrMaskingRule = null) {
