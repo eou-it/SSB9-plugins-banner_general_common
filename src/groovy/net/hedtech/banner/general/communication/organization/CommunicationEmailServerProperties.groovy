@@ -56,6 +56,14 @@ class CommunicationEmailServerProperties implements Serializable {
     CommunicationEmailServerConnectionSecurity securityProtocol = CommunicationEmailServerConnectionSecurity.None
 
     /**
+     * The set of all applicable smtp properties relevant to this server.
+     */
+    @Lob
+    @Column(name = "GCBSPRP_SMTP_PROPERTIES")
+    String smtpProperties
+
+
+    /**
      * VERSION: Optimistic lock token.
      */
     @Version
@@ -87,6 +95,7 @@ class CommunicationEmailServerProperties implements Serializable {
         dataOrigin( nullable: true, maxSize: 30 )
         securityProtocol( nullable: false, maxSize: 2000 )
         host( nullable: false, maxSize: 2000 )
+        smtpProperties(nullable:true)
         port( nullable: false )
         type( nullable: false )
     }
