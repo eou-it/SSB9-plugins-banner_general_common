@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.parameter
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import org.hibernate.annotations.Type
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -68,6 +69,12 @@ class CommunicationParameter implements Serializable {
     CommunicationParameterType type
 
     /**
+     * Indicates if the parameter was created through the seeded data set and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCRPARM_SYSTEM_IND")
+    Boolean systemIndicator = false
+    /**
      * VERSION: Optimistic lock token.
      */
     @Version
@@ -97,6 +104,7 @@ class CommunicationParameter implements Serializable {
         name(nullable: false, maxSize: 255)
         title(nullable: false, maxSize: 255)
         type(nullable: false, maxSize: 255)
+        systemIndicator(nullable:false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
