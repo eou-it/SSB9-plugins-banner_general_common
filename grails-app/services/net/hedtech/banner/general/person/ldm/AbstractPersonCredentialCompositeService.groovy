@@ -8,19 +8,89 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.LdmService
-import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
-import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
-import net.hedtech.banner.general.person.ldm.v1.Credential
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
-class AbstractPersonCredentialCompositeService extends LdmService {
+abstract class AbstractPersonCredentialCompositeService extends LdmService {
 
     private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
 
     PersonCredentialService personCredentialService
+
+    abstract protected void prepareDataMapForAll_ListExtension(Collection<Object[]> entities, Map dataMapForAll)
+
+    abstract protected void prepareDataMapForSingle_ListExtension(Object[] entity,
+                                                                  final Map dataMapForAll, Map dataMapForSingle)
+
+    abstract protected def createPersonCredentialDataModel(final Map dataMapForSingle)
+
+    abstract protected def extractDataFromRequestBody(final Map content)
+
+    private def createPersonCredentialDataModels(def entities) {
+        def decorators = []
+        if (entities) {
+            def dataMapForAll = prepareDataMapForAll_List(entities)
+
+            entities.each {
+                def thing = it
+                log.info(thing)
+                def dataMapForSingle = prepareDataMapForSingle_List(it, dataMapForAll)
+                decorators << createPersonCredentialDataModel(dataMapForSingle)
+            }
+        }
+        return decorators
+    }
+
+    private def prepareDataMapForAll_List(Collection<Object[]> entities) {
+        def dataMapForAll = [:]
+
+        if (entities) {
+            List<Integer> pidms = []
+            entities?.each {
+                pidms << it.getAt(0)
+            }
+
+            fetchPersonsCredentialDataAndPutInMap(pidms, dataMapForAll)
+        }
+
+        // Call extension
+        prepareDataMapForAll_ListExtension(entities, dataMapForAll)
+        return dataMapForAll
+    }
+
+    private def prepareDataMapForSingle_List(Object[] entity,
+                                             final Map dataMapForAll) {
+        Map dataMapForSingle = initDataMapForSingle("LIST", entity)
+
+        if (dataMapForAll.pidmToCredentialsMap.containsKey(dataMapForSingle.pidm)) {
+            dataMapForSingle.put("credentials", dataMapForAll.pidmToCredentialsMap.get(dataMapForSingle.pidm))
+        }
+
+        dataMapForSingle.credentials << [type: CredentialType.BANNER_ID, value: dataMapForSingle.bannerId]
+
+        // Call extension
+        prepareDataMapForSingle_ListExtension(entity, dataMapForAll, dataMapForSingle)
+        return dataMapForSingle
+    }
+
+    private def initDataMapForSingle(String sourceForDataMap, Object[] entity) {
+        Map dataMapForSingle = [:]
+        dataMapForSingle.put("sourceForDataMap", sourceForDataMap)
+        dataMapForSingle.put("personData", entity)
+
+        dataMapForSingle.put("pidm", entity.getAt(0))
+        dataMapForSingle.put("bannerId", entity.getAt(1))
+        dataMapForSingle.put("guid", entity.getAt(2))
+
+        return dataMapForSingle
+    }
+
+    private def prepareDataMapForSingle_Create(Object[] entity) {
+        Map dataMapForSingle = initDataMapForSingle("CREATE", entity)
+        return dataMapForSingle
+    }
 
     /**
      * GET /api/persons-credentials
@@ -38,7 +108,8 @@ class AbstractPersonCredentialCompositeService extends LdmService {
         if (!personDetail) {
             throw new ApplicationException("Person", new NotFoundException())
         }
-        return createDecorators([personDetail])[0]
+
+        return createPersonCredentialDataModels([personDetail])[0]
     }
 
     /**
@@ -54,7 +125,7 @@ class AbstractPersonCredentialCompositeService extends LdmService {
 
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         List<Object[]> personDetailsList = fetchPersons(params)
-        return createDecorators(personDetailsList)
+        return createPersonCredentialDataModels(personDetailsList)
     }
 
 
@@ -101,80 +172,9 @@ class AbstractPersonCredentialCompositeService extends LdmService {
     }
 
 
-    private def createDecorators(def dbRows) {
-        def decorators = []
-        if (dbRows) {
-            List<Integer> pidms = []
-            dbRows?.each {
-                pidms << it.getAt(0)
-            }
-
-            def dataMap = [:]
-            fetchPersonsCredentialDataAndPutInMap(pidms, dataMap)
-
-            dbRows?.each {
-                Integer pidm = it.getAt(0)
-                String bannerId = it?.getAt(1)
-                String guid = it?.getAt(2)
-
-                PersonCredentialsDecorator persCredentialsDecorator = new PersonCredentialsDecorator(guid)
-
-                def credentials = []
-                if (dataMap.pidmToCredentialsMap.containsKey(pidm)) {
-                    credentials = dataMap.pidmToCredentialsMap.get(pidm)
-                }
-                credentials << [type: CredentialType.BANNER_ID, value: bannerId]
-                persCredentialsDecorator.credentials = createCredentialObjectsV6(credentials)
-
-                decorators.add(persCredentialsDecorator)
-            }
-        }
-        return decorators
-    }
-
-
     void fetchPersonsCredentialDataAndPutInMap(List<Integer> pidms, Map dataMap) {
         // Put in Map
         dataMap.put("pidmToCredentialsMap", personCredentialService.getPidmToCredentialsMap(pidms))
-    }
-
-
-    def createCredentialObjectsV3(def credentials) {
-        return createCredentialObjects(credentials, GeneralValidationCommonConstants.VERSION_V3)
-    }
-
-
-    def createCredentialObjectsV6(def credentials) {
-        return createCredentialObjects(credentials, GeneralValidationCommonConstants.VERSION_V6)
-    }
-
-
-    private def createCredentialObjects(def credentials, String version) {
-        def decorators = []
-        if (credentials) {
-            credentials.each {
-                if (GeneralValidationCommonConstants.VERSION_V6.equals(version)) {
-                    decorators << createCredentialObjectV6(it.type, it.value)
-                } else if (GeneralValidationCommonConstants.VERSION_V3.equals(version)) {
-                    decorators << createCredentialObjectV3(it.type, it.value)
-                }
-            }
-        }
-        return decorators
-    }
-
-
-    private PersonCredential createCredentialObjectV6(CredentialType credentialType, String value) {
-        PersonCredential personCredential
-        if (credentialType && value) {
-            personCredential = new PersonCredential(credentialType.versionToEnumMap["v6"], value)
-        }
-        return personCredential
-    }
-
-
-    private Credential createCredentialObjectV3(CredentialType credentialType, String value) {
-        return new Credential(credentialType.versionToEnumMap["v3"], value, null, null)
     }
 
 }
