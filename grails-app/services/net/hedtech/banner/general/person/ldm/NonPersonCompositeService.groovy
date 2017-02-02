@@ -32,7 +32,7 @@ class NonPersonCompositeService extends LdmService {
     private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V1, GeneralValidationCommonConstants.VERSION_V6]
 
     NonPersonPersonViewService nonPersonPersonViewService
-    PersonCredentialCompositeService personCredentialCompositeService
+    PersonCredentialV6CompositeService personCredentialV6CompositeService
     EmailTypeCompositeService emailTypeCompositeService
     PersonEmailService personEmailService
     NonPersonRoleCompositeService nonPersonRoleCompositeService
@@ -191,7 +191,7 @@ class NonPersonCompositeService extends LdmService {
 
             // Credentials
             def personCredentials = dataMapForPerson["personCredentials"]
-            decorator.credentials = personCredentialCompositeService.createCredentialObjectsV6(personCredentials)
+            decorator.credentials = personCredentialV6CompositeService.createCredentialObjectsV6(personCredentials)
 
             // Emails
             List<PersonEmail> personEmailList = dataMapForPerson["personEmails"]
