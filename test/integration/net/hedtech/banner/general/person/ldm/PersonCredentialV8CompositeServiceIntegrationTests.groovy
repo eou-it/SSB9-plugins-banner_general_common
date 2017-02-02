@@ -5,7 +5,10 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
+import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
@@ -23,8 +26,14 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
 
     def personCredentialV8CompositeService
 
+    //used to save alternative ids
+    PersonCredentialService personCredentialService
+    IntegrationConfigurationService integrationConfigurationService
+
     def person
     String guid
+    String guidForSSN
+    String guidForAltIds
     String bannerSourcedId
     String bannerUserName
     String bannerUdcId
@@ -42,6 +51,25 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         bannerSourcedId = ImsSourcedIdBase.findByPidm(person?.pidm)?.sourcedId
         bannerUserName = ThirdPartyAccess.findByPidm(person?.pidm)?.externalUser
         bannerUdcId = PidmAndUDCIdMapping.findByPidm(person?.pidm)?.udcId
+
+        guidForSSN = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName("371".toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
+        log.debug(guidForSSN)
+
+        guidForAltIds= GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName("254".toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
+        log.debug(guidForAltIds)
+
+        Map additionalIdTypeCodeToIdMap = [:]
+
+        def clgPersonId = integrationConfigurationService.fetchByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, "CREDENTIALS.COLLEAGUE_ID")
+        additionalIdTypeCodeToIdMap.put( clgPersonId.value, "_colleaguePersonId_")
+
+        def elevateConfig = integrationConfigurationService.fetchByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, "CREDENTIALS.ELEVATE_ID")
+        additionalIdTypeCodeToIdMap.put(elevateConfig.value, "_elevateId_")
+
+        def clgConfig = integrationConfigurationService.fetchByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, "CREDENTIALS.COLLEAGUE_USERNAME")
+        additionalIdTypeCodeToIdMap.put(clgConfig.value, "_colleagueUserName_")
+
+        personCredentialService.createOrUpdateAdditionalIDs(254, additionalIdTypeCodeToIdMap)
     }
 
     @Test
@@ -83,6 +111,28 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         assertEquals bannerSourcedId, decorator.credentials.find { it.type == "bannerSourcedId" }.value
         assertEquals bannerUserName, decorator.credentials.find { it.type == "bannerUserName" }.value
         assertEquals bannerUdcId, decorator.credentials.find { it.type == "bannerUdcId" }.value
+    }
+
+    @Test
+    void testGet_PersonCredentials_ssnCredentials() {
+        setAcceptHeader("application/vnd.hedtech.integration.v8+json")
+        PersonCredentialsDecorator decorator = personCredentialV8CompositeService.get(guidForSSN)
+        assertNotNull decorator
+        assertEquals guidForSSN, decorator.guid
+
+        assertNotNull decorator.credentials.find { it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v8"] }.value
+    }
+
+    @Test
+    void testGet_PersonCredentials_altCredentials() {
+        setAcceptHeader("application/vnd.hedtech.integration.v8+json")
+        PersonCredentialsDecorator decorator = personCredentialV8CompositeService.get(guidForAltIds)
+        assertNotNull decorator
+        assertEquals guidForAltIds, decorator.guid
+
+        assertNotNull decorator.credentials.find { it.type == CredentialType.COLLEAGUE_USER_NAME.versionToEnumMap["v8"] }.value
+        assertNotNull decorator.credentials.find { it.type == CredentialType.ELEVATE_ID.versionToEnumMap["v8"] }.value
+        assertNotNull decorator.credentials.find { it.type == CredentialType.COLLEAGUE_PERSON_ID.versionToEnumMap["v8"] }.value
     }
 
     @Test

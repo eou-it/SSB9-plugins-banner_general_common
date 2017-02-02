@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredential
 import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
 import net.hedtech.banner.general.person.ldm.v1.Credential
@@ -37,6 +38,10 @@ class PersonCredentialV6CompositeService extends AbstractPersonCredentialComposi
             }
         }
         return decorators
+    }
+
+    protected def getCredentialTypeToAdditionalIdTypeCodeMap() {
+        return [:]
     }
 
     /**

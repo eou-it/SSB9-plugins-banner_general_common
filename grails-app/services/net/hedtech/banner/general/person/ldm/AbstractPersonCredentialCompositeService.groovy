@@ -8,6 +8,8 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.person.AdditionalID
+import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
@@ -28,14 +30,14 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
 
     abstract protected def extractDataFromRequestBody(final Map content)
 
+    abstract protected def getCredentialTypeToAdditionalIdTypeCodeMap()
+
     private def createPersonCredentialDataModels(def entities) {
         def decorators = []
         if (entities) {
             def dataMapForAll = prepareDataMapForAll_List(entities)
 
             entities.each {
-                def thing = it
-                log.info(thing)
                 def dataMapForSingle = prepareDataMapForSingle_List(it, dataMapForAll)
                 decorators << createPersonCredentialDataModel(dataMapForSingle)
             }
@@ -51,6 +53,8 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
             entities?.each {
                 pidms << it.getAt(0)
             }
+            def pidmToPersonBaseMap = getPidmToPersonBaseMap(pidms)
+            dataMapForAll.put("pidmToPersonBaseMap", pidmToPersonBaseMap)
 
             fetchPersonsCredentialDataAndPutInMap(pidms, dataMapForAll)
         }
@@ -58,6 +62,34 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
         // Call extension
         prepareDataMapForAll_ListExtension(entities, dataMapForAll)
         return dataMapForAll
+    }
+
+    private void fetchPersonsCredentialDataAndPutInMap(Collection<Integer> pidms, Map dataMapForAll) {
+        Map pidmToCredentialsMap = personCredentialService.getPidmToCredentialsMap(pidms)
+
+        def credentialTypeToAdditionalIdTypeCodeMap = getCredentialTypeToAdditionalIdTypeCodeMap()
+
+        def pidmToAdditionalIDsMap = personCredentialService.getPidmToAdditionalIDsMap(pidms, credentialTypeToAdditionalIdTypeCodeMap.values())
+
+        pidmToAdditionalIDsMap.each { pidm, additionalIds ->
+            def personCredentials = pidmToCredentialsMap.get(pidm)
+            if (!personCredentials) {
+                personCredentials = []
+                pidmToCredentialsMap.put(pidm, personCredentials)
+            }
+
+            credentialTypeToAdditionalIdTypeCodeMap.each { credentialType, additionalIdTypeCode ->
+                AdditionalID additionalID = additionalIds?.find {
+                    it.additionalIdentificationType.code == additionalIdTypeCode
+                }
+                if (additionalID) {
+                    personCredentials << [type: credentialType, value: additionalID.additionalId]
+                }
+            }
+        }
+
+        // Put in Map
+        dataMapForAll.put("pidmToCredentialsMap", pidmToCredentialsMap)
     }
 
     private def prepareDataMapForSingle_List(Object[] entity,
@@ -171,10 +203,19 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
         return result
     }
 
-
-    void fetchPersonsCredentialDataAndPutInMap(List<Integer> pidms, Map dataMap) {
-        // Put in Map
-        dataMap.put("pidmToCredentialsMap", personCredentialService.getPidmToCredentialsMap(pidms))
+     def getPidmToPersonBaseMap(List<Integer> pidms) {
+        def pidmToPersonBaseMap = [:]
+        if (pidms) {
+            log.debug "Getting SPBPERS records for ${pidms?.size()} PIDMs..."
+            List<PersonBasicPersonBase> entities = PersonBasicPersonBase.fetchByPidmList(pidms)
+            log.debug "Got ${entities?.size()} SPBPERS records"
+            entities?.each {
+                pidmToPersonBaseMap.put(it.pidm, it)
+            }
+        }
+        return pidmToPersonBaseMap
     }
+
+
 
 }
