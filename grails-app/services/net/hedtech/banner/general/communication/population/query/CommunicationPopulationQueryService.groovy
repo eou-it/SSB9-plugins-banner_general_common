@@ -96,7 +96,7 @@ class CommunicationPopulationQueryService extends ServiceBase {
 
 
     void validateFolder(Long folderId) {
-        def fetchedFolder = CommunicationFolder.fetchById(folderId)
+        def fetchedFolder = CommunicationFolder.get(folderId)
         if (fetchedFolder == null || fetchedFolder.id == null) {
             throw new NotFoundException(id: folderId, entityClassName: domainClass.simpleName)
         }

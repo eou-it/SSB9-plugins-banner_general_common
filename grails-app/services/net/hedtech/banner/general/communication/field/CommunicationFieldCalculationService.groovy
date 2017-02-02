@@ -91,7 +91,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         for (String name:fieldNames) {
             CommunicationField communicationField = CommunicationField.fetchByName( name )
             if (communicationField) {
-                String value = calculateSingleFieldByPidm(communicationField, pidm, mepCode)
+                String value = calculateSingleFieldByPidm(communicationField, pidm, parameters, mepCode)
                 CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
                 nameValueMap.put( name, communicationFieldValue )
             } else {

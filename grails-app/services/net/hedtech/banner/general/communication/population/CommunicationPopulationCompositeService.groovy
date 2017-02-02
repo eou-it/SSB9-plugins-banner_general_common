@@ -10,6 +10,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
@@ -21,6 +22,8 @@ import net.hedtech.banner.general.communication.population.selectionlist.Communi
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntryService
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
+import net.hedtech.banner.general.person.PersonIdentificationName
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
@@ -349,6 +352,60 @@ class CommunicationPopulationCompositeService {
         calculation.save( failOnError: true, flush: true )
         return calculation
     }
+
+    private CommunicationPopulation prepareIncludeList( CommunicationPopulation population ) {
+        if (population.includeList == null) {
+            assert population.includeList == null
+            CommunicationPopulationSelectionList selectionList = new CommunicationPopulationSelectionList()
+            selectionList = communicationPopulationSelectionListService.create( selectionList )
+
+            population.includeList = selectionList
+            population = communicationPopulationService.update( population )
+        }
+
+        assert population.includeList != null
+        return population
+    }
+
+    public CommunicationPopulationSelectionListEntry addPersonToIncludeList( CommunicationPopulation population, String bannerId ) {
+        population = prepareIncludeList( population )
+
+        PersonIdentificationName person = PersonUtility.getPerson( bannerId )
+        if (person == null) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "personNotFound", bannerId )
+        }
+
+        CommunicationPopulationSelectionListEntry listEntry = CommunicationPopulationSelectionListEntry.findByPopulationSelectionListAndPidm( population.includeList, person.pidm )
+        if (listEntry == null) {
+            listEntry = new CommunicationPopulationSelectionListEntry()
+            listEntry.populationSelectionList = population.includeList
+            listEntry.pidm = person.pidm
+            listEntry = communicationPopulationSelectionListEntryService.create( listEntry )
+        }
+        return listEntry
+    }
+
+//    public CommunicationPopulation addPersonsToIncludeList( CommunicationPopulationSelectionList populationId, List<String> bannerIds ) {
+//
+//
+//        CommunicationPopulationSelectionListEntry selectionListEntry = new CommunicationPopulationSelectionListEntry()
+//
+//
+//
+//
+//        communicationPopulationSelectionListEntryService
+//
+//    }
+//
+//    public CommunicationPopulation removePersonFromIncludeList( CommunicationPopulationSelectionList populationId, String bannerId ) {
+//
+//    }
+//
+//    public CommunicationPopulation removeAllPersonsFromIncludeList( CommunicationPopulationSelectionList populationId ) {
+//
+//    }
+
+
 
     /**
      * This method is meant to be called from a quartz service to complete

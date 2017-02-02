@@ -21,9 +21,6 @@ import javax.persistence.*
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationFolder.fetchById",
-                query = """ FROM CommunicationFolder a
-                    WHERE a.id = :id"""),
         @NamedQuery(name = "CommunicationFolder.fetchByName",
                 query = """ FROM CommunicationFolder a
                     WHERE upper(a.name) = upper(:name)"""),
@@ -109,26 +106,6 @@ class CommunicationFolder implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         internal(nullable: false)
-    }
-
-    public static CommunicationFolder fetchById(Long id) {
-
-        def query
-        CommunicationFolder.withSession { session ->
-            query = session.getNamedQuery('CommunicationFolder.fetchById')
-                    .setLong('id', id).list()[0]
-
-        }
-        return query
-    }
-
-
-    public static CommunicationFolder fetchByName(String name) {
-        def query
-        CommunicationFolder.withSession { session ->
-            query = session.getNamedQuery('CommunicationFolder.fetchByName').setString('name', name).list()[0]
-        }
-        return query
     }
 
     public static Boolean existsAnotherSameNameFolder(Long folderId, String name ) {
