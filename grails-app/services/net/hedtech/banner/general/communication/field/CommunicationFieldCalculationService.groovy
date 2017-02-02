@@ -10,12 +10,18 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.communication.field
 
+import grails.util.Holders
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
+import net.hedtech.banner.DateUtility
+import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.ServiceBase
+import org.springframework.context.ApplicationContext
+import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.stringtemplate.v4.DateRenderer
@@ -123,9 +129,15 @@ class CommunicationFieldCalculationService extends ServiceBase {
         if (sqlStatement?.contains(":pidm")) {
             sqlParams << ['pidm': pidm]
         }
+
         for (Object parameter: parameters)
         {
-            sqlParams << [ (parameter.name) : (parameter.answer) ]
+            if(parameter.type.equalsIgnoreCase(CommunicationParameterType.DATE.name())) {
+                Date temp = DateUtility.parseDateString(parameter.answer);
+                sqlParams << [ (parameter.name) : (new java.sql.Date(temp.getTime())) ]
+            } else {
+                sqlParams << [ (parameter.name) : (parameter.answer) ]
+            }
         }
         calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
