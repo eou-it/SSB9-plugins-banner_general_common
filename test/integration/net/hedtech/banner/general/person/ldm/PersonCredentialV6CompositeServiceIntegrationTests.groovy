@@ -10,7 +10,7 @@ import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
-import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsDecorator
+import net.hedtech.banner.general.overall.ldm.v6.PersonCredentialsV6
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -51,7 +51,7 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
         assertTrue personsCredentials.size() <= 500
         assertTrue personsCredentials.size() > 0
         assertTrue personsCredentials.size() <= personCredentialV6CompositeService.count([max: '500', offset: '0'])
-        PersonCredentialsDecorator decorator = personsCredentials[0]
+        PersonCredentialsV6 decorator = personsCredentials[0]
         assertNotNull decorator
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralCommonConstants.PERSONS_LDM_NAME, decorator.guid)
         assertNotNull globalUniqueIdentifier
@@ -76,7 +76,7 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
     @Test
     void testGet_PersonCredentials_v6() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
-        PersonCredentialsDecorator decorator = personCredentialV6CompositeService.get(guid)
+        PersonCredentialsV6 decorator = personCredentialV6CompositeService.get(guid)
         assertNotNull decorator
         assertEquals guid, decorator.guid
         assertEquals person.bannerId, decorator.credentials.find { it.type == "bannerId" }.value

@@ -16,7 +16,7 @@ class NonPersonDecorator {
 
     String guid
     String title
-    List<PersonCredential> credentials
+    List<CredentialV6> credentials
     List<EmailV6> emails
     List<PhoneV6> phones
     List<RoleV6> roles

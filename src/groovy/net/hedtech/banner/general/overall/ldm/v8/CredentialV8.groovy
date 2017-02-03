@@ -3,13 +3,13 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall.ldm.v8
 
-class PersonCredential {
+class CredentialV8 {
 
     String type
     String value
 
 
-    def PersonCredential(String type, String value) {
+    def CredentialV8(String type, String value) {
         this.type = type
         this.value = value
     }
