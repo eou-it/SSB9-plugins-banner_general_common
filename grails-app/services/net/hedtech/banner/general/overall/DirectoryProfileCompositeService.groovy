@@ -13,6 +13,8 @@ import net.hedtech.banner.person.PersonTelephoneDecorator
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.springframework.web.context.request.RequestContextHolder
 
+import java.sql.Timestamp
+
 class DirectoryProfileCompositeService {
 
     boolean transactional = true
@@ -132,7 +134,10 @@ class DirectoryProfileCompositeService {
         } else if (item.code == 'CLASS_YR') {
             if (InstitutionalDescription.fetchByKey()?.alumniInstalled) {
                 def result = fetchClassYear(pidm)
-                resultStringList.push(result)
+
+                if (result) {
+                    resultStringList.push(result)
+                }
             }
         } else if (item.code == 'COLLEGE') {
             def result = fetchCollege(pidm)
@@ -291,7 +296,7 @@ class DirectoryProfileCompositeService {
 
                     if (result) {
                         collegeDescription.college = result.STVCOLL_DESC
-                        collegeDescription.gradYear = result.SGBSTDN_EXP_GRAD_DATE
+                        collegeDescription.gradYear = getYearFromTimestamp(result.SGBSTDN_EXP_GRAD_DATE)
                     }
                 } catch (e) {
                     throw e
@@ -304,6 +309,18 @@ class DirectoryProfileCompositeService {
         }
 
         collegeDescription
+    }
+
+    private getYearFromTimestamp(Timestamp timestamp) {
+        def year = ''
+
+        if (timestamp) {
+            Calendar cal = Calendar.getInstance()
+            cal.setTime(timestamp)
+            year = cal.get(Calendar.YEAR) as String
+        }
+
+        year
     }
 
     private List fetchJobDepartment(pidm) {
@@ -412,7 +429,7 @@ class DirectoryProfileCompositeService {
 
         if (InstitutionalDescription.fetchByKey()?.financeInstalled) {
             if (tableExists('FTVORGN')) {
-                def effDate = new Date().format('YYYYMMDD')
+                def effDate = new Date().format('yyyyMMdd')
                 def effTime = '235959'
                 String effDateTime = "$effDate$effTime"
 
