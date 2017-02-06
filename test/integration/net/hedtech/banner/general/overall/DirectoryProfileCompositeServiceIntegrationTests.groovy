@@ -83,7 +83,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetItemProperties() {
-        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def pidm = PersonUtility.getPerson("GDP000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
 
         def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem)
@@ -91,17 +91,16 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull result
         assertEquals 1, result.size()
         assertEquals "Name", result[0].description
-        assertNotNull result[0].checked
-        assertEquals 1, result[0].checked.size()
+        assertFalse result[0].checked
         assertFalse result[0].changeable
         assertNotNull result[0].currentListing
         assertEquals 1, result[0].currentListing.size()
-        assertEquals "Delihia Gaddis", result[0].currentListing[0]
+        assertEquals "Delihia Margot", result[0].currentListing[0]
     }
 
     @Test
     void testGetItemPropertiesWithAddressWithMaskingRule() {
-        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def pidm = PersonUtility.getPerson("GDP000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'ADDR_OF' // Force to be an address
         profileItem.itemType = 'A' // Force to be an address
@@ -122,7 +121,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetItemPropertiesWithAddressWithoutMaskingRule() {
-        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def pidm = PersonUtility.getPerson("GDP000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'ADDR_OF' // Force to be an address
         profileItem.itemType = 'A' // Force to be an address
@@ -241,6 +240,9 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetCurrentListingForDirectoryItemforCollege() {
+        // Update college code for the purposes of this test -- only for current session's connection.
+        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_PIDM =?", 29329
+
         def pidm = PersonUtility.getPerson("STUAFR329").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'COLLEGE'
@@ -257,7 +259,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetCurrentListingForDirectoryItemforGradYear() {
         // Update college code for the purposes of this test -- only for current session's connection.
-        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_SURROGATE_ID =?", 427
+        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_PIDM =?", 29329
 
         def pidm = PersonUtility.getPerson("STUAFR329").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
@@ -335,7 +337,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetCurrentListingForDirectoryItemforPhone() {
-        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def pidm = PersonUtility.getPerson("GDP000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'TELE_PR' // Force to be a phone
         profileItem.itemType = 'T' // Force to be a phone
@@ -346,8 +348,8 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         assertEquals 1, result.size()
         assertNotNull result[0]
         assertEquals 3, result[0].size()
-        assertEquals '312 5568001', result[0][0]
-        assertEquals '215 2083094', result[0][1]
+        assertEquals '312 5568001', result[0][0] // Primary phone, so listed first
+        assertEquals '215 2083094', result[0][1] // Next two listed by sequence number
         assertEquals 'Unlisted', result[0][2]
     }
 
