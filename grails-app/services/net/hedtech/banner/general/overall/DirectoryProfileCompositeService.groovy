@@ -7,12 +7,13 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonAddress
 import net.hedtech.banner.general.person.PersonAddressUtility
 import net.hedtech.banner.general.person.PersonTelephone
-import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.DirectoryOption
 import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.person.PersonTelephoneDecorator
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.springframework.web.context.request.RequestContextHolder
+
+import java.sql.Timestamp
 
 class DirectoryProfileCompositeService {
 
@@ -30,7 +31,7 @@ class DirectoryProfileCompositeService {
 
     def fetchDirectoryProfileItemsForUser(pidm, addrMaskingRule = null) {
         def userDirProfileList = []
-        def fullDirProfileList = DirectoryProfileView.fetchAll()
+        def fullDirProfileList = fetchAllDirectoryProfileItems()
 
         fullDirProfileList.each { item ->
             if (item.displayProfileIndicator && isMatchingRoleForDirectoryType(pidm, item.directoryType)) {
@@ -39,6 +40,16 @@ class DirectoryProfileCompositeService {
         }
 
         userDirProfileList
+    }
+
+    def static List fetchAllDirectoryProfileItems() {
+        def directoryProfileItems
+
+        DirectoryProfileItem.withSession { session ->
+            directoryProfileItems = session.getNamedQuery('DirectoryProfileItem.fetchAllOrderBySeqNo').list()
+        }
+
+        return directoryProfileItems
     }
 
     def isMatchingRoleForDirectoryType(pidm, directoryType) {
@@ -65,10 +76,10 @@ class DirectoryProfileCompositeService {
         return isMatchingRole
     }
 
-    def getItemProperties(pidm, DirectoryProfileView profileItem, addrMaskingRule = null) {
+    def getItemProperties(pidm, DirectoryProfileItem profileItem, addrMaskingRule = null) {
         def allItemProperties = []
-        def description = DirectoryOption.fetchByCode(profileItem.code)?.description?.find{true}
-        def userItem = DirectoryProfileItem.fetchByPidmAndCode(pidm, profileItem.code)
+        def description = fetchDirectoryOptionItem(profileItem.code)?.description?.find{true}
+        def userItem = fetchDirectoryProfilePreference(pidm, profileItem.code)
         def checked = userItem ? userItem.displayInDirectoryIndicator : profileItem.nonProfileDefaultIndicator
         def changeable = profileItem.updateProfileIndicator
 
@@ -90,6 +101,24 @@ class DirectoryProfileCompositeService {
         allItemProperties
     }
 
+    def static List fetchDirectoryOptionItem(String code) {
+
+        def directoryOptionsValidationItem = DirectoryOption.withSession { session ->
+            session.getNamedQuery('DirectoryOption.fetchByCode').setString('code', code).list()
+        }
+
+        return directoryOptionsValidationItem
+    }
+
+    def static List fetchDirectoryProfilePreference(Integer pidm, String code) {
+
+        def directoryProfilePref = DirectoryProfilePreference.withSession { session ->
+            session.getNamedQuery('DirectoryProfilePreference.fetchByPidmAndCode').setInteger('pidm', pidm).setString('code', code).list()
+        }
+
+        return directoryProfilePref
+    }
+
     def getCurrentListingForDirectoryItem(pidm, item, addrMaskingRule = null) {
         def resultStringList = []
 
@@ -105,7 +134,10 @@ class DirectoryProfileCompositeService {
         } else if (item.code == 'CLASS_YR') {
             if (InstitutionalDescription.fetchByKey()?.alumniInstalled) {
                 def result = fetchClassYear(pidm)
-                resultStringList.push(result)
+
+                if (result) {
+                    resultStringList.push(result)
+                }
             }
         } else if (item.code == 'COLLEGE') {
             def result = fetchCollege(pidm)
@@ -264,7 +296,7 @@ class DirectoryProfileCompositeService {
 
                     if (result) {
                         collegeDescription.college = result.STVCOLL_DESC
-                        collegeDescription.gradYear = result.SGBSTDN_EXP_GRAD_DATE
+                        collegeDescription.gradYear = getYearFromTimestamp(result.SGBSTDN_EXP_GRAD_DATE)
                     }
                 } catch (e) {
                     throw e
@@ -277,6 +309,18 @@ class DirectoryProfileCompositeService {
         }
 
         collegeDescription
+    }
+
+    private getYearFromTimestamp(Timestamp timestamp) {
+        def year = ''
+
+        if (timestamp) {
+            Calendar cal = Calendar.getInstance()
+            cal.setTime(timestamp)
+            year = cal.get(Calendar.YEAR) as String
+        }
+
+        year
     }
 
     private List fetchJobDepartment(pidm) {
@@ -385,7 +429,7 @@ class DirectoryProfileCompositeService {
 
         if (InstitutionalDescription.fetchByKey()?.financeInstalled) {
             if (tableExists('FTVORGN')) {
-                def effDate = new Date().format('YYYYMMDD')
+                def effDate = new Date().format('yyyyMMdd')
                 def effTime = '235959'
                 String effDateTime = "$effDate$effTime"
 
