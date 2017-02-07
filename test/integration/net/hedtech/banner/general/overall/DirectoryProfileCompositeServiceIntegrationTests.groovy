@@ -40,7 +40,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testFetchDirectoryProfileItemsForUserWithOneDisplayedOnDirectoryProfile() {
         // Make an item displayable for the purposes of this test -- only for current session's connection.
-        executeUpdateSQL "update GOBDIRO set GOBDIRO_DISP_PROFILE_IND = 'Y' where GOBDIRO_SURROGATE_ID =?", 1
+        executeUpdateSQL "update GOBDIRO set GOBDIRO_DISP_PROFILE_IND = 'Y' where GOBDIRO_SEQ_NO =?", 1
 
         def pidm = PersonUtility.getPerson("GDP000005").pidm
 
