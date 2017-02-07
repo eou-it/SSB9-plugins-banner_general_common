@@ -33,8 +33,10 @@ class CommunicationSendMobileNotificationMethod {
 
         serverResponse = null
         CommunicationOrganization rootOrganization = CommunicationOrganization.fetchRoot()
+println "THE ROOT ORG IS "+rootOrganization
 
         if (isEmpty(rootOrganization.mobileEndPointUrl)) {
+            println "THE URL is empty "
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(),
                     "emptyMobileNotificationEndpointUrl",
@@ -43,6 +45,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (!message.externalUser || message.externalUser.trim().length() == 0) {
+            println "THE USER IS EMPTY"
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationService.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.toString(),
                     "noExternalUser"
@@ -59,8 +62,11 @@ class CommunicationSendMobileNotificationMethod {
             mobileApplicationName = rootOrganization?.mobileApplicationName
             mobileApplicationKey = communicationOrganizationService.decryptPassword( rootOrganization.encryptedMobileApplicationKey )
         }
+println "THE MOBILE APPLICATION NAME IS "+mobileApplicationName
+        println "THE MOBILE KEY IS "+mobileApplicationKey
 
         if (isEmpty(mobileApplicationName)) {
+            println "THE NAME IS EMPTY"
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
                     "emptyMobileNotificationApplicationName",
@@ -69,6 +75,7 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         if (isEmpty(mobileApplicationKey)) {
+            println "THE KEY IS EMPTY"
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(),
                     "emptyMobileNotificationApplicationKey",
@@ -77,9 +84,11 @@ class CommunicationSendMobileNotificationMethod {
         }
 
         try {
+            println "I AM NOW IN THE TRY"
             // Ex: 'https://mobiledev1.ellucian.com/'
             HTTPBuilder httpBuilder = new HTTPBuilder(rootOrganization.mobileEndPointUrl)
             httpBuilder.auth.basic mobileApplicationName, mobileApplicationKey
+            println "I HAVE NOW GOTTEN PAST AUTHENTICATION"
             httpBuilder.request(POST, JSON) { request ->
                 headers.Accept = 'application/json'
 
@@ -150,26 +159,32 @@ class CommunicationSendMobileNotificationMethod {
                 }
             }
         } catch (Throwable t) {
+            println "CAME TO THROWABLE CATCH "+t.getMessage()
             log.error( 'Error trying to send mobile notification.', t );
 
             if (t instanceof java.lang.IllegalStateException) {
+                println "I AM AN ILLEGAL STATE"
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
             }
 
             if ((t instanceof java.net.UnknownHostException) || (t instanceof org.apache.http.conn.HttpHostConnectException) || (t instanceof javax.net.ssl.SSLPeerUnverifiedException)) {
+                println "I AM IN THE SECOND"
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
             }
 
             if (t instanceof groovyx.net.http.HttpResponseException) {
+                println "I AM IN THE THIRD"
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.name())
             }
-
+println ( " I AM UNKNOWN")
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }
 
 
     private boolean isEmpty(String s) {
-        return !s || s.length() == 0
+        println "IN THE IS EMPTY "+ s
+        println "THE LENGTH OF S IS "+ s?.length()
+        return !s || (s.length() == 0)
     }
 }
