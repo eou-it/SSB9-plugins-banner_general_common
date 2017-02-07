@@ -1754,6 +1754,139 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-instructor-categories" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructor-categories/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.InstructorCategory.STVFCTG</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVFCTG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-instructor-staff-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructor-categories/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.InstructorStaffType.STVFSTP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVFSTP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-instructor-tenure-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructor-categories/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.InstructorTenureTypes.PTRTENR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRTENR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-sources" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructor-categories/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Sources.STVORIG</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVORIG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-financial-aid-fund-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructor-categories/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FundClassifications.RTVFCAT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RTVFCAT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-financial-aid-fund-categories" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>room-characteristics</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructor-categories/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FundCategories.RFRBASE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RFRBASE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -1831,6 +1964,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-accounting-string-component-values"/>
                 <ref bean="ar-student-academic-standings"/>
                 <ref bean="ar-room-characteristics"/>
+                <ref bean="ar-instructor-categories"/>
+                <ref bean="ar-instructor-staff-types"/>
+                <ref bean="ar-instructor-tenure-types"/>
+                <ref bean="ar-sources"/>
+                <ref bean="ar-financial-aid-fund-classifications"/>
+                <ref bean="ar-financial-aid-fund-categories"/>
             </list>
         </property>
     </bean>
@@ -1912,6 +2051,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-accounting-string-component-values"/>
                 <ref bean="ar-student-academic-standings"/>
                 <ref bean="ar-room-characteristics"/>
+                <ref bean="ar-instructor-categories"/>
+                <ref bean="ar-instructor-staff-types"/>
+                <ref bean="ar-instructor-tenure-types"/>
+                <ref bean="ar-sources"/>
+                <ref bean="ar-financial-aid-fund-classifications"/>
+                <ref bean="ar-financial-aid-fund-categories"/>
             </list>
         </property>
     </bean>
