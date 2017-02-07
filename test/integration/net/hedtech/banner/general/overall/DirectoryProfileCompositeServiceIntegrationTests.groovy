@@ -276,7 +276,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetCurrentListingForDirectoryItemforDept() {
-        def pidm = PersonUtility.getPerson("710000020").pidm
+        def pidm = PersonUtility.getPerson("710000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'DEPT'
 
@@ -286,12 +286,12 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         assertEquals 1, result.size()
         assertNotNull result[0]
         assertEquals 1, result[0].size()
-        assertEquals 'Dept of Aerospace Studies', result[0][0]
+        assertEquals 'Div of Home Economics', result[0][0]
     }
 
     @Test
     void testGetCurrentListingForDirectoryItemforTitle() {
-        def pidm = PersonUtility.getPerson("710000020").pidm
+        def pidm = PersonUtility.getPerson("710000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'TITLE'
 
@@ -302,7 +302,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         assertNotNull result[0]
         assertEquals 1, result[0].size()
         assertNotNull result[0][0]
-        assertEquals 'Dean Engineering (Dept of Aerospace Studies)', result[0][0].toString()
+        assertEquals 'Assistant Professor (Div of Home Economics)', result[0][0].toString()
     }
 
     @Test
