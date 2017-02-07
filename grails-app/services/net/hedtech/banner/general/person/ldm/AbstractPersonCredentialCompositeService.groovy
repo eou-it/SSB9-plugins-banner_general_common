@@ -7,23 +7,29 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
+import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.person.AdditionalID
+import net.hedtech.banner.general.person.PersonAdvancedSearchViewService
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
+import net.hedtech.banner.general.person.view.PersonAdvancedSearchView
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
 abstract class AbstractPersonCredentialCompositeService extends LdmService {
 
-    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
+    PersonAdvancedSearchViewService personAdvancedSearchViewService
+
+    PersonIdentificationNameCurrentService personIdentificationNameCurrentService
 
     PersonCredentialService personCredentialService
 
-    abstract protected void prepareDataMapForAll_ListExtension(Collection<Object[]> entities, Map dataMapForAll)
+    abstract protected void prepareDataMapForAll_ListExtension(Collection<Map> entities, Map dataMapForAll)
 
-    abstract protected void prepareDataMapForSingle_ListExtension(Object[] entity,
+    abstract protected void prepareDataMapForSingle_ListExtension(Map entity,
                                                                   final Map dataMapForAll, Map dataMapForSingle)
 
     abstract protected def createPersonCredentialDataModel(final Map dataMapForSingle)
@@ -45,13 +51,13 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
         return decorators
     }
 
-    private def prepareDataMapForAll_List(Collection<Object[]> entities) {
+    private def prepareDataMapForAll_List(Collection<Map> entities) {
         def dataMapForAll = [:]
 
         if (entities) {
             List<Integer> pidms = []
             entities?.each {
-                pidms << it.getAt(0)
+                pidms << it["personIdentificationNameCurrent"].pidm
             }
             def pidmToPersonBaseMap = getPidmToPersonBaseMap(pidms)
             dataMapForAll.put("pidmToPersonBaseMap", pidmToPersonBaseMap)
@@ -92,7 +98,7 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
         dataMapForAll.put("pidmToCredentialsMap", pidmToCredentialsMap)
     }
 
-    private def prepareDataMapForSingle_List(Object[] entity,
+    private def prepareDataMapForSingle_List(Map entity,
                                              final Map dataMapForAll) {
         Map dataMapForSingle = initDataMapForSingle("LIST", entity)
 
@@ -102,24 +108,30 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
 
         dataMapForSingle.credentials << [type: CredentialType.BANNER_ID, value: dataMapForSingle.bannerId]
 
+        PersonBasicPersonBase personBase = dataMapForAll.pidmToPersonBaseMap.get(dataMapForSingle.pidm)
+        def existingSsn = dataMapForSingle.credentials?.find { it.type == CredentialType.SOCIAL_SECURITY_NUMBER }
+        if (!existingSsn && personBase?.ssn) {
+            dataMapForSingle.credentials << [type: CredentialType.SOCIAL_SECURITY_NUMBER, value: personBase.ssn]
+        }
+
         // Call extension
         prepareDataMapForSingle_ListExtension(entity, dataMapForAll, dataMapForSingle)
         return dataMapForSingle
     }
 
-    private def initDataMapForSingle(String sourceForDataMap, Object[] entity) {
+    private def initDataMapForSingle(String sourceForDataMap,Map entity) {
         Map dataMapForSingle = [:]
         dataMapForSingle.put("sourceForDataMap", sourceForDataMap)
         dataMapForSingle.put("personData", entity)
 
-        dataMapForSingle.put("pidm", entity.getAt(0))
-        dataMapForSingle.put("bannerId", entity.getAt(1))
-        dataMapForSingle.put("guid", entity.getAt(2))
+        dataMapForSingle.put("pidm", entity["personIdentificationNameCurrent"].pidm)
+        dataMapForSingle.put("bannerId", entity["personIdentificationNameCurrent"].bannerId)
+        dataMapForSingle.put("guid", entity["globalUniqueIdentifier"].guid)
 
         return dataMapForSingle
     }
 
-    private def prepareDataMapForSingle_Create(Object[] entity) {
+    private def prepareDataMapForSingle_Create(Map entity) {
         Map dataMapForSingle = initDataMapForSingle("CREATE", entity)
         return dataMapForSingle
     }
@@ -133,10 +145,9 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def get(id) {
         log.trace "getById:Begin:$id"
-        String acceptVersion = getAcceptVersion(VERSIONS)
 
-        def persons = [:]
-        Object[] personDetail = fetchPersons(["guid": id])
+        Map personDetail =personIdentificationNameCurrentService.fetchByGuid(id)
+
         if (!personDetail) {
             throw new ApplicationException("Person", new NotFoundException())
         }
@@ -153,54 +164,20 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
     @Transactional(readOnly = true)
     def list(Map params) {
         log.trace "list:Begin:$params"
-        String acceptVersion = getAcceptVersion(VERSIONS)
 
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List<Object[]> personDetailsList = fetchPersons(params)
+        int max= new Integer(params?.max?:0)
+        int offset = new Integer(params?.offset?: 0)
+        def personsList = personAdvancedSearchViewService.fetchAllByCriteria([:], null, null, max, offset)
+        def pidms =personsList*.pidm
+        def personDetailsList= personIdentificationNameCurrentService.fetchAllWithGuidByPidmInList(pidms)
+
         return createPersonCredentialDataModels(personDetailsList)
     }
 
 
     def count(Map params) {
-        return fetchPersons(params, true)
-    }
-
-    /**
-     * fetch person details
-     * @param params
-     */
-    private def fetchPersons(Map params, boolean count = false) {
-        log.trace "fetchPersons: Begin: $params"
-        def result
-        String hql
-        if (count) {
-            hql = ''' select count(*) '''
-        } else {
-            hql = ''' select a.pidm, a.bannerId, b.guid '''
-        }
-        hql += ''' from PersonIdentificationNameCurrent a, GlobalUniqueIdentifier b WHERE b.ldmName = :ldmName and a.pidm = b.domainKey and a.entityIndicator = 'P' '''
-        if (params?.containsKey("guid")) {
-            hql += ''' and b.guid = :guid '''
-        }
-        log.debug "$hql"
-        PersonIdentificationNameCurrent.withSession { session ->
-            def query = session.createQuery(hql).
-                    setString(GeneralCommonConstants.QUERY_PARAM_LDM_NAME, GeneralCommonConstants.PERSONS_LDM_NAME)
-            if (params?.containsKey("guid")) {
-                result = query.setString(GeneralCommonConstants.PERSONS_GUID_NAME, params.guid).uniqueResult()
-                log.debug "query returned $result"
-            } else {
-                if (count) {
-                    result = query.uniqueResult()
-                    log.debug "query returned $result"
-                } else {
-                    result = query.setMaxResults(params?.max as Integer).setFirstResult((params?.offset ?: '0') as Integer).list()
-                    log.debug "query returned ${result.size()} rows"
-                }
-            }
-        }
-        log.trace "fetchPersons: End"
-        return result
+        return personAdvancedSearchViewService.countByCriteria([:])
     }
 
      def getPidmToPersonBaseMap(List<Integer> pidms) {

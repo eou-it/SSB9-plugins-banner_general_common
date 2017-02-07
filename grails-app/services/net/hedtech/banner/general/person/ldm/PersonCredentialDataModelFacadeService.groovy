@@ -8,7 +8,7 @@ import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.LdmService
 
 @Transactional
-class PersonCredentialFacadeService  {
+class PersonCredentialDataModelFacadeService {
     private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6, GeneralValidationCommonConstants.VERSION_V8]
 
 

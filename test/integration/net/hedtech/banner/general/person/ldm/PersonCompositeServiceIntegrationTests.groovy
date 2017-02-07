@@ -2304,7 +2304,7 @@ class PersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertEquals content1.ethnicityDetail.guid, o_success_person_update.ethnicityDetail.guid
     }
 
-    //Filter on CredentialId and Credential Type
+    //Filter on CredentialId and CredentialV6 Type
     @Test
     public void testCredentialsFilterOnPersonV3() {
         setAcceptHeader("application/vnd.hedtech.integration.v3+json")

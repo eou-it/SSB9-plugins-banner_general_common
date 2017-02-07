@@ -6,9 +6,10 @@ package net.hedtech.banner.general.person.ldm
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
-import net.hedtech.banner.general.overall.ldm.v8.PersonCredential
-import net.hedtech.banner.general.overall.ldm.v8.PersonCredentialsDecorator
+import net.hedtech.banner.general.overall.ldm.v8.CredentialV8
+import net.hedtech.banner.general.overall.ldm.v8.PersonCredentialsV8
 import net.hedtech.banner.general.person.PersonBasicPersonBase
+import net.hedtech.banner.general.person.view.PersonAdvancedSearchView
 import org.springframework.transaction.annotation.Transactional
 
 @Transactional
@@ -18,7 +19,7 @@ class PersonCredentialV8CompositeService extends AbstractPersonCredentialComposi
 
     protected def createPersonCredentialDataModel(final Map dataMapForSingle) {
 
-        PersonCredentialsDecorator persCredentialsDecorator = new PersonCredentialsDecorator(dataMapForSingle.guid)
+        PersonCredentialsV8 persCredentialsDecorator = new PersonCredentialsV8(dataMapForSingle.guid)
 
         persCredentialsDecorator.credentials = createCredentialObjects(dataMapForSingle.credentials)
 
@@ -31,9 +32,9 @@ class PersonCredentialV8CompositeService extends AbstractPersonCredentialComposi
         if (credentials) {
             credentials.each {
 
-                PersonCredential personCredential
+                CredentialV8 personCredential
                 if (it.type && it.value) {
-                    personCredential = new PersonCredential(it.type.versionToEnumMap["v8"], it.value)
+                    personCredential = new CredentialV8(it.type.versionToEnumMap["v8"], it.value)
                 }
 
                 decorators << personCredential
@@ -68,17 +69,14 @@ class PersonCredentialV8CompositeService extends AbstractPersonCredentialComposi
     }
 
     @Override
-    protected void prepareDataMapForAll_ListExtension(Collection<Object[]> entities, Map dataMapForAll) {
+    protected void prepareDataMapForAll_ListExtension(Collection<Map> entities, Map dataMapForAll) {
 
     }
 
     @Override
-    protected void prepareDataMapForSingle_ListExtension(Object[] entity, Map dataMapForAll, Map dataMapForSingle) {
-        PersonBasicPersonBase personBase = dataMapForAll.pidmToPersonBaseMap.get(dataMapForSingle.pidm)
-        def existingSsn = dataMapForSingle.credentials?.find { it.type == CredentialType.SOCIAL_SECURITY_NUMBER }
-        if (!existingSsn && personBase?.ssn) {
-            dataMapForSingle.credentials << [type: CredentialType.SOCIAL_SECURITY_NUMBER, value: personBase.ssn]
-        }
+    protected void prepareDataMapForSingle_ListExtension(Map entity, Map dataMapForAll, Map dataMapForSingle) {
+
     }
+
 
 }
