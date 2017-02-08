@@ -3,10 +3,13 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.converters.JSON
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
@@ -149,6 +152,16 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_GROUP_ID")
     String groupId
 
+    /**
+     * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
+     */
+    @Lob
+    @Column(name = "GCBGSND_PARAMETER_VALUES")
+    String parameterValues
+
+    @Transient
+    Map parameterValueMap
+
     static constraints = {
         mepCode(nullable: true)
         name(nullable: false)
@@ -171,6 +184,25 @@ class CommunicationGroupSend implements Serializable {
         errorCode(nullable:true)
         jobId(nullable:true)
         groupId(nullable:true)
+        parameterValues(nullable:true)
+    }
+
+    public Map getParameterValueMap()
+    {
+        if(parameterValueMap == null && (parameterValues!=null && !parameterValues.isEmpty()))
+        {
+            parameterValueMap = new HashMap<String,Object>()
+            List parameterValuesList = JSON.parse(parameterValues)
+            for(Object parameterValue : parameterValuesList)
+            {
+                if(parameterValue.type == CommunicationParameterType.DATE.name()) {
+                    Date temp = DateUtility.parseDateString(parameterValue.answer);
+                    parameterValue.answer = temp;
+                }
+                parameterValueMap.put(parameterValue.name, parameterValue)
+            }
+        }
+        return parameterValueMap
     }
 
     public void markScheduled( String jobId, String groupId ) {

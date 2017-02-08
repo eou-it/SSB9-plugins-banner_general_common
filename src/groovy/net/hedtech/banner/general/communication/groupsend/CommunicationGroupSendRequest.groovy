@@ -15,4 +15,5 @@ class CommunicationGroupSendRequest implements Serializable {
     String referenceId
     Date scheduledStartDate
     Boolean recalculateOnSend
+    List parameterValues
 }
