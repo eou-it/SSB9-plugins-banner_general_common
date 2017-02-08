@@ -82,11 +82,47 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
     }
 
     @Test
-    void testGetItemProperties() {
+    void testGetItemPropertiesWithNoUserPrefs() {
         def pidm = PersonUtility.getPerson("GDP000004").pidm
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
 
         def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem)
+
+        assertNotNull result
+        assertEquals 1, result.size()
+        assertEquals "Name", result[0].description
+        assertFalse result[0].checked
+        assertFalse result[0].changeable
+        assertNotNull result[0].currentListing
+        assertEquals 1, result[0].currentListing.size()
+        assertEquals "Delihia Margot", result[0].currentListing[0]
+    }
+
+    @Test
+    void testGetItemPropertiesWithUserPrefOfDisplayTrue() {
+        def pidm = PersonUtility.getPerson("GDP000004").pidm
+        def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
+        def userPref = [displayInDirectoryIndicator: true]
+
+        def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem, userPref)
+
+        assertNotNull result
+        assertEquals 1, result.size()
+        assertEquals "Name", result[0].description
+        assertTrue result[0].checked
+        assertFalse result[0].changeable
+        assertNotNull result[0].currentListing
+        assertEquals 1, result[0].currentListing.size()
+        assertEquals "Delihia Margot", result[0].currentListing[0]
+    }
+
+    @Test
+    void testGetItemPropertiesWithUserPrefOfDisplayFalse() {
+        def pidm = PersonUtility.getPerson("GDP000004").pidm
+        def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
+        def userPref = [displayInDirectoryIndicator: false]
+
+        def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem, userPref)
 
         assertNotNull result
         assertEquals 1, result.size()
@@ -107,7 +143,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         def addrMaskingRule = getMaskingRuleForTest()
 
 
-        def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem, addrMaskingRule)
+        def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem, null, addrMaskingRule)
 
         assertNotNull result
         assertEquals 1, result.size()
@@ -163,10 +199,10 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
     }
 
     @Test
-    void testFetchDirectoryProfilePreference() {
+    void testFetchAllDirectoryProfilePreferencesForUser() {
         def pidm = PersonUtility.getPerson("GDP000005").pidm
 
-        def result = directoryProfileCompositeService.fetchDirectoryProfilePreference(pidm, 'NAME')
+        def result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
 
         assertNotNull result
         assertEquals 1, result.size()
@@ -353,7 +389,115 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         assertEquals 'Unlisted', result[0][2]
     }
 
+    @Test
+    void testCreateDirectoryProfilePreferences() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("GDP000004").pidm
+        executeUpdateSQL "update GOBDIRO set GOBDIRO_UPD_PROFILE_IND = 'Y' where GOBDIRO_SEQ_NO =?", 2
+        executeUpdateSQL "update GOBDIRO set GOBDIRO_UPD_PROFILE_IND = 'Y' where GOBDIRO_SEQ_NO =?", 13
 
+        def result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
+        assertNotNull "DirectoryProfilePreference list is NULL", result
+        assertEquals 0, result.size()
+
+        def directoryProfilePreferences = newDirectoryProfilePreferences()
+
+        // Flip second item to FALSE to prove out that it does not update.  (If FALSE, it won't update because
+        // existing GOBDIRO record is already FALSE.)
+        directoryProfilePreferences[1].checked = false
+
+        directoryProfileCompositeService.createOrUpdate(pidm, directoryProfilePreferences)
+
+        result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
+        assertNotNull "DirectoryProfilePreference list is NULL", result
+
+        // Only one is found, because the second preference in directoryProfilePreferences did not make
+        // a change to the current value of the default GOBDIRO item.
+        assertEquals 1, result.size()
+        assertEquals 'ADDR_PR', result[0].code
+    }
+
+    @Test
+    void testUpdateDirectoryProfilePreferences() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("GDP000004").pidm
+        executeUpdateSQL "update GOBDIRO set GOBDIRO_UPD_PROFILE_IND = 'Y' where GOBDIRO_SEQ_NO =?", 2
+        executeUpdateSQL "update GOBDIRO set GOBDIRO_UPD_PROFILE_IND = 'Y' where GOBDIRO_SEQ_NO =?", 13
+
+        def directoryProfilePreferences = newDirectoryProfilePreferences()
+
+        directoryProfileCompositeService.createOrUpdate(pidm, directoryProfilePreferences)
+
+        def result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
+        assertNotNull "DirectoryProfilePreference list is NULL", result
+        assertEquals 2, result.size()
+        assertTrue "DirectoryProfilePreference item displayInDirectoryIndicator attribute is FALSE but should be TRUE", result[0].displayInDirectoryIndicator
+        assertTrue "DirectoryProfilePreference item displayInDirectoryIndicator attribute is FALSE but should be TRUE", result[1].displayInDirectoryIndicator
+
+        // Toggle their values
+        directoryProfilePreferences = [
+                [
+                        code: result[0].code,
+                        checked: false
+                ],
+                [
+                        code: result[1].code,
+                        checked: true
+                ],
+        ]
+
+        directoryProfileCompositeService.createOrUpdate(pidm, directoryProfilePreferences)
+
+        result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
+        assertNotNull "DirectoryProfilePreference list is NULL", result
+        assertEquals 2, result.size()
+        assertFalse "DirectoryProfilePreference item displayInDirectoryIndicator attribute is TRUE but should be FALSE", result[0].displayInDirectoryIndicator
+        assertTrue "DirectoryProfilePreference item displayInDirectoryIndicator attribute is FALSE but should be TRUE", result[1].displayInDirectoryIndicator
+    }
+
+    @Test
+    void testUpdateDirectoryProfilePreferencesWithNoneUpdatable() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("GDP000004").pidm
+        def directoryProfilePreferences = newDirectoryProfilePreferences()
+
+        directoryProfileCompositeService.createOrUpdate(pidm, directoryProfilePreferences)
+
+        def result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
+        assertNotNull "DirectoryProfilePreference list is NULL", result
+        assertEquals 0, result.size()
+    }
+
+    @Test
+    void testCreateOrUpdateDirectoryProfilePreferencesWithNullPreferences() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("GDP000004").pidm
+
+        directoryProfileCompositeService.createOrUpdate(pidm, null)
+
+        def result = directoryProfileCompositeService.fetchAllDirectoryProfilePreferencesForUser(pidm)
+        assertNotNull "DirectoryProfilePreference list is NULL", result
+        assertEquals 0, result.size()
+    }
+
+
+    private List newDirectoryProfilePreferences() {
+        def pidm = net.hedtech.banner.general.person.PersonUtility.getPerson("GDP000004").pidm
+        def directoryProfilePreferences = []
+        def directoryProfilePreference1 = [
+                pidm: pidm,
+                code: 'ADDR_PR',
+                checked: true
+        ]
+
+        directoryProfilePreferences << directoryProfilePreference1
+
+        def directoryProfilePreference2 = [
+                pidm: pidm,
+                code: 'EMAIL',
+                checked: true
+        ]
+
+        directoryProfilePreferences << directoryProfilePreference2
+
+        return directoryProfilePreferences
+    }
 
     private getMaskingRuleForTest() {
         def maskingRule = [
