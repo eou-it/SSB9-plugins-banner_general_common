@@ -10,12 +10,12 @@ import groovy.transform.ToString
 @ToString(includeNames = true, includeFields = true)
 class PersonCredentialsV6 {
 
-    String guid
+    String id
     List<CredentialV6> credentials = []
 
 
     def PersonCredentialsV6(String guid) {
-        this.guid = guid
+        this.id = guid
     }
 
 }
