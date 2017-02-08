@@ -27,15 +27,19 @@ class DirectoryProfileCompositeService {
     def sessionFactory
     def preferredNameService
     def personEmailService
+    def directoryProfilePreferenceService
 
 
     def fetchDirectoryProfileItemsForUser(pidm, addrMaskingRule = null) {
         def userDirProfileList = []
         def fullDirProfileList = fetchAllDirectoryProfileItems()
+        def userPreferences = fetchAllDirectoryProfilePreferencesForUser(pidm)
 
         fullDirProfileList.each { item ->
             if (item.displayProfileIndicator && isMatchingRoleForDirectoryType(pidm, item.directoryType)) {
-                userDirProfileList.addAll(getItemProperties(pidm, item, addrMaskingRule))
+                def userSelection = userPreferences.find {it.code == item.code}
+
+                userDirProfileList.addAll(getItemProperties(pidm, item, userSelection, addrMaskingRule))
             }
         }
 
@@ -50,6 +54,16 @@ class DirectoryProfileCompositeService {
         }
 
         return directoryProfileItems
+    }
+
+    def static List fetchAllDirectoryProfilePreferencesForUser(Integer pidm) {
+        def directoryProfilePrefs
+
+        DirectoryProfilePreference.withSession { session ->
+            directoryProfilePrefs = session.getNamedQuery('DirectoryProfilePreference.fetchByPidm').setInteger('pidm', pidm).list()
+        }
+
+        return directoryProfilePrefs
     }
 
     def isMatchingRoleForDirectoryType(pidm, directoryType) {
@@ -76,11 +90,10 @@ class DirectoryProfileCompositeService {
         return isMatchingRole
     }
 
-    def getItemProperties(pidm, DirectoryProfileItem profileItem, addrMaskingRule = null) {
+    def getItemProperties(pidm, DirectoryProfileItem profileItem, userSelection = null, addrMaskingRule = null) {
         def allItemProperties = []
         def description = fetchDirectoryOptionItem(profileItem.code)?.description?.find{true}
-        def userItem = fetchDirectoryProfilePreference(pidm, profileItem.code)
-        def checked = userItem ? userItem.displayInDirectoryIndicator : profileItem.nonProfileDefaultIndicator
+        def checked = userSelection ? userSelection.displayInDirectoryIndicator : profileItem.nonProfileDefaultIndicator
         def changeable = profileItem.updateProfileIndicator
 
         if (profileItem) {
@@ -88,13 +101,14 @@ class DirectoryProfileCompositeService {
 
             currentListings.each {
                 def itemProperties = [
+                        code: profileItem.code,
                         description: description,
                         checked: checked,
                         changeable: changeable,
                         currentListing: it
                 ]
 
-                allItemProperties.push(itemProperties)
+                allItemProperties << itemProperties
             }
         }
 
@@ -108,15 +122,6 @@ class DirectoryProfileCompositeService {
         }
 
         return directoryOptionsValidationItem
-    }
-
-    def static List fetchDirectoryProfilePreference(Integer pidm, String code) {
-
-        def directoryProfilePref = DirectoryProfilePreference.withSession { session ->
-            session.getNamedQuery('DirectoryProfilePreference.fetchByPidmAndCode').setInteger('pidm', pidm).setString('code', code).list()
-        }
-
-        return directoryProfilePref
     }
 
     def getCurrentListingForDirectoryItem(pidm, item, addrMaskingRule = null) {
@@ -136,44 +141,44 @@ class DirectoryProfileCompositeService {
                 def result = fetchClassYear(pidm)
 
                 if (result) {
-                    resultStringList.push(result)
+                    resultStringList << result
                 }
             }
         } else if (item.code == 'COLLEGE') {
             def result = fetchCollege(pidm)
 
             if (result) {
-                resultStringList.push(result)
+                resultStringList << result
             }
         } else if (item.code == 'GRD_YEAR') {
             def result = fetchGraduationYear(pidm)
 
             if (result) {
-                resultStringList.push(result)
+                resultStringList << result
             }
         } else if (item.code == 'DEPT') {
             def result = fetchJobDepartment(pidm)
 
             if (result) {
-                resultStringList.push(result)
+                resultStringList << result
             }
         } else if (item.code == 'TITLE') {
             def result = fetchJobTitle(pidm)
 
             if (result) {
-                resultStringList.push(result)
+                resultStringList << result
             }
         } else if (item.code == 'MAIDEN') {
             def result = fetchMaidenName(pidm)
 
             if (result) {
-                resultStringList.push(result)
+                resultStringList << result
             }
         } else if (item.code == 'PR_COLL') {
             def result = fetchPreferredCollege(pidm)
 
             if (result) {
-                resultStringList.push(result)
+                resultStringList << result
             }
         } else if (item.itemType == 'A') { // It's an address
             def directoryAddresses = DirectoryAddress.fetchByDirectoryOptionOrderByPriority(item.code)
@@ -182,7 +187,7 @@ class DirectoryProfileCompositeService {
                 def addr = PersonAddress.fetchActiveAddressByPidmAndAddressType(pidm, dirAddr.addressType)
 
                 if (addr) {
-                    resultStringList.push(formatAddress(addr, addrMaskingRule))
+                    resultStringList << formatAddress(addr, addrMaskingRule)
                 }
             }
         } else if (item.itemType == 'T') { // It's a phone
@@ -201,7 +206,7 @@ class DirectoryProfileCompositeService {
             def notReportedStr = new ValidationTagLib().message(
                     [code: 'net.hedtech.banner.general.overall.DirectoryProfileCompositeService.notReported', default: 'Not Reported']
             )
-            resultStringList.push([notReportedStr])
+            resultStringList << [notReportedStr]
         }
 
         resultStringList
@@ -235,7 +240,7 @@ class DirectoryProfileCompositeService {
                 result = sql.firstRow(sqlStatement, [pidm])
 
                 if (result?.APBCONS_PREF_CLAS) {
-                    classYearList.push(result.APBCONS_PREF_CLAS)
+                    classYearList << result.APBCONS_PREF_CLAS
                 }
             } catch (e) {
                 throw e
@@ -252,7 +257,7 @@ class DirectoryProfileCompositeService {
         def fullDescription = fetchCollegeDescription(pidm)
 
         if (fullDescription?.college) {
-            result.push(fullDescription.college)
+            result << fullDescription.college
         }
 
         result
@@ -263,7 +268,7 @@ class DirectoryProfileCompositeService {
         def fullDescription = fetchCollegeDescription(pidm)
 
         if (fullDescription?.gradYear) {
-            result.push(fullDescription.gradYear)
+            result << fullDescription.gradYear
         }
 
         result
@@ -394,7 +399,7 @@ class DirectoryProfileCompositeService {
                             def jobTitleDept = "${it.NBRJOBS_DESC}${jobDept}"
 
                             if (jobTitleDept != prevJobTitleDept) {
-                                printJobsDesc.push("${it.NBRJOBS_DESC} (${jobDept})")
+                                printJobsDesc << "${it.NBRJOBS_DESC} (${jobDept})"
                             }
 
                             prevJobTitleDept = jobTitleDept
@@ -402,7 +407,7 @@ class DirectoryProfileCompositeService {
 
                             // Get DEPT
                             if (jobDept != prevJobDept) {
-                                printJobsDept.push(jobDept)
+                                printJobsDept << jobDept
                             }
 
                             prevJobDept = jobDept
@@ -491,7 +496,7 @@ class DirectoryProfileCompositeService {
                 if (result) {
                     result.each {
                         if (it.APBCONS_MAIDEN_LAST_NAME) {
-                            maidenName.push(it.APBCONS_MAIDEN_LAST_NAME)
+                            maidenName << it.APBCONS_MAIDEN_LAST_NAME
                         }
                     }
                 }
@@ -520,7 +525,7 @@ class DirectoryProfileCompositeService {
                 if (result) {
                     result.each {
                         if (it.STVCOLL_DESC) {
-                            preferredCollege.push(it.STVCOLL_DESC)
+                            preferredCollege << it.STVCOLL_DESC
                         }
                     }
                 }
@@ -556,7 +561,7 @@ class DirectoryProfileCompositeService {
             // Parse map values into array
             formattedAddr.each { k, v ->
                 if (v) {
-                    addrLines.push(v)
+                    addrLines << v
                 }
             }
         }
@@ -575,16 +580,16 @@ class DirectoryProfileCompositeService {
 
         phones.each { phone ->
             if (phone.primaryIndicator == 'Y') {
-                formattedPhones.push(formatPhone(phone))
+                formattedPhones << formatPhone(phone)
             } else {
-                nonPrimary.push(phone)
+                nonPrimary << phone
             }
         }
 
         nonPrimary = nonPrimary.sort {it.sequenceNumber}
 
         nonPrimary.each {
-            formattedPhones.push(formatPhone(it))
+            formattedPhones << formatPhone(it)
         }
 
         [formattedPhones]
@@ -641,47 +646,50 @@ class DirectoryProfileCompositeService {
         dirProfileSessionCache
     }
 
-    /**
-     * Composite service is required to handle when the e-mail type or e-mail address is changed.  The primary key for the e-mail information
-     * includes the e-mail code, e-mail address and pidm.  The form allows that to be changed but the API does not.  Because we never want to override the update
-     * from the serviceBase class this service will examine the e-mail update and do the delete and create if the e-mail type or e-mail address
-     * has been changed.
-     */
+    def createOrUpdate(pidm, items) {
+        def allDirProfileItems = fetchAllDirectoryProfileItems()
+        def userPreferences = fetchAllDirectoryProfilePreferencesForUser(pidm)
+        def prefsForSave = []
 
-//    def createOrUpdate(map) {
-//
-//        if (map?.deletePersonEmails) {
-//            deleteDomain(map?.deletePersonEmails, personEmailService)
-//        }
-//
-//        if (map?.personEmails) {
-//            processInsertUpdates(map?.personEmails, personEmailService)
-//        }
-//    }
+        items.each { item ->
+            def model
+            def matchingPref = userPreferences.find {it.code == item.code}
 
+            if (matchingPref) {
+                // Matches an existing user preference
 
-    /**
-     *    Insert all new records
-     *    If the existing record's e-mail code or e-mail address was changed delete it and reinsert
-     */
-//    private void processInsertUpdates(domains, service) {
-//
-//        domains.each { domain ->
-//            if (domain.id == null)
-//                service.create(domain)
-//            else if (domain.id) {
-//                if (findIfPrimaryKeyChanged(domain)) {
-//                    PersonEmail newEmail = new PersonEmail(domain.properties)
-//                    def delMap = [domainModel: domain]
-//
-//                    service.delete(delMap)
-//                    def newMap = [domainModel: newEmail]
-//                    service.create(newMap)
-//                } else {
-//                    service.update([domainModel:domain])
-//                }
-//            }
-//        }
-//    }
+                if (matchingPref.displayInDirectoryIndicator != item.checked) {
+                    // Update the existing preference with the new one
+                    model = [
+                            pidm: pidm,
+                            id: matchingPref.id,
+                            version: matchingPref.version,
+                            displayInDirectoryIndicator: item.checked
+                    ]
+                }
+            } else {
+                // Find the matching system (non user modified) Directory Profile item.
+                // ASSERT: there must be a match.
+                matchingPref = allDirProfileItems.find {it.code == item.code}
+
+                if (matchingPref.updateProfileIndicator && (matchingPref.nonProfileDefaultIndicator != item.checked)) {
+                    // Create a new user preference
+                    model = [
+                            pidm: pidm,
+                            code: item.code,
+                            displayInDirectoryIndicator: item.checked
+                    ]
+                }
+            }
+
+            if (model) {
+                prefsForSave << model
+            }
+        }
+
+        if (prefsForSave) {
+            directoryProfilePreferenceService.createOrUpdate(prefsForSave)
+        }
+    }
 
 }

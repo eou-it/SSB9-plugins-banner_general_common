@@ -18,11 +18,9 @@ import javax.persistence.*
 @Entity
 @Table(name = "GV_GORDPRF")
 @NamedQueries(value = [
-        @NamedQuery(name = "DirectoryProfilePreference.fetchByPidmAndCode",
+        @NamedQuery(name = "DirectoryProfilePreference.fetchByPidm",
                 query = """FROM DirectoryProfilePreference a
-    WHERE a.pidm = :pidm
-    AND a.code = :code
-""")
+                            WHERE a.pidm = :pidm""")
 ])
 class DirectoryProfilePreference implements Serializable {
     static def log = Logger.getLogger('net.hedtech.banner.general.person.DirectoryProfilePreference')
