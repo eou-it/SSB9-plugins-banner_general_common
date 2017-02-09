@@ -8,6 +8,7 @@ import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.hibernate.FlushMode
+import org.hibernate.annotations.Type
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -126,6 +127,10 @@ class CommunicationPopulation implements Serializable {
     @JoinColumn(name = "GCBPOPL_INCLUDE_LIST_ID", referencedColumnName = "GCRSLIS_SURROGATE_ID")
     CommunicationPopulationSelectionList includeList
 
+    @Type(type = "yes_no")
+    @Column(name = "GCBPOPL_CHANGED_IND")
+    Boolean changesPending = false
+
     public CommunicationPopulationVersion createVersion() {
         CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
         populationVersion.population = this
@@ -141,6 +146,7 @@ class CommunicationPopulation implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         includeList(nullable: true)
+        changesPending(nullable: false)
     }
 
     public static CommunicationPopulation fetchById(Long id) {

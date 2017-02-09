@@ -153,7 +153,7 @@ class CommunicationGroupSend implements Serializable {
         mepCode(nullable: true)
         name(nullable: false)
         populationId(nullable: false)
-        populationVersionId(nullable: false)
+        populationVersionId(nullable: true)
         populationCalculationId(nullable: true)
         organizationId(nullable: false)
         templateId(nullable: false)
