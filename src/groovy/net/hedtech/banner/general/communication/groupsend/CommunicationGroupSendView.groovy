@@ -3,10 +3,13 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.converters.JSON
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.item.CommunicationChannel
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -138,6 +141,34 @@ class CommunicationGroupSendView implements Serializable {
     @Type(type="yes_no")
     @Column(name = "recalc_on_send")
     boolean recalculateOnSend
+
+    /**
+     * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
+     */
+    @Lob
+    @Column(name = "parameter_values")
+    String parameterValues
+
+    @Transient
+    Map parameterValueMap
+
+    public Map getParameterValueMap()
+    {
+        if(parameterValueMap == null && (parameterValues!=null && !parameterValues.isEmpty()))
+        {
+            parameterValueMap = new HashMap<String,Object>()
+            List parameterValuesList = JSON.parse(parameterValues)
+            for(Object parameterValue : parameterValuesList)
+            {
+                if(parameterValue.type == CommunicationParameterType.DATE.name()) {
+                    Date temp = DateUtility.parseDateString(parameterValue.answer);
+                    parameterValue.answer = temp;
+                }
+                parameterValueMap.put(parameterValue.name, parameterValue)
+            }
+        }
+        return parameterValueMap
+    }
 
     public static CommunicationGroupSendView fetchById(Long groupSendId) {
 

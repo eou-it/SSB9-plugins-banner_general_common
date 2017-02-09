@@ -36,7 +36,10 @@ import org.hibernate.criterion.Order
         @NamedQuery(name = "CommunicationParameter.existsAnotherName",
                 query = """select a.name  FROM CommunicationParameter a
                     WHERE  lower(a.name) = lower(:name)
-                    AND   a.id <> :id""")
+                    AND   a.id <> :id"""),
+        @NamedQuery(name = "CommunicationParameter.fetchByIds",
+                query = """ FROM CommunicationParameter a
+                    WHERE a.id IN (:parameterIds)""")
 ])
 class CommunicationParameter implements Serializable {
 
@@ -135,6 +138,14 @@ class CommunicationParameter implements Serializable {
             }
         }
         return (parameter != null)
+    }
+
+    public static List<CommunicationParameter> fetchByIds(List<Long> parameterIds) {
+        def parameterList
+        CommunicationParameter.withSession { session ->
+            parameterList = session.getNamedQuery('CommunicationParameter.fetchByIds').setParameter('parameterIds', parameterIds).list()
+        }
+        return parameterList
     }
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {

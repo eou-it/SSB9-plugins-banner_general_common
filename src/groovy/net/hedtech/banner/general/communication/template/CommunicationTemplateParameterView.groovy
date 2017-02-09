@@ -1,3 +1,6 @@
+/*********************************************************************************
+ Copyright 2017 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
 import groovy.transform.EqualsAndHashCode
@@ -57,34 +60,34 @@ class CommunicationTemplateParameterView implements Serializable {
      * Name of the parameter.
      */
     @Column(name = "parameter_name")
-    String name
+    String parameterName
 
     /**
      * Title of the parameter.
      */
     @Column(name = "parameter_title")
-    String title
+    String parameterTitle
 
     /**
      * Type of the parameter.
      */
     @Column(name = "parameter_type")
     @Enumerated(EnumType.STRING)
-    CommunicationParameterType type
+    CommunicationParameterType parameterType
 
     /**
      * Fetch all the communication parameters for a given template
      * @param templateId the Template ID
      * @return List of parameters for the given template
      */
-    public static CommunicationTemplateParameterView fetchByTemplateId(Long templateId) {
+    public static List<CommunicationTemplateParameterView> fetchByTemplateId(Long templateId) {
 
         def params =
                 CommunicationTemplateParameterView.withSession { session ->
                     session.getNamedQuery('CommunicationTemplateParameterView.fetchByTemplateId')
                             .setLong('templateId', templateId)
                             .list()
-                }
+        }
         return params
     }
 }

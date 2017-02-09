@@ -84,6 +84,10 @@ class CommunicationGroupSendCompositeService {
             }
             groupSend.populationCalculationId = calculation.id
         }
+
+        if(request.getParameterValues())
+            groupSend.parameterValues = request.getParameterValues()
+
         groupSend = communicationGroupSendService.create( groupSend )
 
         String mepCode = groupSend.mepCode
