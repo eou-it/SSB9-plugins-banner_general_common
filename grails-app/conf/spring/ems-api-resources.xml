@@ -1756,7 +1756,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-instructor-categories" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>room-characteristics</value>
+            <value>instructor-categories</value>
         </constructor-arg>
         <constructor-arg name="path">
             <value>/instructor-categories/</value>
@@ -1778,10 +1778,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-instructor-staff-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>room-characteristics</value>
+            <value>instructor-staff-types</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/instructor-categories/</value>
+            <value>/instructor-staff-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
@@ -1800,10 +1800,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-instructor-tenure-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>room-characteristics</value>
+            <value>instructor-tenure-types</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/instructor-categories/</value>
+            <value>/instructor-tenure-types/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
@@ -1822,10 +1822,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-sources" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>room-characteristics</value>
+            <value>sources</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/instructor-categories/</value>
+            <value>/sources/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
@@ -1844,10 +1844,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-financial-aid-fund-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>room-characteristics</value>
+            <value>financial-aid-fund-classifications</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/instructor-categories/</value>
+            <value>/financial-aid-fund-classifications/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
@@ -1866,10 +1866,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
 
     <bean id="ar-financial-aid-fund-categories" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>room-characteristics</value>
+            <value>financial-aid-fund-categories</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/instructor-categories/</value>
+            <value>/financial-aid-fund-categories/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
