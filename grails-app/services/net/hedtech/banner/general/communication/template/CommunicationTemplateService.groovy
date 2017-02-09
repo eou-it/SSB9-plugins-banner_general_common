@@ -8,12 +8,16 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
+import net.hedtech.banner.general.communication.parameter.CommunicationTemplateFieldAssociation
 import net.hedtech.banner.service.ServiceBase
 
 class CommunicationTemplateService extends ServiceBase {
 
     def communicationTemplateMergeService
     def communicationFieldService
+    def communicationTemplateFieldAssociationService
 
     def preCreate( domainModelOrMap ) {
         if (!CommunicationCommonUtility.userCanAuthorContent()) {
@@ -42,6 +46,28 @@ class CommunicationTemplateService extends ServiceBase {
         }
 
         stampAndValidate(template)
+
+        //Insert the template field associations if the template is already published and the association does not exist already
+        if(template.published) {
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
+            List<CommunicationTemplateFieldAssociation> templateFieldAssociations
+
+            if (fieldNameList) {
+                templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName( fieldName )
+                    CommunicationTemplateFieldAssociation templateFieldAssociation = CommunicationTemplateFieldAssociation.findByTemplateAndField(template, field)
+                    if(!templateFieldAssociation) {
+                        templateFieldAssociation = new CommunicationTemplateFieldAssociation()
+                        templateFieldAssociation.template = template
+                        templateFieldAssociation.field = field
+                        templateFieldAssociations.add(templateFieldAssociation)
+                    }
+                }
+                if(templateFieldAssociations.size() > 0)
+                    communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+            }
+        }
     }
 
     /**

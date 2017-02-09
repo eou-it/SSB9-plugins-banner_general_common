@@ -283,8 +283,8 @@ class CommunicationTemplateMergeService {
      */
 
     List<String> extractTemplateVariables( Long templateId ) {
-        CommunicationEmailTemplate communicationEmailTemplate = CommunicationEmailTemplate.get( templateId )
-        List<String> extractedTemplateVariables = extractTemplateVariables( communicationEmailTemplate )
+        CommunicationTemplate communicationTemplate = CommunicationTemplate.get( templateId )
+        List<String> extractedTemplateVariables = extractTemplateVariables( communicationTemplate )
         extractedTemplateVariables
     }
 

@@ -213,6 +213,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBRDAT")
                 sql.executeUpdate("Delete from GCRGSIM")
                 sql.executeUpdate("Delete from GCBGSND")
+                sql.executeUpdate("Delete from GCRTPFL")
                 sql.executeUpdate("Delete from GCBEMTL")
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBLTPL")
