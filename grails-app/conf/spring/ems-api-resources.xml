@@ -1873,7 +1873,95 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FundCategories.RFRBASE</value>
+                <value>EEDM.FinancialAidFundCategories.RFRFFID</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RFRFFID</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-financial-aid-award-periods" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>financial-aid-award-periods</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/financial-aid-award-periods/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FinancialAidAwardPeriods.RORTPRD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RORTPRD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-financial-aid-years" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>financial-aid-years</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/financial-aid-years/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FinancialAidYears.ROBINST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>ROBINST</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-financial-aid-offices" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>financial-aid-offices</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/financial-aid-offices/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FinancialAidOffices.RORCAMP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RORCAMP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-financial-aid-funds" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>financial-aid-funds</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/financial-aid-funds/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FinancialAidFunds.RFRBASE</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1885,7 +1973,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
     </bean>
-
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -1970,6 +2057,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-sources"/>
                 <ref bean="ar-financial-aid-fund-classifications"/>
                 <ref bean="ar-financial-aid-fund-categories"/>
+                <ref bean="ar-financial-aid-award-periods"/>
+                <ref bean="ar-financial-aid-years"/>
+                <ref bean="ar-financial-aid-offices"/>
+                <ref bean="ar-financial-aid-funds"/>
             </list>
         </property>
     </bean>
@@ -2057,6 +2148,10 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-sources"/>
                 <ref bean="ar-financial-aid-fund-classifications"/>
                 <ref bean="ar-financial-aid-fund-categories"/>
+                <ref bean="ar-financial-aid-award-periods"/>
+                <ref bean="ar-financial-aid-years"/>
+                <ref bean="ar-financial-aid-offices"/>
+                <ref bean="ar-financial-aid-funds"/>
             </list>
         </property>
     </bean>
