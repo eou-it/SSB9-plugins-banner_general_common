@@ -170,6 +170,6 @@ class CommunicationSendMobileNotificationMethod {
 
 
     private boolean isEmpty(String s) {
-        return !s || (s.length() == 0)
+        return ((!s) || (s == null) || (s.length() == 0) || (s == ""))
     }
 }
