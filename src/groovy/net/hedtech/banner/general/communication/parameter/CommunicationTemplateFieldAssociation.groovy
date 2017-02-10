@@ -33,7 +33,11 @@ import javax.persistence.Version
                 WHERE a.field = :field"""),
         @NamedQuery(name = "CommunicationTemplateFieldAssociation.findAllByTemplate",
                 query = """ FROM CommunicationTemplateFieldAssociation a
-                WHERE a.template = :template""")
+                WHERE a.template = :template"""),
+        @NamedQuery(name = "CommunicationTemplateFieldAssociation.findByTemplateAndField",
+                query = """ FROM CommunicationTemplateFieldAssociation a
+                WHERE a.template = :template
+                AND a.field = :field """)
 ])
 class CommunicationTemplateFieldAssociation implements Serializable {
 
@@ -110,5 +114,14 @@ class CommunicationTemplateFieldAssociation implements Serializable {
             list = session.getNamedQuery( 'CommunicationTemplateFieldAssociation.findAllByTemplate' ).setParameter( 'template', template ).list()
         }
         return list
+    }
+
+    public static CommunicationTemplateFieldAssociation findByTemplateAndField( CommunicationTemplate template, CommunicationField field ) {
+        def templateFieldAssociation
+        CommunicationTemplateFieldAssociation.withSession { session ->
+            templateFieldAssociation = session.getNamedQuery( 'CommunicationTemplateFieldAssociation.findByTemplateAndField' )
+                    .setParameter( 'template', template ).setParameter( 'field', field ).list()[0]
+        }
+        return templateFieldAssociation
     }
 }
