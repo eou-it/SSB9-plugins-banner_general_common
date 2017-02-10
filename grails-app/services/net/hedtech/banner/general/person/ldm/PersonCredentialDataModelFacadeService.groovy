@@ -17,6 +17,18 @@ class PersonCredentialDataModelFacadeService {
 
 
     /**
+     * PUT /api/persons-credentials/<guid>
+     *
+     * @param content Request body
+     */
+    def update(Map content) {
+
+        AbstractPersonCredentialCompositeService requestProcessingService = getServiceUsingContentTypeHeader()
+        def dataMapForSingle = requestProcessingService.update(content)
+        return requestProcessingService.createPersonCredentialDataModel(dataMapForSingle)
+    }
+
+    /**
      * GET /api/persons-credentials
      *
      * @param params Request parameters

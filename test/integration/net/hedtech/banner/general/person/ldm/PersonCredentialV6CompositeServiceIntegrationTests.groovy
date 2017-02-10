@@ -44,8 +44,22 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
         bannerUdcId = PidmAndUDCIdMapping.findByPidm(person?.pidm)?.udcId
     }
 
+
     @Test
-    void testList_PersonsCredentials_v6() {
+    void testUpdate_PersonsCredentials() {
+        Map request = [ id: "02361930-1e4c-4f28-af02-397b148aad78",
+                        credentials: [  [bannerId:610009616]  ]
+                ]
+        try {
+            personCredentialV6CompositeService.update(request)
+            fail('Invalid operation')
+        } catch (ApplicationException e) {
+            assertApplicationException e, 'Not supported'
+        }
+    }
+
+    @Test
+    void testList_PersonsCredentials() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
         def personsCredentials = personCredentialV6CompositeService.list([max: '500', offset: '0'])
         assertTrue personsCredentials.size() <= 500
@@ -53,7 +67,7 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
         assertTrue personsCredentials.size() <= personCredentialV6CompositeService.count([max: '500', offset: '0'])
         PersonCredentialsV6 decorator = personsCredentials[0]
         assertNotNull decorator
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralCommonConstants.PERSONS_LDM_NAME, decorator.guid)
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralCommonConstants.PERSONS_LDM_NAME, decorator.id)
         assertNotNull globalUniqueIdentifier
         assertNotNull globalUniqueIdentifier.domainKey
         Integer pidm = globalUniqueIdentifier.domainKey.toInteger()
@@ -74,11 +88,11 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
     }
 
     @Test
-    void testGet_PersonCredentials_v6() {
+    void testGet_PersonCredentials() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
         PersonCredentialsV6 decorator = personCredentialV6CompositeService.get(guid)
         assertNotNull decorator
-        assertEquals guid, decorator.guid
+        assertEquals guid, decorator.id
         assertEquals person.bannerId, decorator.credentials.find { it.type == "bannerId" }.value
         assertEquals bannerSourcedId, decorator.credentials.find { it.type == "bannerSourcedId" }.value
         assertEquals bannerUserName, decorator.credentials.find { it.type == "bannerUserName" }.value
@@ -86,7 +100,7 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
     }
 
     @Test
-    void testGet_InvalidPersonCredentials_v6() {
+    void testGet_InvalidPersonCredentials() {
         setAcceptHeader("application/vnd.hedtech.integration.v6+json")
         String guid = 'xxxxx'
         try {

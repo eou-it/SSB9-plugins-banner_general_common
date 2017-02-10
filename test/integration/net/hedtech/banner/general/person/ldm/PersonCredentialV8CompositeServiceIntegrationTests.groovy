@@ -3,10 +3,13 @@
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
+import groovy.mock.interceptor.MockFor
+import groovy.mock.interceptor.StubFor
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ImsSourcedIdBase
+import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.PidmAndUDCIdMapping
 import net.hedtech.banner.general.overall.ThirdPartyAccess
@@ -29,9 +32,11 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
     PersonCredentialService personCredentialService
     IntegrationConfigurationService integrationConfigurationService
 
+
     def person
     String guid
     String guidForSSN
+    String guidForUpdates
     String guidForAltIds
     String bannerSourcedId
     String bannerUserName
@@ -54,13 +59,16 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         guidForSSN = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName("371".toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
         log.debug(guidForSSN)
 
-        guidForAltIds= GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName("254".toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
+        guidForAltIds = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName("254".toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
         log.debug(guidForAltIds)
+
+
+        guidForUpdates = GlobalUniqueIdentifier.fetchByDomainKeyAndLdmName("145".toString(), GeneralCommonConstants.PERSONS_LDM_NAME)?.guid
 
         Map additionalIdTypeCodeToIdMap = [:]
 
         def clgPersonId = integrationConfigurationService.fetchByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, "CREDENTIALS.COLLEAGUE_ID")
-        additionalIdTypeCodeToIdMap.put( clgPersonId.value, "_colleaguePersonId_")
+        additionalIdTypeCodeToIdMap.put(clgPersonId.value, "_colleaguePersonId_")
 
         def elevateConfig = integrationConfigurationService.fetchByProcessCodeAndSettingName(GeneralValidationCommonConstants.PROCESS_CODE, "CREDENTIALS.ELEVATE_ID")
         additionalIdTypeCodeToIdMap.put(elevateConfig.value, "_elevateId_")
@@ -69,6 +77,133 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         additionalIdTypeCodeToIdMap.put(clgConfig.value, "_colleagueUserName_")
 
         personCredentialService.createOrUpdateAdditionalIDs(254, additionalIdTypeCodeToIdMap)
+    }
+
+    @Test
+    void testUpdate_PersonsCredentials_bannerId() {
+        Map request = [id         : guidForUpdates,
+                       credentials: [[type: "bannerId", value: "CHANGED"]]
+        ]
+
+        personCredentialV8CompositeService.update(request)
+
+        PersonCredentialsV8 decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "CHANGED", decorator.credentials.find { it.type == "bannerId" }.value
+    }
+
+
+    @Test
+    void testUpdate_PersonsCredentials_ElevateId() {
+
+        //test create
+        Map request = [id         : guidForUpdates,
+                       credentials: [[type: "elevateId", value: "elevateId_test"]]
+        ]
+
+        personCredentialV8CompositeService.update(request)
+
+        PersonCredentialsV8 decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "elevateId_test", decorator.credentials.find { it.type == "elevateId" }.value
+
+        //test update
+        request = [id         : guidForUpdates,
+                   credentials: [[type: "elevateId", value: "elevateId_test2"]]]
+
+        personCredentialV8CompositeService.update(request)
+
+        decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "elevateId_test2", decorator.credentials.find { it.type == "elevateId" }.value
+    }
+
+    @Test
+    void testUpdate_PersonsCredentials_colleaguePersonId() {
+
+        //test create
+        Map request = [id         : guidForUpdates,
+                       credentials: [[type: "colleaguePersonId", value: "colleaguePersonId_test"]]
+        ]
+
+        personCredentialV8CompositeService.update(request)
+
+        PersonCredentialsV8 decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "colleaguePersonId_test", decorator.credentials.find { it.type == "colleaguePersonId" }.value
+
+        //test update
+        request = [id         : guidForUpdates,
+                   credentials: [[type: "colleaguePersonId", value: "colleaguePersonId_test2"]]]
+
+        personCredentialV8CompositeService.update(request)
+
+        decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "colleaguePersonId_test2", decorator.credentials.find { it.type == "colleaguePersonId" }.value
+    }
+
+    @Test
+    void testUpdate_PersonsCredentials_colleagueUserName() {
+
+        //test create
+        Map request = [id         : guidForUpdates,
+                       credentials: [[type: "colleagueUserName", value: "colleagueUserName_test"]]
+        ]
+
+        personCredentialV8CompositeService.update(request)
+
+        PersonCredentialsV8 decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "colleagueUserName_test", decorator.credentials.find { it.type == "colleagueUserName" }.value
+
+        //test update
+        request = [id         : guidForUpdates,
+                   credentials: [[type: "colleagueUserName", value: "colleagueUserName_test2"]]]
+
+        personCredentialV8CompositeService.update(request)
+
+        decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "colleagueUserName_test2", decorator.credentials.find { it.type == "colleagueUserName" }.value
+    }
+
+    @Test
+    void testUpdate_PersonsCredentials_ssn() {
+
+        //test create
+        Map request = [id         : guidForUpdates,
+                       credentials: [[type: "ssn", value: "ssn_test"]]
+        ]
+
+        personCredentialV8CompositeService.update(request)
+
+        PersonCredentialsV8 decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "ssn_test", decorator.credentials.find { it.type == "ssn" }.value
+
+        //test update
+
+        request = [id         : guidForUpdates,
+                   credentials: [[type: "ssn", value: "ssn_test2"]]]
+
+
+        IntegrationConfigurationService.metaClass.canUpdatePersonSSN = { return true }
+        personCredentialV8CompositeService.update(request)
+
+        decorator = personCredentialV8CompositeService.get(guidForUpdates)
+        assertNotNull decorator
+        assertEquals guidForUpdates, decorator.id
+        assertEquals "ssn_test2", decorator.credentials.find { it.type == "ssn" }.value
+
     }
 
     @Test
@@ -119,7 +254,9 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         assertNotNull decorator
         assertEquals guidForSSN, decorator.id
 
-        assertNotNull decorator.credentials.find { it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v8"] }.value
+        assertNotNull decorator.credentials.find {
+            it.type == CredentialType.SOCIAL_SECURITY_NUMBER.versionToEnumMap["v8"]
+        }.value
     }
 
     @Test
@@ -129,9 +266,13 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         assertNotNull decorator
         assertEquals guidForAltIds, decorator.id
 
-        assertNotNull decorator.credentials.find { it.type == CredentialType.COLLEAGUE_USER_NAME.versionToEnumMap["v8"] }.value
+        assertNotNull decorator.credentials.find {
+            it.type == CredentialType.COLLEAGUE_USER_NAME.versionToEnumMap["v8"]
+        }.value
         assertNotNull decorator.credentials.find { it.type == CredentialType.ELEVATE_ID.versionToEnumMap["v8"] }.value
-        assertNotNull decorator.credentials.find { it.type == CredentialType.COLLEAGUE_PERSON_ID.versionToEnumMap["v8"] }.value
+        assertNotNull decorator.credentials.find {
+            it.type == CredentialType.COLLEAGUE_PERSON_ID.versionToEnumMap["v8"]
+        }.value
     }
 
     @Test

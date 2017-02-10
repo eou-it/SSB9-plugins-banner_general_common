@@ -58,15 +58,6 @@ class PersonCredentialV8CompositeService extends AbstractPersonCredentialComposi
         return map
     }
 
-    /**
-     * Creates map with data to be used in POST/PUT operations
-     * @param content request payload
-     * @return a Map with the request data
-     */
-    @Override
-    protected extractDataFromRequestBody(Map content) {
-        return null
-    }
 
     @Override
     protected void prepareDataMapForAll_ListExtension(Collection<Map> entities, Map dataMapForAll) {
