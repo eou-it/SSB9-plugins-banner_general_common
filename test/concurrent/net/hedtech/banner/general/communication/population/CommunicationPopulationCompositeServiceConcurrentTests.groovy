@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
+import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -55,7 +56,6 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         logout()
     }
 
-
     @Test
     public void testAllSpridenPopulationFromQuery() {
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
@@ -93,48 +93,48 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertTrue( populationCalculation.calculatedCount >= 1000 )
     }
 
-//    @Test
-//    public void testCreatePopulationSelectionExtractQuery() {
-//        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
-//        extractStatement.application = 'ADMISSIONS'
-//        extractStatement.selection = '199610_APPLICANTS'
-//        extractStatement.creatorId = 'SAISUSR'
-//        extractStatement.userId = 'SAISUSR'
-//        String extractQueryString = extractStatement.getQueryString()
-//
-//        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
-//            folder: defaultFolder,
-//            name: "testCreatePopulationSelectionExtractQuery",
-//            description: "test description",
-//            type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT,
-//            queryString: extractQueryString
-//        )
-//
-//        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
-//        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
-//        assertFalse( populationQuery.changesPending )
-//
-//        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
-//        assertNotNull( population.id )
-//        assertEquals( "testPopulation", population.name )
-//        assertEquals( "testPopulationDescription", population.description )
-//
-//        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
-//        assertEquals( 1, associations.size() )
-//        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
-//        assertNotNull( association.id )
-//        assertEquals( population.id, association.population.id )
-//        assertEquals( populationQuery.id, association.populationQuery.id )
-//        assertNull( association.populationQueryVersion )
-//
-//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
-//        def isAvailable = {
-//            def theCalculation = CommunicationPopulationCalculation.get( it )
-//            theCalculation.refresh()
-//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
-//                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
-//        }
-//        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
-//    }
+    @Test
+    public void testCreatePopulationSelectionExtractQuery() {
+        CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
+        extractStatement.application = 'ADMISSIONS'
+        extractStatement.selection = '199610_APPLICANTS'
+        extractStatement.creatorId = 'SAISUSR'
+        extractStatement.userId = 'SAISUSR'
+        String extractQueryString = extractStatement.getQueryString()
+
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+            folder: defaultFolder,
+            name: "testCreatePopulationSelectionExtractQuery",
+            description: "test description",
+            type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT,
+            queryString: extractQueryString
+        )
+
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation", "testPopulationDescription" )
+        assertNotNull( population.id )
+        assertEquals( "testPopulation", population.name )
+        assertEquals( "testPopulationDescription", population.description )
+
+        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
+        assertEquals( 1, associations.size() )
+        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
+        assertNotNull( association.id )
+        assertEquals( population.id, association.population.id )
+        assertEquals( populationQuery.id, association.populationQuery.id )
+        assertNull( association.populationQueryVersion )
+
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
+        def isAvailable = {
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
+                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
+        }
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+    }
 
 }
