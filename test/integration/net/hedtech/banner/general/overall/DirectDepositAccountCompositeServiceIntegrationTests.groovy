@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
@@ -48,7 +49,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     ]
 
     BannerAuthenticationToken bannerAuthenticationToken
-    
+
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
@@ -85,13 +86,13 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
             assertApplicationException ae, "recordAlreadyExists"
         }
     }
-    
+
     @Test
     void testAddApAccountToPayroll() {
         def account1, account2
 
         account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
-        
+
         testAccountMap0.hrIndicator = "A"
         testAccountMap0.apIndicator = "I"
         account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
@@ -199,6 +200,17 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
 
         assertEquals true, lastPayDist.hasPayrollHist
+    }
+
+    @Test
+    void testGetLastPayDistributionWithHrNotInstalled() {
+        def pidm = PersonUtility.getPerson("HOP510001").pidm
+        executeCustomSQL "update GUBINST set GUBINST_HUMANRE_INSTALLED = 'N'"
+
+        def lastPayDist = directDepositAccountCompositeService.getLastPayDistribution(pidm)
+
+        assertNotNull lastPayDist
+        assertEquals 0, lastPayDist.size()
     }
 
 
@@ -315,5 +327,21 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def newId = result[1].id
 
         assertEquals false, oldId == newId
+    }
+
+
+    private executeCustomSQL( String updateStatement, id = null ) {
+        def sql
+        try {
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
+
+            if (id) {
+                sql.executeUpdate( updateStatement, [ id ] )
+            } else {
+                sql.executeUpdate( updateStatement )
+            }
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
     }
 }
