@@ -284,7 +284,8 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralValidationCommonConstants.NON_PERSONS_LDM_NAME, nonPersonDecorator.guid)
         assertNotNull globalUniqueIdentifier
 
-        List<PersonIdentificationNameCurrent> identificationNameCurrents = personIdentificationNameCurrentService.fetchAllWithPidmsAndEntityIndicator([globalUniqueIdentifier.domainKey as Integer], 'C')
+        Integer pidm = globalUniqueIdentifier.domainKey?.toInteger()
+        List<PersonIdentificationNameCurrent> identificationNameCurrents = PersonIdentificationNameCurrent.findAllByPidmInList([pidm])
         assertFalse identificationNameCurrents.isEmpty()
         assertEquals 1, identificationNameCurrents.size()
     }
