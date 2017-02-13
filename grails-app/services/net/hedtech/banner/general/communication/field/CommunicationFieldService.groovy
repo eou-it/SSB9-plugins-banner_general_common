@@ -4,20 +4,28 @@
 
 package net.hedtech.banner.general.communication.field
 
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.parameter.CommunicationParameter
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterFieldAssociation
 import net.hedtech.banner.service.ServiceBase
+
+import java.sql.Connection
+import java.sql.SQLException
+import java.util.regex.Pattern
 
 class CommunicationFieldService extends ServiceBase {
     boolean transactional = true
     def communicationPopulationQueryStatementParseService
     def communicationFieldCalculationService
     def asynchronousBannerAuthenticationSpoofer
+    def communicationParameterFieldAssociationService
 
-    def preCreate( domainModelOrMap ) {
+    def preCreate(domainModelOrMap) {
 
         if (!CommunicationCommonUtility.userCanAuthorContent()) {
             throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
@@ -79,6 +87,7 @@ class CommunicationFieldService extends ServiceBase {
 
         if (communicationField.isPublished()) {
             validatePublished( communicationField )
+            updateFieldParameterAssociation(communicationField)
         }
     }
 
@@ -140,9 +149,43 @@ class CommunicationFieldService extends ServiceBase {
 
         if (communicationField.isPublished()) {
             validatePublished( communicationField )
+            updateFieldParameterAssociation(communicationField)
         }
     }
 
+    List<String> fieldParameterNameList(CommunicationField field) {
+        def regex = Pattern.compile(":(\\w+)", Pattern.DOTALL); //get all words between a colon and a space including new lines
+        return (field?.ruleContent =~ regex) as List
+    }
+
+    void updateFieldParameterAssociation(CommunicationField communicationField) {
+
+        //delete any existing associations before creating new
+        def Sql sql
+        try {
+            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
+            sql = new Sql((Connection) sessionFactory.getCurrentSession().connection())
+            int rowsDeleted = sql.executeUpdate("delete from gcrflpm where gcrflpm_field_id = ${communicationField.id}")
+        } catch (SQLException e) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
+        } catch (Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
+        } finally {
+            sql?.close()
+        }
+        // for each extracted parameter create a parmaeter field association
+        fieldParameterNameList(communicationField)?.each { m ->
+            if (m[1] != 'pidm') { //dont create association for the pidm
+                def cfa = new CommunicationParameterFieldAssociation()
+                cfa.parameter = CommunicationParameter.fetchByName(m[1])
+                if (cfa.parameter == null || cfa?.parameter?.id == null) {
+                    throw new ApplicationException( CommunicationField, "@@r1:parameter.does.not.exist@@" )
+                }
+                cfa.field = communicationField
+                communicationParameterFieldAssociationService.create(cfa)
+            }
+        }
+    }
 
     void validateFormatter( CommunicationField communicationField ) {
         /* Either all three of these are null, or all three are not null */

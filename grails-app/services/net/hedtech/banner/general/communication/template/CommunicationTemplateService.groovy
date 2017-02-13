@@ -49,23 +49,22 @@ class CommunicationTemplateService extends ServiceBase {
 
         //Insert the template field associations if the template is already published and the association does not exist already
         if(template.published) {
-            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
-            List<CommunicationTemplateFieldAssociation> templateFieldAssociations
+            List<CommunicationTemplateFieldAssociation> oldTemplateFieldAssociations = CommunicationTemplateFieldAssociation.findAllByTemplate(template)
+            if(oldTemplateFieldAssociations) {
+                communicationTemplateFieldAssociationService.delete(oldTemplateFieldAssociations)
+            }
 
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
             if (fieldNameList) {
-                templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
+                List<CommunicationTemplateFieldAssociation> templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
                 fieldNameList.each { String fieldName ->
                     CommunicationField field = CommunicationField.fetchByName( fieldName )
-                    CommunicationTemplateFieldAssociation templateFieldAssociation = CommunicationTemplateFieldAssociation.findByTemplateAndField(template, field)
-                    if(!templateFieldAssociation) {
-                        templateFieldAssociation = new CommunicationTemplateFieldAssociation()
+                        CommunicationTemplateFieldAssociation templateFieldAssociation = new CommunicationTemplateFieldAssociation()
                         templateFieldAssociation.template = template
                         templateFieldAssociation.field = field
                         templateFieldAssociations.add(templateFieldAssociation)
-                    }
                 }
-                if(templateFieldAssociations.size() > 0)
-                    communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+                communicationTemplateFieldAssociationService.create(templateFieldAssociations)
             }
         }
     }
