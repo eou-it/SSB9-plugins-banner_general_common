@@ -5,14 +5,17 @@ package net.hedtech.banner.general.person.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.overall.ldm.v6.NonPersonDecorator
 import net.hedtech.banner.general.person.PersonEmail
 import net.hedtech.banner.general.person.PersonEmailService
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrentService
 import net.hedtech.banner.general.person.PersonTelephone
 import net.hedtech.banner.general.person.PersonTelephoneService
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.person.ldm.v6.EmailV6
 import net.hedtech.banner.general.person.ldm.v6.PhoneV6
 import net.hedtech.banner.general.person.view.NonPersonPersonView
@@ -24,6 +27,7 @@ import org.codehaus.groovy.grails.plugins.testing.GrailsMockHttpServletRequest
 import org.junit.Before
 import org.junit.Test
 
+import javax.print.attribute.TextSyntax
 import java.sql.Timestamp
 
 
@@ -36,6 +40,7 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     PhoneTypeCompositeService phoneTypeCompositeService
     PersonTelephoneService personTelephoneService
     NonPersonPersonViewService nonPersonPersonViewService
+    PersonIdentificationNameCurrentService personIdentificationNameCurrentService
 
 
     def person
@@ -107,6 +112,227 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         } catch (ApplicationException ae) {
             assertApplicationException ae, 'NotFoundException'
         }
+    }
+
+
+    @Test
+    void testCreateWithMandatoryFileds(){
+        prepareCreateRequest()
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+    }
+
+    @Test
+    void testCreateWithGuidFiled(){
+        prepareCreateRequest()
+        params.id = 'XXXXX-XXXXX-XXXXXX'
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertEquals nonPersonDecorator.guid, params.id.toLowerCase()
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+    }
+
+    @Test
+    void testCreateWithNullTitle(){
+        prepareCreateRequest()
+        params.title = ''
+       def errorMessage = shouldFail(ApplicationException) {
+            nonPersonCompositeService.create(params)
+        }
+        assertEquals errorMessage , 'title.required'
+    }
+
+    @Test
+    void testCreateWithBannerIdCredentials(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'bannerId', value:'TESTID']]
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+        assertEquals nonPersonDecorator.credentials.get(0).type, 'bannerId'
+        assertEquals nonPersonDecorator.credentials.get(0).value, 'TESTID'
+    }
+
+    @Test
+    void testCreateWithElevateIdCredentials(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'bannerId', value:'TESTID'],[type: 'elevateId', value:'ELEVATEID']]
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+        assertEquals 2, nonPersonDecorator.credentials.size()
+        assertEquals nonPersonDecorator.credentials.get(1).type, 'bannerId'
+        assertEquals nonPersonDecorator.credentials.get(1).value, 'TESTID'
+        assertEquals nonPersonDecorator.credentials.get(0).type, 'elevateId'
+        assertEquals nonPersonDecorator.credentials.get(0).value, 'ELEVATEID'
+    }
+
+    @Test
+    void testCreateWithColleaguePersonIdCredentials(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'bannerId', value:'TESTID'],[type: 'elevateId', value:'ELEVATEID'],[type:'colleaguePersonId',value:"COLLEAGUEPERSONID"]]
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+        assertEquals 3, nonPersonDecorator.credentials.size()
+        assertEquals nonPersonDecorator.credentials.get(2).type, 'bannerId'
+        assertEquals nonPersonDecorator.credentials.get(2).value, 'TESTID'
+        assertEquals nonPersonDecorator.credentials.get(1).type, 'colleaguePersonId'
+        assertEquals nonPersonDecorator.credentials.get(1).value, 'COLLEAGUEPERSONID'
+        assertEquals nonPersonDecorator.credentials.get(0).type, 'elevateId'
+        assertEquals nonPersonDecorator.credentials.get(0).value, 'ELEVATEID'
+    }
+
+    @Test
+    void testCreateWithEmptyCredential(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'bannerId', value:'']]
+        def errorMessage = shouldFail(ApplicationException) {
+            nonPersonCompositeService.create(params)
+        }
+        assertEquals errorMessage , 'invalid.credentialType'
+    }
+
+    @Test
+    void testCreateWithWrongCredentialType(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'BannerId', value:'123']]
+        def errorMessage = shouldFail(ApplicationException) {
+            nonPersonCompositeService.create(params)
+        }
+        assertEquals errorMessage , 'invalid.credentialType'
+    }
+
+    @Test
+    void testCreateWithExistBannerIdCredentials(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'bannerId', value:'TESTID']]
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+        assertEquals nonPersonDecorator.credentials.get(0).type, 'bannerId'
+        assertEquals nonPersonDecorator.credentials.get(0).value, 'TESTID'
+
+        def errorMessage = shouldFail(ApplicationException) {
+            nonPersonCompositeService.create(params)
+        }
+        assertEquals errorMessage , 'bannerId.already.exists'
+    }
+
+
+    @Test
+    void testUpdateWithNoChanges(){
+        prepareCreateRequest()
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+
+        params.id = nonPersonDecorator.guid
+        NonPersonDecorator updateNonPersonDecorator = nonPersonCompositeService.update(params)
+        assertEquals nonPersonDecorator.guid, updateNonPersonDecorator.guid
+        assertEquals nonPersonDecorator.title, updateNonPersonDecorator.title
+
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralValidationCommonConstants.NON_PERSONS_LDM_NAME, nonPersonDecorator.guid)
+        assertNotNull globalUniqueIdentifier
+
+        List<PersonIdentificationNameCurrent> identificationNameCurrents = personIdentificationNameCurrentService.fetchAllWithPidmsAndEntityIndicator([globalUniqueIdentifier.domainKey as Integer], 'C')
+        assertFalse identificationNameCurrents.isEmpty()
+        assertEquals 1, identificationNameCurrents.size()
+    }
+
+    @Test
+    void testUpdateWithTitleChanges(){
+        prepareCreateRequest()
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+
+        params.id = nonPersonDecorator.guid
+        params.title = 'update non person'
+        NonPersonDecorator updateNonPersonDecorator = nonPersonCompositeService.update(params)
+        assertEquals nonPersonDecorator.guid, updateNonPersonDecorator.guid
+
+        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralValidationCommonConstants.NON_PERSONS_LDM_NAME, nonPersonDecorator.guid)
+        assertNotNull globalUniqueIdentifier
+
+        Integer pidm = globalUniqueIdentifier.domainKey?.toInteger()
+        List<PersonIdentificationNameCurrent> identificationNameCurrents = PersonIdentificationNameCurrent.findAllByPidmInList([pidm])
+        assertFalse identificationNameCurrents.isEmpty()
+        assertEquals 2, identificationNameCurrents.size()
+        PersonIdentificationNameCurrent oldRecord = identificationNameCurrents.find{
+            it.changeIndicator == 'N'
+        }
+
+        assertNotNull oldRecord
+        PersonIdentificationNameCurrent newRecord = identificationNameCurrents.find{
+            it.changeIndicator == null
+        }
+
+        assertNotNull newRecord
+        assertEquals oldRecord.lastName, nonPersonDecorator.title
+        assertEquals newRecord.lastName, updateNonPersonDecorator.title
+    }
+
+
+    private void prepareCreateRequest(){
+        params.put("title", "non person")
+        params.put("id", GeneralValidationCommonConstants.NIL_GUID)
     }
 
     private void verifyResponse(NonPersonDecorator nonPersonDecorator, Map entitiesMap, Map vendorRoleMap) {
@@ -183,6 +409,7 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
 
 
     }
+
 
     private def getPidmToVendorRoleMap(List<Integer> pidms) {
         def pidmToVendorRoleMap = [:]
