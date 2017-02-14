@@ -159,20 +159,12 @@ class CommunicationFieldService extends ServiceBase {
     }
 
     void updateFieldParameterAssociation(CommunicationField communicationField) {
+        assert communicationField != null
 
-        //delete any existing associations before creating new
-        def Sql sql
-        try {
-            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
-            sql = new Sql((Connection) sessionFactory.getCurrentSession().connection())
-            int rowsDeleted = sql.executeUpdate("delete from gcrflpm where gcrflpm_field_id = ${communicationField.id}")
-        } catch (SQLException e) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
-        } catch (Exception e) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
-        } finally {
-            sql?.close()
+        if (communicationField.id != null) {
+            deleteExistingParameterFieldAssociations( communicationField )
         }
+
         // for each extracted parameter create a parmaeter field association
         fieldParameterNameList(communicationField)?.each { m ->
             if (m[1] != 'pidm') { //dont create association for the pidm
@@ -277,5 +269,20 @@ class CommunicationFieldService extends ServiceBase {
 
     private boolean isEmpty( String s ) {
         return (!s || s.trim().size() == 0)
+    }
+
+    private void deleteExistingParameterFieldAssociations(CommunicationField communicationField) {
+        def Sql sql
+        try {
+            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
+            sql = new Sql((Connection) sessionFactory.getCurrentSession().connection())
+            int rowsDeleted = sql.executeUpdate("delete from gcrflpm where gcrflpm_field_id = ?", [communicationField.id])
+        } catch (SQLException e) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
+        } catch (Exception e) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
+        } finally {
+            sql?.close()
+        }
     }
 }

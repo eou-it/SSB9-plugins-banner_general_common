@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.exceptions
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 
 /**
@@ -115,9 +116,9 @@ class CommunicationExceptionFactory {
      * @param resourceId the sub key of the string resource
      * @param parameter0 the first parameterized value which will be passed as the {0} of the string value
      */
-    public static ApplicationException createFriendlyApplicationException( Class service, String errorCode, String resourceId, String parameter0 ) {
+    public static ApplicationException createFriendlyApplicationException( Class service, CommunicationErrorCode errorCode, String resourceId, String parameter0 ) {
         ApplicationException ae = new CommunicationApplicationException( service, "@@r1:${resourceId}:${parameter0}@@" )
-        ae.friendlyName = errorCode
+        ae.friendlyName = errorCode?.toString()
         return ae
     }
 }

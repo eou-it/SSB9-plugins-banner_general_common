@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.query.*
@@ -65,6 +66,71 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
         assertEquals( 2, entries.size() )
         assertEquals( PersonUtility.getPerson( 'BCMADMIN' ).pidm, entries.get( 0 ).pidm )
         assertEquals( PersonUtility.getPerson( 'BCMUSER' ).pidm, entries.get( 1 ).pidm )
+    }
+
+    @Test void testAddPersonsToIncludeList() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
+
+        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        assertNotNull( results.population.includeList )
+        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 3, entryCount )
+        assertEquals( 3, results.entryResults.size() )
+
+        persons = [ 'CMOORE', '710000051' ]
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 4, entryCount )
+        assertEquals( 2, results.entryResults.size() )
+        assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND, results.entryResults.get(0).errorCode )
+        assertNull( results.entryResults.get(1).errorCode )
+    }
+
+    @Test void testRemovePersonFromIncludeList() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMADMIN' )
+        population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMUSER' )
+
+        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 2, entryCount )
+
+        population = communicationPopulationCompositeService.removePersonFromIncludeList( population, 'BCMUSER' )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 1, entryCount )
+
+        try {
+            population = communicationPopulationCompositeService.removePersonFromIncludeList( population, 'MBRZYCKI' )
+            fail "Expected application exception"
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:bannerIdNotFound:MBRZYCKI@@", e.message )
+            assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND.toString(), e.friendlyName )
+        }
+
+        population = communicationPopulationCompositeService.removePersonFromIncludeList( population, 'BCMADMIN' )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 0, entryCount )
+
+        population = communicationPopulationCompositeService.removePersonFromIncludeList( population, 'BCMADMIN' )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 0, entryCount )
+    }
+
+    @Test void testRemoveAllPersonsFromIncludeList() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        population = communicationPopulationCompositeService.removeAllPersonsFromIncludeList( population )
+        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 0, entryCount )
+
+        List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
+        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 3, entryCount )
+
+        population = communicationPopulationCompositeService.removeAllPersonsFromIncludeList( population )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 0, entryCount )
     }
 
     private String getUser() {

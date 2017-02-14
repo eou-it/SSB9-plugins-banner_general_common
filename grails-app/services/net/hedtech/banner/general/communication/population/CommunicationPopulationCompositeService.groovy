@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.population
 
 import grails.orm.PagedResultList
 import grails.util.Holders
+import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
@@ -13,6 +14,8 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
+import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
@@ -31,6 +34,9 @@ import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
+
+import java.sql.Connection
+import java.sql.SQLException
 
 /**
  * A service for driving interaction with Communication population objects and their
@@ -68,10 +74,29 @@ class CommunicationPopulationCompositeService {
         return population
     }
 
-    public void addPeopleToIncludeList( CommunicationPopulation population, String[] bannerIds ) {
-        for (String bannerId:bannerIds) {
-            addPersonToIncludeList( population, bannerId )
+    public CommunicationPopulationSelectionListBulkResults addPersonsToIncludeList( CommunicationPopulation population, List<String> bannerIds ) {
+        log.trace( "addPersonsToIncludeList called" )
+
+        if (bannerIds == null) {
+            bannerIds = new ArrayList<String>()
         }
+
+        CommunicationPopulationSelectionListBulkResults results = new CommunicationPopulationSelectionListBulkResults()
+        CommunicationPopulationSelectionListEntryResult entryResult
+        int index = 0
+        for (String bannerId:bannerIds) {
+            try {
+                population = addPersonToIncludeList( population, bannerId )
+                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:null, errorText:null )
+            } catch (ApplicationException e) {
+                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:e.friendlyName, errorText:StringHelper.stackTraceToString( e ) )
+            } catch (Throwable t) {
+                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:CommunicationErrorCode.UNKNOWN_ERROR, errorText:StringHelper.stackTraceToString( t ) )
+            }
+            results.entryResults.add( entryResult )
+        }
+        results.population = population
+        return results
     }
 
     public CommunicationPopulation addPersonToIncludeList( CommunicationPopulation population, String bannerId ) {
@@ -79,7 +104,7 @@ class CommunicationPopulationCompositeService {
         PersonIdentificationName person = (PersonIdentificationName) PersonUtility.getPerson( bannerId )
 
         if (person == null) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdNotFound", bannerId )
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "bannerIdNotFound", bannerId )
         }
 
         CommunicationPopulationSelectionListEntry found = null
@@ -131,7 +156,7 @@ class CommunicationPopulationCompositeService {
 
         PersonIdentificationName person = (PersonIdentificationName) PersonUtility.getPerson( bannerId )
         if (person == null) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdNotFound", bannerId )
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "bannerIdNotFound", bannerId )
         }
 
         CommunicationPopulationSelectionListEntry found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( person.pidm, population.includeList )
@@ -149,6 +174,55 @@ class CommunicationPopulationCompositeService {
             if (log.isDebugEnabled()) {
                 log.debug( "Person with banner id ${bannerId} not found in population ${population.id} - ignoring." )
             }
+        }
+
+        return population
+    }
+
+    public CommunicationPopulation removeAllPersonsFromIncludeList( CommunicationPopulation population ) {
+        log.trace( "removeAllPersonsFromIncludeList called" )
+        assert (population != null) && (population.id != null)
+
+        if (population.includeList == null) {
+            if (log.isDebugEnabled()) {
+                log.debug( "Include list for population with id ${population.id} is null." )
+            }
+            return population
+        }
+        assert population.includeList.id != null
+
+        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+
+        if (entryCount == 0) {
+            if (log.isDebugEnabled()) {
+                log.debug( "Include list for population with id ${population.id} has no entries." )
+            }
+            return population
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug( "Entry count for population with id ${population.id} is ${entryCount} before update." )
+            }
+        }
+
+        def Sql sql
+        try {
+            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
+            sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+            int rowsUpdated = sql.executeUpdate( "delete from GCRLENT where GCRLENT_SLIS_ID = ?", [population.includeList.id] )
+            if (log.isDebugEnabled()) {
+                log.debug( "Deleted ${rowsUpdated} included entries for population with name ${population.name} and id ${population.id}." )
+            }
+        } catch (SQLException e) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, e )
+        } catch (Throwable t) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, t )
+        } finally {
+            sql?.close()
+        }
+
+        if (!population.changesPending) {
+            population.changesPending = true
+            population = communicationPopulationService.update( population )
         }
 
         return population

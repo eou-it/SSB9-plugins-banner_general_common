@@ -34,6 +34,9 @@ enum CommunicationErrorCode implements Serializable {
     EMPTY_LETTER_TO_ADDRESS,
     EMPTY_LETTER_CONTENT,
 
+    /** Population Selection List bulk operations **/
+    BANNER_ID_NOT_FOUND,
+
     UNKNOWN_ERROR; //Unknown Error
 
     /**

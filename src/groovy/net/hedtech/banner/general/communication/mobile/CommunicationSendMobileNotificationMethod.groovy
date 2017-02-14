@@ -36,7 +36,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(rootOrganization.mobileEndPointUrl)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(),
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL,
                     "emptyMobileNotificationEndpointUrl",
                     senderOrganization.name
             )
@@ -62,7 +62,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(mobileApplicationName)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME,
                     "emptyMobileNotificationApplicationName",
                     senderOrganization.name
             )
@@ -70,7 +70,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(mobileApplicationKey)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(),
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY,
                     "emptyMobileNotificationApplicationKey",
                     senderOrganization.name
             )
