@@ -82,7 +82,7 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
     @Test
     void testUpdate_PersonsCredentials_bannerId() {
         Map request = [id         : guidForUpdates,
-                       credentials: [[type: "bannerId", value: "CHANGED"]]
+                       credentials: [[type: "bannerId", value: "CHANGED20"]]
         ]
 
         personCredentialV8CompositeService.update(request)
@@ -90,7 +90,7 @@ class PersonCredentialV8CompositeServiceIntegrationTests extends BaseIntegration
         PersonCredentialsV8 decorator = personCredentialV8CompositeService.get(guidForUpdates)
         assertNotNull decorator
         assertEquals guidForUpdates, decorator.id
-        assertEquals "CHANGED", decorator.credentials.find { it.type == "bannerId" }.value
+        assertEquals "CHANGED20", decorator.credentials.find { it.type == "bannerId" }.value
     }
 
 

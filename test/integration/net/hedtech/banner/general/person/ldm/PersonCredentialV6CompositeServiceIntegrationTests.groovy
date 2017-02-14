@@ -54,7 +54,7 @@ class PersonCredentialV6CompositeServiceIntegrationTests extends BaseIntegration
             personCredentialV6CompositeService.update(request)
             fail('Invalid operation')
         } catch (ApplicationException e) {
-            assertApplicationException e, 'Not supported'
+            assertApplicationException e, '@@r1:unsupported.operation@@'
         }
     }
 

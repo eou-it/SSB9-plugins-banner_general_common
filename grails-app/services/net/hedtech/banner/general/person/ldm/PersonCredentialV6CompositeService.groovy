@@ -57,8 +57,12 @@ class PersonCredentialV6CompositeService extends AbstractPersonCredentialComposi
     @Transactional
     @Override
     def update(Map personCredential) {
-        throw new ApplicationException( "PersonCredentialV6CompositeService", new RuntimeException("Not supported"))
+        throw new ApplicationException( PersonCredentialV6CompositeService.class, "@@r1:unsupported.operation@@")
     }
 
+    @Override
+    protected Map extractDataFromRequestBody(Map personCredential) {
+        throw new ApplicationException( PersonCredentialV6CompositeService.class, "@@r1:unsupported.operation@@")
+    }
 
 }

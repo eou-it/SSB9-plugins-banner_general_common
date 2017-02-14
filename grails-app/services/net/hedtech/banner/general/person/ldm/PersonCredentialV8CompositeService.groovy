@@ -58,6 +58,30 @@ class PersonCredentialV8CompositeService extends AbstractPersonCredentialComposi
         return map
     }
 
+    protected Map extractDataFromRequestBody(Map personCredential) {
+        def requestData = [:]
+
+        /* Required in DataModel - Required in Banner */
+        String personGuidInPayload
+        if (personCredential.containsKey("id") && personCredential.get("id") instanceof String) {
+            personGuidInPayload = personCredential?.id?.trim()?.toLowerCase()
+            requestData.put('guid', personGuidInPayload)
+        }
+
+        // UPDATE operation - API SHOULD prefer the resource identifier on the URI, over the payload.
+        String personGuidInURI = personCredential?.id?.trim()?.toLowerCase()
+        if (personGuidInPayload && !personGuidInPayload.equals(personGuidInPayload)) {
+            personCredential.put('id', personGuidInURI)
+            requestData.put('guid', personGuidInURI)
+        }
+
+        if (personCredential.containsKey("credentials") && personCredential.get("credentials") instanceof List) {
+            Collection extractedCreds = extractCredentials(personCredential)
+            requestData.put("credentials", extractedCreds)
+        }
+
+        return requestData
+    }
 
     @Override
     protected void prepareDataMapForAll_ListExtension(Collection<Map> entities, Map dataMapForAll) {
