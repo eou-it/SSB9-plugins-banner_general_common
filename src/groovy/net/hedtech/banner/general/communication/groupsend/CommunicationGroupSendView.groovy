@@ -142,34 +142,6 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "recalc_on_send")
     boolean recalculateOnSend
 
-    /**
-     * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
-     */
-    @Lob
-    @Column(name = "parameter_values")
-    String parameterValues
-
-    @Transient
-    Map parameterValueMap
-
-    public Map getParameterValueMap()
-    {
-        if(parameterValueMap == null && (parameterValues!=null && !parameterValues.isEmpty()))
-        {
-            parameterValueMap = new HashMap<String,Object>()
-            List parameterValuesList = JSON.parse(parameterValues)
-            for(Object parameterValue : parameterValuesList)
-            {
-                if(parameterValue.type == CommunicationParameterType.DATE.name()) {
-                    Date temp = DateUtility.parseDateString(parameterValue.answer);
-                    parameterValue.answer = temp;
-                }
-                parameterValueMap.put(parameterValue.name, parameterValue)
-            }
-        }
-        return parameterValueMap
-    }
-
     public static CommunicationGroupSendView fetchById(Long groupSendId) {
 
         def query =
