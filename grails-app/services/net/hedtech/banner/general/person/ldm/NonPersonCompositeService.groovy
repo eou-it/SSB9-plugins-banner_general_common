@@ -135,7 +135,12 @@ class NonPersonCompositeService extends LdmService {
         Map additionalIdTypeCodeToIdMap = [:]
 
         // extract data from request body
-        Map requestData = extractDataFromRequestBody(content)
+        Map requestData
+        if(content.containsKey("source") && content.get("source") == 'update'){
+            requestData = content
+        }else{
+            requestData = extractDataFromRequestBody(content)
+        }
         setCredentialsDataIntoMap(requestData, bannerIdCredentialObj, additionalIdTypeCodeToIdMap)
 
         // banner validation
@@ -196,7 +201,8 @@ class NonPersonCompositeService extends LdmService {
         String nonPersonGuid = requestData.get("nonPersonGuid")
         GlobalUniqueIdentifier globalUniqueIdentifier = globalUniqueIdentifierService.fetchByLdmNameAndGuid(GeneralValidationCommonConstants.NON_PERSONS_LDM_NAME, nonPersonGuid)
         if (!globalUniqueIdentifier) {
-            return create(requestData)
+            requestData.put("source","update")
+            return create(content)
         }
         setCredentialsDataIntoMap(requestData, bannerIdCredentialObj, additionalIdTypeCodeToIdMap)
 
