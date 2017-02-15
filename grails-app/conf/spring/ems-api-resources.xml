@@ -140,7 +140,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="rootEntityList">
             <list>
                 <value>SHRGSCH</value>
-                <value>GORGUID</value>
             </list>
         </constructor-arg>
     </bean>
@@ -698,7 +697,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>STVCACT</value>
+                <value>SOBCACT</value>
             </list>
         </constructor-arg>
     </bean>
@@ -937,7 +936,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="rootEntityList">
             <list>
                 <value>SORFOLK</value>
-                <value>GORGUID</value>
             </list>
         </constructor-arg>
     </bean>
@@ -959,8 +957,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>SPREMGR</value>
-                <value>GORGUID</value>
+                <value>SPREMRG</value>
             </list>
         </constructor-arg>
     </bean>
@@ -1974,6 +1971,294 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-comments" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>comments</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/comments/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Comments.SORBCMT</value>
+                <value>EEDM.Comments.SPRCMNT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SORBCMT</value>
+                <value>SPRCMNT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-comment-subject-areas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>comment-subject-areas</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/comment-subject-areas/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CommentSubjectAreas.STVCMTT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVCMTT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-admission-application-supporting-items" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-application-supporting-items</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-application-supporting-items/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplicationSupportingItems.SARCHKL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SARCHKL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-payroll-deduction-arrangement-change-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>payroll-deduction-arrangement-change-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/payroll-deduction-arrangement-change-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.PayrollDeductionArrangementChangeReasons.PTRBREA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRBREA</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-employment-leave-of-absence-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-leave-of-absence-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-leave-of-absence-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.EmploymentLeaveOfAbsenceReasons.PTRLREA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRLREA</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-employment-termination-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-termination-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-termination-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.EmploymentTerminationReasons.PTRTREA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRTREA</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-job-change-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>job-change-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/job-change-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.JobChangeReasons.PTRJCRE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRJCRE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-commerce-tax-codes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>commerce-tax-codes</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/commerce-tax-codes/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CommerceTaxCodes.FTVTGRP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVTGRP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-commodity-unit-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>commodity-unit-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/commodity-unit-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CommodityUnitTypes.FTVUOMS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVTGRP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-vendor-payment-terms" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>vendor-payment-terms</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/vendor-payment-terms/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.VendorPaymentTerms.FTVDISC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVDISC</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-vendor-hold-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>vendor-hold-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/vendor-hold-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.VendorHoldReasons.FTVHRSN</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVHRSN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-vendor-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>vendor-classifications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/vendor-classifications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.VendorClassifications.FTVVTYP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVVTYP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-deduction-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>deduction-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/deduction-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.DeductionTypes.PTRBDCA</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRBDCA</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -2061,6 +2346,19 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-financial-aid-years"/>
                 <ref bean="ar-financial-aid-offices"/>
                 <ref bean="ar-financial-aid-funds"/>
+                <ref bean="ar-comments"/>
+                <ref bean="ar-comment-subject-areas"/>
+                <ref bean="ar-admission-application-supporting-items"/>
+                <ref bean="ar-payroll-deduction-arrangement-change-reasons"/>
+                <ref bean="ar-employment-leave-of-absence-reasons"/>
+                <ref bean="ar-employment-termination-reasons"/>
+                <ref bean="ar-job-change-reasons"/>
+                <ref bean="ar-commerce-tax-codes"/>
+                <ref bean="ar-commodity-unit-types"/>
+                <ref bean="ar-vendor-payment-terms"/>
+                <ref bean="ar-vendor-hold-reasons"/>
+                <ref bean="ar-vendor-classifications"/>
+                <ref bean="ar-deduction-types"/>
             </list>
         </property>
     </bean>
@@ -2152,6 +2450,19 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-financial-aid-years"/>
                 <ref bean="ar-financial-aid-offices"/>
                 <ref bean="ar-financial-aid-funds"/>
+                <ref bean="ar-comments"/>
+                <ref bean="ar-comment-subject-areas"/>
+                <ref bean="ar-admission-application-supporting-items"/>
+                <ref bean="ar-payroll-deduction-arrangement-change-reasons"/>
+                <ref bean="ar-employment-leave-of-absence-reasons"/>
+                <ref bean="ar-employment-termination-reasons"/>
+                <ref bean="ar-job-change-reasons"/>
+                <ref bean="ar-commerce-tax-codes"/>
+                <ref bean="ar-commodity-unit-types"/>
+                <ref bean="ar-vendor-payment-terms"/>
+                <ref bean="ar-vendor-hold-reasons"/>
+                <ref bean="ar-vendor-classifications"/>
+                <ref bean="ar-deduction-types"/>
             </list>
         </property>
     </bean>
