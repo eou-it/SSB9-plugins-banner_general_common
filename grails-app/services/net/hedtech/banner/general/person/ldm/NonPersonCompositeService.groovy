@@ -140,6 +140,7 @@ class NonPersonCompositeService extends LdmService {
 
         // banner validation
         validateBannerIdCredential(bannerIdCredentialObj)
+        validateTitle(requestData.get("lastName"))
 
         if (!bannerIdCredentialObj) {
             bannerIdCredentialObj = [value: 'GENERATED']
@@ -212,6 +213,8 @@ class NonPersonCompositeService extends LdmService {
         PersonIdentificationNameCurrent oldPersonIdentificationNameCurrent = new PersonIdentificationNameCurrent(newPersonIdentificationNameCurrent?.properties)
 
         if(requestData.get("lastName") != oldPersonIdentificationNameCurrent.lastName){
+            // banner validation
+            validateTitle(requestData.get("lastName"))
             newPersonIdentificationNameCurrent.lastName = requestData.get("lastName")
         }
 
@@ -273,6 +276,13 @@ class NonPersonCompositeService extends LdmService {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("bannerId.already.exists", null))
             }
         }
+    }
+
+    protected void validateTitle(String lastName){
+        if(lastName.length() > 60){
+            throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("title.length.exceed", null))
+        }
+
     }
 
     protected void setCredentialsDataIntoMap(Map requestData, Map bannerIdCredentialObj, Map additionalIdTypeCodeToIdMap) {
