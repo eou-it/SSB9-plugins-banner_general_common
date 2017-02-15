@@ -216,10 +216,9 @@ class NonPersonCompositeService extends LdmService {
         }
 
         if (bannerIdCredentialObj && (bannerIdCredentialObj.value?.length() > 0 && bannerIdCredentialObj.value?.length() <= 9) && (oldPersonIdentificationNameCurrent.bannerId != bannerIdCredentialObj.value)){
-            newPersonIdentificationNameCurrent.bannerId = bannerIdCredentialObj.value
             // banner validation
             validateBannerIdCredential(bannerIdCredentialObj)
-
+            newPersonIdentificationNameCurrent.bannerId = bannerIdCredentialObj.value
         }
 
         if(!oldPersonIdentificationNameCurrent.equals(newPersonIdentificationNameCurrent) ){
@@ -283,7 +282,9 @@ class NonPersonCompositeService extends LdmService {
             Map bannerIdCredential = credentials.find {
                 it.type == CredentialType.BANNER_ID
             }
-            bannerIdCredentialObj.putAll(bannerIdCredential)
+            if(bannerIdCredential) {
+                bannerIdCredentialObj.putAll(bannerIdCredential)
+            }
             Map credentialTypeToAdditionalIdTypeCodeMap = getCredentialTypeToAdditionalIdTypeCodeMap()
             credentialTypeToAdditionalIdTypeCodeMap.each { credentialType, additionalIdTypeCode ->
                 def obj = credentials?.find {
@@ -909,7 +910,6 @@ class NonPersonCompositeService extends LdmService {
     private void extractEmails(final Map content, Map extractedData) {
 
         if (content.containsKey("emails") && content.get("emails") instanceof List) {
-            List emailsData = []
             Collection extractedEmails = []
             Boolean preferredEmailSelected = false
 
@@ -918,7 +918,7 @@ class NonPersonCompositeService extends LdmService {
 
             emailsContent.retainAll { it instanceof Map }
             emailsContent.each {
-              Map data =  emailsData << extractEmail(it, bannerEmailTypeCodeToHedmEmailTypeMap)
+              Map data = extractEmail(it, bannerEmailTypeCodeToHedmEmailTypeMap)
                 if (isDuplicateEmailInRequest(extractedEmails, data)) {
                     throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("duplicate.email.request", null))
                 }
