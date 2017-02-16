@@ -91,14 +91,14 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
     }
 
     private CommunicationRecipientData createCommunicationRecipientData( CommunicationTemplate template, List<String> fieldNames ) {
-        Map nameToValueMap = calculateFieldsForUser( fieldNames )
+        Map fieldNameValueMap = calculateFieldsForUser( fieldNames )
 
         new CommunicationRecipientData(
             pidm: groupSendItem.recipientPidm,
             templateId: template.id,
             referenceId: groupSendItem.referenceId,
             ownerId: groupSendItem.communicationGroupSend.createdBy,
-            fieldValues: nameToValueMap,
+            fieldValues: fieldNameValueMap,
             organizationId: groupSendItem.communicationGroupSend.organizationId,
             communicationChannel: template.communicationChannel
         )
@@ -113,6 +113,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
             // consequently pick up a new db connection with the current oracle user name.
             return communicationFieldCalculationService.calculateFieldsByPidmWithNewTransaction(
                 fieldNames,
+                this.groupSendItem.communicationGroupSend.getParameterNameValueMap(),
                 this.groupSendItem.recipientPidm,
                 this.groupSendItem.communicationGroupSend.mepCode
             )

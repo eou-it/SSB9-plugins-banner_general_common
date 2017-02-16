@@ -10,18 +10,12 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.communication.field
 
-import grails.util.Holders
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.DateUtility
-import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
-import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.ServiceBase
-import org.springframework.context.ApplicationContext
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.stringtemplate.v4.DateRenderer
@@ -92,53 +86,51 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Long pidm, String mepCode=null ) {
-        Map nameValueMap = [:]
-        for (String name:fieldNames) {
-            CommunicationField communicationField = CommunicationField.fetchByName( name )
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+        Map fieldNameValueMap = [:]
+        for (String fieldName :fieldNames) {
+            CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
             if (communicationField) {
-                String value = calculateSingleFieldByPidm(communicationField, pidm, mepCode)
+                String value = calculateSingleFieldByPidm(communicationField, parameterNameValueMap, pidm, mepCode)
                 CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
-                nameValueMap.put( name, communicationFieldValue )
+                fieldNameValueMap.put( fieldName, communicationFieldValue )
             } else {
               // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
               // Will come back to this to figure out desired behavior.
             }
         }
 
-        return nameValueMap
+        return fieldNameValueMap
     }
 
-    public String calculateSingleFieldByPidm( CommunicationField communicationField, Long pidm, List parameters, String mepCode=null ) {
+    public String calculateSingleFieldByPidm( CommunicationField communicationField, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
 
         String value = calculateFieldByPidm(
                 communicationField.ruleContent,
                 communicationField.returnsArrayArguments,
                 communicationField.formatString,
+                parameterNameValueMap,
                 pidm,
-                parameters,
                 mepCode
         )
 
         return value
     }
 
-    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, List parameters, String mepCode=null ) {
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
         boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
         if (sqlStatement?.contains(":pidm")) {
             sqlParams << ['pidm': pidm]
         }
 
-        for (Object parameter: parameters)
-        {
-            if(parameter.type.equalsIgnoreCase(CommunicationParameterType.DATE.name())) {
-                Date temp = DateUtility.parseDateString(parameter.answer);
-                sqlParams << [ (parameter.name) : (new java.sql.Date(temp.getTime())) ]
-            } else {
-                sqlParams << [ (parameter.name) : (parameter.answer) ]
+        for (String name:parameterNameValueMap.keySet()) {
+            if (sqlStatement?.contains( ":" + name)) {
+                Object value = parameterNameValueMap.get( name )
+                sqlParams.put( name, (value instanceof Date) ? new java.sql.Date( ((Date) value).time ) : value )
             }
         }
+
         calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
 
@@ -150,10 +142,10 @@ class CommunicationFieldCalculationService extends ServiceBase {
     /**
      * Executes a data function and returns result set
      * @param communicationFieldId The id of the communication field
-     * @param parameters Map of parameter values
+     * @param nameValueMap Map of parameter values
      * @return
      */
-    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters, String mepCode=null ) {
+    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, String mepCode=null ) {
         def attributeMap = [:]
         def Sql sql = null
         try {
@@ -164,8 +156,8 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
                 List<GroovyRowResult> resultSet
-                if (parameters && parameters.size() > 0) {
-                    resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
+                if (parameterNameValueMap && parameterNameValueMap.size() > 0) {
+                    resultSet = sql.rows( sqlStatement, parameterNameValueMap, 0, maxRows )
                 } else {
                     resultSet = sql.rows( sqlStatement, 0, maxRows )
                 }

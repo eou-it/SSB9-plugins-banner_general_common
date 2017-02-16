@@ -20,8 +20,6 @@ import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
 
-import javax.mail.internet.AddressException
-
 /**
  * To clarify some naming confusion, the term CommunicationTemplate refers to the Communication Manager object
  * that contains several string fields. Each of these string fields can contain delimited template variables.
@@ -62,12 +60,12 @@ class CommunicationTemplateMergeService {
      * @return
      */
     CommunicationMergedEmailTemplate calculateTemplateByPidm( CommunicationEmailTemplate communicationTemplate, Long pidm ) {
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
             log.debug( "Calculating template by pidm." )
-        def sqlParams = [:]
-        sqlParams << ['pidm': pidm]
+        }
+
         List<String> templateVariables = extractTemplateVariables( communicationTemplate.content )
-        def recipientDataMap = calculateRecipientData( templateVariables, sqlParams )
+        def recipientDataMap = calculateRecipientData( templateVariables, pidm )
         def CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.content = renderTemplate( communicationTemplate.content, recipientDataMap )
         communicationMergedEmailTemplate
@@ -81,13 +79,12 @@ class CommunicationTemplateMergeService {
      * If it contains a pidm, the bannerId parameter will be ignored.
      * @return
      */
-    Map<String, String> calculateRecipientData( List<String> communicationFieldNames, Map parameters ) {
+    private Map<String, String> calculateRecipientData( List<String> communicationFieldNames, Long pidm) {
         if (log.isDebugEnabled())
             log.debug( "Calculating recipient data." )
         def recipientData = [:]
         def CommunicationField communicationField
-        if (parameters.containsKey( 'pidm' )) {
-            Long pidm = (Long) parameters.get( 'pidm' )
+        if (pidm != null) {
             log.debug( "Calculating recipient data for pidm ${pidm}." )
             communicationFieldNames.each {
                 communicationField = CommunicationField.fetchByName( it )
@@ -96,6 +93,7 @@ class CommunicationTemplateMergeService {
                         communicationField.getRuleContent(),
                         communicationField.returnsArrayArguments,
                         communicationField.getFormatString(),
+                        [:],
                         pidm
                     )
                     if (fieldResult) recipientData[communicationField.name] = fieldResult
