@@ -160,7 +160,7 @@ class CommunicationGroupSend implements Serializable {
     String parameterValues
 
     @Transient
-    Map parameterValueMap
+    private Map parameterNameValueMap
 
     static constraints = {
         mepCode(nullable: true)
@@ -187,22 +187,21 @@ class CommunicationGroupSend implements Serializable {
         parameterValues(nullable:true)
     }
 
-    public Map getParameterValueMap()
-    {
-        if(parameterValueMap == null && (parameterValues!=null && !parameterValues.isEmpty()))
-        {
-            parameterValueMap = new HashMap<String,Object>()
-            List parameterValuesList = JSON.parse(parameterValues)
-            for(Object parameterValue : parameterValuesList)
-            {
-                if(parameterValue.type == CommunicationParameterType.DATE.name()) {
-                    Date temp = DateUtility.parseDateString(parameterValue.answer);
-                    parameterValue.answer = temp;
+    public Map getParameterNameValueMap() {
+        if (parameterNameValueMap == null) {
+            Map newParameterNameValueMap = [:]
+            if (parameterValues!=null && !parameterValues.isEmpty()) {
+                List parameters = JSON.parse(parameterValues)
+                for (def p : parameters) {
+                    String name = p.name as String
+                    CommunicationParameterType type = CommunicationParameterType.valueOf(p.type)
+                    Object value = (type == CommunicationParameterType.DATE) ? DateUtility.parseDateString(p.answer) : p.answer
+                    parameterNameValueMap.put(name, value)
                 }
-                parameterValueMap.put(parameterValue.name, parameterValue)
             }
+            parameterNameValueMap = newParameterNameValueMap
         }
-        return parameterValueMap
+        return parameterNameValueMap
     }
 
     public void markScheduled( String jobId, String groupId ) {
