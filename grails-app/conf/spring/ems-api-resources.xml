@@ -2166,7 +2166,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>FTVTGRP</value>
+                <value>FTVUOMS</value>
             </list>
         </constructor-arg>
     </bean>
@@ -2258,6 +2258,73 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
     </bean>
+
+    <bean id="ar-assessment-percentile-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>assessment-percentile-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/assessment-percentile-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AssessmentPercentileTypes.STVTSPT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVTSPT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-instructors" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>instructors</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/instructors/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Instructors.SIBINST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SIBINST</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-admission-decision-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-decision-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-decision-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionDecisionTypes.STVAPDC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVAPDC</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -2359,6 +2426,9 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-vendor-hold-reasons"/>
                 <ref bean="ar-vendor-classifications"/>
                 <ref bean="ar-deduction-types"/>
+                <ref bean="ar-assessment-percentile-types"/>
+                <ref bean="ar-instructors"/>
+                <ref bean="ar-admission-decision-types"/>
             </list>
         </property>
     </bean>
@@ -2463,6 +2533,9 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-vendor-hold-reasons"/>
                 <ref bean="ar-vendor-classifications"/>
                 <ref bean="ar-deduction-types"/>
+                <ref bean="ar-assessment-percentile-types"/>
+                <ref bean="ar-instructors"/>
+                <ref bean="ar-admission-decision-types"/>
             </list>
         </property>
     </bean>
