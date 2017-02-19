@@ -1995,16 +1995,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-comment-subject-areas" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-comment-subject-area" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>comment-subject-areas</value>
+            <value>comment-subject-area</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/comment-subject-areas/</value>
+            <value>/comment-subject-area/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CommentSubjectAreas.STVCMTT</value>
+                <value>EEDM.CommentSubjectArea.STVCMTT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2325,6 +2325,27 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-admission-application-withdrawal-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-application-withdrawal-reasons</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-application-withdrawal-reasons/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplicationWithdrawlReasons.STVWRSN</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVWRSN</value>
+            </list>
+        </constructor-arg>
+    </bean>
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -2414,7 +2435,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-financial-aid-offices"/>
                 <ref bean="ar-financial-aid-funds"/>
                 <ref bean="ar-comments"/>
-                <ref bean="ar-comment-subject-areas"/>
+                <ref bean="ar-comment-subject-area"/>
                 <ref bean="ar-admission-application-supporting-items"/>
                 <ref bean="ar-payroll-deduction-arrangement-change-reasons"/>
                 <ref bean="ar-employment-leave-of-absence-reasons"/>
@@ -2429,6 +2450,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-assessment-percentile-types"/>
                 <ref bean="ar-instructors"/>
                 <ref bean="ar-admission-decision-types"/>
+                <ref bean="ar-admission-application-withdrawal-reasons"/>
             </list>
         </property>
     </bean>
@@ -2521,7 +2543,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-financial-aid-offices"/>
                 <ref bean="ar-financial-aid-funds"/>
                 <ref bean="ar-comments"/>
-                <ref bean="ar-comment-subject-areas"/>
+                <ref bean="ar-comment-subject-area"/>
                 <ref bean="ar-admission-application-supporting-items"/>
                 <ref bean="ar-payroll-deduction-arrangement-change-reasons"/>
                 <ref bean="ar-employment-leave-of-absence-reasons"/>
@@ -2536,6 +2558,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-assessment-percentile-types"/>
                 <ref bean="ar-instructors"/>
                 <ref bean="ar-admission-decision-types"/>
+                <ref bean="ar-admission-application-withdrawal-reasons"/>
             </list>
         </property>
     </bean>
