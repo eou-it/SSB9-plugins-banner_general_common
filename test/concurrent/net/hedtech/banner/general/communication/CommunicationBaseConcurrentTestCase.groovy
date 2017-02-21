@@ -32,6 +32,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
@@ -83,6 +84,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationMobileNotificationItemService communicationMobileNotificationItemService
     CommunicationFieldService communicationFieldService
     CommunicationSendMobileNotificationService CommunicationSendMobileNotificationService
+    CommunicationParameterService communicationParameterService
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder

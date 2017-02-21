@@ -12,6 +12,9 @@ package net.hedtech.banner.general.communication.field
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
+import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -55,16 +58,18 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
         assertNotNull communicationField.immutableId
 
-
         def params = [:]
-        params << ['pidm': 2]
-        params << ['bannerId': "710000001"]
+        Long pidm = 2
+        params << ['bannerId': new CommunicationParameterValue( "710000001", CommunicationParameterType.TEXT )]
 
-        def resultSet = communicationFieldCalculationService.calculateFieldByMap(
+
+        def resultSet = communicationFieldCalculationService.calculateFieldByPidm(
                 (String) communicationField.ruleContent,
                 (Boolean) communicationField.returnsArrayArguments,
                 (String) communicationField.formatString,
-                (Map) params )
+                (Map) params,
+                pidm
+        )
         assertNotNull resultSet
 
     }
@@ -77,13 +82,14 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
         assertNotNull communicationField.immutableId
         def params = [:]
-        params << ['pidm': 2]
-        params << ['bannerId': "710000001"]
-        def resultSet = communicationFieldCalculationService.calculateFieldByMap(
+        Long pidm = 2
+        params << ['bannerId': new CommunicationParameterValue( "710000001" )]
+        def resultSet = communicationFieldCalculationService.calculateFieldByPidm(
                 (String) communicationField.ruleContent,
                 (Boolean) communicationField.returnsArrayArguments,
                 (String) communicationField.formatString,
-                (Map) params )
+                (Map) params,
+                pidm )
         assertEquals( "Hello  ", resultSet )
     }
 

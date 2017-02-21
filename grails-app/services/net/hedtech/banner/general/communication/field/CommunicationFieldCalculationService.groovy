@@ -12,12 +12,16 @@ package net.hedtech.banner.general.communication.field
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import org.stringtemplate.v4.AttributeRenderer
 import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
@@ -126,16 +130,15 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
         for (String name:parameterNameValueMap.keySet()) {
             if (sqlStatement?.contains( ":" + name)) {
-                Object value = parameterNameValueMap.get( name )
-                sqlParams.put( name, (value instanceof Date) ? new java.sql.Date( ((Date) value).time ) : value )
+                CommunicationParameterValue value = (CommunicationParameterValue) parameterNameValueMap.get(name)
+                if (value.type == CommunicationParameterType.DATE) {
+                    sqlParams.put(name, new java.sql.Date(((Date) value.value).time))
+                } else {
+                    sqlParams.put(name, value.value)
+                }
             }
         }
 
-        calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
-    }
-
-    public String calculateFieldByMap( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map sqlParams, String mepCode=null ) {
-        boolean returnsArray = returnsArrayArguments ?: false
         calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
 
@@ -192,8 +195,17 @@ class CommunicationFieldCalculationService extends ServiceBase {
         CommunicationFieldMissingPropertyCapture missingPropertyCapture = new CommunicationFieldMissingPropertyCapture()
         STGroup group = new STGroup( delimiter, delimiter )
         group.setListener( missingPropertyCapture )
-        group.registerRenderer( Integer.class, new NumberRenderer() );
-        group.registerRenderer( Date.class, new DateRenderer() );
+        NumberRenderer numberRenderer = new NumberRenderer()
+        group.registerRenderer( Integer.class, numberRenderer );
+        group.registerRenderer( Double.class, numberRenderer );
+        group.registerRenderer( Long.class, numberRenderer );
+        group.registerRenderer( Date.class, new AttributeRenderer() {
+            @Override
+            String toString(Object o, String s, Locale locale) {
+                String dateString = DateUtility.formatDate( (Date) o, "MM-dd-yyyy" )
+                return dateString
+            }
+        } )
         return new ST( group, templateString );
     }
 }

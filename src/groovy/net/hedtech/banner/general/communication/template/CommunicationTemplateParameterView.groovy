@@ -21,18 +21,11 @@ import javax.persistence.Table
 @Table(name = "GVQ_GCBTPPM")
 @EqualsAndHashCode
 @ToString
-@NamedQueries(value = [
-        @NamedQuery(name = "CommunicationTemplateParameterView.fetchByTemplateId",
-                query = """ FROM CommunicationTemplateParameterView a
-                            WHERE  a.templateId = :templateId
-                        """)
-])
 class CommunicationTemplateParameterView implements Serializable {
 
     /**
      * ID of the Communication Template
      */
-    @Id
     @Column(name = "template_id")
     Long templateId
 
@@ -74,20 +67,4 @@ class CommunicationTemplateParameterView implements Serializable {
     @Column(name = "parameter_type")
     @Enumerated(EnumType.STRING)
     CommunicationParameterType parameterType
-
-    /**
-     * Fetch all the communication parameters for a given template
-     * @param templateId the Template ID
-     * @return List of parameters for the given template
-     */
-    public static List<CommunicationTemplateParameterView> fetchByTemplateId(Long templateId) {
-
-        def params =
-                CommunicationTemplateParameterView.withSession { session ->
-                    session.getNamedQuery('CommunicationTemplateParameterView.fetchByTemplateId')
-                            .setLong('templateId', templateId)
-                            .list()
-        }
-        return params
-    }
 }

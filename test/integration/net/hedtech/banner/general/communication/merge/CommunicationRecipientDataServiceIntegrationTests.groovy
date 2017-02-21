@@ -218,18 +218,18 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         //pidm from popualation to the field calculation service
         selectionList.each {
             person ->
-                params = [:]
-                params << ['pidm': person.pidm]
+                Map parameterNameValueMap = [:]
                 def fieldListByPidm = [:]
                 fieldList.each {
                     fieldName ->
                         CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
                         if (communicationField) {
-                            resultSet = communicationFieldCalculationService.calculateFieldByMap(
+                            resultSet = communicationFieldCalculationService.calculateFieldByPidm(
                                     (String) communicationField.ruleContent,
                                     (Boolean) communicationField.returnsArrayArguments,
                                     (String) communicationField.formatString,
-                                    (Map) params
+                                    parameterNameValueMap,
+                                    person.pidm
                             )
                             fieldListByPidm.put(communicationField.name, newFieldValue(resultSet))
                         }

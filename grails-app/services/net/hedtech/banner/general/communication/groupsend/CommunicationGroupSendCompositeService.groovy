@@ -9,16 +9,19 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
+import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
+import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
@@ -85,8 +88,8 @@ class CommunicationGroupSendCompositeService {
             groupSend.populationCalculationId = calculation.id
         }
 
-        if(request.getParameterValues())
-            groupSend.parameterValues = request.getParameterValues()
+        groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
+        validateTemplateAndParameters( groupSend )
 
         groupSend = communicationGroupSendService.create( groupSend )
 
@@ -493,4 +496,37 @@ class CommunicationGroupSendCompositeService {
 
     }
 
+    private void validateTemplateAndParameters(CommunicationGroupSend groupSend) {
+        if (groupSend.templateId == null) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
+        }
+        List templateParameterList = CommunicationTemplateParameterView.findAllByTemplateId(groupSend.templateId)
+        if (templateParameterList != null) {
+            templateParameterList.each { CommunicationTemplateParameterView templateParameter ->
+                Object value = groupSend.getParameterNameValueMap().get(templateParameter.parameterName)?.value
+                if (value == null) {
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "missingParameterValue", templateParameter.parameterName)
+                }
+                if (templateParameter.parameterType == CommunicationParameterType.TEXT) {
+                    if (!(value instanceof String)) {
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "invalidParameterValue", templateParameter.parameterName)
+                    }
+                    String stringValue = (String) value
+                    if (stringValue.length() == 0) {
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "missingParameterValue", templateParameter.parameterName)
+                    }
+                } else if (templateParameter.parameterType == CommunicationParameterType.NUMBER) {
+                    if (!(value instanceof Number)) {
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "invalidParameterValue", templateParameter.parameterName)
+                    }
+                } else if (templateParameter.parameterType == CommunicationParameterType.DATE) {
+                    if (!(value instanceof Date)) {
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "invalidParameterValue", templateParameter.parameterName)
+                    }
+                } else {
+                    throw new NotImplementedException("Unhandled template parameter type when validating send parameter values.")
+                }
+            }
+        }
+    }
 }

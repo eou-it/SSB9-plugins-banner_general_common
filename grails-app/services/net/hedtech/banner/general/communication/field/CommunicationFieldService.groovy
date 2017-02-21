@@ -256,13 +256,17 @@ class CommunicationFieldService extends ServiceBase {
         if ((domainModelOrMap.id == null) && (domainModelOrMap?.domainModel.id == null))
             throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
 
-        def oldfield = CommunicationField.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
+        def communicationField = CommunicationField.get(domainModelOrMap.id ?: domainModelOrMap?.domainModel.id)
 
-        if (oldfield.id == null)
+        if (communicationField.id == null)
             throw new ApplicationException(CommunicationField, "@@r1:fieldDoesNotExist@@")
 
-        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(oldfield.lastModifiedBy)) {
+        if (!CommunicationCommonUtility.userCanUpdateDeleteContent(communicationField.lastModifiedBy)) {
             throw new ApplicationException(CommunicationField, "@@r1:operation.not.authorized@@")
+        }
+
+        if (communicationField.id != null) {
+            deleteExistingParameterFieldAssociations( communicationField )
         }
     }
 

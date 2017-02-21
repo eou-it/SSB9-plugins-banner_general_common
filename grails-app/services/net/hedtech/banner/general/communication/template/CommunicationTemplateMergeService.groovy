@@ -294,7 +294,7 @@ class CommunicationTemplateMergeService {
     List<String> extractTemplateVariables( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled())
             log.debug( "Extracting template variables from CommunicationEmailTemplate ${communicationEmailTemplate.name}." )
-        def templateVariables = []
+        def templateVariables = new HashSet()
         extractTemplateVariables( communicationEmailTemplate.toList ).each {
             templateVariables << it
         }
@@ -305,7 +305,7 @@ class CommunicationTemplateMergeService {
             templateVariables << it
         }
 
-        templateVariables
+        templateVariables.toList()
     }
 
     List<String> extractTemplateVariables( CommunicationLetterTemplate communicationLetterTemplate ) {
@@ -313,14 +313,14 @@ class CommunicationTemplateMergeService {
         if (log.isDebugEnabled()) {
             log.debug( "Extracting template variables from CommunicationLetterTemplate ${communicationLetterTemplate.name}." )
         }
-        def templateVariables = []
+        def templateVariables = new HashSet()
         extractTemplateVariables( communicationLetterTemplate.toAddress ).each {
             templateVariables << it
         }
         extractTemplateVariables( communicationLetterTemplate.content ).each {
             templateVariables << it
         }
-        return templateVariables
+        return templateVariables.toList()
     }
 
     /**
@@ -332,7 +332,7 @@ class CommunicationTemplateMergeService {
             log.debug( "Extracting template variables from CommunicationMobileNotificationTemplate ${communicationMobileNotificationTemplate.name}." )
         }
 
-        def templateVariables = []
+        def templateVariables = new HashSet()
 
         extractTemplateVariables( communicationMobileNotificationTemplate.mobileHeadline ).each {
             templateVariables << it
@@ -349,7 +349,7 @@ class CommunicationTemplateMergeService {
         extractTemplateVariables( communicationMobileNotificationTemplate.destinationLabel ).each {
         }
 
-        return templateVariables
+        return templateVariables.toList()
     }
 
     /**
