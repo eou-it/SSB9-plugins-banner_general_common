@@ -167,14 +167,17 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 resultSet.each { row ->
                     row.each { column ->
                         String attributeName = column.getKey().toString().toLowerCase()
+                        String attributeNameActual = column.getKey().toString()
                         Object attributeValue = column.value
                         if (maxRows <= 1) {
                             attributeMap.put( attributeName, attributeValue )
+                            attributeMap.put( attributeNameActual, attributeValue)
                         } else {
                             // handle array of values per column name
                             ArrayList values = attributeMap.containsKey( attributeName ) ? (ArrayList) attributeMap.get( attributeName ) : new ArrayList()
                             values.add( attributeValue )
                             attributeMap.put( attributeName, values )
+                            attributeMap.put( attributeNameActual, values)
                         }
                     }
                 }

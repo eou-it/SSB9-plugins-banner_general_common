@@ -475,7 +475,7 @@ class CommunicationPopulationCompositeService {
             try {
                 communicationPopulationCalculationService.delete( calculation )
             } catch( ApplicationException e ) {
-                if (e.getWrappedException().getCause().getConstraintName().equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPC" )) {
+                if (e.getWrappedException()?.getCause()?.getConstraintName()?.equals( "GENERAL.FK1_GCBGSND_INV_GCRPOPC" )) {
                     throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotDeletePopulationWithExistingGroupSends")
                 } else {
                     throw e
