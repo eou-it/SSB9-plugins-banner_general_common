@@ -8,13 +8,15 @@ class ApiResource {
     String path
     List<String> events
     String apiDeployment
-	List<String> rootEntityList
+    List<String> rootEntityList
+    Map<String,String> shadowTableGuidList
 
-    ApiResource(String resource, String path, List<String> events, String apiDeployment, List<String> rootEntityList = null) {
+    ApiResource(String resource, String path, List<String> events, String apiDeployment, List<String> rootEntityList = null, Map<String,String> shadowTableGuidList = null) {
         this.resource = resource
         this.path = path
         this.events = events
         this.apiDeployment = apiDeployment
-		this.rootEntityList = rootEntityList
+        this.rootEntityList = rootEntityList
+        this.shadowTableGuidList = shadowTableGuidList
     }
 }
