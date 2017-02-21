@@ -8,6 +8,7 @@ import net.hedtech.banner.general.common.GeneralCommonConstants
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.overall.ldm.v6.CredentialV6
 import net.hedtech.banner.general.overall.ldm.v6.NonPersonDecorator
 import net.hedtech.banner.general.person.PersonEmail
 import net.hedtech.banner.general.person.PersonEmailService
@@ -281,13 +282,6 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         assertEquals nonPersonDecorator.guid, updateNonPersonDecorator.guid
         assertEquals nonPersonDecorator.title, updateNonPersonDecorator.title
 
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralValidationCommonConstants.NON_PERSONS_LDM_NAME, nonPersonDecorator.guid)
-        assertNotNull globalUniqueIdentifier
-
-        Integer pidm = globalUniqueIdentifier.domainKey?.toInteger()
-        List<PersonIdentificationNameCurrent> identificationNameCurrents = PersonIdentificationNameCurrent.findAllByPidmInList([pidm])
-        assertFalse identificationNameCurrents.isEmpty()
-        assertEquals 1, identificationNameCurrents.size()
     }
 
     @Test
@@ -308,26 +302,41 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         params.title = 'update non person'
         NonPersonDecorator updateNonPersonDecorator = nonPersonCompositeService.update(params)
         assertEquals nonPersonDecorator.guid, updateNonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.title, updateNonPersonDecorator.title
+        assertEquals updateNonPersonDecorator.title, params.title
+    }
 
-        GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByGuid(GeneralValidationCommonConstants.NON_PERSONS_LDM_NAME, nonPersonDecorator.guid)
-        assertNotNull globalUniqueIdentifier
+    @Test
+    void testUpdateWithBannerId(){
+        prepareCreateRequest()
+        params.credentials = [[type: 'bannerId', value:'TESTID']]
+        NonPersonDecorator nonPersonDecorator = nonPersonCompositeService.create(params)
+        assertNotNull nonPersonDecorator
+        assertNotNull nonPersonDecorator.guid
+        assertNotEquals nonPersonDecorator.guid, params.id
+        assertEquals nonPersonDecorator.title, params.title
+        assertNotNull nonPersonDecorator.roles
+        assertFalse nonPersonDecorator.roles.isEmpty()
+        assertEquals 1, nonPersonDecorator.roles.size()
+        assertNotNull nonPersonDecorator.credentials
+        assertFalse nonPersonDecorator.credentials.isEmpty()
+        assertEquals nonPersonDecorator.credentials.get(0).type, 'bannerId'
+        assertEquals nonPersonDecorator.credentials.get(0).value, 'TESTID'
 
-        Integer pidm = globalUniqueIdentifier.domainKey?.toInteger()
-        List<PersonIdentificationNameCurrent> identificationNameCurrents = PersonIdentificationNameCurrent.findAllByPidmInList([pidm])
-        assertFalse identificationNameCurrents.isEmpty()
-        assertEquals 2, identificationNameCurrents.size()
-        PersonIdentificationNameCurrent oldRecord = identificationNameCurrents.find{
-            it.changeIndicator == 'N'
-        }
+        params.id = nonPersonDecorator.guid
+        params.credentials = [[type: 'bannerId', value:'UPDATEID']]
+        NonPersonDecorator updateNonPersonDecorator = nonPersonCompositeService.update(params)
+        assertEquals nonPersonDecorator.guid, updateNonPersonDecorator.guid
+        assertEquals nonPersonDecorator.title, updateNonPersonDecorator.title
+        assertNotNull updateNonPersonDecorator.roles
+        assertFalse updateNonPersonDecorator.roles.isEmpty()
+        assertEquals 1, updateNonPersonDecorator.roles.size()
+        assertNotNull updateNonPersonDecorator.credentials
+        assertFalse updateNonPersonDecorator.credentials.isEmpty()
+        assertEquals updateNonPersonDecorator.credentials.get(0).type, 'bannerId'
+        assertEquals updateNonPersonDecorator.credentials.get(0).value, 'UPDATEID'
 
-        assertNotNull oldRecord
-        PersonIdentificationNameCurrent newRecord = identificationNameCurrents.find{
-            it.changeIndicator == null
-        }
 
-        assertNotNull newRecord
-        assertEquals oldRecord.lastName, nonPersonDecorator.title
-        assertEquals newRecord.lastName, updateNonPersonDecorator.title
     }
 
 
@@ -366,8 +375,11 @@ class NonPersonCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
 
         assertEquals nonPersonDecorator.title, nonPersonPersonView.lastName
         assertEquals nonPersonDecorator.guid, globalUniqueIdentifier.guid
-        assertTrue([CredentialType.BANNER_ID.versionToEnumMap["v6"]].containsAll(nonPersonDecorator.credentials.type))
-        assertEquals nonPersonDecorator.credentials.value, [nonPersonPersonView.bannerId]
+        CredentialV6 credentialV6 =  nonPersonDecorator.credentials.find{
+            it.type == CredentialType.BANNER_ID.versionToEnumMap["v6"]
+        }
+        assertNotNull credentialV6
+       assertEquals credentialV6.value, nonPersonPersonView.bannerId
 
         if (vendorRoleMap.containsKey(nonPersonPersonView.pidm)) {
             assertEquals nonPersonDecorator.roles.size(), 2

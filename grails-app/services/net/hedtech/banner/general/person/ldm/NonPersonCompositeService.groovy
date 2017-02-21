@@ -272,7 +272,7 @@ class NonPersonCompositeService extends LdmService {
 
         //Needs to do refactor
         Map entitiesMap = nonPersonPersonViewService.fetchByGuid(nonPersonGuid)
-        return createDecorators([entitiesMap.nonPersonPersonView], getPidmToGuidMap([entitiesMap]))?.getAt(0)
+        return createDecorators([entitiesMap.nonPersonPersonView.refresh()], getPidmToGuidMap([entitiesMap]))?.getAt(0)
     }
 
     protected void validateBannerIdCredential(Map bannerIdCredentialObj) {
@@ -1032,11 +1032,11 @@ class NonPersonCompositeService extends LdmService {
             phones.each {
                 Map data = extractPhone(it, bannerPhoneTypeCodeToHedmPhoneTypeMap)
                 if (isDuplicatePhoneInRequest(extractedPhones, data)) {
-                    throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.phoneType.duplicate", null))
+                   // throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.phoneType.duplicate", null))
                 }
                 if (data.get("primaryIndicator") == "Y") {
                     if (preferredPhoneSelected) {
-                        throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.preferences.duplicate", null))
+                        //throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("phone.preferences.duplicate", null))
                     }
                     preferredPhoneSelected = true
                 }
@@ -1177,8 +1177,13 @@ class NonPersonCompositeService extends LdmService {
             throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("type.required", null))
         }
 
+        String pattern = '^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[0-1]|0[1-9]|[1-2][0-9])T(2[0-3]|[0-1][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z|[+-](?:2[0-3]|[0-1][0-9]):[0-5][0-9])?$'
+
         if (addressObj.containsKey("startOn") && addressObj.get("startOn") instanceof String) {
             String startOn = addressObj.get("startOn").trim()
+            if(!startOn.matches(pattern)){
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.date.format", []))
+            }
             Date fromDate
             if (startOn.length() > 0) {
                 fromDate = DateConvertHelperService.convertUTCStringToServerDate(startOn)
@@ -1188,6 +1193,9 @@ class NonPersonCompositeService extends LdmService {
 
         if (addressObj.containsKey("endOn") && addressObj.get("endOn") instanceof String) {
             String endOn = addressObj.get("endOn").trim()
+            if(!endOn.matches(pattern)){
+                throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("invalid.date.format", []))
+            }
             Date toDate
             if (endOn.length() > 0) {
                 toDate = DateConvertHelperService.convertUTCStringToServerDate(endOn)
