@@ -340,11 +340,6 @@ class NonPersonCompositeService extends LdmService {
     private
     def createOrUpdatePersonEmails(List emailListInRequest, Integer pidm, List<PersonEmail> existingPersonEmails) {
         List<PersonEmail> personEmails = []
-        existingPersonEmails.each {
-            it.statusIndicator = "I"
-            it.preferredIndicator = false
-            personEmailService.update([domainModel: it])
-        }
         emailListInRequest.each { emailMapInRequest ->
             EmailType emailTypeInRequest = emailTypeService.fetchByCode(emailMapInRequest.emailTypeCode)
             String emailAddressInRequest = emailMapInRequest.emailAddress
@@ -361,11 +356,14 @@ class NonPersonCompositeService extends LdmService {
                 throw new ApplicationException(this.class.simpleName, new BusinessLogicValidationException("existing.email.message", [existingPersonEmailWithDiffrentCase.emailAddress]))
             }
             if (existingPersonEmail) {
-                existingPersonEmail.preferredIndicator = emailMapInRequest.preferredIndicator ?: false
-                if (existingPersonEmail.statusIndicator == 'I') {
-                    existingPersonEmail.statusIndicator = 'A'
+                if(emailMapInRequest.containsKey("preferredIndicator") && emailMapInRequest.preferredIndicator != existingPersonEmail.preferredIndicator){
+                    existingPersonEmail.preferredIndicator = emailMapInRequest.preferredIndicator ?: false
+                    personEmailService.update([domainModel: existingPersonEmail])
                 }
-                personEmailService.update([domainModel: existingPersonEmail])
+               /* if (existingPersonEmail.statusIndicator == 'I') {
+                    existingPersonEmail.statusIndicator = 'A'
+                }*/
+
                 personEmails << existingPersonEmail
                 existingPersonEmails.remove(existingPersonEmail)
             } else {
@@ -378,6 +376,13 @@ class NonPersonCompositeService extends LdmService {
                 personEmails << personEmail
             }
         }
+
+        existingPersonEmails.each {
+            it.statusIndicator = "I"
+            it.preferredIndicator = false
+            personEmailService.update([domainModel: it])
+        }
+
         return personEmails
     }
 
