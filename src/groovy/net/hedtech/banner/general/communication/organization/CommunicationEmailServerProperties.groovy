@@ -1,5 +1,6 @@
 package net.hedtech.banner.general.communication.organization
 
+import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
@@ -62,7 +63,6 @@ class CommunicationEmailServerProperties implements Serializable {
     @Column(name = "GCBSPRP_SMTP_PROPERTIES")
     String smtpProperties
 
-
     /**
      * VERSION: Optimistic lock token.
      */
@@ -103,4 +103,15 @@ class CommunicationEmailServerProperties implements Serializable {
     // Read Only fields that should be protected against update
     public static readonlyProperties = ['id']
 
+    public Map getSmtpPropertiesAsMap() {
+        def jsonSlurper = new JsonSlurper()
+        return (smtpProperties ? jsonSlurper.parseText(this.smtpProperties) : null)
+    }
+
+    public void setSmtpProperties(Map smtpProp) {
+        def mapToString = {
+            it.collect { /"$it.key":$it.value/ } join " "
+        }
+        this.smtpProperties = smtpProp ? "{"+mapToString(smtpProp)+"}" : null
+    }
 }

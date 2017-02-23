@@ -17,10 +17,6 @@ class CommunicationMailboxAccountService extends ServiceBase {
             mailboxAccount.encryptedPassword = encryptPassword( mailboxAccount.clearTextPassword)
         }
 
-        if (mailboxAccount && !(mailboxAccount.emailAddress != null && mailboxAccount.userName != null)
-                && !(mailboxAccount.emailAddress == null && mailboxAccount.userName == null)) {
-            throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
-        }
     }
 
     def decryptPassword(String encryptedPassword) {

@@ -98,7 +98,7 @@ class CommunicationMailboxAccount implements Serializable {
         emailAddress( nullable: false, maxSize: 1020 )
         encryptedPassword( nullable: true )
         type( nullable: false, maxSize: 200 )
-        userName( nullable: false, maxSize: 1020 )
+        userName( nullable: true, maxSize: 1020 )
         emailDisplayName( nullable: true )
 
         clearTextPassword( nullable: true )

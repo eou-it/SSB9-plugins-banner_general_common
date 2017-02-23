@@ -218,11 +218,11 @@ class CommunicationSendEmailMethod {
         }
 
         boolean shouldAuthenticate
-        if (Holders.config.communication.email.isSet( "senderAuthenticationEnabled" )) {
-            shouldAuthenticate = Holders.config.communication.email.senderAuthenticationEnabled
-        } else {
+        def smtpProperties = senderOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()
+        if (smtpProperties && smtpProperties?.auth != null)
+           shouldAuthenticate = smtpProperties.auth
+        else
             shouldAuthenticate = true
-        }
 
         if (shouldAuthenticate) {
             CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.senderMailboxAccount.userName, senderOrganization.senderMailboxAccount.clearTextPassword );
