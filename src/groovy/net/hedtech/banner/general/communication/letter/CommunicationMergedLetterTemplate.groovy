@@ -22,4 +22,5 @@ import groovy.transform.ToString
 class CommunicationMergedLetterTemplate implements Serializable {
     String toAddress
     String content
+    String style
 }

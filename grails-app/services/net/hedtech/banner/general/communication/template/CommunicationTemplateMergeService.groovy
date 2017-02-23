@@ -154,6 +154,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedLetterTemplate mergedTemplate = new CommunicationMergedLetterTemplate()
         mergedTemplate.toAddress = merge( template.toAddress, recipientData.fieldValues )
         mergedTemplate.content = merge( template.content, recipientData.fieldValues )
+        mergedTemplate.style = template.style
         return mergedTemplate
     }
 
@@ -221,6 +222,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedLetterTemplate communicationMergedLetterTemplate = new CommunicationMergedLetterTemplate()
         communicationMergedLetterTemplate.toAddress = mergeForPreview( communicationLetterTemplate.toAddress ?: "", renderPreviewValues( communicationLetterTemplate.toAddress ?: "" ) )
         communicationMergedLetterTemplate.content = mergeForPreview( communicationLetterTemplate.content ?: "", renderPreviewValues( communicationLetterTemplate.content ?: "" ) )
+        communicationMergedLetterTemplate.style = communicationLetterTemplate.style
         return communicationMergedLetterTemplate
     }
 

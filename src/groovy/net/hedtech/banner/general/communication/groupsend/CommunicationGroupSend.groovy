@@ -167,13 +167,6 @@ class CommunicationGroupSend implements Serializable {
     @Transient
     private Map parameterNameValueMap
 
-    /**
-     * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
-     */
-    @Lob
-    @Column(name = "GCBGSND_TEMPLATE_STYLE")
-    String templateStyle
-
 
     static constraints = {
         mepCode(nullable: true)
@@ -198,7 +191,6 @@ class CommunicationGroupSend implements Serializable {
         jobId(nullable:true)
         groupId(nullable:true)
         parameterValues(nullable:true)
-        templateStyle(nullable:true)
     }
 
     public Map getParameterNameValueMap() {

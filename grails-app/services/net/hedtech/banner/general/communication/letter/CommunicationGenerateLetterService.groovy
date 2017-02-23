@@ -73,6 +73,7 @@ class CommunicationGenerateLetterService {
         // letter specific fields
         item.toAddress = message.toAddress
         item.content = message.content
+        item.style = message.style
 
         item = communicationLetterItemService.create( item )
         log.debug( "recorded letter item sent with item id = ${item.id}." )
