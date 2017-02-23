@@ -200,6 +200,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.MaritalStatus.STVMRTL</value>
+                <value>EEDM.MaritalStatus.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -209,6 +210,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>STVMRTL</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -455,6 +457,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.EmailType.GTVEMAL</value>
+                <value>EEDM.EmailType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -464,6 +467,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>GTVEMAL</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -478,6 +482,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.AddressType.STVATYP</value>
+                <value>EEDM.AddressType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -487,6 +492,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>STVATYP</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -524,6 +530,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.TelephoneType.STVTELE</value>
+                <value>EEDM.TelephoneType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -533,6 +540,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>STVTELE</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -712,6 +720,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.NameType.GTVNTYP</value>
+                <value>EEDM.NameType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -721,6 +730,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>GTVNTYP</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -816,7 +826,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="rootEntityList">
             <list>
                 <value>STVSBGI</value>
-                <value>SOBSBGI</value>
                 <value>GUBINST</value>
                 <value>GORGUID</value>
             </list>
@@ -1050,6 +1059,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.PersonalRelationshipTypes.STVRELT</value>
+                <value>EEDM.PersonalRelationshipTypes.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1059,6 +1069,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>STVRELT</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -1073,6 +1084,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.SectionRegistrationStatuses.STVRSTS</value>
+                <value>EEDM.SectionRegistrationStatuses.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1082,6 +1094,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>STVRSTS</value>
                 <value>GORGUID</value>
+                <value>GORICCR</value>
             </list>
         </constructor-arg>
     </bean>
@@ -1205,120 +1218,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-external-educations-hs" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>external-educations-hs</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/external-education/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
-                <value>EEDM.ExternalEducations.SORHSCH</value>
-            </list>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-        <constructor-arg name="rootEntityList">
-            <list>
-                <value>SORHSCH</value>
-                <value>GORGUID</value>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-external-educations-pc" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>external-educations-pc</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/external-education/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
-                <value>EEDM.ExternalEducations.SORPCOL</value>
-            </list>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-        <constructor-arg name="rootEntityList">
-            <list>
-                <value>SORPCOL</value>
-                <value>GORGUID</value>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-external-educations-trit" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>external-educations-trit</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/external-education/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
-                <value>EEDM.ExternalEducations.SHRTRIT</value>
-            </list>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-        <constructor-arg name="rootEntityList">
-            <list>
-                <value>SHRTRIT</value>
-                <value>GORGUID</value>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-external-educations-degr" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>external-educations-degr</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/external-education/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
-                <value>EEDM.ExternalEducations.Degree</value>
-            </list>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-        <constructor-arg name="rootEntityList">
-            <list>
-                <value>SORDEGR</value>
-                <value>GORGUID</value>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="ar-external-educations-tram" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
-        <constructor-arg name="resource">
-            <value>external-educations-tram</value>
-        </constructor-arg>
-        <constructor-arg name="path">
-            <value>/external-education/</value>
-        </constructor-arg>
-        <constructor-arg name="events">
-            <list>
-                <value>EEDM.ExternalEducations.SHRTRAM</value>
-            </list>
-        </constructor-arg>
-        <constructor-arg name="apiDeployment">
-            <value>Student</value>
-        </constructor-arg>
-        <constructor-arg name="rootEntityList">
-            <list>
-                <value>SHRTRAM</value>
-                <value>GORGUID</value>
-            </list>
-        </constructor-arg>
-    </bean>
 
     <bean id="ar-academic-standings" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
@@ -2347,6 +2246,38 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-external-education" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-education</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-education/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ExternalEducation.SORHSCH</value>
+                <value>EEDM.ExternalEducation.SORPCOL</value>
+                <value>EEDM.ExternalEducation.SHRTRIT</value>
+                <value>EEDM.ExternalEducation.Degree</value>
+                <value>EEDM.ExternalEducation.SHRTRAM</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SORHSCH</value>
+                <value>SORPCOL</value>
+                <value>SHRTRIT</value>
+                <value>SORDEGR</value>
+                <value>SHRTRAM</value>
+                <value>GORGUID</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -2401,11 +2332,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-gradechangereasons"/>
                 <ref bean="ar-citizenshipstatuses"/>
                 <ref bean="ar-visatypes"/>
-                <ref bean="ar-external-educations-hs"/>
-                <ref bean="ar-external-educations-pc"/>
-                <ref bean="ar-external-educations-trit"/>
-                <ref bean="ar-external-educations-degr"/>
-                <ref bean="ar-external-educations-tram"/>
                 <ref bean="ar-academic-standings"/>
                 <ref bean="ar-student-classifications"/>
                 <ref bean="ar-student-cohorts"/>
@@ -2451,6 +2377,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-instructors"/>
                 <ref bean="ar-admission-decision-types"/>
                 <ref bean="ar-admission-application-withdrawal-reasons"/>
+                <ref bean="ar-external-education"/>
             </list>
         </property>
     </bean>
@@ -2509,11 +2436,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-gradechangereasons"/>
                 <ref bean="ar-citizenshipstatuses"/>
                 <ref bean="ar-visatypes"/>
-                <ref bean="ar-external-educations-hs"/>
-                <ref bean="ar-external-educations-pc"/>
-                <ref bean="ar-external-educations-trit"/>
-                <ref bean="ar-external-educations-degr"/>
-                <ref bean="ar-external-educations-tram"/>
                 <ref bean="ar-academic-standings"/>
                 <ref bean="ar-student-classifications"/>
                 <ref bean="ar-student-cohorts"/>
@@ -2559,6 +2481,7 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-instructors"/>
                 <ref bean="ar-admission-decision-types"/>
                 <ref bean="ar-admission-application-withdrawal-reasons"/>
+                <ref bean="ar-external-education"/>
             </list>
         </property>
     </bean>
