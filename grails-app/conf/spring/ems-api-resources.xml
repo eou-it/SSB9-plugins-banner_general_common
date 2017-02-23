@@ -399,6 +399,15 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>SFRSTCR</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SFRSTCR" value="SFRRGID.SFRRGID_GUID"></entry>
+                <entry key="SHRTCKG" value="SFRRGID.SFRRGID_GUID"></entry>
+                <entry key="SHRTCKL" value="SFRRGID.SFRRGID_GUID"></entry>
+                <entry key="SHRTCKN" value="SFRRGID.SFRRGID_GUID"></entry>
+                <entry key="SORSATR" value="SFRRGID.SFRRGID_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-sites" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -1190,6 +1199,16 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>SCRGSID</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SCBCRSE" value="SCBCGID.SCBCGID_GUID"></entry>
+                <entry key="SCRGMOD" value="SCBCGID.SCBCGID_GUID"></entry>
+                <entry key="SCRGSID" value="SCBCGID.SCBCGID_GUID"></entry>
+                <entry key="SCRLEVL" value="SCBCGID.SCBCGID_GUID"></entry>
+                <entry key="SCRSCHD" value="SCBCGID.SCBCGID_GUID"></entry>
+                <entry key="SCRSYLN" value="SCBCGID.SCBCGID_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-sections" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -1201,9 +1220,6 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Sections.SCBCGID</value>
-                <value>EEDM.Sections.SSRGSID</value>
-                <value>EEDM.Sections.SSBSGID</value>
                 <value>EEDM.Sections.SSBSECT</value>
             </list>
         </constructor-arg>
@@ -1216,8 +1232,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>SCBCGID</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SCBCGID" value="SSBSGID.SSBSGID_GUID"></entry>
+                <entry key="SSBSECT" value="SSBSGID.SSBSGID_GUID"></entry>
+                <entry key="SSRGSID" value="SSBSGID.SSBSGID_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
-
 
     <bean id="ar-academic-standings" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
@@ -1802,6 +1824,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>RORTPRD</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="ROBPRDS" value="RORTPRD.RORTPRD_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-financial-aid-years" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -1845,6 +1872,11 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>RORCAMP</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="STVCAMP" value="RORCAMP.RORCAMP_GUID"></entry>
+            </map>
         </constructor-arg>
     </bean>
 
@@ -2199,6 +2231,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>SIBINST</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SIBFACD" value="SIBINST.SIBINST_GUID"></entry>
+                <entry key="SIRDPCL" value="SIBINST.SIBINST_GUID"></entry>
+            </map>
         </constructor-arg>
     </bean>
 
