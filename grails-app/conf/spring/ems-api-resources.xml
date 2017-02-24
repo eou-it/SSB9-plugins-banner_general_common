@@ -2315,6 +2315,149 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-admission-application-status-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-application-status-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-application-status-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplicationStatusTypes.STVAPST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVAPST</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-admission-application-supporting-item-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-application-supporting-item-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-application-supporting-item-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplicationSupportingItemStatuses.STVCKST</value>
+                <value>EEDM.AdmissionApplicationSupportingItemStatuses.GORICCR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVCKST</value>
+                <value>GORICCR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="GORICCR" value="STVCKST.STVCKST_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-admission-application-supporting-item-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-application-supporting-item-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-application-supporting-item-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplicationSupportingItemTypes.STVADMR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVADMR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-admission-application-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-application-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-application-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplicationTypes.STVADMT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVADMT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-admission-decisions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-decisions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-decisions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionDecisions.SARAPPD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SARAPPD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-commodity-codes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>commodity-codes</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/commodity-codes/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.CommodityCodes.FTVCOMM</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVCOMM</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="FOBTEXT" value="FTVCOMM.FTVCOMM_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -2416,6 +2559,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-admission-decision-types"/>
                 <ref bean="ar-admission-application-withdrawal-reasons"/>
                 <ref bean="ar-external-education"/>
+                <ref bean="ar-admission-application-status-types"/>
+                <ref bean="ar-admission-application-supporting-item-statuses"/>
+                <ref bean="ar-admission-application-supporting-item-types"/>
+                <ref bean="ar-admission-application-types"/>
+                <ref bean="ar-admission-decisions"/>
+                <ref bean="ar-commodity-codes"/>
             </list>
         </property>
     </bean>
@@ -2520,6 +2669,12 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-admission-decision-types"/>
                 <ref bean="ar-admission-application-withdrawal-reasons"/>
                 <ref bean="ar-external-education"/>
+                <ref bean="ar-admission-application-status-types"/>
+                <ref bean="ar-admission-application-supporting-item-statuses"/>
+                <ref bean="ar-admission-application-supporting-item-types"/>
+                <ref bean="ar-admission-application-types"/>
+                <ref bean="ar-admission-decisions"/>
+                <ref bean="ar-commodity-codes"/>
             </list>
         </property>
     </bean>
