@@ -153,7 +153,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         renderMap = [:]
         redirectMap = [:]
         flash = [:]
-
+        formContext = ['SELFSERVICE']
         if (formContext) {
             FormContext.set( formContext )
         } else if (controller) {
@@ -346,7 +346,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
      * Convenience method to login a user if not already logged in. You may pass in a username and password,
      * or omit and accept the default 'grails_user' and 'u_pick_it'.
      **/
-    protected void loginIfNecessary( userName = "grails_user", password = "u_pick_it" ) {
+    protected void loginIfNecessary( userName = "BCMADMIN", password = "111111" ) {
         if (!SecurityContextHolder.getContext().getAuthentication()) {
             login userName, password
         }
@@ -368,6 +368,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
      * object from the Spring security context holder.
      **/
     protected void logout() {
+        def sql
+        try {
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
+            sql.executeUpdate( 'commit')
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
         SecurityContextHolder.getContext().setAuthentication( null )
     }
 
