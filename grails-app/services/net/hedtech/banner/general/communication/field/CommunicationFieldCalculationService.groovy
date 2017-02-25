@@ -19,6 +19,7 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationParameter
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.ServiceBase
+import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.stringtemplate.v4.AttributeRenderer
@@ -185,7 +186,11 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
             return merge( formatString ?: "", attributeMap )
         } catch (SQLException e) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationFieldCalculationService.class, e, CommunicationErrorCode.DATA_FIELD_SQL_ERROR.name() )
+            if (e.getMessage()?.contains("ORA-06553")) {
+                throw new ApplicationException(CommunicationFieldCalculationService.class, e)
+            } else {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.DATA_FIELD_SQL_ERROR.name())
+            }
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
         } finally {
