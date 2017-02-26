@@ -17,16 +17,11 @@ import javax.persistence.*
 @Entity
 @EqualsAndHashCode
 @ToString
-@Table(name = "GVQ_GCRLENT_AGGR")
+@Table(name = "GVQ_GCRLENT")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationProfileView.findAllBySelectionListId",
                 query = """ FROM CommunicationPopulationProfileView a
                     WHERE  a.selectionListId = :selectionListId
-                    """),
-        @NamedQuery(name = "CommunicationPopulationProfileView.fetchAggregateBySelectionListId",
-                query = """ FROM CommunicationPopulationProfileView a
-                    WHERE  (:selectionListId <> null and a.selectionListId = :selectionListId)
-                    and    (:includeListId <> null and a.selectionListId = :includeListId)
                     """)
 ])
 class CommunicationPopulationProfileView implements Serializable {
