@@ -168,13 +168,17 @@ class CommunicationFieldService extends ServiceBase {
         // for each extracted parameter create a parmaeter field association
         fieldParameterNameList(communicationField)?.each { m ->
             if (m[1] != 'pidm') { //dont create association for the pidm
-                def cfa = new CommunicationParameterFieldAssociation()
-                cfa.parameter = CommunicationParameter.fetchByName(m[1])
-                if (cfa.parameter == null || cfa?.parameter?.id == null) {
+
+                def param = CommunicationParameter.fetchByName(m[1])
+                if (param == null || param?.id == null) {
                     throw new ApplicationException( CommunicationField, "@@r1:parameter.does.not.exist@@" )
                 }
-                cfa.field = communicationField
-                communicationParameterFieldAssociationService.create(cfa)
+                if (!CommunicationParameterFieldAssociation.fetchByFieldAndParameter(communicationField, param)) {
+                    def cfa = new CommunicationParameterFieldAssociation()
+                    cfa.field = communicationField
+                    cfa.parameter = param
+                    communicationParameterFieldAssociationService.create(cfa)
+                }
             }
         }
     }

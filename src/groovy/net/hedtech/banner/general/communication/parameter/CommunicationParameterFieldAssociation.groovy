@@ -29,7 +29,11 @@ import javax.persistence.Version
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationParameterFieldAssociation.findAllByField",
                 query = """ FROM CommunicationParameterFieldAssociation a
-                WHERE a.field = :field""")
+                WHERE a.field = :field"""),
+        @NamedQuery(name = "CommunicationParameterFieldAssociation.fetchByFieldAndParameter",
+                query = """ FROM CommunicationParameterFieldAssociation a
+                WHERE a.field = :field
+                AND   a.parameter = :param""")
 ])
 class CommunicationParameterFieldAssociation implements Serializable {
 
@@ -98,5 +102,15 @@ class CommunicationParameterFieldAssociation implements Serializable {
             list = session.getNamedQuery( 'CommunicationParameterFieldAssociation.findAllByField' ).setParameter( 'field', field ).list()
         }
         return list
+    }
+
+    public static CommunicationParameterFieldAssociation fetchByFieldAndParameter( CommunicationField field, CommunicationParameter param ) {
+        def list
+        CommunicationParameterFieldAssociation.withSession { session ->
+            list = session.getNamedQuery( 'CommunicationParameterFieldAssociation.fetchByFieldAndParameter' )
+                    .setParameter( 'field', field )
+                    .setParameter( 'param',param).list()
+        }
+        return list[0]
     }
 }
