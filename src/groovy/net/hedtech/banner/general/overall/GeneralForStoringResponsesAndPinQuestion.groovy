@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 /**
  Banner Automator Version: 1.29
@@ -27,6 +27,17 @@ import javax.persistence.*
                    FROM GeneralForStoringResponsesAndPinQuestion a
                    WHERE  pidm = :pidm
                    AND questionDescription = :questionDescription
+                """),
+@NamedQuery(name = "GeneralForStoringResponsesAndPinQuestion.fetchCountOfSameQuestionForPidmById",
+        query = """select count(a.questionDescription)
+                   FROM GeneralForStoringResponsesAndPinQuestion a
+                   WHERE  pidm = :pidm
+                   AND questionDescription = :questionDescription
+                   AND id <> :id
+                """),
+@NamedQuery(name = "GeneralForStoringResponsesAndPinQuestion.fetchQuestionForPidm",
+        query = """FROM GeneralForStoringResponsesAndPinQuestion a
+                   WHERE  pidm = :pidm
                 """)
 ])
 class GeneralForStoringResponsesAndPinQuestion implements Serializable {

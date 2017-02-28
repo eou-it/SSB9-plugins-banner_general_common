@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 /**
  Banner Automator Version: 1.29
@@ -27,6 +27,7 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
     def i_success_questionDescription = "TTTTT"
     def i_success_answerDescription = "TTTTT"
     def i_success_answerSalt = "TTTTT"
+    def i_success_user_def_question = "TTTTT"
 
 
     //Invalid test data (For failure tests)
@@ -174,6 +175,47 @@ class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends Ba
         catch (ApplicationException ae) {
             assertApplicationException ae, "readonlyFieldsCannotBeModified"
         }
+    }
+
+    @Test
+    void testFetchQuestionForPidm() {
+        def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
+        generalForStoringResponsesAndPinQuestion.save()
+        def result = generalForStoringResponsesAndPinQuestionService.fetchQuestionForPidm(generalForStoringResponsesAndPinQuestion.pidm)[0]
+
+        groovy.util.GroovyTestCase.assertEquals i_success_questionDescription, result.questionDescription
+        groovy.util.GroovyTestCase.assertEquals i_success_answerDescription, result.answerDescription
+        groovy.util.GroovyTestCase.assertEquals i_success_answerSalt, result.answerSalt
+    }
+
+    @Test
+    void testFetchCountOfSameQuestionForPidmByIdNone() {
+        def qstn = newValidUserResponsesWithOutPinQuestion()
+        qstn.save()
+        def result = generalForStoringResponsesAndPinQuestionService.fetchCountOfSameQuestionForPidmById(qstn.pidm, qstn.questionDescription, qstn.id as int)
+
+        groovy.util.GroovyTestCase.assertEquals 0, result
+    }
+
+    @Test
+    void testFetchCountOfSameQuestionForPidmByIdOne() {
+        def qstn = newValidUserResponsesWithOutPinQuestion()
+        qstn.save()
+        def result = generalForStoringResponsesAndPinQuestionService.fetchCountOfSameQuestionForPidmById(qstn.pidm, qstn.questionDescription, qstn.id+1 as int)
+
+        groovy.util.GroovyTestCase.assertEquals 1, result
+    }
+
+    private def newValidUserResponsesWithOutPinQuestion() {
+        def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
+                pidm: i_success_pidm,
+                number: 1,
+                questionDescription: i_success_user_def_question,
+                answerDescription: i_success_answerDescription,
+                answerSalt: "DUMMY",
+                pinQuestion: null,
+        )
+        return generalForStoringResponsesAndPinQuestion
     }
 
     private def newValidForCreateGeneralForStoringResponsesAndPinQuestion() {
