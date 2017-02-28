@@ -131,12 +131,6 @@ class CommunicationPopulation implements Serializable {
     @Column(name = "GCBPOPL_CHANGED_IND")
     Boolean changesPending = false
 
-    public CommunicationPopulationVersion createVersion() {
-        CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
-        populationVersion.population = this
-        return populationVersion
-    }
-
     static constraints = {
         name(nullable: false)
         description(nullable:true)

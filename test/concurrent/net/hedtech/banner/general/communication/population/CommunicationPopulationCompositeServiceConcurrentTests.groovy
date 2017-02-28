@@ -4,10 +4,13 @@
 package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryType
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import org.apache.commons.logging.LogFactory
 import org.junit.After
 import org.junit.Before
@@ -136,6 +139,58 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
                     theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
         }
         assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+    }
+
+    @Test void testPopulationWithOnlyIncludeList() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
+        List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
+
+        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        assertNotNull( results.population.includeList )
+        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 3, entryCount )
+        assertEquals( 3, results.entryResults.size() )
+
+        persons = [ 'CMOORE', '710000051' ]
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 4, entryCount )
+        assertEquals( 2, results.entryResults.size() )
+        assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND, results.entryResults.get(0).errorCode )
+        assertNull( results.entryResults.get(1).errorCode )
+
+        assertEquals( 0, CommunicationPopulationQueryAssociation.countByPopulation( population ) )
+
+        CommunicationPopulationSelectionList copy = communicationPopulationCompositeService.cloneSelectionList( population.includeList )
+        assertNotNull( copy.id )
+
+//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
+//        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
+//        def isAvailable = {
+//            def theCalculation = CommunicationPopulationCalculation.get( it )
+//            theCalculation.refresh()
+//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+//        }
+
+    }
+
+    @Test void testPopulationWithQueryAndIncludeList() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
+        List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
+
+        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        assertNotNull( results.population.includeList )
+        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
+        assertEquals( 3, entryCount )
+        assertEquals( 3, results.entryResults.size() )
+
+        persons = [ 'CMOORE', '710000051' ]
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 4, entryCount )
+        assertEquals( 2, results.entryResults.size() )
+        assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND, results.entryResults.get(0).errorCode )
+        assertNull( results.entryResults.get(1).errorCode )
     }
 
 }

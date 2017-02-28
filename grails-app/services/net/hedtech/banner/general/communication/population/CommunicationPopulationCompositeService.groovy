@@ -11,10 +11,8 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
@@ -206,7 +204,6 @@ class CommunicationPopulationCompositeService {
 
         def Sql sql
         try {
-            Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
             sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
             int rowsUpdated = sql.executeUpdate( "delete from GCRLENT where GCRLENT_SLIS_ID = ?", [population.includeList.id] )
             if (log.isDebugEnabled()) {
@@ -419,8 +416,77 @@ class CommunicationPopulationCompositeService {
      * @param version the optimistic lock counter
      */
     public CommunicationPopulationCalculation calculatePopulationForUser( CommunicationPopulation population, String oracleName = getCurrentUserBannerId() ) {
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
-        return calculatePopulationVersionForUser( populationVersion, oracleName )
+        if (population.changesPending) {
+            CommunicationPopulationVersion = createPopulationVersion( population )
+            population.changesPending = false
+            population = communicationPopulationService.update( population )
+        }
+
+
+
+/*
+From the UI use cases:
+1) Population from query
+    a) guaranteed to have a population version created and calculation scheduled, changes not pending
+
+2) population from add button
+      a) no population version, changes pending
+      - five people, changes pending
+      - hit the calculate button
+        - undefined at moment (ui should disable the button if no query present)
+
+3)  population with query we add include list
+    a) previous population version, calculation exists/scheduled, changes pending = true
+        - hit the calculate button
+        - calculate the previous population version
+
+Aggregate Results View - latest calculation union with population include list
+
+Start now groupsends
+2) population from add button
+        - check if changes pending, if so:
+        - create population version with a clone of the manual include list
+        - set the changes pending on the population to false
+        - start the groupsend with a link to the new population version
+        ===
+        - if no changes pending, that means there is a population version that matches the master population
+        - send the groupsend with the latest population version
+
+Scheduled groupsends - no recalc
+        (same logic a send immediate)
+        - check if changes pending, if so:
+        - create population version with a clone of the manual include list
+        - set the changes pending on the population to false
+        - start the groupsend with a link to the new population version
+        ===
+        - if no changes pending, that means there is a population version that matches the master population
+        - send the groupsend with the latest population version
+
+Scheduled groupsends - calc
+        - start the groupsend with the population set but no population version specified
+        - if changes pending,
+        - create population version with a clone of the manual include list
+        - have to create a NEW calculation
+        - set the changes pending on the population to false
+        ==
+        - if no changes pending, that means there is a population version that matches the master population
+        - use latest population version
+        - perform NEW query calculation
+
+
+*/
+        int queryAssociationCount = CommunicationPopulationQueryAssociation.countByPopulation( population )
+
+        if (queryAssociationCount == 0) {
+            return null
+        } else {
+            if (population.changesPending) {
+                // create a new population version
+            } else {
+                CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
+                return calculatePopulationVersionForUser( populationVersion, oracleName )
+            }
+        }
     }
 
     /**
@@ -596,10 +662,13 @@ class CommunicationPopulationCompositeService {
      * @param population
      * @return
      */
-    private CommunicationPopulationVersion createPopulationVersion(CommunicationPopulation population) {
+    public CommunicationPopulationVersion createPopulationVersion(CommunicationPopulation population) {
         log.trace( "createPopulationVersion( population ) called" )
         try {
-            CommunicationPopulationVersion populationVersion = population.createVersion()
+            CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
+            populationVersion.population = population
+            populationVersion.includeList = cloneSelectionList( population.includeList )
+
             populationVersion = (CommunicationPopulationVersion) communicationPopulationVersionService.create( populationVersion )
             assert populationVersion.id
             if (log.isDebugEnabled()) log.debug( "population version with id = ${populationVersion.id} created." )
@@ -615,6 +684,38 @@ class CommunicationPopulationCompositeService {
         } finally {
             log.trace( "createPopulationVersion( population ) exited" )
         }
+    }
+
+    public CommunicationPopulationSelectionList cloneSelectionList( CommunicationPopulationSelectionList selectionList ) {
+        if (selectionList == null) {
+            return null
+        }
+        CommunicationPopulationSelectionList clone = new CommunicationPopulationSelectionList()
+        clone = communicationPopulationSelectionListService.create( clone )
+
+        def Sql sql
+        try {
+            sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+            int rowsUpdated = sql.executeUpdate(
+                "INSERT INTO GCRLENT (GCRLENT_SLIS_ID, GCRLENT_PIDM, GCRLENT_USER_ID, GCRLENT_ACTIVITY_DATE) " +
+                        "SELECT ?, GCRLENT_PIDM, ?, SYSDATE FROM GCRLENT WHERE GCRLENT_SLIS_ID = ?",
+                [ clone.id, getCurrentUserBannerId(), selectionList.id ]
+            )
+
+            if (log.isDebugEnabled()) {
+                log.debug( "Deleted ${rowsUpdated} included entries for population with name ${population.name} and id ${population.id}." )
+            }
+        } catch (SQLException e) {
+            this.log.error( "Failed to clone selection list", e )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, e )
+        } catch (Throwable t) {
+            this.log.error( "Failed to clone selection list", t )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, t )
+        } finally {
+            sql?.close()
+        }
+
+        return clone
     }
 
     /**

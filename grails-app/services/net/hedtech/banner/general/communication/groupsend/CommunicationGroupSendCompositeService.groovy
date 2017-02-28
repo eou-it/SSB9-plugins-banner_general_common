@@ -10,10 +10,13 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
+import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
+import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
@@ -68,10 +71,6 @@ class CommunicationGroupSendCompositeService {
         groupSend.populationId = request.getPopulationId()
 
         // do lookup for population version
-        CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( request.getPopulationId() )
-        assert populationVersion.id
-        groupSend.populationVersionId = populationVersion.id
-
         groupSend.organizationId = request.getOrganizationId()
         groupSend.name = jobName
         groupSend.scheduledStartDate = request.scheduledStartDate
@@ -79,13 +78,46 @@ class CommunicationGroupSendCompositeService {
         groupSend.jobId = request.referenceId
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
-        if(!groupSend.recalculateOnSend || !request.scheduledStartDate) {
-            // May want to have UI pass the current calculation as part of the request so there is no chance of picking the wrong one.
-            CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( groupSend.getPopulationId(), bannerUser )
-            if (!calculation || !calculation.status.equals( CommunicationPopulationCalculationStatus.AVAILABLE )) {
-                throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser" )
+
+ // To do: what to do with population calculation if create a new population version
+
+        if (groupSend.scheduledStartDate) {
+            if (groupSend.recalculateOnSend) {
+                // will calculate population version at time of recalculate to get any late
+                // manual include additions
+                groupSend.populationVersionId = null
+                groupSend.populationCalculationId = null
+            } else {
+                // send later with a current replica
+                assignPopulationVersion( groupSend )
+                assignPopulationCalculation( groupSend, bannerUser )
             }
-            groupSend.populationCalculationId = calculation.id
+        } else { // sending immediately with a replica of the current population
+            assignPopulationVersion( groupSend )
+            assignPopulationCalculation( groupSend, bannerUser )
+        }
+
+        CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
+        boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0)
+        boolean useCurrentReplica = (!groupSend.recalculateOnSend || !request.scheduledStartDate)
+
+        if (hasQuery && useCurrentReplica) {
+            // this will need to be updated once we allow queries to be added to existing manual only populations
+            assignPopulationVersion( groupSend )
+            assignPopulationCalculation( groupSend, bannerUser )
+        } else if (groupSend.recalculateOnSend) { // scheduled with future replica of population
+        } else { // sending now or scheduled with replica of current population
+            assert (useCurrentReplica == true)
+            assignPopulationVersion( groupSend )
+        }
+
+        CommunicationPopulationVersion populationVersion = assignPopulationVersion( groupSend )
+        boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion( populationVersion ) > 0)
+
+
+        if(hasQuery && useCurrentReplica) {
+            // May want to have UI pass the current calculation as part of the request so there is no chance of picking the wrong one.
+
         }
 
         groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
@@ -101,6 +133,14 @@ class CommunicationGroupSendCompositeService {
         }
 
         return groupSend
+    }
+
+    private void assignPopulationCalculation(CommunicationGroupSend groupSend, String bannerUser) {
+        CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(groupSend.getPopulationId(), bannerUser)
+        if (!calculation || !calculation.status.equals(CommunicationPopulationCalculationStatus.AVAILABLE)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser")
+        }
+        groupSend.populationCalculationId = calculation.id
     }
 
     /**
@@ -215,6 +255,19 @@ class CommunicationGroupSendCompositeService {
 
     public CommunicationGroupSend generateGroupSendItemsFailed( SchedulerErrorContext errorContext ) {
         return scheduledGroupSendCallbackFailed( errorContext )
+    }
+
+    private CommunicationPopulationVersion assignPopulationVersion( CommunicationGroupSend groupSend ) {
+        CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
+        CommunicationPopulationVersion populationVersion
+        if (population.changesPending) {
+            populationVersion = communicationPopulationCompositeService.createPopulationVersion( population )
+        } else {
+            populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( groupSend.populationId )
+        }
+        assert populationVersion.id
+        groupSend.populationVersionId = populationVersion.id
+        return populationVersion
     }
 
     private CommunicationGroupSend scheduledGroupSendCallbackFailed( SchedulerErrorContext errorContext ) {
