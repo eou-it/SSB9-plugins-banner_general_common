@@ -16,7 +16,7 @@ import javax.persistence.*
 @Entity
 @EqualsAndHashCode
 @ToString
-@Table(name = "GVQ_GCBPOPL")
+@Table(name = "GVQ_GCBPOPL_DETAIL")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationListView.fetchAllByQueryId",
                 query = """ FROM CommunicationPopulationListView a
@@ -33,7 +33,11 @@ import javax.persistence.*
                     ORDER BY a.lastCalculatedTime desc """),
         @NamedQuery(name = "CommunicationPopulationListView.fetchByPopulationId",
                 query = """ FROM CommunicationPopulationListView a
-                    WHERE  a.id = :populationId """)
+                    WHERE  a.id = :populationId """),
+        @NamedQuery(name = "CommunicationPopulationListView.fetchBySelectionListIdAndManual",
+                query = """ select distinct a FROM CommunicationPopulationListView a
+            WHERE  a.populationSelectionListId IN ( :selectionListId, :includeListId)
+            """)
 ])
 class CommunicationPopulationListView implements Serializable {
     /**
@@ -101,6 +105,18 @@ class CommunicationPopulationListView implements Serializable {
      */
     @Column(name = "POPULATION_SELECTION_LIST_ID")
     Long populationSelectionListId
+
+    /**
+     *
+     */
+    @Column(name = "POPULATION_INCLUDE_LIST_ID")
+    Long includeListId
+
+    /**
+     *
+     */
+    @Column(name = "POPULATION_EXCLUDE_LIST_ID")
+    Long excludeListId
 
     /**
      *
@@ -256,5 +272,18 @@ class CommunicationPopulationListView implements Serializable {
             }
         }
         return results
+    }
+
+    public static List<CommunicationPopulationListView> fetchBySelectionListIdAndManual(Long selectionListId, Long includeListId) {
+
+        def populationListViews
+
+        populationListViews = CommunicationPopulationListView.withSession { session ->
+            session.getNamedQuery('CommunicationPopulationListView.fetchBySelectionListIdAndManual')
+                    .setLong('selectionListId', selectionListId)
+                    .setLong('includeListId', includeListId)
+                    .list()
+        }
+        return populationListViews
     }
 }
