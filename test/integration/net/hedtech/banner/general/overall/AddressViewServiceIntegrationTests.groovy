@@ -62,18 +62,14 @@ class AddressViewServiceIntegrationTests extends BaseIntegrationTestCase {
     void testFetchAllByGuidsAndAddressTypeCodes() {
         List<AddressView> addressViews = addressViewService.fetchAll(10, 0)
         assertTrue addressViews.size() > 0
-
-        AddressView addressView
-        for(AddressView each:addressViews) {
-            if (each.addressTypeCode != null) {
-                addressView = each
-                break
-            }
+        //get the index that has the atyp code populated otherwise the test fails
+        def atypIndex = addressViews.findIndexOf {it.addressTypeCode != null}
+        if (atypIndex == 0) {
+            //there could be a case where the first 10 rows selected have no atyp so get first 30
+            addressViews = addressViewService.fetchAll(30, 0)
         }
-
-        assertNotNull( addressView )
-        assertNotNull( addressView.addressTypeCode )
-        def results = addressViewService.fetchAllByGuidsAndAddressTypeCodes([addressView.id], [addressView.addressTypeCode])
+        atypIndex = addressViews.findIndexOf {it.addressTypeCode != null}
+        def results = addressViewService.fetchAllByGuidsAndAddressTypeCodes([addressViews[atypIndex].id], [addressViews[atypIndex].addressTypeCode])
         assertTrue results.size() > 0
         assertTrue results[0] instanceof AddressView
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.overall.loginworkflow
 
@@ -92,6 +92,45 @@ class SecurityQAService {
         }
     }
 
+    public void saveOrUpdateSecurityQAResponse(String pidm, List questionList, String pin) {
+
+        boolean isValidPin = GeneralCommonUtility.validatePin(pin, pidm)
+        if (!isValidPin) {
+            throw new ApplicationException("", "securityQA.invaild.pin")
+        }
+
+        if (questionList.size() <= 0) {
+            throw new ApplicationException("", "securityQA.error")
+        }
+
+        int cnt = 1
+        questionList.each {
+
+            String dropDownQuestion = it["question"]
+            String editableQuestion = it["userDefinedQuestion"]
+            String answer = it["answer"]
+            String dropDownQuestionId = it["questionNo"]
+            String questionNumber = cnt++
+
+            validateValueConstraints(dropDownQuestion, editableQuestion, answer)
+
+            if (isDropDownQuestionAnswered(dropDownQuestion, answer)) {
+                if(it.id) {
+                    updateDropDownQuestionAndAnswer(pidm, dropDownQuestionId, answer, it.id, it.version)
+                }
+                else {
+                    createDropDownQuestionAndAnswer(pidm, dropDownQuestionId, questionNumber, answer)
+                }
+            } else {
+                if(it.id) {
+                    updateEditableQuestionAndAnswer(pidm, editableQuestion, answer, it.id, it.version)
+                }
+                else {
+                    createEditableQuestionAndAnswer(pidm, editableQuestion, questionNumber, answer)
+                }
+            }
+        }
+    }
 
     private void validateValueConstraints(String question1, String question2, String answer) {
         checkAndRaiseExceptionIfMoreThanOneQuestionEntered(question1, question2)
@@ -196,5 +235,36 @@ class SecurityQAService {
                 pinQuestion: null
         )
         generalForStoringResponsesAndPinQuestionService.create(generalForStoringResponsesAndPinQuestion)
+    }
+
+    private void updateDropDownQuestionAndAnswer(pidm, questionId, answer, id, version) {
+        def pinQuestion = PinQuestion.fetchQuestionOnId(questionId)
+        Map generalForStoringResponsesAndPinQuestion = [
+               id: id,
+               version: version,
+               pidm: Integer.valueOf(pidm),
+               questionDescription: null,
+               answerDescription: answer,
+               answerSalt: ANSWER_SALT_DUMMY,
+               pinQuestion: pinQuestion
+        ]
+        generalForStoringResponsesAndPinQuestionService.update(generalForStoringResponsesAndPinQuestion)
+    }
+
+    private void updateEditableQuestionAndAnswer(pidm, question, answer, id, version) {
+        if (generalForStoringResponsesAndPinQuestionService.fetchCountOfSameQuestionForPidmById(Integer.valueOf(pidm), question, id as int) > 0) {
+            log.warn("Question has to be Unique")
+            throw new ApplicationException("", "securityQA.unique.question")
+        }
+        Map generalForStoringResponsesAndPinQuestion = [
+                id: id,
+                version: version,
+                pidm: Integer.valueOf(pidm),
+                questionDescription: question,
+                answerDescription: answer,
+                answerSalt: ANSWER_SALT_DUMMY,
+                pinQuestion: null
+        ]
+        generalForStoringResponsesAndPinQuestionService.update(generalForStoringResponsesAndPinQuestion)
     }
 }
