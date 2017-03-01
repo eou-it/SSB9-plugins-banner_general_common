@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.person.ldm
 
@@ -735,11 +735,12 @@ class UserRoleCompositeService extends LdmService {
 
 
     private String getSQLforFetchingStudentsByPIDMs() {
-        def sql = """ select a.spriden_pidm
-                      from spriden a
-                      where exists (select 1 from sgbstdn b where b.sgbstdn_pidm = a.spriden_pidm)
-                      and a.spriden_change_ind is null
+        def sql = """ select a.spriden_pidm, c.STVTERM_START_DATE, c.STVTERM_END_DATE
+                      from spriden a, sgbstdn b, stvterm c
+                      where a.spriden_change_ind is null
                       and a.spriden_entity_ind = 'P'
+                      and a.spriden_pidm = b.sgbstdn_pidm
+                      and b.SGBSTDN_TERM_CODE_EFF = c.STVTERM_CODE
                       and a.spriden_pidm in (:pidms) """
         return sql.replace("\n", "").replaceAll(/  */, " ")
     }

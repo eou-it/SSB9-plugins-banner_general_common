@@ -265,9 +265,10 @@ class PersonV3CompositeService {
 
     private def getPidmToStudentRoleMap(List<Integer> pidms) {
         def pidmToStudentRoleMap = [:]
-        List<BigDecimal> rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
+        List<Object[]> rows = userRoleCompositeService.fetchStudentsByPIDMs(pidms)
         rows?.each {
-            pidmToStudentRoleMap.put(it.toInteger(), [role: RoleName.STUDENT])
+            BigDecimal bdPidm = it[0]
+            pidmToStudentRoleMap.put(bdPidm.toInteger(), [role: RoleName.STUDENT])
         }
         return pidmToStudentRoleMap
     }
