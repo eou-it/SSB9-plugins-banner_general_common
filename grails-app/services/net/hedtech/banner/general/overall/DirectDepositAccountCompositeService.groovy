@@ -83,11 +83,6 @@ class DirectDepositAccountCompositeService {
      */
     def getUserHrAllocations(pidm) {
         def model = [:]
-        def lastPayDist
-
-        if (checkIfHrInstalled()) {
-            lastPayDist=getLastPayDistribution(pidm)
-        }
 
         def allocations = directDepositAccountService.getActiveHrAccounts(pidm).sort {it.priority}
         def allocList = []
@@ -344,54 +339,57 @@ class DirectDepositAccountCompositeService {
 
         def model = [:]
 
-        def lastPayStub = lastPayStub(pidm)
+        if (checkIfHrInstalled()) {
+            def lastPayStub = lastPayStub(pidm)
 
-        if (lastPayStub) {
+            if (lastPayStub) {
 
-            def lastPaidDate = lastPayStub.eventDate
-            def pictCode = lastPayStub.pictCode
-            def year = lastPayStub.year
-            def payNo = lastPayStub.payNo
-            def seqNo = lastPayStub.seqNo
-            def payTypeInd = lastPayStub.typeInd
+                def lastPaidDate = lastPayStub.eventDate
+                def pictCode = lastPayStub.pictCode
+                def year = lastPayStub.year
+                def payNo = lastPayStub.payNo
+                def seqNo = lastPayStub.seqNo
+                def payTypeInd = lastPayStub.typeInd
 
-            model.hasPayrollHist = true
-            model.totalNet = 0
-            model.payDate = lastPaidDate
-            model.docAccts = []
-            def directDeposit = lastPayDirectDeposit (pidm,
-                                                      year,
-                                                      pictCode,
-                                                      payNo)
-            if (directDeposit == 'Y') {
-                def docs
-                if (payTypeInd != 'M') {
-                    docs = payrollDocs(pidm, year, pictCode, payNo, 0)
+                model.hasPayrollHist = true
+                model.totalNet = 0
+                model.payDate = lastPaidDate
+                model.docAccts = []
+                def directDeposit = lastPayDirectDeposit(pidm,
+                        year,
+                        pictCode,
+                        payNo)
+                if (directDeposit == 'Y') {
+                    def docs
+                    if (payTypeInd != 'M') {
+                        docs = payrollDocs(pidm, year, pictCode, payNo, 0)
+                    } else {
+                        docs = payrollDocs(pidm, year, pictCode, payNo, seqNo)
+                    }
+
+                    docs.eachWithIndex { acct, i ->
+                        model.docAccts[i] = [:]
+                        model.docAccts[i].bankName = acct.bankName
+                        model.docAccts[i].bankRoutingNumber = acct.bank_rout
+                        model.docAccts[i].bankAccountNumber = acct.phrdocm_bank_acct_no
+                        model.docAccts[i].accountType = acct.phrdocm_acct_type
+                        model.docAccts[i].net = acct.phrdocm_net
+
+                        model.totalNet += acct.phrdocm_net
+
+                        model.docAccts[i].net = formatCurrency(model.docAccts[i].net)
+                    }
                 } else {
-                    docs = payrollDocs(pidm, year, pictCode, payNo, seqNo)
+
+                    def lastPayAmtRec = lastPayAmount(pidm)
+                    if (lastPayAmtRec) {
+                        model.totalNet = lastPayAmtRec.netAmount
+                    }
+
                 }
-
-                docs.eachWithIndex { acct, i ->
-                    model.docAccts[i] = [:]
-                    model.docAccts[i].bankName = acct.bankName
-                    model.docAccts[i].bankRoutingNumber = acct.bank_rout
-                    model.docAccts[i].bankAccountNumber = acct.phrdocm_bank_acct_no
-                    model.docAccts[i].accountType = acct.phrdocm_acct_type
-                    model.docAccts[i].net = acct.phrdocm_net
-
-                    model.totalNet += acct.phrdocm_net
-
-                    model.docAccts[i].net = formatCurrency(model.docAccts[i].net)
-                }
-            } else {
-
-                def lastPayAmtRec = lastPayAmount(pidm)
-                if (lastPayAmtRec) {
-                    model.totalNet = lastPayAmtRec.netAmount
-                }
-
             }
         }
+
         return model
     }
 

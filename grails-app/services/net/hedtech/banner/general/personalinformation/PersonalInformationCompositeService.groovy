@@ -33,29 +33,7 @@ class PersonalInformationCompositeService {
     }
 
     def fetchUpdateableTelephoneTypeList(pidm, roles, int max = 10, int offset = 0, String searchString = '') {
-        def phoneTypeList = telephoneTypeService.fetchUpdateableTelephoneTypeList(25, offset, searchString)
-        def validPhoneTypeList = []
-        def userParams = buildUserMapForRules(pidm, roles)
-
-        int i = 0, count = 0;
-        while (i < phoneTypeList.size() && count < max) {
-            def params = [:]
-            params.TELEPHONE_TYPE = phoneTypeList[i].code
-            params.putAll(userParams)
-
-            if (sqlProcessCompositeService.getSsbRuleResult('SSB_TELEPHONE_UPDATE', params)) {
-                validPhoneTypeList << phoneTypeList[i]
-                count++
-            }
-            i++
-            if(i == phoneTypeList.size()){
-                offset += phoneTypeList.size()
-                phoneTypeList = telephoneTypeService.fetchUpdateableTelephoneTypeList(25, offset, searchString)
-                if(phoneTypeList.size() > 0) i = 0
-            }
-        }
-
-        validPhoneTypeList
+        return fetchUpdateableTypesList('TELEPHONE', pidm, roles, max, offset, searchString)
     }
 
     def validateTelephoneTypeRule(phoneType, pidm, roles) {
@@ -67,29 +45,7 @@ class PersonalInformationCompositeService {
     }
 
     def fetchUpdateableEmailTypeList(pidm, roles, int max = 10, int offset = 0, String searchString = '') {
-        def emailTypeList = emailTypeService.fetchEmailTypeList(25, offset, searchString)
-        def validEmailTypeList = []
-        def userParams = buildUserMapForRules(pidm, roles)
-
-        int i = 0, count = 0;
-        while (i < emailTypeList.size() && count < max) {
-            def params = [:]
-            params.EMAIL_TYPE = emailTypeList[i].code
-            params.putAll(userParams)
-
-            if (sqlProcessCompositeService.getSsbRuleResult('SSB_EMAIL_UPDATE', params)) {
-                validEmailTypeList << emailTypeList[i]
-                count++
-            }
-            i++
-            if(i == emailTypeList.size()){
-                offset += emailTypeList.size()
-                emailTypeList = emailTypeService.fetchEmailTypeList(25, offset, searchString)
-                if(emailTypeList.size() > 0) i = 0
-            }
-        }
-
-        validEmailTypeList
+        return fetchUpdateableTypesList('EMAIL', pidm, roles, max, offset, searchString)
     }
 
     def validateEmailTypeRule(emailType, pidm, roles) {
@@ -132,5 +88,48 @@ class PersonalInformationCompositeService {
         }
 
         paramMap
+    }
+
+    private def fetchUpdateableTypesList(type, pidm, roles, int max, int offset, String searchString) {
+        Closure fetchList
+        String rule, typeName
+        if(type == 'TELEPHONE') {
+            fetchList = { int maximum, int ofst, String searchStr ->
+                telephoneTypeService.fetchUpdateableTelephoneTypeList(maximum, ofst, searchStr)
+            }
+            rule = 'SSB_TELEPHONE_UPDATE'
+            typeName = 'TELEPHONE_TYPE'
+        }
+        else {
+            fetchList = { int maximum, int ofst, String searchStr ->
+                emailTypeService.fetchEmailTypeList(maximum, ofst, searchStr)
+            }
+            rule = 'SSB_EMAIL_UPDATE'
+            typeName = 'EMAIL_TYPE'
+        }
+        def typeList = fetchList(25, 0, searchString)
+        def validTypeList = []
+        def userParams = buildUserMapForRules(pidm, roles)
+
+        int i = 0, count = 0, rawOffset = 0;
+        while (i < typeList.size() && count < (max+offset)) {
+            def params = [:]
+            params[typeName] = typeList[i].code
+            params.putAll(userParams)
+
+            if (sqlProcessCompositeService.getSsbRuleResult(rule, params)) {
+                count++
+                if(count > offset)
+                    validTypeList << typeList[i]
+            }
+            i++
+            if(i == typeList.size()) {
+                rawOffset += typeList.size()
+                typeList = fetchList(25, rawOffset, searchString)
+                if(typeList.size() > 0) i = 0
+            }
+        }
+
+        validTypeList
     }
 }

@@ -22,6 +22,7 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     def i_success_answer1 ="My Success Answer"
     def i_failure_answer1 ="My Answer<>"
     def i_failure_question_desc1 ="My test Question<>"
+    def u_success_answer1 = "The successful answer"
     def pidm
 
     @Before
@@ -228,12 +229,85 @@ class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
         setNumberOfQuestion(3)
         assertEquals 3, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS.toInteger()
         List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:i_success_answer1,questionNo:pinQuestion.id],
-                [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:i_success_answer1,questionNo:""],
-                [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
+                            [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:i_success_answer1,questionNo:""],
+                            [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
         securityQAService.saveSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
         int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
         assertTrue ansrCount==3
 
+    }
+
+    @Test
+    void testValidSaveUpdateSecurityQAResponseSave()
+    {
+        def pinQuestion  = newValidForCreatePinQuestion("TT12")
+        pinQuestion.save( failOnError: true, flush: true )
+        assertNotNull pinQuestion.id
+        String validPassword = "111111"
+        setNumberOfQuestion(3)
+        assertEquals 3, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS.toInteger()
+        List quesAnsList = [[pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:i_success_answer1,questionNo:pinQuestion.id],
+                            [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:i_success_answer1,questionNo:""],
+                            [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""] ]
+        securityQAService.saveOrUpdateSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
+        assertTrue ansrCount==3
+    }
+
+    @Test
+    void testValidSaveUpdateSecurityQAResponseUpdate()
+    {
+        def pinQuestion  = newValidForCreatePinQuestion("TT12")
+        pinQuestion.save( failOnError: true, flush: true )
+        assertNotNull pinQuestion.id
+
+        def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
+        generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
+        assertNotNull generalForStoringResponsesAndPinQuestion.id
+        assertNotNull generalForStoringResponsesAndPinQuestion.version
+        assertEquals i_success_answer1, generalForStoringResponsesAndPinQuestion.answerDescription
+        def u_success_id = generalForStoringResponsesAndPinQuestion.id
+        def u_success_version = generalForStoringResponsesAndPinQuestion.version
+
+        String validPassword = "111111"
+        setNumberOfQuestion(3)
+        assertEquals 3, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS.toInteger()
+        List quesAnsList = [[pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question2,answer:u_success_answer1,questionNo:"",id:u_success_id,version:u_success_version],
+                            [pidm: i_success_pidm,question: i_success_question_desc1,userDefinedQuestion:"",answer:i_success_answer1,questionNo:pinQuestion.id],
+                            [pidm: i_success_pidm,question: "",userDefinedQuestion:i_user_def_question1,answer:i_success_answer1,questionNo:""]]
+        securityQAService.saveOrUpdateSecurityQAResponse(i_success_pidm,quesAnsList,validPassword)
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
+        assertTrue ansrCount==3
+    }
+
+    @Test
+    void testInvalidSaveUpdateSecurityQAResponseUpdate()
+    {
+        def pinQuestion  = newValidForCreatePinQuestion("TT12")
+        pinQuestion.save( failOnError: true, flush: true )
+        assertNotNull pinQuestion.id
+
+        def generalForStoringResponsesAndPinQuestion = newValidUserResponsesWithOutPinQuestion()
+        generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
+        assertNotNull generalForStoringResponsesAndPinQuestion.id
+        assertNotNull generalForStoringResponsesAndPinQuestion.version
+        assertEquals i_success_answer1, generalForStoringResponsesAndPinQuestion.answerDescription
+        def u_success_id = generalForStoringResponsesAndPinQuestion.id
+        def u_success_version = generalForStoringResponsesAndPinQuestion.version
+
+        String validPassword = "111111"
+        setNumberOfQuestion(3)
+        assertEquals 3, securityQAService.getUserDefinedPreference()?.GUBPPRF_NO_OF_QSTNS.toInteger()
+        List quesAnsList = [[pidm: i_success_pidm, question: "", userDefinedQuestion:i_user_def_question2, answer:u_success_answer1, questionNo:"", id:u_success_id,version:u_success_version],
+                            [pidm: i_success_pidm, question: "", userDefinedQuestion:i_user_def_question2, answer:i_success_answer1, questionNo:""],
+                            [pidm: i_success_pidm, question: i_success_question_desc1, userDefinedQuestion:"", answer:i_success_answer1, questionNo:pinQuestion.id]]
+
+        def exceptionMessage = shouldFail(ApplicationException) {
+            securityQAService.saveOrUpdateSecurityQAResponse(i_success_pidm, quesAnsList, validPassword)
+        }
+        assertEquals 'securityQA.unique.question', exceptionMessage
+        int ansrCount = GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)
+        assertTrue ansrCount==1
     }
 
     @Test

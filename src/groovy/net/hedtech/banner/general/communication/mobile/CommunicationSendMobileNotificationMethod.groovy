@@ -11,7 +11,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-
+import org.joda.time.format.ISODateTimeFormat
 
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.POST
@@ -170,6 +170,6 @@ class CommunicationSendMobileNotificationMethod {
 
 
     private boolean isEmpty(String s) {
-        return !s || s.length() == 0
+        return ((!s) || (s == null) || (s.length() == 0) || (s == ""))
     }
 }

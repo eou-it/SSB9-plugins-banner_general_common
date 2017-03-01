@@ -9,6 +9,7 @@ import org.junit.After
 import grails.validation.ValidationException
 import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonUtility
+import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
 
@@ -123,7 +124,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
-        def today = new Date()
+        def today = GeneralCommonUtility.getSystemDate()
 
         def pidmAndUDCIdMapping = newValidForCreatePidmAndUDCIdMapping()
         pidmAndUDCIdMapping.createDate = new Date()
