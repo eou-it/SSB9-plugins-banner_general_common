@@ -416,8 +416,9 @@ class CommunicationPopulationCompositeService {
      * @param version the optimistic lock counter
      */
     public CommunicationPopulationCalculation calculatePopulationForUser( CommunicationPopulation population, String oracleName = getCurrentUserBannerId() ) {
+        CommunicationPopulationVersion populationVersion
         if (population.changesPending) {
-            CommunicationPopulationVersion = createPopulationVersion( population )
+            populationVersion = createPopulationVersion( population )
             population.changesPending = false
             population = communicationPopulationService.update( population )
         }
@@ -483,7 +484,7 @@ Scheduled groupsends - calc
             if (population.changesPending) {
                 // create a new population version
             } else {
-                CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
+                populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
                 return calculatePopulationVersionForUser( populationVersion, oracleName )
             }
         }

@@ -16,7 +16,6 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
@@ -106,26 +105,21 @@ class CommunicationGroupSendCompositeService {
             assignPopulationVersion( groupSend )
             assignPopulationCalculation( groupSend, bannerUser )
         } else if (groupSend.recalculateOnSend) { // scheduled with future replica of population
+            groupSend.populationVersionId = null
+            groupSend.populationCalculationId = null
         } else { // sending now or scheduled with replica of current population
             assert (useCurrentReplica == true)
             assignPopulationVersion( groupSend )
-        }
-
-        CommunicationPopulationVersion populationVersion = assignPopulationVersion( groupSend )
-        boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion( populationVersion ) > 0)
-
-
-        if(hasQuery && useCurrentReplica) {
-            // May want to have UI pass the current calculation as part of the request so there is no chance of picking the wrong one.
-
+            if (hasQuery) {
+                assignPopulationCalculation( groupSend, bannerUser )
+            }
         }
 
         groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
         validateTemplateAndParameters( groupSend )
 
-        groupSend = communicationGroupSendService.create( groupSend )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.create( groupSend )
 
-        String mepCode = groupSend.mepCode
         if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend( groupSend, bannerUser )
         } else {
@@ -135,7 +129,7 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-    private void assignPopulationCalculation(CommunicationGroupSend groupSend, String bannerUser) {
+    private static void assignPopulationCalculation(CommunicationGroupSend groupSend, String bannerUser) {
         CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(groupSend.getPopulationId(), bannerUser)
         if (!calculation || !calculation.status.equals(CommunicationPopulationCalculationStatus.AVAILABLE)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService.class, "populationNotCalculatedForUser")
@@ -171,7 +165,6 @@ class CommunicationGroupSendCompositeService {
         }
 
         //if group send is scheduled
-        String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
         if(groupSend.jobId != null) {
             schedulerJobService.deleteScheduledJob( groupSend.jobId, groupSend.groupId )
         } else {
@@ -203,7 +196,7 @@ class CommunicationGroupSendCompositeService {
     public CommunicationGroupSend stopGroupSend( Long groupSendId ) {
         if (log.isDebugEnabled()) log.debug( "Stopping group send with id = ${groupSendId}." )
 
-        CommunicationGroupSend groupSend = communicationGroupSendService.get( groupSendId )
+        CommunicationGroupSend groupSend = (CommunicationGroupSend) communicationGroupSendService.get( groupSendId )
 
         if (groupSend.currentExecutionState.isTerminal()) {
             log.error( "Group send with id = ${groupSend.id} has already concluded with execution state ${groupSend.currentExecutionState.toString()}." )
@@ -232,7 +225,7 @@ class CommunicationGroupSendCompositeService {
     public CommunicationGroupSend completeGroupSend( Long groupSendId ) {
         if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
 
-        CommunicationGroupSend aGroupSend = communicationGroupSendService.get( groupSendId )
+        CommunicationGroupSend aGroupSend = (CommunicationGroupSend) communicationGroupSendService.get( groupSendId )
         aGroupSend.markComplete()
         return saveGroupSend( aGroupSend )
     }
@@ -310,7 +303,13 @@ class CommunicationGroupSendCompositeService {
 
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
-                CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
+                CommunicationPopulationVersion populationVersion
+                if (!groupSend.populationVersionId) {
+                    populationVersion = assignPopulationVersion( groupSend )
+                } else {
+                    populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
+                }
+
                 if (!populationVersion) {
                     throw new ApplicationException( "populationVersion", new NotFoundException() )
                 }
@@ -319,14 +318,14 @@ class CommunicationGroupSendCompositeService {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
                     CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
-                    groupSend = communicationGroupSendService.update( groupSend )
+                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
                 }
                 groupSend = generateGroupSendItemsImpl(groupSend)
             } catch (Throwable t) {
                 log.error( t.getMessage() )
                 groupSend.refresh()
                 groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, t.getMessage() )
-                groupSend = communicationGroupSendService.update(groupSend)
+                groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
             }
         }
         return groupSend
@@ -354,7 +353,7 @@ class CommunicationGroupSendCompositeService {
             } catch (Throwable t) {
                 log.error(t.getMessage())
                 groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, t.getMessage() )
-                groupSend = communicationGroupSendService.update(groupSend)
+                groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
             }
         }
         return groupSend
@@ -372,7 +371,7 @@ class CommunicationGroupSendCompositeService {
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
         groupSend.markQueued( jobReceipt.jobId, jobReceipt.groupId )
-        groupSend = communicationGroupSendService.update(groupSend)
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         return groupSend
     }
 
@@ -399,7 +398,7 @@ class CommunicationGroupSendCompositeService {
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleServiceMethod( jobContext )
         groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
-        groupSend = communicationGroupSendService.update( groupSend )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
         return groupSend
     }
 
@@ -408,7 +407,7 @@ class CommunicationGroupSendCompositeService {
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems(groupSend)
         groupSend.markProcessing()
-        groupSend = communicationGroupSendService.update(groupSend)
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         return groupSend
     }
 
@@ -453,7 +452,7 @@ class CommunicationGroupSendCompositeService {
         }
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
         try {
-            int rows = sql.executeUpdate("DELETE FROM gcbrdat a WHERE EXISTS (SELECT b.gcrgsim_surrogate_id FROM gcrgsim b, gcbgsnd c WHERE a.gcbrdat_reference_id = b.gcrgsim_reference_id AND b.gcrgsim_group_send_id = c.gcbgsnd_surrogate_id AND c.gcbgsnd_surrogate_id = ?)",
+            int rows = sql.executeUpdate( "DELETE FROM gcbrdat a WHERE EXISTS (SELECT b.gcrgsim_surrogate_id FROM gcrgsim b, gcbgsnd c WHERE a.gcbrdat_reference_id = b.gcrgsim_reference_id AND b.gcrgsim_group_send_id = c.gcbgsnd_surrogate_id AND c.gcbgsnd_surrogate_id = ?)",
                     [ groupSendId ] )
             if (log.isDebugEnabled()) {
                 log.debug( "Deleting ${rows} recipient data referenced by group send id = ${groupSendId}.")
@@ -472,7 +471,7 @@ class CommunicationGroupSendCompositeService {
         try {
             Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
             sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
-            int rowsUpdated = sql.executeUpdate( "update GCBCJOB set GCBCJOB_STATUS='STOPPED', GCBCJOB_ACTIVITY_DATE = SYSDATE where " +
+            sql.executeUpdate( "update GCBCJOB set GCBCJOB_STATUS='STOPPED', GCBCJOB_ACTIVITY_DATE = SYSDATE where " +
                     "GCBCJOB_STATUS in ('PENDING', 'DISPATCHED') and GCBCJOB_REFERENCE_ID in " +
                     "(select GCRGSIM_REFERENCE_ID from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId} and GCRGSIM_CURRENT_STATE = 'Complete')" )
         } catch (SQLException e) {
@@ -489,7 +488,7 @@ class CommunicationGroupSendCompositeService {
         try {
             Connection connection = (Connection) sessionFactory.getCurrentSession().connection()
             sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
-            int rowsUpdated = sql.executeUpdate( "update GCRGSIM set GCRGSIM_CURRENT_STATE='Stopped', GCRGSIM_ACTIVITY_DATE = SYSDATE, GCRGSIM_STOP_DATE = SYSDATE where " +
+            sql.executeUpdate( "update GCRGSIM set GCRGSIM_CURRENT_STATE='Stopped', GCRGSIM_ACTIVITY_DATE = SYSDATE, GCRGSIM_STOP_DATE = SYSDATE where " +
                     "GCRGSIM_CURRENT_STATE in ('Ready') and GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
         } catch (SQLException e) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
