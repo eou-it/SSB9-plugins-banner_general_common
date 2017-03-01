@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Timestamp
 
+@Deprecated
 @Transactional
 class NonPersonCompositeService extends LdmService {
 
