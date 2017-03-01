@@ -3,11 +3,14 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.util.Holders
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.context.ApplicationContext
+import org.springframework.context.i18n.LocaleContextHolder
 
 class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
@@ -142,6 +145,8 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         profileItem.itemType = 'A' // Force to be an address
         def addrMaskingRule = getMaskingRuleForTest()
 
+        // Set temporary "messages.properties" key/value pair for address line 6
+        injectMessageProperty('default.personAddress.line6.format', '$streetLine4')
 
         def result = directoryProfileCompositeService.getItemProperties(pidm, profileItem, null, addrMaskingRule)
 
@@ -505,6 +510,20 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         ]
 
         return maskingRule
+    }
+
+    /**
+     * Inject new message key/value pair into Grails messageSource.
+     * @param key
+     * @param value
+     */
+    private injectMessageProperty(key, value) {
+        def application = Holders.getGrailsApplication()
+        ApplicationContext applicationContext = application.mainContext
+        def messageSource = applicationContext.getBean("messageSource")
+        Properties insertedProperties = new Properties()
+        insertedProperties.setProperty(key, value)
+        messageSource.setCommonMessages(insertedProperties)
     }
 
 }
