@@ -85,11 +85,11 @@ class CommunicationPopulationCompositeService {
         for (String bannerId:bannerIds) {
             try {
                 population = addPersonToIncludeList( population, bannerId )
-                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:null, errorText:null )
+                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:null, errorText:null, updated:true )
             } catch (ApplicationException e) {
-                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:e.friendlyName, errorText:StringHelper.stackTraceToString( e ) )
+                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:e.friendlyName, errorText:StringHelper.stackTraceToString( e ), updated:false )
             } catch (Throwable t) {
-                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:CommunicationErrorCode.UNKNOWN_ERROR, errorText:StringHelper.stackTraceToString( t ) )
+                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:CommunicationErrorCode.UNKNOWN_ERROR, errorText:StringHelper.stackTraceToString( t ), updated:false )
             }
             results.entryResults.add( entryResult )
         }
