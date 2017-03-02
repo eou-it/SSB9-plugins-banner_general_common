@@ -2626,7 +2626,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-admission-application-types"/>
                 <ref bean="ar-admission-decisions"/>
                 <ref bean="ar-commodity-codes"/>
-                <ref bean="ar-admission-bargaining-units"/>
+                <ref bean="ar-bargaining-units"/>
                 <ref bean="ar-student-payments"/>
             </list>
         </property>
@@ -2738,7 +2738,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-admission-application-types"/>
                 <ref bean="ar-admission-decisions"/>
                 <ref bean="ar-commodity-codes"/>
-                <ref bean="ar-admission-bargaining-units"/>
+                <ref bean="ar-bargaining-units"/>
                 <ref bean="ar-student-payments"/>
             </list>
         </property>
