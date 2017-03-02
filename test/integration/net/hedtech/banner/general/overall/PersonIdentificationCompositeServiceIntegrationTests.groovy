@@ -95,7 +95,7 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals "2134", personIdentificationDecorator.enterpriseId
         assertEquals "Faculty", personIdentificationDecorator.firstName
         assertEquals "Faculty PCC", personIdentificationDecorator.fullName
-        assertEquals "913", personIdentificationDecorator.imsSourcedIdBase.sourcedId
+        assertEquals "forTest2", personIdentificationDecorator.imsSourcedIdBase.sourcedId
         assertEquals "PCC", personIdentificationDecorator.lastName
         assertEquals null, personIdentificationDecorator.middleName
         assertEquals null, personIdentificationDecorator.surnamePrefix
