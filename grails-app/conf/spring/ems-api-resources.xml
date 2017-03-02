@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- *****************************************************************************
-Copyright 2016 Ellucian Company L.P. and its affiliates.
+Copyright 2017 Ellucian Company L.P. and its affiliates.
 ****************************************************************************** -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1008,6 +1008,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <value>SORLFOS</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SHRDGDH" value="SORLCUR.SORLCUR_GUID"></entry>
+                <entry key="SHRDGIH" value="SORLCUR.SORLCUR_GUID"></entry>
+                <entry key="SHRDGMR" value="SORLCUR.SORLCUR_GUID"></entry>
+                <entry key="SORLFOS" value="SORLCUR.SORLCUR_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-academicprograms" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -1512,11 +1520,14 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>SGRCHRT</value>
-                <value>SGRSATT</value>
-                <value>SHRLGPA</value>
                 <value>SGBSTDN</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SGRCHRT" value="SGBSTDN.SGBSTDN_GUID"></entry>
+                <entry key="SGRSATT" value="SGBSTDN.SGBSTDN_GUID"></entry>
+            </map>
         </constructor-arg>
     </bean>
 
@@ -2459,6 +2470,56 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-bargaining-units" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>bargaining-units</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/bargaining-units/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.BargainingUnits.PTVBARG</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTVBARG</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-payments" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-payments</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-payments/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentPayments.TBRACCD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>TBRACCD</value>
+                <value>TSRTGID</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="TBRACCD" value="TSRTGID.TSRTGID_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -2565,6 +2626,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-admission-application-types"/>
                 <ref bean="ar-admission-decisions"/>
                 <ref bean="ar-commodity-codes"/>
+                <ref bean="ar-admission-bargaining-units"/>
+                <ref bean="ar-student-payments"/>
             </list>
         </property>
     </bean>
@@ -2675,6 +2738,8 @@ Copyright 2016 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-admission-application-types"/>
                 <ref bean="ar-admission-decisions"/>
                 <ref bean="ar-commodity-codes"/>
+                <ref bean="ar-admission-bargaining-units"/>
+                <ref bean="ar-student-payments"/>
             </list>
         </property>
     </bean>
