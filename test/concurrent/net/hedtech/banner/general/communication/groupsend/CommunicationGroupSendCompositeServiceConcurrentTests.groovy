@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 import grails.gorm.PagedResultList
 import net.hedtech.banner.DateUtility
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
@@ -20,9 +21,13 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationListView
+import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
+import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionListBulkResults
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import org.apache.commons.logging.LogFactory
 import org.junit.After
@@ -135,6 +140,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, CommunicationJob.findAll().size() )
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
+
+
 
     @Test
     public void testGroupSendWithParameters() {
@@ -740,6 +747,100 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     @Test
     public void testDeleteGroupSend() {
         testDeleteGroupSend( defaultEmailTemplate )
+    }
+
+    @Test
+    public void testGroupSendWithManualIncludeSentImmediately() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
+        communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
+        assertEquals( 3, CommunicationPopulationProfileView.countBySelectionListId( population.includeList.id ) )
+//
+//
+//        assertEquals( 0, CommunicationPopulationQueryAssociation.countByPopulation( population ) )
+//
+//        CommunicationPopulationSelectionList copy = communicationPopulationCompositeService.cloneSelectionList( population.includeList )
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//        CommunicationGroupSend groupSend
+//        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
+//        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+//        populationQuery = queryVersion.query
+//
+//        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
+//        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
+//        def isAvailable = {
+//            def theCalculation = CommunicationPopulationCalculation.get( it )
+//            theCalculation.refresh()
+//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+//        }
+//        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+//
+//        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
+//        assertEquals( 1, queryAssociations.size() )
+//
+//        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
+//        assertNotNull(selectionListEntryList)
+//        assertEquals(5, selectionListEntryList.size())
+//
+//        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+//                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
+//                populationId: population.id,
+//                templateId: defaultEmailTemplate.id,
+//                organizationId: defaultOrganization.id,
+//                referenceId: UUID.randomUUID().toString(),
+//                recalculateOnSend: false
+//        )
+//
+//        groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+//        assertNotNull(groupSend)
+//
+//        def checkExpectedGroupSendItemsCreated = {
+//            CommunicationGroupSend each = CommunicationGroupSend.get( it )
+//            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
+//        }
+//        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+//
+//        // Confirm group send view returns the correct results
+//        def sendViewDetails = CommunicationGroupSendView.findAll()
+//        assertEquals(1, sendViewDetails.size())
+//
+//        // Confirm group send item view returns the correct results
+//        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+//        assertEquals(5, sendItemViewDetails.size())
+//
+//        sleepUntilGroupSendItemsComplete( groupSend, 60 )
+//
+//        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+//        assertEquals( 5, countCompleted )
+//
+//        sleepUntilCommunicationJobsComplete( 10 * 60 )
+//        countCompleted = CommunicationJob.fetchCompleted().size()
+//        assertEquals( 5, countCompleted )
+//
+//        sleepUntilGroupSendComplete( groupSend, 3 * 60 )
+//
+//        // test delete group send
+//        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+//        assertEquals( 5, fetchGroupSendItemCount( groupSend.id ) )
+//        assertEquals( 5, CommunicationJob.findAll().size() )
+//        assertEquals( 5, CommunicationRecipientData.findAll().size() )
+//        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+//        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+//        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+//        assertEquals( 0, CommunicationJob.findAll().size() )
+//        assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
 }

@@ -518,19 +518,32 @@ class CommunicationGroupSendCompositeService {
             """
             INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
                                             ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date, gcrgsim_started_date)
-                           SELECT gcbgsnd_surrogate_id
-                                 ,gcrlent_pidm
-                                 , :current_time
-                                 , :state
-                                 , SYS_GUID()
-                                 ,gcbgsnd_user_id
-                                 , :current_time
-                                 , :current_time
-                            FROM gcrslis, gcrlent, gcbgsnd, gcrpopc
-                            WHERE gcbgsnd_popcalc_id = gcrpopc_surrogate_id
-                                  and gcrslis_surrogate_id = gcrpopc_slis_id
-                                  AND gcrlent_slis_id = gcrslis_surrogate_id
-                                  AND gcbgsnd_surrogate_id = :group_send_key
+                    select
+                        gcbgsnd_surrogate_id,
+                        gcrlent_pidm,
+                        :current_time,
+                        :state,
+                        sys_guid(),
+                        gcbgsnd_user_id,
+                        :current_time,
+                        :current_time
+                    from (
+                        select gcrlent_pidm, gcbgsnd_surrogate_id, gcbgsnd_user_id
+                            from gcrslis, gcrlent, gcbgsnd, gcrpopc
+                            where
+                            gcbgsnd_surrogate_id = :group_send_key
+                            and gcrpopc_surrogate_id = gcbgsnd_popcalc_id
+                            and gcrslis_surrogate_id = gcrpopc_slis_id
+                            and gcrlent_slis_id = gcrslis_surrogate_id
+                        union
+                        select gcrlent_pidm, gcbgsnd_surrogate_id, gcbgsnd_user_id
+                            from gcrslis, gcrlent, gcbgsnd, gcrpopv
+                            where
+                            gcbgsnd_surrogate_id = :group_send_key
+                            and gcrpopv_surrogate_id = gcbgsnd_popversion_id
+                            and gcrslis_surrogate_id = gcrpopv_include_list_id
+                            and gcrlent_slis_id = gcrslis_surrogate_id
+                    )
             """ )
 
             if (log.isDebugEnabled()) log.debug( "Created " + sql.updateCount + " group send item records for group send with id = " + groupSend.id )
