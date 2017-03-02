@@ -107,7 +107,7 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals "025EB9EF618DF0D0E05018958B283255", personIdentificationDecorator.enterpriseId
         assertEquals "Warren", personIdentificationDecorator.firstName
         assertEquals "Warren Zevon Grim", personIdentificationDecorator.fullName
-        assertEquals "1234", personIdentificationDecorator.imsSourcedIdBase.sourcedId
+        assertEquals "forTest3", personIdentificationDecorator.imsSourcedIdBase.sourcedId
         assertEquals "Grim", personIdentificationDecorator.lastName
         assertEquals "Zevon", personIdentificationDecorator.middleName
         assertEquals null, personIdentificationDecorator.surnamePrefix
