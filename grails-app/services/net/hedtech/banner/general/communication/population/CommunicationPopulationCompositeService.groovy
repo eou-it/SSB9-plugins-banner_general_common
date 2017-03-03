@@ -315,6 +315,20 @@ class CommunicationPopulationCompositeService {
         return communicationPopulationService.get( Long.valueOf( id ) )
     }
 
+    public CommunicationPopulationDetail fetchPopulationDetail( long populationId ) {
+        log.trace( "Calling fetchPopulationDetail with id ${populationId}" )
+
+        CommunicationPopulation population = fetchPopulation( populationId )
+        if (population == null) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, "populationNotFound" )
+        }
+
+        CommunicationPopulationDetail populationDetail = new CommunicationPopulationDetail()
+        populationDetail.populationListView = CommunicationPopulationListView.fetchLatestByPopulation( population )
+        populationDetail.totalCount = CommunicationPopulationProfileView.findTotalCountByPopulation( populationDetail.populationListView )
+        return populationDetail
+    }
+
     /**
      * Delete the population calculation marked by the given calculation id.
      * @param populationCalculationId the long id of the population calculation

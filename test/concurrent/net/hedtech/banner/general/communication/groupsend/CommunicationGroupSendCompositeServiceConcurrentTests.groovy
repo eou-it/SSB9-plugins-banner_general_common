@@ -20,6 +20,7 @@ import net.hedtech.banner.general.communication.parameter.CommunicationTemplateF
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
+import net.hedtech.banner.general.communication.population.CommunicationPopulationDetail
 import net.hedtech.banner.general.communication.population.CommunicationPopulationListView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
@@ -753,7 +754,10 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     public void testGroupSendWithManualIncludeSentImmediately() {
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
         communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
-        assertEquals( 3, CommunicationPopulationProfileView.countBySelectionListId( population.includeList.id ) )
+        CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
+        assertNotNull( populationDetail.populationListView )
+        assertEquals( population.id, populationDetail.populationListView.id )
+        assertEquals( 3, populationDetail.totalCount )
 //
 //
 //        assertEquals( 0, CommunicationPopulationQueryAssociation.countByPopulation( population ) )

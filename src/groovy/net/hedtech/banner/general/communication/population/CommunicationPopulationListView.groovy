@@ -209,6 +209,10 @@ class CommunicationPopulationListView implements Serializable {
         return populationListView
     }
 
+    public static CommunicationPopulationListView fetchLatestByPopulation( CommunicationPopulation population ) {
+        return fetchLatestByPopulationIdAndUserId( population.id, population.createdBy )
+    }
+
     public static CommunicationPopulationListView fetchLatestByPopulationIdAndUserId(Long populationId, String userid) {
 
         def CommunicationPopulationListView populationListView

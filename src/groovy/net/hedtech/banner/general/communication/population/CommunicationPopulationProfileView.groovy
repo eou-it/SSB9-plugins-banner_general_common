@@ -140,7 +140,19 @@ class CommunicationPopulationProfileView implements Serializable {
         return results
     }
 
-    public static findCountDistinctProfilesByName(filterData) {
+    public static int findTotalCountByPopulation( CommunicationPopulationListView populationListView ) {
+        Map filterData = [
+            params: [
+                selectionListId: populationListView.populationSelectionListId ?: 0L, // guaranteed to not satisfy 0 if null
+                includeListId: populationListView.includeListId ?: 0L, // guaranteed to not satisfy 0 if null
+                "name": '%'
+            ]
+        ]
+        int count = findCountDistinctProfilesByName( filterData )
+        return count
+    }
+
+    public static findCountDistinctProfilesByName( Map filterData ) {
         if(!filterData)
             return 0;
 
