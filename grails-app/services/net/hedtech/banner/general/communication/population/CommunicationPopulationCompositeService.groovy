@@ -77,6 +77,12 @@ class CommunicationPopulationCompositeService {
         return population
     }
 
+    public CommunicationPopulation updatePopulation( CommunicationPopulation population ) {
+        log.trace( "updatePopulation called" )
+        population = communicationPopulationService.update( population )
+        return population
+    }
+
     public CommunicationPopulationSelectionListBulkResults addPersonsToIncludeList( CommunicationPopulation population, List<String> bannerIds ) {
         log.trace( "addPersonsToIncludeList called" )
 

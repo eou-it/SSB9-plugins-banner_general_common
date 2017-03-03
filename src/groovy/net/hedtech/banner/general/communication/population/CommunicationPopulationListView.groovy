@@ -89,6 +89,13 @@ class CommunicationPopulationListView implements Serializable {
     String createdBy
 
     /**
+     * Record creation date
+     */
+    @Column(name = "CREATED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date createdDate
+
+    /**
      * Last calculated count
      */
     @Column(name = "CALCULATED_COUNT")
