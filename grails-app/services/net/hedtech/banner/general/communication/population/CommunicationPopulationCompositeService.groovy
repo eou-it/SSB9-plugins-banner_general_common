@@ -31,7 +31,11 @@ import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -40,6 +44,7 @@ import java.sql.SQLException
  * A service for driving interaction with Communication population objects and their
  * dependent objects and services.
  */
+@Transactional
 class CommunicationPopulationCompositeService {
 
     CommunicationPopulationQueryService communicationPopulationQueryService
@@ -664,14 +669,13 @@ Scheduled groupsends - calc
         return s1 == null ? s2 == null : s1 == s2
     }
 
-
     private CommunicationPopulationQueryAssociation fetchPopulationQueryAssociation(CommunicationPopulation population) {
         List queryAssociationList = CommunicationPopulationQueryAssociation.findAllByPopulation(population)
         if (!queryAssociationList || queryAssociationList.size() == 0) {
-            throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotFindAssociatedQueryForPopulation")
+            return null
+        } else {
+            return (CommunicationPopulationQueryAssociation) queryAssociationList.get(0)
         }
-        CommunicationPopulationQueryAssociation populationQueryAssociation = queryAssociationList.get(0)
-        populationQueryAssociation
     }
 
     /**
@@ -693,11 +697,12 @@ Scheduled groupsends - calc
             if (log.isDebugEnabled()) log.debug( "population version with id = ${populationVersion.id} created." )
 
             CommunicationPopulationQueryAssociation populationQueryAssociation = fetchPopulationQueryAssociation( population )
-            CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = populationQueryAssociation.createVersion( populationVersion )
-            populationVersionQueryAssociation =
-                (CommunicationPopulationVersionQueryAssociation) communicationPopulationVersionQueryAssociationService.create( populationVersionQueryAssociation )
-            assert populationVersionQueryAssociation.id
-            if (log.isDebugEnabled()) log.debug( "population version query association with id = ${populationVersionQueryAssociation.id} created." )
+            if (populationQueryAssociation) {
+                CommunicationPopulationVersionQueryAssociation populationVersionQueryAssociation = populationQueryAssociation.createVersion( populationVersion )
+                populationVersionQueryAssociation = (CommunicationPopulationVersionQueryAssociation) communicationPopulationVersionQueryAssociationService.create( populationVersionQueryAssociation )
+                assert populationVersionQueryAssociation.id
+                if (log.isDebugEnabled()) log.debug( "population version query association with id = ${populationVersionQueryAssociation.id} created." )
+            }
 
             return populationVersion
         } finally {
@@ -731,7 +736,7 @@ Scheduled groupsends - calc
             this.log.error( "Failed to clone selection list", t )
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, t )
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         return clone

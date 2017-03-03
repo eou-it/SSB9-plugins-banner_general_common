@@ -77,24 +77,8 @@ class CommunicationGroupSendCompositeService {
         groupSend.jobId = request.referenceId
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
-
- // To do: what to do with population calculation if create a new population version
-
-        if (groupSend.scheduledStartDate) {
-            if (groupSend.recalculateOnSend) {
-                // will calculate population version at time of recalculate to get any late
-                // manual include additions
-                groupSend.populationVersionId = null
-                groupSend.populationCalculationId = null
-            } else {
-                // send later with a current replica
-                assignPopulationVersion( groupSend )
-                assignPopulationCalculation( groupSend, bannerUser )
-            }
-        } else { // sending immediately with a replica of the current population
-            assignPopulationVersion( groupSend )
-            assignPopulationCalculation( groupSend, bannerUser )
-        }
+        groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
+        validateTemplateAndParameters( groupSend )
 
         CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
         boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0)
@@ -115,14 +99,14 @@ class CommunicationGroupSendCompositeService {
             }
         }
 
-        groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
-        validateTemplateAndParameters( groupSend )
-
         groupSend = (CommunicationGroupSend) communicationGroupSendService.create( groupSend )
 
         if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend( groupSend, bannerUser )
         } else {
+            if (hasQuery) {
+                assert( groupSend.populationCalculationId != null )
+            }
             groupSend = scheduleGroupSendImmediately( groupSend, bannerUser )
         }
 
@@ -360,8 +344,6 @@ class CommunicationGroupSendCompositeService {
     }
 
     private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser ) {
-        assert( groupSend.populationCalculationId != null )
-
         SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString() )
             .setBannerUser( bannerUser )
             .setMepCode( groupSend.mepCode )
