@@ -1001,9 +1001,6 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>SHRDGDH</value>
-                <value>SHRDGIH</value>
-                <value>SHRDGMR</value>
                 <value>SORLCUR</value>
                 <value>SORLFOS</value>
             </list>
@@ -2520,6 +2517,139 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-employment-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-classifications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-classifications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.EmploymentClassifications.PTRECLS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRECLS</value>
+                <value>NTRECLS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-institution-positions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>institution-positions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/institution-positions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.InstitutionPositions.NBBPOSN</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>NBBPOSN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-account-payable-sources" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>account-payable-sources</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/account-payable-sources/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AccountPayableSources.GXVBANK</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>GXVBANK</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-institution-jobs" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>institution-jobs</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/institution-jobs/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.InstitutionJobs.NBRJOBS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>NBRJOBS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-employees" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employees</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employees/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.Employees.PEBEMPL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>NBRJOBS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-contribution-payroll-deductions" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>contribution-payroll-deductions</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/contribution-payroll-deductions/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.ContributionPayrollDeductions.PHRDEDN</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PHRDEDN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -2628,6 +2758,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-commodity-codes"/>
                 <ref bean="ar-bargaining-units"/>
                 <ref bean="ar-student-payments"/>
+                <ref bean="ar-employment-classifications"/>
+                <ref bean="ar-institution-positions"/>
+                <ref bean="ar-account-payable-sources"/>
+                <ref bean="ar-institution-jobs"/>
+                <ref bean="ar-employees"/>
+                <ref bean="ar-contribution-payroll-deductions"/>
             </list>
         </property>
     </bean>
@@ -2740,6 +2876,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-commodity-codes"/>
                 <ref bean="ar-bargaining-units"/>
                 <ref bean="ar-student-payments"/>
+                <ref bean="ar-employment-classifications"/>
+                <ref bean="ar-institution-positions"/>
+                <ref bean="ar-account-payable-sources"/>
+                <ref bean="ar-institution-jobs"/>
+                <ref bean="ar-employees"/>
+                <ref bean="ar-contribution-payroll-deductions"/>
             </list>
         </property>
     </bean>
