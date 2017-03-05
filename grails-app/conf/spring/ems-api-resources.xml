@@ -2535,7 +2535,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="rootEntityList">
             <list>
                 <value>PTRECLS</value>
-                <value>NTRECLS</value>
+                <value>NTRPCLS</value>
             </list>
         </constructor-arg>
     </bean>
@@ -2623,7 +2623,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>NBRJOBS</value>
+                <value>PEBEMPL</value>
             </list>
         </constructor-arg>
     </bean>
