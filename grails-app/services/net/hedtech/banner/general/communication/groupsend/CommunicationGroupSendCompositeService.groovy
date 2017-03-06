@@ -239,6 +239,8 @@ class CommunicationGroupSendCompositeService {
         CommunicationPopulationVersion populationVersion
         if (population.changesPending) {
             populationVersion = communicationPopulationCompositeService.createPopulationVersion( population )
+            population.changesPending = false
+            communicationPopulationCompositeService.updatePopulation(population)
         } else {
             populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( groupSend.populationId )
         }

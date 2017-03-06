@@ -6,8 +6,9 @@ package net.hedtech.banner.general.communication.interaction
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemView
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendListView
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendRequest
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendView
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendDetailView
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
@@ -101,8 +102,11 @@ class CommunicationInteractionViewConcurrentTests extends CommunicationBaseConcu
         assertTrueWithRetry(checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10)
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()

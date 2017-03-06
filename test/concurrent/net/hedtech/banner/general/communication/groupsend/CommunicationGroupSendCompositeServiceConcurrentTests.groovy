@@ -112,8 +112,11 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
@@ -496,8 +499,12 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
+
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
@@ -574,8 +581,11 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertTrueWithRetry( checkExpectedGroupSendItemsCreated, null, 30, 10 )
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
@@ -778,8 +788,11 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
