@@ -138,6 +138,9 @@ class CommunicationPopulationCompositeService {
                 population.includeList = selectionList
                 population.changesPending = true
                 population = communicationPopulationService.update( population )
+            } else if (!population.changesPending) {
+                population.changesPending = true
+                population = communicationPopulationService.update( population )
             }
 
             if (log.isDebugEnabled()) {

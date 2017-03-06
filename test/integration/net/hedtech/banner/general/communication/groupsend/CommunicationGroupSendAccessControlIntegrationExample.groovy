@@ -81,7 +81,7 @@ class CommunicationGroupSendAccessControlIntegrationExample {
 //
 //        assertEquals( 5, communicationGroupSendItemService.fetchByGroupSend( groupSend ).size() )
 //
-//        def sendviewdetails = CommunicationGroupSendView.findAll()
+//        def sendviewdetails = CommunicationGroupSendDetailView.findAll()
 //        assertEquals(1, sendviewdetails.size())
 //
 //        List groupSendItemList = communicationGroupSendItemService.list()
