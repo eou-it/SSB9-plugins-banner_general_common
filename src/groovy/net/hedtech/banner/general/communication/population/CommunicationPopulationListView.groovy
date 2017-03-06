@@ -193,6 +193,19 @@ class CommunicationPopulationListView implements Serializable {
     @Column(name = "QUERY_VERSION_SELECTED")
     String useRecentOrCurrent
 
+    /**
+     * This field defines who updated the manual inclusion exclusion list last
+     */
+    @Column(name = "LIST_LAST_UPDATED_BY")
+    String listLastUpdatedBy
+
+    /**
+     * the last time the the manual inclusion exclusion list was updated
+     */
+    @Column(name = "LIST_LAST_UPDATED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date listLastUpdatedDate
+
     static constraints = {
         name(nullable: false)
         populationQueryId(nullable: false)
