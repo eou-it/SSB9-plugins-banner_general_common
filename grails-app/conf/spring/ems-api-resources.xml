@@ -2562,16 +2562,16 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-account-payable-sources" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-accounts-payable-sources" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>account-payable-sources</value>
+            <value>accounts-payable-sources</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/account-payable-sources/</value>
+            <value>/accounts-payable-sources/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AccountPayableSources.GXVBANK</value>
+                <value>EEDM.AccountsPayableSources.GXVBANK</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2760,7 +2760,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-student-payments"/>
                 <ref bean="ar-employment-classifications"/>
                 <ref bean="ar-institution-positions"/>
-                <ref bean="ar-account-payable-sources"/>
+                <ref bean="ar-accounts-payable-sources"/>
                 <ref bean="ar-institution-jobs"/>
                 <ref bean="ar-employees"/>
                 <ref bean="ar-contribution-payroll-deductions"/>
@@ -2878,7 +2878,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-student-payments"/>
                 <ref bean="ar-employment-classifications"/>
                 <ref bean="ar-institution-positions"/>
-                <ref bean="ar-account-payable-sources"/>
+                <ref bean="ar-accounts-payable-sources"/>
                 <ref bean="ar-institution-jobs"/>
                 <ref bean="ar-employees"/>
                 <ref bean="ar-contribution-payroll-deductions"/>
