@@ -750,6 +750,26 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         testDeleteGroupSend( defaultEmailTemplate )
     }
 
+    @Test void testEmptyPopulationSentImmediately() {
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
+        CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
+        assertEquals( 0, populationDetail.totalCount )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+        sleepUntilGroupSendComplete( groupSend, 3 * 60 )
+        assertEquals( 0, CommunicationGroupSendItem.count() )
+    }
+
     @Test
     public void testGroupSendWithManualIncludeSentImmediately() {
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
@@ -805,6 +825,70 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
         assertEquals( 0, CommunicationJob.findAll().size() )
+        assertEquals( 0, CommunicationRecipientData.findAll().size() )
+    }
+
+    @Test
+    public void testGroupSendWithBothManualIncludeAndQuerySentImmediately() {
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        populationQuery = queryVersion.query
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testPopulation" )
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
+        def isAvailable = {
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+
+        communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
+        CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
+        assertNotNull( populationDetail.populationListView )
+        assertEquals( population.id, populationDetail.populationListView.id )
+        assertEquals( 8, populationDetail.totalCount )
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                recalculateOnSend: false
+        )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        def checkExpectedGroupSendItemsCreated = {
+            CommunicationGroupSend each = CommunicationGroupSend.get( it )
+            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 8
+        }
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+
+        // Confirm group send view returns the correct results
+        def sendViewDetails = CommunicationGroupSendView.findAll()
+        assertEquals(1, sendViewDetails.size())
+
+        // Confirm group send item view returns the correct results
+        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+        assertEquals(8, sendItemViewDetails.size())
+
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
+
+        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+        assertEquals( 8, countCompleted )
+
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
+        countCompleted = CommunicationJob.fetchCompleted().size()
+        assertEquals( 8, countCompleted )
+
+        sleepUntilGroupSendComplete( groupSend, 8 * 60 )
+
+        assertEquals( 8, CommunicationRecipientData.findAll().size() )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
