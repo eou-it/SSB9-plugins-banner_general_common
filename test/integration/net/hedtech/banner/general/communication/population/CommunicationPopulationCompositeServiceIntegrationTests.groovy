@@ -103,7 +103,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
             population = communicationPopulationCompositeService.removePersonFromIncludeList( population, 'MBRZYCKI' )
             fail "Expected application exception"
         } catch (ApplicationException e) {
-            assertEquals( "@@r1:bannerIdNotFound:MBRZYCKI@@", e.message )
+            assertEquals( "@@r1:BANNER_ID_NOT_FOUND:MBRZYCKI@@", e.message )
             assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND.toString(), e.friendlyName )
         }
 

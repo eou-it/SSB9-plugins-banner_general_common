@@ -111,13 +111,13 @@ class CommunicationPopulationCompositeService {
     public CommunicationPopulation addPersonToIncludeList( CommunicationPopulation population, String bannerId ) {
         log.trace( "addPersonToIncludeList called" )
         if ((bannerId == null) || (bannerId.trim().size() == 0)) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_INVALID_OR_EMPTY, "bannerIdInvalidOrEmpty", bannerId )
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_INVALID_OR_EMPTY, "BANNER_ID_INVALID_OR_EMPTY", bannerId )
         }
 
         PersonIdentificationName person = (PersonIdentificationName) PersonUtility.getPerson( bannerId )
 
         if (person == null) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "bannerIdNotFound", bannerId )
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
         }
 
         CommunicationPopulationSelectionListEntry found = null
@@ -172,7 +172,7 @@ class CommunicationPopulationCompositeService {
 
         PersonIdentificationName person = (PersonIdentificationName) PersonUtility.getPerson( bannerId )
         if (person == null) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "bannerIdNotFound", bannerId )
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
         }
 
         CommunicationPopulationSelectionListEntry found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( person.pidm, population.includeList )
