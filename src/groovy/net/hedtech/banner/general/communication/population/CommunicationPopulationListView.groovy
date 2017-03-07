@@ -96,6 +96,18 @@ class CommunicationPopulationListView implements Serializable {
     Date createdDate
 
     /**
+     * ID of user who updated the Selection List
+     */
+    @Column(name = "LIST_LAST_UPDATED_BY")
+    String lastModifedBy
+
+    /**
+     * Record updated date
+     */
+    @Column(name = "LIST_LAST_UPDATED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date lastModified
+    /**
      * Last calculated count
      */
     @Column(name = "CALCULATED_COUNT")
