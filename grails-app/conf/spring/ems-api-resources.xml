@@ -1908,6 +1908,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>RFRBASE</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="RFRASPC" value="RFRBASE.RFRBASE_GUID"></entry>
+                <entry key="RFRFCAT" value="RFRBASE.RFRBASE_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-comments" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
