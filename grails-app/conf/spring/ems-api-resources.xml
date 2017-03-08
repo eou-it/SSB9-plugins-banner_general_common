@@ -274,7 +274,25 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Person.SPRIDEN</value>
+                <value.EEDM.Persons.APRCATG</value>
+                <value.EEDM.Persons.FTVVEND</value>
+                <value.EEDM.Persons.GOBINTL</value>
+                <value.EEDM.Persons.GOBSRID</value>
+                <value.EEDM.Persons.GOBTPAC</value>
+                <value.EEDM.Persons.GOBUMAP</value>
+                <value.EEDM.Persons.GORADID</value>
+                <value.EEDM.Persons.GOREMAL</value>
+                <value.EEDM.Persons.GORGUID</value>
+                <value.EEDM.Persons.GORPRAC</value>
+                <value.EEDM.Persons.PEBEMPL</value>
+                <value.EEDM.Persons.SGBSTDN</value>
+                <value.EEDM.Persons.SIBINST</value>
+                <value.EEDM.Persons.SORINTS</value>
+                <value.EEDM.Persons.SPBPERS</value>
+                <value.EEDM.Persons.SPRADDR</value>
+                <value.EEDM.Persons.SPRIDEN</value>
+                <value.EEDM.Persons.SPRTELE</value>
+                <value.EEDM.Persons.SRBRECR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2656,6 +2674,40 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-admission-applications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admission-applications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admission-applications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.AdmissionApplications.SARACMT</value>
+                <value>EEDM.AdmissionApplications.SARADAP</value>
+                <value>EEDM.AdmissionApplications.SARAPPD</value>
+                <value>EEDM.AdmissionApplications.SORLCUR</value>
+                <value>EEDM.AdmissionApplications.SORLFOS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SARADAP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SARACMT" value="SARADAP.SARADAP_GUID"></entry>
+                <entry key="SARAPPD" value="SARADAP.SARADAP_GUID"></entry>
+                <entry key="SORLCUR" value="SARADAP.SARADAP_GUID"></entry>
+                <entry key="SORLFOS" value="SARADAP.SARADAP_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -2770,6 +2822,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-institution-jobs"/>
                 <ref bean="ar-employees"/>
                 <ref bean="ar-contribution-payroll-deductions"/>
+                <ref bean="ar-admission-applications"/>
             </list>
         </property>
     </bean>
@@ -2888,6 +2941,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-institution-jobs"/>
                 <ref bean="ar-employees"/>
                 <ref bean="ar-contribution-payroll-deductions"/>
+                <ref bean="ar-admission-applications"/>
             </list>
         </property>
     </bean>
