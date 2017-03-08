@@ -720,9 +720,12 @@ class CommunicationPopulationCompositeService {
             if (populationCalculation.status.equals(CommunicationPopulationCalculationStatus.PENDING_EXECUTION)) {
                 throw CommunicationExceptionFactory.createApplicationException(this.getClass(), "cannotRecalculatePopulationPendingExecution")
             } else {
-                if (CommunicationGroupSend.findCountByPopulationCalculationId(populationCalculation.id) == 0) {
+                if (populationCalculation.id != null && CommunicationGroupSend.countByPopulationCalculationId( populationCalculation.id ) == 0) {
                     deletePopulationCalculation(populationCalculation)
                 }
+//                if (CommunicationGroupSend.findCountByPopulationCalculationId(populationCalculation.id) == 0) {
+//                    deletePopulationCalculation(populationCalculation)
+//                }
             }
         }
     }

@@ -68,6 +68,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testGroupSendRequestByTemplateByPopulationSendImmediately() {
+        println "testGroupSendRequestByTemplateByPopulationSendImmediately"
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -146,6 +147,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testGroupSendWithParameters() {
+        println "testGroupSendWithParameters"
         // Set up a population
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -257,6 +259,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testDeletePopulationWithGroupSend() {
+        println "testDeletePopulationWithGroupSend"
+
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeletePopulationWithGroupSend Query") )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -302,6 +306,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testDeletePopulationWithGroupSendWaitingRecalculation() {
+        println "testDeletePopulationWithGroupSendWaitingRecalculation"
+
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testDeletePopulationWithGroupSendWaitingRecalculation Query") )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -347,6 +353,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testRecalculatePopulationAfterScheduledGroupSend() {
+        println "testRecalculatePopulationAfterScheduledGroupSend"
+
         CommunicationGroupSend groupSend
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( newPopulationQuery("testRecalculatePopulationAfterScheduledGroupSend Query") )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -392,6 +400,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     void testFindRunning() {
+        println "testFindRunning"
+
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning1" ))
         assertNotNull(groupSend)
         CommunicationGroupSend groupSendB = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning2" ))
@@ -410,6 +420,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     void testStopStoppedGroupSend() {
+        println "testStopStoppedGroupSend"
+
         CommunicationGroupSendRequest request = createGroupSendRequest( "testStopStoppedGroupSend" )
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
@@ -431,6 +443,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     void testStopCompletedGroupSend() {
+        println "testStopCompletedGroupSend"
+
         CommunicationGroupSendRequest request = createGroupSendRequest( "testStopCompletedGroupSend" )
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
         assertNotNull(groupSend)
@@ -453,6 +467,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testScheduledPopulationGroupSend() {
+        println "testScheduledPopulationGroupSend"
+
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
@@ -533,6 +549,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testScheduledRecalculatePopulationGroupSend() {
+        println "testScheduledRecalculatePopulationGroupSend"
+
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
@@ -615,6 +633,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testMediumPopulationAndDelete() {
+        println "testMediumPopulationAndDelete"
+
         // 0) Test parameters
         String testName = "testMediumPopulationAndDelete"
         String testUserId = 'BCMADMIN'
@@ -756,10 +776,15 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testDeleteGroupSend() {
+        println "testDeleteGroupSend"
+
         testDeleteGroupSend( defaultEmailTemplate )
     }
 
-    @Test void testEmptyPopulationSentImmediately() {
+    @Test
+    void testEmptyPopulationSentImmediately() {
+        println "testEmptyPopulationSentImmediately"
+
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
         CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
         assertEquals( 0, populationDetail.totalCount )
@@ -781,6 +806,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testGroupSendWithManualIncludeSentImmediately() {
+        println "testGroupSendWithManualIncludeSentImmediately"
+
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
         communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
         CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
@@ -842,6 +869,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testGroupSendWithBothManualIncludeAndQuerySentImmediately() {
+        println "testGroupSendWithBothManualIncludeAndQuerySentImmediately"
+
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query
@@ -911,6 +940,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
     @Test
     public void testGroupSendWithBothManualIncludeAndQueryScheduledRecalculate() {
+        println "testGroupSendWithBothManualIncludeAndQueryScheduledRecalculate"
+
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
         populationQuery = queryVersion.query

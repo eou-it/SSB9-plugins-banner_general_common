@@ -546,8 +546,8 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
 
         public void run() {
-            asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
             try {
+                asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                 if(cause instanceof CommunicationApplicationException) {
                     jobManager.markFailed(job, cause.friendlyName, cause );
