@@ -205,6 +205,11 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCRQRTZ_SIMPLE_TRIGGERS")
+                sql.executeUpdate("Delete from GCRQRTZ_TRIGGERS")
+                sql.executeUpdate("Delete from GCRQRTZ_JOB_DETAILS")
+                sql.executeUpdate("Delete from GCRQRTZ_LOCKS")
+                sql.executeUpdate("Delete from GCRQRTZ_SCHEDULER_STATE")
                 sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")

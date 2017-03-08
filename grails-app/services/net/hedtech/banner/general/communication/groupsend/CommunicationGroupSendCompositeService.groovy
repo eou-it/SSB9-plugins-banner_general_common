@@ -241,6 +241,8 @@ class CommunicationGroupSendCompositeService {
             populationVersion = communicationPopulationCompositeService.createPopulationVersion( population )
             population.changesPending = false
             communicationPopulationCompositeService.updatePopulation(population)
+            // Todo: Should we delete population versions no longer in use by any group sends aside from he one we just created
+            // We would need to remove all the associated objects.
         } else {
             populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( groupSend.populationId )
         }

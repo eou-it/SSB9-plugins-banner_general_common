@@ -358,7 +358,7 @@ class CommunicationPopulationCompositeService {
      * @return true if successful
      */
     public boolean deletePopulationCalculation( CommunicationPopulationCalculation calculation ) {
-        return calculation
+        communicationPopulationCalculationService.delete( calculation )
     }
 
     /**
@@ -448,77 +448,13 @@ class CommunicationPopulationCompositeService {
      * @param version the optimistic lock counter
      */
     public CommunicationPopulationCalculation calculatePopulationForUser( CommunicationPopulation population, String oracleName = getCurrentUserBannerId() ) {
-        CommunicationPopulationVersion populationVersion
-        if (population.changesPending) {
-            populationVersion = createPopulationVersion( population )
-            population.changesPending = false
-            population = communicationPopulationService.update( population )
-        }
-
-
-
-/*
-From the UI use cases:
-1) Population from query
-    a) guaranteed to have a population version created and calculation scheduled, changes not pending
-
-2) population from add button
-      a) no population version, changes pending
-      - five people, changes pending
-      - hit the calculate button
-        - undefined at moment (ui should disable the button if no query present)
-
-3)  population with query we add include list
-    a) previous population version, calculation exists/scheduled, changes pending = true
-        - hit the calculate button
-        - calculate the previous population version
-
-Aggregate Results View - latest calculation union with population include list
-
-Start now groupsends
-2) population from add button
-        - check if changes pending, if so:
-        - create population version with a clone of the manual include list
-        - set the changes pending on the population to false
-        - start the groupsend with a link to the new population version
-        ===
-        - if no changes pending, that means there is a population version that matches the master population
-        - send the groupsend with the latest population version
-
-Scheduled groupsends - no recalc
-        (same logic a send immediate)
-        - check if changes pending, if so:
-        - create population version with a clone of the manual include list
-        - set the changes pending on the population to false
-        - start the groupsend with a link to the new population version
-        ===
-        - if no changes pending, that means there is a population version that matches the master population
-        - send the groupsend with the latest population version
-
-Scheduled groupsends - calc
-        - start the groupsend with the population set but no population version specified
-        - if changes pending,
-        - create population version with a clone of the manual include list
-        - have to create a NEW calculation
-        - set the changes pending on the population to false
-        ==
-        - if no changes pending, that means there is a population version that matches the master population
-        - use latest population version
-        - perform NEW query calculation
-
-
-*/
         int queryAssociationCount = CommunicationPopulationQueryAssociation.countByPopulation( population )
 
         if (queryAssociationCount == 0) {
             return null
         } else {
-            if (population.changesPending) {
-                // create a new population version
-            } else {
-                populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
-                return calculatePopulationVersionForUser( populationVersion, oracleName )
-            }
+            CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
+            return calculatePopulationVersionForUser( populationVersion, oracleName )
         }
     }
 

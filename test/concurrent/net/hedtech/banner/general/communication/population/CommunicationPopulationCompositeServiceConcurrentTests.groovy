@@ -131,14 +131,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertEquals( populationQuery.id, association.populationQuery.id )
         assertNull( association.populationQueryVersion )
 
-        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
-        def isAvailable = {
-            def theCalculation = CommunicationPopulationCalculation.get( it )
-            theCalculation.refresh()
-            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
-                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
-        }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        waitForPopulationCalculationToFinish( population, 'BCMADMIN' )
     }
 
     @Test void testPopulationWithOnlyIncludeList() {
@@ -164,33 +157,56 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulationSelectionList copy = communicationPopulationCompositeService.cloneSelectionList( population.includeList )
         assertNotNull( copy.id )
 
-//        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
-//        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
-//        def isAvailable = {
-//            def theCalculation = CommunicationPopulationCalculation.get( it )
-//            theCalculation.refresh()
-//            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
-//        }
-
+        assertNull( communicationPopulationCompositeService.calculatePopulationForUser( population ) )
     }
 
     @Test void testPopulationWithQueryAndIncludeList() {
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
-        List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                folder: defaultFolder,
+                name: "testQuery",
+                description: "test description",
+                queryString: "select SPRIDEN_PIDM from SPRIDEN where SPRIDEN_CHANGE_IND is not null and rownum < 6"
+        )
 
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testQuery" )
+        waitForPopulationCalculationToFinish( population, 'BCMADMIN' )
+        assertEquals( 1, CommunicationPopulationVersion.countByPopulation( population ) )
+        assertEquals( 1, CommunicationPopulationCalculation.count() )
+
+        List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
         CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
         assertNotNull( results.population.includeList )
-        def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
-        assertEquals( 3, entryCount )
-        assertEquals( 3, results.entryResults.size() )
+        population.refresh()
+        assertTrue( population.changesPending )
 
-        persons = [ 'CMOORE', '710000051' ]
-        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
-        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
-        assertEquals( 4, entryCount )
-        assertEquals( 2, results.entryResults.size() )
-        assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND, results.entryResults.get(0).errorCode )
-        assertNull( results.entryResults.get(1).errorCode )
+        CommunicationPopulationListView populationListView = CommunicationPopulationListView.fetchLatestByPopulation( population )
+        int totalCount = CommunicationPopulationProfileView.findTotalCountByPopulation( populationListView )
+        assertEquals( 8, totalCount )
+
+        communicationPopulationCompositeService.calculatePopulationForUser( population )
+        waitForPopulationCalculationToFinish( population, 'BCMADMIN' )
+        assertEquals( 1, CommunicationPopulationVersion.countByPopulation( population ) )
+        assertEquals( 1, CommunicationPopulationCalculation.count() )
+
+        communicationPopulationCompositeService.calculatePopulationForUser( population )
+        waitForPopulationCalculationToFinish( population, 'BCMADMIN' )
+        assertEquals( 1, CommunicationPopulationVersion.countByPopulation( population ) )
+        assertEquals( 1, CommunicationPopulationCalculation.count() )
+
     }
 
+    private void waitForPopulationCalculationToFinish(CommunicationPopulation population, String calculatedByBannerId) {
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(population.id, calculatedByBannerId)
+        def isAvailable = {
+            def theCalculation = CommunicationPopulationCalculation.get(it)
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE ||
+                    theCalculation.status == CommunicationPopulationCalculationStatus.ERROR
+        }
+        assertTrueWithRetry(isAvailable, populationCalculation.id, 30, 10)
+    }
 }
