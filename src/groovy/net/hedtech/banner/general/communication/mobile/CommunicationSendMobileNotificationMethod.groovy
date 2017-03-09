@@ -78,9 +78,14 @@ class CommunicationSendMobileNotificationMethod {
             )
         }
 
+        def mobileEndPointUrl = rootOrganization.mobileEndPointUrl
         try {
             // Ex: 'https://mobiledev1.ellucian.com/'
-            HTTPBuilder httpBuilder = new HTTPBuilder(rootOrganization.mobileEndPointUrl)
+            if (log.isDebugEnabled()) {
+                log.debug( "Connecting to ${mobileEndPointUrl} as ${mobileApplicationName}")
+            }
+
+            HTTPBuilder httpBuilder = new HTTPBuilder(mobileEndPointUrl)
             httpBuilder.auth.basic mobileApplicationName, mobileApplicationKey
             httpBuilder.request(POST, JSON) { request ->
                 headers.Accept = 'application/json'
