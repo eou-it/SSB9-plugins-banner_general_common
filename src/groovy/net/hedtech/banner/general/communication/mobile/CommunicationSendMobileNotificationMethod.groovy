@@ -164,10 +164,26 @@ class CommunicationSendMobileNotificationMethod {
             log.error( 'Error trying to send mobile notification.', t );
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
         } catch(groovyx.net.http.ResponseParseException t) {
-            log.error( "Error trying to send mobile notification. Response content type = ${t.response?.contentType}; status line = '${t.response?.statusLine}'", t )
+            if (log.isErrorEnabled()) {
+                String contentType
+                try {
+                    contentType = t.response?.contentType
+                } catch(IllegalArgumentException e) {
+                    contentType = e.getMessage()
+                }
+                log.error( "Error trying to send mobile notification. Response content type = ${contentType}; status line = '${t.response?.statusLine}'", t )
+            }
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         } catch(groovyx.net.http.HttpResponseException t) {
-            log.error( "Error trying to send mobile notification. Response content type = ${t.response?.contentType}; status line = '${t.response?.statusLine}'", t )
+            if (log.isErrorEnabled()) {
+                String contentType
+                try {
+                    contentType = t.response?.contentType
+                } catch(IllegalArgumentException e) {
+                    contentType = e.getMessage()
+                }
+                log.error( "Error trying to send mobile notification. Response content type = ${contentType}; status line = '${t.response?.statusLine}'", t )
+            }
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.name())
         } catch(Throwable t) {
             log.error( 'Error trying to send mobile notification.', t );
