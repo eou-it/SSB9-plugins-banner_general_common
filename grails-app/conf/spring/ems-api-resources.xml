@@ -274,25 +274,25 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value.EEDM.Persons.APRCATG</value>
-                <value.EEDM.Persons.FTVVEND</value>
-                <value.EEDM.Persons.GOBINTL</value>
-                <value.EEDM.Persons.GOBSRID</value>
-                <value.EEDM.Persons.GOBTPAC</value>
-                <value.EEDM.Persons.GOBUMAP</value>
-                <value.EEDM.Persons.GORADID</value>
-                <value.EEDM.Persons.GOREMAL</value>
-                <value.EEDM.Persons.GORGUID</value>
-                <value.EEDM.Persons.GORPRAC</value>
-                <value.EEDM.Persons.PEBEMPL</value>
-                <value.EEDM.Persons.SGBSTDN</value>
-                <value.EEDM.Persons.SIBINST</value>
-                <value.EEDM.Persons.SORINTS</value>
-                <value.EEDM.Persons.SPBPERS</value>
-                <value.EEDM.Persons.SPRADDR</value>
-                <value.EEDM.Persons.SPRIDEN</value>
-                <value.EEDM.Persons.SPRTELE</value>
-                <value.EEDM.Persons.SRBRECR</value>
+                <value>EEDM.Persons.APRCATG</value>
+                <value>EEDM.Persons.FTVVEND</value>
+                <value>EEDM.Persons.GOBINTL</value>
+                <value>EEDM.Persons.GOBSRID</value>
+                <value>EEDM.Persons.GOBTPAC</value>
+                <value>EEDM.Persons.GOBUMAP</value>
+                <value>EEDM.Persons.GORADID</value>
+                <value>EEDM.Persons.GOREMAL</value>
+                <value>EEDM.Persons.GORGUID</value>
+                <value>EEDM.Persons.GORPRAC</value>
+                <value>EEDM.Persons.PEBEMPL</value>
+                <value>EEDM.Persons.SGBSTDN</value>
+                <value>EEDM.Persons.SIBINST</value>
+                <value>EEDM.Persons.SORINTS</value>
+                <value>EEDM.Persons.SPBPERS</value>
+                <value>EEDM.Persons.SPRADDR</value>
+                <value>EEDM.Persons.SPRIDEN</value>
+                <value>EEDM.Persons.SPRTELE</value>
+                <value>EEDM.Persons.SRBRECR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
