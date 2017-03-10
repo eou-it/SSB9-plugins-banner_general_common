@@ -93,7 +93,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
         assertTrue( populationCalculation.calculatedCount >= 1000 )
     }
 

@@ -310,7 +310,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
                     executor.execute(new AsynchronousTaskHandler(job) {
                         @Override
                         void run() {
-                            log.debug("Going to make it rock")
                             handleTask(getJob())
                         }
                     })

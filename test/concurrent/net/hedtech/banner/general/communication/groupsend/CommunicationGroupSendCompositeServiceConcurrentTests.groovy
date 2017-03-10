@@ -82,7 +82,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -107,7 +107,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -161,7 +161,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId( populationCalculation.selectionList.id )
         assertNotNull(selectionListEntryList)
@@ -243,7 +243,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         List items = CommunicationGroupSendItem.findAllByCommunicationGroupSend(  groupSend )
         assertEquals( 5, items.size() )
@@ -273,7 +273,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
@@ -320,7 +320,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
@@ -368,7 +368,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, null, 30, 10 )
+        assertTrueWithRetry( isAvailable, null, 15, 5 )
 
         Calendar now = Calendar.getInstance()
         now.add(Calendar.HOUR, 1)
@@ -389,7 +389,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         populationCalculation = communicationPopulationCompositeService.calculatePopulationVersionForUser( populationCalculation.populationVersion )
         populationCalculationId = populationCalculation.id
-        assertTrueWithRetry( isAvailable, null, 30, 10 )
+        assertTrueWithRetry( isAvailable, null, 15, 5 )
 
         communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
         communicationPopulationCompositeService.deletePopulation( population )
@@ -481,7 +481,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -510,7 +510,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -563,7 +563,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         assertEquals( 1, CommunicationPopulationVersion.count() )
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
@@ -595,7 +595,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             List groupSendItemList = CommunicationGroupSendItem.fetchByGroupSend( each )
             return groupSendItemList.size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, null, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, null, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -638,14 +638,13 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         // 0) Test parameters
         String testName = "testMediumPopulationAndDelete"
         String testUserId = 'BCMADMIN'
-        int lowerPopulationSizeRange = 500
-        int upperPopulationSizeRange = 1000
+        final int targetSize = 500
 
         // 1)Generate such a population which will fetch large number of people from the system (in the range 2000-4000 etc.)
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
             folder: defaultFolder,
             name: testName,
-            queryString: "SELECT spriden_pidm FROM spriden, spbpers WHERE spriden_change_ind IS NULL AND spriden_pidm = spbpers_pidm AND spbpers_sex in ( 'F' ) AND rownum < 2001"
+            queryString: "SELECT spriden_pidm FROM spriden, spbpers WHERE spriden_change_ind IS NULL AND spriden_pidm = spbpers_pidm AND rownum <= ${targetSize}"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -660,11 +659,10 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, testUserId )
-        boolean isPopulationSizeInRange = (populationCalculation.calculatedCount >= lowerPopulationSizeRange) && (populationCalculation.calculatedCount <= upperPopulationSizeRange)
-        assertTrue( "Expected population size ${populationCalculation.calculatedCount} to be in range of ${lowerPopulationSizeRange} to ${upperPopulationSizeRange}", isPopulationSizeInRange )
+        assertEquals( targetSize, populationCalculation.calculatedCount )
 
         // 2)Using this population send any Email template.
         // Wait on the Open com job page till status becomes "Processing" and at least few items got completed.
@@ -749,7 +747,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -831,7 +829,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 3
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -883,7 +881,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
         CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
@@ -907,7 +905,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 8
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -954,7 +952,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
         CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
@@ -985,7 +983,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             CommunicationGroupSend each = CommunicationGroupSend.get( groupSendId )
             return CommunicationGroupSendItem.countByCommunicationGroupSend( each ) == 8
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, null, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, null, 15, 5 )
 
         // Wait for items to be done
         sleepUntilGroupSendItemsComplete( groupSend, 60 )

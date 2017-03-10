@@ -80,7 +80,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -105,7 +105,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -191,7 +191,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -242,7 +242,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         def letterItemCreated = {
             return communicationLetterItemService.list().size() == it
         }
-        assertTrueWithRetry( letterItemCreated, 1, 30, 10 )
+        assertTrueWithRetry( letterItemCreated, 1, 15, 5 )
 
         CommunicationLetterItem item = communicationLetterItemService.list().get( 0 )
         assertEquals( testExternalUser, item.toAddress )
@@ -263,7 +263,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -333,7 +333,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields

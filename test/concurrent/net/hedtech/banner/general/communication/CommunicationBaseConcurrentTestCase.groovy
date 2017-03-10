@@ -186,7 +186,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         FormContext.clear()
     }
 
-    public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 10 ) {
+    public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {
         boolean result = false
         for (int i=0; i<maxAttempts; i++ ) {
             result = booleanClosure.call( arguments )
@@ -293,7 +293,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",

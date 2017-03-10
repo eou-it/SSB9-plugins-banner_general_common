@@ -82,7 +82,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -107,7 +107,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
         def sendViewDetails = CommunicationGroupSendDetailView.findAll()
@@ -172,7 +172,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
         assertEquals( 1, populationCalculation.calculatedCount )
 
         CommunicationField communicationField = new CommunicationField(
@@ -227,7 +227,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         def mobileItemCreated = {
             return communicationMobileNotificationItemService.list().size() == it
         }
-        assertTrueWithRetry( mobileItemCreated, 1, 30, 10 )
+        assertTrueWithRetry( mobileItemCreated, 1, 15, 5 )
 
         CommunicationMobileNotificationItem item = communicationMobileNotificationItemService.list().get( 0 )
         def jsonSlurper = new JsonSlurper()
