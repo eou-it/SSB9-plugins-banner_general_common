@@ -230,10 +230,8 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         assertTrueWithRetry( mobileItemCreated, 1, 30, 10 )
 
         CommunicationMobileNotificationItem item = communicationMobileNotificationItemService.list().get( 0 )
-// the item now has serverResponse to store all the individual values.  The server response
-// is a string formatted as [{"":"","":"",....}].  So strip of the begin and end characters and get the JSON map out
         def jsonSlurper = new JsonSlurper()
-        def serverResponseMap = jsonSlurper.parseText(item.serverResponse.substring(1, item.serverResponse.length()-1))
+        def serverResponseMap = jsonSlurper.parseText( item.serverResponse )
 
         assert serverResponseMap instanceof Map
         assertEquals( "testPersonalization from BCM", serverResponseMap.mobileHeadline )
