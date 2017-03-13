@@ -60,6 +60,22 @@ class PersonCredentialService {
         return pidmToAdditionalIDsMap
     }
 
+    def getPidmToAdditionalIDsMap(Collection<Integer> pidms) {
+        def pidmToAdditionalIDsMap = [:]
+        if (pidms) {
+            def entities = additionalIDService.fetchAllByPidmInList(pidms)
+            entities.each {
+                Collection<AdditionalID> personAdditionalIDs = []
+                if (pidmToAdditionalIDsMap.containsKey(it.pidm)) {
+                    personAdditionalIDs = pidmToAdditionalIDsMap.get(it.pidm)
+                } else {
+                    pidmToAdditionalIDsMap.put(it.pidm, personAdditionalIDs)
+                }
+                personAdditionalIDs.add(it)
+            }
+        }
+        return pidmToAdditionalIDsMap
+    }
 
     def createOrUpdateAdditionalIDs(Integer pidm, Map additionalIdTypeCodeToIdMap) {
         Collection<AdditionalID> list = []
