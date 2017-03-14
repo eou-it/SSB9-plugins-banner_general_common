@@ -143,17 +143,18 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
         assertEquals( 3, entryCount )
         assertEquals( 3, results.insertedCount )
-        assertEquals( 1, results.notExistCount )
-        assertEquals( 1, results.ignoredCount)
+        assertEquals( 0, results.notExistCount )
+        assertEquals( 0, results.ignoredCount)
+        assertEquals( 0, results.duplicateCount)
 
         persons = [ 'CMOORE', '710000051' ]
         results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
         entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
         assertEquals( 4, entryCount )
-        assertEquals( 0, results.insertedCount )
+        assertEquals( 1, results.insertedCount )
         assertEquals( 1, results.notExistCount )
-        assertEquals( 3, results.duplicateCount)
-        assertEquals( 4, results.ignoredCount )
+        assertEquals( 0, results.duplicateCount)
+        assertEquals( 1, results.ignoredCount )
 
         assertEquals( 0, CommunicationPopulationQueryAssociation.countByPopulation( population ) )
 
