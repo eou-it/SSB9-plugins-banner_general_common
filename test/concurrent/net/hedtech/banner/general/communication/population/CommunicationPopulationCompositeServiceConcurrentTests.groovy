@@ -142,15 +142,19 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertNotNull( results.population.includeList )
         def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
         assertEquals( 3, entryCount )
-        assertEquals( 3, results.entryResults.size() )
+        assertEquals( 3, results.insertedCount )
+        assertEquals( 0, results.notExistCount )
+        assertEquals( 0, results.ignoredCount)
+        assertEquals( 0, results.duplicateCount)
 
         persons = [ 'CMOORE', '710000051' ]
         results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
         entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
         assertEquals( 4, entryCount )
-        assertEquals( 2, results.entryResults.size() )
-        assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND, results.entryResults.get(0).errorCode )
-        assertNull( results.entryResults.get(1).errorCode )
+        assertEquals( 1, results.insertedCount )
+        assertEquals( 1, results.notExistCount )
+        assertEquals( 0, results.duplicateCount)
+        assertEquals( 1, results.ignoredCount )
 
         assertEquals( 0, CommunicationPopulationQueryAssociation.countByPopulation( population ) )
 

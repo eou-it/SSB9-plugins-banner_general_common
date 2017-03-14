@@ -13,7 +13,6 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
-import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
@@ -30,11 +29,9 @@ import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
+import org.apache.commons.lang.StringUtils
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Connection
@@ -83,28 +80,157 @@ class CommunicationPopulationCompositeService {
         return population
     }
 
+
     public CommunicationPopulationSelectionListBulkResults addPersonsToIncludeList( CommunicationPopulation population, List<String> bannerIds ) {
-        log.trace( "addPersonsToIncludeList called" )
+        log.trace("addPersonsToIncludeList called")
 
         if (bannerIds == null) {
             bannerIds = new ArrayList<String>()
         }
 
+        def config = Holders?.config
+        def dataOrigin = config.dataOrigin ?: "Banner"
+
+        if (log.isDebugEnabled()) {
+            log.debug("Dataorigin has been determined: $dataOrigin")
+        }
+
         CommunicationPopulationSelectionListBulkResults results = new CommunicationPopulationSelectionListBulkResults()
-        CommunicationPopulationSelectionListEntryResult entryResult
-        int index = 0
-        for (String bannerId:bannerIds) {
-            try {
-                population = addPersonToIncludeList( population, bannerId )
-                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:null, errorText:null, updated:true )
-            } catch (ApplicationException e) {
-                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:e.friendlyName, errorText:StringHelper.stackTraceToString( e ), updated:false )
-            } catch (Throwable t) {
-                entryResult = new CommunicationPopulationSelectionListEntryResult( index:index, bannerId:bannerId, errorCode:CommunicationErrorCode.UNKNOWN_ERROR, errorText:StringHelper.stackTraceToString( t ), updated:false )
+
+        if (population.includeList == null) {
+            if (log.isDebugEnabled()) {
+                log.debug( "Creating new manual include list for population with id ${population.id}." )
             }
-            results.entryResults.add( entryResult )
+
+            CommunicationPopulationSelectionList selectionList = new CommunicationPopulationSelectionList()
+            communicationPopulationSelectionListService.create( selectionList )
+
+            population.includeList = selectionList
+            population.changesPending = true
+            population = communicationPopulationService.update( population )
+        } else if (!population.changesPending) {
+            population.changesPending = true
+            population = communicationPopulationService.update( population )
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Selection list has been created - $population?.includeList?.id")
+        }
+
+       //Define all the sql statements needed to insert, check for duplicates and check for non existent IDs
+        def insertString1 = """  insert into gcrlent (
+                                    gcrlent_slis_id,gcrlent_pidm,gcrlent_user_id,gcrlent_activity_date, gcrlent_data_origin
+                                )
+                                 select  ?, goodpidmlist.spridenpidm, USER, SYSDATE, ?
+                                 from (SELECT spriden_pidm spridenpidm, spriden_change_ind spridenchangeind FROM spriden WHERE spriden_id IN
+                             """
+        def insertString2 = """     AND NOT EXISTS (select b.gcrlent_pidm from gcrlent b where  b.gcrlent_slis_id = ? and b.gcrlent_pidm = spriden_pidm)) goodpidmlist
+                                 where  goodpidmlist.spridenchangeind IS NULL
+                           """
+        def idExistsSqlString = """
+                           SELECT spriden_id from spriden, gcrlent
+                           where spriden_pidm = gcrlent_pidm
+                           and gcrlent_slis_id = ?
+                           and spriden_Id in
+                           """
+        def duplicateExistsSqlString = """
+                        SELECT  distinct spriden_pidm FROM spriden, gcrlent
+                        WHERE  spriden_pidm = gcrlent_pidm
+                        AND gcrlent_slis_id = ?
+                        AND spriden_id IN
+                        """
+        //Define all total count variables
+        def totalInserted = 0
+        def totalIgnored = 0
+        def totalDuplicates = 0
+        def totalBannerIdsNotFound = 0
+        def bannerIdsNotFound = []
+
+        def batchSize = 0
+        def uniqueBatchSize = 0
+        def batchDuplicateCount = 0
+        def batchIgnoredCount = 0
+        def batchInsertedcount = 0
+        def batchNotFound = 0
+
+        def sql
+        def sqlParams = []
+        def paramsMap = []
+        def resultSet
+
+        try {
+            Connection conn = (Connection) sessionFactory.getCurrentSession().connection()
+            sql = new Sql((Connection) sessionFactory.getCurrentSession().connection())
+
+            def groupedBannerIds = bannerIds.collate(1000)
+
+            groupedBannerIds.each { batchBannerIds ->
+
+                batchSize = batchBannerIds.size()
+                uniqueBatchSize = batchBannerIds.unique().size()
+                batchDuplicateCount = 0
+                batchIgnoredCount = 0
+                batchInsertedcount = 0
+                batchNotFound = 0
+
+                paramsMap = []
+                sqlParams = []
+//create the bind parameter map for the insert statement
+                paramsMap.add(population.includeList.id)
+                paramsMap.add(dataOrigin)
+                paramsMap.addAll(batchBannerIds)
+                paramsMap.add(population.includeList.id)
+
+                // create the bind parameter map for the 2 query statement
+                sqlParams.add(population.includeList.id)
+                sqlParams.addAll(batchBannerIds)
+
+                //A IN predicate requires a bind placeholder for each of the value.
+                def bindplaceholderstring = StringUtils.repeat("?,", uniqueBatchSize - 1) + '?'
+
+                //run the dup query for duplicates already existing in selection list
+                def sqldupquery = duplicateExistsSqlString + '(' + bindplaceholderstring + ')'
+                def duplicateIds = sql.rows(sqldupquery, sqlParams)
+                batchDuplicateCount = duplicateIds.size()
+
+                //run the insert statement
+                def sqlinsert = insertString1 + '(' + bindplaceholderstring + ')' + insertString2
+                sql.executeUpdate(sqlinsert, paramsMap)
+                batchInsertedcount = sql.updateCount
+
+                //get which ids exist
+                def sqlquery = idExistsSqlString + '(' + bindplaceholderstring + ')'
+                resultSet = sql.rows(sqlquery, sqlParams)
+
+                //collect all IDs that dont exist in banner
+                batchBannerIds.removeAll(resultSet.collect { it.SPRIDEN_ID })
+                bannerIdsNotFound.addAll(batchBannerIds)
+                batchNotFound = batchBannerIds.size()
+
+                batchIgnoredCount = (batchSize - batchInsertedcount)  // dup or not exists
+                //the duplicates in the file + pidms that were already in selection list + mulitple ids in file for the same pidm
+                // duplicates in file = batchSize - uniquebatch size
+                //duplicates already in selection list =  batchDuplicationCount
+                //multiple pidms = what was ignored - what doesnt exist - what already exists
+
+                batchDuplicateCount = (batchSize - batchInsertedcount - batchNotFound)
+
+                //update the totals
+                totalDuplicates = totalDuplicates + batchDuplicateCount
+                totalInserted = totalInserted + batchInsertedcount
+                totalBannerIdsNotFound = totalBannerIdsNotFound + batchNotFound
+                totalIgnored = totalIgnored + batchIgnoredCount
+            }
+        } catch (Exception e) {
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.UNKNOWN_ERROR.name())
+        } finally {
+            sql?.close()
         }
         results.population = population
+        results.insertedCount = totalInserted
+        results.duplicateCount = totalDuplicates
+        results.ignoredCount = totalIgnored
+        results.bannerIdsNotFound = bannerIdsNotFound
+        results.notExistCount = totalBannerIdsNotFound
         return results
     }
 
@@ -666,8 +792,8 @@ class CommunicationPopulationCompositeService {
         try {
             sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
             int rowsUpdated = sql.executeUpdate(
-                "INSERT INTO GCRLENT (GCRLENT_SLIS_ID, GCRLENT_PIDM, GCRLENT_USER_ID, GCRLENT_ACTIVITY_DATE) " +
-                        "SELECT ?, GCRLENT_PIDM, ?, SYSDATE FROM GCRLENT WHERE GCRLENT_SLIS_ID = ?",
+                "INSERT INTO GCRLENT (GCRLENT_SLIS_ID, GCRLENT_PIDM, GCRLENT_USER_ID, GCRLENT_ACTIVITY_DATE, GCRLENT_DATA_ORIGIN) " +
+                        "SELECT ?, GCRLENT_PIDM, ?, SYSDATE, GCRLENT_DATA_ORIGIN FROM GCRLENT WHERE GCRLENT_SLIS_ID = ?",
                 [ clone.id, getCurrentUserBannerId(), selectionList.id ]
             )
 

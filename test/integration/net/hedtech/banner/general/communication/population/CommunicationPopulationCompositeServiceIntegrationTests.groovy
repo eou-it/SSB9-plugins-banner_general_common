@@ -76,15 +76,33 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
         assertNotNull( results.population.includeList )
         def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )
         assertEquals( 3, entryCount )
-        assertEquals( 3, results.entryResults.size() )
+        assertEquals( 3, results.insertedCount )
 
         persons = [ 'CMOORE', '710000051' ]
         results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
         entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
         assertEquals( 4, entryCount )
-        assertEquals( 2, results.entryResults.size() )
-        assertEquals( CommunicationErrorCode.BANNER_ID_NOT_FOUND, results.entryResults.get(0).errorCode )
-        assertNull( results.entryResults.get(1).errorCode )
+        assertEquals( 1, results.insertedCount )
+        assertEquals( 1, results.notExistCount )
+        assertEquals( 1, results.ignoredCount)
+
+        persons = [ 'CMOORE', '710000051','BCMADMIN', 'BCMUSER' ]
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 4, entryCount )
+        assertEquals( 0, results.insertedCount )
+        assertEquals( 1, results.notExistCount )
+        assertEquals( 3, results.duplicateCount)
+        assertEquals( 4, results.ignoredCount )
+
+        persons = [ 'BCMEMPL','CMOORE', '710000051','BCMADMIN', 'BCMUSER', 'BCMEMPL' ]
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 5, entryCount )
+        assertEquals( 1, results.insertedCount )
+        assertEquals( 1, results.notExistCount )
+        assertEquals( 4, results.duplicateCount)
+        assertEquals( 5, results.ignoredCount )
     }
 
     @Test void testRemovePersonFromIncludeList() {
