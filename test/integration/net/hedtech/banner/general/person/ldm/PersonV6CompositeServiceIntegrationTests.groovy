@@ -716,7 +716,7 @@ class PersonV6CompositeServiceIntegrationTests extends BaseIntegrationTestCase {
             def bannerId = person.credentials.find { credentialType ->
                 credentialType.type == 'bannerId'
             }
-            personIdentificationName = PersonUtility.getPersonOrNonPerson(bannerId.value)
+            personIdentificationName = PersonUtility.getPerson(bannerId.value)
             personBase = PersonBasicPersonBase.findByPidm(personIdentificationName.pidm)
             personDetails = ["guid": person.guid, "personBase": personBase, "personIdentificationName": personIdentificationName]
             if (personBase && personIdentificationName) {
