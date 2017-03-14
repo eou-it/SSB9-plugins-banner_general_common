@@ -109,15 +109,17 @@ class UserRoleCompositeService extends LdmService {
     }
 
 
-    private def setStudentRole(def pidms, def results) {
-        pidms?.each { it ->
-            def roles = results.get(it.toInteger()) ?: []
+    private def setStudentRole(def rows, def results) {
+        rows?.each { it ->
+            def roles = results.get(it[0].toInteger()) ?: []
             def newRole = new RoleDetail()
             newRole.role = 'Student'
+            newRole.effectiveStartDate =  it[1]
+            newRole.effectiveEndDate =  it[2]
             roles << newRole
-            results.put(it.toInteger(), roles)
+            results.put(it[0].toInteger(), roles)
         }
-        return results
+       return results
     }
 
     /**
