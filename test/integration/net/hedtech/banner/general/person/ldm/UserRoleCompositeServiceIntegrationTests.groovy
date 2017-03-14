@@ -41,7 +41,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
         assertTrue results?.pidms?.size() > 0
         results.pidms?.find { pidm ->
-            assertNotNull PersonUtility.getPerson(pidm)
+            assertNotNull PersonUtility.getPersonOrNonPerson(pidm)
         }
     }
 
@@ -108,7 +108,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         assertTrue results.count > 60
         assertEquals 10, results.pidms?.size()
         results.pidms?.each { pidm ->
-            assertNotNull PersonUtility.getPerson(pidm)
+            assertNotNull PersonUtility.getPersonOrNonPerson(pidm)
         }
         // paginate beyond number of rows to test we get 0 back
         def maxPages = Math.round((results.count / 500) + 1) * 500
@@ -126,7 +126,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         else actual = results.count.toInteger()
         assertEquals actual, results?.pidms?.size()
         results?.pidms.each { pidm ->
-            assertNotNull PersonUtility.getPerson(pidm)
+            assertNotNull PersonUtility.getPersonOrNonPerson(pidm)
         }
     }
 
@@ -139,14 +139,14 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         // expect to get rows 50-59 back
         assertEquals 10, results?.pidms?.size()
         results.pidms?.find { pidm ->
-            assertNotNull PersonUtility.getPerson(pidm)
+            assertNotNull PersonUtility.getPersonOrNonPerson(pidm)
         }
         // expect to get rows 500-999 back
         def results2 = userRoleCompositeService.fetchAllByRole([role: "student", max: '500', offset: '500'])
         assertTrue results1.count > 1000
         assertEquals 500, results2?.pidms?.size()
         results.pidms?.each { pidm ->
-            assertNotNull PersonUtility.getPerson(pidm)
+            assertNotNull PersonUtility.getPersonOrNonPerson(pidm)
         }
         // test pgination beyond number of rows we have to test we get 0 back
         def maxPages = Math.round((results1.count / 500) + 1) * 500
@@ -167,7 +167,7 @@ class UserRoleCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
         // service forces pagination of 500
         assertEquals actual, results?.pidms?.size()
         results?.pidms?.each { pidm ->
-            assertNotNull PersonUtility.getPerson(pidm)
+            assertNotNull PersonUtility.getPersonOrNonPerson(pidm)
         }
     }
 
