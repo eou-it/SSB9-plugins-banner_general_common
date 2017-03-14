@@ -15,7 +15,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Level.STVLEVL</value>
+                <value>EEDM.STU.Level.STVLEVL</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -38,7 +38,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AcademicPeriods.STVACYR</value>
+                <value>EEDM.STU.AcademicPeriods.STVACYR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -63,7 +63,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Building.SLBBLDG</value>
+                <value>EEDM.GEN.Building.SLBBLDG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -86,7 +86,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GradeMode.STVGMOD</value>
+                <value>EEDM.STU.GradeMode.STVGMOD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -109,7 +109,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GradeDefinition.SHRGDID</value>
+                <value>EEDM.STU.GradeDefinition.SHRGDID</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -131,7 +131,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GradeScheme.SHRGSCH</value>
+                <value>EEDM.STU.GradeScheme.SHRGSCH</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -153,7 +153,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.ScheduleType.STVSCHD</value>
+                <value>EEDM.STU.ScheduleType.STVSCHD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -176,7 +176,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstructionalPlatforms.GORINTG</value>
+                <value>EEDM.GEN.InstructionalPlatforms.GORINTG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -199,8 +199,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.MaritalStatus.STVMRTL</value>
-                <value>EEDM.MaritalStatus.GORICCR</value>
+                <value>EEDM.GEN.MaritalStatus.STVMRTL</value>
+                <value>EEDM.GEN.MaritalStatus.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -224,9 +224,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.College.STVCOLL</value>
-                <value>EEDM.Department.STVDEPT</value>
-                <value>EEDM.Division.STVDIVS</value>
+                <value>EEDM.GEN.College.STVCOLL</value>
+                <value>EEDM.GEN.Department.STVDEPT</value>
+                <value>EEDM.STU.Division.STVDIVS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -251,7 +251,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Organization.SPRIDEN</value>
+                <value>EEDM.GEN.Organization.SPRIDEN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -274,25 +274,25 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Persons.APRCATG</value>
-                <value>EEDM.Persons.FTVVEND</value>
-                <value>EEDM.Persons.GOBINTL</value>
-                <value>EEDM.Persons.GOBSRID</value>
-                <value>EEDM.Persons.GOBTPAC</value>
-                <value>EEDM.Persons.GOBUMAP</value>
-                <value>EEDM.Persons.GORADID</value>
-                <value>EEDM.Persons.GOREMAL</value>
-                <value>EEDM.Persons.GORGUID</value>
-                <value>EEDM.Persons.GORPRAC</value>
-                <value>EEDM.Persons.PEBEMPL</value>
-                <value>EEDM.Persons.SGBSTDN</value>
-                <value>EEDM.Persons.SIBINST</value>
-                <value>EEDM.Persons.SORINTS</value>
-                <value>EEDM.Persons.SPBPERS</value>
-                <value>EEDM.Persons.SPRADDR</value>
-                <value>EEDM.Persons.SPRIDEN</value>
-                <value>EEDM.Persons.SPRTELE</value>
-                <value>EEDM.Persons.SRBRECR</value>
+                <value>EEDM.ADV.Persons.APRCATG</value>
+                <value>EEDM.FIN.Persons.FTVVEND</value>
+                <value>EEDM.GEN.Persons.GOBINTL</value>
+                <value>EEDM.GEN.Persons.GOBSRID</value>
+                <value>EEDM.GEN.Persons.GOBTPAC</value>
+                <value>EEDM.GEN.Persons.GOBUMAP</value>
+                <value>EEDM.GEN.Persons.GORADID</value>
+                <value>EEDM.GEN.Persons.GOREMAL</value>
+                <value>EEDM.GEN.Persons.GORGUID</value>
+                <value>EEDM.GEN.Persons.GORPRAC</value>
+                <value>EEDM.HR.Persons.PEBEMPL</value>
+                <value>EEDM.STU.Persons.SGBSTDN</value>
+                <value>EEDM.STU.Persons.SIBINST</value>
+                <value>EEDM.STU.Persons.SORINTS</value>
+                <value>EEDM.GEN.Persons.SPBPERS</value>
+                <value>EEDM.GEN.Persons.SPRADDR</value>
+                <value>EEDM.GEN.Persons.SPRIDEN</value>
+                <value>EEDM.GEN.Persons.SPRTELE</value>
+                <value>EEDM.GEN.Persons.SRBRECR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -314,7 +314,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PersonFilters.GLBSLCT</value>
+                <value>EEDM.GEN.PersonFilters.GLBSLCT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -337,7 +337,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Race.GORRACE</value>
+                <value>EEDM.GEN.Race.GORRACE</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -360,7 +360,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HoldType.STVHLDD</value>
+                <value>EEDM.STU.HoldType.STVHLDD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -383,7 +383,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Room.SLBRDEF</value>
+                <value>EEDM.GEN.Room.SLBRDEF</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -406,7 +406,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.SectionRegistration.SFRSTCR</value>
+                <value>EEDM.STU.SectionRegistration.SFRSTCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -437,7 +437,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Campus.STVCAMP</value>
+                <value>EEDM.GEN.Campus.STVCAMP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -460,7 +460,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Subject.STVSUBJ</value>
+                <value>EEDM.STU.Subject.STVSUBJ</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -483,8 +483,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.EmailType.GTVEMAL</value>
-                <value>EEDM.EmailType.GORICCR</value>
+                <value>EEDM.GEN.EmailType.GTVEMAL</value>
+                <value>EEDM.GEN.EmailType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -508,8 +508,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AddressType.STVATYP</value>
-                <value>EEDM.AddressType.GORICCR</value>
+                <value>EEDM.GEN.AddressType.STVATYP</value>
+                <value>EEDM.GEN.AddressType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -533,7 +533,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Degree.STVDEGC</value>
+                <value>EEDM.STU.Degree.STVDEGC</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -556,8 +556,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.TelephoneType.STVTELE</value>
-                <value>EEDM.TelephoneType.GORICCR</value>
+                <value>EEDM.GEN.TelephoneType.STVTELE</value>
+                <value>EEDM.GEN.TelephoneType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -581,9 +581,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.MajorMinorConcentration.STVMAJR.MAJOR</value>
-                <value>EEDM.MajorMinorConcentration.STVMAJR.MINOR</value>
-                <value>EEDM.MajorMinorConcentration.STVMAJR.CONCENTRATION</value>
+                <value>EEDM.STU.MajorMinorConcentration.STVMAJR.MAJOR</value>
+                <value>EEDM.STU.MajorMinorConcentration.STVMAJR.MINOR</value>
+                <value>EEDM.STU.MajorMinorConcentration.STVMAJR.CONCENTRATION</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -606,8 +606,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.SectionCrossListEnrollmentInformationBase.SSBXLST</value>
-                <value>EEDM.SectionCrossListSection.SSRXLST</value>
+                <value>EEDM.STU.SectionCrossListEnrollmentInformationBase.SSBXLST</value>
+                <value>EEDM.STU.SectionCrossListSection.SSRXLST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -630,7 +630,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Religion.STVRELG</value>
+                <value>EEDM.GEN.Religion.STVRELG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -653,7 +653,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PersonHold.SPRHOLD</value>
+                <value>EEDM.GEN.PersonHold.SPRHOLD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -676,7 +676,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GeoArea.SORGEOR</value>
+                <value>EEDM.GEN.GeoArea.SORGEOR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -699,8 +699,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GeoRegion.STVGEOR</value>
-                <value>EEDM.GeoDivision.STVGEOD</value>
+                <value>EEDM.GEN.GeoRegion.STVGEOR</value>
+                <value>EEDM.GEN.GeoDivision.STVGEOD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -724,7 +724,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.EnrollmentStatuses.STVCACT</value>
+                <value>EEDM.STU.EnrollmentStatuses.STVCACT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -746,8 +746,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.NameType.GTVNTYP</value>
-                <value>EEDM.NameType.GORICCR</value>
+                <value>EEDM.GEN.NameType.GTVNTYP</value>
+                <value>EEDM.GEN.NameType.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -771,7 +771,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HoldType.STVHLDD</value>
+                <value>EEDM.STU.HoldType.STVHLDD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -794,8 +794,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.DepartmentalHonor.STVHOND</value>
-                <value>EEDM.InstitutionalHonor.STVHONR</value>
+                <value>EEDM.STU.DepartmentalHonor.STVHOND</value>
+                <value>EEDM.GEN.InstitutionalHonor.STVHONR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -819,7 +819,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Interest.STVINTS</value>
+                <value>EEDM.STU.Interest.STVINTS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -842,9 +842,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.SourceBackgroundInstitution.STVSBGI</value>
-                <value>EEDM.SourceBackgroundInstBase.SOBSBGI</value>
-                <value>EEDM.InstitutionalDescription.GUBINST</value>
+                <value>EEDM.GEN.SourceBackgroundInstitution.STVSBGI</value>
+                <value>EEDM.GEN.SourceBackgroundInstBase.SOBSBGI</value>
+                <value>EEDM.GEN.InstitutionalDescription.GUBINST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -868,8 +868,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Addresses.SPRADDR</value>
-                <value>EEDM.Addresses.SOBSBGI</value>
+                <value>EEDM.GEN.Addresses.SPRADDR</value>
+                <value>EEDM.GEN.Addresses.SOBSBGI</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -892,7 +892,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CampusInvolvementsRoles.STVCOMF</value>
+                <value>EEDM.STU.CampusInvolvementsRoles.STVCOMF</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -915,7 +915,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CampusOrganizationsTypes.STVACTP</value>
+                <value>EEDM.GEN.CampusOrganizationsTypes.STVACTP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -938,8 +938,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentActivity.STVACTC</value>
-                <value>EEDM.CommitteeType.STVCOMT</value>
+                <value>EEDM.STU.StudentActivity.STVACTC</value>
+                <value>EEDM.GEN.CommitteeType.STVCOMT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -963,7 +963,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PersonGuardian.SORFOLK</value>
+                <value>EEDM.STU.PersonGuardian.SORFOLK</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -985,7 +985,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PersonContact.SPREMRG</value>
+                <value>EEDM.GEN.PersonContact.SPREMRG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1007,11 +1007,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentAcademicProgram.SORLCUR</value>
-                <value>EEDM.StudentAcademicProgram.SHRDGMR</value>
-                <value>EEDM.StudentAcademicProgram.SORLFOS</value>
-                <value>EEDM.StudentAcademicProgram.SHRDGDH</value>
-                <value>EEDM.StudentAcademicProgram.SHRDGIH</value>
+                <value>EEDM.STU.StudentAcademicProgram.SORLCUR</value>
+                <value>EEDM.STU.StudentAcademicProgram.SHRDGMR</value>
+                <value>EEDM.STU.StudentAcademicProgram.SORLFOS</value>
+                <value>EEDM.STU.StudentAcademicProgram.SHRDGDH</value>
+                <value>EEDM.STU.StudentAcademicProgram.SHRDGIH</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1042,7 +1042,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AcademicProgram.SMRPRLE</value>
+                <value>EEDM.STU.AcademicProgram.SMRPRLE</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1064,9 +1064,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CampusInvolvements.SGRSACT</value>
-                <value>EEDM.CampusInvolvements.SGRSPRT</value>
-                <value>EEDM.CampusInvolvements.SHRCOMM</value>
+                <value>EEDM.STU.CampusInvolvements.SGRSACT</value>
+                <value>EEDM.STU.CampusInvolvements.SGRSPRT</value>
+                <value>EEDM.STU.CampusInvolvements.SHRCOMM</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1090,8 +1090,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PersonalRelationshipTypes.STVRELT</value>
-                <value>EEDM.PersonalRelationshipTypes.GORICCR</value>
+                <value>EEDM.GEN.PersonalRelationshipTypes.STVRELT</value>
+                <value>EEDM.GEN.PersonalRelationshipTypes.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1115,8 +1115,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.SectionRegistrationStatuses.STVRSTS</value>
-                <value>EEDM.SectionRegistrationStatuses.GORICCR</value>
+                <value>EEDM.STU.SectionRegistrationStatuses.STVRSTS</value>
+                <value>EEDM.STU.SectionRegistrationStatuses.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1140,7 +1140,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GradeChangeReason.STVGCHG</value>
+                <value>EEDM.STU.GradeChangeReason.STVGCHG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1163,7 +1163,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CitizenshipStatus.STVCITZ</value>
+                <value>EEDM.GEN.CitizenshipStatus.STVCITZ</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1186,7 +1186,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.VisaType.STVVTYP</value>
+                <value>EEDM.GEN.VisaType.STVVTYP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1209,7 +1209,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Courses.SCBCRSE</value>
+                <value>EEDM.STU.Courses.SCBCRSE</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1243,7 +1243,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Sections.SSBSECT</value>
+                <value>EEDM.STU.Sections.SSBSECT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1273,7 +1273,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AcademicStandings.STVASTD</value>
+                <value>EEDM.STU.AcademicStandings.STVASTD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1295,7 +1295,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.ClassCodes.STVCLAS</value>
+                <value>EEDM.STU.ClassCodes.STVCLAS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1317,7 +1317,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Cohorts.STVCHRT</value>
+                <value>EEDM.STU.Cohorts.STVCHRT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1339,7 +1339,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AcademicPeriodEnrollmentStatuses.STVESTS</value>
+                <value>EEDM.STU.AcademicPeriodEnrollmentStatuses.STVESTS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1361,7 +1361,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.ResidencyTypes.STVRESD</value>
+                <value>EEDM.STU.ResidencyTypes.STVRESD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1383,7 +1383,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentAttributes.STVATTS</value>
+                <value>EEDM.STU.StudentAttributes.STVATTS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1405,7 +1405,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentStatuses.STVSTST</value>
+                <value>EEDM.STU.StudentStatuses.STVSTST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1427,7 +1427,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentTypes.STVSTYP</value>
+                <value>EEDM.STU.StudentTypes.STVSTYP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1449,7 +1449,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstructionalEvents.SSRMEET</value>
+                <value>EEDM.STU.InstructionalEvents.SSRMEET</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1472,7 +1472,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PersonVisas.GORVISA</value>
+                <value>EEDM.GEN.PersonVisas.GORVISA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1494,11 +1494,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentAcademicPeriodProfiles.SFBETRM</value>
-                <value>EEDM.StudentAcademicPeriodProfiles.SGBSTDN</value>
-                <value>EEDM.StudentAcademicPeriodProfiles.SGRSATT</value>
-                <value>EEDM.StudentAcademicPeriodProfiles.SHRTGPA</value>
-                <value>EEDM.StudentAcademicPeriodProfiles.SORLCUR</value>
+                <value>EEDM.STU.StudentAcademicPeriodProfiles.SFBETRM</value>
+                <value>EEDM.STU.StudentAcademicPeriodProfiles.SGBSTDN</value>
+                <value>EEDM.STU.StudentAcademicPeriodProfiles.SGRSATT</value>
+                <value>EEDM.STU.StudentAcademicPeriodProfiles.SHRTGPA</value>
+                <value>EEDM.STU.StudentAcademicPeriodProfiles.SORLCUR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1524,10 +1524,10 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Students.SGBSTDN</value>
-                <value>EEDM.Students.SGRCHRT</value>
-                <value>EEDM.Students.SGRSATT</value>
-                <value>EEDM.Students.SHRLGPA</value>
+                <value>EEDM.STU.Students.SGBSTDN</value>
+                <value>EEDM.STU.Students.SGRCHRT</value>
+                <value>EEDM.STU.Students.SGRSATT</value>
+                <value>EEDM.STU.Students.SHRLGPA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1555,7 +1555,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AccountingStringComponents.FTVSDAT</value>
+                <value>EEDM.FIN.AccountingStringComponents.FTVSDAT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1577,7 +1577,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AccountingStringFormats.FTVSDAT</value>
+                <value>EEDM.FIN.AccountingStringFormats.FTVSDAT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1599,7 +1599,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GeneralLedgerTransactions.GURTRNH</value>
+                <value>EEDM.FIN.GeneralLedgerTransactions.GURTRNH</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1621,17 +1621,17 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AccountingStringComponentValues.FTVCOAS</value>
-                <value>EEDM.AccountingStringComponentValues.FTVACCI</value>
-                <value>EEDM.AccountingStringComponentValues.FTVFUND</value>
-                <value>EEDM.AccountingStringComponentValues.FTVORGN</value>
-                <value>EEDM.AccountingStringComponentValues.FTVACCT</value>
-                <value>EEDM.AccountingStringComponentValues.FTVPROG</value>
-                <value>EEDM.AccountingStringComponentValues.FTVACTV</value>
-                <value>EEDM.AccountingStringComponentValues.FTVLOCN</value>
-                <value>EEDM.AccountingStringComponentValues.FTVPROJ</value>
-                <value>EEDM.AccountingStringComponentValues.FTVRUCL</value>
-                <value>EEDM.AccountingStringComponentValues.GXVBANK</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVCOAS</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVACCI</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVFUND</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVORGN</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVACCT</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVPROG</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVACTV</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVLOCN</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVPROJ</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.FTVRUCL</value>
+                <value>EEDM.FIN.AccountingStringComponentValues.GXVBANK</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1663,7 +1663,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentAcademicStanding.SHRTTRM</value>
+                <value>EEDM.STU.StudentAcademicStanding.SHRTTRM</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1685,7 +1685,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.RoomCharacteristics.STVRDEF</value>
+                <value>EEDM.GEN.RoomCharacteristics.STVRDEF</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1707,7 +1707,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstructorCategory.STVFCTG</value>
+                <value>EEDM.STU.InstructorCategory.STVFCTG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1729,7 +1729,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstructorStaffType.STVFSTP</value>
+                <value>EEDM.STU.InstructorStaffType.STVFSTP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1751,7 +1751,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstructorTenureTypes.PTRTENR</value>
+                <value>EEDM.STU.InstructorTenureTypes.PTRTENR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1773,7 +1773,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Sources.STVORIG</value>
+                <value>EEDM.GEN.Sources.STVORIG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1795,7 +1795,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FundClassifications.RTVFCAT</value>
+                <value>EEDM.FINAID.FundClassifications.RTVFCAT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1817,7 +1817,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FinancialAidFundCategories.RFRFFID</value>
+                <value>EEDM.FINAID.FinancialAidFundCategories.RFRFFID</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1839,7 +1839,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FinancialAidAwardPeriods.RORTPRD</value>
+                <value>EEDM.FINAID.FinancialAidAwardPeriods.RORTPRD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1866,7 +1866,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FinancialAidYears.ROBINST</value>
+                <value>EEDM.FINAID.FinancialAidYears.ROBINST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1888,7 +1888,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FinancialAidOffices.RORCAMP</value>
+                <value>EEDM.FINAID.FinancialAidOffices.RORCAMP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1915,7 +1915,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FinancialAidFunds.RFRBASE</value>
+                <value>EEDM.FINAID.FinancialAidFunds.RFRBASE</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1943,8 +1943,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Comments.SORBCMT</value>
-                <value>EEDM.Comments.SPRCMNT</value>
+                <value>EEDM.GEN.Comments.SORBCMT</value>
+                <value>EEDM.GEN.Comments.SPRCMNT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1967,7 +1967,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CommentSubjectArea.STVCMTT</value>
+                <value>EEDM.STU.CommentSubjectArea.STVCMTT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1989,7 +1989,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplicationSupportingItems.SARCHKL</value>
+                <value>EEDM.STU.AdmissionApplicationSupportingItems.SARCHKL</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2011,7 +2011,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.PayrollDeductionArrangementChangeReasons.PTRBREA</value>
+                <value>EEDM.HR.PayrollDeductionArrangementChangeReasons.PTRBREA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2033,7 +2033,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.EmploymentLeaveOfAbsenceReasons.PTRLREA</value>
+                <value>EEDM.HR.EmploymentLeaveOfAbsenceReasons.PTRLREA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2055,7 +2055,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.EmploymentTerminationReasons.PTRTREA</value>
+                <value>EEDM.HR.EmploymentTerminationReasons.PTRTREA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2077,7 +2077,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.JobChangeReasons.PTRJCRE</value>
+                <value>EEDM.HR.JobChangeReasons.PTRJCRE</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2099,7 +2099,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CommerceTaxCodes.FTVTGRP</value>
+                <value>EEDM.FIN.CommerceTaxCodes.FTVTGRP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2121,7 +2121,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CommodityUnitTypes.FTVUOMS</value>
+                <value>EEDM.FIN.CommodityUnitTypes.FTVUOMS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2143,7 +2143,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.VendorPaymentTerms.FTVDISC</value>
+                <value>EEDM.FIN.VendorPaymentTerms.FTVDISC</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2165,7 +2165,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.VendorHoldReasons.FTVHRSN</value>
+                <value>EEDM.FIN.VendorHoldReasons.FTVHRSN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2187,7 +2187,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.VendorClassifications.FTVVTYP</value>
+                <value>EEDM.FIN.VendorClassifications.FTVVTYP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2209,7 +2209,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.DeductionTypes.PTRBDCA</value>
+                <value>EEDM.HR.DeductionTypes.PTRBDCA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2231,7 +2231,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AssessmentPercentileTypes.STVTSPT</value>
+                <value>EEDM.STU.AssessmentPercentileTypes.STVTSPT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2253,7 +2253,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Instructors.SIBINST</value>
+                <value>EEDM.STU.Instructors.SIBINST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2281,7 +2281,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionDecisionTypes.STVAPDC</value>
+                <value>EEDM.STU.AdmissionDecisionTypes.STVAPDC</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2303,7 +2303,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplicationWithdrawlReasons.STVWRSN</value>
+                <value>EEDM.STU.AdmissionApplicationWithdrawlReasons.STVWRSN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2325,11 +2325,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.ExternalEducation.SORHSCH</value>
-                <value>EEDM.ExternalEducation.SORPCOL</value>
-                <value>EEDM.ExternalEducation.SHRTRIT</value>
-                <value>EEDM.ExternalEducation.Degree</value>
-                <value>EEDM.ExternalEducation.SHRTRAM</value>
+                <value>EEDM.STU.ExternalEducation.SORHSCH</value>
+                <value>EEDM.STU.ExternalEducation.SORPCOL</value>
+                <value>EEDM.STU.ExternalEducation.SHRTRIT</value>
+                <value>EEDM.STU.ExternalEducation.Degree</value>
+                <value>EEDM.STU.ExternalEducation.SHRTRAM</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2356,7 +2356,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplicationStatusTypes.STVAPST</value>
+                <value>EEDM.STU.AdmissionApplicationStatusTypes.STVAPST</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2378,8 +2378,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplicationSupportingItemStatuses.STVCKST</value>
-                <value>EEDM.AdmissionApplicationSupportingItemStatuses.GORICCR</value>
+                <value>EEDM.STU.AdmissionApplicationSupportingItemStatuses.STVCKST</value>
+                <value>EEDM.STU.AdmissionApplicationSupportingItemStatuses.GORICCR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2407,7 +2407,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplicationSupportingItemTypes.STVADMR</value>
+                <value>EEDM.STU.AdmissionApplicationSupportingItemTypes.STVADMR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2429,7 +2429,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplicationTypes.STVADMT</value>
+                <value>EEDM.STU.AdmissionApplicationTypes.STVADMT</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2451,7 +2451,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionDecisions.SARAPPD</value>
+                <value>EEDM.STU.AdmissionDecisions.SARAPPD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2473,7 +2473,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.CommodityCodes.FTVCOMM</value>
+                <value>EEDM.FIN.CommodityCodes.FTVCOMM</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2500,7 +2500,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.BargainingUnits.PTVBARG</value>
+                <value>EEDM.HR.BargainingUnits.PTVBARG</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2522,7 +2522,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.StudentPayments.TBRACCD</value>
+                <value>EEDM.STU.StudentPayments.TBRACCD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2550,7 +2550,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.EmploymentClassifications.PTRECLS</value>
+                <value>EEDM.HR.EmploymentClassifications.PTRECLS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2573,7 +2573,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstitutionPositions.NBBPOSN</value>
+                <value>EEDM.HR.InstitutionPositions.NBBPOSN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2595,7 +2595,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AccountsPayableSources.GXVBANK</value>
+                <value>EEDM.FIN.AccountsPayableSources.GXVBANK</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2617,7 +2617,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstitutionJobs.NBRJOBS</value>
+                <value>EEDM.HR.InstitutionJobs.NBRJOBS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2639,7 +2639,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.Employees.PEBEMPL</value>
+                <value>EEDM.HR.Employees.PEBEMPL</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2661,7 +2661,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.ContributionPayrollDeductions.PHRDEDN</value>
+                <value>EEDM.HR.ContributionPayrollDeductions.PHRDEDN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2683,11 +2683,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.AdmissionApplications.SARACMT</value>
-                <value>EEDM.AdmissionApplications.SARADAP</value>
-                <value>EEDM.AdmissionApplications.SARAPPD</value>
-                <value>EEDM.AdmissionApplications.SORLCUR</value>
-                <value>EEDM.AdmissionApplications.SORLFOS</value>
+                <value>EEDM.STU.AdmissionApplications.SARACMT</value>
+                <value>EEDM.STU.AdmissionApplications.SARADAP</value>
+                <value>EEDM.STU.AdmissionApplications.SARAPPD</value>
+                <value>EEDM.STU.AdmissionApplications.SORLCUR</value>
+                <value>EEDM.STU.AdmissionApplications.SORLFOS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2705,6 +2705,28 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <entry key="SORLCUR" value="SARADAP.SARADAP_GUID"></entry>
                 <entry key="SORLFOS" value="SARADAP.SARADAP_GUID"></entry>
             </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-payroll-deduction-arrangements" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>payroll-deduction-arrangements</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/payroll-deduction-arrangements/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.PayrollDeductionArrangements.PDRDEDN</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PDRDEDN</value>
+            </list>
         </constructor-arg>
     </bean>
 
@@ -2823,6 +2845,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-employees"/>
                 <ref bean="ar-contribution-payroll-deductions"/>
                 <ref bean="ar-admission-applications"/>
+                <ref bean="ar-payroll-deduction-arrangements"/>
             </list>
         </property>
     </bean>
@@ -2942,6 +2965,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-employees"/>
                 <ref bean="ar-contribution-payroll-deductions"/>
                 <ref bean="ar-admission-applications"/>
+                <ref bean="ar-payroll-deduction-arrangements"/>
             </list>
         </property>
     </bean>
