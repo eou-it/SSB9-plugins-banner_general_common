@@ -146,7 +146,6 @@ class CommunicationPopulationCompositeService {
         def bannerIdsNotFound = []
 
         def batchSize = 0
-        def uniqueBatchSize = 0
         def batchDuplicateCount = 0
         def batchIgnoredCount = 0
         def batchInsertedcount = 0
@@ -166,7 +165,7 @@ class CommunicationPopulationCompositeService {
             groupedBannerIds.each { batchBannerIds ->
 
                 batchSize = batchBannerIds.size()
-                uniqueBatchSize = batchBannerIds.unique().size()
+
                 batchDuplicateCount = 0
                 batchIgnoredCount = 0
                 batchInsertedcount = 0
@@ -185,7 +184,7 @@ class CommunicationPopulationCompositeService {
                 sqlParams.addAll(batchBannerIds)
 
                 //A IN predicate requires a bind placeholder for each of the value.
-                def bindplaceholderstring = StringUtils.repeat("?,", uniqueBatchSize - 1) + '?'
+                def bindplaceholderstring = StringUtils.repeat("?,", batchSize - 1) + '?'
 
                 //run the dup query for duplicates already existing in selection list
                 def sqldupquery = duplicateExistsSqlString + '(' + bindplaceholderstring + ')'

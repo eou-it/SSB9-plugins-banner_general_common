@@ -3,11 +3,13 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import groovy.transform.ToString
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 
 /**
  * Captures
  */
+@ToString
 class CommunicationPopulationSelectionListBulkResults implements Serializable {
     CommunicationPopulation population
     int duplicateCount
