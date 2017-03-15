@@ -406,7 +406,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.STU.SectionRegistration.SFRSTCR</value>
+				<value>EEDM.STU.SectionRegistration.SFRRGID</value>
+                <value>EEDM.STU.SectionRegistration.SFRSTCR</value>				
+				<value>EEDM.STU.SectionRegistration.SHRTCKG</value>
+				<value>EEDM.STU.SectionRegistration.SHRTCKL</value>
+				<value>EEDM.STU.SectionRegistration.SHRTCKN</value>
+				<value>EEDM.STU.SectionRegistration.SORSATR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1674,6 +1679,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>SHRTTRM</value>
             </list>
         </constructor-arg>
+		<constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SGBSTDN" value="SHRTTRM.SHRTTRM_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-room-characteristics" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -2617,7 +2627,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HR.InstitutionJobs.NBRJOBS</value>
+                <value>EEDM.InstitutionJobs.NBRJOBS</value>
+                <value>EEDM.InstitutionJobs.NBRBJOB</value>
+                <value>EEDM.InstitutionJobs.NBRJLBD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2628,7 +2640,14 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>NBRJOBS</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="NBRBJOB" value="NBRJOBS.NBRJOBS_GUID"></entry>
+                <entry key="NBRJLBD" value="NBRJOBS.NBRJOBS_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
+
 
     <bean id="ar-employees" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
