@@ -2749,6 +2749,50 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-student-financial-aid-awards" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-financial-aid-awards</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-financial-aid-awards/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FINAID.StudentFinancialAidAwards.RPRAWRD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RPRAWRD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-restricted-student-financial-aid-awards" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>restricted-student-financial-aid-awards</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/restricted-student-financial-aid-awards/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FINAID.RestrictedStudentFinancialAidAwards.RPRAWARD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>RPRAWRD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
             <list>
@@ -2865,6 +2909,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-contribution-payroll-deductions"/>
                 <ref bean="ar-admission-applications"/>
                 <ref bean="ar-payroll-deduction-arrangements"/>
+                <ref bean="ar-student-financial-aid-awards"/>
+                <ref bean="ar-restricted-student-financial-aid-awards"/>
             </list>
         </property>
     </bean>
@@ -2985,6 +3031,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-contribution-payroll-deductions"/>
                 <ref bean="ar-admission-applications"/>
                 <ref bean="ar-payroll-deduction-arrangements"/>
+                <ref bean="ar-student-financial-aid-awards"/>
+                <ref bean="ar-restricted-student-financial-aid-awards"/>
             </list>
         </property>
     </bean>
