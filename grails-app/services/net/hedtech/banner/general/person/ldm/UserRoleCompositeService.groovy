@@ -100,7 +100,13 @@ class UserRoleCompositeService extends LdmService {
                     }
 
                 } else {
-                    results = setStudentRole(pidms, results)
+                    pidms?.each { it ->
+                        def roles = results.get(it.toInteger()) ?: []
+                        def newRole = new RoleDetail()
+                        newRole.role = 'Student'
+                        roles << newRole
+                        results.put(it.toInteger(), roles)
+                    }
                 }
             }
         }
