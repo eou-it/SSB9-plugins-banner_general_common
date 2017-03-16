@@ -2788,7 +2788,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.FINAID.RestrictedStudentFinancialAidAwards.RPRAWARD</value>
+                <value>EEDM.FINAID.RestrictedStudentFinancialAidAwards.RPRAWRD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2805,6 +2805,29 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </map>
         </constructor-arg>
     </bean>
+
+    <bean id="ar-accounting-codes" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>accounting-codes</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/accounting-codes/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.AccountingCodes.TBBDETC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>TBBDETC</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -2924,6 +2947,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-payroll-deduction-arrangements"/>
                 <ref bean="ar-student-financial-aid-awards"/>
                 <ref bean="ar-restricted-student-financial-aid-awards"/>
+                <ref bean="ar-accounting-codes"/>
             </list>
         </property>
     </bean>
@@ -3046,6 +3070,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-payroll-deduction-arrangements"/>
                 <ref bean="ar-student-financial-aid-awards"/>
                 <ref bean="ar-restricted-student-financial-aid-awards"/>
+                <ref bean="ar-accounting-codes"/>
             </list>
         </property>
     </bean>
