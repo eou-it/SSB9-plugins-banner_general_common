@@ -406,12 +406,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-				<value>EEDM.STU.SectionRegistration.SFRRGID</value>
-                <value>EEDM.STU.SectionRegistration.SFRSTCR</value>				
-				<value>EEDM.STU.SectionRegistration.SHRTCKG</value>
-				<value>EEDM.STU.SectionRegistration.SHRTCKL</value>
-				<value>EEDM.STU.SectionRegistration.SHRTCKN</value>
-				<value>EEDM.STU.SectionRegistration.SORSATR</value>
+                <value>EEDM.STU.SectionRegistration.SFRRGID</value>
+                <value>EEDM.STU.SectionRegistration.SFRSTCR</value>
+                <value>EEDM.STU.SectionRegistration.SHRTCKG</value>
+                <value>EEDM.STU.SectionRegistration.SHRTCKL</value>
+                <value>EEDM.STU.SectionRegistration.SHRTCKN</value>
+                <value>EEDM.STU.SectionRegistration.SORSATR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -1679,7 +1679,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>SHRTTRM</value>
             </list>
         </constructor-arg>
-		<constructor-arg name="shadowTableGuidList">
+        <constructor-arg name="shadowTableGuidList">
             <map>
                 <entry key="SGBSTDN" value="SHRTTRM.SHRTTRM_GUID"></entry>
             </map>
@@ -2012,7 +2012,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-payroll-deduction-arrangement-change-reasons" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-payroll-deduction-arrangement-change-reasons"
+          class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>payroll-deduction-arrangement-change-reasons</value>
         </constructor-arg>
@@ -2379,7 +2380,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-admission-application-supporting-item-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-admission-application-supporting-item-statuses"
+          class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>admission-application-supporting-item-statuses</value>
         </constructor-arg>
@@ -2408,7 +2410,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-admission-application-supporting-item-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-admission-application-supporting-item-types"
+          class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
             <value>admission-application-supporting-item-types</value>
         </constructor-arg>
@@ -2769,6 +2772,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>RPRAWRD</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="RPRATRM" value="RPRAWRD.RPRAWRD_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-restricted-student-financial-aid-awards" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
@@ -2790,6 +2798,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>RPRAWRD</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="RPRATRM" value="RPRAWRD.RPRAWRD_GUID"></entry>
+            </map>
         </constructor-arg>
     </bean>
 
