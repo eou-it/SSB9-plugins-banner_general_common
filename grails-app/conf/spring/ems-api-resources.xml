@@ -2750,6 +2750,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>PDRDEDN</value>
             </list>
         </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="PDRBDED" value="PDRDEDN.PDRDEDN_GUID"></entry>
+            </map>
+        </constructor-arg>
     </bean>
 
     <bean id="ar-student-financial-aid-awards" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
