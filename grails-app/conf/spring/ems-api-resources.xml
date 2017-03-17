@@ -2630,9 +2630,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.InstitutionJobs.NBRJOBS</value>
-                <value>EEDM.InstitutionJobs.NBRBJOB</value>
-                <value>EEDM.InstitutionJobs.NBRJLBD</value>
+                <value>EEDM.HR.InstitutionJobs.NBRJOBS</value>
+                <value>EEDM.HR.InstitutionJobs.NBRBJOB</value>
+                <value>EEDM.HR.InstitutionJobs.NBRJLBD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
