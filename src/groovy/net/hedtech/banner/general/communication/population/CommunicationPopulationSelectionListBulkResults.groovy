@@ -7,7 +7,7 @@ import groovy.transform.ToString
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 
 /**
- * Captures
+ * Captures the results of a batch insert of banner ids to a communication selection list.
  */
 @ToString
 class CommunicationPopulationSelectionListBulkResults implements Serializable {
@@ -16,6 +16,5 @@ class CommunicationPopulationSelectionListBulkResults implements Serializable {
     int ignoredCount
     int notExistCount
     int insertedCount
-    String notFoundErrorCode = CommunicationErrorCode.BANNER_ID_NOT_FOUND
     List<String> bannerIdsNotFound
 }

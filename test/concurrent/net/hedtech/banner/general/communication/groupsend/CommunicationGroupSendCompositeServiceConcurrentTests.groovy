@@ -631,7 +631,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
-    @Test
+/*    @Test
     public void testMediumPopulationAndDelete() {
         println "testMediumPopulationAndDelete"
 
@@ -718,22 +718,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             // 5)Error message displays. Ignore or acknowledge that message so that it will disappear.
             assertEquals( "@@r1:cannotDeletePopulationWithExistingGroupSends@@", e.message )
         }
-
-        // Note: the controller is receiving the recalculatedPopulationVersion instead of getting an updated populationListView (might be a mistake)
-
-        // 7)Notice that at some point population details page will display blank field,
-        // no data and only Delete button. At this point navigate back to population list page.
-
-        // 8)Notice that population does not display anymore on the list page. It disappears from the page.
-
-
-        // 9)Navigate to Communication job list page to see the status of the processing job.
-
-
-        // 10)Notice that com job list page either displays weird blank line or there is No data at all.
-        // Blank com job list page display. Only total count of records may display at the bottom of the page.
     }
-
+*/
     private CommunicationGroupSendRequest createGroupSendRequest( String defaultName ) {
         CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery( defaultName ))
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )

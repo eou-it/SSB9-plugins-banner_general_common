@@ -13,6 +13,7 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
+import net.hedtech.banner.general.communication.interaction.CommunicationInteractionCompositeService
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
@@ -239,50 +240,19 @@ class CommunicationPopulationCompositeService {
             throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_INVALID_OR_EMPTY, "BANNER_ID_INVALID_OR_EMPTY", bannerId )
         }
 
-        PersonIdentificationName person = (PersonIdentificationName) PersonUtility.getPerson( bannerId )
-
-        if (person == null) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
-        }
-
-        CommunicationPopulationSelectionListEntry found = null
-        if (population.includeList != null) {
-            found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( person.pidm, population.includeList )
-        }
-
-        CommunicationPopulationSelectionListEntry createdEntry
-        if (!found) {
-            if (population.includeList == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug( "Creating new manual include list for population with id ${population.id}." )
-                }
-
-                CommunicationPopulationSelectionList selectionList = new CommunicationPopulationSelectionList()
-                communicationPopulationSelectionListService.create( selectionList )
-
-                population.includeList = selectionList
-                population.changesPending = true
-                population = communicationPopulationService.update( population )
-            } else if (!population.changesPending) {
-                population.changesPending = true
-                population = communicationPopulationService.update( population )
-            }
-
+        CommunicationPopulationSelectionListBulkResults results = addPersonsToIncludeList( population, [bannerId] )
+        if (results.insertedCount == 1) {
             if (log.isDebugEnabled()) {
-                log.debug( "Creating new manual include entry for population ${population.id} with banner id ${bannerId}." )
+                log.debug( "Banner ID '${bannerId} added to population id = ${population.id}." )
             }
-            createdEntry = new CommunicationPopulationSelectionListEntry()
-            createdEntry.pidm = person.pidm
-            createdEntry.populationSelectionList = population.includeList
-            createdEntry = communicationPopulationSelectionListEntryService.create( createdEntry )
-            assert createdEntry.id != null
-        } else {
+        } else if (results.notExistCount > 0) {
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
+        } else if (results.duplicateCount == 1) {
             if (log.isDebugEnabled()) {
                 log.debug( "Banner ID '${bannerId} already exists in population include list - ignoring." )
             }
         }
-
-        return population
+        return results.population
     }
 
     public CommunicationPopulation removePersonFromIncludeList( CommunicationPopulation population, String bannerId ) {
@@ -295,12 +265,12 @@ class CommunicationPopulationCompositeService {
             return population
         }
 
-        PersonIdentificationName person = (PersonIdentificationName) PersonUtility.getPerson( bannerId )
-        if (person == null) {
+        PersonIdentificationName identificationName = CommunicationInteractionCompositeService.getPersonOrNonPerson( bannerId )
+        if (identificationName == null) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
         }
 
-        CommunicationPopulationSelectionListEntry found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( person.pidm, population.includeList )
+        CommunicationPopulationSelectionListEntry found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( identificationName.pidm, population.includeList )
         if (found) {
             if (log.isDebugEnabled()) {
                 log.debug( "Removing manual include entry for population ${population.id} with banner id ${bannerId}." )
