@@ -75,7 +75,7 @@ class CommunicationParameterServiceIntegrationTests extends BaseIntegrationTestC
             communicationParameterService.create(sameNameParameter)
             Assert.fail "Expected sameNameParameter to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertEquals("@@r1:parameterNameAlreadyExists@@", e.getMessage())
+            assertEquals("@@r1:parameterNameAlreadyExists:firstName@@", e.getMessage())
         }
     }
 
@@ -107,7 +107,7 @@ class CommunicationParameterServiceIntegrationTests extends BaseIntegrationTestC
             communicationParameterService.update(parameter1)
             Assert.fail "Expected sameNameParameter to fail because of name unique constraint."
         } catch (ApplicationException e) {
-            assertEquals("@@r1:parameterNameAlreadyExists@@", e.message)
+            assertEquals("@@r1:parameterNameAlreadyExists:firstName@@", e.message)
         }
     }
 
