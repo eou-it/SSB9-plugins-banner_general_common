@@ -36,7 +36,7 @@ class CommunicationParameterService extends ServiceBase {
             throw new ApplicationException( CommunicationParameter, "@@r1:pidmNotAllowedInParameterName@@" )
 
         if (CommunicationParameter.fetchByName( communicationParameter.name ))
-            throw new ApplicationException( CommunicationParameter, "@@r1:parameterNameAlreadyExists@@" )
+            throw new ApplicationException( CommunicationParameter, "@@r1:parameterNameAlreadyExists:"+communicationParameter.name + "@@" )
     }
 
 
@@ -72,7 +72,7 @@ class CommunicationParameterService extends ServiceBase {
             throw new ApplicationException( CommunicationParameter, "@@r1:pidmNotAllowedInParameterName@@" )
 
         if (CommunicationParameter.existsAnotherName( communicationParameter.id, communicationParameter.name ))
-            throw new ApplicationException( CommunicationParameter, "@@r1:parameterNameAlreadyExists@@" )
+            throw new ApplicationException( CommunicationParameter, "@@r1:parameterNameAlreadyExists:"+communicationParameter.name + "@@" )
     }
 
 
