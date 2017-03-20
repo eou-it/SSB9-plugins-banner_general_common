@@ -16,6 +16,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
+import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
@@ -291,9 +292,11 @@ class CommunicationGroupSendCompositeService {
 
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
+                boolean shouldUpdateGroupSend = false
                 CommunicationPopulationVersion populationVersion
                 if (!groupSend.populationVersionId) {
                     populationVersion = assignPopulationVersion( groupSend )
+                    shouldUpdateGroupSend = true
                 } else {
                     populationVersion = CommunicationPopulationVersion.get( groupSend.populationVersionId )
                 }
@@ -302,10 +305,15 @@ class CommunicationGroupSendCompositeService {
                     throw new ApplicationException( "populationVersion", new NotFoundException() )
                 }
 
-                if (!groupSend.populationCalculationId) {
+                boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion( populationVersion ) > 0)
+
+                if (!groupSend.populationCalculationId && hasQuery) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
                     CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
+                    shouldUpdateGroupSend = true
+                }
+                if (shouldUpdateGroupSend) {
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
                 }
                 groupSend = generateGroupSendItemsImpl(groupSend)
