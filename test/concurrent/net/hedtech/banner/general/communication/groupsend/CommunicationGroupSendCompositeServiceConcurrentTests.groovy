@@ -982,7 +982,73 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         population.refresh()
         assertFalse( population.changesPending )
-//        assertEquals( 1, CommunicationPopulationVersion.countByPopulation( population ) )
+    }
+
+    @Test
+    public void testGroupSendWithManualIncludeAndQueryScheduledRecalculate() {
+        println "testGroupSendWithManualIncludeAndQueryScheduledRecalculate"
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
+        communicationPopulationCompositeService.addPersonsToIncludeList( population, ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'] )
+        CommunicationPopulationDetail populationDetail = communicationPopulationCompositeService.fetchPopulationDetail( population.id )
+        assertNotNull( populationDetail.populationListView )
+        assertEquals( population.id, populationDetail.populationListView.id )
+        assertEquals( 3, populationDetail.totalCount )
+
+        Calendar now = Calendar.getInstance()
+        now.add(Calendar.SECOND, 10)
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testGroupSendRequestByTemplateByPopulationSendImmediately",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                scheduledStartDate: now.getTime(),
+                recalculateOnSend: true
+        )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        assertNotNull(groupSend)
+
+        def checkExpectedGroupSendItemsCreated = {
+            CommunicationGroupSend each = CommunicationGroupSend.get( it )
+            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 3
+        }
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
+
+        // Confirm group send view returns the correct results
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
+        assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
+
+        // Confirm group send item view returns the correct results
+        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+        assertEquals(3, sendItemViewDetails.size())
+
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
+
+        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+        assertEquals( 3, countCompleted )
+
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
+        countCompleted = CommunicationJob.fetchCompleted().size()
+        assertEquals( 3, countCompleted )
+
+        sleepUntilGroupSendComplete( groupSend, 3 * 60 )
+
+        // test delete group send
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 3, fetchGroupSendItemCount( groupSend.id ) )
+        assertEquals( 3, CommunicationJob.findAll().size() )
+        assertEquals( 3, CommunicationRecipientData.findAll().size() )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+        assertEquals( 0, CommunicationJob.findAll().size() )
+        assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
 
