@@ -941,8 +941,10 @@ class PersonCompositeService extends LdmService {
         List<ImsSourcedIdBase> imsSourcedIdBaseList = ImsSourcedIdBase.findAllByPidmInList(pidms)
         List<ThirdPartyAccess> thirdPartyAccessList = ThirdPartyAccess.findAllByPidmInList(pidms)
         List<PidmAndUDCIdMapping> pidmAndUDCIdMappingList = PidmAndUDCIdMapping.findAllByPidmInList(pidms)
+        def additionalIdTypes = Credential.additionalIdMap.keySet().asList()
+       def additionalIdList = additionalIDService.fetchAllByPidmInListAndIdentificationTypeCodeInList(pidms, additionalIdTypes)
         log.trace "getPersonCredentialDetails:End"
-        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList]
+        return [imsSourcedIdBaseList: imsSourcedIdBaseList, thirdPartyAccessList: thirdPartyAccessList, pidmAndUDCIdMappingList: pidmAndUDCIdMappingList, additionalIdList:additionalIdList]
     }
 
 
@@ -978,11 +980,18 @@ class PersonCompositeService extends LdmService {
                 Person person = persons.get(pidmAndUDCIdMapping.pidm)
                 person.credentials << new Credential("Banner UDC ID", pidmAndUDCIdMapping.udcId, null, null)
             }
+
+            credentialsMap.additionalIdList.each { credential ->
+                Person currentRecord = persons.get(credential.pidm)
+                currentRecord.credentials << new Credential(Credential.additionalIdMap[credential.additionalIdentificationType.code],
+                        credential.additionalId, null, null)
+            }
         }
         personList?.each { currentRecord ->
             Person person = persons.get(currentRecord.pidm)
             person.credentials << new Credential("Banner ID", currentRecord.bannerId, null, null)
         }
+
         return persons
     }
 

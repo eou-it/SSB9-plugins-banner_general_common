@@ -40,7 +40,9 @@ class PersonCredentialV6CompositeService extends AbstractPersonCredentialComposi
     }
 
     protected def getCredentialTypeToAdditionalIdTypeCodeMap() {
-        return [:]
+        def map = [:]
+        map.put(CredentialType.ELEVATE_ID, "ELV8")
+        return map
     }
 
 
