@@ -233,6 +233,7 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
 
         //retrieve credentials data
         if (requestData.containsKey("credentials")) {
+            def updatedCredentials = []
             def personCredentials = requestData.get("credentials")
 
                 ssnCredentialObj = personCredentials.find {
@@ -244,9 +245,12 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
                     }
                 }
 
+                updatedCredentials<<ssnCredentialObj
+
                 bannerIdCredentialObj = personCredentials.find {
                     it.type == CredentialType.BANNER_ID
                 }
+                updatedCredentials<<bannerIdCredentialObj
 
                 Map credentialTypeToAdditionalIdTypeCodeMap = getCredentialTypeToAdditionalIdTypeCodeMap()
                 credentialTypeToAdditionalIdTypeCodeMap.each { credentialType, additionalIdTypeCode ->
@@ -256,8 +260,11 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
                     if (obj) {
                         log.debug "$credentialType --- $additionalIdTypeCode --- ${obj.value}"
                         additionalIdTypeCodeToIdMap.put(additionalIdTypeCode, obj.value)
-                        personCredentials.remove(obj)
+                        updatedCredentials<<obj
                     }
+
+
+                    requestData["credentials"] = updatedCredentials.findAll { it!=null}
                 }
         }
 
@@ -290,6 +297,10 @@ abstract class AbstractPersonCredentialCompositeService extends LdmService {
                 if (personBase.ssn == null || integrationConfigurationService.canUpdatePersonSSN()) {
                     personBase.ssn = ssnCredentialObj.value
                     personBasicPersonBaseService.update(personBase)
+                }
+                else
+                {
+                    ssnCredentialObj.value =  personBase.ssn
                 }
             }
         }
