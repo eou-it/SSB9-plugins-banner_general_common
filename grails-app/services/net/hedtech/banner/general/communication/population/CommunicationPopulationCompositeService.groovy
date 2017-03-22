@@ -221,7 +221,7 @@ class CommunicationPopulationCompositeService {
                 totalIgnored = totalIgnored + batchIgnoredCount
             }
         } catch (Exception e) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.UNKNOWN_ERROR.name())
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, e )
         } finally {
             sql?.close()
         }
@@ -237,7 +237,7 @@ class CommunicationPopulationCompositeService {
     public CommunicationPopulation addPersonToIncludeList( CommunicationPopulation population, String bannerId ) {
         log.trace( "addPersonToIncludeList called" )
         if ((bannerId == null) || (bannerId.trim().size() == 0)) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_INVALID_OR_EMPTY, "BANNER_ID_INVALID_OR_EMPTY", bannerId )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdInvalidOrEmpty", bannerId )
         }
 
         CommunicationPopulationSelectionListBulkResults results = addPersonsToIncludeList( population, [bannerId] )
@@ -246,7 +246,7 @@ class CommunicationPopulationCompositeService {
                 log.debug( "Banner ID '${bannerId} added to population id = ${population.id}." )
             }
         } else if (results.notExistCount > 0) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdNotFound", bannerId )
         } else if (results.duplicateCount == 1) {
             if (log.isDebugEnabled()) {
                 log.debug( "Banner ID '${bannerId} already exists in population include list - ignoring." )
@@ -267,7 +267,7 @@ class CommunicationPopulationCompositeService {
 
         PersonIdentificationName identificationName = CommunicationInteractionCompositeService.getPersonOrNonPerson( bannerId )
         if (identificationName == null) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, CommunicationErrorCode.BANNER_ID_NOT_FOUND, "BANNER_ID_NOT_FOUND", bannerId )
+            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, "BANNER_ID_NOT_FOUND", bannerId )
         }
 
         CommunicationPopulationSelectionListEntry found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( identificationName.pidm, population.includeList )
