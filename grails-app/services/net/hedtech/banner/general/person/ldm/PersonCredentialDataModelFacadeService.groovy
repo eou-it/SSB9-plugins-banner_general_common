@@ -25,7 +25,8 @@ class PersonCredentialDataModelFacadeService {
 
         AbstractPersonCredentialCompositeService requestProcessingService = getServiceUsingContentTypeHeader()
         def dataMapForSingle = requestProcessingService.update(content)
-        return requestProcessingService.createPersonCredentialDataModel(dataMapForSingle)
+        AbstractPersonCredentialCompositeService responseRenderingService = getServiceUsingAcceptHeader()
+        return responseRenderingService.get(dataMapForSingle.guid)
     }
 
     /**
