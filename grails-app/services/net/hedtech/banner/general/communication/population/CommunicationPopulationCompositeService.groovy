@@ -267,7 +267,7 @@ class CommunicationPopulationCompositeService {
 
         PersonIdentificationName identificationName = CommunicationInteractionCompositeService.getPersonOrNonPerson( bannerId )
         if (identificationName == null) {
-            throw CommunicationExceptionFactory.createFriendlyApplicationException( CommunicationPopulationCompositeService.class, "BANNER_ID_NOT_FOUND", bannerId )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdNotFound", bannerId )
         }
 
         CommunicationPopulationSelectionListEntry found = CommunicationPopulationSelectionListEntry.findByPidmAndPopulationSelectionList( identificationName.pidm, population.includeList )
