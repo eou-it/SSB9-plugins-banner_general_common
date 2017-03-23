@@ -248,6 +248,7 @@ class CommunicationPopulationCompositeService {
         } else if (results.notExistCount > 0) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdNotFound", bannerId )
         } else if (results.duplicateCount == 1) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, "bannerIdAlreadyExistsInPopulation", bannerId )
             if (log.isDebugEnabled()) {
                 log.debug( "Banner ID '${bannerId} already exists in population include list - ignoring." )
             }
