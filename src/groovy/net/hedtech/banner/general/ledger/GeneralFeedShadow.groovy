@@ -118,7 +118,7 @@ class GeneralFeedShadow implements Serializable {
                     }
                 }
         )
-        amount(nullable: false, min: new BigDecimal(0), max: new BigDecimal(999999999999999.99))
+        amount(nullable: false, min: new BigDecimal(-999999999999999.99), max: new BigDecimal(999999999999999.99))
         currencyCode(nullable: false, maxSize: 4)
         systemTimestamp(nullable: false, maxSize: 14)
         activityDate(nullable: false)
