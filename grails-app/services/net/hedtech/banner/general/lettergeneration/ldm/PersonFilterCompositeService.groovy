@@ -91,6 +91,7 @@ class PersonFilterCompositeService {
      * @return
      */
     PersonFilter get(String guid) {
+        LdmService.getAcceptVersion(VERSIONS)
         GlobalUniqueIdentifier globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndGuid(LDM_NAME, guid)
         if (!globalUniqueIdentifier) {
             throw new ApplicationException(GeneralCommonConstants.PERSON_FILTER, new NotFoundException())

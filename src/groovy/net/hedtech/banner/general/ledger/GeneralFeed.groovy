@@ -183,7 +183,7 @@ class GeneralFeed implements Serializable{
                     }
                 }
             )
-        amount(nullable:false, min: new BigDecimal(0), max: new BigDecimal(999999999999999.99))
+        amount(nullable: false, min: new BigDecimal(-999999999999999.99), max: new BigDecimal(999999999999999.99))
         currencyCode(nullable: true, maxSize: 4)
         systemId(nullable: false, maxSize: 8)
         recordTypeIndicator(nullable: false, maxSize: 1,

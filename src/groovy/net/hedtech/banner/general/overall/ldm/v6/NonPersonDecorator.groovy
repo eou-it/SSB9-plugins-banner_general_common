@@ -1,5 +1,5 @@
 /** *******************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.overall.ldm.v6
 
@@ -16,7 +16,7 @@ class NonPersonDecorator {
 
     String guid
     String title
-    List<PersonCredential> credentials
+    List<CredentialV6> credentials
     List<EmailV6> emails
     List<PhoneV6> phones
     List<RoleV6> roles

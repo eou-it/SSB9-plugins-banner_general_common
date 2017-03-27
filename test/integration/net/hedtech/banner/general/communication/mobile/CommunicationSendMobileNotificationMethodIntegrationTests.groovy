@@ -271,13 +271,23 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
 
     protected void setUpTestOrganization() {
-        rootOrganization = new CommunicationOrganization()
-        rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
-        rootOrganization.mobileApplicationName = "StudentSuccess"
-        rootOrganization.clearMobileApplicationKey = "ss-key-value"
-        rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
-        communicationOrganizationCompositeService.createOrganization( rootOrganization )
+        rootOrganization = CommunicationOrganization.fetchRoot()
+        if (rootOrganization == null) {
+            rootOrganization = new CommunicationOrganization()
+            rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+            rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootOrganization.mobileApplicationName = "StudentSuccess"
+            rootOrganization.clearMobileApplicationKey = "ss-key-value"
+            rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
+            communicationOrganizationCompositeService.createOrganization( rootOrganization )
+        } else {
+            rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+            rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootOrganization.mobileApplicationName = "StudentSuccess"
+            rootOrganization.clearMobileApplicationKey = "ss-key-value"
+            rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
+            communicationOrganizationCompositeService.updateOrganization( rootOrganization )
+        }
     }
 
 }
