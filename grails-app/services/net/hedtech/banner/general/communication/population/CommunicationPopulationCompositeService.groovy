@@ -121,12 +121,12 @@ class CommunicationPopulationCompositeService {
         def insertString1 = """  insert into gcrlent (
                                     gcrlent_slis_id,gcrlent_pidm,gcrlent_user_id,gcrlent_activity_date, gcrlent_data_origin
                                 )
-                                 select  ?, goodpidmlist.spridenpidm, USER, SYSDATE, ?
-                                 from (SELECT spriden_pidm spridenpidm, spriden_change_ind spridenchangeind FROM spriden WHERE spriden_id IN
-                             """
-        def insertString2 = """     AND NOT EXISTS (select b.gcrlent_pidm from gcrlent b where  b.gcrlent_slis_id = ? and b.gcrlent_pidm = spriden_pidm)) goodpidmlist
-                                 where  goodpidmlist.spridenchangeind IS NULL
-                           """
+                                 select  DISTINCT ?, goodpidmlist.spriden_pidm, USER, SYSDATE, ?
+                                 FROM spriden goodpidmlist
+                                 WHERE NOT EXISTS (select b.gcrlent_pidm from gcrlent b where  b.gcrlent_slis_id = ? and b.gcrlent_pidm = goodpidmlist.spriden_pidm)
+                                 AND goodpidmlist.spriden_id IN
+                            """
+
         def idExistsSqlString = """
                            SELECT spriden_id from spriden, gcrlent
                            where spriden_pidm = gcrlent_pidm
@@ -177,9 +177,8 @@ class CommunicationPopulationCompositeService {
 //create the bind parameter map for the insert statement
                 paramsMap.add(population.includeList.id)
                 paramsMap.add(dataOrigin)
-                paramsMap.addAll(batchBannerIds)
                 paramsMap.add(population.includeList.id)
-
+                paramsMap.addAll(batchBannerIds)
                 // create the bind parameter map for the 2 query statement
                 sqlParams.add(population.includeList.id)
                 sqlParams.addAll(batchBannerIds)
@@ -193,7 +192,7 @@ class CommunicationPopulationCompositeService {
                 batchDuplicateCount = duplicateIds.size()
 
                 //run the insert statement
-                def sqlinsert = insertString1 + '(' + bindplaceholderstring + ')' + insertString2
+                def sqlinsert = insertString1 + '(' + bindplaceholderstring + ')'
                 sql.executeUpdate(sqlinsert, paramsMap)
                 batchInsertedcount = sql.updateCount
 

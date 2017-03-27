@@ -62,8 +62,10 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
 
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMUSER' )
 
-        entries = CommunicationPopulationSelectionListEntry.findAllByPopulationSelectionList( population.includeList, [sort: "lastModified", order: "asc"] )
+        //changing sort from last modified to id as it is not sorting if the lastmodified date is the same for both adds
+        entries = CommunicationPopulationSelectionListEntry.findAllByPopulationSelectionList( population.includeList, [sort: "id", order: "asc"] )
         assertEquals( 2, entries.size() )
+
         assertEquals( PersonUtility.getPerson( 'BCMADMIN' ).pidm, entries.get( 0 ).pidm )
         assertEquals( PersonUtility.getPerson( 'BCMUSER' ).pidm, entries.get( 1 ).pidm )
     }
@@ -103,6 +105,24 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
         assertEquals( 1, results.notExistCount )
         assertEquals( 4, results.duplicateCount)
         assertEquals( 5, results.ignoredCount )
+
+        persons = ['@00000011']  // this id is both an older id and a non-person id so testing both cases at the same time
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 6, entryCount )
+        assertEquals( 1, results.insertedCount )
+        assertEquals( 0, results.notExistCount )
+        assertEquals( 0, results.duplicateCount)
+        assertEquals( 0, results.ignoredCount )
+
+        persons = ['@00000011','300000011' ]  // both these IDs belong to the same pidm
+        results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
+        entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
+        assertEquals( 6, entryCount )
+        assertEquals( 0, results.insertedCount )
+        assertEquals( 0, results.notExistCount )
+        assertEquals( 2, results.duplicateCount)
+        assertEquals( 2, results.ignoredCount )
     }
 
     @Test void testRemovePersonFromIncludeList() {

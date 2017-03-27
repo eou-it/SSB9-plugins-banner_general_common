@@ -293,6 +293,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         //the jobs enqueued from the previous poll have run to completion
         if (pendingJobs.size() > 0) {
             log.debug("Pending jobs still queued (size=${pendingJobs.size()}).")
+            log.debug("Are threads still running: ${threadsRunning}")
             return false
         } else {
             log.debug("Get more pending jobs")
