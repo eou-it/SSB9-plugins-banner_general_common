@@ -95,7 +95,7 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals "2134", personIdentificationDecorator.enterpriseId
         assertEquals "Faculty", personIdentificationDecorator.firstName
         assertEquals "Faculty PCC", personIdentificationDecorator.fullName
-        assertEquals "forTest2", personIdentificationDecorator.imsSourcedIdBase.sourcedId
+        assertEquals "913", personIdentificationDecorator.imsSourcedIdBase.sourcedId
         assertEquals "PCC", personIdentificationDecorator.lastName
         assertEquals null, personIdentificationDecorator.middleName
         assertEquals null, personIdentificationDecorator.surnamePrefix
@@ -107,7 +107,7 @@ class PersonIdentificationCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals "025EB9EF618DF0D0E05018958B283255", personIdentificationDecorator.enterpriseId
         assertEquals "Warren", personIdentificationDecorator.firstName
         assertEquals "Warren Zevon Grim", personIdentificationDecorator.fullName
-        assertEquals "forTest3", personIdentificationDecorator.imsSourcedIdBase.sourcedId
+        assertEquals "1234", personIdentificationDecorator.imsSourcedIdBase.sourcedId
         assertEquals "Grim", personIdentificationDecorator.lastName
         assertEquals "Zevon", personIdentificationDecorator.middleName
         assertEquals null, personIdentificationDecorator.surnamePrefix
