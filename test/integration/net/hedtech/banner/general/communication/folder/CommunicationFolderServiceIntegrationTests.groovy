@@ -47,6 +47,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
         folder.description = "description"
         CommunicationFolder createdFolder = communicationFolderService.create(folder)
         assertNotNull(createdFolder)
+        assertFalse(createdFolder.systemIndicator)
 
         long addedListCount = communicationFolderService.list().size()
         assertEquals(originalListCount + 1, addedListCount)
@@ -63,6 +64,7 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
         assertEquals("test-integration", createdFolder.name)
         assertEquals("description", createdFolder.description)
         assertEquals(false, createdFolder.internal)
+        assertFalse createdFolder.systemIndicator
 
         CommunicationFolder foundFolder = CommunicationFolder.findByName("test-integration")
         assertEquals(createdFolder, foundFolder)

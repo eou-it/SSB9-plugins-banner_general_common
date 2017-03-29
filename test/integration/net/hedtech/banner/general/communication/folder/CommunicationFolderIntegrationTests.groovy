@@ -45,6 +45,7 @@ class CommunicationFolderIntegrationTests extends BaseIntegrationTestCase {
         folder.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull folder.id
+        assertFalse folder.systemIndicator
     }
 
 
@@ -76,6 +77,7 @@ class CommunicationFolderIntegrationTests extends BaseIntegrationTestCase {
         assertEquals("Updated description", u_valid_description, folder.description)
         assertEquals("Updated internal", u_valid_internal, folder.internal)
         assertEquals("Updated name", u_valid_name, folder.name)
+        assertFalse folder.systemIndicator
     }
 
 

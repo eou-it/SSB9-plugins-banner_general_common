@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import org.hibernate.FlushMode
+import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
 import javax.persistence.*
@@ -20,9 +21,6 @@ import javax.persistence.*
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationFolder.fetchById",
-                query = """ FROM CommunicationFolder a
-                    WHERE a.id = :id"""),
         @NamedQuery(name = "CommunicationFolder.fetchByName",
                 query = """ FROM CommunicationFolder a
                     WHERE upper(a.name) = upper(:name)"""),
@@ -60,6 +58,14 @@ class CommunicationFolder implements Serializable {
     @Column(name = "GCRFLDR_INTERNAL")
     Boolean internal = false
 
+
+    /**
+     * Indicates if the folder was created through the seeded data set and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCRFLDR_SYSTEM_IND")
+    Boolean systemIndicator = false
+
     /**
      * Name of the folder.
      */
@@ -95,30 +101,11 @@ class CommunicationFolder implements Serializable {
     static constraints = {
         name(nullable: false, maxSize: 255)
         description(nullable: true, maxSize: 2000)
+        systemIndicator(nullable:false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         internal(nullable: false)
-    }
-
-    public static CommunicationFolder fetchById(Long id) {
-
-        def query
-        CommunicationFolder.withSession { session ->
-            query = session.getNamedQuery('CommunicationFolder.fetchById')
-                    .setLong('id', id).list()[0]
-
-        }
-        return query
-    }
-
-
-    public static CommunicationFolder fetchByName(String name) {
-        def query
-        CommunicationFolder.withSession { session ->
-            query = session.getNamedQuery('CommunicationFolder.fetchByName').setString('name', name).list()[0]
-        }
-        return query
     }
 
     public static Boolean existsAnotherSameNameFolder(Long folderId, String name ) {

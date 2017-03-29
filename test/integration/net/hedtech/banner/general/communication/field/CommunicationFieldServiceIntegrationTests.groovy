@@ -5,6 +5,9 @@ package net.hedtech.banner.general.communication.field
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.parameter.CommunicationParameter
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterFieldAssociation
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Assert
@@ -16,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationFieldService
+    def communicationParameterService
     def CommunicationFolder validFolder
     def String validImmutableId
     def selfServiceBannerAuthenticationProvider
@@ -60,8 +64,34 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         assertEquals true, communicationField.renderAsHtml
         assertEquals "TTTTTTTTTT", communicationField.ruleUri
         assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
+        assertFalse(communicationField.systemIndicator)
     }
 
+    @Test
+    void testCreateFieldParameterAssociation() {
+        CommunicationParameter parameter = new CommunicationParameter()
+        parameter.name = "firstName"
+        parameter.title = "First Name"
+        parameter.type = CommunicationParameterType.TEXT
+        CommunicationParameter createdParameter = communicationParameterService.create(parameter)
+        assertNotNull(createdParameter)
+
+        def newCommunicationField = newCommunicationFieldWithParameter()
+        def communicationField = communicationFieldService.create( [domainModel: newCommunicationField] )
+        // Assert domain values
+        assertNotNull communicationField?.id
+        assertNotNull communicationField?.ruleContent
+        assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
+        def newPublishedField = communicationFieldService.publishDataField([id:communicationField.id])
+        assertEquals(CommunicationFieldStatus.PRODUCTION, newPublishedField.status)
+        def flpmList = CommunicationParameterFieldAssociation.findAllByField(communicationField)
+        assertNotNull flpmList
+        assertEquals 1, flpmList.size()
+        assertEquals createdParameter.id, flpmList[0].parameter.id
+        assertEquals communicationField.id, flpmList[0].field.id
+    }
+
+    
     @Test
     void testCommunicationFieldPublish() {
         def newCommunicationField = newCommunicationField()
@@ -254,6 +284,28 @@ class CommunicationFieldServiceIntegrationTests extends BaseIntegrationTestCase 
         return communicationField
     }
 
+    private def newCommunicationFieldWithParameter() {
+        def communicationField = new CommunicationField(
+                // Required fields
+                folder: validFolder,
+                immutableId: validImmutableId,
+                name: "TTTTTTTTTT",
+                returnsArrayArguments: false,
+
+                // Nullable fields
+                description: "TTTTTTTTTT",
+                formatString: "TTTTTTTT",
+                groovyFormatter: "TTTTTTTT",
+                previewValue: "TTTTTTTTTT",
+                renderAsHtml: true,
+                ruleUri: "TTTTTTTTTT",
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                ruleContent: "Select spriden_pidm from spriden where spriden_pidm = :pidm and spriden_first_name = :firstName"
+        )
+
+        return communicationField
+    }
 
     private def newValidForCreateFolder() {
         def folder = new CommunicationFolder(

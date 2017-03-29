@@ -5,10 +5,8 @@ package net.hedtech.banner.general.communication.groupsend
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.annotations.Type
-import org.hibernate.criterion.Order
 
 import javax.persistence.*
 
@@ -17,16 +15,16 @@ import javax.persistence.*
  *
  */
 @Entity
-@Table(name = "GVQ_GCBGSND")
+@Table(name = "GVQ_GCBGSND_DETAIL")
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
-        @NamedQuery(name = "CommunicationGroupSendView.fetchById",
-                query = """ FROM CommunicationGroupSendView a
+        @NamedQuery(name = "CommunicationGroupSendDetailView.fetchById",
+                query = """ FROM CommunicationGroupSendDetailView a
                             WHERE  a.id = :groupSendId
                         """)
 ])
-class CommunicationGroupSendView implements Serializable {
+class CommunicationGroupSendDetailView implements Serializable {
 
     /**
      * KEY: Generated unique key.
@@ -139,11 +137,11 @@ class CommunicationGroupSendView implements Serializable {
     @Column(name = "recalc_on_send")
     boolean recalculateOnSend
 
-    public static CommunicationGroupSendView fetchById(Long groupSendId) {
+    public static CommunicationGroupSendDetailView fetchById(Long groupSendId) {
 
         def query =
-                CommunicationGroupSendView.withSession { session ->
-                    session.getNamedQuery('CommunicationGroupSendView.fetchById')
+                CommunicationGroupSendDetailView.withSession { session ->
+                    session.getNamedQuery('CommunicationGroupSendDetailView.fetchById')
                             .setLong('groupSendId', groupSendId)
                             .list()[0]
 
@@ -152,14 +150,14 @@ class CommunicationGroupSendView implements Serializable {
     }
 
 //    Commented out for performance reason in calling a very complex view. Instead of paging through this view directly,
-//    the controller fetches from the main entity GroupSend and then does a CommunicationGroupSendView#fetchById on each
+//    the controller fetches from the main entity GroupSend and then does a CommunicationGroupSendDetailView#fetchById on each
 //    found object for the current page it is returning back.
 //
 //    public static def findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 //
 //        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
 //
-//        def queryCriteria = CommunicationGroupSendView.createCriteria()
+//        def queryCriteria = CommunicationGroupSendDetailView.createCriteria()
 //        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
 //            ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
 //            ilike("createdBy", filterData?.params?.createdBy)

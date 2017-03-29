@@ -70,6 +70,7 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
         CommunicationLetterMessage letterMessage = new CommunicationLetterMessage()
         letterMessage.toAddress = mergedLetterTemplate.toAddress
         letterMessage.content = mergedLetterTemplate.content
+        letterMessage.style = mergedLetterTemplate.style
         this.message = letterMessage
     }
 

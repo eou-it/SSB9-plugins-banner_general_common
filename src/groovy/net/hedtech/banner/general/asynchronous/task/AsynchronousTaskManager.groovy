@@ -13,9 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  * A manager of Jobs that should be executed asynchronously.  This manager performs
  * basic CRUD on jobs that will be executed asynchronously through a polling mechanism
  * based upon a JobProcessingEngine that is configured to support this manager.
- * The key difference between using a AsynchronousTaskManager-AsynchronousTaskProcessingEngine pair versus
- * using the AsynchronousActionSchedulingService is 1) this does no scheduling, and 2) this persists
- * actions so that their status may be tracked.  The AsynchronousTaskManager is a generic
+ * The AsynchronousTaskManager is a generic
  * service that consumes jobs immediately, and has the potential for loss as the job
  * is solely in memory.
  *

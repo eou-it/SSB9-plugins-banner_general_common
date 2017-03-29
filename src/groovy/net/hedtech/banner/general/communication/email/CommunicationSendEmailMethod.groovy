@@ -3,12 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -62,13 +62,6 @@ class CommunicationSendEmailMethod {
             if (emailMessage.getMessageBody() != null) {
                 sb.append( emailMessage.getMessageBody() );
             }
-//            sb.append(
-//                    EmailAddressUtilities.getOptOutText(
-//                    getCommunicationConfiguration().getEmailService().getOptOutUrl(),
-//                    getCommunicationConfiguration().getEmailService().getOptOutText(),
-//                    this.optOutMessageId )
-//            );
-
 
             emailMessage.setMessageBody( sb.toString() );
             email = createMessage( emailMessage, true, emailReceipt )
@@ -201,8 +194,6 @@ class CommunicationSendEmailMethod {
      * @param email the HtmlEmail object to set the appropriate to
      */
     private void setConnectionProperties( HtmlEmail email ) {
-        Properties emailServerProperties = new Properties()
-
         CommunicationEmailServerProperties sendEmailServerProperties
 
         if (senderOrganization?.sendEmailServerProperties != null)
@@ -226,9 +217,17 @@ class CommunicationSendEmailMethod {
             }
         }
 
-        log.debug "Mail server properties:" + emailServerProperties.toString()
-        CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.senderMailboxAccount.userName, senderOrganization.senderMailboxAccount.clearTextPassword );
-        email.setAuthenticator(auth);
+        boolean shouldAuthenticate
+        def smtpProperties = senderOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()
+        if (smtpProperties && smtpProperties?.auth != null)
+           shouldAuthenticate = smtpProperties.auth
+        else
+            shouldAuthenticate = true
+
+        if (shouldAuthenticate) {
+            CommunicationEmailAuthenticator auth = new CommunicationEmailAuthenticator( senderOrganization.senderMailboxAccount.userName, senderOrganization.senderMailboxAccount.clearTextPassword );
+            email.setAuthenticator(auth);
+        }
     }
 
 

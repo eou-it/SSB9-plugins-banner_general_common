@@ -3,6 +3,7 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.organization
 
+import net.hedtech.banner.exceptions.ApplicationException
 /**
  * Service for providing basic crud services on
  * Communication Organization domain objects while also
@@ -81,11 +82,25 @@ class CommunicationOrganizationCompositeService {
 
 
     private void createDependentMailboxAccountAndEmailServerProperties( CommunicationOrganization newOrganization, CommunicationOrganization oldOrganization = null) {
+        CommunicationOrganization rootorg = CommunicationOrganization.fetchRoot()
+        Map smtpProperties
+        if (!(rootorg && rootorg.id && rootorg.id == newOrganization?.id) && newOrganization.sendEmailServerProperties == null) {
+              smtpProperties = rootorg?.sendEmailServerProperties?.getSmtpPropertiesAsMap()
+        } else {
+            smtpProperties = newOrganization.sendEmailServerProperties?.getSmtpPropertiesAsMap()
+        }
         if (newOrganization.senderMailboxAccount) {
             newOrganization.senderMailboxAccount.type = CommunicationMailboxAccountType.Sender
             if (!newOrganization.senderMailboxAccount.clearTextPassword && oldOrganization?.senderMailboxAccount) {
                 newOrganization.senderMailboxAccount.encryptedPassword = oldOrganization.senderMailboxAccount.encryptedPassword
             }
+
+            if ( (smtpProperties == null || smtpProperties?.auth == null || smtpProperties?.auth) && (newOrganization.senderMailboxAccount && !(newOrganization.senderMailboxAccount.emailAddress != null && newOrganization.senderMailboxAccount.userName != null)
+                    && !(newOrganization.senderMailboxAccount.emailAddress == null && newOrganization.senderMailboxAccount.userName == null)
+                    && ((oldOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()?.auth) || (!newOrganization.parent))) ){
+                throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
+            }
+
             newOrganization.senderMailboxAccount = communicationMailboxAccountService.create(newOrganization.senderMailboxAccount)
         }
 
@@ -93,6 +108,12 @@ class CommunicationOrganizationCompositeService {
             newOrganization.replyToMailboxAccount.type = CommunicationMailboxAccountType.ReplyTo
             if (!newOrganization.replyToMailboxAccount.clearTextPassword && oldOrganization?.replyToMailboxAccount) {
                 newOrganization.replyToMailboxAccount.encryptedPassword = oldOrganization.replyToMailboxAccount.encryptedPassword
+            }
+
+            if ((smtpProperties == null || smtpProperties?.auth == null || smtpProperties?.auth) && (newOrganization.replyToMailboxAccount && !(newOrganization.replyToMailboxAccount.emailAddress != null && newOrganization.replyToMailboxAccount.userName != null)
+                    && !(newOrganization.replyToMailboxAccount.emailAddress == null && newOrganization.replyToMailboxAccount.userName == null))
+                    && ((oldOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()?.auth) || (!newOrganization.parent))){
+                throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
             }
             newOrganization.replyToMailboxAccount = communicationMailboxAccountService.create(newOrganization.replyToMailboxAccount)
         }

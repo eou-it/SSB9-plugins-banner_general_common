@@ -117,6 +117,11 @@ class CommunicationPopulationProfileView implements Serializable {
         return populationProfileViews
     }
 
+    public static Map findDistinctProfilesByNameWithPagingAndSortParams(filter, pagingAndSortParams) {
+        return [list: CommunicationPopulationProfileView.findAllDistinctProfilesByNameWithPagingAndSortParams(filter, pagingAndSortParams)
+                , totalCount: CommunicationPopulationProfileView.findCountDistinctProfilesByName(filter)]
+    }
+
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
 
         def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
@@ -124,7 +129,7 @@ class CommunicationPopulationProfileView implements Serializable {
 
         def queryCriteria = CommunicationPopulationProfileView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-             eq ("selectionListId", filterData?.params?.selectionListId)
+             'in' ("selectionListId", [filterData?.params?.selectionListId, filterData?.params?.includeListId])
              or {
                  ilike("lastName", searchName)
                  ilike("firstName", searchName)
@@ -135,4 +140,56 @@ class CommunicationPopulationProfileView implements Serializable {
         return results
     }
 
+    public static int findTotalCountByPopulation( CommunicationPopulationListView populationListView ) {
+        Map filterData = [
+            params: [
+                selectionListId: populationListView.populationSelectionListId ?: 0L, // guaranteed to not satisfy 0 if null
+                includeListId: populationListView.includeListId ?: 0L, // guaranteed to not satisfy 0 if null
+                "name": '%'
+            ]
+        ]
+        int count = findCountDistinctProfilesByName( filterData )
+        return count
+    }
+
+    public static findCountDistinctProfilesByName( Map filterData ) {
+        if(!filterData)
+            return 0;
+
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+        def queryCriteria = CommunicationPopulationProfileView.createCriteria()
+        def results = queryCriteria.get() {
+            'in' ("selectionListId", [filterData?.params?.selectionListId, filterData?.params?.includeListId])
+            or {
+                ilike("lastName", searchName)
+                ilike("firstName", searchName)
+                ilike("bannerId", searchName)
+            }
+            projections {
+                countDistinct("pidm")
+            }
+        }
+        return results
+    }
+
+    public static findAllDistinctProfilesByNameWithPagingAndSortParams(filterData, pagingAndSortParams){
+
+        def ascdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'asc'
+        def searchName = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name)
+
+        def queryCriteria = CommunicationPopulationProfileView.createCriteria()
+        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+            'in' ("selectionListId", [filterData?.params?.selectionListId, filterData?.params?.includeListId])
+            or {
+                ilike("lastName", searchName)
+                ilike("firstName", searchName)
+                ilike("bannerId", searchName)
+            }
+            projections {
+                distinct(["pidm","bannerId","lastName","firstName","middleName","surnamePrefix","confidential","deceased"])
+            }
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+        }
+        return results
+    }
 }

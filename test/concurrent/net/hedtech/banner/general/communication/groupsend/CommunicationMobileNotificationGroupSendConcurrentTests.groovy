@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import groovy.json.JsonSlurper
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
@@ -81,7 +82,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -106,11 +107,14 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
@@ -148,11 +152,15 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
 
     @Test
     public void testPersonalization() {
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is not null and rownum = 1" )[0]
+        String testExternalUser = row.GOBTPAC_EXTERNAL_USER
+
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testPersonalizationQuery",
                 description: "test description",
-                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
+                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = '${testExternalUser}'"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -164,7 +172,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
         assertEquals( 1, populationCalculation.calculatedCount )
 
         CommunicationField communicationField = new CommunicationField(
@@ -179,7 +187,7 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
                 renderAsHtml: false,
                 status: CommunicationFieldStatus.DEVELOPMENT,
                 statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
-                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = 'cbeaver' and :pidm = :pidm"
+                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = '${testExternalUser}' and :pidm = :pidm"
         )
         communicationField = communicationFieldService.create( [domainModel: communicationField] )
         communicationField = communicationFieldService.publishDataField( [id: communicationField.id] )
@@ -219,17 +227,15 @@ class CommunicationMobileNotificationGroupSendConcurrentTests extends Communicat
         def mobileItemCreated = {
             return communicationMobileNotificationItemService.list().size() == it
         }
-        assertTrueWithRetry( mobileItemCreated, 1, 30, 10 )
+        assertTrueWithRetry( mobileItemCreated, 1, 15, 5 )
 
         CommunicationMobileNotificationItem item = communicationMobileNotificationItemService.list().get( 0 )
-// the item now has serverResponse to store all the individual values.  The server response
-// is a string formatted as [{"":"","":"",....}].  So strip of the begin and end characters and get the JSON map out
         def jsonSlurper = new JsonSlurper()
-        def serverResponseMap = jsonSlurper.parseText(item.serverResponse.substring(1, item.serverResponse.length()-1))
+        def serverResponseMap = jsonSlurper.parseText( item.serverResponse )
 
         assert serverResponseMap instanceof Map
         assertEquals( "testPersonalization from BCM", serverResponseMap.mobileHeadline )
-        assertEquals( "name = cbeaver", serverResponseMap.headline )
+        assertEquals( "name = ${testExternalUser}".toString(), serverResponseMap.headline )
         assertEquals( "test description", serverResponseMap.description )
         assertEquals( "http://www.amazon.com", serverResponseMap.destination )
         assertEquals( "Amazon", serverResponseMap.destinationLabel )

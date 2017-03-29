@@ -20,8 +20,6 @@ import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
 
-import javax.mail.internet.AddressException
-
 /**
  * To clarify some naming confusion, the term CommunicationTemplate refers to the Communication Manager object
  * that contains several string fields. Each of these string fields can contain delimited template variables.
@@ -62,12 +60,12 @@ class CommunicationTemplateMergeService {
      * @return
      */
     CommunicationMergedEmailTemplate calculateTemplateByPidm( CommunicationEmailTemplate communicationTemplate, Long pidm ) {
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
             log.debug( "Calculating template by pidm." )
-        def sqlParams = [:]
-        sqlParams << ['pidm': pidm]
+        }
+
         List<String> templateVariables = extractTemplateVariables( communicationTemplate.content )
-        def recipientDataMap = calculateRecipientData( templateVariables, sqlParams )
+        def recipientDataMap = calculateRecipientData( templateVariables, pidm )
         def CommunicationMergedEmailTemplate communicationMergedEmailTemplate = new CommunicationMergedEmailTemplate()
         communicationMergedEmailTemplate.content = renderTemplate( communicationTemplate.content, recipientDataMap )
         communicationMergedEmailTemplate
@@ -81,13 +79,12 @@ class CommunicationTemplateMergeService {
      * If it contains a pidm, the bannerId parameter will be ignored.
      * @return
      */
-    Map<String, String> calculateRecipientData( List<String> communicationFieldNames, Map parameters ) {
+    private Map<String, String> calculateRecipientData( List<String> communicationFieldNames, Long pidm) {
         if (log.isDebugEnabled())
             log.debug( "Calculating recipient data." )
         def recipientData = [:]
         def CommunicationField communicationField
-        if (parameters.containsKey( 'pidm' )) {
-            Long pidm = (Long) parameters.get( 'pidm' )
+        if (pidm != null) {
             log.debug( "Calculating recipient data for pidm ${pidm}." )
             communicationFieldNames.each {
                 communicationField = CommunicationField.fetchByName( it )
@@ -96,6 +93,7 @@ class CommunicationTemplateMergeService {
                         communicationField.getRuleContent(),
                         communicationField.returnsArrayArguments,
                         communicationField.getFormatString(),
+                        [:],
                         pidm
                     )
                     if (fieldResult) recipientData[communicationField.name] = fieldResult
@@ -156,6 +154,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedLetterTemplate mergedTemplate = new CommunicationMergedLetterTemplate()
         mergedTemplate.toAddress = merge( template.toAddress, recipientData.fieldValues )
         mergedTemplate.content = merge( template.content, recipientData.fieldValues )
+        mergedTemplate.style = template.style
         return mergedTemplate
     }
 
@@ -223,6 +222,7 @@ class CommunicationTemplateMergeService {
         CommunicationMergedLetterTemplate communicationMergedLetterTemplate = new CommunicationMergedLetterTemplate()
         communicationMergedLetterTemplate.toAddress = mergeForPreview( communicationLetterTemplate.toAddress ?: "", renderPreviewValues( communicationLetterTemplate.toAddress ?: "" ) )
         communicationMergedLetterTemplate.content = mergeForPreview( communicationLetterTemplate.content ?: "", renderPreviewValues( communicationLetterTemplate.content ?: "" ) )
+        communicationMergedLetterTemplate.style = communicationLetterTemplate.style
         return communicationMergedLetterTemplate
     }
 
@@ -283,8 +283,8 @@ class CommunicationTemplateMergeService {
      */
 
     List<String> extractTemplateVariables( Long templateId ) {
-        CommunicationEmailTemplate communicationEmailTemplate = CommunicationEmailTemplate.get( templateId )
-        List<String> extractedTemplateVariables = extractTemplateVariables( communicationEmailTemplate )
+        CommunicationTemplate communicationTemplate = CommunicationTemplate.get( templateId )
+        List<String> extractedTemplateVariables = extractTemplateVariables( communicationTemplate )
         extractedTemplateVariables
     }
 
@@ -296,7 +296,7 @@ class CommunicationTemplateMergeService {
     List<String> extractTemplateVariables( CommunicationEmailTemplate communicationEmailTemplate ) {
         if (log.isDebugEnabled())
             log.debug( "Extracting template variables from CommunicationEmailTemplate ${communicationEmailTemplate.name}." )
-        def templateVariables = []
+        def templateVariables = new HashSet()
         extractTemplateVariables( communicationEmailTemplate.toList ).each {
             templateVariables << it
         }
@@ -307,7 +307,7 @@ class CommunicationTemplateMergeService {
             templateVariables << it
         }
 
-        templateVariables
+        templateVariables.toList()
     }
 
     List<String> extractTemplateVariables( CommunicationLetterTemplate communicationLetterTemplate ) {
@@ -315,14 +315,14 @@ class CommunicationTemplateMergeService {
         if (log.isDebugEnabled()) {
             log.debug( "Extracting template variables from CommunicationLetterTemplate ${communicationLetterTemplate.name}." )
         }
-        def templateVariables = []
+        def templateVariables = new HashSet()
         extractTemplateVariables( communicationLetterTemplate.toAddress ).each {
             templateVariables << it
         }
         extractTemplateVariables( communicationLetterTemplate.content ).each {
             templateVariables << it
         }
-        return templateVariables
+        return templateVariables.toList()
     }
 
     /**
@@ -334,7 +334,7 @@ class CommunicationTemplateMergeService {
             log.debug( "Extracting template variables from CommunicationMobileNotificationTemplate ${communicationMobileNotificationTemplate.name}." )
         }
 
-        def templateVariables = []
+        def templateVariables = new HashSet()
 
         extractTemplateVariables( communicationMobileNotificationTemplate.mobileHeadline ).each {
             templateVariables << it
@@ -351,7 +351,7 @@ class CommunicationTemplateMergeService {
         extractTemplateVariables( communicationMobileNotificationTemplate.destinationLabel ).each {
         }
 
-        return templateVariables
+        return templateVariables.toList()
     }
 
     /**

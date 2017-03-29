@@ -3,11 +3,19 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.converters.JSON
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSettings
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.DatabaseModifiesState
+import org.apache.commons.lang.NotImplementedException
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
@@ -149,11 +157,22 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_GROUP_ID")
     String groupId
 
+    /**
+     * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
+     */
+    @Lob
+    @Column(name = "GCBGSND_PARAMETER_VALUES")
+    String parameterValues
+
+    @Transient
+    private Map parameterNameValueMap
+
+
     static constraints = {
         mepCode(nullable: true)
         name(nullable: false)
         populationId(nullable: false)
-        populationVersionId(nullable: false)
+        populationVersionId(nullable: true)
         populationCalculationId(nullable: true)
         organizationId(nullable: false)
         templateId(nullable: false)
@@ -171,6 +190,72 @@ class CommunicationGroupSend implements Serializable {
         errorCode(nullable:true)
         jobId(nullable:true)
         groupId(nullable:true)
+        parameterValues(nullable:true)
+    }
+
+    public Map getParameterNameValueMap() {
+        if (parameterNameValueMap == null) {
+            if (parameterValues == null || parameterValues.trim().length() == 0 ) {
+                parameterNameValueMap = [:]
+            } else {
+                JsonSlurper jsonSlurper = new JsonSlurper()
+                try {
+                    Map rawNameValueMap = jsonSlurper.parseText( parameterValues )
+                    if (rawNameValueMap != null) {
+                        rawNameValueMap.keySet().each { String name ->
+                            Map valueType = rawNameValueMap.get( name )
+                            CommunicationParameterType type = CommunicationParameterType.valueOf( (String) valueType.type )
+                            if (type == CommunicationParameterType.DATE) {
+                                Date d = DateUtility.parseDateString( valueType.value, 'yyyy-MM-dd' )
+                                rawNameValueMap.put( name, new CommunicationParameterValue( [ value: d, type: type ] ) )
+                            } else if (type == CommunicationParameterType.NUMBER) {
+                                Number number = null
+                                try {
+                                    number = Long.parseLong( valueType.value )
+                                } catch (NumberFormatException e) {
+                                    number = Double.parseDouble( valueType.value )
+                                }
+                                if (number != null) {
+                                    rawNameValueMap.put( name, new CommunicationParameterValue( [ value: number, type: type ] ) )
+                                }
+                            } else if (type == CommunicationParameterType.TEXT) {
+                                rawNameValueMap.put( name, new CommunicationParameterValue( [ value: valueType.value, type: type ] ) )
+                            } else {
+                                throw new NotImplementedException( "Unhandled parameter type" )
+                            }
+                        }
+                    }
+                    parameterNameValueMap = rawNameValueMap
+                } catch (groovy.json.JsonException e) {
+                    throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSend.class, "badSyntax" )
+                }
+            }
+        }
+
+        return parameterNameValueMap
+    }
+
+    public void setParameterNameValueMap( Map nameParameterValueMap ) {
+        assert nameParameterValueMap != null
+        Map rawNameValueMap = [:]
+        if (nameParameterValueMap != null) {
+            nameParameterValueMap.keySet().each { String name ->
+                CommunicationParameterValue parameterValue = nameParameterValueMap.get( name )
+                String valueAsString
+                if (parameterValue.type == CommunicationParameterType.DATE) {
+                    valueAsString = DateUtility.getDateString( parameterValue.value, 'yyyy-MM-dd' )
+                } else if (parameterValue.type == CommunicationParameterType.NUMBER) {
+                    valueAsString = parameterValue.value.toString()
+                } else if (parameterValue.type == CommunicationParameterType.TEXT) {
+                    valueAsString = parameterValue.value
+                } else {
+                    throw new NotImplementedException( "Not handled parameter type" )
+                }
+                rawNameValueMap.put( name, [ value: valueAsString, type: parameterValue.type.toString() ] )
+            }
+        }
+        parameterValues = JsonOutput.toJson( rawNameValueMap )
+        parameterNameValueMap = null
     }
 
     public void markScheduled( String jobId, String groupId ) {
@@ -215,7 +300,7 @@ class CommunicationGroupSend implements Serializable {
         this.groupId = groupId
     }
 
-    public static List findRunning() {
+    public static List findRunning( Integer max = Integer.MAX_VALUE ) {
         def query
         CommunicationGroupSend.withSession { session ->
             query = session.getNamedQuery('CommunicationGroupSend.findRunning')
@@ -224,11 +309,12 @@ class CommunicationGroupSend implements Serializable {
                     .setParameter('scheduled_', CommunicationGroupSendExecutionState.Scheduled)
                     .setParameter('queued_', CommunicationGroupSendExecutionState.Queued)
                     .setParameter('calculating_', CommunicationGroupSendExecutionState.Calculating)
+                    .setFirstResult( 0 )
+                    .setMaxResults( max )
                     .list()
         }
         return query
     }
-
 
     public static List fetchCompleted() {
         def results

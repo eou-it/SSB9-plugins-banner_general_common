@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import groovy.sql.Sql
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.field.CommunicationField
@@ -79,7 +80,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion( populationCalculation.populationVersion )
         assertEquals( 1, queryAssociations.size() )
@@ -104,11 +105,14 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 5
         }
-        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 30, 10 )
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
 
         // Confirm group send view returns the correct results
-        def sendViewDetails = CommunicationGroupSendView.findAll()
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
         assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
 
         // Confirm group send item view returns the correct results
         def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
@@ -166,11 +170,15 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
 
     @Test
     public void testPersonalization() {
+        def sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def row = sql.rows("select GOBTPAC_EXTERNAL_USER, GOBTPAC_PIDM from GV_GOBTPAC where GOBTPAC_EXTERNAL_USER is not null and rownum = 1" )[0]
+        String testExternalUser = row.GOBTPAC_EXTERNAL_USER
+
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testPersonalizationQuery",
                 description: "test description",
-                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = 'cbeaver'"
+                queryString: "select gobtpac_pidm from gobtpac where gobtpac_external_user = '${testExternalUser}'"
         )
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
         CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
@@ -183,7 +191,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -197,7 +205,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
                 renderAsHtml: false,
                 status: CommunicationFieldStatus.DEVELOPMENT,
                 statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
-                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = 'cbeaver' and :pidm = :pidm"
+                ruleContent: "select gobtpac_external_user from gobtpac where gobtpac_external_user = '${testExternalUser}' and :pidm = :pidm"
         )
         communicationField = communicationFieldService.create( [domainModel: communicationField] )
         communicationField = communicationFieldService.publishDataField( [id: communicationField.id] )
@@ -234,11 +242,11 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         def letterItemCreated = {
             return communicationLetterItemService.list().size() == it
         }
-        assertTrueWithRetry( letterItemCreated, 1, 30, 10 )
+        assertTrueWithRetry( letterItemCreated, 1, 15, 5 )
 
         CommunicationLetterItem item = communicationLetterItemService.list().get( 0 )
-        assertEquals( "cbeaver", item.toAddress )
-        assert( item.content.indexOf( "test description cbeaver" ) >= 0 )
+        assertEquals( testExternalUser, item.toAddress )
+        assert( item.content.indexOf( "test description ${testExternalUser}" ) >= 0 )
     }
 
     @Test
@@ -255,7 +263,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields
@@ -325,7 +333,7 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationField communicationField = new CommunicationField(
                 // Required fields

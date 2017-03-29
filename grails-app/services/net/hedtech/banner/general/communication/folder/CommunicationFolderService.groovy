@@ -24,7 +24,7 @@ class CommunicationFolderService extends ServiceBase {
         if (folder.getName() == null || folder.getName() == "")
             throw new ApplicationException( CommunicationFolder, "@@r1:nameCannotBeNull@@" )
 
-        if (CommunicationFolder.fetchByName( folder.name )) {
+        if (CommunicationFolder.findByName( folder.name )) {
             throw new ApplicationException( CommunicationFolder, "@@r1:folderExists:"+folder.name + "@@")
         }
     }

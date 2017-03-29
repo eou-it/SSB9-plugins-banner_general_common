@@ -28,8 +28,13 @@ class CommunicationLetterItem extends CommunicationItem implements Serializable 
     @Column(name = "GCRLETM_CONTENT")
     String content
 
+    @Column(name = "GCRLETM_STYLE")
+    String style
+
+
     static constraints = {
         toAddress(nullable: false)
         content(nullable: false)
+        style(nullable:true)
     }
 }

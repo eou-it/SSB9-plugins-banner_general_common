@@ -47,7 +47,8 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testTemplateView() {
-        def origTemplateListSize = CommunicationTemplateView.list().size()
+        def origTemplateList =  CommunicationTemplateView.list().size()
+
         CommunicationEmailTemplate emailTemplate = new CommunicationEmailTemplate(
             name: "testEmailTemplate",
             folder: testFolder,
@@ -88,7 +89,7 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
         assertNotNull( templateView )
         assertEquals( letterTemplate.communicationChannel, templateView.communicationChannel )
 
-        assertEquals( origTemplateListSize+3, CommunicationTemplateView.list().size() )
+        assertEquals( origTemplateList + 3, CommunicationTemplateView.list().size() )
 
         cleanUpGorm()
         templateView = CommunicationTemplateView.get( emailTemplate.id )

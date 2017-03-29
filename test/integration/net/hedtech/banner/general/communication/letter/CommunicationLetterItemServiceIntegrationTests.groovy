@@ -68,6 +68,11 @@ class CommunicationLetterItemServiceIntegrationTests extends BaseIntegrationTest
         letterItem.referenceId = referenceId
         letterItem.createdBy = createdBy
         letterItem.recipientPidm = recipientPidm
+
+        CommunicationLetterPageSettings extractStatement = new CommunicationLetterPageSettings()
+
+        String json = extractStatement.toJson()
+        letterItem.style = json
         letterItem = (CommunicationLetterItem) communicationLetterItemService.create( letterItem )
 
         assertNotNull( letterItem.id )
@@ -78,6 +83,7 @@ class CommunicationLetterItemServiceIntegrationTests extends BaseIntegrationTest
         assertEquals( referenceId, letterItem.referenceId )
         assertEquals( createdBy, letterItem.createdBy )
         assertEquals( recipientPidm, letterItem.recipientPidm )
+        assertEquals(json,letterItem.style)
 
         assertNotNull( communicationLetterItemService.get( letterItem.id ) )
     }

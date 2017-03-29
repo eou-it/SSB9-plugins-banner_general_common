@@ -17,4 +17,5 @@ import net.hedtech.banner.general.communication.template.CommunicationMessage
 public class CommunicationLetterMessage extends CommunicationMessage {
     String toAddress
     String content
+    String style
 }

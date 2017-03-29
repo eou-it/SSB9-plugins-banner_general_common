@@ -3,7 +3,9 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.item
 
-public enum CommunicationChannel implements Serializable {
+import net.hedtech.banner.general.communication.CommunicationEnum
+
+public enum CommunicationChannel implements CommunicationEnum {
 
     EMAIL,
     MOBILE_NOTIFICATION,

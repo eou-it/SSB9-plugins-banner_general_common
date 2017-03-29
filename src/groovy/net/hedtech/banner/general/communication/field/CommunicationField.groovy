@@ -65,6 +65,13 @@ class CommunicationField implements Serializable {
     CommunicationFolder folder
 
     /**
+     * Indicates if the datafield was created through the seeded data set and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCRCFLD_SYSTEM_IND")
+    Boolean systemIndicator = false
+
+    /**
      * FORMATSTRING: Format string with placeholders to be used.
      */
     @Lob
@@ -182,6 +189,7 @@ class CommunicationField implements Serializable {
     static constraints = {
         name(nullable: false, maxSize: 255)
         description(nullable: true, maxSize: 2000)
+        systemIndicator(nullable:false)
         folder(nullable: false)
         formatString(nullable: true)
         groovyFormatter(nullable: true)

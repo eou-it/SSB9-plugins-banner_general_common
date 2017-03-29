@@ -32,6 +32,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterService
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
@@ -83,6 +84,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationMobileNotificationItemService communicationMobileNotificationItemService
     CommunicationFieldService communicationFieldService
     CommunicationSendMobileNotificationService CommunicationSendMobileNotificationService
+    CommunicationParameterService communicationParameterService
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
@@ -151,7 +153,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         renderMap = [:]
         redirectMap = [:]
         flash = [:]
-
+        formContext = ['SELFSERVICE']
         if (formContext) {
             FormContext.set( formContext )
         } else if (controller) {
@@ -184,7 +186,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         FormContext.clear()
     }
 
-    public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 10 ) {
+    public void assertTrueWithRetry( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {
         boolean result = false
         for (int i=0; i<maxAttempts; i++ ) {
             result = booleanClosure.call( arguments )
@@ -203,6 +205,11 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCRQRTZ_SIMPLE_TRIGGERS")
+                sql.executeUpdate("Delete from GCRQRTZ_TRIGGERS")
+                sql.executeUpdate("Delete from GCRQRTZ_JOB_DETAILS")
+                sql.executeUpdate("Delete from GCRQRTZ_LOCKS")
+                sql.executeUpdate("Delete from GCRQRTZ_SCHEDULER_STATE")
                 sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")
@@ -213,10 +220,12 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBRDAT")
                 sql.executeUpdate("Delete from GCRGSIM")
                 sql.executeUpdate("Delete from GCBGSND")
+                sql.executeUpdate("Delete from GCRTPFL")
                 sql.executeUpdate("Delete from GCBEMTL")
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBLTPL")
                 sql.executeUpdate("Delete from GCBTMPL")
+                sql.executeUpdate("Delete from GCRFLPM")
                 sql.executeUpdate("Delete from GCRCFLD")
                 sql.executeUpdate("Delete from GCRLENT")
                 sql.executeUpdate("Delete from GCRPQID")
@@ -228,7 +237,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRITPE")
-                sql.executeUpdate("Delete from GCRFLDR")
+                sql.executeUpdate("Delete from GCRPARM")
+                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.gcbactm_folder_id FROM gcbactm a WHERE a.gcbactm_folder_id = gcrfldr_surrogate_id)")
                 sql.executeUpdate("Delete from GCRORAN")
                 sql.executeUpdate("Delete from GCBSPRP")
                 sql.executeUpdate("Delete from GCRMBAC")
@@ -283,7 +293,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             theCalculation.refresh()
             return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
         }
-        assertTrueWithRetry( isAvailable, populationCalculation.id, 30, 10 )
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testDeleteGroupSend",
@@ -363,6 +373,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
      * object from the Spring security context holder.
      **/
     protected void logout() {
+        def sql
+        try {
+            sql = new Sql( sessionFactory.getCurrentSession().connection() )
+            sql.executeUpdate( 'commit')
+        } finally {
+            sql?.close() // note that the test will close the connection, since it's our current session's connection
+        }
         SecurityContextHolder.getContext().setAuthentication( null )
     }
 
@@ -578,7 +595,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         try {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
-            println( result.rowcount )
+//            println( result.rowcount )
         } finally {
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }

@@ -48,6 +48,8 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      */
     private boolean continuousPolling = false;
 
+    private boolean enabled = false
+
     /**
      * Maximum queue size.
      */
@@ -103,8 +105,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
     private int maxThreads
 
-    private boolean isDisabled = false
-
     private AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
 
 //  ------------------------- Initialization Method(s) -------------------------
@@ -113,8 +113,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
      * Initializes the job processing engine.  This method starts the polling process.
      */
     public void init() {
-        isDisabled = Holders.config.communication.engine.isEnabled ? false : true
-        log.info("Initialized with isDisabled = ${isDisabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
+        log.info("Initialized with enabled = ${enabled}, maxThreads = ${maxThreads}, maxQueueSize = ${maxQueueSize}, continuousPolling = ${continuousPolling}, pollingInterval = ${pollingInterval}, and deleteSuccessfullyCompleted = ${deleteSuccessfullyCompleted}.")
     }
 
     /**
@@ -158,11 +157,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
 
     public void startRunning() {
-        if (isDisabled) {
-            log.warn("Asynchronous Task Processing engine disabled in configuration; will not start");
-            return;
-        }
-
         log.info("Asynchronous Task Processing engine starting.");
 
         if (!threadsRunning) {
@@ -263,6 +257,10 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         this.continuousPolling = continuousPolling
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled
+    }
+
 
     public void setPollingInterval(int pollingInterval) {
         this.pollingInterval = pollingInterval
@@ -295,6 +293,7 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
         //the jobs enqueued from the previous poll have run to completion
         if (pendingJobs.size() > 0) {
             log.debug("Pending jobs still queued (size=${pendingJobs.size()}).")
+            log.debug("Are threads still running: ${threadsRunning}")
             return false
         } else {
             log.debug("Get more pending jobs")
@@ -312,7 +311,6 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
                     executor.execute(new AsynchronousTaskHandler(job) {
                         @Override
                         void run() {
-                            log.debug("Going to make it rock")
                             handleTask(getJob())
                         }
                     })
@@ -548,8 +546,8 @@ public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskPro
 
 
         public void run() {
-            asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
             try {
+                asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
 //                  ThreadCallerContext.set( new TrustedCallerContext() );
                 if(cause instanceof CommunicationApplicationException) {
                     jobManager.markFailed(job, cause.friendlyName, cause );

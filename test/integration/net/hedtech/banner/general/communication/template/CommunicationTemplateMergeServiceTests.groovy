@@ -130,19 +130,18 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
         CommunicationRecipientData communicationRecipientData
         def fieldListByPidm = [:]
-        params = [:]
-        params << ['pidm': i_valid_pidm]
-
+        Map parameterNameValueMap = [:]
 
         templateVariables.each {
             variableName ->
                 tempfield = CommunicationField.fetchByName( variableName )
                 assertNotNull( tempfield.immutableId )
-                fieldCalculationResult = communicationFieldCalculationService.calculateFieldByMap (
+                fieldCalculationResult = communicationFieldCalculationService.calculateFieldByPidm (
                     (String) tempfield.ruleContent,
                     (Boolean) tempfield.returnsArrayArguments,
                     (String) tempfield.formatString,
-                    (Map) params
+                    parameterNameValueMap,
+                    i_valid_pidm
                 )
                 fieldListByPidm.put( tempfield.name, new CommunicationFieldValue(
                         value: fieldCalculationResult,
@@ -245,19 +244,18 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
         CommunicationRecipientData communicationRecipientData
         def fieldListByPidm = [:]
-        params = [:]
-        params << ['pidm': i_valid_pidm]
-
+        Map parameterNameValueMap = [:]
 
         templateVariables.each {
             variableName ->
                 tempfield = CommunicationField.fetchByName( variableName )
                 assertNotNull( tempfield.immutableId )
-                fieldCalculationResult = communicationFieldCalculationService.calculateFieldByMap (
+                fieldCalculationResult = communicationFieldCalculationService.calculateFieldByPidm (
                         (String) tempfield.ruleContent,
                         (Boolean) tempfield.returnsArrayArguments,
                         (String) tempfield.formatString,
-                        (Map) params
+                        parameterNameValueMap,
+                        i_valid_pidm
                 )
                 fieldListByPidm.put( tempfield.name, new CommunicationFieldValue(
                         value: fieldCalculationResult,

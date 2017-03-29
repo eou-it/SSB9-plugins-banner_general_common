@@ -55,6 +55,7 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
         assertEquals true, communicationField.renderAsHtml
         assertEquals "TTTTTTTTTT", communicationField.ruleUri
         assertEquals CommunicationFieldStatus.DEVELOPMENT, communicationField.status
+        assertFalse communicationField.systemIndicator
     }
 
 

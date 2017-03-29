@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.field.CommunicationRuleStatement
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.parameter.CommunicationParameter
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationProfileView
@@ -38,6 +39,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     def communicationTemplateService
     def communicationEmailTemplateService
     def communicationPopulationCompositeService
+    def communicationParameterService
 
     def CommunicationFolder validFolder
     def CommunicationEmailTemplate emailTemplate
@@ -121,8 +123,16 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         validQuery = validQueryVersion.query
         assertNotNull( validQuery.id )
 
+        // create the parameters
+        def banneridparm = new CommunicationParameter()
+        banneridparm.name = 'bannerId'
+        banneridparm.type = 'TEXT'
+        banneridparm.title = 'Banner ID'
+        CommunicationParameter cp = communicationParameterService.create(banneridparm)
+        assertNotNull cp.id
+
         /* Create communication Field */
-        validField1 = communicationFieldService.create( newCommunicationField( validFolder, "PersonName",
+        def cf = newCommunicationField( validFolder, "PersonName",
                 "Hello \$firstname\$ \$lastname\$", "Hello Peter Tosh", """SELECT spriden_id
                                        ,spriden_last_name lastname
                                        ,spriden_first_name firstname
@@ -133,8 +143,13 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                                    FROM spriden, spbpers
                                   WHERE     spriden_pidm = spbpers_pidm(+)
                                         AND spriden_change_ind IS NULL
-                                        AND (spriden_pidm = :pidm or spriden_id = :bannerId)""" ) )
+                                        AND (spriden_pidm = :pidm or spriden_id = :bannerId)""" )
+        cf.status = 'DEVELOPMENT'
+        validField1 = communicationFieldService.create( cf )
         assertNotNull validField1.id
+
+        validField1 = communicationFieldService.publishDataField(cf)
+        assertEquals CommunicationFieldStatus.PRODUCTION,validField1.status
 
         /* create a template */
         validTemplate = communicationEmailTemplateService.create( [domainModel: newValidForCreateEmailTemplate( validFolder )] )
@@ -203,18 +218,18 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         //pidm from popualation to the field calculation service
         selectionList.each {
             person ->
-                params = [:]
-                params << ['pidm': person.pidm]
+                Map parameterNameValueMap = [:]
                 def fieldListByPidm = [:]
                 fieldList.each {
                     fieldName ->
                         CommunicationField communicationField = CommunicationField.fetchByName(fieldName)
                         if (communicationField) {
-                            resultSet = communicationFieldCalculationService.calculateFieldByMap(
+                            resultSet = communicationFieldCalculationService.calculateFieldByPidm(
                                     (String) communicationField.ruleContent,
                                     (Boolean) communicationField.returnsArrayArguments,
                                     (String) communicationField.formatString,
-                                    (Map) params
+                                    parameterNameValueMap,
+                                    person.pidm
                             )
                             fieldListByPidm.put(communicationField.name, newFieldValue(resultSet))
                         }

@@ -8,12 +8,15 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.field.CommunicationField
+import net.hedtech.banner.general.communication.parameter.CommunicationTemplateFieldAssociation
 import net.hedtech.banner.service.ServiceBase
 
 class CommunicationTemplateService extends ServiceBase {
 
     def communicationTemplateMergeService
     def communicationFieldService
+    def communicationTemplateFieldAssociationService
 
     def preCreate( domainModelOrMap ) {
         if (!CommunicationCommonUtility.userCanAuthorContent()) {
@@ -42,6 +45,24 @@ class CommunicationTemplateService extends ServiceBase {
         }
 
         stampAndValidate(template)
+
+        //Insert the template field associations if the template is already published and the association does not exist already
+        if(template.published) {
+            deleteFieldAssociations(template)
+
+            List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
+            if (fieldNameList) {
+                List<CommunicationTemplateFieldAssociation> templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
+                fieldNameList.each { String fieldName ->
+                    CommunicationField field = CommunicationField.fetchByName( fieldName )
+                        CommunicationTemplateFieldAssociation templateFieldAssociation = new CommunicationTemplateFieldAssociation()
+                        templateFieldAssociation.template = template
+                        templateFieldAssociation.field = field
+                        templateFieldAssociations.add(templateFieldAssociation)
+                }
+                communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+            }
+        }
     }
 
     /**
@@ -64,8 +85,8 @@ class CommunicationTemplateService extends ServiceBase {
      * @return
      */
     def publishTemplate( map ) {
+        def template = get( map.id )
         if (map.id) {
-            def template = get( map.id )
             return publish( template )
         } else {
             throw new ApplicationException( template, "@@r1:idNotValid@@" )
@@ -73,12 +94,13 @@ class CommunicationTemplateService extends ServiceBase {
     }
 
     def preDelete( domainModelOrMap ) {
-
-        def oldTemplate = CommunicationTemplate.get(domainModelOrMap?.id ?: domainModelOrMap?.domainModel?.id)
+        def template = CommunicationTemplate.get(domainModelOrMap?.id ?: domainModelOrMap?.domainModel?.id)
 
         //check if user is authorized. user should be admin or author
-        if (oldTemplate == null || !CommunicationCommonUtility.userCanUpdateDeleteContent(oldTemplate?.createdBy)) {
+        if (template == null || !CommunicationCommonUtility.userCanUpdateDeleteContent(template?.createdBy)) {
             throw new ApplicationException(CommunicationEmailTemplate, "@@r1:operation.not.authorized@@")
+        } else {
+            deleteFieldAssociations( template )
         }
     }
 
@@ -127,6 +149,17 @@ class CommunicationTemplateService extends ServiceBase {
             }
 
             validatePublished( template )
+        }
+    }
+
+    private void deleteFieldAssociations(template) {
+        if (template == null) return
+
+        if (template.id == null) return
+
+        List<CommunicationTemplateFieldAssociation> oldTemplateFieldAssociations = CommunicationTemplateFieldAssociation.findAllByTemplate(template)
+        if (oldTemplateFieldAssociations && (oldTemplateFieldAssociations.size() > 0)) {
+            communicationTemplateFieldAssociationService.delete(oldTemplateFieldAssociations)
         }
     }
 }

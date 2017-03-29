@@ -6,7 +6,9 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.hibernate.FlushMode
+import org.hibernate.annotations.Type
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -17,6 +19,7 @@ import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
+import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -120,11 +123,13 @@ class CommunicationPopulation implements Serializable {
     @Column(name = "GCBPOPL_DATA_ORIGIN")
     String dataOrigin
 
-    public CommunicationPopulationVersion createVersion() {
-        CommunicationPopulationVersion populationVersion = new CommunicationPopulationVersion()
-        populationVersion.population = this
-        return populationVersion
-    }
+    @OneToOne
+    @JoinColumn(name = "GCBPOPL_INCLUDE_LIST_ID", referencedColumnName = "GCRSLIS_SURROGATE_ID")
+    CommunicationPopulationSelectionList includeList
+
+    @Type(type = "yes_no")
+    @Column(name = "GCBPOPL_CHANGED_IND")
+    Boolean changesPending = false
 
     static constraints = {
         name(nullable: false)
@@ -134,6 +139,8 @@ class CommunicationPopulation implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
+        includeList(nullable: true)
+        changesPending(nullable: false)
     }
 
     public static CommunicationPopulation fetchById(Long id) {

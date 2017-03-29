@@ -9,6 +9,8 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
+import net.sf.json.JSONArray
+import net.sf.json.util.JSONUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.joda.time.format.ISODateTimeFormat
@@ -36,7 +38,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(rootOrganization.mobileEndPointUrl)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.toString(),
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL,
                     "emptyMobileNotificationEndpointUrl",
                     senderOrganization.name
             )
@@ -62,7 +64,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(mobileApplicationName)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.toString(),
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME,
                     "emptyMobileNotificationApplicationName",
                     senderOrganization.name
             )
@@ -70,15 +72,20 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(mobileApplicationKey)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.toString(),
+                    CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY,
                     "emptyMobileNotificationApplicationKey",
                     senderOrganization.name
             )
         }
 
+        def mobileEndPointUrl = rootOrganization.mobileEndPointUrl
         try {
             // Ex: 'https://mobiledev1.ellucian.com/'
-            HTTPBuilder httpBuilder = new HTTPBuilder(rootOrganization.mobileEndPointUrl)
+            if (log.isDebugEnabled()) {
+                log.debug( "Connecting to ${mobileEndPointUrl} as ${mobileApplicationName}")
+            }
+
+            HTTPBuilder httpBuilder = new HTTPBuilder(mobileEndPointUrl)
             httpBuilder.auth.basic mobileApplicationName, mobileApplicationKey
             httpBuilder.request(POST, JSON) { request ->
                 headers.Accept = 'application/json'
@@ -136,34 +143,55 @@ class CommunicationSendMobileNotificationMethod {
                 body = messageMap
 
                 response.success = { theResponse, reader ->
-                    if (reader?.notifications) {
-                        def builder = new groovy.json.JsonBuilder( reader.notifications )
-                        serverResponse = builder.content.toString()
-                        if (log.isDebugEnabled()) {
-                            log.debug( new groovy.json.JsonBuilder( reader.notifications ).toPrettyString() )
+                    def jsonResponse = reader?.notifications
+                    if (jsonResponse instanceof JSONArray) {
+                        JSONArray jsonArray = (JSONArray) jsonResponse
+                        if (jsonArray.size() == 1) {
+                            jsonResponse = jsonArray.get( 0 )
                         }
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug( "Response is null." )
-                        }
+                    }
+                    serverResponse = JSONUtils.valueToString( jsonResponse, 2, 0 )
+                    if (log.isDebugEnabled()) {
+                        log.debug( "Response is: " + serverResponse )
                     }
                 }
             }
-        } catch (Throwable t) {
+        } catch(java.lang.IllegalStateException t) {
             log.error( 'Error trying to send mobile notification.', t );
-
-            if (t instanceof java.lang.IllegalStateException) {
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
+        } catch(java.net.UnknownHostException t) {
+            log.error( 'Error trying to send mobile notification.', t );
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
+        } catch(org.apache.http.conn.HttpHostConnectException t) {
+            log.error( 'Error trying to send mobile notification.', t );
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
+        } catch(javax.net.ssl.SSLPeerUnverifiedException t) {
+            log.error( 'Error trying to send mobile notification.', t );
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
+        } catch(groovyx.net.http.ResponseParseException t) {
+            if (log.isErrorEnabled()) {
+                String contentType
+                try {
+                    contentType = t.response?.contentType
+                } catch(IllegalArgumentException e) {
+                    contentType = e.getMessage()
+                }
+                log.error( "Error trying to send mobile notification. Response content type = ${contentType}; status line = '${t.response?.statusLine}'", t )
             }
-
-            if ((t instanceof java.net.UnknownHostException) || (t instanceof org.apache.http.conn.HttpHostConnectException) || (t instanceof javax.net.ssl.SSLPeerUnverifiedException)) {
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
+        } catch(groovyx.net.http.HttpResponseException t) {
+            if (log.isErrorEnabled()) {
+                String contentType
+                try {
+                    contentType = t.response?.contentType
+                } catch(IllegalArgumentException e) {
+                    contentType = e.getMessage()
+                }
+                log.error( "Error trying to send mobile notification. Response content type = ${contentType}; status line = '${t.response?.statusLine}'", t )
             }
-
-            if (t instanceof groovyx.net.http.HttpResponseException) {
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.name())
-            }
-
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.name())
+        } catch(Throwable t) {
+            log.error( 'Error trying to send mobile notification.', t );
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
     }

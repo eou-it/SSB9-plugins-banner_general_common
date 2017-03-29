@@ -12,12 +12,17 @@ package net.hedtech.banner.general.communication.field
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.DateUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
+import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.ServiceBase
+import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import org.stringtemplate.v4.AttributeRenderer
 import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
@@ -42,7 +47,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         if (parameters == null) parameters = [:]
 
         ST st = newST( stringTemplate );
-        parameters.keySet().each { key ->
+        parameters.keySet().each { String key ->
             st.add( key, parameters[key] )
         }
         String firstPass = st.render()
@@ -86,33 +91,67 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public String calculateFieldByPidmWithNewTransaction( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
-        calculateFieldByPidm( sqlStatement, returnsArrayArguments, formatString, pidm, mepCode )
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+        Map fieldNameValueMap = [:]
+        for (String fieldName :fieldNames) {
+            CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
+            if (communicationField) {
+                String value = calculateSingleFieldByPidm(communicationField, parameterNameValueMap, pidm, mepCode)
+                CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
+                fieldNameValueMap.put( fieldName, communicationFieldValue )
+            } else {
+              // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
+              // Will come back to this to figure out desired behavior.
+            }
+        }
+
+        return fieldNameValueMap
     }
 
-    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Long pidm, String mepCode=null ) {
+    public String calculateSingleFieldByPidm( CommunicationField communicationField, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+
+        String value = calculateFieldByPidm(
+                communicationField.ruleContent,
+                communicationField.returnsArrayArguments,
+                communicationField.formatString,
+                parameterNameValueMap,
+                pidm,
+                mepCode
+        )
+
+        return value
+    }
+
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
         boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
         if (sqlStatement?.contains(":pidm")) {
             sqlParams << ['pidm': pidm]
         }
-        calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
-    }
 
-    public String calculateFieldByMap( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map sqlParams, String mepCode=null ) {
-        boolean returnsArray = returnsArrayArguments ?: false
+        for (String name:parameterNameValueMap.keySet()) {
+            if (sqlStatement?.contains( ":" + name)) {
+                CommunicationParameterValue value = (CommunicationParameterValue) parameterNameValueMap.get(name)
+                if (value.type == CommunicationParameterType.DATE) {
+                    sqlParams.put(name, new java.sql.Date(((Date) value.value).time))
+                } else {
+                    sqlParams.put(name, value.value)
+                }
+            }
+        }
+
         calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
     }
 
     /**
      * Executes a data function and returns result set
      * @param communicationFieldId The id of the communication field
-     * @param parameters Map of parameter values
+     * @param nameValueMap Map of parameter values
      * @return
      */
-    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameters, String mepCode=null ) {
+    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, String mepCode=null ) {
         def attributeMap = [:]
-        def Sql sql
+        def Sql sql = null
         try {
             if (sqlStatement && sqlStatement.trim().size() > 0) {
                 // ToDo: decide if the upper bound should be configurable
@@ -121,22 +160,25 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
                 sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
                 List<GroovyRowResult> resultSet
-                if (parameters && parameters.size() > 0) {
-                    resultSet = sql.rows( sqlStatement, parameters, 0, maxRows )
+                if (parameterNameValueMap && parameterNameValueMap.size() > 0) {
+                    resultSet = sql.rows( sqlStatement, parameterNameValueMap, 0, maxRows )
                 } else {
                     resultSet = sql.rows( sqlStatement, 0, maxRows )
                 }
                 resultSet.each { row ->
                     row.each { column ->
                         String attributeName = column.getKey().toString().toLowerCase()
+                        String attributeNameActual = column.getKey().toString()
                         Object attributeValue = column.value
                         if (maxRows <= 1) {
                             attributeMap.put( attributeName, attributeValue )
+                            attributeMap.put( attributeNameActual, attributeValue)
                         } else {
                             // handle array of values per column name
                             ArrayList values = attributeMap.containsKey( attributeName ) ? (ArrayList) attributeMap.get( attributeName ) : new ArrayList()
                             values.add( attributeValue )
                             attributeMap.put( attributeName, values )
+                            attributeMap.put( attributeNameActual, values)
                         }
                     }
                 }
@@ -144,7 +186,11 @@ class CommunicationFieldCalculationService extends ServiceBase {
 
             return merge( formatString ?: "", attributeMap )
         } catch (SQLException e) {
-            throw CommunicationExceptionFactory.createApplicationException( CommunicationFieldCalculationService.class, e, CommunicationErrorCode.DATA_FIELD_SQL_ERROR.name() )
+            if (e.getMessage()?.contains("ORA-06553")) {
+                throw new ApplicationException(CommunicationFieldCalculationService.class, e)
+            } else {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.DATA_FIELD_SQL_ERROR.name())
+            }
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
         } finally {
@@ -157,8 +203,17 @@ class CommunicationFieldCalculationService extends ServiceBase {
         CommunicationFieldMissingPropertyCapture missingPropertyCapture = new CommunicationFieldMissingPropertyCapture()
         STGroup group = new STGroup( delimiter, delimiter )
         group.setListener( missingPropertyCapture )
-        group.registerRenderer( Integer.class, new NumberRenderer() );
-        group.registerRenderer( Date.class, new DateRenderer() );
+        NumberRenderer numberRenderer = new NumberRenderer()
+        group.registerRenderer( Integer.class, numberRenderer );
+        group.registerRenderer( Double.class, numberRenderer );
+        group.registerRenderer( Long.class, numberRenderer );
+        group.registerRenderer( Date.class, new AttributeRenderer() {
+            @Override
+            String toString(Object o, String s, Locale locale) {
+                String dateString = DateUtility.formatDate( (Date) o, "MM-dd-yyyy" )
+                return dateString
+            }
+        } )
         return new ST( group, templateString );
     }
 }

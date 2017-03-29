@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
+import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import org.hibernate.annotations.Type
 
 import javax.persistence.*
@@ -86,6 +87,10 @@ class CommunicationPopulationVersion implements Serializable {
     @Column(name = "GCRPOPV_VPDI_CODE")
     String mepCode
 
+    @OneToOne
+    @JoinColumn(name = "GCRPOPV_INCLUDE_LIST_ID", referencedColumnName = "GCRSLIS_SURROGATE_ID")
+    CommunicationPopulationSelectionList includeList
+
     static constraints = {
         population(nullable: false)
         createDate(nullable: false)
@@ -94,6 +99,7 @@ class CommunicationPopulationVersion implements Serializable {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable: true)
+        includeList(nullable: true)
     }
 
     // Read Only fields that should be protected against update
