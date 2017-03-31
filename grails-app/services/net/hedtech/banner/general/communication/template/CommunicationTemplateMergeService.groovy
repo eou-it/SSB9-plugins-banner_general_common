@@ -8,12 +8,12 @@ import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
+import net.hedtech.banner.general.communication.interaction.CommunicationInteractionCompositeService
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.general.communication.letter.CommunicationMergedLetterTemplate
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
-import net.hedtech.banner.general.person.PersonUtility
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.NumberRenderer
@@ -42,7 +42,7 @@ class CommunicationTemplateMergeService {
         if (communicationTemplate == null) {
             throw new ApplicationException( CommunicationTemplateMergeService, "@@r1:templateNotExist:" + templateId + "@@" )
         }
-        def person = PersonUtility.getPerson( bannerId )
+        def person = CommunicationInteractionCompositeService.getPersonOrNonPerson( bannerId )
 
         if (person == null) {
             throw new ApplicationException( CommunicationFieldCalculationService, "@@r1:bannerIdNotExist:" + bannerId + "@@" )

@@ -11,6 +11,7 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotifi
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
+import org.apache.commons.lang.StringUtils
 import org.apache.log4j.Logger
 
 /**
@@ -66,6 +67,11 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
         }
         fieldNames = fieldNames.unique()
         recipientData = createCommunicationRecipientData( template, fieldNames )
+        //escape xml 5 special characters in the field values to enable pdf generation for letters
+        def String[] fromstring = ["&", "<", "\"","'",">"]
+        def String[] tostring = ["&amp;", "&lt;", "&quot;", "&apos;", "&gt;"]
+        recipientData.fieldValues.each {it -> it.value.value = StringUtils.replaceEach(it.value.value,fromstring,tostring)}
+
     }
 
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
