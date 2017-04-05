@@ -59,8 +59,6 @@ class CommunicationInteractionCompositeServiceTests extends BaseIntegrationTestC
         assertEquals( "C", found.entityIndicator )
         assertEquals( "I", found.changeIndicator )
 
-        found = communicationInteractionCompositeService.fetchPersonOrNonPersonByAlternativeBannerId( "610009613" )
-        assertNull( found )
     }
 
     @Test

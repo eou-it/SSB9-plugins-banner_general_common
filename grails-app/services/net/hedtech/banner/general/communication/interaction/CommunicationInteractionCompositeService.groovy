@@ -23,8 +23,9 @@ class CommunicationInteractionCompositeService {
     public static PersonIdentificationName getPersonOrNonPerson(String bannerId) {
         def person = fetchPersonOrNonPersonByAlternativeBannerId(bannerId)
         if (person) {
-            return PersonIdentificationName.fetchPersonOrNonPersonByPidm( person.pidm )
-        } else return PersonIdentificationName.fetchBannerPersonOrNonPerson(bannerId)
+            return PersonIdentificationName.fetchPersonOrNonPersonByPidm( person?.pidm )
+        } else
+            return null
     }
 
     public static Map fetchPersonOrNonPersonByNameOrBannerId(filter, pagingAndSortParams) {
@@ -38,7 +39,35 @@ class CommunicationInteractionCompositeService {
         String countQueryString = "select count(a.bannerId) " + baseQuery
 
         if (!filter) return []
-        def queryCriteria = filter.toUpperCase() + "%"
+        def queryCriteria = '%' + filter.toUpperCase().replaceAll("\\s","") + "%"  //remove spaces from search string
+
+        def persons = PersonIdentificationName.withSession { session ->
+            org.hibernate.Query query = session.createQuery( queryString ).setString('filter', queryCriteria)
+            query.setMaxResults(pagingAndSortParams.max)
+            query.setFirstResult(pagingAndSortParams.offset)
+            query.list()
+        }
+
+        def count = PersonIdentificationName.withSession { session ->
+            org.hibernate.Query query = session.createQuery( countQueryString ).setString('filter', queryCriteria)
+            query.list().get(0)
+        }
+
+        return [list: persons, totalCount: count]
+    }
+
+    public static Map fetchPersonOrNonPersonByNameOrBannerIdEqual(filter, pagingAndSortParams) {
+        String baseQuery = """FROM PersonIdentificationName a
+	  	                WHERE (a.bannerId = :filter
+	  	                or a.searchFirstName = :filter
+	  	                or a.searchMiddleName = :filter
+	  	                or a.searchLastName = :filter) """
+
+        String queryString = baseQuery + " order by lastName, firstName, middleName, bannerId "
+        String countQueryString = "select count(a.bannerId) " + baseQuery
+
+        if (!filter) return []
+        def queryCriteria = filter.toUpperCase().replaceAll("\\s","")
 
         def persons = PersonIdentificationName.withSession { session ->
             org.hibernate.Query query = session.createQuery( queryString ).setString('filter', queryCriteria)
@@ -58,7 +87,7 @@ class CommunicationInteractionCompositeService {
     public static PersonIdentificationName fetchPersonOrNonPersonByAlternativeBannerId(String bannerId) {
         String queryString = """FROM PersonIdentificationName a
                         WHERE a.bannerId = :filter
-                        and a.changeIndicator = 'I' """
+                        """
 
         PersonIdentificationName object = PersonIdentificationName.withSession { session ->
             def list = session.createQuery( queryString ).setString('filter', bannerId).list()[0]
