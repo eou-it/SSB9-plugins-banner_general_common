@@ -144,12 +144,6 @@ class CommunicationSendMobileNotificationMethod {
 
                 response.success = { theResponse, reader ->
                     def jsonResponse = reader?.notifications
-                    if (jsonResponse instanceof JSONArray) {
-                        JSONArray jsonArray = (JSONArray) jsonResponse
-                        if (jsonArray.size() == 1) {
-                            jsonResponse = jsonArray.get( 0 )
-                        }
-                    }
                     serverResponse = JSONUtils.valueToString( jsonResponse, 2, 0 )
                     if (log.isDebugEnabled()) {
                         log.debug( "Response is: " + serverResponse )
