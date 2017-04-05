@@ -2828,6 +2828,28 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-aptitude-assessments" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>aptitude-assessments</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/aptitude-assessments/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.AptitudeAssessments.STVTESC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVTESC</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
