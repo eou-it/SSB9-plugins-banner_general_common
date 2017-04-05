@@ -114,4 +114,8 @@ class CommunicationEmailServerProperties implements Serializable {
         }
         this.smtpProperties = smtpProp ? "{"+mapToString(smtpProp)+"}" : null
     }
+
+    public void setSmtpProperties(String smtpProp) {
+        this.smtpProperties = smtpProp
+    }
 }
