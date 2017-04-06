@@ -145,6 +145,7 @@ class CommunicationCommonUtility {
 //get the oracle userid associated with the login banner id.  If there is a gobeacc record, that oracle user will be
 //returned. If no gobeacc record then the username associated with the bannerSsbDataSource will be returned
             map.put("userId", (SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: Holders.config?.bannerSsbDataSource?.username)?.toUpperCase())
+            map.put("bannerId", (SecurityContextHolder?.context?.authentication?.principal?.username?.toUpperCase()))
 
             return map
         } catch (Exception it) {
@@ -187,7 +188,9 @@ class CommunicationCommonUtility {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAdmin)
                 return true;
-            else if (usermap.isAuthor && (usermap.userId).equals(createdBy.toUpperCase()))
+            else if (usermap.isAuthor && (usermap.userId)?.equals(createdBy.toUpperCase()))
+                return true;
+            else if (usermap.isAuthor && (usermap.bannerId)?.equals(createdBy.toUpperCase()))
                 return true;
             return false;
         } catch (Exception e) {
@@ -204,6 +207,8 @@ class CommunicationCommonUtility {
             if (usermap.isAdmin)
                 return true;
             else if (usermap.isUser && (usermap.userId).equals(createdBy.toUpperCase()))
+                return true;
+            else if (usermap.isUser && (usermap.bannerId).equals(createdBy.toUpperCase()))
                 return true;
             return false;
         } catch (Exception e) {
