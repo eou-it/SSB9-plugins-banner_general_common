@@ -7,6 +7,7 @@ import net.hedtech.banner.general.system.County
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.general.system.State
+import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
 
@@ -22,6 +23,7 @@ query = """  FROM SourceBackgroundInstitutionBase a
 
 @Entity
 @Table(name = "SOBSBGI")
+@DatabaseModifiesState
 class SourceBackgroundInstitutionBase implements Serializable {
 
     /**
