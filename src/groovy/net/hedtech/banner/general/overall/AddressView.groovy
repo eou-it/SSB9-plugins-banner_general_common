@@ -17,7 +17,10 @@ import javax.persistence.*
 @NamedQueries(value = [
         @NamedQuery(name = "AddressView.fetchByGuid",
                 query = """FROM AddressView a
-                    where a.id = :guid""")
+                    where a.id = :guid"""),
+        @NamedQuery(name = "AddressView.fetchByGuidList",
+                query = """FROM AddressView a
+                    where a.id in :guids""")
 ])
 
 class AddressView implements Serializable {

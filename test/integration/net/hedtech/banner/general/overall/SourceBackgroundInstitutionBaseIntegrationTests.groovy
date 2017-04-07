@@ -84,7 +84,8 @@ class SourceBackgroundInstitutionBaseIntegrationTests extends BaseIntegrationTes
         assertEquals 0L, sourceBackgroundInstitutionBase.version
         assertNotNull sourceBackgroundInstitutionBase.id
 
-        //Update the entity
+        //Update the entity - must call refresh to get the Ethos API assigned GUID value
+        sourceBackgroundInstitutionBase.refresh()
         doUpdate(sourceBackgroundInstitutionBase)
         sourceBackgroundInstitutionBase.save(failOnError: true, flush: true)
 

@@ -59,6 +59,27 @@ class AddressViewServiceIntegrationTests extends BaseIntegrationTestCase {
     }
 
     @Test
+    void testFetchByGuid() {
+        List<AddressView> addressViews = addressViewService.fetchAll(1, 0)
+        assertEquals 1, addressViews.size()
+        def guid = addressViews[0].id
+        def result = addressViewService.fetchByGuid(guid)
+        assertNotNull result
+        assertTrue result instanceof AddressView
+    }
+
+    @Test
+    void testFetchByGuidList() {
+        List<AddressView> addressViews = addressViewService.fetchAll(10, 0)
+        assertTrue addressViews.size() > 0
+        def guids = addressViews.id
+        def results = addressViewService.fetchByGuidList(guids)
+        assertTrue results.size() > 0
+        assertTrue results[0] instanceof AddressView
+        assertEquals addressViews.size(), results.size()
+    }
+
+    @Test
     void testFetchAllByGuidsAndAddressTypeCodes() {
         List<AddressView> addressViews = addressViewService.fetchAll(10, 0)
         assertTrue addressViews.size() > 0
