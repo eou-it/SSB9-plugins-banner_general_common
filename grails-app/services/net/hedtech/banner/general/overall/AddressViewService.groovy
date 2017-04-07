@@ -53,6 +53,18 @@ class AddressViewService extends ServiceBase {
         return addressView
     }
 
+    List<AddressView> fetchByGuidList(Collection<String> guids) {
+        List entities = []
+        if (guids) {
+            AddressView.withSession { session ->
+                def query = session.getNamedQuery('AddressView.fetchByGuidList')
+                query.setParameterList('guids', guids.unique())
+                entities = query.list()
+            }
+        }
+        return entities
+    }
+
     def fetchAllByGuidsAndAddressTypeCodes(Collection<String> guids, Collection<String> addressTypeCodes) {
         List entities = []
         if (guids && addressTypeCodes) {

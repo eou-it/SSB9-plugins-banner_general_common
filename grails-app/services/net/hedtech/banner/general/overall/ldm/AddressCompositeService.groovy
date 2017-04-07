@@ -9,10 +9,12 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.AddressGeographicAreasView
 import net.hedtech.banner.general.overall.AddressGeographicAreasViewService
+import net.hedtech.banner.general.overall.AddressViewGuidService
 import net.hedtech.banner.general.overall.AddressViewService
 import net.hedtech.banner.general.overall.IntegrationConfigurationService
 import net.hedtech.banner.general.overall.ldm.v6.AddressV6
 import net.hedtech.banner.general.overall.AddressView
+import net.hedtech.banner.general.overall.AddressViewGuid
 import net.hedtech.banner.general.overall.ldm.v6.HedmCountry
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.utility.IsoCodeService
@@ -24,6 +26,7 @@ class AddressCompositeService extends LdmService {
 
     private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
 
+    AddressViewGuidService addressViewGuidService
     AddressViewService addressViewService
     IntegrationConfigurationService integrationConfigurationService
     IsoCodeService isoCodeService
@@ -41,7 +44,8 @@ class AddressCompositeService extends LdmService {
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
         int max = (map?.max as Integer)
         int offset = ((map?.offset ?: '0') as Integer)
-        List<AddressView> addressesView = addressViewService.fetchAll(max, offset)
+        List<AddressViewGuid> addressesViewGuid = addressViewGuidService.fetchAll(max, offset)
+        List<AddressView> addressesView = addressViewService.fetchByGuidList(addressesViewGuid.id)
         return createAddressDataModels(addressesView)
     }
 
@@ -52,7 +56,7 @@ class AddressCompositeService extends LdmService {
      */
     @Transactional(readOnly = true)
     Long count(Map params) {
-        return AddressView.count()
+        return AddressViewGuid.count()
     }
 
     /**
