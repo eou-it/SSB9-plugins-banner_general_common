@@ -35,8 +35,8 @@ class CommunicationPopulationQueryVersion implements Serializable {
 
     @Id
     @Column(name = "GCRQRYV_SURROGATE_ID")
-    @SequenceGenerator(name = "GCBQURY_SEQ_GEN", allocationSize = 1, sequenceName = "GCBQURY_SURROGATE_ID_SEQUENCE")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCBQURY_SEQ_GEN")
+    @SequenceGenerator(name = "GCRQRYV_SEQ_GEN", allocationSize = 1, sequenceName = "GCRQRYV_SURROGATE_ID_SEQUENCE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GCRQRYV_SEQ_GEN")
     Long id
 
     /** Parent population query **/

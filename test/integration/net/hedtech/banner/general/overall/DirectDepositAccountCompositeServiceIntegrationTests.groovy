@@ -21,6 +21,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.context.i18n.LocaleContextHolder
+import org.apache.log4j.Logger
 
 
 /**
@@ -30,6 +31,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     def directDepositAccountCompositeService
     def selfServiceBannerAuthenticationProvider
+    private static final log = Logger.getLogger(getClass())
 
     def testBankRoutingInfo0 = [
         bankRoutingNum: '234798944'
