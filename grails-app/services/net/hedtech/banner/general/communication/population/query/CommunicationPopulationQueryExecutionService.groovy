@@ -83,13 +83,13 @@ class CommunicationPopulationQueryExecutionService {
             return result
         }
         catch (SQLException ae) {
-            log.debug "SqlException in gckextr.p_create_popsel ${ae}"
-            log.debug ae.stackTrace
+            log.error "SqlException in gckextr.p_create_popsel ${ae}"
+            log.error ae.stackTrace
             throw ae
         }
         catch (Exception ae) {
-            log.debug "Exception in gckextr.p_create_popsel ${ae}"
-            log.debug ae.stackTrace
+            log.error "Exception in gckextr.p_create_popsel ${ae}"
+            log.error ae.stackTrace
             throw ae
         }
         finally {
