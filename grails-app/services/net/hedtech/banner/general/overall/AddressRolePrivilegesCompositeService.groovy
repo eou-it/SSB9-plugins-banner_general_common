@@ -6,7 +6,12 @@ import net.hedtech.banner.general.system.AddressType
 class AddressRolePrivilegesCompositeService {
 
     def getUpdateableAddressTypes(roles) {
-        def addressTypeList = AddressRolePrivileges.fetchUpdatePrivsByRoleList(roles).collect {
+        // Filter out results having no addressType
+        def addressTypeList = AddressRolePrivileges.fetchUpdatePrivsByRoleList(roles).findAll {
+            it.addressType
+        }
+
+        addressTypeList = addressTypeList.collect {
             it.addressType
         }
 
