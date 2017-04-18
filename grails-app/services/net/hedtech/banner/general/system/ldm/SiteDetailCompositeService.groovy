@@ -5,6 +5,7 @@ package net.hedtech.banner.general.system.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import net.hedtech.banner.general.overall.ldm.LdmService
 import net.hedtech.banner.general.system.Campus
@@ -28,7 +29,7 @@ class SiteDetailCompositeService {
     public static final String LDM_NAME = "campuses"
     private static final String CODE ="code"
     private static final String DESCRIPTION ="description"
-    private static final List<String> VERSIONS = ["v1","v4"]
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V1, GeneralValidationCommonConstants.VERSION_V6]
 
 
     def campusService
@@ -49,14 +50,16 @@ class SiteDetailCompositeService {
         }
 
         Campus campus = Campus.get(globalUniqueIdentifier.domainId)
-        if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralCommonConstants.VERSION_V4)){
+        if(!campus?.getDescription() && LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralValidationCommonConstants.VERSION_V6)){
             campus.setDescription(campus?.getCode())
         }
         if (!campus) {
             throw new ApplicationException("site", new NotFoundException())
         }
         def buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-        def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralCommonConstants.VERSION_V4) ? new SiteDetailV4(globalUniqueIdentifier.fetchByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+        def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralValidationCommonConstants.VERSION_V6) ?
+                new SiteDetailV4(globalUniqueIdentifier.fetchByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :
+                new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
         return siteDetail
     }
 
@@ -70,7 +73,7 @@ class SiteDetailCompositeService {
         def sites = []
         def buildings = []
         RestfulApiValidationUtility.correctMaxAndOffset(map, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
+        List allowedSortFields = (GeneralValidationCommonConstants.VERSION_V6.equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.validateSortField(map.sort, allowedSortFields)
         map.sort = LdmService.fetchBannerDomainPropertyForLdmField(map.sort)
 
@@ -95,7 +98,7 @@ class SiteDetailCompositeService {
                 addProjectionToList(Projections.sqlProjection("nvl(STVCAMP_DESC,STVCAMP_CODE) as description", ['description'] as String[], [Hibernate.STRING] as Type[]), 'description')
             }
             if(map?.sort) {
-                if (map?.sort?.equalsIgnoreCase('description') && ("v4".equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)))) {
+                if (map?.sort?.equalsIgnoreCase('description') && (GeneralValidationCommonConstants.VERSION_V6.equalsIgnoreCase(LdmService.getAcceptVersion(VERSIONS)))) {
                     order('description', map?.order)
                     order('id', map?.order)
                 } else {
@@ -110,7 +113,9 @@ class SiteDetailCompositeService {
         details.each { detail ->
             Campus campus = Campus.findByCode(detail[0])
             buildings = buildingCompositeService.fetchByCampusCode(campus.code)
-            def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralCommonConstants.VERSION_V4) ? new SiteDetailV4(globalUniqueIdentifierService.fetchByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
+            def siteDetail = LdmService.getAcceptVersion(VERSIONS).equalsIgnoreCase(GeneralValidationCommonConstants.VERSION_V6) ?
+                    new SiteDetailV4(globalUniqueIdentifierService.fetchByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin)) :
+                    new SiteDetail(GlobalUniqueIdentifier.findByLdmNameAndDomainId(LDM_NAME, campus.id).guid, campus, buildings, new Metadata(campus.dataOrigin))
             sites << siteDetail
         }
 

@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtract
 import net.hedtech.banner.general.lettergeneration.PopulationSelectionExtractReadonly
 import net.hedtech.banner.general.lettergeneration.ldm.v2.PersonFilter
@@ -30,7 +31,7 @@ class PersonFilterCompositeService {
     private static final List allowedSortFields = [GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.CODE]
     private static
     final List filtersAllowedWithCriterion = [GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.CODE]
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V2, GeneralCommonConstants.VERSION_V4]
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V2, GeneralValidationCommonConstants.VERSION_V6]
 
     private HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: GeneralCommonConstants.SELECTION,
@@ -125,7 +126,7 @@ class PersonFilterCompositeService {
 
         Map namedParams = [:]
 
-        String sortField = GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS)) ? GeneralCommonConstants.CODE : GeneralCommonConstants.ABBREVIATION
+        String sortField = GeneralValidationCommonConstants.VERSION_V6.equals(LdmService.getAcceptVersion(VERSIONS)) ? GeneralCommonConstants.CODE : GeneralCommonConstants.ABBREVIATION
         if (params.containsKey(sortField)) {
             // filter[index][field]=abbreviation
             retainSingleCriterionForFilter(criteria, sortField)

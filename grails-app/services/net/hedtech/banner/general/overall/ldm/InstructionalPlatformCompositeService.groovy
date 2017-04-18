@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.IntegrationPartnerSystemRule
 import net.hedtech.banner.general.overall.IntegrationPartnerSystemRuleService
 import net.hedtech.banner.general.overall.ldm.v2.InstructionalPlatform
@@ -25,14 +26,14 @@ class InstructionalPlatformCompositeService {
     IntegrationPartnerSystemRuleService integrationPartnerSystemRuleService
 
     private static final String LDM_NAME = 'instructional-platforms'
-    private static final List<String> VERSIONS = ["v2","v3","v4"]
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V2, GeneralValidationCommonConstants.VERSION_V3, GeneralValidationCommonConstants.VERSION_V6]
 
 
     @Transactional(readOnly = true)
     List<InstructionalPlatform> list(Map params) {
         List<InstructionalPlatform> instructionalPlatforms = []
         RestfulApiValidationUtility.correctMaxAndOffset(params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT)
-        List allowedSortFields = ("v4".equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
+        List allowedSortFields = (GeneralValidationCommonConstants.VERSION_V6.equals(LdmService.getAcceptVersion(VERSIONS))? ['code', 'title']:['abbreviation', 'title'])
         RestfulApiValidationUtility.validateSortField(params.sort, allowedSortFields)
         RestfulApiValidationUtility.validateSortOrder(params.order)
         params.sort = LdmService.fetchBannerDomainPropertyForLdmField(params.sort)

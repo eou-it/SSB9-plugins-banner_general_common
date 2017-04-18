@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class RoomTypeCompositeService extends LdmService{
 
-    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V4]
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V6]
 
 
     private static final String ROOMTYPE = "roomtype"

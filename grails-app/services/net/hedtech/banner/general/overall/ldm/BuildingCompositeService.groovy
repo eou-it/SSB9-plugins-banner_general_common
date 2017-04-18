@@ -5,6 +5,7 @@ package net.hedtech.banner.general.overall.ldm
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.common.GeneralCommonConstants
+import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.HousingLocationBuildingDescription
 import net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly
 import net.hedtech.banner.general.overall.ldm.v1.AvailableRoom
@@ -27,7 +28,7 @@ class BuildingCompositeService extends  LdmService{
     public static final String LDM_NAME = 'buildings'
     def housingLocationBuildingDescriptionService
     def siteDetailCompositeService
-    private static final List<String> VERSIONS = [GeneralCommonConstants.VERSION_V1,GeneralCommonConstants.VERSION_V4]
+    private static final List<String> VERSIONS = [GeneralValidationCommonConstants.VERSION_V1, GeneralValidationCommonConstants.VERSION_V6]
     private static final HashMap ldmFieldToBannerDomainPropertyMap = [
             abbreviation: 'building.code',
             title       : 'building.description',
@@ -43,7 +44,7 @@ class BuildingCompositeService extends  LdmService{
      */
     List<BuildingDetail> list( Map params ) {
         List buildings = []
-        List allowedSortFields = (GeneralCommonConstants.VERSION_V4.equals(LdmService.getAcceptVersion(VERSIONS))? [GeneralCommonConstants.CODE, GeneralCommonConstants.TITLE]:[GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.TITLE])
+        List allowedSortFields = (GeneralValidationCommonConstants.VERSION_V6.equals(LdmService.getAcceptVersion(VERSIONS))? [GeneralCommonConstants.CODE, GeneralCommonConstants.TITLE]:[GeneralCommonConstants.ABBREVIATION, GeneralCommonConstants.TITLE])
         RestfulApiValidationUtility.correctMaxAndOffset( params, RestfulApiValidationUtility.MAX_DEFAULT, RestfulApiValidationUtility.MAX_UPPER_LIMIT )
 
         if (params.containsKey("sort") && !params.sort.equals(BUILDING_SURROGATE_ID)) {
@@ -72,7 +73,7 @@ class BuildingCompositeService extends  LdmService{
      * @return
      */
     private def fetchBuildingDetails(Map params) {
-        if (GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && params.containsKey(SITE_FILTER_NAME)) {
+        if (GeneralValidationCommonConstants.VERSION_V6.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && params.containsKey(SITE_FILTER_NAME)) {
             SiteDetail detail = siteDetailCompositeService.get(params.get(SITE_FILTER_NAME))
             return housingLocationBuildingDescriptionService.fetchAllByCampuses([detail?.code]) as List
         } else {
@@ -87,7 +88,7 @@ class BuildingCompositeService extends  LdmService{
      * @return count
      */
     Long count(params) {
-        if (GeneralCommonConstants.VERSION_V4.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && params.containsKey(SITE_FILTER_NAME)) {
+        if (GeneralValidationCommonConstants.VERSION_V6.equalsIgnoreCase(getAcceptVersion(VERSIONS)) && params.containsKey(SITE_FILTER_NAME)) {
             SiteDetail detail = siteDetailCompositeService.get(params.get(SITE_FILTER_NAME))
             return housingLocationBuildingDescriptionService.countAllByCampuses([detail?.code])
         } else {
