@@ -292,7 +292,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>EEDM.GEN.Persons.SPRADDR</value>
                 <value>EEDM.GEN.Persons.SPRIDEN</value>
                 <value>EEDM.GEN.Persons.SPRTELE</value>
-                <value>EEDM.GEN.Persons.SRBRECR</value>
+                <value>EEDM.STU.Persons.SRBRECR</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2850,6 +2850,28 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-advisor-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>advisor-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/advisor-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.AdvisorTypes.STVADVR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVADVR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -2971,6 +2993,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-restricted-student-financial-aid-awards"/>
                 <ref bean="ar-accounting-codes"/>
                 <ref bean="ar-aptitude-assessments"/>
+                <ref bean="ar-ar-advisor-types"/>
             </list>
         </property>
     </bean>
@@ -3095,6 +3118,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-restricted-student-financial-aid-awards"/>
                 <ref bean="ar-accounting-codes"/>
                 <ref bean="ar-aptitude-assessments"/>
+                <ref bean="ar-ar-advisor-types"/>
             </list>
         </property>
     </bean>
