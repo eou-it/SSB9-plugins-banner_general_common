@@ -2993,7 +2993,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-restricted-student-financial-aid-awards"/>
                 <ref bean="ar-accounting-codes"/>
                 <ref bean="ar-aptitude-assessments"/>
-                <ref bean="ar-ar-advisor-types"/>
+                <ref bean="ar-advisor-types"/>
             </list>
         </property>
     </bean>
@@ -3118,7 +3118,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-restricted-student-financial-aid-awards"/>
                 <ref bean="ar-accounting-codes"/>
                 <ref bean="ar-aptitude-assessments"/>
-                <ref bean="ar-ar-advisor-types"/>
+                <ref bean="ar-advisor-types"/>
             </list>
         </property>
     </bean>
