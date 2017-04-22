@@ -2872,6 +2872,100 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-meal-plan-rates" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>meal-plan-rates</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/meal-plan-rates/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.MealPlanRates.SLRLMFE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SLRLMFE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-meal-plans" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>meal-plans</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/meal-plans/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.MealPlans.STVMRCD</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVMRCD</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-advisor-relationships" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-advisor-relationships</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-advisor-relationships/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.StudentAdvisorRelationships.SGRADVR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SGRADVR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-aptitude-assessments" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-aptitude-assessments</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-aptitude-assessments/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.StudentAptitudeAssessments.SORTEST</value>
+                <value>EEDM.STU.StudentAptitudeAssessments.SORTSPC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SORTEST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="SORTSPC" value="SORTEST.SORTEST_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -2994,6 +3088,10 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-accounting-codes"/>
                 <ref bean="ar-aptitude-assessments"/>
                 <ref bean="ar-advisor-types"/>
+                <ref bean="ar-meal-plan-rates"/>
+                <ref bean="ar-meal-plans"/>
+                <ref bean="ar-student-advisor-relationships"/>
+                <ref bean="ar-student-aptitude-assessments"/>
             </list>
         </property>
     </bean>
@@ -3119,6 +3217,10 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-accounting-codes"/>
                 <ref bean="ar-aptitude-assessments"/>
                 <ref bean="ar-advisor-types"/>
+                <ref bean="ar-meal-plan-rates"/>
+                <ref bean="ar-meal-plans"/>
+                <ref bean="ar-student-advisor-relationships"/>
+                <ref bean="ar-student-aptitude-assessments"/>
             </list>
         </property>
     </bean>
