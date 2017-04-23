@@ -1071,6 +1071,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>EEDM.STU.CampusInvolvements.SGRSACT</value>
                 <value>EEDM.STU.CampusInvolvements.SGRSPRT</value>
                 <value>EEDM.STU.CampusInvolvements.SHRCOMM</value>
+                <value>EEDM.STU.CampusInvolvements.SHBCOMI</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
