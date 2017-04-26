@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.overall.ldm
@@ -9,6 +9,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.Before
 import org.junit.Test
 
+@Deprecated
 class RoomTypeCompositeServiceIntegrationTests extends BaseIntegrationTestCase{
 
     def roomTypeCompositeService

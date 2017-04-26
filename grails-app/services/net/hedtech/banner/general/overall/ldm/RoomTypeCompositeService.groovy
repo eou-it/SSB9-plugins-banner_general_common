@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 
 package net.hedtech.banner.general.overall.ldm
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 /**
  * Service for room-types
  */
+@Deprecated
 @Transactional
 class RoomTypeCompositeService extends LdmService{
 
