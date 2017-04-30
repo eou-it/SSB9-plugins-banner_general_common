@@ -21,6 +21,10 @@ import javax.persistence.*
         @NamedQuery(name = "HousingRoomAttributesDefinition.fetchByBuildingCodeList",
                 query = """FROM HousingRoomAttributesDefinition hrad WHERE
                  hrad.building.code in :buildingCodeList """),
+        @NamedQuery(name = "HousingRoomAttributesDefinition.fetchAllByBuildingRoomNumberAndTermEffective",
+                query = """FROM HousingRoomAttributesDefinition a WHERE
+                 a.building.code in :buildingCodes and
+                  a.roomNumber in :roomNumbers and a.termEffective in :termEffectives""")
 
 ])
 class HousingRoomAttributesDefinition implements Serializable {
