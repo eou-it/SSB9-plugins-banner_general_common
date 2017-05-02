@@ -184,7 +184,7 @@ class CommunicationSendEmailMethod {
          if (null == messageText || 0 == messageText.trim().length()) {
              messageText = new String();
          }
-         htmlEmail.setMsg(messageText);
+         htmlEmail.setHtmlMsg(messageText);
          htmlEmail.setSentDate(message.getDateSent());
 
          return htmlEmail;
