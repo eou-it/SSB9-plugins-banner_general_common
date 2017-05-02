@@ -48,7 +48,7 @@ grails.project.dependency.resolution = {
         compile "javax.mail:javax.mail-api:1.5.5"
         runtime "com.sun.mail:javax.mail:1.5.5"
         compile 'com.icegreen:greenmail:1.5.0'
-        compile 'org.apache.commons:commons-email:1.3.1'
+        compile 'org.apache.commons:commons-email:1.4'
         compile 'org.quartz-scheduler:quartz:2.2.1'
     }
 
