@@ -149,6 +149,7 @@ class CommunicationSendEmailMethod {
     private HtmlEmail createMessage( final CommunicationEmailMessage message, boolean setRecipients, CommunicationEmailReceipt emailReceipt ) {
 
          HtmlEmail htmlEmail = new HtmlEmail();
+         htmlEmail.setCharset( "UTF-8" )
          htmlEmail.setFrom(message.senders?.mailAddress, message.senders?.displayName );
          // Set Reply-To
          InternetAddress [] addresses = getAddressArray(message.getReplyTo());
