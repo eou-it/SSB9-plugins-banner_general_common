@@ -2967,6 +2967,243 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-purchase-classifications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>purchase-classifications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/purchase-classifications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FIN.PurchaseClassifications.FTVPCLS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVPCLS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-job-application-statuses" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>job-application-statuses</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/job-application-statuses/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.JobApplicationStatuses.PTRAPPS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRAPPS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-job-application-sources" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>job-application-sources</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/job-application-sources/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.JobApplicationSources.PTVASRC</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTVASRC</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-free-on-board-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>free-on-board-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/free-on-board-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FIN.FreeOnBoardTypes.FTVFOBS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVFOBS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-buyers" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>buyers</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/buyers/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FIN.Buyers.FTVBUYR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVBUYR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-ship-to-destinations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>ship-to-destinations</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/ship-to-destinations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FIN.ShipToDestinations.FTVSHIP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVSHIP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-job-applications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>job-applications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/job-applications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.JobApplications.PABAPPL</value>
+                <value>EEDM.HR.JobApplications.PARAPST</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PABAPPL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="PARAPST" value="PABAPPL.PABAPPL_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-vendors" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>vendors</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/vendors/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.FIN.Vendors.FTVVEND</value>
+                <value>EEDM.FIN.Vendors.FTVVENT</value>
+                <value>EEDM.FIN.Vendors.FTVVENB</value>
+                <value>EEDM.FIN.Vendors.FOBTEXT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>FTVVEND</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="FTVVENT" value="FTVVEND.FTVVEND_GUID"></entry>
+                <entry key="FTVVENB" value="FTVVEND.FTVVEND_GUID"></entry>
+                <entry key="FOBTEXT" value="FTVVEND.FTVVEND_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-course-transfers" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-course-transfers</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-course-transfers/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.StudentCourseTransfers.SHRTRCE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SHRTRCE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-student-attendances" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-attendances</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-attendances/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.StudentAttendances.SORSATR</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SORSATR</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -3093,6 +3330,16 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-meal-plans"/>
                 <ref bean="ar-student-advisor-relationships"/>
                 <ref bean="ar-student-aptitude-assessments"/>
+                <ref bean="ar-purchase-classifications"/>
+                <ref bean="ar-job-application-statuses"/>
+                <ref bean="ar-job-application-sources"/>
+                <ref bean="ar-free-on-board-types"/>
+                <ref bean="ar-job-applications"/>
+                <ref bean="ar-student-course-transfers"/>
+                <ref bean="ar-student-attendances"/>
+                <ref bean="ar-buyers"/>
+                <ref bean="ar-vendors"/>
+                <ref bean="ar-ship-to-destinations"/>
             </list>
         </property>
     </bean>
@@ -3222,6 +3469,16 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-meal-plans"/>
                 <ref bean="ar-student-advisor-relationships"/>
                 <ref bean="ar-student-aptitude-assessments"/>
+                <ref bean="ar-purchase-classifications"/>
+                <ref bean="ar-job-application-statuses"/>
+                <ref bean="ar-job-application-sources"/>
+                <ref bean="ar-free-on-board-types"/>
+                <ref bean="ar-job-applications"/>
+                <ref bean="ar-student-course-transfers"/>
+                <ref bean="ar-student-attendances"/>
+                <ref bean="ar-buyers"/>
+                <ref bean="ar-vendors"/>
+                <ref bean="ar-ship-to-destinations"/>
             </list>
         </property>
     </bean>
