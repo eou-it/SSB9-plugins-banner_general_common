@@ -71,8 +71,18 @@ class AvailableRoomHelper {
 
 
     private static String fetchConditionalClauseForAvailableRoomSearch(String tableIdentifier) {
-        return """${tableIdentifier}.roomType in :roomTypes
-                                    AND ${tableIdentifier}.capacity >= NVL(:capacity, 0)
+        return """ ( ( ${tableIdentifier}.roomType = :cType
+                                    AND ${tableIdentifier}.capacity >= :cCapacity
+                                    )
+                                    OR
+                                     ( ${tableIdentifier}.roomType =  :dType
+                                    AND ${tableIdentifier}.capacity >= :dCapacity
+                                    )
+                                    OR
+                                     ( ${tableIdentifier}.roomType = :oType
+                                    AND ${tableIdentifier}.capacity >= :oCapacity
+                                    )
+                                    )
                                     AND ${tableIdentifier}.termEffective.startDate <= :startDate
                                     AND (${tableIdentifier}.termTo is null OR termToOfA.startDate > :endDate)
                                     AND nvl(${tableIdentifier}.roomStatusInactiveIndicator,'N') != 'Y'
