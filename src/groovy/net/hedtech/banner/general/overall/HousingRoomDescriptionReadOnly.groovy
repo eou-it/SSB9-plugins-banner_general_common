@@ -9,6 +9,12 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "SVQ_SLBRDEF_SLBBLDG")
+@NamedQueries(value = [
+        @NamedQuery(name = "HousingRoomDescriptionReadOnly.fetchByGuid",
+                query = """FROM  HousingRoomDescriptionReadOnly a WHERE a.roomGUID = :guid""")
+
+
+])
 class HousingRoomDescriptionReadOnly {
 
     /**
