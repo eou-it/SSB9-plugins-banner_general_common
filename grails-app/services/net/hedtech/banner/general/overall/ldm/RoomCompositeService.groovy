@@ -277,18 +277,39 @@ class RoomCompositeService extends LdmService {
         } else {
             roomTypes = getHEDMRoomTypes()
         }
-        // TODO: Not sure why IN operator of DynamicFinder requires list in this format
-        def roomTypeObjects = []
-        roomTypes.each {
-            roomTypeObjects << [data: it]
-        }
-        inputData.put('roomTypes', roomTypeObjects)
 
+        int capacity = 0
         if (params.occupancies) {
-            inputData.put('capacity', params.occupancies[0]?.maxOccupancy)
-        } else {
-            inputData.put('capacity', null)
+            capacity = params.occupancies[0]?.maxOccupancy
         }
+
+
+        roomTypes.each {
+
+            if(it == 'C'){
+                inputData.put('cType', it)
+            }else{
+                inputData.put('cType', '')
+            }
+
+            if(it == 'D'){
+                inputData.put('dType', it)
+            }else{
+                inputData.put('dType', '')
+            }
+
+            if(it == 'O'){
+                inputData.put('oType', it)
+            }else{
+                inputData.put('oType', '')
+            }
+
+            inputData.put('dCapacity', capacity)
+            inputData.put('cCapacity', capacity)
+            inputData.put('oCapacity', capacity)
+
+        }
+
 
         if (!GeneralCommonConstants.VERSION_V1.equals(contentTypeVersion)) {
             if (params.containsKey('building')) {
