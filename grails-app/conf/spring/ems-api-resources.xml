@@ -3203,6 +3203,144 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-admissions-populations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>admissions-populations</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/admissions-populations/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.AdmissionsPopulations.STVSTYP</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>STVSTYP</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-employment-proficiencies" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-proficiencies</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-proficiencies/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.EmploymentProficiencies.PPRCERT</value>
+                <value>EEDM.HR.EmploymentProficiencies.PPRENDS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PPRCERT</value>
+            </list>
+        </constructor-arg>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="PPRENDS" value="PPRCERT.PPRCERT_GUID"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-proficiency-licensing-authorities" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>proficiency-licensing-authorities</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/proficiency-licensing-authorities/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.ProficiencyLicensingAuthorities.PTVENDS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTVENDS</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-person-employment-proficiencies" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-employment-proficiencies</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-employment-proficiencies/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.PersonEmploymentProficiencies.PPRSKIL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PPRSKIL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-employment-proficiency-levels" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-proficiency-levels</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-proficiency-levels/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.EmploymentProficiencyLevels.PTRSKIL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTRSKIL</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-person-publications" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-publications</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-publications/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.PersonPublications.PPRPUBL</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PPRPUBL</value>
+            </list>
+        </constructor-arg>
+    </bean>
 
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
@@ -3340,6 +3478,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-buyers"/>
                 <ref bean="ar-vendors"/>
                 <ref bean="ar-ship-to-destinations"/>
+                <ref bean="ar-admissions-populations"/>
+                <ref bean="ar-employment-proficiencies"/>
+                <ref bean="ar-proficiency-licensing-authorities"/>
+                <ref bean="ar-person-employment-proficiencies"/>
+                <ref bean="ar-employment-proficiency-levels"/>
+                <ref bean="ar-person-publications"/>
             </list>
         </property>
     </bean>
@@ -3479,6 +3623,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-buyers"/>
                 <ref bean="ar-vendors"/>
                 <ref bean="ar-ship-to-destinations"/>
+                <ref bean="ar-admissions-populations"/>
+                <ref bean="ar-employment-proficiencies"/>
+                <ref bean="ar-proficiency-licensing-authorities"/>
+                <ref bean="ar-person-employment-proficiencies"/>
+                <ref bean="ar-employment-proficiency-levels"/>
+                <ref bean="ar-person-publications"/>
             </list>
         </property>
     </bean>
