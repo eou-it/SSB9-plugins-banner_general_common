@@ -3342,6 +3342,116 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
+    <bean id="ar-external-employments" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>external-employments</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/external-employments/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.ExternalEmployments.PPREXPE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PPREXPE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-person-achievements" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-achievements</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-achievements/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.PersonAchievements.PPRHNAW</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PPRHNAW</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-person-employment-references" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>person-employment-references</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/person-employment-references/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.PersonEmploymentReferences.PPRREFE</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PPRREFE</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-publication-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>publication-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/publication-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.PublicationTypes.PTVPUBT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTVPUBT</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="ar-section-instructors" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>section-instructors</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/section-instructors/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.STU.SectionInstructors.SIRASGN</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>SIRASGN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
         <property name="resourceMap">
@@ -3484,6 +3594,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-person-employment-proficiencies"/>
                 <ref bean="ar-employment-proficiency-levels"/>
                 <ref bean="ar-person-publications"/>
+                <ref bean="ar-external-employments"/>
+                <ref bean="ar-person-achievements"/>
+                <ref bean="ar-person-employment-references"/>
+                <ref bean="ar-publication-types"/>
+                <ref bean="ar-section-instructors"/>
             </list>
         </property>
     </bean>
@@ -3629,6 +3744,11 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-person-employment-proficiencies"/>
                 <ref bean="ar-employment-proficiency-levels"/>
                 <ref bean="ar-person-publications"/>
+                <ref bean="ar-external-employments"/>
+                <ref bean="ar-person-achievements"/>
+                <ref bean="ar-person-employment-references"/>
+                <ref bean="ar-publication-types"/>
+                <ref bean="ar-section-instructors"/>
             </list>
         </property>
     </bean>
