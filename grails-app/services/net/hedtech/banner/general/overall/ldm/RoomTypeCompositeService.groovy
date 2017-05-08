@@ -45,7 +45,7 @@ class RoomTypeCompositeService extends LdmService{
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     Long count() {
-        return globalUniqueIdentifierService.fetchCountByLdmName(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME)
+        return globalUniqueIdentifierService.fetchAllByLdmNameAndDomainKeyInList(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME,['C'])?.size()
     }
 
 
@@ -72,6 +72,6 @@ class RoomTypeCompositeService extends LdmService{
      * @return
      */
     List<GlobalUniqueIdentifier> getRoomTypeDetails() {
-        return globalUniqueIdentifierService.fetchByLdmName(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME)
+        return globalUniqueIdentifierService.fetchAllByLdmNameAndDomainKeyInList(GeneralCommonConstants.ROOM_TYPES_HEDM_NAME,['C'])
     }
 }

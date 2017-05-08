@@ -28,6 +28,7 @@ import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.restfulapi.RestfulApiValidationUtility
 import org.springframework.transaction.annotation.Transactional
 
+@Deprecated
 @Transactional
 class RoomCompositeService extends LdmService {
 
