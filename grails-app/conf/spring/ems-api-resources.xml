@@ -3246,7 +3246,6 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <value>PPRCERT</value>
             </list>
         </constructor-arg>
-        </constructor-arg>
         <constructor-arg name="shadowTableGuidList">
             <map>
                 <entry key="PPRENDS" value="PPRCERT.PPRCERT_GUID"></entry>
