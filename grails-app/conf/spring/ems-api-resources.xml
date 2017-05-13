@@ -251,7 +251,13 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.GEN.Organization.SPRIDEN</value>
+                <value>EEDM.FIN.Organizations.FTVVEND</value>
+                <value>EEDM.GEN.Organizations.GORADID</value>
+                <value>EEDM.GEN.Organizations.GOREMAL</value>
+                <value>EEDM.GEN.Organizations.SPRADDR</value>
+                <value>EEDM.GEN.Organizations.SPRTELE</value>
+                <value>EEDM.GEN.Organizations.SPRIDEN</value>
+                <value>EEDM.GEN.Organizations.GORGUID</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
