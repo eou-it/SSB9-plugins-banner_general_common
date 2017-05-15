@@ -67,7 +67,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -204,7 +204,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -261,7 +261,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -302,7 +302,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -324,7 +324,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -347,7 +347,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -370,7 +370,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -393,7 +393,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -452,7 +452,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -499,7 +499,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -524,7 +524,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -572,7 +572,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -645,7 +645,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -691,7 +691,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -715,7 +715,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -762,7 +762,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -859,7 +859,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -884,7 +884,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1178,7 +1178,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1201,7 +1201,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1487,7 +1487,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1701,7 +1701,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1789,7 +1789,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1960,7 +1960,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
@@ -1983,7 +1983,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
-            <value>Student</value>
+            <value>Integration</value>
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
