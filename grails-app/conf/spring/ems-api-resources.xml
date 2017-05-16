@@ -2543,6 +2543,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.HR.EmploymentClassifications.PTRECLS</value>
+                <value>EEDM.PC.EmploymentClassifications.NTRPCLS</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2565,7 +2566,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HR.InstitutionPositions.NBBPOSN</value>
+                <value>EEDM.PC.InstitutionPositions.NBBPOSN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2609,9 +2610,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HR.InstitutionJobs.NBRJOBS</value>
-                <value>EEDM.HR.InstitutionJobs.NBRBJOB</value>
-                <value>EEDM.HR.InstitutionJobs.NBRJLBD</value>
+                <value>EEDM.PC.InstitutionJobs.NBRJOBS</value>
+                <value>EEDM.PC.InstitutionJobs.NBRBJOB</value>
+                <value>EEDM.PC.InstitutionJobs.NBRJLBD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
