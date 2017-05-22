@@ -3269,6 +3269,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.HR.PersonEmploymentProficiencies.PPRSKIL</value>
+                <value>EEDM.HR.PersonEmploymentProficiencies.PPRCERT</value>
+                <value>EEDM.HR.PersonEmploymentProficiencies.PPREXAM</value>
+
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -3277,6 +3280,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="rootEntityList">
             <list>
                 <value>PPRSKIL</value>
+                <value>PPRCERT</value>
+                <value>PPREXAM</value>
             </list>
         </constructor-arg>
     </bean>
@@ -3290,7 +3295,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HR.EmploymentProficiencyLevels.PTRSKIL</value>
+                <value>EEDM.HR.EmploymentProficiencyLevels.PTRSKLV</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -3298,7 +3303,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>PTRSKIL</value>
+                <value>PTRSKLV</value>
             </list>
         </constructor-arg>
     </bean>
@@ -3431,6 +3436,27 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="rootEntityList">
             <list>
                 <value>SIRASGN</value>
+            </list>
+        </constructor-arg>
+    </bean>
+    <bean id="ar-employment-performance-review-types" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-performance-review-types</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-performance-review-types/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.EmploymentPerformanceReviewTypes.PTVREVT</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PTVREVT</value>
             </list>
         </constructor-arg>
     </bean>
@@ -3581,6 +3607,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-person-employment-references"/>
                 <ref bean="ar-publication-types"/>
                 <ref bean="ar-section-instructors"/>
+                <ref bean="ar-employment-performance-review-types"/>
             </list>
         </property>
     </bean>
@@ -3730,6 +3757,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-person-employment-references"/>
                 <ref bean="ar-publication-types"/>
                 <ref bean="ar-section-instructors"/>
+                <ref bean="ar-employment-performance-review-types"/>
             </list>
         </property>
     </bean>
