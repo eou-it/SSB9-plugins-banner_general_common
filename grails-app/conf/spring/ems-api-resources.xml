@@ -3218,8 +3218,9 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.HR.EmploymentProficiencies.PPRCERT</value>
-                <value>EEDM.HR.EmploymentProficiencies.PPRENDS</value>
+                <value>EEDM.HR.EmploymentProficiencies.PTRSKIL</value>
+                <value>EEDM.HR.EmploymentProficiencies.PTRCERT</value>
+                <value>EEDM.HR.EmploymentProficiencies.PTREXAM</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -3227,13 +3228,10 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
         <constructor-arg name="rootEntityList">
             <list>
-                <value>PPRCERT</value>
+                <value>PTRSKIL</value>
+                <value>PTRCERT</value>
+                <value>PTREXAM</value>
             </list>
-        </constructor-arg>
-        <constructor-arg name="shadowTableGuidList">
-            <map>
-                <entry key="PPRENDS" value="PPRCERT.PPRCERT_GUID"></entry>
-            </map>
         </constructor-arg>
     </bean>
 
