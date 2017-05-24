@@ -3187,16 +3187,16 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         </constructor-arg>
     </bean>
 
-    <bean id="ar-admissions-populations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+    <bean id="ar-admission-populations" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
         <constructor-arg name="resource">
-            <value>admissions-populations</value>
+            <value>admission-populations</value>
         </constructor-arg>
         <constructor-arg name="path">
-            <value>/admissions-populations/</value>
+            <value>/admission-populations/</value>
         </constructor-arg>
         <constructor-arg name="events">
             <list>
-                <value>EEDM.STU.AdmissionsPopulations.STVSTYP</value>
+                <value>EEDM.STU.AdmissionPopulations.STVSTYP</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -3458,6 +3458,28 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
     </bean>
+    <bean id="ar-employment-performance-reviews" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>employment-performance-reviews</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/employment-performance-reviews/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.HR.EmploymentPerformanceReviews.PERREVW</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Integration</value>
+        </constructor-arg>
+        <constructor-arg name="rootEntityList">
+            <list>
+                <value>PERREVW</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
 
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
@@ -3594,7 +3616,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-buyers"/>
                 <ref bean="ar-vendors"/>
                 <ref bean="ar-ship-to-destinations"/>
-                <ref bean="ar-admissions-populations"/>
+                <ref bean="ar-admission-populations"/>
                 <ref bean="ar-employment-proficiencies"/>
                 <ref bean="ar-proficiency-licensing-authorities"/>
                 <ref bean="ar-person-employment-proficiencies"/>
@@ -3606,6 +3628,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-publication-types"/>
                 <ref bean="ar-section-instructors"/>
                 <ref bean="ar-employment-performance-review-types"/>
+                <ref bean="ar-employment-performance-reviews"/>
             </list>
         </property>
     </bean>
@@ -3744,7 +3767,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-buyers"/>
                 <ref bean="ar-vendors"/>
                 <ref bean="ar-ship-to-destinations"/>
-                <ref bean="ar-admissions-populations"/>
+                <ref bean="ar-admission-populations"/>
                 <ref bean="ar-employment-proficiencies"/>
                 <ref bean="ar-proficiency-licensing-authorities"/>
                 <ref bean="ar-person-employment-proficiencies"/>
@@ -3756,6 +3779,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-publication-types"/>
                 <ref bean="ar-section-instructors"/>
                 <ref bean="ar-employment-performance-review-types"/>
+                <ref bean="ar-employment-performance-reviews"/>
             </list>
         </property>
     </bean>
