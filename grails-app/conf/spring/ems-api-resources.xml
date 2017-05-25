@@ -642,6 +642,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.GEN.PersonHold.SPRHOLD</value>
+                <value>EEDM.GEN.PersonHold.SPRHOLEA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -3468,6 +3469,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.HR.EmploymentPerformanceReviews.PERREVW</value>
+                <value>EEDM.HR.EmploymentPerformanceReviews.PERREVEA</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
