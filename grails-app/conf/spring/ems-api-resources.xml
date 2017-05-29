@@ -3482,7 +3482,22 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             </list>
         </constructor-arg>
     </bean>
-
+    <bean id="ar-student-section-waitlists" class="net.hedtech.banner.general.system.ldm.v1.ApiResource">
+        <constructor-arg name="resource">
+            <value>student-section-waitlists</value>
+        </constructor-arg>
+        <constructor-arg name="path">
+            <value>/student-section-waitlists/</value>
+        </constructor-arg>
+        <constructor-arg name="events">
+            <list>
+                <value>EEDM.StudentSectionWaitlist.SVQ_SFRSTCR_STU_SECT_WAITLISTS</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="apiDeployment">
+            <value>Student</value>
+        </constructor-arg>
+    </bean>
 
 
     <bean id="erpApiConfig-BANNER-ELEVATE" class="net.hedtech.banner.general.system.ldm.v1.ErpApiConfig">
@@ -3632,6 +3647,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-section-instructors"/>
                 <ref bean="ar-employment-performance-review-types"/>
                 <ref bean="ar-employment-performance-reviews"/>
+                <ref bean="ar-student-section-waitlists"/>
             </list>
         </property>
     </bean>
@@ -3783,6 +3799,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
                 <ref bean="ar-section-instructors"/>
                 <ref bean="ar-employment-performance-review-types"/>
                 <ref bean="ar-employment-performance-reviews"/>
+                <ref bean="ar-student-section-waitlists"/>
             </list>
         </property>
     </bean>
