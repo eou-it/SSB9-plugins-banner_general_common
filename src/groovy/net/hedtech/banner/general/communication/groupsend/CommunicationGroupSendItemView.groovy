@@ -153,6 +153,7 @@ class CommunicationGroupSendItemView implements Serializable {
                 ilike("bannerId", searchName)
             }
             order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            order(Order.asc("currentExecutionState"))
 
         }
         return results
