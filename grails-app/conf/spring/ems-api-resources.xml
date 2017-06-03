@@ -1439,6 +1439,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.STU.InstructionalEvents.SSRMEET</value>
+                <value>EEDM.STU.InstructionalEvents.SIRASGN</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
