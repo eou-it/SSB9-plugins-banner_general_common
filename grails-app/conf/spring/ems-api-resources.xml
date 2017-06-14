@@ -2569,6 +2569,8 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
         <constructor-arg name="events">
             <list>
                 <value>EEDM.PC.InstitutionPositions.NBBPOSN</value>
+                <value>EEDM.PC.InstitutionPositions.NBRPTOT</value>
+                <value>EEDM.PC.InstitutionPositions.NBRPLBD</value>
             </list>
         </constructor-arg>
         <constructor-arg name="apiDeployment">
@@ -2578,6 +2580,12 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
             <list>
                 <value>NBBPOSN</value>
             </list>
+        </constructor-arg>
+        <constructor-arg name="shadowTableGuidList">
+            <map>
+                <entry key="NBRPTOT" value="NBBPOSN.NBBPOSN_GUID"></entry>
+                <entry key="NBRPLBD" value="NBBPOSN.NBBPOSN_GUID"></entry>
+            </map>
         </constructor-arg>
     </bean>
 
