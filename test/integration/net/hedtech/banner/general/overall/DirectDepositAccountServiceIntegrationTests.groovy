@@ -485,6 +485,26 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
     // END: TESTS TO VALIDATE ACCOUNT AMOUNTS
 
+    @Test
+    void testFetchApAccountsByPidm() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount.status = 'I'
+        directDepositAccount.bankAccountNum = "982304444"
+        directDepositAccount.apIndicator = 'A'
+        directDepositAccount.hrIndicator = 'I'
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        def directDepositAccount2 = newDirectDepositAccount()
+        directDepositAccount2.priority = 17
+        directDepositAccount2.apIndicator = 'A'
+        directDepositAccount2.hrIndicator = 'I'
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount2])
+
+        def results = directDepositAccountService.fetchApAccountsByPidm(directDepositAccount2.pidm)
+        assertTrue results.size() >= 2
+        assertTrue results.bankAccountNum.contains("982304444")
+    }
+
     private def newDirectDepositAccount() {
         def bankRoutingInfo = new BankRoutingInfo()
 

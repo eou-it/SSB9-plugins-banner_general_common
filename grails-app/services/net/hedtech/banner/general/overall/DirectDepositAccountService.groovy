@@ -51,10 +51,12 @@ class DirectDepositAccountService extends ServiceBase{
         model.messages = []
         
         for (acct in accounts) {
+            // if the account is not active, no need to return message about still being active
+            boolean ignoreMessage = acct.status == 'I'
+
+            // if account to be deleted is a legacy record set the appropriate indicator
+            // to I instead of deleting it
             if(acct.hrIndicator == 'A' && acct.apIndicator == 'A') {
-                // if account to be deleted is a legacy record set the appropiate indicator
-                // to I instead of deleting it
-                
                 def apDelete = acct.apDelete
 
                 // get a fresh version of account in case user has unsaved edits on the one 
@@ -63,11 +65,15 @@ class DirectDepositAccountService extends ServiceBase{
 
                 if(apDelete) {
                     acct.apIndicator = 'I'
-                    model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
+                    if(!ignoreMessage) {
+                        model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
+                    }
                 }
                 else {
                     acct.hrIndicator = 'I'
-                    model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
+                    if(!ignoreMessage) {
+                        model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
+                    }
                 }
                 update(acct)
             }
@@ -76,13 +82,15 @@ class DirectDepositAccountService extends ServiceBase{
 
                 if(acct.apIndicator == 'A' && acct.apDelete) {
                     model.toBeDeleted.add(acct)
-                    if(accts.size() > 1)
+                    if(accts.size() > 1 && !ignoreMessage) {
                         model.messages.add([acct: acct.bankAccountNum, activeType: 'PR'])
+                    }
                 }
                 else if(acct.hrIndicator == 'A' && !acct.apDelete) {
                     model.toBeDeleted.add(acct)
-                    if(accts.size() > 1)
+                    if(accts.size() > 1 && !ignoreMessage) {
                         model.messages.add([acct: acct.bankAccountNum, activeType: 'AP'])
+                    }
                 }
             }
         }
@@ -100,6 +108,18 @@ class DirectDepositAccountService extends ServiceBase{
         def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
 
         return activeAccounts
+    }
+
+    def fetchApAccountsByPidm(Integer pidm) {
+        def dirdAccounts
+
+        DirectDepositAccount.withSession { session ->
+            dirdAccounts = session.getNamedQuery(
+                    'DirectDepositAccount.fetchApAccountsByPidm')
+                    .setInteger('pidm', pidm).list()
+        }
+
+        return dirdAccounts
     }
 
 }
