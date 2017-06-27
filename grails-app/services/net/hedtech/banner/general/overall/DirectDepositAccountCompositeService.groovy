@@ -46,6 +46,7 @@ class DirectDepositAccountCompositeService {
         account.bankRoutingInfo = validateBankRoutingInfo(routingNum)
 
         if(setPriority){
+            validateOnlyOneAP(account)
             validateNotDuplicate(account)
             account = setNextPriority(account)
         }
@@ -129,6 +130,14 @@ class DirectDepositAccountCompositeService {
     private def validateNotDuplicate(account) {
         if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.accountType, account.apIndicator, account.hrIndicator)) {
             throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
+        }
+    }
+
+    def validateOnlyOneAP(account) {
+        if(account.apIndicator == 'A'){
+            if(directDepositAccountService.fetchApAccountsByPidm(account.pidm).size() > 0) {
+                throw new ApplicationException(DirectDepositAccount, "@@r1:apAccountAlreadyExists@@")
+            }
         }
     }
 
