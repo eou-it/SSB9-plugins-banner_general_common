@@ -19,7 +19,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 class CommunicationSendEmailService {
     private Log log = LogFactory.getLog(this.getClass())
     def communicationEmailItemService
-    public CommunicationMailboxAccountService communicationMailboxAccountService
+    def communicationMailboxAccountService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
 
@@ -40,13 +40,10 @@ class CommunicationSendEmailService {
         CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
 
         if(!organization?.senderMailboxAccount)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Sender mailbox account settings are not available for the chosen organization"), CommunicationErrorCode.UNKNOWN_ERROR.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidSenderMailbox"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
 
-
-        if (organization?.senderMailboxAccount.encryptedPassword != null)
+        if (organization?.senderMailboxAccount?.encryptedPassword != null)
             organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
-
-
 
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod(emailMessage, organization);
         sendEmailMethod.execute();
@@ -62,34 +59,35 @@ class CommunicationSendEmailService {
 
      void sendTestEmailSetup (Long organizationId, String sendTo) {
          if (sendTo == null || sendTo.length() == 0)
-             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, "communication.error.message.invalidReceiverEmail", CommunicationErrorCode.INVALID_RECEIVER_ADDRESS .name())
+             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS .name())
+         CommunicationEmailAddress receiverAddress
 
          try {
-             CommunicationEmailAddress receiverAddress = new CommunicationEmailAddress(     mailAddress: sendTo    )
+             receiverAddress = new CommunicationEmailAddress(     mailAddress: sendTo    )
          } catch (Throwable e) {
              log.error(e)
-             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, "communication.error.message.invalidReceiverEmail", CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
+             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
          }
 
          try {
              CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
 
              if (!organization)
-                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, (String) null, CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
+                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
              if (!receiverAddress || !receiverAddress.mailAddress)
-                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, "communication.error.message.invalidReceiverEmail", CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
+                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
 
              sendTestEmail(organization, receiverAddress)
 
         } catch (ApplicationException e) {
             log.error(e)
             if (e.type == 'UNKNOWN_ERROR')
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, "communication.error.message.unknownEmail", CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
             throw e
         } catch (Throwable e) {
             // catch unexpected exceptions
             log.error(e)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, "communication.error.message.unknownEmail", CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
         }
     }
 
@@ -105,44 +103,48 @@ class CommunicationSendEmailService {
         emailMessage.setMessageBodyContentType("text/html; charset=UTF-8")
         emailMessage.setToList(([receiverAddress] as Set))
 
-        if (organization?.senderMailboxAccount.encryptedPassword != null)
+        if (organization?.senderMailboxAccount?.encryptedPassword != null)
             organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
+
         organization.senderMailboxAccount.clearTextPassword = 'incorrect pass'
-        //incorrect password does not make auth fail?
+        // TODO incorrect password does not make auth fail??
 
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod(emailMessage, organization)
 
         try {
             sendEmailMethod.execute()
-        } catch (Throwable e) {
+        } catch (ApplicationException e) {
             log.error(e)
             // catch email exception to give more user friendly name
             if (e.type == 'INVALID_EMAIL_ADDRESS' || e.message == "RFC 822 address format violation.")
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Invalid test email address."), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidEmailGeneral"), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
             if (e.type == 'UNKNOWN_ERROR')
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Unknown error. Email not sent successfully."), CommunicationErrorCode.UNKNOWN_ERROR.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
             if (e.type.contains('EMAIL_SERVER')) {
                 def wrappedException = e.wrappedException
                 def cause = getCause(wrappedException)
                 def errSplit = cause.message.split(':')
                 if (errSplit[0]) {
                     if (errSplit[0].contains('certification path to'))
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException(errSplit[0]), CommunicationErrorCode.CERTIFICATION_PATH_NOT_FOUND.name())
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.notFoundOnPath"), CommunicationErrorCode.CERTIFICATION_PATH_NOT_FOUND.name())
                     if (errSplit[0].contains('Failed to validate certificate'))
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException(errSplit[0]), CommunicationErrorCode.CERTIFICATION_FAILED.name())
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.failed"), CommunicationErrorCode.CERTIFICATION_FAILED.name())
                     if (errSplit[0].contains('certification'))
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException(errSplit[0]), CommunicationErrorCode.UNKNOWN_CERTIFICATION_ERROR.name())
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.unknownError"), CommunicationErrorCode.UNKNOWN_CERTIFICATION_ERROR.name())
                 }
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Could not connect to server : unknown problem."), CommunicationErrorCode.EMAIL_SERVER_CONNECTION_FAILED.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.failed"), CommunicationErrorCode.EMAIL_SERVER_CONNECTION_FAILED.name())
             }
             throw e
         } catch (Throwable e) {
             // catch any unexpected error
             log.error(e)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Unknown error. Email not sent successfully."), CommunicationErrorCode.UNKNOWN_ERROR.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
         }
     }
 
+    /*
+     * Method to find root cause of exception and extract the message. Used to identify certification exceptions.
+     */
     Throwable getCause(Throwable e) {
         Throwable cause = null;
         Throwable result = e;
@@ -155,31 +157,31 @@ class CommunicationSendEmailService {
 
     private static void checkValidOrganization(CommunicationOrganization organization) {
         if (organization == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Organization not found."), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
         // if properties are null then it may default to use root properties.
         if (organization.sendEmailServerProperties != null) {
             if (organization.sendEmailServerProperties.host == null || organization.sendEmailServerProperties.host.length() == 0)
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Organization host name invalid."), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.hostNotFound"), CommunicationErrorCode.EMAIL_SERVER_HOST_NOT_FOUND.name())
             if (organization.sendEmailServerProperties.port <= 0)
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Organization port number is invalid."), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.portInvalid"), CommunicationErrorCode.EMAIL_SERVER_PORT_INVALID.name())
             if (organization.sendEmailServerProperties.securityProtocol == null)
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Organization security protocol not found."), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.securityProtocolInvalid"), CommunicationErrorCode.EMAIL_SERVER_SECURITY_PROTOCOL_INVALID.name())
             if (organization.sendEmailServerProperties.type == null)
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Organization type not found."), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.typeInvalid"), CommunicationErrorCode.EMAIL_SERVER_TYPE_INVALID.name())
         }
         if (organization.senderMailboxAccount == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Sender mailbox not configured properly."), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.senderMailbox.notFound"), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
         if (organization.senderMailboxAccount.type == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Sender mailbox type not found."), CommunicationErrorCode.INVALID_SENDER_MAILBOX.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.senderMailbox.typeNotFound"), CommunicationErrorCode.INVALID_SENDER_MAILBOX_TYPE.name())
         if (organization.senderMailboxAccount.emailAddress == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Sender email address invalid."), CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.senderMailbox.emptySenderEmail"), CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
         if (organization.senderMailboxAccount.emailAddress.length() == 0)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Sender email address invalid."), CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.senderMailbox.emptySenderEmail"), CommunicationErrorCode.EMPTY_SENDER_ADDRESS.name())
     }
 
     private static void checkValidEmail(CommunicationEmailAddress receiverAddress) {
         if (receiverAddress == null || receiverAddress.mailAddress == null || receiverAddress.mailAddress.length() == 0)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("Receiver address invalid."), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
     }
 
     private void trackEmailMessage(CommunicationOrganization organization, CommunicationEmailMessage emailMessage, CommunicationRecipientData recipientData, Long pidm) {
