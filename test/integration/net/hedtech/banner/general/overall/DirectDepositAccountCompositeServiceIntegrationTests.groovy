@@ -331,6 +331,19 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals false, oldId == newId
     }
 
+    @Test
+    void testValidateOnlyOneAP() {
+        def pidm = PersonUtility.getPerson("HOSH00018").pidm
+        def accountMap = [pidm: pidm, apIndicator: 'A']
+        try {
+            directDepositAccountCompositeService.validateOnlyOneAP(accountMap)
+            fail("I should have received an error but it passed; @@r1:apAccountAlreadyExists@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "apAccountAlreadyExists"
+        }
+    }
+
 
     private executeCustomSQL( String updateStatement, id = null ) {
         def sql
