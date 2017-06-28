@@ -5,6 +5,7 @@ package net.hedtech.banner.general.communication.email
 
 import com.icegreen.greenmail.util.GreenMailUtil
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
@@ -49,6 +50,7 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     @After
     public void tearDown() {
         super.tearDown()
+
         if (mailServer) mailServer.stop()
         sessionFactory.currentSession?.close()
         logout()
@@ -78,7 +80,6 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT);
         assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
     }
-
 
     protected void setUpEmailTestOrganization()
     {

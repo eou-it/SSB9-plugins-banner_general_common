@@ -38,7 +38,8 @@ class CommunicationInteractionCompositeService {
         String queryString = baseQuery + " order by lastName, firstName, middleName, bannerId "
         String countQueryString = "select count(a.bannerId) " + baseQuery
 
-        if (!filter) return []
+        if (!filter)
+            return []
         def queryCriteria = '%' + filter.toUpperCase().replaceAll("\\s","") + "%"  //remove spaces from search string
 
         def persons = PersonIdentificationName.withSession { session ->

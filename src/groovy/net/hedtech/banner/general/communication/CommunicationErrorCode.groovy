@@ -16,10 +16,13 @@ enum CommunicationErrorCode implements Serializable {
     EMAIL_SERVER_CONNECTION_FAILED, //Failure connecting to the email server
     EMAIL_SERVER_AUTHENTICATION_FAILED, //Failure authenticating to the email server
     EMPTY_SENDER_ADDRESS, //No sender email address exists
+    INVALID_SENDER_MAILBOX, // Sender mailbox does not exist or is invalid
+    INVALID_SENDER_MAILBOX_TYPE, //sender mailbox type not fond or is invalid
     EMPTY_RECIPIENT_ADDRESS, //No recipient email address exists
     INVALID_EMAIL_ADDRESS, //Email address is not valid
     EMPTY_EMAIL_SUBJECT, //Email subject is empty
     EMAIL_CONTENT_TOO_LARGE, //Email content is too large
+    INVALID_RECEIVER_ADDRESS, // Email receiver address invalid
 
     /** Mobile Notification error codes **/
     EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL,
@@ -34,6 +37,20 @@ enum CommunicationErrorCode implements Serializable {
     EMPTY_LETTER_TO_ADDRESS,
     EMPTY_LETTER_CONTENT,
 
+    /**  Organization Configuration error codes **/
+    ORGANIZATION_NOT_FOUND,
+    ORGANIZATION_HOST_NAME_INVALID,
+    ORGANIZATION_PORT_NUMBER_INVALID,
+    ORGANIZATION_SECURITY_PROTOCOL_NOT_FOUND,
+    ORGANIZATION_TYPE_NOT_FOUND,
+
+    /**  Certification errors  **/
+    UNKNOWN_CERTIFICATION_ERROR,
+    CERTIFICATION_PATH_NOT_FOUND,
+    CERTIFICATION_FAILED,
+
+    UNKNOWN_ERROR_EMAIL,
+    UNKNOWN_ERROR_MOBILE,
     UNKNOWN_ERROR; //Unknown Error
 
     /**
