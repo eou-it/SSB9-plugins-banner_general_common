@@ -206,6 +206,19 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     }
 
 
+    @Test
+    void testValidateOnlyOneAP() {
+        def pidm = PersonUtility.getPerson("HOSH00018").pidm
+        def accountMap = [pidm: pidm, apIndicator: 'A']
+        try {
+            directDepositAccountCompositeService.validateOnlyOneAP(accountMap)
+            fail("I should have received an error but it passed; @@r1:apAccountAlreadyExists@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "apAccountAlreadyExists"
+        }
+    }
+
 
     // TODO: All of the below tests PASSED when they were broken out into their own temporary file
     // which corresponded to a temporary DirectDepositCompositeService class which was located at the app level (as

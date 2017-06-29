@@ -24,6 +24,10 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
                    WHERE a.pidm = :pidm
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
+    @NamedQuery(name = "DirectDepositAccount.fetchApAccountsByPidm",
+                query = """ FROM DirectDepositAccount a
+                   WHERE a.pidm = :pidm
+                     AND a.apIndicator = 'A'"""),
     @NamedQuery(name = "DirectDepositAccount.fetchActiveHrAccountsByPidm",
         query = """ FROM DirectDepositAccount a
                    WHERE a.pidm = :pidm
