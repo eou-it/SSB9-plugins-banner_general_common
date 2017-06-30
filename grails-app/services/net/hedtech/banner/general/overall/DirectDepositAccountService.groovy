@@ -128,6 +128,12 @@ class DirectDepositAccountService extends ServiceBase{
         marshallAccountsToMinimalStateForUi(fetchApAccountsByPidm(pidm))
     }
 
+    def getActiveHrAccounts(pidm) {
+        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
+
+        return activeAccounts
+    }
+
     /**
      * Given an account object or list of account objects (i.e. payroll or AP), extract only the data needed for
      * the Direct Deposit UI.  Also unbinds from any associations with Hibernate.
@@ -176,12 +182,6 @@ class DirectDepositAccountService extends ServiceBase{
         }
 
         return isCollection ? marshalledAccounts : marshalledAccounts.first()
-    }
-
-    def getActiveHrAccounts(pidm) {
-        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
-
-        return activeAccounts
     }
 
     static boolean isCollectionOrArray(object) {
