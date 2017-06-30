@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -93,7 +93,47 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveApAccountsWhereNoAccountsExist() {
-        def activeAccounts = directDepositAccountService.getActiveApAccounts(-1) // One account
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(-1) // No accounts
+
+        // Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 0, activeAccounts.size()
+    }
+
+    @Test
+    void testFetchApAccountsByPidmAsListOfMapsWhereMultipleAccountsExist() {
+        def pidm = PersonUtility.getPerson("HOSH00018").pidm
+        def activeAccounts = directDepositAccountService.fetchApAccountsByPidmAsListOfMaps(pidm) // Multiple accounts
+
+         //Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 2, activeAccounts.size()
+
+        // First account
+        activeAccounts = activeAccounts.sort{it.id}
+        def userAccount = activeAccounts[0]
+
+        assertNotNull userAccount.id
+        assertEquals "9876543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+
+        // Second account
+        userAccount = activeAccounts[1]
+
+        assertNotNull userAccount.id
+        assertEquals "38167543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+    }
+
+    @Test
+    void testFetchApAccountsByPidmAsListOfMapsWhereNoAccountsExist() {
+        def activeAccounts = directDepositAccountService.fetchApAccountsByPidmAsListOfMaps(-1) // No accounts
 
         // Assert domain values
         assertNotNull activeAccounts
@@ -163,6 +203,89 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         // Assert domain values
         assertNotNull activeAccounts
         assertEquals 0, activeAccounts.size()
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithSingleObject() {
+        def directDepositAccount = newDirectDepositAccount()
+
+        directDepositAccount.id = 1
+        directDepositAccount.version = 0
+
+        def marshalledAccount = directDepositAccountService.marshallAccountsToMinimalStateForUi(directDepositAccount)
+
+        // Assert values
+        assertNotNull marshalledAccount
+        assertEquals 1, marshalledAccount.id
+        assertEquals 16, marshalledAccount.priority
+        assertEquals "36948575", marshalledAccount.bankAccountNum
+        assertEquals "C", marshalledAccount.accountType
+        assertEquals "I", marshalledAccount.apIndicator
+        assertEquals "A", marshalledAccount.hrIndicator
+        assertNotNull marshalledAccount.version
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithNullAccount() {
+        def marshalledAccount = directDepositAccountService.marshallAccountsToMinimalStateForUi(null)
+
+        assertNull marshalledAccount
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithList() {
+        def directDepositAccount0 = newDirectDepositAccount()
+
+        directDepositAccount0.id = 1
+        directDepositAccount0.version = 0
+
+        def directDepositAccount1 = newDirectDepositAccount()
+
+        directDepositAccount1.id = 2
+        directDepositAccount1.version = 4
+
+        def accounts = []
+
+        accounts.push(directDepositAccount0)
+        accounts.push(directDepositAccount1)
+
+        def marshalledAccounts = directDepositAccountService.marshallAccountsToMinimalStateForUi(accounts)
+
+        assertEquals 2, marshalledAccounts.size()
+
+        def marshalledAccount = marshalledAccounts[0]
+
+        // Assert values
+        assertNotNull marshalledAccount
+        assertEquals 1, marshalledAccount.id
+        assertEquals 0, marshalledAccount.version
+        assertEquals 16, marshalledAccount.priority
+        assertEquals "36948575", marshalledAccount.bankAccountNum
+        assertEquals "C", marshalledAccount.accountType
+        assertEquals "I", marshalledAccount.apIndicator
+        assertEquals "A", marshalledAccount.hrIndicator
+        assertNotNull marshalledAccount.version
+
+        marshalledAccount = marshalledAccounts[1]
+
+        // Assert values
+        assertNotNull marshalledAccount
+        assertEquals 2, marshalledAccount.id
+        assertEquals 4, marshalledAccount.version
+        assertEquals 16, marshalledAccount.priority
+        assertEquals "36948575", marshalledAccount.bankAccountNum
+        assertEquals "C", marshalledAccount.accountType
+        assertEquals "I", marshalledAccount.apIndicator
+        assertEquals "A", marshalledAccount.hrIndicator
+        assertNotNull marshalledAccount.version
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithNoAccounts() {
+        def accounts = []
+        def marshalledAccounts = directDepositAccountService.marshallAccountsToMinimalStateForUi(accounts)
+
+        assertEquals 0, marshalledAccounts.size()
     }
 
     @Test

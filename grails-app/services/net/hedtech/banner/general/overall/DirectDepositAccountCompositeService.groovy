@@ -1,5 +1,5 @@
 /********************************************************************************
-  Copyright 2016 Ellucian Company L.P. and its affiliates.
+  Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -104,6 +104,21 @@ class DirectDepositAccountCompositeService {
 
         model
     }
+
+    /**
+     * Retrieve user payroll allocations and convert to a list of maps.
+     * @param pidm
+     * @return List of allocation maps
+     */
+    def getUserHrAllocationsAsListOfMaps(pidm) {
+        def allocations = getUserHrAllocations(pidm).allocations
+
+        return [
+            allocations: directDepositAccountService.marshallAccountsToMinimalStateForUi(allocations)
+        ]
+
+    }
+
 
     private def validateRoutingNumExistsInMap(directDepositAccountMap) {
         def routingNum = directDepositAccountMap?.bankRoutingInfo?.bankRoutingNum

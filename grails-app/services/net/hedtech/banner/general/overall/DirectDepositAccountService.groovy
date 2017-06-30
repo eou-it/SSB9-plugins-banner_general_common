@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
@@ -103,12 +106,6 @@ class DirectDepositAccountService extends ServiceBase{
 
         return activeAccounts
     }
-    
-    def getActiveHrAccounts(pidm) {
-        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
-
-        return activeAccounts
-    }
 
     def fetchApAccountsByPidm(Integer pidm) {
         def dirdAccounts
@@ -120,6 +117,75 @@ class DirectDepositAccountService extends ServiceBase{
         }
 
         return dirdAccounts
+    }
+
+    /**
+     * Retrieve active AP accounts and convert to a list of maps.
+     * @param pidm
+     * @return List of account maps
+     */
+    def fetchApAccountsByPidmAsListOfMaps(pidm) {
+        marshallAccountsToMinimalStateForUi(fetchApAccountsByPidm(pidm))
+    }
+
+    /**
+     * Given an account object or list of account objects (i.e. payroll or AP), extract only the data needed for
+     * the Direct Deposit UI.  Also unbinds from any associations with Hibernate.
+     * @param account
+     * @return Account map
+     */
+    static marshallAccountsToMinimalStateForUi(accounts) {
+        if (!accounts) return accounts
+
+        boolean isCollection = isCollectionOrArray(accounts)
+        def accountList = isCollection ? accounts : [accounts]
+        def marshalledAccounts = []
+
+        accountList.each {
+            // Routing info
+            def bankRoutingInfo = [:]
+
+            if (it.bankRoutingInfo) {
+                bankRoutingInfo = [
+                    id            : it.bankRoutingInfo.id,
+                    version       : it.bankRoutingInfo.version,
+                    bankRoutingNum: it.bankRoutingInfo.bankRoutingNum,
+                    bankName      : it.bankRoutingInfo.bankName
+                ]
+            }
+
+            // Account info
+            def marshalledAccount = [
+                id                         : it.id,
+                version                    : it.version,
+                pidm                       : it.pidm,
+                status                     : it.status,
+                documentType               : it.status,
+                priority                   : it.priority,
+                apIndicator                : it.apIndicator,
+                hrIndicator                : it.hrIndicator,
+                bankAccountNum             : it.bankAccountNum,
+                bankRoutingInfo            : bankRoutingInfo,
+                amount                     : it.amount,
+                percent                    : it.percent,
+                accountType                : it.accountType,
+                intlAchTransactionIndicator: it.intlAchTransactionIndicator
+            ]
+
+            marshalledAccounts << marshalledAccount
+        }
+
+        return isCollection ? marshalledAccounts : marshalledAccounts.first()
+    }
+
+    def getActiveHrAccounts(pidm) {
+        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
+
+        return activeAccounts
+    }
+
+    static boolean isCollectionOrArray(object) {
+        [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
     }
 
 }
