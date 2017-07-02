@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
+import com.sun.mail.smtp.SMTPAddressFailedException
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
@@ -12,6 +13,9 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.lang3.exception.ExceptionUtils
+import sun.security.provider.certpath.SunCertPathBuilderException
+
+import javax.mail.AuthenticationFailedException
 
 /**
  * Email Service provides low level email send capability.
@@ -57,7 +61,7 @@ class CommunicationSendEmailService {
         }
     }
 
-     void sendTestEmailSetup (Long organizationId, String sendTo) {
+     void sendTestEmailSetup (Long organizationId, String sendTo, Map messageData) {
          if (sendTo == null || sendTo.length() == 0)
              throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS .name())
          CommunicationEmailAddress receiverAddress
@@ -77,7 +81,7 @@ class CommunicationSendEmailService {
              if (!receiverAddress || !receiverAddress.mailAddress)
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
 
-             sendTestEmail(organization, receiverAddress)
+             sendTestEmail(organization, receiverAddress, messageData)
 
         } catch (ApplicationException e) {
             log.error(e)
@@ -91,12 +95,12 @@ class CommunicationSendEmailService {
         }
     }
 
-    public void sendTestEmail(CommunicationOrganization organization, CommunicationEmailAddress receiverAddress) {
+    public void sendTestEmail(CommunicationOrganization organization, CommunicationEmailAddress receiverAddress, Map messageData) {
         checkValidOrganization(organization)
         checkValidEmail(receiverAddress)
 
-        def EMAIL_MESSAGE = 'This is a test email message from the Banner Communication Management Application.'
-        def EMAIL_SUBJECT = 'BCM test email'
+        def EMAIL_MESSAGE = messageData.body
+        def EMAIL_SUBJECT = messageData.subject
         CommunicationEmailMessage emailMessage = new CommunicationEmailMessage()
         emailMessage.setSubjectLine(EMAIL_SUBJECT)
         emailMessage.setMessageBody(EMAIL_MESSAGE)
@@ -105,9 +109,6 @@ class CommunicationSendEmailService {
 
         if (organization?.senderMailboxAccount?.encryptedPassword != null)
             organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
-
-        organization.senderMailboxAccount.clearTextPassword = 'incorrect pass'
-        // TODO incorrect password does not make auth fail??
 
         CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod(emailMessage, organization)
 
@@ -120,18 +121,27 @@ class CommunicationSendEmailService {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidEmailGeneral"), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
+//            if (e.type == 'EMAIL_SERVER_AUTHENTICATION_FAILED')
+//                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
             if (e.type.contains('EMAIL_SERVER')) {
                 def wrappedException = e.wrappedException
                 def cause = getCause(wrappedException)
-                def errSplit = cause.message.split(':')
-                if (errSplit[0]) {
-                    if (errSplit[0].contains('certification path to'))
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.notFoundOnPath"), CommunicationErrorCode.CERTIFICATION_PATH_NOT_FOUND.name())
-                    if (errSplit[0].contains('Failed to validate certificate'))
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.failed"), CommunicationErrorCode.CERTIFICATION_FAILED.name())
-                    if (errSplit[0].contains('certification'))
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.unknownError"), CommunicationErrorCode.UNKNOWN_CERTIFICATION_ERROR.name())
-                }
+                def errSplit = cause.message.split(':')[0]?:""
+                if (cause.getClass() == SunCertPathBuilderException.class || errSplit.contains('certification path to'))
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.notFoundOnPath"), CommunicationErrorCode.CERTIFICATION_PATH_NOT_FOUND.name())
+                // TODO Possibly not in english. Look for better way to identify specific problems
+                if (errSplit.contains('Failed to validate certificate'))
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.failed"), CommunicationErrorCode.CERTIFICATION_FAILED.name())
+                if (errSplit.contains('certification'))
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.unknownError"), CommunicationErrorCode.UNKNOWN_CERTIFICATION_ERROR.name())
+
+                if (cause.getClass() == AuthenticationFailedException.class || errSplit.contains('535 Authentication Failed'))
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.EMAIL_SERVER_USER_NOT_AUTHORIZED.name())
+                if (cause.getClass() == SMTPAddressFailedException.class || errSplit.contains('550 5.1.1 User unknown'))
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.userNotAuthorized"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+                if (errSplit.contains('uthentication'))
+                    throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.authenticationFailedUnknown"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED_UNKNOWN.name())
+
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.failed"), CommunicationErrorCode.EMAIL_SERVER_CONNECTION_FAILED.name())
             }
             throw e

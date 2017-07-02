@@ -5,6 +5,13 @@
 package net.hedtech.banner.general.communication.mobile
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.log4j.Logger
@@ -17,38 +24,27 @@ import groovy.mock.interceptor.MockFor
 
 class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegrationTestCase {
     def log = Logger.getLogger(this.getClass())
-
+    def communicationOrganizationService
+    def communicationOrganizationCompositeService
+    def communicationMailboxAccountService
     CommunicationOrganization organization
     CommunicationSendMobileNotificationService service
     def validOrgId = 1
-    def validSendTo = 1
+    def validPerson = 1
+
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
-        service = new CommunicationSendMobileNotificationService()
-        super.setUp()
+        super.setUseTransactions( false )
+        formContext = ['GUAGMNU','SELFSERVICE']
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        refreshOrganization()
+        super.setUp()
+//        service = new CommunicationSendMobileNotificationService()
+//        service.communicationOrganizationService = communicationOrganizationService
 
-//        def CommunicationOrganization = new MockFor(CommunicationOrganization)
-//        communicationSendMobileNotificationMethod.demand.execute(1..1) {
-//            CommunicationMobileNotificationMessage message, CommunicationOrganization senderOrganization ->
-//                throw new ApplicationException(CommunicationSendMobileNotificationMethod.class.simpleName, "Exception")
-//        }
-//        service.communicationSendMobileNotificationMethod = communicationSendMobileNotificationMethod.proxyInstance()
-
+        setUpOrganization()
+        //service.testOverride = [ externalUser: "amandamason1" ]
     }
-
-    private void refreshOrganization () {
-        organization = new CommunicationOrganization()
-        organization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
-        organization.mobileApplicationName = "StudentSuccess"
-        organization.clearMobileApplicationKey = "ss-key-value"
-        organization.encryptedMobileApplicationKey = "%encrypted%"
-    }
-
 
     @After
     public void tearDown() {
@@ -58,10 +54,26 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
 
     @Test
     void testSendMobile () {
-        def orgID = validOrgId
+        def orgID = organization.id
         def sendTo = validPerson
-        service.sendTestMobileSetup(orgId, sendTo)
+//        service.sendTestMobileSetup(orgID, sendTo)
 
+    }
+
+    protected void setUpOrganization() {
+        List organizations = communicationOrganizationCompositeService.listOrganizations()
+        if (organizations.size() == 0) {
+            organization = new CommunicationOrganization(name: "Test Org")
+
+            organization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
+            organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            organization.mobileApplicationName = "StudentSuccess"
+            organization.clearMobileApplicationKey = "ss-key-value"
+            organization.encryptedMobileApplicationKey = "%encrypted%"
+            organization = communicationOrganizationCompositeService.createOrganization(organization) as CommunicationOrganization
+        } else {
+            organization = organizations.get(0) as CommunicationOrganization
+        }
     }
 
 

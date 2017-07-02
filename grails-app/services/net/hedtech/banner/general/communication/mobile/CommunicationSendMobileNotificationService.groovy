@@ -15,13 +15,14 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import java.lang.reflect.Array
+
 /**
  * Provides a service for submitting a mobile notification.
  */
 class CommunicationSendMobileNotificationService {
     private Log log = LogFactory.getLog( this.getClass() )
     def communicationMobileNotificationItemService
-    def communicationMobileNotificationTemplateService
     def communicationOrganizationService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
@@ -61,20 +62,20 @@ class CommunicationSendMobileNotificationService {
     void sendTestMobileSetup(Long organizationId, Long pidm) {
         CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(organizationId)
         if (!senderOrganization)
-            throw ApplicationException(CommunicationSendMobileNotificationService, new RuntimeException("@@r1:organizationNotFound@@"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND .name())
 
-
-
-        CommunicationRecipientData recipientData = createCommunicationRecipientData(  pidm, organizationId)
+        CommunicationRecipientData recipientData = createCommunicationRecipientData(pidm, organizationId)
         try {
             sendTest(senderOrganization, recipientData)
         } catch (ApplicationException e) {
             log.error(e)
+            if (e.type == 'UNKNOWN_ERROR')
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
             throw e
         } catch (Throwable e) {
             // catch any additional / unexpected exceptions
             log.error(e)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Unknown error. Message failed to send."), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
         }
     }
 
@@ -82,13 +83,12 @@ class CommunicationSendMobileNotificationService {
 
         return new CommunicationRecipientData(
                 pidm: pidm,
-                referenceId: -1,
+                referenceId: UUID.randomUUID().toString(),
                 ownerId: -1,
                 fieldValues: null,
                 organizationId: organizationId,
-                communicationChannel: CommunicationChannel.MOBILE_NOTIFICATION
+                communicationChannel: CommunicationChannel.MOBILE_NOTIFICATION,
         )
-
     }
 
     void sendTest(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData) {
@@ -101,15 +101,21 @@ class CommunicationSendMobileNotificationService {
 
         CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService );
 
+        // to override not having externalUser with no thirdparty set up
+        if (testOverride)
+            message.externalUser = testOverride.externalUser
+
         try {
             notificationMethod.execute( message, senderOrganization )
         } catch (ApplicationException e) {
             log.error(e)
+            if (e.type == 'UNKNOWN_ERROR')
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
             throw e
         } catch (Throwable t) {
             // check for unexpected exceptions
             log.error( t )
-            throw t;
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
         }
     }
 
@@ -133,24 +139,22 @@ class CommunicationSendMobileNotificationService {
         return mobileNotificationMessage
     }
 
-    private void checkOrg (CommunicationOrganization org) {
+    private static void checkOrg (CommunicationOrganization org) {
         if (org == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Organization not found. Check to make sure the organization exists and is saved."), CommunicationErrorCode.UNKNOWN_ERROR.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
         if (org.mobileEndPointUrl == null || org.mobileEndPointUrl.trim().length() == 0)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Mobile End Point URL not found."), CommunicationErrorCode.UNKNOWN_ERROR.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.mobileEndPointUrlNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
         if (org.encryptedMobileApplicationKey == null && org.clearMobileApplicationKey == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Mobile Application Key not found."), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.mobileApplicationKeyNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.name())
         if (org.mobileApplicationName == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Mobile Application Name not found."), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.mobileApplicationNameNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.name())
     }
 
-    private void checkRecipientData(CommunicationRecipientData recipientData) {
+    private static void checkRecipientData(CommunicationRecipientData recipientData) {
         if (recipientData == null)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Recipient data not found. Please check the selected user is valid."), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name())
-        if (recipientData.referenceId == null || recipientData.referenceId.trim().length() == 0)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Recipient data not complete. Please check the selected user is valid."), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name())
-        if (recipientData.mepCode == null || recipientData.mepCode.trim().length() == 0)
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("Recipient data not complete. Please check the selected user is valid."), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.externalUserInvalid"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name())
+        if (recipientData.pidm <= 0)
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.externalUserInvalid"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_EXTERNAL_USER.name())
     }
 
     private void track( CommunicationOrganization organization, CommunicationMobileNotificationMessage message, CommunicationRecipientData recipientData, String serverResponse ) {

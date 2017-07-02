@@ -12,7 +12,9 @@ import net.hedtech.banner.general.communication.organization.CommunicationEmailS
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import org.apache.commons.logging.LogFactory
+import org.hibernate.SessionFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.junit.Rule;
@@ -25,7 +27,6 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 
     @Rule
     public ExpectedException thrown = ExpectedException.none()
-
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
     CommunicationOrganization emailTestOrganization
@@ -39,7 +40,6 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 
     @Before
     public void setUp() {
-        super.setUseTransactions( false )
         formContext = ['GUAGMNU','SELFSERVICE']
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
@@ -60,26 +60,47 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
     @Test  // works and doesnt throw exception
     public void testSendTestEmail() {
         // use receiverAddress for receiver
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
-        def EMAIL_MESSAGE = 'This is a test email message from the Banner Communication Management Application.'
-        def EMAIL_SUBJECT = 'BCM test email'
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
-        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_MESSAGE))
+        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
     }
 
     @Test
     public void testSendTestEmailNullServer() {
         thrown.expect(ApplicationException)
-        thrown.expectMessage( ('Organization host name invalid.'))
+        thrown.expectMessage( ('communication.error.message.server.hostNotFound'))
+
         emailTestOrganization.sendEmailServerProperties.host = null
+
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(0, receivedMessages.length)
@@ -88,28 +109,53 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
     @Test
     public void testSendTestEmailInvalidServer() {
         thrown.expect(ApplicationException)
-        thrown.expectMessage( ('Sending the email to the following server failed :'))
+        thrown.expectMessage( "communication.error.message.server.failed")
         emailTestOrganization.sendEmailServerProperties.host = 'invalidHostName'
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+
+        // use receiverAddress for receiver
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
-        assertEquals(0, receivedMessages.length)
+        assertEquals(1, receivedMessages.length)
+        assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
+        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
     }
 
     @Test
     public void testSendTestEmailInvalidPort() {
         thrown.expect(ApplicationException)
-        thrown.expectMessage( ('Sending the email to the following server failed :'))
+        thrown.expectMessage( "communication.error.message.server.failed")
         emailTestOrganization.sendEmailServerProperties.port += 1
         // use receiverAddress for receiver
- 
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
-        def receivedMessages = mailServer.getReceivedMessages()
 
+        // use receiverAddress for receiver
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
+        def receivedMessages = mailServer.getReceivedMessages()
         assertEquals(0, receivedMessages.length)
     }
 
@@ -117,49 +163,72 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
     // TODO: find out how to make incorrect username or password reject
     @Test
     public void testSendTestEmailInvalidPassword() {
-        mailServer.setUser(receiverAddress.mailAddress, userName, clearTextPassword)
-        emailTestOrganization.senderMailboxAccount.clearTextPassword = 'invalid password'
-        emailTestOrganization.senderMailboxAccount.encryptedPassword = 'invalid password encrypted'
-
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
-        def receivedMessages = mailServer.getReceivedMessages()
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
-        def EMAIL_MESSAGE = 'This is a test email message from the Banner Communication Management Application.'
-        def EMAIL_SUBJECT = 'BCM test email'
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
+        def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
-        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_MESSAGE))
+        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
     }
 
     @Test
     public void testSendTestEmailInvalidAccount() {
-        emailTestOrganization.senderMailboxAccount.userName = 'invalid username'
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
-        def EMAIL_MESSAGE = 'This is a test email message from the Banner Communication Management Application.'
-        def EMAIL_SUBJECT = 'BCM test email'
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
-        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_MESSAGE))
+        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
     }
 
     @Test
     public void testSendTestEmailInvalidEmail() {
         thrown.expect(ApplicationException)
-        thrown.expectMessage('Invalid test email address.')
+        thrown.expectMessage('communication.error.message.invalidEmailGeneral')
+
         emailTestOrganization.senderMailboxAccount.emailAddress = 'invalid email'
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+
+        // use receiverAddress for receiver
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(0, receivedMessages.length)
@@ -168,12 +237,24 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
     @Test
     public void testSendTestEmailNullEmail() {
         thrown.expect(ApplicationException)
-        thrown.expectMessage('Sender email address not found.')
+        thrown.expectMessage('communication.error.message.senderMailbox.emptySenderEmail')
         emailTestOrganization.senderMailboxAccount.emailAddress = null
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+
+        // use receiverAddress for receiver
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(0, receivedMessages.length)
@@ -183,44 +264,52 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
     public void testSendTestEmailNullReceiverDisplayName() {
         receiverAddress.displayName = null
         // use receiverAddress for receiver
-  
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmail(emailTestOrganization, receiverAddress)
+
+        // use receiverAddress for receiver
+        def EMAIL_SUBJECT = "Test Subject SMTP"
+        def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
+        //Create email message
+        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage();
+        emailMessage.messageBody = EMAIL_TEXT
+        emailMessage.subjectLine = EMAIL_SUBJECT
+        emailMessage.messageBodyContentType = "text/html; charset=UTF-8";
+        emailMessage.toList = [receiverAddress]
+        emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
+
+        CommunicationSendEmailService service = new CommunicationSendEmailService()
+        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+
         def receivedMessages = mailServer.getReceivedMessages()
 
-        def EMAIL_MESSAGE = 'This is a test email message from the Banner Communication Management Application.'
-        def EMAIL_SUBJECT = 'BCM test email'
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
-        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_MESSAGE))
+        assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
     }
 
-    @Test
-    public void testSendTestEmailSetupNullEmail() {
-        thrown.expect(ApplicationException)
-        thrown.expectMessage('Email address not found.')
-        emailTestOrganization.senderMailboxAccount.emailAddress = null
-        // use receiverAddress for receiver
-        String str = null
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmailSetup(1, str)
-        def receivedMessages = mailServer.getReceivedMessages()
-
-        assertEquals(0, receivedMessages.length)
-    }
-
-    @Test
-    public void testSendTestEmailSetupEmail() {
-        thrown.expect(ApplicationException)
-        thrown.expectMessage('Organization not found.')
-        // use receiverAddress for receiver
-
-        CommunicationSendEmailService communicationSendEmailService = new CommunicationSendEmailService()
-        communicationSendEmailService.sendTestEmailSetup(-1, receiverAddress.mailAddress)
-        def receivedMessages = mailServer.getReceivedMessages()
-
-        assertEquals(0, receivedMessages.length)
-    }
+//    @Test
+//    public void testSendTestEmailSetupNullEmail() {
+//        thrown.expect(ApplicationException)
+//        thrown.expectMessage('communication.error.message.invalidReceiverEmail')
+//        emailTestOrganization.senderMailboxAccount.emailAddress = null
+//        // use receiverAddress for receiver
+//        String str = null
+//        service.sendTestEmailSetup(1, str)
+//        def receivedMessages = mailServer.getReceivedMessages()
+//
+//        assertEquals(0, receivedMessages.length)
+//    }
+//
+//    @Test
+//    public void testSendTestEmailSetupEmail() {
+//        thrown.expect(ApplicationException)
+//        thrown.expectMessage('communication.error.message.organizationNotFound')
+//        // use receiverAddress for receiver
+//
+//        service.sendTestEmailSetup(-1, receiverAddress.mailAddress)
+//        def receivedMessages = mailServer.getReceivedMessages()
+//
+//        assertEquals(0, receivedMessages.length)
+//    }
 
     protected void setUpEmailTestOrganization()
     {
@@ -248,7 +337,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 
         def cma = new CommunicationMailboxAccount(
                 emailAddress: 'bcm-sender@ellucian.com',
-                encryptedPassword: communicationMailboxAccountService.encryptPassword( clearTextPassword ),
+                encryptedPassword: null,
                 clearTextPassword: clearTextPassword,
                 userName: userName,
                 organization: defaultOrganization,
