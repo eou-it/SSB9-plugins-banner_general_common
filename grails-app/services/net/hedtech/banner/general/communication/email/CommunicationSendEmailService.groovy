@@ -135,7 +135,7 @@ class CommunicationSendEmailService {
                 if (errSplit.contains('certification'))
                     throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.unknownError"), CommunicationErrorCode.UNKNOWN_CERTIFICATION_ERROR.name())
 
-                if (cause.getClass() == AuthenticationFailedException.class || errSplit.contains('535 Authentication Failed'))
+                if (cause.getClass() == AuthenticationFailedException.class || errSplit.contains('535') || errSplit.contains(' Authentication Failed'))
                     throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.EMAIL_SERVER_USER_NOT_AUTHORIZED.name())
                 if (cause.getClass() == SMTPAddressFailedException.class || errSplit.contains('550 5.1.1 User unknown'))
                     throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.userNotAuthorized"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())

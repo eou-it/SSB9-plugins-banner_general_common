@@ -120,9 +120,9 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         rootOrganization = communicationOrganizationService.update( rootOrganization )
         try {
             sendMethod.execute( message, rootOrganization )
-            fail( "Expected MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_SSL_UNVERIFIED." )
+            fail( "Expected MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_UNKNOWN_HOST." )
         } catch( CommunicationApplicationException e ) {
-            assertEquals( CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_SSL_UNVERIFIED.toString(), e.type )
+            assertEquals( CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_UNKNOWN_HOST.toString(), e.type )
         }
     }
 

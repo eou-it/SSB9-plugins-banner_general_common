@@ -108,7 +108,7 @@ class CommunicationSendEmailMethod {
             {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
