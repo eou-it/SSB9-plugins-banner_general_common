@@ -189,7 +189,7 @@ class CommunicationSendMobileNotificationMethod {
                 }
                 log.error( "Error trying to send mobile notification. Response content type = ${contentType}; status line = '${t.response?.statusLine}'", t )
             }
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.name())
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, new RuntimeException("communication.error.message.unauthorizedMobile"), CommunicationErrorCode.INVALID_MOBILE_NOTIFICATION_APPLICATION_NAME_OR_KEY.name())
         } catch(ApplicationException t) {
             log.error( 'Error trying to send mobile notification.', t );
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())

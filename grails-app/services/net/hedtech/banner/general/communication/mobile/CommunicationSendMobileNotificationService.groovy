@@ -59,14 +59,14 @@ class CommunicationSendMobileNotificationService {
     }
 
 
-    void sendTestMobileSetup(Long organizationId, Long pidm) {
+    void sendTestMobileSetup(Long organizationId, Long pidm, Map messageData) {
         CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(organizationId)
         if (!senderOrganization)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND .name())
 
         CommunicationRecipientData recipientData = createCommunicationRecipientData(pidm, organizationId)
         try {
-            sendTest(senderOrganization, recipientData)
+            sendTest(senderOrganization, recipientData, messageData)
         } catch (ApplicationException e) {
             log.error(e)
             if (e.type == 'UNKNOWN_ERROR')
@@ -91,13 +91,14 @@ class CommunicationSendMobileNotificationService {
         )
     }
 
-    void sendTest(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData) {
+    void sendTest(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData, Map messageData) {
         log.debug( "sending mobile test notification message" )
         checkOrg(senderOrganization)
         checkRecipientData(recipientData)
+        if (!testOverride)
+            asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
 
-        asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
-        CommunicationMobileNotificationMessage message = createTestMessage(recipientData)
+        CommunicationMobileNotificationMessage message = createTestMessage(recipientData, messageData)
 
         CommunicationSendMobileNotificationMethod notificationMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService );
 
@@ -119,12 +120,12 @@ class CommunicationSendMobileNotificationService {
         }
     }
 
-    private static CommunicationMobileNotificationMessage createTestMessage (CommunicationRecipientData recipientData) {
+    private static CommunicationMobileNotificationMessage createTestMessage (CommunicationRecipientData recipientData, Map messageData) {
         // create preset static message for mobile test notifications
         CommunicationMobileNotificationMessage mobileNotificationMessage = new CommunicationMobileNotificationMessage(
-                mobileHeadline: 'BCM Mobile Test notification',
-                headline: 'BCM Mobile Test notification',
-                messageDescription: 'This is a test mobile notification from Banner Communication Management - Ellucian University',
+                mobileHeadline: messageData.mobileHeadline,
+                headline: messageData.headline,
+                messageDescription: messageData.description,
                 destinationLink: null,
                 destinationLabel: null,
                 expirationPolicy: CommunicationMobileNotificationExpirationPolicy.DURATION,
