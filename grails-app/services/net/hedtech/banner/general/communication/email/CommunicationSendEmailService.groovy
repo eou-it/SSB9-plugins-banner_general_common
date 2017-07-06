@@ -115,14 +115,12 @@ class CommunicationSendEmailService {
         try {
             sendEmailMethod.execute()
         } catch (ApplicationException e) {
-            log.error(e)
+            log.error('sendEmailMethod threw:',e)
             // catch email exception to give more user friendly name
             if (e.type == 'INVALID_EMAIL_ADDRESS' || e.message == "RFC 822 address format violation.")
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidEmailGeneral"), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
-//            if (e.type == 'EMAIL_SERVER_AUTHENTICATION_FAILED')
-//                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
             if (e.type.contains('EMAIL_SERVER')) {
                 def wrappedException = e.wrappedException
                 def cause = getCause(wrappedException)

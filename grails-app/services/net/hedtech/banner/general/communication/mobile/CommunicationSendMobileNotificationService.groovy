@@ -175,4 +175,9 @@ class CommunicationSendMobileNotificationService {
         log.debug( "recorded mobile notification item sent with item id = ${item.id}." )
     }
 
+    // helper method to get external ID  for display on testMobileNotification modal
+    def fetchExternalId (Long pidm) {
+        return CommunicationMessageGenerator.fetchExternalLoginIdByPidm(pidm)
+    }
+
 }
