@@ -12,7 +12,7 @@ import net.hedtech.banner.general.system.GeographicDivision
 import net.hedtech.banner.general.system.GeographicRegion
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.State
-import net.hedtech.banner.general.system.ldm.v4.GeographicArea
+
 
 import javax.persistence.Column
 import javax.persistence.Entity
