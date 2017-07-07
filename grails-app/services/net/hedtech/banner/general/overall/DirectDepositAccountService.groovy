@@ -214,11 +214,11 @@ class DirectDepositAccountService extends ServiceBase{
         }
     }
 
-    def static getPrincipalPidm() {
+    def getPrincipalPidm() {
         try {
             return SecurityContextHolder?.context?.authentication?.principal?.pidm
         } catch (MissingPropertyException it) {
-            log.error("principal lacks a pidm - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
+            log.error("Principal lacks a pidm - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
             log.error(it)
             throw it
         }
