@@ -12,6 +12,7 @@ import org.junit.After
 import net.hedtech.banner.general.overall.DirectDepositAccountService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  *
@@ -49,7 +50,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull directDepositAccount.dataOrigin
         assertNotNull directDepositAccount.lastModifiedBy
         assertNotNull directDepositAccount.lastModified
-        
+
         def id = directDepositAccount.id
 
         directDepositAccount = directDepositAccount.get(id)
@@ -430,6 +431,10 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         def list = []
         list[0] = directDepositAccountMap
 
+
+        def sessionPidm = 95999
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = sessionPidm
+
         def result = directDepositAccountService.setupAccountsForDelete(list)
 
         assert true, result.toBeDeleted.size() == 0
@@ -628,13 +633,86 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertTrue results.bankAccountNum.contains("982304444")
     }
 
-    private def newDirectDepositAccount() {
+    @Test
+    void testDeleteOfAccountBelongingToPidm() {
+        def pidm = 49776
+
+        def newDirectDepositAccount = newDirectDepositAccount(pidm)
+        def directDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        directDepositAccount.discard()
+
+        def savedDirectDepositAccount = directDepositAccountService.get(directDepositAccount.id)
+
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def success = directDepositAccountService.delete(savedDirectDepositAccount)
+
+        assertTrue success
+    }
+
+    @Test
+    void testDeleteOfAccountNotBelongingToPidm() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        def sessionPidm = 49776
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = sessionPidm
+
+        try {
+            directDepositAccountService.delete(directDepositAccount)
+            fail("I should have received an error but it passed; @@r1:operation.not.authorized@@")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "@@r1:operation.not.authorized@@"
+        }
+    }
+
+    @Test
+    void testUpdateOfAccountBelongingToPidm() {
+        def pidm = 49776
+
+        def newDirectDepositAccount = newDirectDepositAccount(pidm)
+        def directDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        assertEquals "C", directDepositAccount.accountType
+
+        // Update it
+        directDepositAccount.accountType = "S"
+
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def updatedAccount = directDepositAccountService.update(directDepositAccount)
+
+        assertNotNull updatedAccount
+        assertEquals "S", updatedAccount.accountType
+    }
+
+    @Test
+    void testUpdateOfAccountNotBelongingToPidm() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        // Update it
+        directDepositAccount.accountType = "S"
+
+        def sessionPidm = 49776
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = sessionPidm
+
+        try {
+            directDepositAccountService.update(directDepositAccount)
+            fail("I should have received an error but it passed; @@r1:operation.not.authorized@@")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "@@r1:operation.not.authorized@@"
+        }
+    }
+
+    private def newDirectDepositAccount(pidm=95999) {
         def bankRoutingInfo = new BankRoutingInfo()
 
         bankRoutingInfo.bankRoutingNum = 234798944
 
         def domain = new DirectDepositAccount(
-            pidm: 95999, //49758,
+            pidm: pidm,
             status: "P",
             documentType: "D",
             priority: 16,

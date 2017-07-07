@@ -6,6 +6,7 @@ package net.hedtech.banner.general.overall
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
+import org.springframework.security.core.context.SecurityContextHolder
 
 class DirectDepositAccountService extends ServiceBase{
 
@@ -101,6 +102,14 @@ class DirectDepositAccountService extends ServiceBase{
         return model;
     }
 
+    void preDelete(map) {
+        verifyAccountBelongsToPidm(map)
+    }
+
+    void preUpdate(map) {
+        verifyAccountBelongsToPidm(map)
+    }
+
     def getActiveApAccounts(pidm) {
         def activeAccounts = DirectDepositAccount.fetchActiveApAccountsByPidm(pidm)
 
@@ -186,6 +195,33 @@ class DirectDepositAccountService extends ServiceBase{
 
     static boolean isCollectionOrArray(object) {
         [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
+    }
+
+    /**
+     * Verify that the account proposed for update or delete actually belongs to the PIDM for current session.
+     * @param map Account
+     */
+    def verifyAccountBelongsToPidm(map) {
+        def sessionPidm = getPrincipalPidm()
+        def existingAccount = get(map?.id)
+
+        if (!(existingAccount && existingAccount.pidm == sessionPidm)) {
+            log.error("Prevented attempt to alter Direct Deposit data not belonging to PIDM. " +
+                    "Session PIDM: ${sessionPidm}. PIDM of account targeted for delete (if available): ${existingAccount?.pidm}. " +
+                    "Surrogate ID of account targeted for delete (if available): ${existingAccount?.id}.")
+
+            throw new ApplicationException(DirectDepositAccountService, "@@r1:operation.not.authorized@@")
+        }
+    }
+
+    def static getPrincipalPidm() {
+        try {
+            return SecurityContextHolder?.context?.authentication?.principal?.pidm
+        } catch (MissingPropertyException it) {
+            log.error("principal lacks a pidm - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
+            log.error(it)
+            throw it
+        }
     }
 
 }
