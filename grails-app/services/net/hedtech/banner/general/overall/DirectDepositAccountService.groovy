@@ -1,8 +1,12 @@
+/*******************************************************************************
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
+import org.springframework.security.core.context.SecurityContextHolder
 
 class DirectDepositAccountService extends ServiceBase{
 
@@ -98,14 +102,16 @@ class DirectDepositAccountService extends ServiceBase{
         return model;
     }
 
+    void preDelete(map) {
+        verifyAccountBelongsToPidm(map)
+    }
+
+    void preUpdate(map) {
+        verifyAccountBelongsToPidm(map)
+    }
+
     def getActiveApAccounts(pidm) {
         def activeAccounts = DirectDepositAccount.fetchActiveApAccountsByPidm(pidm)
-
-        return activeAccounts
-    }
-    
-    def getActiveHrAccounts(pidm) {
-        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
 
         return activeAccounts
     }
@@ -120,6 +126,102 @@ class DirectDepositAccountService extends ServiceBase{
         }
 
         return dirdAccounts
+    }
+
+    /**
+     * Retrieve active AP accounts and convert to a list of maps.
+     * @param pidm
+     * @return List of account maps
+     */
+    def fetchApAccountsByPidmAsListOfMaps(pidm) {
+        marshallAccountsToMinimalStateForUi(fetchApAccountsByPidm(pidm))
+    }
+
+    def getActiveHrAccounts(pidm) {
+        def activeAccounts = DirectDepositAccount.fetchActiveHrAccountsByPidm(pidm)
+
+        return activeAccounts
+    }
+
+    /**
+     * Given an account object or list of account objects (i.e. payroll or AP), extract only the data needed for
+     * the Direct Deposit UI.  Also unbinds from any associations with Hibernate.
+     * @param account
+     * @return Account map
+     */
+    static marshallAccountsToMinimalStateForUi(accounts) {
+        if (!accounts) return accounts
+
+        boolean isCollection = isCollectionOrArray(accounts)
+        def accountList = isCollection ? accounts : [accounts]
+        def marshalledAccounts = []
+
+        accountList.each {
+            // Routing info
+            def bankRoutingInfo = [:]
+
+            if (it.bankRoutingInfo) {
+                bankRoutingInfo = [
+                    id            : it.bankRoutingInfo.id,
+                    version       : it.bankRoutingInfo.version,
+                    bankRoutingNum: it.bankRoutingInfo.bankRoutingNum,
+                    bankName      : it.bankRoutingInfo.bankName
+                ]
+            }
+
+            // Account info
+            def marshalledAccount = [
+                id                         : it.id,
+                version                    : it.version,
+                pidm                       : it.pidm,
+                status                     : it.status,
+                documentType               : it.status,
+                priority                   : it.priority,
+                apIndicator                : it.apIndicator,
+                hrIndicator                : it.hrIndicator,
+                bankAccountNum             : it.bankAccountNum,
+                bankRoutingInfo            : bankRoutingInfo,
+                amount                     : it.amount,
+                percent                    : it.percent,
+                accountType                : it.accountType,
+                intlAchTransactionIndicator: it.intlAchTransactionIndicator
+            ]
+
+            marshalledAccounts << marshalledAccount
+        }
+
+        return isCollection ? marshalledAccounts : marshalledAccounts.first()
+    }
+
+    static boolean isCollectionOrArray(object) {
+        [Collection, Object[]].any { it.isAssignableFrom(object.getClass()) }
+    }
+
+    /**
+     * Verify that the account proposed for update or delete actually belongs to the PIDM for current session.
+     * @param map Account
+     */
+    def verifyAccountBelongsToPidm(map) {
+        def sessionPidm = getPrincipalPidm()
+        def existingAccount = get(map?.id)
+
+        if (!(existingAccount && existingAccount.pidm == sessionPidm)) {
+            log.error("Prevented attempt to alter Direct Deposit data not belonging to PIDM. " +
+                    "Session PIDM: ${sessionPidm}. PIDM of account targeted for delete (if available): ${existingAccount?.pidm}. " +
+                    "Surrogate ID of account targeted for delete (if available): ${existingAccount?.id}.")
+
+            throw new ApplicationException(DirectDepositAccountService, "@@r1:operation.not.authorized@@")
+        }
+    }
+
+    def getPrincipalPidm() {
+        try {
+            return SecurityContextHolder?.context?.authentication?.principal?.pidm
+        } catch (MissingPropertyException it) {
+            log.error("Principal lacks a pidm - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
+            log.error(it)
+            throw it
+        }
     }
 
 }
