@@ -173,7 +173,6 @@ class DirectDepositAccountService extends ServiceBase{
             def marshalledAccount = [
                 id                         : it.id,
                 version                    : it.version,
-                pidm                       : it.pidm,
                 status                     : it.status,
                 documentType               : it.status,
                 priority                   : it.priority,
