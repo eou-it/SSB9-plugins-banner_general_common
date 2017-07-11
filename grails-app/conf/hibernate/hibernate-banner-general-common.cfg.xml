@@ -137,7 +137,6 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
-        <mapping class="net.hedtech.banner.general.overall.ldm.SectionMeetingTimeHedmDetail"/>
         <mapping class="net.hedtech.banner.general.ledger.GeneralFeed" />
         <mapping class="net.hedtech.banner.general.ledger.GeneralFeedShadow" />
         <mapping class="net.hedtech.banner.general.overall.AddressViewGuid" />
