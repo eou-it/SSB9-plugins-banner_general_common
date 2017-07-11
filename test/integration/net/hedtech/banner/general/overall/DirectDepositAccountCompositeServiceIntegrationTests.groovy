@@ -47,6 +47,19 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         status: 'P'
     ]
 
+    def testAccountMap1 = [
+            accountType: 'C',
+            bankAccountNum: '22334455',
+            bankRoutingInfo: testBankRoutingInfo0,
+            documentType: 'D',
+            id: 0,
+            apIndicator: 'I',
+            hrIndicator: 'A',
+            intlAchTransactionIndicator: 'N',
+            pidm: 95999,
+            status: 'P'
+    ]
+
     BannerAuthenticationToken bannerAuthenticationToken
     
     @Before
@@ -75,14 +88,14 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testAddDuplicateAccount() {
         def account1, account2
 
-        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap1)
 
         try {
-            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap1)
             fail("I should have received an error but it passed; @@r1:recordAlreadyExists@@ ")
         }
         catch (ApplicationException ae) {
-            assertApplicationException ae, "@@r1:apAccountAlreadyExists@@"
+            assertApplicationException ae, "@@r1:recordAlreadyExists@@"
         }
     }
     
@@ -285,6 +298,44 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals "C", allocation.accountType
         assertNull allocation.amount
         assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+    }
+
+    @Test
+    void testGetCurrencySymbolPreDigits() {
+        def symbol = directDepositAccountCompositeService.getCurrencySymbol()
+
+        assertEquals '$', symbol
+    }
+
+    @Test
+    void testGetCurrencySymbolPostDigits() {
+        Locale originalLocale = LocaleContextHolder.getLocale()
+        LocaleContextHolder.setLocale(new Locale("fr-CA"))
+        try {
+            def symbol = directDepositAccountCompositeService.getCurrencySymbol()
+
+        assertEquals '\u00A0$\u00A0US', symbol
+        } finally {
+            LocaleContextHolder.setLocale( originalLocale )
+        }
+    }
+
+    @Test
+    void testReorderAccounts() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        accts[0].priority = 2
+        accts[1].priority = 1
+
+        def oldId = accts[0].id
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        def newId = result[1].id
+
+        assertEquals false, oldId == newId
     }
 
     @Test
