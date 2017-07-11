@@ -50,6 +50,19 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         status: 'P'
     ]
 
+    def testAccountMap1 = [
+            accountType: 'C',
+            bankAccountNum: '22334455',
+            bankRoutingInfo: testBankRoutingInfo0,
+            documentType: 'D',
+            id: 0,
+            apIndicator: 'I',
+            hrIndicator: 'A',
+            intlAchTransactionIndicator: 'N',
+            pidm: 95999,
+            status: 'P'
+    ]
+
     BannerAuthenticationToken bannerAuthenticationToken
 
     @Before
@@ -78,14 +91,14 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testAddDuplicateAccount() {
         def account1, account2
 
-        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap1)
 
         try {
-            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap1)
             fail("I should have received an error but it passed; @@r1:recordAlreadyExists@@ ")
         }
         catch (ApplicationException ae) {
-            assertApplicationException ae, "@@r1:apAccountAlreadyExists@@"
+            assertApplicationException ae, "@@r1:recordAlreadyExists@@"
         }
     }
 
@@ -107,6 +120,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @Test
     void testRePrioritizeExistingAccount() {
         def pidm = PersonUtility.getPerson("GDP000001").pidm
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
 
         //   def existingItem = DirectDepositAccount.findById(1164) as DirectDepositAccount
         def account1
@@ -396,6 +410,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testReorderAccounts() {
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
 
         accts[0].priority = 2
         accts[1].priority = 1
