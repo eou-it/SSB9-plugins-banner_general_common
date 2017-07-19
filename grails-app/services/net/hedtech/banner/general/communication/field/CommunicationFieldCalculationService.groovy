@@ -36,7 +36,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
     def asynchronousBannerAuthenticationSpoofer
     /**
      * Merges the data from the parameter map into the string template
-     * @param stringTemplate A stcring containing delimited token fields
+     * @param stringTemplate A string containing delimited token fields
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */

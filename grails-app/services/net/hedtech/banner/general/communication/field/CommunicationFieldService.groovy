@@ -211,7 +211,7 @@ class CommunicationFieldService extends ServiceBase {
     }
 
 
-    private void validatePublished( CommunicationField field ) {
+    void validatePublished( CommunicationField field ) {
         assert( field )
 
         if (isEmpty( field.name )) {

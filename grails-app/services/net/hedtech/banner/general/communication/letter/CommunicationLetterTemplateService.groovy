@@ -15,7 +15,7 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplateSe
 class CommunicationLetterTemplateService extends CommunicationTemplateService {
 
     @Override
-    protected void validatePublished( CommunicationTemplate template) {
+    void validatePublished( CommunicationTemplate template) {
         assert( template != null )
         CommunicationLetterTemplate letterTemplate = (CommunicationLetterTemplate) template
         if (!letterTemplate.toAddress || letterTemplate.toAddress.trim().size() == 0 ) {

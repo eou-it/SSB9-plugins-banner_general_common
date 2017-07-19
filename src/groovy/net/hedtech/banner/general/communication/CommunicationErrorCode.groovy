@@ -30,6 +30,13 @@ enum CommunicationErrorCode implements Serializable {
     EMAIL_CONTENT_TOO_LARGE, //Email content is too large
     INVALID_RECEIVER_ADDRESS, // Email receiver address invalid
 
+    TEMPLATE_NOT_FOUND,
+    TO_FIELD_EMPTY,
+    SUBJECT_FIELD_EMPTY,
+    SERVER_PROPERTIES_NOT_FOUND,
+    TEMPLATE_ERROR_UNKNOWN,
+    FIELD_REQUIRED,
+
     /** Mobile Notification error codes **/
     EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL,
     EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME,

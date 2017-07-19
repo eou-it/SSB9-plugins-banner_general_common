@@ -64,11 +64,23 @@ class CommunicationSendMobileNotificationService {
         if (!senderOrganization)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND .name())
 
+        // check if child has no settings then look at root settings
+        if (!senderOrganization.mobileEndPointUrl && !senderOrganization.mobileEndPointUrl && !senderOrganization.clearMobileApplicationKey && !senderOrganization.encryptedMobileApplicationKey) {
+            CommunicationOrganization root = CommunicationOrganization.fetchRoot()
+            if (!root)
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
+            senderOrganization.encryptedMobileApplicationKey = root.encryptedMobileApplicationKey
+            senderOrganization.clearMobileApplicationKey = root.clearMobileApplicationKey
+            senderOrganization.mobileEndPointUrl = root.mobileEndPointUrl
+            senderOrganization.mobileApplicationName = root.mobileApplicationName
+        }
+
         CommunicationRecipientData recipientData = createCommunicationRecipientData(pidm, organizationId)
         try {
             sendTest(senderOrganization, recipientData, messageData)
         } catch (ApplicationException e) {
             log.error(e)
+            // re-wrap unknown error with better message
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.unknownMobile"), CommunicationErrorCode.UNKNOWN_ERROR_MOBILE.name())
             throw e
