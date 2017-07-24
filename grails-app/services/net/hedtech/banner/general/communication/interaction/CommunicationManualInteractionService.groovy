@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.interaction
 
@@ -16,7 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 class CommunicationManualInteractionService extends ServiceBase {
 
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationManualInteractionService.class)
 
     def preCreate(domainModelOrMap) {
 

@@ -23,7 +23,8 @@ import javax.persistence.*
                             WHERE a.pidm = :pidm""")
 ])
 class DirectoryProfilePreference implements Serializable {
-    static def log = Logger.getLogger('net.hedtech.banner.general.person.DirectoryProfilePreference')
+
+    private static final log = Logger.getLogger(DirectoryProfilePreference.class)
 
     /**
      * Surrogate ID for GORDPRF

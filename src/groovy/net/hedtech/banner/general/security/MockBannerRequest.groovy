@@ -1,3 +1,6 @@
+/*********************************************************************************
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
+ ********************************************************************************* */
 package net.hedtech.banner.general.security
 
 import org.apache.log4j.Logger
@@ -8,7 +11,7 @@ import org.springframework.web.context.request.RequestAttributes
  * A mock request attribute for handing back a batch banner session.
  */
 class MockBannerRequest implements RequestAttributes {
-    private final Logger log = Logger.getLogger(getClass())
+    private static final log = Logger.getLogger(MockBannerRequest.class)
     def session
 
     def getSession() {

@@ -1,3 +1,7 @@
+
+/*******************************************************************************
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.security
 
 import org.apache.log4j.Logger
@@ -9,7 +13,7 @@ import org.apache.log4j.Logger
  * of the servlet filters (AccessFilter). Since a batch thread has no http session, we fake it out.
  */
 class MockBannerSession {
-    private final Logger log = Logger.getLogger(getClass())
+    private static final log = Logger.getLogger(MockBannerSession.class)
 
     String mep
 

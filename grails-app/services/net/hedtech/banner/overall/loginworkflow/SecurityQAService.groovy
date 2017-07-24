@@ -22,7 +22,7 @@ class SecurityQAService {
     /* Dummy value for answer salt as the domain expects a not null and non empty value.
     This will be updated in domain with correct salt by the backed up triggers and api's for the domain */
     private final static String ANSWER_SALT_DUMMY = "ML3MTB80"
-    private static final Logger log = Logger.getLogger(getClass())
+    private static final log = Logger.getLogger(SecurityQAService.class)
 
     public def getNumberOfQuestionsAnswered(Integer pidm) {
         return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)

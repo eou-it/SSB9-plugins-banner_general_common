@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.job
 
@@ -26,7 +26,8 @@ import javax.mail.internet.InternetAddress
  * that eventually gets passed to the communication channel for final delivery.
  */
 class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
-    def log = Logger.getLogger(this.getClass())
+
+    private static final log = Logger.getLogger(CommunicationMessageGenerator.class)
 
     CommunicationTemplateMergeService communicationTemplateMergeService
 

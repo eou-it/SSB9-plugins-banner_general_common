@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.overall.loginworkflow
 
@@ -10,7 +10,7 @@ import java.sql.SQLException
 class UserAgreementService {
     static transactional = true
     def sessionFactory
-    private final log = Logger.getLogger(getClass())
+    private static final log = Logger.getLogger(UserAgreementService.class)
 
     public void updateUsageIndicator(String pidm,String usageIndicator)
     {

@@ -10,7 +10,7 @@ import org.apache.log4j.Logger
 
 class CommunicationTemplateFieldAssociationService extends ServiceBase {
 
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationTemplateFieldAssociationService.class)
 
     def preCreate(domainModelOrMap) {
         if (!CommunicationCommonUtility.userCanAuthorContent()) {

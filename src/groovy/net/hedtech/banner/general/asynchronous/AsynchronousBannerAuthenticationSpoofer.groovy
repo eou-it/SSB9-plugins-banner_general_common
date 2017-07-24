@@ -1,3 +1,6 @@
+/*********************************************************************************
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
 package net.hedtech.banner.general.asynchronous
 
 import groovy.sql.Sql
@@ -22,7 +25,7 @@ import java.sql.SQLException
  * An authentication provider for batch threads that authorize a user using behind a batch job thread.
  */
 public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationProvider {
-    private static final Logger log = Logger.getLogger("net.hedtech.banner.general.communication.batch.BatchAuthenticationProvider")
+    private static final log = Logger.getLogger(AsynchronousBannerAuthenticationSpoofer.class)
     public static final monitorOracleUserName = 'COMMMGR'
 
     def dataSource  // injected by Spring

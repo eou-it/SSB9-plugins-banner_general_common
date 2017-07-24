@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
 import groovy.json.JsonOutput
@@ -10,7 +13,7 @@ import org.apache.log4j.Logger
  * Formats a query for storage or execution.
  */
 class CommunicationPopulationQueryExtractStatement {
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationPopulationQueryExtractStatement.class)
     private Map queryMap = [ application: "", selection: "", creatorId: "", userId: "" ]
 
     public getQueryString() {

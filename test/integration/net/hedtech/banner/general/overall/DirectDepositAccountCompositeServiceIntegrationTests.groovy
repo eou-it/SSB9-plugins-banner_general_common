@@ -31,7 +31,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     def directDepositAccountCompositeService
     def selfServiceBannerAuthenticationProvider
-    private static final log = Logger.getLogger(getClass())
+    private static final log = Logger.getLogger(DirectDepositAccountCompositeServiceIntegrationTests.class)
 
     def testBankRoutingInfo0 = [
         bankRoutingNum: '234798944'

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
@@ -25,7 +25,7 @@ class CommunicationPopulationQueryCompositeService {
     def communicationPopulationQueryVersionService
     def communicationPopulationQueryStatementParseService
     def sessionFactory
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationPopulationQueryCompositeService.class)
 
 
     /**

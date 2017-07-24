@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
@@ -13,7 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 class CommunicationPopulationQueryVersionService extends ServiceBase {
 
     def communicationPopulationQueryStatementParseService
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationPopulationQueryVersionService.class)
 
 
     def preCreate(domainModelOrMap) {

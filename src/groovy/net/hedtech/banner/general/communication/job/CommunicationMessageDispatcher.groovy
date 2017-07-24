@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.job
 
@@ -21,7 +21,8 @@ import org.apache.log4j.Logger
  * work to the appropriate communication channel service.
  */
 class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
-    def log = Logger.getLogger(this.getClass())
+
+    private static final log = Logger.getLogger(CommunicationMessageDispatcher.class)
 
     CommunicationSendEmailService communicationSendEmailService
     CommunicationSendMobileNotificationService communicationSendMobileNotificationService

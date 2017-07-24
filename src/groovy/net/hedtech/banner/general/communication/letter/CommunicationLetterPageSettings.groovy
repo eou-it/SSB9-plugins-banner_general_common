@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.communication.letter
 
 import groovy.json.JsonOutput
@@ -9,7 +12,8 @@ import org.apache.log4j.Logger
  * Formats a query for storage or execution.
  */
 class CommunicationLetterPageSettings {
-    def log = Logger.getLogger(this.getClass())
+
+    private static final log = Logger.getLogger(CommunicationLetterPageSettings.class)
     private Map queryMap = createDefaultQueryMap()
     private final float minimumMarginInches = 0
     private final float maximumMarginInches = 22

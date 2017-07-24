@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
@@ -17,7 +17,7 @@ import java.sql.SQLException
  */
 class CommunicationGroupSendProcessorService {
     boolean transactional = true
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationGroupSendProcessorService.class)
     def communicationGroupSendItemService
     def communicationTemplateMergeService
     def communicationFieldCalculationService

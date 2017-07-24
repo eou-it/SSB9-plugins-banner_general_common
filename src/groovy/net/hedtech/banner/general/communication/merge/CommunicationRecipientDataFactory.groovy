@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.communication.merge
 
@@ -18,7 +18,8 @@ import org.apache.log4j.Logger
  * Creates a recipient data object.
  */
 class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor {
-    def log = Logger.getLogger(this.getClass())
+
+    private static final log = Logger.getLogger(CommunicationRecipientDataFactory.class)
 
     CommunicationTemplateMergeService communicationTemplateMergeService
     CommunicationFieldCalculationService communicationFieldCalculationService

@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
@@ -57,7 +57,8 @@ class CommunicationPopulationCompositeService {
     CommunicationPopulationSelectionListService communicationPopulationSelectionListService
     def sessionFactory
     SchedulerJobService schedulerJobService
-    def log = Logger.getLogger(this.getClass())
+
+    private static final log = Logger.getLogger(CommunicationPopulationCompositeService.class)
 
 
     public PagedResultList findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {

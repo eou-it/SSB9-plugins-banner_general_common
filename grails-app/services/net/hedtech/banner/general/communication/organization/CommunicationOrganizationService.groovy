@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
 package net.hedtech.banner.general.communication.organization
@@ -17,7 +17,8 @@ import java.text.SimpleDateFormat
  * Folder domain objects.
  */
 class CommunicationOrganizationService extends ServiceBase {
-    def log = Logger.getLogger(this.getClass())
+
+    private static final log = Logger.getLogger(CommunicationOrganizationService.class)
 
     def preCreate(domainModelOrMap) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization

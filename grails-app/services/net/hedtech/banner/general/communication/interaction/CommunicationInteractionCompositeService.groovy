@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class CommunicationInteractionCompositeService {
 
-    def log = Logger.getLogger(this.getClass())
+    private static final log = Logger.getLogger(CommunicationInteractionCompositeService.class)
 
     public static PersonIdentificationName getPersonOrNonPerson(String bannerId) {
         def person = fetchPersonOrNonPersonByAlternativeBannerId(bannerId)

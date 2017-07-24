@@ -1,3 +1,7 @@
+/*********************************************************************************
+ Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
+ **********************************************************************************/
+
 package net.hedtech.banner.general.communication.letter.pdf
 
 import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSize
@@ -9,7 +13,7 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
  * Builds a pdf from a letter html fragment.
  */
 class CommunicationLetterPdfBuilder {
-    private Logger log = Logger.getLogger( this.getClass() )
+    private static final log = Logger.getLogger(CommunicationLetterPdfBuilder.class)
     private ByteArrayOutputStream outputStream
     private ITextRenderer renderer
     private int documentCount

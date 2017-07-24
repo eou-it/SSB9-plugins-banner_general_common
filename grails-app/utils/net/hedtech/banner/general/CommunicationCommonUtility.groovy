@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2010-2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2017 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general
 
@@ -18,7 +18,7 @@ import java.util.regex.Pattern
  */
 class CommunicationCommonUtility {
 
-    static def log = Logger.getLogger('net.hedtech.banner.general.communication.CommunicationCommonUtility')
+    private static final log = Logger.getLogger(CommunicationCommonUtility.class)
 
     //TODO enhance these regex to make it more comprehensive
 

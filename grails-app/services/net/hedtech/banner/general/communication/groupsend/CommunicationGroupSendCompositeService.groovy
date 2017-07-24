@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
@@ -42,7 +42,7 @@ import java.sql.SQLException
 @Transactional
 class CommunicationGroupSendCompositeService {
 
-    def log = Logger.getLogger( this.getClass() )
+    private static final log = Logger.getLogger(CommunicationGroupSendCompositeService.class)
     CommunicationGroupSendService communicationGroupSendService
     CommunicationTemplateService communicationTemplateService
     CommunicationPopulationSelectionListService communicationPopulationSelectionListService

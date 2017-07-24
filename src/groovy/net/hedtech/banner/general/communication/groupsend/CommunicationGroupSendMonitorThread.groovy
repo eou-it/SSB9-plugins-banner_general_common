@@ -1,3 +1,7 @@
+/*******************************************************************************
+ Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
+
 package net.hedtech.banner.general.communication.groupsend
 
 import org.apache.log4j.Logger
@@ -9,7 +13,7 @@ class CommunicationGroupSendMonitorThread extends Thread {
 
     private boolean keepRunning = true;
     private CommunicationGroupSendMonitor monitor
-    private Logger log = Logger.getLogger( this.getClass() )
+    private static final log = Logger.getLogger(CommunicationGroupSendMonitorThread.class)
 
 
     CommunicationGroupSendMonitorThread( CommunicationGroupSendMonitor monitor ) {

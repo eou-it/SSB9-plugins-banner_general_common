@@ -24,7 +24,7 @@ import javax.persistence.*
 """)
 ])
 class DirectoryProfileItem {
-    static def log = Logger.getLogger('net.hedtech.banner.general.person.view.DirectoryProfileItem')
+    private static final log = Logger.getLogger(DirectoryProfileItem.class)
 
     /**
      * Surrogate ID for GOBDIRO
