@@ -18,6 +18,7 @@ import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
+import net.hedtech.banner.general.utility.InformationText
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.transaction.annotation.Propagation
@@ -34,6 +35,7 @@ import java.sql.SQLException
 class CommunicationFieldCalculationService extends ServiceBase {
 
     def asynchronousBannerAuthenticationSpoofer
+    def testTemplate
     /**
      * Merges the data from the parameter map into the string template
      * @param stringTemplate A string containing delimited token fields
@@ -57,6 +59,16 @@ class CommunicationFieldCalculationService extends ServiceBase {
         if (missingPropertyCapture.missingProperties.size() == 0) {
             return firstPass
         } else {
+            // For test template methods. Should alert user that data field value is empty/not found
+            if (testTemplate) {
+                def str = ""
+                missingPropertyCapture.missingProperties.each { String property ->
+                    str += " " + property + ","
+                }
+                if (str.length() > 0)
+                    str = str.getAt(0..(str.length() - 2)) // remove extra comma
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, "invalidDataField", str)
+            }
             missingPropertyCapture.missingProperties.each { String property ->
                 st.add( property, "" )
             }
@@ -91,7 +103,8 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null , testTemplate = false) {
+        this.testTemplate = testTemplate
         Map fieldNameValueMap = [:]
         for (String fieldName :fieldNames) {
             CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
@@ -102,6 +115,9 @@ class CommunicationFieldCalculationService extends ServiceBase {
             } else {
               // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
               // Will come back to this to figure out desired behavior.
+                // TODO What is this error?
+//                if (testTemplate)
+//                    throw CommunicationExceptionFactory.createApplicationException(this.class, "communication.error.message.dataField.noValue", fieldName)
             }
         }
 

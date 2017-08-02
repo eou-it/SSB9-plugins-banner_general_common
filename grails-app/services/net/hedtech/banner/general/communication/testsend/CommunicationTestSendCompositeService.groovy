@@ -2,45 +2,38 @@ package net.hedtech.banner.general.communication.testsend
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
-import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
-import net.hedtech.banner.general.communication.email.CommunicationSendEmailMethod
-import net.hedtech.banner.general.communication.email.CommunicationSendEmailService
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.item.CommunicationChannel
-import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
+import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
 import net.hedtech.banner.general.communication.letter.CommunicationLetterItem
 import net.hedtech.banner.general.communication.letter.CommunicationLetterMessage
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
-import net.hedtech.banner.general.communication.letter.CommunicationMergedLetterTemplate
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
-import net.hedtech.banner.general.communication.merge.CommunicationRecipientDataFactory
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.template.CommunicationMessage
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
-import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
-import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import org.apache.commons.lang.StringUtils
-
-import javax.mail.internet.AddressException
-import javax.mail.internet.InternetAddress
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 class CommunicationTestSendCompositeService  {
 
-    CommunicationTemplateService service
+    private Log log = LogFactory.getLog( this.getClass() )
+
+    def service
     def communicationTemplateMergeService
     def communicationJobService
-    def communicationMailboxAccountService
     def communicationRecipientDataService
     def asynchronousBannerAuthenticationSpoofer
     def communicationFieldCalculationService
     def communicationSendEmailService
-    CommunicationRecipientDataFactory communicationRecipientDataFactory
+    def communicationSendMobileNotificationService
+    def communicationGenerateLetterService
 
     def recipientData
     def channel
@@ -61,27 +54,6 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-//    def sendTestEmail (Long pidm, Long organizationId, Long templateId) {
-//        def organization = fetchOrg(organizationId)
-//        try {
-//            checkOrgEmail(organization)
-//        } catch (Throwable t) {
-//            log.error(t)
-//            def root = CommunicationOrganization.fetchRoot()
-//            if (root) {
-//                if (!organization.sendEmailServerProperties)
-//                    organization.sendEmailServerProperties = root.sendEmailServerProperties
-//                if (!organization.senderMailboxAccount)
-//                    organization.senderMailboxAccount = root.senderMailboxAccount
-//            }
-//        }
-//        checkOrgEmail(organization)
-//        CommunicationTemplate template = fetchTemplate(templateId)
-//        def fieldNames = visitEmail(template as CommunicationEmailTemplate)
-//        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames)
-//        createCommunicationJob(recipientData)
-//    }
-
     def sendTestEmail (Long pidm, Long organizationId, Long templateId) {
         def organization = fetchOrg(organizationId)
         try {
@@ -89,18 +61,26 @@ class CommunicationTestSendCompositeService  {
         } catch (Throwable t) {
             log.error(t)
             def root = CommunicationOrganization.fetchRoot()
-            if (root) {
-                if (!organization.sendEmailServerProperties)
-                    organization.sendEmailServerProperties = root.sendEmailServerProperties
-                if (!organization.senderMailboxAccount)
-                    organization.senderMailboxAccount = root.senderMailboxAccount
-            }
+            if (root)
+                organization.sendEmailServerProperties = root.sendEmailServerProperties
+            checkOrgEmail(organization)
         }
-        checkOrgEmail(organization)
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitEmail(template as CommunicationEmailTemplate)
         def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames)
-        sendTestEmail ( recipientData,  organization,  template)
+        saveRecipientData(recipientData)
+        try {
+            CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
+                    communicationTemplateMergeService: communicationTemplateMergeService
+            )
+            CommunicationMessage message = messageGenerator.generate(template, recipientData)
+            communicationSendEmailService.sendEmail(organizationId, message as CommunicationEmailMessage, recipientData, pidm)
+        } catch (Throwable t) {
+            log.error(t)
+            if (t instanceof ApplicationException)
+                throw t
+            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.email"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        }
     }
 
     def sendTestMobileNotification (Long pidm, Long organizationId, Long templateId) {
@@ -111,22 +91,30 @@ class CommunicationTestSendCompositeService  {
             log.error(t)
             def root = CommunicationOrganization.fetchRoot()
             if (root) {
-                if (!organization.mobileApplicationName)
-                    organization.mobileApplicationName = root.mobileApplicationName
-                if (!organization.mobileEndPointUrl)
-                    organization.mobileEndPointUrl = root.mobileEndPointUrl
-                if (!organization.encryptedMobileApplicationKey)
-                    organization.encryptedMobileApplicationKey = root.encryptedMobileApplicationKey
-                if (!organization.clearMobileApplicationKey)
-                    organization.clearMobileApplicationKey = root.clearMobileApplicationKey
+                organization.mobileApplicationName = root.mobileApplicationName
+                organization.mobileEndPointUrl = root.mobileEndPointUrl
+                organization.encryptedMobileApplicationKey = root.encryptedMobileApplicationKey
+                organization.clearMobileApplicationKey = root.clearMobileApplicationKey
             }
         }
         checkOrgMobile(organization)
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitMobileNotification(template as CommunicationMobileNotificationTemplate)
-        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames)
         checkExternalIdExists(pidm)
-        createCommunicationJob(recipientData)
+        saveRecipientData(recipientData)
+        try {
+            CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
+                    communicationTemplateMergeService: communicationTemplateMergeService
+            )
+            CommunicationMessage message = messageGenerator.generate(template, recipientData)
+            communicationSendMobileNotificationService.send(organizationId, message as CommunicationMobileNotificationMessage, recipientData)
+        } catch (Throwable t) {
+            log.error(t)
+            if (t instanceof ApplicationException)
+                throw t
+            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.mobile"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        }
     }
 
     def sendTestLetter (Long pidm, Long organizationId, Long templateId) {
@@ -136,17 +124,24 @@ class CommunicationTestSendCompositeService  {
 
         CommunicationTemplate template = fetchTemplate(templateId)
         def recipientData = visitLetter(template as CommunicationLetterTemplate, pidm, organizationId, templateId)
+        saveRecipientData(recipientData)
+        try {
+            CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
+                    communicationTemplateMergeService: communicationTemplateMergeService
+            )
+            CommunicationMessage message = messageGenerator.generate(template, recipientData)
+            def letter = createLetter(organization, (CommunicationLetterMessage) message , recipientData)
 
-        CommunicationMergedLetterTemplate mergedLetterTemplate = communicationTemplateMergeService.mergeLetterTemplate(template as CommunicationLetterTemplate, recipientData )
-        CommunicationLetterMessage message = new CommunicationLetterMessage()
-        message.toAddress = mergedLetterTemplate.toAddress
-        message.content = mergedLetterTemplate.content
-        message.style = mergedLetterTemplate.style
-
-        def letter = createLetter(organization, message , recipientData)
-        return letter
+            communicationGenerateLetterService.testTemplate = true
+            letter.id = communicationGenerateLetterService.send(organizationId, message as CommunicationLetterMessage, recipientData )
+            return letter
+        } catch (Throwable t) {
+            log.error(t)
+            if (t instanceof ApplicationException)
+                throw t
+            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.testSendTemplate.letter"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        }
     }
-
 
     // HELPER FUNCTIONS
 
@@ -200,23 +195,11 @@ class CommunicationTestSendCompositeService  {
         return recipientData
     }
 
-    private void createCommunicationJob(CommunicationRecipientData recipientData) {
-        communicationRecipientDataService.create(recipientData)
-        CommunicationJob communicationJob
-        try {
-            communicationJob = new CommunicationJob(referenceId: recipientData.referenceId)
-            communicationJob = communicationJobService.create(communicationJob)
-//            trackEmail(pidm, organization, recipientData, template)
-        } catch (ApplicationException e) {
-            log.error(e)
-            throw e
-        } catch (Throwable t) {
-            log.error(t)
-            /* throw unknown error */
-            throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.templateErrorUnknown"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
-        }
+    private void saveRecipientData(CommunicationRecipientData recipientData) {
+        CommunicationRecipientData data = communicationRecipientDataService.create(recipientData) as CommunicationRecipientData
+        data.ownerId = data.lastModifiedBy
+        communicationRecipientDataService.update(recipientData)
     }
-
 
     private Map calculateFieldsForUser( List<String> fieldNames, Long pidm ) {
         def originalMap = null
@@ -226,7 +209,8 @@ class CommunicationTestSendCompositeService  {
                     (List<String>)  fieldNames,
                     (Map) [:],
                     (Long) pidm,
-                    ""
+                    "",
+                    true
             )
         } finally {
             if (originalMap) {
@@ -317,14 +301,12 @@ class CommunicationTestSendCompositeService  {
     }
 
     def createLetter(CommunicationOrganization organization, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
-
         if (isEmpty(message.toAddress)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
                     CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS.toString(),
                     "emptyLetterToAddress"
             )
         }
-
         if (isEmpty(message.content)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
                     CommunicationErrorCode.EMPTY_LETTER_CONTENT.toString(),
@@ -340,7 +322,6 @@ class CommunicationTestSendCompositeService  {
         item.setCreatedBy( recipientData.ownerId )
         item.setSentDate( message.dateSent )
         item.setTemplateId(recipientData.templateId)
-
         // letter specific fields
         item.toAddress = message.toAddress
         item.content = message.content
@@ -348,69 +329,4 @@ class CommunicationTestSendCompositeService  {
         return item
     }
 
-
-    def sendTestEmail (CommunicationRecipientData recipientData, CommunicationOrganization organization, CommunicationTemplate template) {
-        CommunicationMergedEmailTemplate mergedTemplate = communicationTemplateMergeService.mergeEmailTemplate(template, recipientData)
-        CommunicationEmailMessage emailMessage = new CommunicationEmailMessage()
-        emailMessage.setSubjectLine(mergedTemplate.subject)
-        emailMessage.setMessageBody(mergedTemplate.content)
-        emailMessage.setMessageBodyContentType("text/html; charset=UTF-8")
-//        def toList = []
-//        for (def i = 0; i < mergedTemplate.toList.length(); i++) {
-//            def toAddress = new CommunicationEmailAddress(
-//                    mailAddress: mergedTemplate.toList[i],
-//                    displayName: mergedTemplate.toList[i]
-//            )
-//            if (toAddress)
-//                toList.push(toAddress)
-//        }
-//        emailMessage.setToList(toList.toSet())
-
-        if (mergedTemplate.toList && mergedTemplate.toList.trim().length() > 0) {
-            emailMessage.setToList( createAddresses( mergedTemplate.toList.trim(), ";" ) )
-        }
-
-        if (organization?.senderMailboxAccount?.encryptedPassword != null)
-            organization.senderMailboxAccount.clearTextPassword = communicationMailboxAccountService.decryptPassword( organization.senderMailboxAccount.encryptedPassword )
-
-        CommunicationSendEmailMethod sendEmailMethod = new CommunicationSendEmailMethod(emailMessage, organization)
-
-        try {
-            sendEmailMethod.execute()
-        } catch (ApplicationException e) {
-            log.error(e)
-            throw e
-        }
-    }
-
-    private HashSet<CommunicationEmailAddress> createAddresses( String listOfEmails, String separator ) throws AddressException {
-        HashSet<CommunicationEmailAddress> emailAddresses = new HashSet<CommunicationEmailAddress>();
-        String[] tempEA = listOfEmails.trim().split( separator );
-        CommunicationEmailAddress emailAddress;
-
-        for (String string : tempEA) {
-
-            emailAddress = new CommunicationEmailAddress();
-
-            try {
-                // Try to parse the personal display name out of the address first.
-                InternetAddress[] internetAddresses = InternetAddress.parse( string.trim(), true );
-                if (internetAddresses.length == 1) {
-                    InternetAddress internetAddress = internetAddresses[0];
-                    emailAddress.setMailAddress( internetAddress.getAddress() );
-                    emailAddress.setDisplayName( internetAddress.getPersonal() );
-                } else {
-                    if (log.isDebugEnabled()) log.debug( "Did not find exactly one internet address parsing: " + string );
-                    emailAddress.setMailAddress( string.trim() );
-                }
-            } catch (AddressException e) {
-                if (log.isDebugEnabled()) log.debug( "AddressException attempting to parse: " + string );
-                emailAddress.setMailAddress( string.trim() );
-            }
-
-            emailAddresses.add( emailAddress );
-        }
-
-        return emailAddresses;
-    }
 }

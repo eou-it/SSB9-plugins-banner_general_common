@@ -45,7 +45,7 @@ class CommunicationSendMobileNotificationMethod {
 
         if (isEmpty(rootOrganization.mobileEndPointUrl)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,
-                    new RuntimeException('communication.error.message.mobileEndpoint.invalidUrl'),
+                    new RuntimeException('communication.error.message.mobileEndPointUrlNotFound'),
                     CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.name()
             )
         }
