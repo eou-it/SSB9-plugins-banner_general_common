@@ -17,6 +17,7 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.parameter.CommunicationParameter
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.general.utility.InformationText
 import net.hedtech.banner.service.ServiceBase
@@ -67,8 +68,9 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 }
                 if (str.length() > 0)
                     str = str.getAt(0..(str.length() - 2)) // remove extra comma
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, "invalidDataField", str)
+                throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException(str), CommunicationErrorCode.MISSING_DATA_FIELD.name())
             }
+
             missingPropertyCapture.missingProperties.each { String property ->
                 st.add( property, "" )
             }
@@ -116,8 +118,6 @@ class CommunicationFieldCalculationService extends ServiceBase {
               // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
               // Will come back to this to figure out desired behavior.
                 // TODO What is this error?
-//                if (testTemplate)
-//                    throw CommunicationExceptionFactory.createApplicationException(this.class, "communication.error.message.dataField.noValue", fieldName)
             }
         }
 
