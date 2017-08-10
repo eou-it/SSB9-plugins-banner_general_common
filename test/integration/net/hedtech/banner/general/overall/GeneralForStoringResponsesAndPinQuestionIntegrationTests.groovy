@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 /**
  Banner Automator Version: 1.29

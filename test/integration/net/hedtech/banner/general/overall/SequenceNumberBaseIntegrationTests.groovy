@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2017 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
