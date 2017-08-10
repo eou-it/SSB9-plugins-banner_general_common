@@ -15,10 +15,7 @@ enum CommunicationErrorCode implements Serializable {
 
     /** Email error codes **/
     EMAIL_SERVER_CONNECTION_FAILED, //Failure connecting to the email server
-    EMAIL_SERVER_HOST_NOT_FOUND,
-    EMAIL_SERVER_PORT_INVALID,
-    EMAIL_SERVER_SECURITY_PROTOCOL_INVALID,
-    EMAIL_SERVER_TYPE_INVALID,
+
     EMAIL_SERVER_AUTHENTICATION_FAILED, //Failure authenticating to the email server
     EMAIL_SERVER_USER_NOT_AUTHORIZED,  // Server does not allow this user to have access
     EMAIL_SERVER_AUTHENTICATION_FAILED_UNKNOWN, // Unknown cause to authentication failure
@@ -29,6 +26,11 @@ enum CommunicationErrorCode implements Serializable {
     INVALID_EMAIL_ADDRESS, //Email address is not valid
     EMPTY_EMAIL_SUBJECT, //Email subject is empty
     EMAIL_CONTENT_TOO_LARGE, //Email content is too large
+
+    EMAIL_SERVER_HOST_NOT_FOUND,
+    EMAIL_SERVER_PORT_INVALID,
+    EMAIL_SERVER_SECURITY_PROTOCOL_INVALID,
+    EMAIL_SERVER_TYPE_INVALID,
     INVALID_RECEIVER_ADDRESS, // Email receiver address invalid
 
     TEMPLATE_NOT_FOUND,
