@@ -70,7 +70,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                     str = str.getAt(0..(str.length() - 2)) // remove extra comma
                 throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException(str), CommunicationErrorCode.MISSING_DATA_FIELD.name())
             }
-
+            // TODO Check if this is actually the desired functionality. Possibly allow users to require datafield
             missingPropertyCapture.missingProperties.each { String property ->
                 st.add( property, "" )
             }
