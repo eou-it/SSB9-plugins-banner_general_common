@@ -1,5 +1,5 @@
 /********************************************************************************
-  Copyright 2016 Ellucian Company L.P. and its affiliates.
+  Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -49,6 +49,7 @@ class DirectDepositAccountCompositeService {
         account.bankRoutingInfo = validateBankRoutingInfo(routingNum)
 
         if(setPriority){
+            validateOnlyOneAP(account)
             validateNotDuplicate(account)
             account = setNextPriority(account)
         }
@@ -104,6 +105,21 @@ class DirectDepositAccountCompositeService {
         model
     }
 
+    /**
+     * Retrieve user payroll allocations and convert to a list of maps.
+     * @param pidm
+     * @return List of allocation maps
+     */
+    def getUserHrAllocationsAsListOfMaps(pidm) {
+        def allocations = getUserHrAllocations(pidm).allocations
+
+        return [
+            allocations: directDepositAccountService.marshallAccountsToMinimalStateForUi(allocations)
+        ]
+
+    }
+
+
     private def validateRoutingNumExistsInMap(directDepositAccountMap) {
         def routingNum = directDepositAccountMap?.bankRoutingInfo?.bankRoutingNum
 
@@ -127,6 +143,14 @@ class DirectDepositAccountCompositeService {
     private def validateNotDuplicate(account) {
         if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.accountType, account.apIndicator, account.hrIndicator)) {
             throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
+        }
+    }
+
+    def validateOnlyOneAP(account) {
+        if(account.apIndicator == 'A'){
+            if(directDepositAccountService.fetchApAccountsByPidm(account.pidm).size() > 0) {
+                throw new ApplicationException(DirectDepositAccount, "@@r1:apAccountAlreadyExists@@")
+            }
         }
     }
 

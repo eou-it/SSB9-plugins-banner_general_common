@@ -50,6 +50,19 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         status: 'P'
     ]
 
+    def testAccountMap1 = [
+            accountType: 'C',
+            bankAccountNum: '22334455',
+            bankRoutingInfo: testBankRoutingInfo0,
+            documentType: 'D',
+            id: 0,
+            apIndicator: 'I',
+            hrIndicator: 'A',
+            intlAchTransactionIndicator: 'N',
+            pidm: 95999,
+            status: 'P'
+    ]
+
     BannerAuthenticationToken bannerAuthenticationToken
 
     @Before
@@ -78,14 +91,14 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testAddDuplicateAccount() {
         def account1, account2
 
-        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+        account1 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap1)
 
         try {
-            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap0)
+            account2 = directDepositAccountCompositeService.addorUpdateAccount(testAccountMap1)
             fail("I should have received an error but it passed; @@r1:recordAlreadyExists@@ ")
         }
         catch (ApplicationException ae) {
-            assertApplicationException ae, "recordAlreadyExists"
+            assertApplicationException ae, "@@r1:recordAlreadyExists@@"
         }
     }
 
@@ -107,6 +120,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @Test
     void testRePrioritizeExistingAccount() {
         def pidm = PersonUtility.getPerson("GDP000001").pidm
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
 
         //   def existingItem = DirectDepositAccount.findById(1164) as DirectDepositAccount
         def account1
@@ -295,6 +309,84 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     }
 
     @Test
+    /**
+     * No accounts
+     */
+    void testGetUserHrAllocationsAsListOfMapsNoAccounts() {
+        def pidm = PersonUtility.getPerson("GDP000001").pidm
+        def allocationsObj = directDepositAccountCompositeService.getUserHrAllocationsAsListOfMaps(pidm) //36732 // No accounts
+
+        // Assert domain values
+        assertNotNull allocationsObj
+        assertNotNull allocationsObj.allocations
+        assertEquals 0, allocationsObj.allocations.size()
+    }
+
+    @Test
+    /**
+     * One account:
+     *   100% allocated
+     */
+    void testGetUserHrAllocationsAsListOfMapsOneAccount() {
+        def pidm = PersonUtility.getPerson("GDP000003").pidm
+        def allocationsObj = directDepositAccountCompositeService.getUserHrAllocationsAsListOfMaps(pidm) //49548 // One account
+
+        // Assert domain values
+        assertNotNull allocationsObj
+        assertNotNull allocationsObj.allocations
+        assertEquals 1, allocationsObj.allocations.size()
+
+        def allocation = allocationsObj.allocations[0]
+
+        assertNotNull allocation.id
+        assertEquals "1293902", allocation.bankAccountNum
+        assertEquals "C", allocation.accountType
+        assertNull allocation.amount
+        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+    }
+
+    @Test
+    /**
+     * Three accounts:
+     *   Priority 1) $77.00 allocated
+     *   Priority 2) 50% allocated
+     *   Priority 3) 100% allocated
+     */
+    void testGetUserHrAllocationsAsListOfMapsThreeAccounts() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def allocationsObj = directDepositAccountCompositeService.getUserHrAllocationsAsListOfMaps(pidm) //36743 // Two accounts
+
+        // Assert domain values
+        assertNotNull allocationsObj
+        assertNotNull allocationsObj.allocations
+        assertEquals 3, allocationsObj.allocations.size()
+
+        def allocation = allocationsObj.allocations[0]
+
+        assertNotNull allocation.id
+        assertEquals "736900542", allocation.bankAccountNum
+        assertEquals "C", allocation.accountType
+        assertTrue(76.9 < allocation.amount && allocation.amount < 77.1)
+        assertNull allocation.percent
+
+        allocation = allocationsObj.allocations[1]
+
+        assertNotNull allocation.id
+        assertEquals "95003546", allocation.bankAccountNum
+        assertEquals "S", allocation.accountType
+        assertNull allocation.amount
+        assertTrue(49.9 < allocation.percent && allocation.percent < 50.1)
+
+        allocation = allocationsObj.allocations[2]
+
+        assertNotNull allocation.id
+        assertEquals "67674852", allocation.bankAccountNum
+        assertEquals "C", allocation.accountType
+        assertNull allocation.amount
+        assertTrue(99.9 < allocation.percent && allocation.percent < 100.1)
+    }
+
+    @Test
     void testGetCurrencySymbolPreDigits() {
         def symbol = directDepositAccountCompositeService.getCurrencySymbol()
 
@@ -318,6 +410,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     void testReorderAccounts() {
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
 
         accts[0].priority = 2
         accts[1].priority = 1
@@ -329,6 +422,19 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def newId = result[1].id
 
         assertEquals false, oldId == newId
+    }
+
+    @Test
+    void testValidateOnlyOneAP() {
+        def pidm = PersonUtility.getPerson("HOSH00018").pidm
+        def accountMap = [pidm: pidm, apIndicator: 'A']
+        try {
+            directDepositAccountCompositeService.validateOnlyOneAP(accountMap)
+            fail("I should have received an error but it passed; @@r1:apAccountAlreadyExists@@ ")
+        }
+        catch (ApplicationException ae) {
+            assertApplicationException ae, "apAccountAlreadyExists"
+        }
     }
 
 

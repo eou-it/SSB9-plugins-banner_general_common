@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -12,6 +12,7 @@ import org.junit.After
 import net.hedtech.banner.general.overall.DirectDepositAccountService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  *
@@ -49,7 +50,7 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull directDepositAccount.dataOrigin
         assertNotNull directDepositAccount.lastModifiedBy
         assertNotNull directDepositAccount.lastModified
-        
+
         def id = directDepositAccount.id
 
         directDepositAccount = directDepositAccount.get(id)
@@ -93,7 +94,47 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testGetActiveApAccountsWhereNoAccountsExist() {
-        def activeAccounts = directDepositAccountService.getActiveApAccounts(-1) // One account
+        def activeAccounts = directDepositAccountService.getActiveApAccounts(-1) // No accounts
+
+        // Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 0, activeAccounts.size()
+    }
+
+    @Test
+    void testFetchApAccountsByPidmAsListOfMapsWhereMultipleAccountsExist() {
+        def pidm = PersonUtility.getPerson("HOSH00018").pidm
+        def activeAccounts = directDepositAccountService.fetchApAccountsByPidmAsListOfMaps(pidm) // Multiple accounts
+
+         //Assert domain values
+        assertNotNull activeAccounts
+        assertEquals 2, activeAccounts.size()
+
+        // First account
+        activeAccounts = activeAccounts.sort{it.id}
+        def userAccount = activeAccounts[0]
+
+        assertNotNull userAccount.id
+        assertEquals "9876543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+
+        // Second account
+        userAccount = activeAccounts[1]
+
+        assertNotNull userAccount.id
+        assertEquals "38167543", userAccount.bankAccountNum
+        assertEquals "C", userAccount.accountType
+        assertEquals "A", userAccount.apIndicator
+        assertEquals "I", userAccount.hrIndicator
+        assertNotNull userAccount.version
+    }
+
+    @Test
+    void testFetchApAccountsByPidmAsListOfMapsWhereNoAccountsExist() {
+        def activeAccounts = directDepositAccountService.fetchApAccountsByPidmAsListOfMaps(-1) // No accounts
 
         // Assert domain values
         assertNotNull activeAccounts
@@ -163,6 +204,89 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         // Assert domain values
         assertNotNull activeAccounts
         assertEquals 0, activeAccounts.size()
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithSingleObject() {
+        def directDepositAccount = newDirectDepositAccount()
+
+        directDepositAccount.id = 1
+        directDepositAccount.version = 0
+
+        def marshalledAccount = directDepositAccountService.marshallAccountsToMinimalStateForUi(directDepositAccount)
+
+        // Assert values
+        assertNotNull marshalledAccount
+        assertEquals 1, marshalledAccount.id
+        assertEquals 16, marshalledAccount.priority
+        assertEquals "36948575", marshalledAccount.bankAccountNum
+        assertEquals "C", marshalledAccount.accountType
+        assertEquals "I", marshalledAccount.apIndicator
+        assertEquals "A", marshalledAccount.hrIndicator
+        assertNotNull marshalledAccount.version
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithNullAccount() {
+        def marshalledAccount = directDepositAccountService.marshallAccountsToMinimalStateForUi(null)
+
+        assertNull marshalledAccount
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithList() {
+        def directDepositAccount0 = newDirectDepositAccount()
+
+        directDepositAccount0.id = 1
+        directDepositAccount0.version = 0
+
+        def directDepositAccount1 = newDirectDepositAccount()
+
+        directDepositAccount1.id = 2
+        directDepositAccount1.version = 4
+
+        def accounts = []
+
+        accounts.push(directDepositAccount0)
+        accounts.push(directDepositAccount1)
+
+        def marshalledAccounts = directDepositAccountService.marshallAccountsToMinimalStateForUi(accounts)
+
+        assertEquals 2, marshalledAccounts.size()
+
+        def marshalledAccount = marshalledAccounts[0]
+
+        // Assert values
+        assertNotNull marshalledAccount
+        assertEquals 1, marshalledAccount.id
+        assertEquals 0, marshalledAccount.version
+        assertEquals 16, marshalledAccount.priority
+        assertEquals "36948575", marshalledAccount.bankAccountNum
+        assertEquals "C", marshalledAccount.accountType
+        assertEquals "I", marshalledAccount.apIndicator
+        assertEquals "A", marshalledAccount.hrIndicator
+        assertNotNull marshalledAccount.version
+
+        marshalledAccount = marshalledAccounts[1]
+
+        // Assert values
+        assertNotNull marshalledAccount
+        assertEquals 2, marshalledAccount.id
+        assertEquals 4, marshalledAccount.version
+        assertEquals 16, marshalledAccount.priority
+        assertEquals "36948575", marshalledAccount.bankAccountNum
+        assertEquals "C", marshalledAccount.accountType
+        assertEquals "I", marshalledAccount.apIndicator
+        assertEquals "A", marshalledAccount.hrIndicator
+        assertNotNull marshalledAccount.version
+    }
+
+    @Test
+    void testMarshallAccountsToMinimalStateForUiWithNoAccounts() {
+        def accounts = []
+        def marshalledAccounts = directDepositAccountService.marshallAccountsToMinimalStateForUi(accounts)
+
+        assertEquals 0, marshalledAccounts.size()
     }
 
     @Test
@@ -306,6 +430,10 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
         def list = []
         list[0] = directDepositAccountMap
+
+
+        def sessionPidm = 95999
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = sessionPidm
 
         def result = directDepositAccountService.setupAccountsForDelete(list)
 
@@ -485,13 +613,106 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
     // END: TESTS TO VALIDATE ACCOUNT AMOUNTS
 
-    private def newDirectDepositAccount() {
+    @Test
+    void testFetchApAccountsByPidm() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount.status = 'I'
+        directDepositAccount.bankAccountNum = "982304444"
+        directDepositAccount.apIndicator = 'A'
+        directDepositAccount.hrIndicator = 'I'
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        def directDepositAccount2 = newDirectDepositAccount()
+        directDepositAccount2.priority = 17
+        directDepositAccount2.apIndicator = 'A'
+        directDepositAccount2.hrIndicator = 'I'
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount2])
+
+        def results = directDepositAccountService.fetchApAccountsByPidm(directDepositAccount2.pidm)
+        assertTrue results.size() >= 2
+        assertTrue results.bankAccountNum.contains("982304444")
+    }
+
+    @Test
+    void testDeleteOfAccountBelongingToPidm() {
+        def pidm = 49776
+
+        def newDirectDepositAccount = newDirectDepositAccount(pidm)
+        def directDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        directDepositAccount.discard()
+
+        def savedDirectDepositAccount = directDepositAccountService.get(directDepositAccount.id)
+
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def success = directDepositAccountService.delete(savedDirectDepositAccount)
+
+        assertTrue success
+    }
+
+    @Test
+    void testDeleteOfAccountNotBelongingToPidm() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        def sessionPidm = 49776
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = sessionPidm
+
+        try {
+            directDepositAccountService.delete(directDepositAccount)
+            fail("I should have received an error but it passed; @@r1:operation.not.authorized@@")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "@@r1:operation.not.authorized@@"
+        }
+    }
+
+    @Test
+    void testUpdateOfAccountBelongingToPidm() {
+        def pidm = 49776
+
+        def newDirectDepositAccount = newDirectDepositAccount(pidm)
+        def directDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        assertEquals "C", directDepositAccount.accountType
+
+        // Update it
+        directDepositAccount.accountType = "S"
+
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def updatedAccount = directDepositAccountService.update(directDepositAccount)
+
+        assertNotNull updatedAccount
+        assertEquals "S", updatedAccount.accountType
+    }
+
+    @Test
+    void testUpdateOfAccountNotBelongingToPidm() {
+        def directDepositAccount = newDirectDepositAccount()
+        directDepositAccount = directDepositAccountService.create([domainModel: directDepositAccount])
+
+        // Update it
+        directDepositAccount.accountType = "S"
+
+        def sessionPidm = 49776
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = sessionPidm
+
+        try {
+            directDepositAccountService.update(directDepositAccount)
+            fail("I should have received an error but it passed; @@r1:operation.not.authorized@@")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, "@@r1:operation.not.authorized@@"
+        }
+    }
+
+    private def newDirectDepositAccount(pidm=95999) {
         def bankRoutingInfo = new BankRoutingInfo()
 
         bankRoutingInfo.bankRoutingNum = 234798944
 
         def domain = new DirectDepositAccount(
-            pidm: 95999, //49758,
+            pidm: pidm,
             status: "P",
             documentType: "D",
             priority: 16,

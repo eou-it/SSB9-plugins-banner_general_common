@@ -1,5 +1,5 @@
 /*******************************************************************************
-Copyright 2015 Ellucian Company L.P. and its affiliates.
+Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -24,6 +24,10 @@ import net.hedtech.banner.general.crossproduct.BankRoutingInfo
                    WHERE a.pidm = :pidm
                      AND a.apIndicator = 'A'
                      AND a.status != 'I'"""),
+    @NamedQuery(name = "DirectDepositAccount.fetchApAccountsByPidm",
+                query = """ FROM DirectDepositAccount a
+                   WHERE a.pidm = :pidm
+                     AND a.apIndicator = 'A'"""),
     @NamedQuery(name = "DirectDepositAccount.fetchActiveHrAccountsByPidm",
         query = """ FROM DirectDepositAccount a
                    WHERE a.pidm = :pidm
