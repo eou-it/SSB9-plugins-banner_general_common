@@ -7,7 +7,7 @@
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
-import net.hedtech.banner.general.overall.ldm.LdmService
+import net.hedtech.banner.general.overall.ldm.NonLdmService
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.EntriesForSql
 import net.hedtech.banner.general.system.EntriesForSqlProcesss
@@ -71,7 +71,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testSqlProcessCompositeServiceTestGetSqlProcessResultsTerms() {
-        def params = [sqlCode: 'DERIVE_TERM', sqlProcessCode: 'HEDM', input_date: new java.sql.Date(LdmService.convertString2Date('2014-06-01').time)]
+        def params = [sqlCode: 'DERIVE_TERM', sqlProcessCode: 'HEDM', input_date: new java.sql.Date(NonLdmService.convertString2Date('2014-06-01').time)]
         def results = sqlProcessCompositeService.getSqlProcessResults(params)
         assertEquals results[0][0], "201410"
     }
