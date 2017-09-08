@@ -17,7 +17,9 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
+import net.hedtech.banner.general.communication.parameter.CommunicationParameter
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
+import net.hedtech.banner.general.utility.InformationText
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.transaction.annotation.Propagation
@@ -34,9 +36,10 @@ import java.sql.SQLException
 class CommunicationFieldCalculationService extends ServiceBase {
 
     def asynchronousBannerAuthenticationSpoofer
+    def testTemplate
     /**
      * Merges the data from the parameter map into the string template
-     * @param stringTemplate A stcring containing delimited token fields
+     * @param stringTemplate A string containing delimited token fields
      * @param parameters Map of name value pairs representing tokens in the template and their values
      * @return A fully rendered String
      */
@@ -57,6 +60,17 @@ class CommunicationFieldCalculationService extends ServiceBase {
         if (missingPropertyCapture.missingProperties.size() == 0) {
             return firstPass
         } else {
+            // For test template methods. Should alert user that data field value is empty/not found
+            if (testTemplate) {
+                def str = ""
+                missingPropertyCapture.missingProperties.each { String property ->
+                    str += " " + property + ","
+                }
+                if (str.length() > 0)
+                    str = str.getAt(0..(str.length() - 2)) // remove extra comma
+                throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException(str), CommunicationErrorCode.MISSING_DATA_FIELD.name())
+            }
+            // TODO Check if this is actually the desired functionality. Possibly allow users to require datafield
             missingPropertyCapture.missingProperties.each { String property ->
                 st.add( property, "" )
             }
@@ -91,7 +105,8 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null , testTemplate = false) {
+        this.testTemplate = testTemplate
         Map fieldNameValueMap = [:]
         for (String fieldName :fieldNames) {
             CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
@@ -102,6 +117,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
             } else {
               // Will ignore any not found communication fields (field may have been renamed or deleted, will skip for now.
               // Will come back to this to figure out desired behavior.
+                // TODO What is this error?
             }
         }
 

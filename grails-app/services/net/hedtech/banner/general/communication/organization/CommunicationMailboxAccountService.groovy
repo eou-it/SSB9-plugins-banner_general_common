@@ -11,6 +11,8 @@ import net.hedtech.banner.service.ServiceBase
 
 class CommunicationMailboxAccountService extends ServiceBase {
 
+    def sessionFactory
+
     def preCreate(domainModelOrMap) {
         CommunicationMailboxAccount mailboxAccount = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationMailboxAccount
         if (mailboxAccount.clearTextPassword) {

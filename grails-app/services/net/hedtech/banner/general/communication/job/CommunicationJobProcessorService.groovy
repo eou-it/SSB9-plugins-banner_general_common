@@ -23,6 +23,8 @@ class CommunicationJobProcessorService {
     public void performCommunicationJob( Long jobId ) {
         log.debug( "performed communication job with job id = ${jobId}." )
 
+
+
         CommunicationJob job = communicationJobService.get( jobId )
         List<CommunicationRecipientData> recipientDataList = CommunicationRecipientData.fetchByReferenceId( job.referenceId )
         CommunicationRecipientData recipientData = recipientDataList.size() ? recipientDataList[0] : null

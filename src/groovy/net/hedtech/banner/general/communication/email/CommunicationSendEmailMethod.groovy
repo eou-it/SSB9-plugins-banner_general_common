@@ -99,7 +99,7 @@ class CommunicationSendEmailMethod {
             String recipientList = email.getToAddresses().toListString()
             String replyToList = email.getReplyToAddresses().toListString()
             if(e.getCause() instanceof AuthenticationFailedException) {
-                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
+                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.EMAIL_SERVER_AUTHENTICATION_FAILED.name())
             }
             else if(e.getCause() instanceof MessagingException) {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.EMAIL_SERVER_CONNECTION_FAILED.name())
@@ -108,7 +108,7 @@ class CommunicationSendEmailMethod {
             {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error( "EmailServer.SendEmailMethod.execute caught exception " + e, e );
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailMethod.class, e, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }

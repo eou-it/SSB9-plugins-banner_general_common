@@ -18,7 +18,7 @@ class CommunicationGenerateLetterService {
     def communicationLetterItemService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
-
+    def testTemplate = false
 
     /**
      * Sends a letter message (single) based on the contents of letter message passed.
@@ -27,7 +27,7 @@ class CommunicationGenerateLetterService {
      * @param message the letter message to send
      * @param recipientData a recipient data describing details of the target recipient
      */
-    public void send( Long organizationId, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
+    def send( Long organizationId, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
         log.debug( "creating letter message" )
 
         asynchronousBannerAuthenticationSpoofer.setMepProcessContext(sessionFactory.currentSession.connection(), recipientData.mepCode )
@@ -35,7 +35,11 @@ class CommunicationGenerateLetterService {
         CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(organizationId)
 
         try {
-            track( senderOrganization, message, recipientData )
+            def response = track( senderOrganization, message, recipientData )
+            if (testTemplate) {
+                testTemplate = !testTemplate
+                return response
+            }
         } catch (Throwable t) {
             log.error( t )
             throw t;
@@ -44,7 +48,7 @@ class CommunicationGenerateLetterService {
     }
 
 
-    private void track( CommunicationOrganization organization, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
+    def track( CommunicationOrganization organization, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
         log.debug( "tracking letter message sent")
 
         if (isEmpty(message.toAddress)) {
@@ -77,6 +81,8 @@ class CommunicationGenerateLetterService {
 
         item = communicationLetterItemService.create( item )
         log.debug( "recorded letter item sent with item id = ${item.id}." )
+        if (testTemplate)
+            return item.id
     }
 
     private boolean isEmpty(String s) {

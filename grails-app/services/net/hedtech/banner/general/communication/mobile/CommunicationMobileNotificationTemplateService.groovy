@@ -16,7 +16,7 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplateSe
 class CommunicationMobileNotificationTemplateService extends CommunicationTemplateService {
 
     @Override
-    protected void validatePublished( CommunicationTemplate template ) {
+    void validatePublished( CommunicationTemplate template ) {
         CommunicationMobileNotificationTemplate mobileNotificationTemplate = (CommunicationMobileNotificationTemplate) template;
 
         if (isEmpty( mobileNotificationTemplate.mobileHeadline )) {

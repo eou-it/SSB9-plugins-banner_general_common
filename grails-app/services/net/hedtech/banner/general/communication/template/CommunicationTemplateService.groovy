@@ -108,7 +108,14 @@ class CommunicationTemplateService extends ServiceBase {
      * Overriden by subclasses to implement special validation when the template is marked published.
      * @param template a communication template
      */
-    protected void validatePublished( CommunicationTemplate template ) {
+    void validatePublished( CommunicationTemplate template ) {
+    }
+
+    /**
+     * Overriden by subclasses to implement special validation when the sending test message.
+     * @param template a communication template
+     */
+    void validateTest ( CommunicationTemplate template ) {
     }
 
     protected void stampAndValidate( template ) {

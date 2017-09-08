@@ -79,6 +79,9 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         rootOrganization.encryptedMobileApplicationKey = ""
         rootOrganization = communicationOrganizationService.update( rootOrganization )
 
+        // Get new unique reference ID. Calling sendMethod.execute() twice with same refId will throw exception...
+        message.referenceId = UUID.randomUUID().toString()
+
         childOrganization.mobileApplicationName = "StudentSuccess"
         childOrganization.clearMobileApplicationKey = "ss-key-value"
         childOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( childOrganization.clearMobileApplicationKey )
@@ -117,9 +120,10 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         rootOrganization = communicationOrganizationService.update( rootOrganization )
         try {
             sendMethod.execute( message, rootOrganization )
-            fail( "Expected UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT." )
+            fail( "Expected MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_UNKNOWN_HOST." )
         } catch( CommunicationApplicationException e ) {
-            assertEquals( CommunicationErrorCode.UNKNOWN_MOBILE_NOTIFICATION_APPLICATION_ENDPOINT.toString(), e.type )
+            assertTrue( CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_UNKNOWN_HOST.toString() == e.type ||
+                e.type == CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_SSL_UNVERIFIED .toString())
         }
     }
 

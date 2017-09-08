@@ -118,11 +118,6 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         }
     }
 
-/*
-
-
-     */
-
 
     protected void setUpDefaultOrganization() {
         List organizations = communicationOrganizationCompositeService.listOrganizations()
