@@ -1,3 +1,6 @@
+/********************************************************************************
+  Copyright 2017 Ellucian Company L.P. and its affiliates.
+********************************************************************************/
 package net.hedtech.banner.general.communication.job
 
 import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
