@@ -9,12 +9,40 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.security.core.context.SecurityContextHolder
 
 /**
  * Integration tests for CommunicationJob entity
  */
 class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
 
+    /**
+     * Convenience method to login a user if not already logged in. You may pass in a username and password,
+     * or omit and accept the default 'grails_user' and 'u_pick_it' for admin and 'HOSWEB002' and '111111' for ssb
+     **/
+    @Override
+    protected void loginIfNecessary(String username,password) {
+        println "In the loginIfNecessary of the Communication JOb INtegration tests"
+        println "The username is "+username
+        println "the password is "+password
+        if (!SecurityContextHolder.getContext().getAuthentication()) {
+            println "There is no authentication"
+            if(username != null && username.empty || (password != null && password.Empty())){
+                println "Everything about the username is empty"
+                username = "grails_user"
+                password = "u_pick_it"
+            } else {
+                println "The username test has failed "+username.empty+"***"
+                println "The password test is "+password.Empty()+"***"
+            }
+            println "Going to log in with the username password"
+            println "The username after is "+username
+            println "the password after is "+password
+            login username, password
+        } else {
+            println "There is authentication " + SecurityContextHolder.getContext().getAuthentication()
+        }
+    }
     @Before
     public void setUp() {
         formContext = ['GUAGMNU', 'SELFSERVICE']
