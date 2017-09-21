@@ -238,7 +238,9 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRITPE")
                 sql.executeUpdate("Delete from GCRPARM")
-                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.gcbactm_folder_id FROM gcbactm a WHERE a.gcbactm_folder_id = gcrfldr_surrogate_id)")
+                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.gcbactm_folder_id FROM gcbactm a WHERE a.gcbactm_folder_id = gcrfldr_surrogate_id) AND \
+                                                             NOT EXISTS (SELECT b.gcbagrp_folder_id FROM gcbagrp b WHERE b.gcbagrp_folder_id = gcrfldr_surrogate_id)")
+
                 sql.executeUpdate("Delete from GCRORAN")
                 sql.executeUpdate("Delete from GCBSPRP")
                 sql.executeUpdate("Delete from GCRMBAC")
