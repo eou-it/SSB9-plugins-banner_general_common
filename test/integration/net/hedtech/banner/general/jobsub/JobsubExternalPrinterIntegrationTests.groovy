@@ -113,8 +113,9 @@ class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
             it.printer == i_success_printer && it.printDate == null
         }.size() > 0
 
-        def jobsubExternalPrinters = JobsubExternalPrinter.fetchPendingPrintByPrinter([i_success_printer, "sleepwake", "brothers"])
+        def jobsubExternalPrinters = JobsubExternalPrinter.fetchPendingPrintByPrinter([i_success_printer, "saas2", "brothers"])
         assertTrue jobsubExternalPrinters.size() > 0
+        assertTrue jobsubExternalPrinters.findAll { it.printer == "saas2" && it.printDate == null }.size() > 0
         assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer && it.printDate == null }.size() > 0
     }
 

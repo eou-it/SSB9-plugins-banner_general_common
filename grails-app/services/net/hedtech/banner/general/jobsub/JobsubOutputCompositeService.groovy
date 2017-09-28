@@ -90,7 +90,8 @@ class JobsubOutputCompositeService {
             if (params.printer == "%") {
 
             } else if (params.printer =~ ",") {
-                def printers = params.printer.split(",")
+                def printers = buildArray(params.printer)
+                params.printer = printers
             } else {
                 if (params.printer) {
 
@@ -99,7 +100,12 @@ class JobsubOutputCompositeService {
                 }
             }
         }
+        return params
 
+    }
+
+    private static def buildArray(comp) {
+        comp ? comp.split(",").findAll {!(it.trim() == "")}.collect {it.trim()} : []
     }
 
 

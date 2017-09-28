@@ -15,6 +15,7 @@ class JobsubOutputCompositeServiceIntegrationTests  extends BaseIntegrationTestC
     //Valid test data (For success tests)
 
     def i_success_printer = "saas1"
+    def i_success_printer2 = "saas2"
     def jobsubOutputCompositeService
     def date = new SimpleDateFormat('MM/dd/yyyy')
 
@@ -45,6 +46,44 @@ class JobsubOutputCompositeServiceIntegrationTests  extends BaseIntegrationTestC
             assertNull it.printDate
         }
     }
+
+    @Test
+    void testFetchPendingPrintByLikePrinter(){
+        def jobsubExternalPrinterCheck = JobsubExternalPrinter.findAll()
+        def printJobs = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer && it.printDate == null}
+        assertTrue printJobs.size() > 0
+        def printJobs2 = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer2 && it.printDate == null}
+        assertTrue printJobs2.size() > 0
+
+        def map = [pluralizedResourceName: "jobsub-pending-print", printer: "%"]
+        def jobsubExternalPrinters = jobsubOutputCompositeService.list(map)
+        assertTrue jobsubExternalPrinters.size() > 0
+        jobsubExternalPrinters.each {
+            assertNull it.printDate
+        }
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer}.size() > 0
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer2}.size() > 0
+    }
+
+    @Test
+    void testFetchPendingPrintByPrinterList(){
+        def jobsubExternalPrinterCheck = JobsubExternalPrinter.findAll()
+        def printJobs = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer && it.printDate == null}
+        assertTrue printJobs.size() > 0
+        def printJobs2 = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer2 && it.printDate == null}
+        assertTrue printJobs2.size() > 0
+
+        def map = [pluralizedResourceName: "jobsub-pending-print", printer: "${i_success_printer},${i_success_printer2}"]
+        def jobsubExternalPrinters = jobsubOutputCompositeService.list(map)
+        assertTrue jobsubExternalPrinters.size() > 0
+        jobsubExternalPrinters.each {
+            assertNull it.printDate
+            assertTrue it.printer in [i_success_printer, i_success_printer2]
+        }
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer}.size() > 0
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer2}.size() > 0
+    }
+
 
     @Test
     void testFetchPendingPrintByPrinterCount(){
