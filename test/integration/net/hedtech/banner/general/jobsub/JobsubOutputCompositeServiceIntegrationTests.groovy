@@ -107,10 +107,7 @@ class JobsubOutputCompositeServiceIntegrationTests  extends BaseIntegrationTestC
         def jobsubSavedOutput  = jobsubOutputCompositeService.show([pluralizedResourceName : "jobsub-pending-print",
                                                                         id: saveId])
         assertNotNull jobsubSavedOutput
-        assertTrue jobsubSavedOutput instanceof JobsubSavedOutput
-        assertEquals jobsubSavedOutput.id, saveId
-        assertNotNull jobsubSavedOutput.jobsubOutput
-        assertTrue jobsubSavedOutput.jobsubOutput instanceof FileOutputStream
+        assertTrue jobsubSavedOutput instanceof InputStream
 
     }
 
@@ -143,7 +140,7 @@ class JobsubOutputCompositeServiceIntegrationTests  extends BaseIntegrationTestC
 
         def jobFile = jobsubOutputCompositeService.fetchJobOutputFile(saveId )
         assertNotNull jobFile
-        assertTrue jobFile instanceof FileOutputStream
+        assertTrue jobFile instanceof InputStream
 
     }
 

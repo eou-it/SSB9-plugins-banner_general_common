@@ -7,10 +7,7 @@ package net.hedtech.banner.general.jobsub
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import net.hedtech.restfulapi.UnsupportedMethodException
-import net.hedtech.restfulapi.config.RepresentationConfig
 import org.apache.log4j.Logger
-import java.io.InputStream
 
 class JobsubOutputCompositeService {
     private static final log = Logger.getLogger(JobsubOutputCompositeService.class)
@@ -30,7 +27,6 @@ class JobsubOutputCompositeService {
         log.debug "Begin show Jobsub Saved output  - Request parameters: ${params}"
         params = validateParams(params)
 
-        job = jobsubSavedOutputService.get(params.id)
         def jobsubOutput = fetchJobOutputFile(params.id)
 
         return jobsubOutput
@@ -154,18 +150,6 @@ class JobsubOutputCompositeService {
         InputStream is = pdfFileBlob.getBinaryStream();
 
         return is
-    }
-
-    InputStream marshalObject(Object o, RepresentationConfig config) {
-        InputStream result;
-
-        if (o instanceof Collection) {
-            throw new UnsupportedOperationException("don't Marshal Collections please")
-        }
-        else {
-            result = (InputStream) o
-        }
-        return result
     }
 
 }
