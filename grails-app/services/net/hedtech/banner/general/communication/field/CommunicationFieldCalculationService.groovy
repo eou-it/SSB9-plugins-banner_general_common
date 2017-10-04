@@ -25,6 +25,7 @@ import net.hedtech.banner.general.communication.parameter.CommunicationParameter
 import net.hedtech.banner.general.utility.InformationText
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
+import org.apache.commons.lang.StringUtils
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.stringtemplate.v4.AttributeRenderer
@@ -108,13 +109,13 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null , testTemplate = false) {
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null , testTemplate = false, Boolean escapeFieldValue=false ) {
         this.testTemplate = testTemplate
         Map fieldNameValueMap = [:]
         for (String fieldName :fieldNames) {
             CommunicationField communicationField = CommunicationField.fetchByName( fieldName )
             if (communicationField) {
-                String value = calculateSingleFieldByPidm(communicationField, parameterNameValueMap, pidm, mepCode)
+                String value = calculateSingleFieldByPidm(communicationField, parameterNameValueMap, pidm, mepCode, escapeFieldValue)
                 CommunicationFieldValue communicationFieldValue = new CommunicationFieldValue( value: value, renderAsHtml: communicationField.renderAsHtml )
                 fieldNameValueMap.put( fieldName, communicationFieldValue )
             } else {
@@ -127,7 +128,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         return fieldNameValueMap
     }
 
-    public String calculateSingleFieldByPidm( CommunicationField communicationField, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+    public String calculateSingleFieldByPidm( CommunicationField communicationField, Map parameterNameValueMap, Long pidm, String mepCode=null, Boolean escapeFieldValue=false  ) {
 
         String value = calculateFieldByPidm(
                 communicationField.ruleContent,
@@ -135,13 +136,14 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 communicationField.formatString,
                 parameterNameValueMap,
                 pidm,
-                mepCode
+                mepCode,
+                escapeFieldValue
         )
 
         return value
     }
 
-    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, Long pidm, String mepCode=null ) {
+    public String calculateFieldByPidm( String sqlStatement, Boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, Long pidm, String mepCode=null, Boolean escapeFieldValue=false  ) {
         boolean returnsArray = returnsArrayArguments ?: false
         def sqlParams = [:]
         if (sqlStatement?.contains(":pidm")) {
@@ -159,7 +161,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
             }
         }
 
-        calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode )
+        calculateField( sqlStatement, returnsArray, formatString, sqlParams, mepCode, escapeFieldValue )
     }
 
     /**
@@ -168,7 +170,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @param nameValueMap Map of parameter values
      * @return
      */
-    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, String mepCode=null ) {
+    private String calculateField( String sqlStatement, boolean returnsArrayArguments, String formatString, Map parameterNameValueMap, String mepCode=null, Boolean escapeFieldValue=false ) {
         def attributeMap = [:]
         def Sql sql = null
         try {
@@ -188,7 +190,14 @@ class CommunicationFieldCalculationService extends ServiceBase {
                     row.each { column ->
                         String attributeName = column.getKey().toString().toLowerCase()
                         String attributeNameActual = column.getKey().toString()
-                        Object attributeValue = column.value
+                        def String[] fromstring = ["&", "<", "\"", "'", ">"]
+                        def String[] tostring = ["&amp;", "&lt;", "&quot;", "&apos;", "&gt;"]
+                        Object attributeValue
+                        if (escapeFieldValue) {
+                            attributeValue = StringUtils.replaceEach(column.value, fromstring, tostring)
+                        } else {
+                            attributeValue = column.value
+                        }
                         if (maxRows <= 1) {
                             attributeMap.put( attributeName, attributeValue )
                             attributeMap.put( attributeNameActual, attributeValue)

@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.merge
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
@@ -67,12 +68,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        recipientData = createCommunicationRecipientData( template, fieldNames )
-        //escape xml 5 special characters in the field values to enable pdf generation for letters
-        def String[] fromstring = ["&", "<", "\"","'",">"]
-        def String[] tostring = ["&amp;", "&lt;", "&quot;", "&apos;", "&gt;"]
-        recipientData.fieldValues.each {it -> it.value.value = StringUtils.replaceEach(it.value.value,fromstring,tostring)}
-
+        recipientData = createCommunicationRecipientData( template, fieldNames, (template.communicationChannel== CommunicationChannel.LETTER) )
     }
 
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
@@ -97,8 +93,8 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
         recipientData = createCommunicationRecipientData( template, fieldNames )
     }
 
-    private CommunicationRecipientData createCommunicationRecipientData( CommunicationTemplate template, List<String> fieldNames ) {
-        Map fieldNameValueMap = calculateFieldsForUser( fieldNames )
+    private CommunicationRecipientData createCommunicationRecipientData( CommunicationTemplate template, List<String> fieldNames, Boolean escapeFieldValue=false  ) {
+        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, escapeFieldValue )
 
         new CommunicationRecipientData(
             pidm: groupSendItem.recipientPidm,
@@ -112,7 +108,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
 
     }
 
-    private Map calculateFieldsForUser( List<String> fieldNames ) {
+    private Map calculateFieldsForUser( List<String> fieldNames, Boolean escapeFieldValue=false  ) {
         def originalMap = null
         try {
             originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( groupSendItem.communicationGroupSend.createdBy, groupSendItem.communicationGroupSend.mepCode)
@@ -122,7 +118,8 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
                 fieldNames,
                 this.groupSendItem.communicationGroupSend.getParameterNameValueMap(),
                 this.groupSendItem.recipientPidm,
-                this.groupSendItem.communicationGroupSend.mepCode
+                this.groupSendItem.communicationGroupSend.mepCode,
+                escapeFieldValue
             )
         } finally {
             if (originalMap) {

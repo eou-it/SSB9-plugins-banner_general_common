@@ -204,7 +204,7 @@ class CommunicationTestSendCompositeService  {
         communicationRecipientDataService.update(recipientData)
     }
 
-    private Map calculateFieldsForUser( List<String> fieldNames, Long pidm ) {
+    private Map calculateFieldsForUser( List<String> fieldNames, Long pidm, Boolean escapeFieldValue=false  ) {
         def originalMap = null
         try {
             originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( )
@@ -213,7 +213,8 @@ class CommunicationTestSendCompositeService  {
                     (Map) [:],
                     (Long) pidm,
                     "",
-                    true
+                    true,
+                    escapeFieldValue
             )
         } finally {
             if (originalMap) {
