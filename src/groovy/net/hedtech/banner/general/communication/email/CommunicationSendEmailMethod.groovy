@@ -219,7 +219,7 @@ class CommunicationSendEmailMethod {
         }
 
         boolean shouldAuthenticate
-        def smtpProperties = senderOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()
+        def smtpProperties = sendEmailServerProperties?.getSmtpPropertiesAsMap()
         if (smtpProperties && smtpProperties?.auth != null)
            shouldAuthenticate = smtpProperties.auth
         else
