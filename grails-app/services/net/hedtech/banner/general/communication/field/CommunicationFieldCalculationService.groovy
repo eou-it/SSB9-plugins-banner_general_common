@@ -109,7 +109,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
      * @return
      */
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
-    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null , testTemplate = false, Boolean escapeFieldValue=false ) {
+    public Map calculateFieldsByPidmWithNewTransaction( List<String> fieldNames, Map parameterNameValueMap, Long pidm, String mepCode=null , Boolean testTemplate = false, Boolean escapeFieldValue=false ) {
         this.testTemplate = testTemplate
         Map fieldNameValueMap = [:]
         for (String fieldName :fieldNames) {

@@ -68,7 +68,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        recipientData = createCommunicationRecipientData( template, fieldNames, (template.communicationChannel== CommunicationChannel.LETTER) )
+        recipientData = createCommunicationRecipientData( template, fieldNames, true  )
     }
 
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
@@ -119,6 +119,7 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
                 this.groupSendItem.communicationGroupSend.getParameterNameValueMap(),
                 this.groupSendItem.recipientPidm,
                 this.groupSendItem.communicationGroupSend.mepCode,
+                false,
                 escapeFieldValue
             )
         } finally {
