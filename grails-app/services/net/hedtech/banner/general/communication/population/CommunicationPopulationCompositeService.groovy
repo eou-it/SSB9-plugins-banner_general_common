@@ -682,7 +682,7 @@ class CommunicationPopulationCompositeService {
         CommunicationPopulationQueryExecutionResult result
         try {
             result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id )
-            if (result.selectionListId) {
+            if (result.selectionListId && !result.errorString) {
                 calculation.selectionList = CommunicationPopulationSelectionList.fetchById( result.selectionListId )
                 totalCount += result.calculatedCount
             } else {
