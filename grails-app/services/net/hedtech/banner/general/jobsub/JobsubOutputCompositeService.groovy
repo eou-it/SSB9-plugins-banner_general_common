@@ -28,8 +28,11 @@ class JobsubOutputCompositeService {
         params = validateParams(params)
 
         def jobsubOutput = fetchJobOutputFile(params.id)
+        InputStream is = jobsubOutput.getBinaryStream();
 
-        return jobsubOutput
+        log.debug "Completed show Jobsub Saved output  - Request parameters: ${params} File Size: ${jobsubOutput.length()} bytes"
+
+        return is
     }
 
     /***
@@ -49,7 +52,12 @@ class JobsubOutputCompositeService {
         def returnList = [] as List
         params = validateParams(params)
 
-        returnList = JobsubExternalPrinter.fetchPendingPrintByPrinter(params.printer)
+        if(params.printer) {
+            returnList = JobsubExternalPrinter.fetchPendingPrintByPrinter(params.printer)
+        }
+        else {
+            returnList = JobsubExternalPrinter.fetchPendingPrintByPrinter('')
+        }
         log.debug "Completed Pending Print List - Request parameters: ${params} Total found: ${returnList?.size()}"
         return returnList
     }
@@ -112,19 +120,9 @@ class JobsubOutputCompositeService {
             if (params.printer instanceof List) {
                 log.debug "Printer is a list ${params.printer}"
             } else {
-                if (params.printer == "%") {
-
-                } else {
-                    if (params.printer =~ ",") {
-                        def printers = buildArray(params.printer)
-                        params.printer = printers
-                    } else {
-                        if (params.printer) {
-
-                        } else {
-                            throw new ApplicationException(JobsubOutputCompositeService, "@@JobsubOutputCompositeService.missingPrinter@@")
-                        }
-                    }
+                if (params.printer =~ ",") {
+                    def printers = buildArray(params.printer)
+                    params.printer = printers
                 }
             }
             log.debug "Printer: ${params.printer}"
@@ -147,9 +145,8 @@ class JobsubOutputCompositeService {
         def jobfile = sql.rows(fileQuery, [id])[0]
 
         java.sql.Blob pdfFileBlob = jobfile.gjrjlis_file
-        InputStream is = pdfFileBlob.getBinaryStream();
 
-        return is
+        return pdfFileBlob
     }
 
 }

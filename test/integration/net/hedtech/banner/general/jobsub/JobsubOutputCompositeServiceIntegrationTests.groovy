@@ -84,6 +84,42 @@ class JobsubOutputCompositeServiceIntegrationTests  extends BaseIntegrationTestC
         assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer2}.size() > 0
     }
 
+    @Test
+    void testFetchPendingPrintEmptyPrinter(){
+        def jobsubExternalPrinterCheck = JobsubExternalPrinter.findAll()
+        def printJobs = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer && it.printDate == null}
+        assertTrue printJobs.size() > 0
+        def printJobs2 = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer2 && it.printDate == null}
+        assertTrue printJobs2.size() > 0
+
+        def map = [pluralizedResourceName: "jobsub-pending-print", printer: ""]
+        def jobsubExternalPrinters = jobsubOutputCompositeService.list(map)
+        assertTrue jobsubExternalPrinters.size() > 0
+        jobsubExternalPrinters.each {
+            assertNull it.printDate
+        }
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer}.size() > 0
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer2}.size() > 0
+    }
+
+    @Test
+    void testFetchPendingPrintNoPrinter(){
+        def jobsubExternalPrinterCheck = JobsubExternalPrinter.findAll()
+        def printJobs = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer && it.printDate == null}
+        assertTrue printJobs.size() > 0
+        def printJobs2 = jobsubExternalPrinterCheck.findAll{it.printer == i_success_printer2 && it.printDate == null}
+        assertTrue printJobs2.size() > 0
+
+        def map = [pluralizedResourceName: "jobsub-pending-print"]
+        def jobsubExternalPrinters = jobsubOutputCompositeService.list(map)
+        assertTrue jobsubExternalPrinters.size() > 0
+        jobsubExternalPrinters.each {
+            assertNull it.printDate
+        }
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer}.size() > 0
+        assertTrue jobsubExternalPrinters.findAll { it.printer == i_success_printer2}.size() > 0
+    }
+
 
     @Test
     void testFetchPendingPrintByPrinterCount(){
@@ -140,7 +176,7 @@ class JobsubOutputCompositeServiceIntegrationTests  extends BaseIntegrationTestC
 
         def jobFile = jobsubOutputCompositeService.fetchJobOutputFile(saveId )
         assertNotNull jobFile
-        assertTrue jobFile instanceof InputStream
+        assertTrue jobFile instanceof java.sql.Blob
 
     }
 
