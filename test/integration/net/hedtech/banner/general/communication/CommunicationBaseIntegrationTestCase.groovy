@@ -1,6 +1,3 @@
-/********************************************************************************
-  Copyright 2017 Ellucian Company L.P. and its affiliates.
-********************************************************************************/
 package net.hedtech.banner.general.communication
 
 import groovy.sql.Sql
@@ -109,9 +106,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRITPE")
-                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.gcbactm_folder_id FROM gcbactm a WHERE a.gcbactm_folder_id = gcrfldr_surrogate_id) AND \
-                                                             NOT EXISTS (SELECT b.gcbagrp_folder_id FROM gcbagrp b WHERE b.gcbagrp_folder_id = gcrfldr_surrogate_id)")
-
+                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.gcbactm_gcrfldr_id FROM gcbactm a WHERE a.gcbactm_gcrfldr_id = gcrfldr_surrogate_id)")
                 sql.executeUpdate("Delete from GCRORAN")
                 sql.executeUpdate("Delete from GCBSPRP")
                 sql.executeUpdate("Delete from GCRMBAC")
@@ -122,6 +117,11 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             sql?.close()
         }
     }
+
+/*
+
+
+     */
 
 
     protected void setUpDefaultOrganization() {
