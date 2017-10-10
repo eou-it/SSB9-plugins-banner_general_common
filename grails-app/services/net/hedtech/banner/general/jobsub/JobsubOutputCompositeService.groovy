@@ -27,10 +27,11 @@ class JobsubOutputCompositeService {
         log.debug "Begin show Jobsub Saved output  - Request parameters: ${params}"
         params = validateParams(params)
 
+        def jobsub = JobsubSavedOutput.get(params.id)
         def jobsubOutput = fetchJobOutputFile(params.id)
         InputStream is = jobsubOutput.getBinaryStream();
 
-        log.debug "Completed show Jobsub Saved output  - Request parameters: ${params} File Size: ${jobsubOutput.length()} bytes"
+        log.debug "Completed show Jobsub Saved output  - Request parameters: ${params} Job: ${jobsub.job} File name: ${jobsub.fileName} File Size: ${jobsubOutput.length()} bytes"
 
         return is
     }
@@ -82,7 +83,7 @@ class JobsubOutputCompositeService {
 
     def update(def content, def params) {
 
-        log.debug "Jobsub Output Composite Service, Print date update   ${content} params ${params}"
+        log.debug "Begin Jobsub Output Composite Service, Print date update   ${content} params ${params}"
         params = validateParams(params)
 
         def jobsub = JobsubSavedOutput.get(params.id)
