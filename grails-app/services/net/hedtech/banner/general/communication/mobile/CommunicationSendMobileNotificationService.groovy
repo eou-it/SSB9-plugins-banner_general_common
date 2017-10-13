@@ -6,16 +6,12 @@ package net.hedtech.banner.general.communication.mobile
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-
-import java.lang.reflect.Array
 
 /**
  * Provides a service for submitting a mobile notification.
@@ -59,7 +55,7 @@ class CommunicationSendMobileNotificationService {
     }
 
 
-    void sendTestMobileSetup(Long organizationId, Long pidm, Map messageData) {
+    void sendTest(Long organizationId, Long pidm, Map messageData) {
         CommunicationOrganization senderOrganization = CommunicationOrganization.fetchById(organizationId)
         if (!senderOrganization)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND .name())
@@ -77,7 +73,7 @@ class CommunicationSendMobileNotificationService {
 
         CommunicationRecipientData recipientData = createCommunicationRecipientData(pidm, organizationId)
         try {
-            sendTest(senderOrganization, recipientData, messageData)
+            submitTestSend(senderOrganization, recipientData, messageData)
         } catch (ApplicationException e) {
             log.error(e)
             // re-wrap unknown error with better message
@@ -103,7 +99,7 @@ class CommunicationSendMobileNotificationService {
         )
     }
 
-    void sendTest(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData, Map messageData) {
+    private void submitTestSend(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData, Map messageData) {
         log.debug( "sending mobile test notification message" )
         checkOrg(senderOrganization)
         checkRecipientData(recipientData)

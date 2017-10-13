@@ -5,13 +5,6 @@
 package net.hedtech.banner.general.communication.mobile
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.log4j.Logger
@@ -22,7 +15,6 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import groovy.mock.interceptor.MockFor
 
 class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegrationTestCase {
     @Rule
@@ -61,7 +53,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
     void testSendMobile () {
         def orgID = organization.id
         def sendTo = validPerson
-        service.sendTestMobileSetup(orgID, sendTo, messageData)
+        service.sendTest(orgID, sendTo, messageData)
     }
 
     @Test
@@ -70,7 +62,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
         thrown.expectMessage( ('communication.error.message.organizationNotFound'))
         def orgID = -1
         def sendTo = validPerson
-        service.sendTestMobileSetup(orgID, sendTo, messageData)
+        service.sendTest(orgID, sendTo, messageData)
     }
 
 
@@ -80,7 +72,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
         thrown.expectMessage( ('communication.error.message.externalUserInvalid'))
         def orgID = organization.id
         def sendTo = -1
-        service.sendTestMobileSetup(orgID, sendTo, messageData)
+        service.sendTest(orgID, sendTo, messageData)
     }
 
     @Test
@@ -90,7 +82,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
         organization.mobileEndPointUrl = null
         def orgID = organization.id
         def sendTo = validPerson
-        service.sendTestMobileSetup(orgID, sendTo, messageData)
+        service.sendTest(orgID, sendTo, messageData)
         organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
     }
 
@@ -104,7 +96,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
 
         def orgID = organization.id
         def sendTo = validPerson
-        service.sendTestMobileSetup(orgID, sendTo, messageData)
+        service.sendTest(orgID, sendTo, messageData)
         organization.clearMobileApplicationKey = "ss-key-value"
         organization.encryptedMobileApplicationKey = communicationMailboxAccountService.encryptPassword("ss-key-value")
     }
