@@ -53,14 +53,14 @@ class CommunicationGenerateLetterService {
 
         if (isEmpty(message.toAddress)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
-                CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS.toString(),
+                CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS,
                 "emptyLetterToAddress"
             )
         }
 
         if (isEmpty(message.content)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
-                CommunicationErrorCode.EMPTY_LETTER_CONTENT.toString(),
+                CommunicationErrorCode.EMPTY_LETTER_CONTENT,
                 "emptyLetterContent"
             )
         }
@@ -86,7 +86,7 @@ class CommunicationGenerateLetterService {
     }
 
     private boolean isEmpty(String s) {
-        return !s || s.trim().length() == 0
+        return (s == null) || s.trim().length() == 0
     }
 
 }

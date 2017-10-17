@@ -112,6 +112,16 @@ class CommunicationExceptionFactory {
     /**
      * Creates an application exception annotated with a friendly name.
      * @param service the service which describes the originator of the exception
+     * @param t the throwable that was caught
+     * @param errorCode a string that will be past along with the application exception as a 'friendlyName'
+     */
+    public static ApplicationException createFriendlyApplicationException( Class service, CommunicationErrorCode errorCode, String resourceId ) {
+        return createFriendlyApplicationException( service, errorCode.toString(), resourceId )
+    }
+
+    /**
+     * Creates an application exception annotated with a friendly name.
+     * @param service the service which describes the originator of the exception
      * @param errorCode a string that will be past along with the application exception as a 'friendlyName'
      * @param resourceId the sub key of the string resource
      * @param parameter0 the first parameterized value which will be passed as the {0} of the string value

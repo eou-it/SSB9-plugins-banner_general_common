@@ -300,20 +300,16 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-    private static boolean isEmpty(String s) {
-        return ((!s) || (s == null) || (s.length() == 0) || (s == ""))
-    }
-
     def createLetter(CommunicationOrganization organization, CommunicationLetterMessage message, CommunicationRecipientData recipientData ) {
-        if (isEmpty(message.toAddress)) {
+        if (isEmpty(message?.toAddress)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
-                    CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS.toString(),
+                    CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS,
                     "emptyLetterToAddress"
             )
         }
-        if (isEmpty(message.content)) {
+        if (isEmpty(message?.content)) {
             throw CommunicationExceptionFactory.createFriendlyApplicationException(CommunicationGenerateLetterService.class,
-                    CommunicationErrorCode.EMPTY_LETTER_CONTENT.toString(),
+                    CommunicationErrorCode.EMPTY_LETTER_CONTENT,
                     "emptyLetterContent"
             )
         }
@@ -333,4 +329,7 @@ class CommunicationTestSendCompositeService  {
         return item
     }
 
+    private boolean isEmpty(String s) {
+        return (s == null) || s.trim().length() == 0
+    }
 }
