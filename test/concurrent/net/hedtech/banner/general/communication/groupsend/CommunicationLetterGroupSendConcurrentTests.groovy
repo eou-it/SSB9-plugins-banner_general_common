@@ -10,6 +10,7 @@ import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
 import net.hedtech.banner.general.communication.job.CommunicationJob
+import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import net.hedtech.banner.general.communication.letter.CommunicationLetterItemView
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.letter.CommunicationLetterItem
@@ -312,9 +313,12 @@ class CommunicationLetterGroupSendConcurrentTests extends CommunicationBaseConcu
         sleepUntilGroupSendComplete( groupSend, 120 )
         List groupSendItemList = CommunicationGroupSendItem.list()
         assertEquals( 1, groupSendItemList.size() )
+        sleepUntilCommunicationJobsComplete( 120 )
         List communicationJobList = CommunicationJob.list()
         assertEquals( 1, communicationJobList.size() )
-        assertEquals(CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS, communicationJobList.get(0).errorCode )
+        CommunicationJob communicationJob = (CommunicationJob) communicationJobList.get(0)
+        assertEquals(CommunicationJobStatus.FAILED, communicationJob.status )
+        assertEquals(CommunicationErrorCode.EMPTY_LETTER_TO_ADDRESS, communicationJob.errorCode )
         List letterItemViewList = CommunicationLetterItemView.list()
         assertEquals( 0, letterItemViewList.size() )
     }
