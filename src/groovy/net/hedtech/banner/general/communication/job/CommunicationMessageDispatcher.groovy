@@ -47,7 +47,7 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
 
     @Override
     void visitEmail(CommunicationEmailTemplate template) {
-        communicationSendEmailService.sendEmail( recipientData.organizationId, message as CommunicationEmailMessage, recipientData, recipientData.pidm )
+        communicationSendEmailService.send( recipientData.organizationId, message as CommunicationEmailMessage, recipientData, recipientData.pidm )
     }
 
     @Override

@@ -12,9 +12,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationEmailS
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import org.apache.commons.logging.LogFactory
-import org.hibernate.SessionFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.junit.Rule;
@@ -71,7 +69,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -99,7 +97,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -125,7 +123,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -153,7 +151,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
         assertEquals(0, receivedMessages.length)
@@ -175,7 +173,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -198,7 +196,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -227,7 +225,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -253,7 +251,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -277,7 +275,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         emailTestOrganization.sendEmailServerProperties.securityProtocol = CommunicationEmailServerConnectionSecurity.None;
 
         CommunicationSendEmailService service = new CommunicationSendEmailService()
-        service.sendTestEmail(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
+        service.sendTestImpl(emailTestOrganization, receiverAddress, [body:EMAIL_TEXT, subject:EMAIL_SUBJECT])
 
         def receivedMessages = mailServer.getReceivedMessages()
 
@@ -293,7 +291,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 //        emailTestOrganization.senderMailboxAccount.emailAddress = null
 //        // use receiverAddress for receiver
 //        String str = null
-//        service.sendTestEmailSetup(1, str)
+//        service.sendTest(1, str)
 //        def receivedMessages = mailServer.getReceivedMessages()
 //
 //        assertEquals(0, receivedMessages.length)
@@ -305,7 +303,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 //        thrown.expectMessage('communication.error.message.organizationNotFound')
 //        // use receiverAddress for receiver
 //
-//        service.sendTestEmailSetup(-1, receiverAddress.mailAddress)
+//        service.sendTest(-1, receiverAddress.mailAddress)
 //        def receivedMessages = mailServer.getReceivedMessages()
 //
 //        assertEquals(0, receivedMessages.length)

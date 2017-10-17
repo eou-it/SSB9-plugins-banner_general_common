@@ -8,11 +8,9 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import org.apache.commons.lang3.exception.ExceptionUtils
 import sun.security.provider.certpath.SunCertPathBuilderException
 
 import javax.mail.AuthenticationFailedException
@@ -36,7 +34,7 @@ class CommunicationSendEmailService {
      * @param recipientData the recipient data this email message belongs to
      * @param pidm the identifier for the constituent for whom the email is being sent
      */
-    public void sendEmail(Long organizationId, CommunicationEmailMessage emailMessage, CommunicationRecipientData recipientData, Long pidm) {
+    public void send(Long organizationId, CommunicationEmailMessage emailMessage, CommunicationRecipientData recipientData, Long pidm) {
         log.debug("sending email message")
 
 
@@ -61,7 +59,7 @@ class CommunicationSendEmailService {
         }
     }
 
-     void sendTestEmailSetup (Long organizationId, String sendTo, Map messageData) {
+     public void sendTest(Long organizationId, String sendTo, Map messageData) {
          if (sendTo == null || sendTo.length() == 0)
              throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS .name())
          CommunicationEmailAddress receiverAddress
@@ -81,7 +79,7 @@ class CommunicationSendEmailService {
              if (!receiverAddress || !receiverAddress.mailAddress)
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
 
-             sendTestEmail(organization, receiverAddress, messageData)
+             sendTestImpl(organization, receiverAddress, messageData)
 
         } catch (ApplicationException e) {
             log.error(e)
@@ -95,7 +93,7 @@ class CommunicationSendEmailService {
         }
     }
 
-    public void sendTestEmail(CommunicationOrganization organization, CommunicationEmailAddress receiverAddress, Map messageData) {
+    void sendTestImpl(CommunicationOrganization organization, CommunicationEmailAddress receiverAddress, Map messageData) {
         checkValidOrganization(organization)
         checkValidEmail(receiverAddress)
 

@@ -73,7 +73,7 @@ class CommunicationSendMobileNotificationService {
 
         CommunicationRecipientData recipientData = createCommunicationRecipientData(pidm, organizationId)
         try {
-            submitTestSend(senderOrganization, recipientData, messageData)
+            sendTestImpl(senderOrganization, recipientData, messageData)
         } catch (ApplicationException e) {
             log.error(e)
             // re-wrap unknown error with better message
@@ -99,7 +99,7 @@ class CommunicationSendMobileNotificationService {
         )
     }
 
-    private void submitTestSend(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData, Map messageData) {
+    void sendTestImpl(CommunicationOrganization senderOrganization, CommunicationRecipientData recipientData, Map messageData) {
         log.debug( "sending mobile test notification message" )
         checkOrg(senderOrganization)
         checkRecipientData(recipientData)

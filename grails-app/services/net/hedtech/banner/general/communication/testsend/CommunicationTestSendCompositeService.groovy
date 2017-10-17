@@ -77,7 +77,7 @@ class CommunicationTestSendCompositeService  {
                     communicationTemplateMergeService: communicationTemplateMergeService
             )
             CommunicationMessage message = messageGenerator.generate(template, recipientData)
-            communicationSendEmailService.sendEmail(organizationId, message as CommunicationEmailMessage, recipientData, pidm)
+            communicationSendEmailService.send(organizationId, message as CommunicationEmailMessage, recipientData, pidm)
         } catch (Throwable t) {
             log.error(t)
             if (t instanceof ApplicationException)
