@@ -27,6 +27,7 @@ enum CommunicationErrorCode implements Serializable {
     EMPTY_EMAIL_SUBJECT, //Email subject is empty
     EMAIL_CONTENT_TOO_LARGE, //Email content is too large
 
+    EMAIL_SERVER_SETTINGS_NOT_FOUND,
     EMAIL_SERVER_HOST_NOT_FOUND,
     EMAIL_SERVER_PORT_INVALID,
     EMAIL_SERVER_SECURITY_PROTOCOL_INVALID,

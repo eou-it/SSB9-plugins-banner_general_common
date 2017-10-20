@@ -76,6 +76,8 @@ class CommunicationSendEmailService {
 
              if (!organization)
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
+             if (!organization.sendEmailServerProperties)
+                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.settingsNotFound"), CommunicationErrorCode.EMAIL_SERVER_SETTINGS_NOT_FOUND.name())
              if (!receiverAddress || !receiverAddress.mailAddress)
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
 
