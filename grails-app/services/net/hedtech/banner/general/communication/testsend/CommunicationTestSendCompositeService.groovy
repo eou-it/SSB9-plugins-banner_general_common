@@ -41,23 +41,23 @@ class CommunicationTestSendCompositeService  {
     def recipientData
     def channel
 
-    def sendTest (Long pidm, Long organizationId, Long templateId) {
+    def sendTest (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         switch (channel) {
             case CommunicationChannel.MOBILE_NOTIFICATION:
-                sendTestMobileNotification(pidm, organizationId, templateId)
+                sendTestMobileNotification(pidm, organizationId, templateId, parameterNameValuesMap)
                 break
             case CommunicationChannel.EMAIL:
-                sendTestEmail(pidm, organizationId, templateId)
+                sendTestEmail(pidm, organizationId, templateId, parameterNameValuesMap)
                 break
             case CommunicationChannel.LETTER:
-                return sendTestLetter(pidm, organizationId, templateId)
+                return sendTestLetter(pidm, organizationId, templateId, parameterNameValuesMap)
                 break
             default:
                 throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.templateErrorUnknown"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
         }
     }
 
-    def sendTestEmail (Long pidm, Long organizationId, Long templateId) {
+    def sendTestEmail (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         def organization = fetchOrg(organizationId)
         try {
             checkOrgEmail(organization)
@@ -70,7 +70,7 @@ class CommunicationTestSendCompositeService  {
         }
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitEmail(template as CommunicationEmailTemplate)
-        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames)
+        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames, parameterNameValuesMap)
         saveRecipientData(recipientData)
         try {
             CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
@@ -86,7 +86,7 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-    def sendTestMobileNotification (Long pidm, Long organizationId, Long templateId) {
+    def sendTestMobileNotification (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         def organization = fetchOrg(organizationId)
         try {
             checkOrgMobile(organization)
@@ -103,7 +103,7 @@ class CommunicationTestSendCompositeService  {
         checkOrgMobile(organization)
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitMobileNotification(template as CommunicationMobileNotificationTemplate)
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap)
         checkExternalIdExists(pidm)
         saveRecipientData(recipientData)
         try {
@@ -120,13 +120,13 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-    def sendTestLetter (Long pidm, Long organizationId, Long templateId) {
+    def sendTestLetter (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         def organization = fetchOrg(organizationId)
         if (!organization)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
 
         CommunicationTemplate template = fetchTemplate(templateId)
-        def recipientData = visitLetter(template as CommunicationLetterTemplate, pidm, organizationId, templateId)
+        def recipientData = visitLetter(template as CommunicationLetterTemplate, pidm, organizationId, templateId, parameterNameValuesMap)
         saveRecipientData(recipientData)
         try {
             CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
@@ -183,14 +183,14 @@ class CommunicationTestSendCompositeService  {
         return fieldNames
     }
 
-    def visitLetter (CommunicationLetterTemplate template, Long pidm, Long organizationId, Long templateId) {
+    def visitLetter (CommunicationLetterTemplate template, Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         // Can this list be cached somewhere for similar processing on the same template but different user
         List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables(template.toAddress?.toString())
         communicationTemplateMergeService.extractTemplateVariables(template.content?.toString()).each {
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap)
         //escape xml 5 special characters in the field values to enable pdf generation for letters
         def String[] fromstring = ["&", "<", "\"", "'", ">"]
         def String[] tostring = ["&amp;", "&lt;", "&quot;", "&apos;", "&gt;"]
@@ -204,13 +204,13 @@ class CommunicationTestSendCompositeService  {
         communicationRecipientDataService.update(recipientData)
     }
 
-    private Map calculateFieldsForUser( List<String> fieldNames, Long pidm, Boolean escapeFieldValue=false  ) {
+    private Map calculateFieldsForUser( List<String> fieldNames, Map parameterNameValuesMap, Long pidm, Boolean escapeFieldValue=false  ) {
         def originalMap = null
         try {
             originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( )
             return communicationFieldCalculationService.calculateFieldsByPidmWithNewTransaction(
                     (List<String>)  fieldNames,
-                    (Map) [:],
+                    parameterNameValuesMap,
                     (Long) pidm,
                     "",
                     true,
@@ -223,8 +223,8 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-    private CommunicationRecipientData createCommunicationRecipientData(Long pidm, Long organizationId, Long templateId, List<String> fieldNames ) {
-        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, pidm )
+    private CommunicationRecipientData createCommunicationRecipientData(Long pidm, Long organizationId, Long templateId, List<String> fieldNames, Map parameterNameValuesMap ) {
+        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, parameterNameValuesMap, pidm )
         return new CommunicationRecipientData(
                 pidm: pidm,
                 referenceId: UUID.randomUUID().toString(),
