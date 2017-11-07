@@ -104,6 +104,24 @@ class CommunicationTemplateService extends ServiceBase {
         }
     }
 
+    def updateTemplateAssociationsBeforeTest( map ) {
+        def template = get( map.id )
+        //Insert the template field associations if the template is under test functionality and the association does not exist already
+        deleteFieldAssociations(template)
+
+        List<String> fieldNameList = communicationTemplateMergeService.extractTemplateVariables(template.id)
+        if (fieldNameList) {
+            List<CommunicationTemplateFieldAssociation> templateFieldAssociations = new ArrayList<CommunicationTemplateFieldAssociation>()
+            fieldNameList.each { String fieldName ->
+                CommunicationField field = CommunicationField.fetchByName( fieldName )
+                CommunicationTemplateFieldAssociation templateFieldAssociation = new CommunicationTemplateFieldAssociation()
+                templateFieldAssociation.template = template
+                templateFieldAssociation.field = field
+                templateFieldAssociations.add(templateFieldAssociation)
+            }
+            communicationTemplateFieldAssociationService.create(templateFieldAssociations)
+        }
+    }
     /**
      * Overriden by subclasses to implement special validation when the template is marked published.
      * @param template a communication template
