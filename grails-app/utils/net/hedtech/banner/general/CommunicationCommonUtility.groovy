@@ -133,11 +133,7 @@ class CommunicationCommonUtility {
                 isAuthor = true
                 isAdmin = true
             }
-            if (authorities.any { it.objectName == "CMQUERYEXECUTE" }
-                    && authorities.any { it.objectName == "CMQUERY" }
-                    ||
-                    authorities.any { it.objectName == "AIPQUERYEXECUTE" }
-                    && authorities.any { it.objectName == "AIPQUERY" }) {
+            if (authorities.any { it.objectName == "CMQUERYEXECUTE" } && authorities.any {it.objectName == "CMQUERY"}) {
                 canExecuteQuery = true
             }
 
