@@ -213,6 +213,9 @@ class CommunicationFieldCalculationService extends ServiceBase {
             }
 
             return merge( formatString ?: "", attributeMap )
+        } catch (ApplicationException e) {
+            if (log.debugEnabled) log.debug("Application exception while calculating field", e);
+            throw e;
         } catch (SQLException e) {
             if (e.getMessage()?.contains("ORA-06553")) {
                 throw new ApplicationException(CommunicationFieldCalculationService.class, e)
