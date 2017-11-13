@@ -8,6 +8,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.general.system.InstitutionalDescription
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.web.context.request.RequestContextHolder
 import net.hedtech.banner.general.system.InstitutionalDescription
@@ -61,18 +62,39 @@ class DirectDepositAccountCompositeService {
 
         return account
     }
-    
-    def reorderAccounts( accounts ) {
-        def result = [];
-        
-        // clear out original records
-        result.add(directDepositAccountService.delete(accounts))
 
-        // insert records in their new order
-        for (acct in accounts) {
-            acct.id = null;
-            result.add(addorUpdateAccount(acct, false))
+    def reorderAccounts( accounts ) {
+        def result = []
+        def accountsForResult = []
+        def unchanged = []
+        def toBeUpdated = []
+        def currentAllocations = directDepositAccountService.getActiveHrAccounts(accounts[0].pidm).collectEntries {[it.id as Long, it]}
+
+        accounts.each {
+            def existingAcct = currentAllocations[it.id as Long]
+
+            if (isAccountsMatch(existingAcct, it)) {
+                unchanged << it
+            } else {
+                toBeUpdated << it
+            }
         }
+
+        // Delete changed records and store results of delete operation in first element of result list
+        result << directDepositAccountService.delete(toBeUpdated)
+
+        // Insert updated records
+        toBeUpdated.each {
+            it.id = null
+            accountsForResult << addorUpdateAccount(it, false)
+        }
+
+        // Add in the unchanged records
+        unchanged.each {
+            accountsForResult << currentAllocations[it.id as Long]
+        }
+
+        result.addAll(accountsForResult.sort{it.priority})
 
         result
     }
@@ -182,6 +204,25 @@ class DirectDepositAccountCompositeService {
         }
 
         return formattedAmount
+    }
+
+    private boolean isAccountsMatch(acct1, acct2) {
+        if (!(acct1 && acct2)) {
+            return false
+        }
+
+        def acct1Priority = acct1.priority == JSONObject.NULL ? null : acct1.priority
+        def acct2Priority = acct2.priority == JSONObject.NULL ? null : acct2.priority
+        def acct1Amount = acct1.amount == JSONObject.NULL ? null : acct1.amount
+        def acct2Amount = acct2.amount == JSONObject.NULL ? null : acct2.amount
+        def acct1Percent = acct1.percent == JSONObject.NULL ? null : acct1.percent
+        def acct2Percent = acct2.percent == JSONObject.NULL ? null : acct2.percent
+
+        def priorityMatch = acct1Priority == acct2Priority
+        def amountMatch = acct1Amount == acct2Amount
+        def percentMatch = acct1Percent == acct2Percent
+
+        priorityMatch && amountMatch && percentMatch
     }
 
     public static getCurrencyCode() {
@@ -456,24 +497,21 @@ class DirectDepositAccountCompositeService {
 
     def rePrioritizeAccounts(def map, def newPosition) {
 
-        def reOrderInd = true
         def priorityList = []
-
         def adjustedMapList = []
-        def prioritizedList = []
-
         def newAcct = false
-
         def itemBeingAdjusted = map
 
         //checking for mandatory values
         validateRoutingNumExistsInMap(itemBeingAdjusted)
         validateBankRoutingInfo(itemBeingAdjusted.bankRoutingInfo.bankRoutingNum)
 
-
-
         def accountList = directDepositAccountService.getActiveHrAccounts(itemBeingAdjusted?.pidm)
         accountList.sort { it.priority };
+
+        def accountListOriginalValues = accountList.collectEntries {
+            [it.id as Long, [priority: it.priority, amount: it.amount, percent: it.percent]]
+        }
 
         //convert map to object and add it to the account list. both new or existing.
         def domainObject = new DirectDepositAccount()
@@ -563,67 +601,68 @@ class DirectDepositAccountCompositeService {
         }
 
         //with all the values figured out, actual reordering happens for the accountList
-        if (reOrderInd) {
-            //move the input account to the new position in the list.
-            def adjItem = [:]
-            adjItem.id = itemBeingAdjusted.id
-            adjItem.newPosition = newPosition
-            adjustedMapList << adjItem
 
-            if (newPosition > positionBeingUpdated) {
-                for (int i = newPosition; i > positionBeingUpdated; i--) {
-                    def adjustedPosition = i - 1
-                    def adjItem1 = [:]
-                    adjItem1.id = (accountList[adjustedPosition] as DirectDepositAccount).id
-                    adjItem1.newPosition = adjustedPosition
-                    adjustedMapList << adjItem1
-                }
-            }
+        //move the input account to the new position in the list.
+        def adjItem = [:]
+        adjItem.id = itemBeingAdjusted.id
+        adjItem.newPosition = newPosition
+        adjustedMapList << adjItem
 
-            if (newPosition < positionBeingUpdated) {
-                for (int i = newPosition; i < positionBeingUpdated; i++) {
-                    def adjustedPosition = i + 1
-                    def adjItem1 = [:]
-                    adjItem1.id = (accountList[i - 1] as DirectDepositAccount).id
-                    adjItem1.newPosition = adjustedPosition
-                    adjustedMapList << adjItem1
-                }
-            }
-
-            //move the accounts in the accountList
-            adjustedMapList.sort { it.newPosition };
-            adjustedMapList.each {
-                def acct = accountList.find { p -> p.id == it.id } as DirectDepositAccount
-                accountList=moveInList(accountList,acct,it.newPosition-1)
-            }
-
-            //collect the priority numbers
-            priorityList = (accountList*.priority).sort{it}
-
-            //remove the records before updating hibernate objects
-            accountList.each {
-                def pid = it.id
-                if (pid != -1) {
-                    directDepositAccountService.delete(it)
-                }
-            }
-
-            //Assign the priority numbers in order all the accounts in the list.
-            int j=0
-            accountList.each {
-                it.priority = priorityList[j++]
-            }
-
-            accountList.sort { it.priority }
-
-            accountList.each {
-                def item = it as DirectDepositAccount
-                item.version = null
-                item.id = null
-                directDepositAccountService.create(item)
+        if (newPosition > positionBeingUpdated) {
+            for (int i = newPosition; i > positionBeingUpdated; i--) {
+                def adjustedPosition = i - 1
+                def adjItem1 = [:]
+                adjItem1.id = (accountList[adjustedPosition] as DirectDepositAccount).id
+                adjItem1.newPosition = adjustedPosition
+                adjustedMapList << adjItem1
             }
         }
-        return directDepositAccountService.getActiveHrAccounts(map.pidm)
+
+        if (newPosition < positionBeingUpdated) {
+            for (int i = newPosition; i < positionBeingUpdated; i++) {
+                def adjustedPosition = i + 1
+                def adjItem1 = [:]
+                adjItem1.id = (accountList[i - 1] as DirectDepositAccount).id
+                adjItem1.newPosition = adjustedPosition
+                adjustedMapList << adjItem1
+            }
+        }
+
+        //move the accounts in the accountList
+        adjustedMapList.sort { it.newPosition };
+        adjustedMapList.each {
+            def acct = accountList.find { p -> p.id == it.id } as DirectDepositAccount
+            accountList=moveInList(accountList,acct,it.newPosition-1)
+        }
+
+        //collect the priority numbers
+        priorityList = (accountList*.priority).sort{it}
+
+        //Assign the priority numbers in order all the accounts in the list.
+        int j=0
+        accountList.each {
+            it.priority = priorityList[j++]
+        }
+
+        def toBeUpdated = []
+
+        accountList.each {
+            def item = it as DirectDepositAccount
+
+            if (!isAccountsMatch(item, accountListOriginalValues[item.id])) {
+                if (item.id != -1) {
+                    directDepositAccountService.delete(item)
+                }
+
+                item.version = null
+                item.id = null
+                toBeUpdated << item
+            }
+        }
+
+        directDepositAccountService.create(toBeUpdated)
+
+        directDepositAccountService.getActiveHrAccounts(map.pidm)
     }
 
 }
