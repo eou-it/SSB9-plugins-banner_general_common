@@ -638,18 +638,19 @@ class DirectDepositAccountCompositeService {
         //collect the priority numbers
         priorityList = (accountList*.priority).sort{it}
 
-        //Assign the priority numbers in order all the accounts in the list.
-        int j=0
-        accountList.each {
-            it.priority = priorityList[j++]
-        }
-
         def toBeUpdated = []
+        int j=0
 
         accountList.each {
             def item = it as DirectDepositAccount
 
-            if (!isAccountsMatch(item, accountListOriginalValues[item.id])) {
+            // Set up the values that will be checked to determine if this allocation has been changed.  Note that
+            // we use the priority as it *will* be upon save, not what it is now.  We can't actually change the
+            // priority yet, because doing so would result in a "unique constraint exception" when the delete
+            // operation is attempted.
+            def itemValuesToCheck = [priority: priorityList[j++], amount: item.amount, percent: item.percent]
+
+            if (!isAccountsMatch(itemValuesToCheck, accountListOriginalValues[item.id])) {
                 if (item.id != -1) {
                     directDepositAccountService.delete(item)
                 }
@@ -658,6 +659,16 @@ class DirectDepositAccountCompositeService {
                 item.id = null
                 toBeUpdated << item
             }
+        }
+
+        // Assign the priority numbers in order on all the accounts in the list.
+        // (Updating accountList rather than toBeUpdated to keep the priority values matched up to the correct
+        // accounts.  The updated priority will occur in toBeUpdated as well, of course, since its elements are
+        // pointers to the same elements accountList is pointing to.)
+        j=0
+
+        accountList.each {
+            it.priority = priorityList[j++]
         }
 
         directDepositAccountService.create(toBeUpdated)
