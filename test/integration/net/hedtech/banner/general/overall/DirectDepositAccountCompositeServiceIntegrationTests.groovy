@@ -171,6 +171,143 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         assertEquals true, list1.size() > 0
     }
 
+    @Test
+    void testRePrioritizeExistingAccountByMovingFirstToSecondAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def firstAcct = accts[0]
+
+        def existingItemMap0 = [
+                accountType: firstAcct.accountType,
+                bankAccountNum: firstAcct.bankAccountNum,
+                bankRoutingInfo: [bankRoutingNum: firstAcct.bankRoutingInfo.bankRoutingNum],
+                documentType: firstAcct.documentType,
+                id: firstAcct.id,
+                apIndicator: firstAcct.apIndicator,
+                hrIndicator: firstAcct.hrIndicator,
+                intlAchTransactionIndicator: firstAcct.intlAchTransactionIndicator,
+                pidm: firstAcct.pidm,
+                status: firstAcct.status,
+                priority: firstAcct.priority
+        ]
+
+        def newPriority = 2
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(existingItemMap0, newPriority)
+
+        result.sort{it.priority}
+
+        assertEquals 3, result.size()
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) > 1800)
+    }
+
+    @Test
+    void testRePrioritizeExistingAccountByMovingLastToFirstAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def lastAcct = accts[accts.size()-1]
+
+        def existingItemMap0 = [
+                accountType: lastAcct.accountType,
+                bankAccountNum: lastAcct.bankAccountNum,
+                bankRoutingInfo: [bankRoutingNum: lastAcct.bankRoutingInfo.bankRoutingNum],
+                documentType: lastAcct.documentType,
+                id: lastAcct.id,
+                apIndicator: lastAcct.apIndicator,
+                hrIndicator: lastAcct.hrIndicator,
+                intlAchTransactionIndicator: lastAcct.intlAchTransactionIndicator,
+                pidm: lastAcct.pidm,
+                status: lastAcct.status,
+                priority: lastAcct.priority
+        ]
+
+        def newPriority = 1
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(existingItemMap0, newPriority)
+
+        result.sort{it.priority}
+
+        assertEquals 3, result.size()
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+    }
+
+    @Test
+    void testRePrioritizeExistingAccountByMovingFirstToLastWhereLastIsRemainingAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def firstAcct = accts[0]
+
+        def existingItemMap0 = [
+                accountType: firstAcct.accountType,
+                bankAccountNum: firstAcct.bankAccountNum,
+                bankRoutingInfo: [bankRoutingNum: firstAcct.bankRoutingInfo.bankRoutingNum],
+                documentType: firstAcct.documentType,
+                id: firstAcct.id,
+                apIndicator: firstAcct.apIndicator,
+                hrIndicator: firstAcct.hrIndicator,
+                intlAchTransactionIndicator: firstAcct.intlAchTransactionIndicator,
+                pidm: firstAcct.pidm,
+                status: firstAcct.status,
+                priority: firstAcct.priority
+        ]
+
+        def newPriority = 3
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(existingItemMap0, newPriority)
+
+        result.sort{it.priority}
+
+        assertEquals 3, result.size()
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) < 1800)
+
+        // "Modified by" time on last record has not been updated (as middle record has),
+        // because last one is "Remaining" and is forced to stay in last position.
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) > 1800)
+    }
+
+    @Test
+    void testRePrioritizeExistingAccountByMovingLastToFirstWhereLastIsNotRemainingAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def lastAcct = accts[accts.size()-1]
+
+        def existingItemMap0 = [
+                accountType: lastAcct.accountType,
+                bankAccountNum: lastAcct.bankAccountNum,
+                bankRoutingInfo: [bankRoutingNum: lastAcct.bankRoutingInfo.bankRoutingNum],
+                documentType: lastAcct.documentType,
+                id: lastAcct.id,
+                apIndicator: lastAcct.apIndicator,
+                hrIndicator: lastAcct.hrIndicator,
+                intlAchTransactionIndicator: lastAcct.intlAchTransactionIndicator,
+                pidm: lastAcct.pidm,
+                status: lastAcct.status,
+                priority: lastAcct.priority
+        ]
+
+        existingItemMap0.percent = 10
+
+        def newPriority = 1
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(existingItemMap0, newPriority)
+
+        result.sort{it.priority}
+
+        assertEquals 3, result.size()
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+    }
+
 
     @Test
     void testRePrioritizeNewAccount() {
@@ -207,6 +344,98 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     }
 
+    @Test
+    void testRePrioritizeAddingNewAccountToFirstPositionAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def newAccountMap0 = [
+                accountType: 'C',
+                bankAccountNum: '777777',
+                bankRoutingInfo: [bankRoutingNum: '748972234'],
+                documentType: 'D',
+                percent: 10,
+                apIndicator: 'A',
+                hrIndicator: 'A',
+                priority: 3,
+                intlAchTransactionIndicator: 'N',
+                pidm: pidm,
+                status: 'P'
+        ]
+
+        def newPosition = 1
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(newAccountMap0, newPosition)
+
+        result.sort{it.priority}
+
+        assertEquals 4, result.size()
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
+    }
+
+    @Test
+    void testRePrioritizeAddingNewAccountToSecondPositionAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def newAccountMap0 = [
+                accountType: 'C',
+                bankAccountNum: '777777',
+                bankRoutingInfo: [bankRoutingNum: '748972234'],
+                documentType: 'D',
+                percent: 10,
+                apIndicator: 'A',
+                hrIndicator: 'A',
+                priority: 3,
+                intlAchTransactionIndicator: 'N',
+                pidm: pidm,
+                status: 'P'
+        ]
+
+        def newPosition = 2
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(newAccountMap0, newPosition)
+
+        result.sort{it.priority}
+
+        assertEquals 4, result.size()
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) > 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
+    }
+
+    @Test
+    void testRePrioritizeAddingNewAccountToLastPositionWhereLastIsRemainingAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        def newAccountMap0 = [
+                accountType: 'C',
+                bankAccountNum: '777777',
+                bankRoutingInfo: [bankRoutingNum: '748972234'],
+                documentType: 'D',
+                percent: 10,
+                apIndicator: 'A',
+                hrIndicator: 'A',
+                priority: 3,
+                intlAchTransactionIndicator: 'N',
+                pidm: pidm,
+                status: 'P'
+        ]
+
+        def newPosition = 4
+
+        def result = directDepositAccountCompositeService.rePrioritizeAccounts(newAccountMap0, newPosition)
+
+        result.sort{it.priority}
+
+        assertEquals 4, result.size()
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[0].lastModified.getTime() - result[1].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) > 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
+    }
 
 
     @Test
@@ -422,6 +651,89 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         def newId = result[1].id
 
         assertEquals false, oldId == newId
+    }
+
+    @Test
+    void testReorderAccountsBySwappingFirstTwoAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson('GDP000005').pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        accts[0].priority = 2
+        accts[1].priority = 1
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        assertEquals 4, result.size() // Results of any delete operation are in first element; the rest are the accounts
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) > 1800)
+    }
+
+    @Test
+    void testReorderAccountsBySwappingLastTwoAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson('GDP000005').pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        accts[1].priority = 3
+        accts[2].priority = 2
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        assertEquals 4, result.size() // Results of any delete operation are in first element; the rest are the accounts
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) > 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
+    }
+
+    @Test
+    void testReorderAccountsBySwappingFirstWithLastAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson('GDP000005').pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        accts[0].priority = 3
+        accts[2].priority = 1
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        assertEquals 4, result.size() // Results of any delete operation are in first element; the rest are the accounts
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) > 1800)
+        assertTrue('Allocation "modified by" times are similar.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) > 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
+    }
+
+    @Test
+    void testReorderAccountsByMovingFirstToLastAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson('GDP000005').pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        accts[0].priority = 3
+        accts[1].priority = 1
+        accts[2].priority = 2
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        assertEquals 4, result.size() // Results of any delete operation are in first element; the rest are the accounts
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
+    }
+
+    @Test
+    void testReorderAccountsByMovingLastToFirstAndCheckingLastModified() {
+        def pidm = PersonUtility.getPerson('GDP000005').pidm
+        def accts = directDepositAccountCompositeService.getUserHrAllocations(pidm).allocations //36743
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = pidm
+
+        accts[0].priority = 2
+        accts[1].priority = 3
+        accts[2].priority = 1
+
+        def result = directDepositAccountCompositeService.reorderAccounts(accts);
+
+        assertEquals 4, result.size() // Results of any delete operation are in first element; the rest are the accounts
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[1].lastModified.getTime() - result[2].lastModified.getTime()) < 1800)
+        assertTrue('Allocation "modified by" times differ.', Math.abs(result[2].lastModified.getTime() - result[3].lastModified.getTime()) < 1800)
     }
 
     @Test
