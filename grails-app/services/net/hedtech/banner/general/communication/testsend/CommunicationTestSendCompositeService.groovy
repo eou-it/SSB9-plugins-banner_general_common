@@ -190,11 +190,7 @@ class CommunicationTestSendCompositeService  {
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap)
-        //escape xml 5 special characters in the field values to enable pdf generation for letters
-        def String[] fromstring = ["&", "<", "\"", "'", ">"]
-        def String[] tostring = ["&amp;", "&lt;", "&quot;", "&apos;", "&gt;"]
-        recipientData.fieldValues.each { it -> it.value.value = StringUtils.replaceEach(it.value.value, fromstring, tostring) }
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap,true)
         return recipientData
     }
 
@@ -223,8 +219,8 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-    private CommunicationRecipientData createCommunicationRecipientData(Long pidm, Long organizationId, Long templateId, List<String> fieldNames, Map parameterNameValuesMap ) {
-        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, parameterNameValuesMap, pidm )
+    private CommunicationRecipientData createCommunicationRecipientData(Long pidm, Long organizationId, Long templateId, List<String> fieldNames, Map parameterNameValuesMap, Boolean escapeFieldValue=false ) {
+        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, parameterNameValuesMap, pidm, escapeFieldValue )
         return new CommunicationRecipientData(
                 pidm: pidm,
                 referenceId: UUID.randomUUID().toString(),
