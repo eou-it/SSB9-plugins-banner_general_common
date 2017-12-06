@@ -4,10 +4,12 @@
 package net.hedtech.banner.general.communication.testsend
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.email.CommunicationEmailMessage
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
 import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
@@ -23,6 +25,8 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.apache.commons.lang.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 class CommunicationTestSendCompositeService  {
 
@@ -30,7 +34,6 @@ class CommunicationTestSendCompositeService  {
 
     def service
     def communicationTemplateMergeService
-    def communicationJobService
     def communicationRecipientDataService
     def asynchronousBannerAuthenticationSpoofer
     def communicationFieldCalculationService
@@ -42,6 +45,9 @@ class CommunicationTestSendCompositeService  {
     def channel
 
     def sendTest (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
+        if (pidm == null || pidm <= 0) {
+            throw new ApplicationException(CommunicationFieldCalculationService,"@@r1:idInvalid@@")
+        }
         switch (channel) {
             case CommunicationChannel.MOBILE_NOTIFICATION:
                 sendTestMobileNotification(pidm, organizationId, templateId, parameterNameValuesMap)
@@ -57,6 +63,33 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = false, rollbackFor = Throwable.class )
+    public  sendCommunicationWithNewTransaction(recipientDataToBeCreated, template, organization, organizationId, Long pidm) {
+
+        def recipientData = communicationRecipientDataService.create(recipientDataToBeCreated) as CommunicationRecipientData
+        CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
+                communicationTemplateMergeService: communicationTemplateMergeService
+        )
+        CommunicationMessage message = messageGenerator.generate(template, recipientData)
+        switch (channel) {
+            case CommunicationChannel.MOBILE_NOTIFICATION:
+                communicationSendMobileNotificationService.send(organizationId, message as CommunicationMobileNotificationMessage, recipientData)
+                break
+            case CommunicationChannel.EMAIL:
+                communicationSendEmailService.send(organizationId, message as CommunicationEmailMessage, recipientData , pidm)
+                break
+            case CommunicationChannel.LETTER:
+                def letter = createLetter(organization, (CommunicationLetterMessage) message , recipientData)
+                communicationGenerateLetterService.testTemplate = true
+                letter.id = communicationGenerateLetterService.send(organizationId, message as CommunicationLetterMessage, recipientData )
+                return letter
+                break
+            default:
+                throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.templateErrorUnknown"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
+        }
+    }
+
+
     def sendTestEmail (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
         def organization = fetchOrg(organizationId)
         try {
@@ -70,14 +103,10 @@ class CommunicationTestSendCompositeService  {
         }
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitEmail(template as CommunicationEmailTemplate)
-        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames, parameterNameValuesMap)
-        saveRecipientData(recipientData)
+        def recipientData = createCommunicationRecipientData( pidm, organizationId,  templateId, fieldNames, parameterNameValuesMap, template.mepCode)
+
         try {
-            CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
-                    communicationTemplateMergeService: communicationTemplateMergeService
-            )
-            CommunicationMessage message = messageGenerator.generate(template, recipientData)
-            communicationSendEmailService.send(organizationId, message as CommunicationEmailMessage, recipientData, pidm)
+            sendCommunicationWithNewTransaction(recipientData, template, organization, organizationId, pidm)
         } catch (Throwable t) {
             log.error(t)
             if (t instanceof ApplicationException)
@@ -102,16 +131,12 @@ class CommunicationTestSendCompositeService  {
         }
         checkOrgMobile(organization)
         CommunicationTemplate template = fetchTemplate(templateId)
-        def fieldNames = visitMobileNotification(template as CommunicationMobileNotificationTemplate)
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap)
         checkExternalIdExists(pidm)
-        saveRecipientData(recipientData)
+        def fieldNames = visitMobileNotification(template as CommunicationMobileNotificationTemplate)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap, template.mepCode)
+
         try {
-            CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
-                    communicationTemplateMergeService: communicationTemplateMergeService
-            )
-            CommunicationMessage message = messageGenerator.generate(template, recipientData)
-            communicationSendMobileNotificationService.send(organizationId, message as CommunicationMobileNotificationMessage, recipientData)
+            sendCommunicationWithNewTransaction(recipientData, template, organization, organizationId, pidm)
         } catch (Throwable t) {
             log.error(t)
             if (t instanceof ApplicationException)
@@ -127,17 +152,8 @@ class CommunicationTestSendCompositeService  {
 
         CommunicationTemplate template = fetchTemplate(templateId)
         def recipientData = visitLetter(template as CommunicationLetterTemplate, pidm, organizationId, templateId, parameterNameValuesMap)
-        saveRecipientData(recipientData)
         try {
-            CommunicationMessageGenerator messageGenerator = new CommunicationMessageGenerator(
-                    communicationTemplateMergeService: communicationTemplateMergeService
-            )
-            CommunicationMessage message = messageGenerator.generate(template, recipientData)
-            def letter = createLetter(organization, (CommunicationLetterMessage) message , recipientData)
-
-            communicationGenerateLetterService.testTemplate = true
-            letter.id = communicationGenerateLetterService.send(organizationId, message as CommunicationLetterMessage, recipientData )
-            return letter
+            return sendCommunicationWithNewTransaction(recipientData, template, organization, organizationId, pidm)
         } catch (Throwable t) {
             log.error(t)
             if (t instanceof ApplicationException)
@@ -190,25 +206,19 @@ class CommunicationTestSendCompositeService  {
             fieldNames << it
         }
         fieldNames = fieldNames.unique()
-        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap,true)
+        def recipientData = createCommunicationRecipientData(pidm, organizationId, templateId, fieldNames, parameterNameValuesMap, template.mepCode, true)
         return recipientData
     }
 
-    private void saveRecipientData(CommunicationRecipientData recipientData) {
-        CommunicationRecipientData data = communicationRecipientDataService.create(recipientData) as CommunicationRecipientData
-        data.ownerId = data.lastModifiedBy
-        communicationRecipientDataService.update(recipientData)
-    }
-
-    private Map calculateFieldsForUser( List<String> fieldNames, Map parameterNameValuesMap, Long pidm, Boolean escapeFieldValue=false  ) {
+    private Map calculateFieldsForUser( List<String> fieldNames, Map parameterNameValuesMap, Long pidm, String mepCode=null, Boolean escapeFieldValue=false  ) {
         def originalMap = null
         try {
-            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave( )
+            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(CommunicationCommonUtility.userOracleUserName, mepCode)
             return communicationFieldCalculationService.calculateFieldsByPidmWithNewTransaction(
                     (List<String>)  fieldNames,
                     parameterNameValuesMap,
                     (Long) pidm,
-                    "",
+                    mepCode,
                     true,
                     escapeFieldValue
             )
@@ -219,12 +229,12 @@ class CommunicationTestSendCompositeService  {
         }
     }
 
-    private CommunicationRecipientData createCommunicationRecipientData(Long pidm, Long organizationId, Long templateId, List<String> fieldNames, Map parameterNameValuesMap, Boolean escapeFieldValue=false ) {
-        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, parameterNameValuesMap, pidm, escapeFieldValue )
+    private CommunicationRecipientData createCommunicationRecipientData(Long pidm, Long organizationId, Long templateId, List<String> fieldNames, Map parameterNameValuesMap, String mepCode=null, Boolean escapeFieldValue=false ) {
+        Map fieldNameValueMap = calculateFieldsForUser( fieldNames, parameterNameValuesMap, pidm, mepCode, escapeFieldValue )
         return new CommunicationRecipientData(
                 pidm: pidm,
                 referenceId: UUID.randomUUID().toString(),
-                ownerId: -1,
+                ownerId: CommunicationCommonUtility.userOracleUserName,
                 fieldValues: fieldNameValueMap,
                 organizationId: organizationId,
                 communicationChannel: channel,
