@@ -768,7 +768,7 @@ class CommunicationPopulationCompositeService {
             )
 
             if (log.isDebugEnabled()) {
-                log.debug( "Deleted ${rowsUpdated} included entries for population with name ${population.name} and id ${population.id}." )
+                log.debug( "Inserted ${rowsUpdated} included entries for selection list with id ${selectionList.id}." )
             }
         } catch (SQLException e) {
             this.log.error( "Failed to clone selection list", e )
