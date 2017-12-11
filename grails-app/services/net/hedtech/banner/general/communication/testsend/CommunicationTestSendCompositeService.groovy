@@ -97,9 +97,11 @@ class CommunicationTestSendCompositeService  {
         } catch (Throwable t) {
             log.error(t)
             def root = CommunicationOrganization.fetchRoot()
-            if (root)
-                organization.sendEmailServerProperties = root.sendEmailServerProperties
-            checkOrgEmail(organization)
+            if (!root)
+                    throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
+            if (!root.sendEmailServerProperties || !root.sendEmailServerProperties?.id)
+                    throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.serverPropertiesNotFound"), CommunicationErrorCode.SERVER_PROPERTIES_NOT_FOUND.name())
+
         }
         CommunicationTemplate template = fetchTemplate(templateId)
         def fieldNames = visitEmail(template as CommunicationEmailTemplate)
@@ -122,14 +124,9 @@ class CommunicationTestSendCompositeService  {
         } catch (Throwable t) {
             log.error(t)
             def root = CommunicationOrganization.fetchRoot()
-            if (root) {
-                organization.mobileApplicationName = root.mobileApplicationName
-                organization.mobileEndPointUrl = root.mobileEndPointUrl
-                organization.encryptedMobileApplicationKey = root.encryptedMobileApplicationKey
-                organization.clearMobileApplicationKey = root.clearMobileApplicationKey
-            }
+            checkOrgMobile(root)
         }
-        checkOrgMobile(organization)
+
         CommunicationTemplate template = fetchTemplate(templateId)
         checkExternalIdExists(pidm)
         def fieldNames = visitMobileNotification(template as CommunicationMobileNotificationTemplate)
@@ -281,7 +278,7 @@ class CommunicationTestSendCompositeService  {
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
         if (org.mobileEndPointUrl == null || org.mobileEndPointUrl.trim().length() == 0)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.mobileEndPointUrlNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
-        if (org.encryptedMobileApplicationKey == null && org.clearMobileApplicationKey == null)
+        if (org.encryptedMobileApplicationKey == null)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.mobileApplicationKeyNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.name())
         if (org.mobileApplicationName == null)
             throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.mobileApplicationNameNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.name())

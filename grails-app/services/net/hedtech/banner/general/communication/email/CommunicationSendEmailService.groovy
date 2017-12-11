@@ -74,12 +74,40 @@ class CommunicationSendEmailService {
          try {
              CommunicationOrganization organization = CommunicationOrganization.fetchById(organizationId)
 
+             def rootorg = organization?.fetchRoot()
              if (!organization)
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-             if (!organization.sendEmailServerProperties)
-                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.settingsNotFound"), CommunicationErrorCode.EMAIL_SERVER_SETTINGS_NOT_FOUND.name())
+             if (!organization.sendEmailServerProperties || !organization.sendEmailServerProperties?.id)  {
+                 if ((!rootorg || !rootorg.sendEmailServerProperties?.id) ) {
+                     throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.settingsNotFound"), CommunicationErrorCode.EMAIL_SERVER_SETTINGS_NOT_FOUND.name())
+                 } else {
+                     if (rootorg.sendEmailServerProperties != null) {
+                         if (rootorg.sendEmailServerProperties.host == null || rootorg.sendEmailServerProperties.host.length() == 0)
+                             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.hostNotFound"), CommunicationErrorCode.EMAIL_SERVER_HOST_NOT_FOUND.name())
+                         if (rootorg.sendEmailServerProperties.port <= 0)
+                             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.portInvalid"), CommunicationErrorCode.EMAIL_SERVER_PORT_INVALID.name())
+                         if (rootorg.sendEmailServerProperties.securityProtocol == null)
+                             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.securityProtocolInvalid"), CommunicationErrorCode.EMAIL_SERVER_SECURITY_PROTOCOL_INVALID.name())
+                         if (rootorg.sendEmailServerProperties.type == null)
+                             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.server.typeInvalid"), CommunicationErrorCode.EMAIL_SERVER_TYPE_INVALID.name())
+                     }
+                 }
+             }
              if (!receiverAddress || !receiverAddress.mailAddress)
                  throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
+
+             if (!organization.senderMailboxAccount?.id || !organization.replyToMailboxAccount?.id) {
+                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.populationdetail.emailSettingsNotFound"), CommunicationErrorCode.CERTIFICATION_FAILED.name())
+             }
+
+             boolean shouldAuthenticate
+             def smtpProperties = organization.sendEmailServerProperties?.getSmtpPropertiesAsMap() ?: rootorg?.sendEmailServerProperties?.getSmtpPropertiesAsMap()
+             if (smtpProperties && smtpProperties?.auth != null)
+                 shouldAuthenticate = smtpProperties.auth
+             else
+                 shouldAuthenticate = true
+             if (shouldAuthenticate && organization.senderMailboxAccount?.encryptedPassword == null)
+                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.certification.authenticationFailedUserPass"), CommunicationErrorCode.CERTIFICATION_FAILED.name())
 
              sendTestImpl(organization, receiverAddress, messageData)
 
