@@ -60,17 +60,6 @@ class CommunicationSendMobileNotificationService {
         if (!senderOrganization)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND .name())
 
-        // check if child has no settings then look at root settings
-        if (!senderOrganization.mobileEndPointUrl && !senderOrganization.mobileEndPointUrl && !senderOrganization.clearMobileApplicationKey && !senderOrganization.encryptedMobileApplicationKey) {
-            CommunicationOrganization root = CommunicationOrganization.fetchRoot()
-            if (!root)
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-            senderOrganization.encryptedMobileApplicationKey = root.encryptedMobileApplicationKey
-            senderOrganization.clearMobileApplicationKey = root.clearMobileApplicationKey
-            senderOrganization.mobileEndPointUrl = root.mobileEndPointUrl
-            senderOrganization.mobileApplicationName = root.mobileApplicationName
-        }
-
         CommunicationRecipientData recipientData = createCommunicationRecipientData(pidm, organizationId)
         try {
             sendTestImpl(senderOrganization, recipientData, messageData)
@@ -149,13 +138,14 @@ class CommunicationSendMobileNotificationService {
     }
 
     private static void checkOrg (CommunicationOrganization org) {
-        if (org == null)
+        CommunicationOrganization root = CommunicationOrganization.fetchRoot()
+        if (org == null || root == null)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.organizationNotFound"), CommunicationErrorCode.ORGANIZATION_NOT_FOUND.name())
-        if (org.mobileEndPointUrl == null || org.mobileEndPointUrl.trim().length() == 0)
+        if (root.mobileEndPointUrl == null || root.mobileEndPointUrl?.trim().length() == 0)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.mobileEndPointUrlNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_ENDPOINT_URL.name())
-        if (org.encryptedMobileApplicationKey == null && org.clearMobileApplicationKey == null)
+        if (root.encryptedMobileApplicationKey == null)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.mobileApplicationKeyNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_KEY.name())
-        if (org.mobileApplicationName == null)
+        if (root.mobileApplicationName == null)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationService.class, new RuntimeException("communication.error.message.mobileApplicationNameNotFound"), CommunicationErrorCode.EMPTY_MOBILE_NOTIFICATION_APPLICATION_NAME.name())
     }
 
