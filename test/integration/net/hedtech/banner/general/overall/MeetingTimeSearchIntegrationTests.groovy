@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2017 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -259,5 +259,24 @@ class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
         list = MeetingTimeSearch.fetchListMeetingTimeDetailByTermAndCourseReferenceNumber(termList, setCRNs)
         assertTrue list.size()==0
 
+    }
+
+    @Test
+    void testMeetingTypeCodeWithSingleMeetingTime() {
+        def existingMeeting = MeetingTimeSearch.findByCourseReferenceNumberAndTerm("20001", "201410")
+        assertNotNull existingMeeting
+        assertNotNull existingMeeting.meetingType
+        assertEquals "CLAS", existingMeeting.meetingType
+    }
+
+    @Test
+    void testMeetingTypeCodeWithMultipleMeetingTimes() {
+        def existingMeetings = MeetingTimeSearch.findAllByCourseReferenceNumberAndTerm("20036", "201410")
+        assertNotNull existingMeetings
+
+        existingMeetings.each {meetingTime ->
+            assertNotNull meetingTime
+            assertNotNull meetingTime.meetingType
+        }
     }
 }

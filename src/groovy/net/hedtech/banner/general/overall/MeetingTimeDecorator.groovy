@@ -1,11 +1,12 @@
 /** *****************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
+import net.hedtech.banner.general.system.MeetingType
 
 class MeetingTimeDecorator {
 
@@ -93,7 +94,8 @@ class MeetingTimeDecorator {
 
     String campusDescription
 
-
+    String meetingType
+    String meetingTypeDescription
 
     MeetingTimeDecorator(MeetingTimeSearch section) {
         this.term = section.term
@@ -122,6 +124,10 @@ class MeetingTimeDecorator {
         if (this.campus && !this.campusDescription) {
             this.campusDescription = Campus.executeQuery("select description from Campus where code = ?",[this.campus])[0]
         }
+        this.meetingType = section.meetingType
+        if (this.meetingType) {
+            this.meetingTypeDescription = MeetingType.findByCode(this.meetingType)?.description
+        }
     }
 
 
@@ -148,6 +154,8 @@ class MeetingTimeDecorator {
         this.meetingScheduleType = null
         this.campus = null
         this.campusDescription = null
+        this.meetingType = null
+        this.meetingTypeDescription = null
     }
 
 
@@ -174,7 +182,9 @@ class MeetingTimeDecorator {
                    buildingDescription=$buildingDescription,
                    meetingScheduleType=$meetingScheduleType,
                    campus=$campus,
-                   campusDescription=$campusDescription
+                   campusDescription=$campusDescription,
+                   meetingType=$meetingType,
+                   meetingTypeDescription=$meetingTypeDescription
 		           ]"""
     }
 

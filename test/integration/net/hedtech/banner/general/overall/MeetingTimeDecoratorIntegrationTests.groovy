@@ -1,5 +1,5 @@
 /** *****************************************************************************
- Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 
 package net.hedtech.banner.general.overall
@@ -8,6 +8,7 @@ import org.junit.Test
 import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import net.hedtech.banner.general.system.MeetingType
 
 class MeetingTimeDecoratorIntegrationTests extends BaseIntegrationTestCase {
 
@@ -86,5 +87,21 @@ class MeetingTimeDecoratorIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testMeetingTypeAndMeetingTypeDescription() {
+        def existingMeetings = MeetingTimeSearch.findAllByCourseReferenceNumberAndTerm("20036", "201410")
+        assertNotNull existingMeetings
+
+        existingMeetings.each {meetingTime ->
+            assertNotNull meetingTime
+            assertNotNull meetingTime.meetingType
+
+            def meetingTimeDecorator = new MeetingTimeDecorator(meetingTime)
+            assertNotNull meetingTimeDecorator.meetingType
+            assertNotNull meetingTimeDecorator.meetingTypeDescription
+            def meetingTypeDescription = MeetingType.findByCode(meetingTime.meetingType)?.description
+            assertEquals meetingTypeDescription, meetingTimeDecorator.meetingTypeDescription
+        }
+    }
 
 }

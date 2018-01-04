@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -208,6 +208,8 @@ class MeetingTimeSearch {
     @Column(name = "ssrmeet_term_crn")
     String termCourseReferenceNumber
 
+    @Column(name = "SSRMEET_MTYP_CODE")
+    String meetingType
 
     public String toString() {
         """MeetingTimeSearch[
@@ -236,10 +238,11 @@ class MeetingTimeSearch {
                    override=$override ,
                    hoursWeek=$hoursWeek,
                    meetNumber=$meetNumber,
-                   creditHoursSession=$creditHourSession   ,
+                   creditHoursSession=$creditHourSession,
                    dayOfWeek=$dayOfWeek,
-                   scheduleType=$scheduleType ,
-                   termCourseReferenceNumber=$termCourseReferenceNumber
+                   scheduleType=$scheduleType,
+                   termCourseReferenceNumber=$termCourseReferenceNumber,
+                   meetingType=$meetingType
                    ]"""
     }
 
