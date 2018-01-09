@@ -104,4 +104,21 @@ class MeetingTimeDecoratorIntegrationTests extends BaseIntegrationTestCase {
         }
     }
 
+    @Test
+    void testMeetingTypeIsNull() {
+        def existingMeetings = MeetingTimeSearch.findAllByCourseReferenceNumberAndTerm("20036", "201410")
+        assertNotNull existingMeetings
+
+        existingMeetings.each {meetingTime ->
+            assertNotNull meetingTime
+            assertNotNull meetingTime.meetingType
+
+            //Explicitly set meetingType to null to make sure description is not returned.
+            meetingTime.meetingType = null
+            def meetingTimeDecorator = new MeetingTimeDecorator(meetingTime)
+            assertNull meetingTimeDecorator.meetingType
+            assertNull meetingTimeDecorator.meetingTypeDescription
+        }
+    }
+
 }
