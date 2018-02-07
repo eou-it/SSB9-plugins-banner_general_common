@@ -189,7 +189,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testFetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList() {
-        def visaInformation = newValidForCreateVisaInformationForParameterPassed("1",(new Date()-1), (new Date()+1), "F1")
+        def visaInformation = newValidForCreateVisaInformationForParameterPassed("1",(new Date()-1), (new Date()+1), "B1")
         def map = [domainModel: visaInformation]
         visaInformation = visaInformationService.create(map)
         assertNotNull visaInformation.id
