@@ -174,7 +174,7 @@ class DirectDepositAccountService extends ServiceBase{
                 id                         : it.id,
                 version                    : it.version,
                 status                     : it.status,
-                documentType               : it.status,
+                documentType               : it.documentType,
                 priority                   : it.priority,
                 apIndicator                : it.apIndicator,
                 hrIndicator                : it.hrIndicator,

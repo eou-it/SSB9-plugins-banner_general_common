@@ -218,6 +218,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         // Assert values
         assertNotNull marshalledAccount
         assertEquals 1, marshalledAccount.id
+        assertEquals "P", marshalledAccount.status
+        assertEquals "D", marshalledAccount.documentType
         assertEquals 16, marshalledAccount.priority
         assertEquals "36948575", marshalledAccount.bankAccountNum
         assertEquals "C", marshalledAccount.accountType
@@ -260,6 +262,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull marshalledAccount
         assertEquals 1, marshalledAccount.id
         assertEquals 0, marshalledAccount.version
+        assertEquals "P", marshalledAccount.status
+        assertEquals "D", marshalledAccount.documentType
         assertEquals 16, marshalledAccount.priority
         assertEquals "36948575", marshalledAccount.bankAccountNum
         assertEquals "C", marshalledAccount.accountType
@@ -273,6 +277,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         assertNotNull marshalledAccount
         assertEquals 2, marshalledAccount.id
         assertEquals 4, marshalledAccount.version
+        assertEquals "P", marshalledAccount.status
+        assertEquals "D", marshalledAccount.documentType
         assertEquals 16, marshalledAccount.priority
         assertEquals "36948575", marshalledAccount.bankAccountNum
         assertEquals "C", marshalledAccount.accountType
