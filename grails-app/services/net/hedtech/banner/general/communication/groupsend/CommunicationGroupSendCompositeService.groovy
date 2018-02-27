@@ -15,9 +15,11 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
 import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
+import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionListBulkResults
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
@@ -28,6 +30,7 @@ import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import org.quartz.CronExpression
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
@@ -112,6 +115,37 @@ class CommunicationGroupSendCompositeService {
         }
 
         return groupSend
+    }
+
+    public CommunicationGroupSend createMessageAndPopulationForGroupSend(String eventCode, List<String> bannerIDs, Long organizationID, Long templateID, Map parameterNameValuesMap) {
+
+        if(!eventCode || eventCode.isEmpty()) {
+            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventCodeInvalid@@" )
+        }
+
+        CommunicationTemplate template = CommunicationTemplate.get(templateID)
+        if(template.id == null) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
+        }
+
+        if(bannerIDs == null || bannerIDs.isEmpty())
+        {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
+        }
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, eventCode)
+        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList(population, bannerIDs)
+
+        CommunicationGroupSendRequest groupSendRequest = new CommunicationGroupSendRequest()
+        groupSendRequest.name = eventCode
+        groupSendRequest.populationId = population.id
+        groupSendRequest.templateId = templateID
+        groupSendRequest.organizationId = organizationID
+        groupSendRequest.referenceId = UUID.randomUUID().toString()
+        groupSendRequest.recalculateOnSend = false
+        groupSendRequest.parameterNameValueMap = parameterNameValuesMap
+
+        CommunicationGroupSend groupSend = sendAsynchronousGroupCommunication(groupSendRequest)
     }
 
     private static void assignPopulationCalculation(CommunicationGroupSend groupSend, String bannerUser) {
@@ -391,6 +425,31 @@ class CommunicationGroupSendCompositeService {
         }
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleServiceMethod( jobContext )
+        groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
+        return groupSend
+    }
+
+    private CommunicationGroupSend scheduleRecurringGroupSend( CommunicationGroupSend groupSend, String cronSchedule, String bannerUser ) {
+        if(!CronExpression.isValidExpression(cronSchedule)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidCronExpression")
+        }
+
+        SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId )
+                .setBannerUser( bannerUser )
+                .setMepCode( groupSend.mepCode )
+                .setCronSchedule("") //Add a column to group send domain to hold the cron schedule string
+                .setParameter( "groupSendId", groupSend.id )
+
+        if(groupSend.recalculateOnSend) {
+            jobContext.setJobHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFired" )
+                    .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
+        } else {
+            jobContext.setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
+                    .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
+        }
+
+        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleCronServiceMethod( jobContext )
         groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
         return groupSend

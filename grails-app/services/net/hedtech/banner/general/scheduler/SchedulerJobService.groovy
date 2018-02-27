@@ -5,6 +5,7 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.quartz.CronScheduleBuilder
 import org.quartz.JobDetail
 import org.quartz.JobKey
 import org.quartz.SimpleTrigger
@@ -46,6 +47,29 @@ class SchedulerJobService {
         SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
             withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
             startAt( evenMinuteDate( jobContext.scheduledStartDate ) ).build()
+        scheduleJob( jobDetail, trigger )
+
+        return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
+    }
+
+    /**
+     * Schedules calling a recurring service method using the quartz scheduler CRON schedule.
+     * The service method invoked should take a single map as a parameter.
+     *
+     * @param runTime the date to wait until starting the task
+     * @param jobId a job identifier; a uuid is one way to go
+     * @param bannerUser a banner id to proxy as before invoking the method
+     * @param mepCode mep or vpdi code, may be null if the db is not a mep database
+     * @param service the name of the service to call
+     * @param method the method of the service to invoke
+     * @param parameters an optional map to pass to to the service method
+     * @return a scheduler job receipt with the jobId and the a groupId consisting of the service and method named concatenated together
+     */
+    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
+        JobDetail jobDetail = createJobDetail( jobContext )
+
+        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+                withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule).withMisfireHandlingInstructionFireAndProceed()).build()
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
@@ -150,6 +174,7 @@ class SchedulerJobService {
             jobDetail.getJobDataMap().put("errorMethod", jobContext.errorHandle.method)
         }
         jobDetail.getJobDataMap().put( "scheduledStartDate", jobContext.scheduledStartDate)
+        jobDetail.getJobDataMap().put( "cronSchedule", jobContext.cronSchedule)
         assignParameters( jobDetail, jobContext.parameters )
         return jobDetail
     }
