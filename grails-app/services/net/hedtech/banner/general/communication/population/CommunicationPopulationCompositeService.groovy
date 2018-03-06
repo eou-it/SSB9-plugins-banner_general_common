@@ -83,7 +83,7 @@ class CommunicationPopulationCompositeService {
     }
 
 
-    public CommunicationPopulationSelectionListBulkResults addPersonsToIncludeList( CommunicationPopulation population, List<String> bannerIds ) {
+    public CommunicationPopulationSelectionListBulkResults addPersonsToIncludeList( CommunicationPopulation population, List<String> bannerIds, boolean closeConnection = true ) {
         log.trace("addPersonsToIncludeList called")
 
         if (bannerIds == null) {
@@ -223,7 +223,9 @@ class CommunicationPopulationCompositeService {
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, e )
         } finally {
-            sql?.close()
+            if(closeConnection) {
+                sql?.close()
+            }
         }
         results.population = population
         results.insertedCount = totalInserted

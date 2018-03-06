@@ -134,7 +134,7 @@ class CommunicationGroupSendCompositeService {
         }
 
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, eventCode)
-        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList(population, bannerIDs)
+        CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList(population, bannerIDs, false)
 
         CommunicationGroupSendRequest groupSendRequest = new CommunicationGroupSendRequest()
         groupSendRequest.name = eventCode
@@ -146,6 +146,7 @@ class CommunicationGroupSendCompositeService {
         groupSendRequest.parameterNameValueMap = parameterNameValuesMap
 
         CommunicationGroupSend groupSend = sendAsynchronousGroupCommunication(groupSendRequest)
+        return groupSend
     }
 
     private static void assignPopulationCalculation(CommunicationGroupSend groupSend, String bannerUser) {

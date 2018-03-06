@@ -21,7 +21,6 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
 import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
 import net.hedtech.banner.general.communication.population.CommunicationPopulationDetail
-import net.hedtech.banner.general.communication.population.CommunicationPopulationListView
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
@@ -256,6 +255,90 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( "testTextParameter = Friday and testNumberParameter = 20", recipientData.fieldValues.get( "textNumberField" ).value )
     }
 
+
+    @Test
+    public void testCreateMessageAndPopulationForGroupSendWithParameters() {
+        println "testCreateMessageAndPopulationForGroupSendWithParameters"
+
+        // Set up the parameters, fields, and template
+        CommunicationParameter testTextParameter = new CommunicationParameter([name:"testTextParameter", title:"test text", type: CommunicationParameterType.TEXT])
+        testTextParameter = communicationParameterService.create( testTextParameter )
+        CommunicationParameter testNumberParameter = new CommunicationParameter([name:"testNumberParameter", title:"test number", type: CommunicationParameterType.NUMBER])
+        testNumberParameter = communicationParameterService.create( testNumberParameter )
+        CommunicationParameter testDateParameter = new CommunicationParameter([name:"testDateParameter", title:"test date", type: CommunicationParameterType.DATE])
+        testDateParameter = communicationParameterService.create( testDateParameter )
+
+        CommunicationField textNumberField = new CommunicationField(
+                // Required fields
+                folder: defaultFolder,
+                immutableId: UUID.randomUUID().toString(),
+                name: "textNumberField",
+                returnsArrayArguments: false,
+                ruleContent: "select :testTextParameter as tt, :testNumberParameter as tn from dual where :pidm = :pidm",
+                formatString: "testTextParameter = \$tt\$ and testNumberParameter = \$tn\$",
+                previewValue: "testTextParameter = Kim and testNumberParameter = 7",
+                renderAsHtml: false,
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT
+        )
+        textNumberField = communicationFieldService.create( [domainModel: textNumberField] )
+        textNumberField = communicationFieldService.publishDataField( [id: textNumberField.id] )
+        assertEquals( 2, CommunicationParameterFieldAssociation.countByField( textNumberField ) )
+
+        CommunicationField dateField = new CommunicationField(
+                // Required fields
+                folder: defaultFolder,
+                immutableId: UUID.randomUUID().toString(),
+                name: "dateField",
+                returnsArrayArguments: false,
+                ruleContent: "select :testDateParameter as td from dual where :pidm = :pidm",
+                formatString: "\$td\$",
+                previewValue: "2-16-2017",
+                renderAsHtml: false,
+                status: CommunicationFieldStatus.DEVELOPMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT
+        )
+        dateField = communicationFieldService.create( [domainModel: dateField] )
+        dateField = communicationFieldService.publishDataField( [id: dateField.id] )
+        assertEquals( 1, CommunicationParameterFieldAssociation.countByField( dateField ) )
+
+        CommunicationEmailTemplate emailTemplate = new CommunicationEmailTemplate (
+                name: "emailTemplate",
+                personal: false,
+                oneOff: false,
+                folder: defaultFolder,
+                toList: "test@test.edu",
+                subject: "dateField = \$dateField\$",
+                content: "textNumberField = \$textNumberField\$ <B> textNumberField = \$textNumberField\$."
+        )
+        emailTemplate = communicationEmailTemplateService.create( emailTemplate )
+        emailTemplate = communicationEmailTemplateService.publish( emailTemplate )
+        assertEquals( 2, CommunicationTemplateFieldAssociation.countByTemplate( emailTemplate ))
+
+        Map parameterNameValuesMap = new HashMap()
+        parameterNameValuesMap.put( "testTextParameter", new CommunicationParameterValue( [ value: "Friday", type: CommunicationParameterType.TEXT ] ) )
+        parameterNameValuesMap.put( "testNumberParameter", new CommunicationParameterValue( [ value: 20, type: CommunicationParameterType.NUMBER ] ) )
+        parameterNameValuesMap.put( "testDateParameter", new CommunicationParameterValue( [ value: DateUtility.parseDateString( "05-30-2013", "MM-dd-yyyy"), type: CommunicationParameterType.DATE ] ) )
+
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createMessageAndPopulationForGroupSend("Test Event", ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'], defaultOrganization.id, emailTemplate.id, parameterNameValuesMap)
+        assertNotNull(groupSend)
+
+        def checkExpectedGroupSendItemsCreated = {
+            CommunicationGroupSend each = CommunicationGroupSend.get( it )
+            return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 3
+        }
+        assertTrueWithRetry( checkExpectedGroupSendItemsCreated, groupSend.id, 15, 5 )
+
+        List items = CommunicationGroupSendItem.findAllByCommunicationGroupSend(  groupSend )
+        assertEquals( 3, items.size() )
+
+        CommunicationRecipientData recipientData = CommunicationRecipientData.findByReferenceId( items.get( 0 ).referenceId )
+        recipientData.refresh()
+        assertNotNull( recipientData )
+        assertEquals( 2, recipientData.fieldValues.size() )
+        assertEquals( "05-30-2013", recipientData.fieldValues.get( "dateField" ).value )
+        assertEquals( "testTextParameter = Friday and testNumberParameter = 20", recipientData.fieldValues.get( "textNumberField" ).value )
+    }
 
     @Test
     public void testDeletePopulationWithGroupSend() {
