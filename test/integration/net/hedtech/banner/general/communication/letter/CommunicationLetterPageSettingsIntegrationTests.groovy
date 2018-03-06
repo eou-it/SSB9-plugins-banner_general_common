@@ -4,7 +4,6 @@
 
 package net.hedtech.banner.general.communication.letter
 
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
 import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After

@@ -5,7 +5,6 @@ package net.hedtech.banner.general.communication.email
 
 import com.icegreen.greenmail.util.GreenMailUtil
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
-import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType

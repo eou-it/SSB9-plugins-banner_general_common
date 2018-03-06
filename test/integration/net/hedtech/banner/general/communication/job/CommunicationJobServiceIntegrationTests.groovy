@@ -4,12 +4,8 @@
 
 package net.hedtech.banner.general.communication.job
 
-import groovy.sql.Sql
-import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.organization.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

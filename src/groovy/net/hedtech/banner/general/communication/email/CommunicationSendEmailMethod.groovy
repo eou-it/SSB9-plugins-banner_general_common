@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode

@@ -3,7 +3,6 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.groupsend
 
-import grails.converters.JSON
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
@@ -12,7 +11,6 @@ import net.hedtech.banner.DateUtility
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSettings
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.apache.commons.lang.NotImplementedException

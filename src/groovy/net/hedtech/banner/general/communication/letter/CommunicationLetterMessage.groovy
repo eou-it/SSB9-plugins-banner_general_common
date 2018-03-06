@@ -5,7 +5,6 @@ package net.hedtech.banner.general.communication.letter
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.email.CommunicationEmailAddress
 import net.hedtech.banner.general.communication.template.CommunicationMessage
 
 /**

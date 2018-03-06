@@ -5,8 +5,6 @@ package net.hedtech.banner.general.communication.population.query
 
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryView
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.hibernate.FlushMode
 import org.junit.After

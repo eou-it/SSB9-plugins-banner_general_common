@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After

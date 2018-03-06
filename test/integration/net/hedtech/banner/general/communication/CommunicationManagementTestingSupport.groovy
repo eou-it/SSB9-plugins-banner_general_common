@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.commons.lang.RandomStringUtils
 
 /**

@@ -17,7 +17,6 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 
-import javax.persistence.EntityManager
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet

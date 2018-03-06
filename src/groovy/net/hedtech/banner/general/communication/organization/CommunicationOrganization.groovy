@@ -7,7 +7,6 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import org.hibernate.annotations.Type
-import org.hibernate.annotations.Where
 import org.hibernate.criterion.Order
 
 import javax.persistence.*

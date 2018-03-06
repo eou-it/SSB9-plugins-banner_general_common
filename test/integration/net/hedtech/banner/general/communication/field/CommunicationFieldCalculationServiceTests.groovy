@@ -13,7 +13,6 @@ package net.hedtech.banner.general.communication.field
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
-import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After

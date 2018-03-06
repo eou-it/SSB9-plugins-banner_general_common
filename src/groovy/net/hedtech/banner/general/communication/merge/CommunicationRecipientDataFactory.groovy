@@ -6,13 +6,11 @@ package net.hedtech.banner.general.communication.merge
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
-import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
-import org.apache.commons.lang.StringUtils
 import org.apache.log4j.Logger
 
 /**

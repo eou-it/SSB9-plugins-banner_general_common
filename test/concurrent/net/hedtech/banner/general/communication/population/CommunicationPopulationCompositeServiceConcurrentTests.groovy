@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication.population
 
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
-import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryType

@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.population.query
 
 import net.hedtech.banner.security.BannerUser
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.hibernate.FlushMode
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

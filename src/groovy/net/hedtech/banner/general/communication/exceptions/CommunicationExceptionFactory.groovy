@@ -6,7 +6,6 @@ package net.hedtech.banner.general.communication.exceptions
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
-import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 
 /**
  * Convenience methods for creating an application exceptions. Largely the factory takes care of stricter

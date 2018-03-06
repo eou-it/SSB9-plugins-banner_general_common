@@ -7,13 +7,11 @@ import groovy.time.DatumDependentDuration
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.ResponseParseException
-import net.hedtech.banner.configuration.ApplicationConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
-import net.sf.json.JSONArray
 import net.sf.json.util.JSONUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory

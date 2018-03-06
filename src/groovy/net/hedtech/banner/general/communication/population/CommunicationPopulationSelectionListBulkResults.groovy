@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.CommunicationErrorCode
 
 /**
  * Captures the results of a batch insert of banner ids to a communication selection list.

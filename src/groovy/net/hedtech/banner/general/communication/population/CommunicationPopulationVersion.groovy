@@ -5,9 +5,7 @@ package net.hedtech.banner.general.communication.population
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
-import org.hibernate.annotations.Type
 
 import javax.persistence.*
 

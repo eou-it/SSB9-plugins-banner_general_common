@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.email
 
-import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import javax.mail.Authenticator
 import javax.mail.PasswordAuthentication
 

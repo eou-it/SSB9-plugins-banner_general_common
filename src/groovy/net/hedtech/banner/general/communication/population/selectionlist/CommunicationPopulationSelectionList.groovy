@@ -5,7 +5,6 @@ package net.hedtech.banner.general.communication.population.selectionlist
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*

@@ -5,13 +5,10 @@ package net.hedtech.banner.general.communication.template
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.FlushMode
-import org.hibernate.annotations.DiscriminatorOptions
 import org.hibernate.annotations.Type
-import org.hibernate.criterion.Order
 
 import javax.persistence.*
 

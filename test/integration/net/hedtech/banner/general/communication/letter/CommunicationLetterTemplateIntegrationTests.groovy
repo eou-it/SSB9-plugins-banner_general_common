@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.communication.letter
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
-import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
