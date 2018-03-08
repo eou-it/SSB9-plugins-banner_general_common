@@ -42,7 +42,7 @@ class CommunicationLetterPdfBuilder {
         if (LCH.getLocale().getLanguage().equalsIgnoreCase("ar")) {
             ITextFontResolver fontResolver = renderer.getFontResolver();
             try {
-                font_path = this.class.classLoader.getResource("fonts");
+                font_path = Thread.currentThread().getContextClassLoader().getResource("fonts")
                 File f = new File(font_path.getPath());
                 if (f.isDirectory()) {
                     File[] files = f.listFiles(new FilenameFilter() {
