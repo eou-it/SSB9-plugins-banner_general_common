@@ -119,6 +119,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         assertNotNull newTemplate.createDate
         assertNotNull(newTemplate.lastModified)
         assertNotNull(newTemplate.lastModifiedBy)
+        assertFalse newTemplate.systemIndicator
 
         // Now test findall
         def foundEmailTemplates = communicationTemplateService.findAll()

@@ -50,6 +50,10 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
         )
 
         template.save( failOnError: true, flush: true )
+        template = CommunicationMobileNotificationTemplate.get( template.id )
+        assertEquals( "create test", template.name )
+        assertEquals( "MIKE", template.createdBy )
+        assertFalse template.systemIndicator
     }
 
     @Test
@@ -80,6 +84,7 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
         assertEquals( "message description", template.messageDescription )
         assertEquals( "destination label", template.destinationLabel )
         assertEquals( "description", template.description )
+        assertFalse template.systemIndicator
     }
 
     @Test

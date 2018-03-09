@@ -65,6 +65,7 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
         assertNotNull template.lastModifiedBy
         assertEquals today, template.validFrom
         assertNull template.validTo
+        assertFalse template.systemIndicator
 
         def templateList = communicationTemplateService.findAll()
         assertEquals( 1, templateList.size() )

@@ -65,6 +65,13 @@ public class CommunicationTemplateView implements Serializable {
     Boolean personal
 
     /**
+     * Indicates if the datafield was created through the seeded data set and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "SYSTEM_IND")
+    Boolean systemIndicator = false
+
+    /**
      *  The user ID of the person who inserted this record.
      */
     @Column(name = "creator_id")

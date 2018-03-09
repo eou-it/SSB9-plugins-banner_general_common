@@ -48,6 +48,9 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
         )
 
         template.save( failOnError: true, flush: true )
+        assertEquals( "create test", template.name )
+        assertEquals( "MIKE", template.createdBy )
+        assertFalse template.systemIndicator
     }
 
     @Test
@@ -71,6 +74,7 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
         template = CommunicationLetterTemplate.get( template.id )
         assertEquals( "Planet Mars", template.toAddress )
         assertEquals( "ET phone home!", template.content )
+        assertFalse template.systemIndicator
     }
 
     @Test

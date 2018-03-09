@@ -104,6 +104,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         assertEquals i_valid_emailTemplate_validTo, emailTemplate.validTo
         assertEquals i_valid_emailTemplate_createdBy, emailTemplate.createdBy
         assertEquals i_valid_emailTemplate_createDate, emailTemplate.createDate
+        assertFalse emailTemplate.systemIndicator
 
         // Now test findall
         def foundEmailTemplates = CommunicationEmailTemplate.findAll()
@@ -133,7 +134,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         assertEquals( "updated fromList                    ", i_valid_emailTemplate_fromList, updatedEmailTemplate.fromList )
         assertEquals( "updated subject                     ", i_valid_emailTemplate_subject, updatedEmailTemplate.subject )
         assertEquals( "updated toList                      ", i_valid_emailTemplate_toList, updatedEmailTemplate.toList )
-
+        assertFalse updatedEmailTemplate.systemIndicator
     }
 
 
@@ -175,6 +176,85 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
     }
 
+    @Test
+    void testExistsAnotherNameFolder() {
+
+        def originalList = CommunicationEmailTemplate.findAll()
+
+        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull emailTemplate.id
+        assertEquals i_valid_emailTemplate_name, emailTemplate.name
+        assertEquals i_valid_emailTemplate_description, emailTemplate.description
+        assertEquals i_valid_emailTemplate_personal, emailTemplate.personal
+        assertEquals i_valid_emailTemplate_bccList, emailTemplate.bccList
+        assertEquals i_valid_emailTemplate_ccList, emailTemplate.ccList
+        assertEquals i_valid_emailTemplate_content, emailTemplate.content
+        assertEquals i_valid_emailTemplate_fromList, emailTemplate.fromList
+        assertEquals i_valid_emailTemplate_subject, emailTemplate.subject
+        assertEquals i_valid_emailTemplate_toList, emailTemplate.toList
+        assertEquals "grails_user".toUpperCase(), emailTemplate.lastModifiedBy.toUpperCase()
+        /* you can't predict what lastModified will get set to, so just check not null */
+        assertNotNull emailTemplate.lastModified
+        /* gets set to Banner by the framework */
+        assertEquals "Banner", emailTemplate.dataOrigin
+        assertEquals i_valid_emailTemplate_oneOff, emailTemplate.oneOff
+        assertEquals i_valid_emailTemplate_published, emailTemplate.published
+        assertEquals i_valid_emailTemplate_validFrom, emailTemplate.validFrom
+        assertEquals i_valid_emailTemplate_validTo, emailTemplate.validTo
+        assertEquals i_valid_emailTemplate_createdBy, emailTemplate.createdBy
+        assertEquals i_valid_emailTemplate_createDate, emailTemplate.createDate
+        assertFalse emailTemplate.systemIndicator
+
+        // Now test findall
+        def foundEmailTemplates = CommunicationEmailTemplate.findAll()
+        assertEquals( originalList.size() + 1, foundEmailTemplates.size() )
+
+        Boolean exists = emailTemplate.existsAnotherNameFolder(emailTemplate.id, emailTemplate.name, emailTemplate.folder.name)
+        assertFalse exists
+
+    }
+
+    @Test
+    void testFetchByTemplateNameAndFolderName() {
+
+        def originalList = CommunicationEmailTemplate.findAll()
+
+        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull emailTemplate.id
+        assertEquals i_valid_emailTemplate_name, emailTemplate.name
+        assertEquals i_valid_emailTemplate_description, emailTemplate.description
+        assertEquals i_valid_emailTemplate_personal, emailTemplate.personal
+        assertEquals i_valid_emailTemplate_bccList, emailTemplate.bccList
+        assertEquals i_valid_emailTemplate_ccList, emailTemplate.ccList
+        assertEquals i_valid_emailTemplate_content, emailTemplate.content
+        assertEquals i_valid_emailTemplate_fromList, emailTemplate.fromList
+        assertEquals i_valid_emailTemplate_subject, emailTemplate.subject
+        assertEquals i_valid_emailTemplate_toList, emailTemplate.toList
+        assertEquals "grails_user".toUpperCase(), emailTemplate.lastModifiedBy.toUpperCase()
+        /* you can't predict what lastModified will get set to, so just check not null */
+        assertNotNull emailTemplate.lastModified
+        /* gets set to Banner by the framework */
+        assertEquals "Banner", emailTemplate.dataOrigin
+        assertEquals i_valid_emailTemplate_oneOff, emailTemplate.oneOff
+        assertEquals i_valid_emailTemplate_published, emailTemplate.published
+        assertEquals i_valid_emailTemplate_validFrom, emailTemplate.validFrom
+        assertEquals i_valid_emailTemplate_validTo, emailTemplate.validTo
+        assertEquals i_valid_emailTemplate_createdBy, emailTemplate.createdBy
+        assertEquals i_valid_emailTemplate_createDate, emailTemplate.createDate
+        assertFalse emailTemplate.systemIndicator
+
+        // Now test findall
+        def foundEmailTemplates = CommunicationEmailTemplate.findAll()
+        assertEquals( originalList.size() + 1, foundEmailTemplates.size() )
+
+        Boolean exists = emailTemplate.fetchByTemplateNameAndFolderName(emailTemplate.name, emailTemplate.folder.name)
+        assertTrue exists
+
+    }
 
     private def newValidForCreateFolder() {
         def folder = new CommunicationFolder(

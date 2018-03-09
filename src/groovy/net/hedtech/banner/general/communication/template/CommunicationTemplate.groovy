@@ -149,6 +149,13 @@ public abstract class CommunicationTemplate implements Serializable {
     @Enumerated(value = EnumType.STRING)
     CommunicationChannel communicationChannel
 
+    /**
+     * Indicates if the datafield was created through the seeded data set and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCBTMPL_SYSTEM_IND")
+    Boolean systemIndicator = false
+
     static constraints = {
         name(nullable: false, maxSize: 250)
         description(nullable: true, maxSize: 2000)
@@ -163,6 +170,7 @@ public abstract class CommunicationTemplate implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable: true)
         communicationChannel(nullable: false)
+        systemIndicator(nullable:false)
     }
 
     CommunicationTemplate( CommunicationChannel communicationChannel ) {
@@ -198,16 +206,16 @@ public abstract class CommunicationTemplate implements Serializable {
         def query
         if (mepCode != null) {
             CommunicationTemplate.withSession { session ->
-                query = session.getNamedQuery('CommunicationTemplate.fetchById')
+                query = session.getNamedQuery('CommunicationTemplate.fetchByIdAndMepCode')
                         .setLong('id', id)
+                        .setString('mepCode', mepCode)
                         .list()[0]
             }
         }
         else {
             CommunicationTemplate.withSession { session ->
-                query = session.getNamedQuery('CommunicationTemplate.fetchByIdAndMepCode')
+                query = session.getNamedQuery('CommunicationTemplate.fetchById')
                         .setLong('id', id)
-                        .setString('mepCode', mepCode)
                         .list()[0]
             }
         }
