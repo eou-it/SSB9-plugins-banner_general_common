@@ -14,12 +14,16 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 import org.hibernate.annotations.Type
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 
 /**
  * Population Selection Base Table
  */
 @Entity
+@EqualsAndHashCode
+@ToString
 @Table(name = "GLBSLCT")
 class PopulationSelectionBase implements Serializable {
 
@@ -94,58 +98,6 @@ class PopulationSelectionBase implements Serializable {
      */
     @Column(name = "GLBSLCT_DATA_ORIGIN")
     String dataOrigin
-
-
-    public String toString() {
-        """PopulationSelectionBase[
-					id=$id,
-					version=$version,
-					application=$application,
-					selection=$selection,
-					creatorId=$creatorId,
-					description=$description,
-					lockIndicator=$lockIndicator,
-					typeIndicator=$typeIndicator,
-					lastModified=$lastModified,
-					lastModifiedBy=$lastModifiedBy,
-					dataOrigin=$dataOrigin]"""
-    }
-
-
-    boolean equals( o ) {
-        if (this.is( o )) return true
-        if (!(o instanceof PopulationSelectionBase)) return false
-        PopulationSelectionBase that = (PopulationSelectionBase) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (application != that.application) return false
-        if (selection != that.selection) return false
-        if (creatorId != that.creatorId) return false
-        if (description != that.description) return false
-        if (lockIndicator != that.lockIndicator) return false
-        if (typeIndicator != that.typeIndicator) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (application != null ? application.hashCode() : 0)
-        result = 31 * result + (selection != null ? selection.hashCode() : 0)
-        result = 31 * result + (creatorId != null ? creatorId.hashCode() : 0)
-        result = 31 * result + (description != null ? description.hashCode() : 0)
-        result = 31 * result + (lockIndicator != null ? lockIndicator.hashCode() : 0)
-        result = 31 * result + (typeIndicator != null ? typeIndicator.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        return result
-    }
 
     static constraints = {
         application( nullable: false, maxSize: 30 )

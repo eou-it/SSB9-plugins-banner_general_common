@@ -3,6 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.lettergeneration
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+
 import javax.persistence.*
 
 /**
@@ -10,6 +13,8 @@ import javax.persistence.*
  */
 
 @Entity
+@EqualsAndHashCode
+@ToString
 @Table(name = "GLBEXTR")
 @NamedQueries(value = [
         @NamedQuery(name = "PopulationSelectionExtract.fetchByApplicationSelectionCreatorIdLastModifiedBy",
@@ -90,58 +95,6 @@ class PopulationSelectionExtract implements Serializable {
      */
     @Column(name = "GLBEXTR_DATA_ORIGIN")
     String dataOrigin
-
-
-    public String toString() {
-        """PopulationSelectionExtract[
-					id=$id, 
-					version=$version, 
-					application=$application, 
-					selection=$selection, 
-					creatorId=$creatorId, 
-					key=$key, 
-					systemIndicator=$systemIndicator, 
-					selectIndicator=$selectIndicator, 
-					lastModified=$lastModified, 
-					lastModifiedBy=$lastModifiedBy, 
-					dataOrigin=$dataOrigin ]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof PopulationSelectionExtract)) return false
-        PopulationSelectionExtract that = (PopulationSelectionExtract) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (application != that.application) return false
-        if (selection != that.selection) return false
-        if (creatorId != that.creatorId) return false
-        if (key != that.key) return false
-        if (systemIndicator != that.systemIndicator) return false
-        if (selectIndicator != that.selectIndicator) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (application != null ? application.hashCode() : 0)
-        result = 31 * result + (selection != null ? selection.hashCode() : 0)
-        result = 31 * result + (creatorId != null ? creatorId.hashCode() : 0)
-        result = 31 * result + (key != null ? key.hashCode() : 0)
-        result = 31 * result + (systemIndicator != null ? systemIndicator.hashCode() : 0)
-        result = 31 * result + (selectIndicator != null ? selectIndicator.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        return result
-    }
 
     static constraints = {
         application(nullable: false, maxSize: 30)
