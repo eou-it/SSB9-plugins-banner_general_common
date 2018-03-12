@@ -212,8 +212,11 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 println "The result is false and so sleep for some time"
                 TimeUnit.SECONDS.sleep( pauseBetweenAttemptsInSeconds )
             }
+            println "Came out of the if else statement: "+i
         }
+        println "Now out of the for loop"
         assertTrue( result )
+        println "After asserting the result"
     }
 
     protected void deleteAll() {

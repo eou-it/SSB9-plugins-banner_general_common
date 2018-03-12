@@ -51,15 +51,17 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         communicationGroupSendMonitor.startMonitoring()
         communicationGroupSendItemProcessingEngine.startRunning()
         communicationJobProcessingEngine.startRunning()
+        println "in the setup and all background processes started"
     }
 
 
     @After
     public void tearDown() {
+        println "IN the teardown of the communicationgroupsendcompositeserviceconcurrenttests"
         communicationGroupSendMonitor.shutdown()
         communicationGroupSendItemProcessingEngine.stopRunning()
         communicationJobProcessingEngine.stopRunning()
-
+        println "everything has been shutdown"
         super.tearDown()
 //        sessionFactory.currentSession?.close()
         logout()
@@ -504,6 +506,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             return CommunicationGroupSend.findRunning().size() == 0
         }
         assertTrueWithRetryFindRunning( allDone, null, 10, 10 )
+        println "End of the test find running"
     }
 
     @Test
