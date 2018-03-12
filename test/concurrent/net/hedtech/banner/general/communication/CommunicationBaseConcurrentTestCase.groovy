@@ -199,6 +199,23 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         assertTrue( result )
     }
 
+    public void assertTrueWithRetryFindRunning( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {
+        boolean result = false
+        println "Inside the assertTrueWithRetry: "+"**maxAttempts is: "+maxAttempts+" **** pause is: "+pauseBetweenAttemptsInSeconds
+        for (int i=0; i<maxAttempts; i++ ) {
+            println "inside the for loop: value of i is "+i
+            result = booleanClosure.call( arguments )
+            if (result) {
+                println "The result is true"
+                break
+            } else {
+                println "The result is false and so sleep for some time"
+                TimeUnit.SECONDS.sleep( pauseBetweenAttemptsInSeconds )
+            }
+        }
+        assertTrue( result )
+    }
+
     protected void deleteAll() {
         def sql
         try {

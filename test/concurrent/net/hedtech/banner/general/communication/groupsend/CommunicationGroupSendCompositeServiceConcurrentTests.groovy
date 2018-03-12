@@ -487,18 +487,23 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning1" ))
         assertNotNull(groupSend)
+        println "testFindRunning test has sent testFindRunning 1"
         CommunicationGroupSend groupSendB = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning2" ))
         assertNotNull(groupSendB)
+        println "testFindRunning test has sent testFindRunning 2"
         CommunicationGroupSend groupSendC = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning3" ))
         assertNotNull(groupSendC)
+        println "testFindRunning test has sent testFindRunning 3"
 
         List runningList = CommunicationGroupSend.findRunning()
         assertEquals( 3, runningList.size() )
 
+        println "TestFindRunning test has found 3 running group sends"
         def allDone = {
+            println "TestFindRunning: inside the closure allDone with size = "+ CommunicationGroupSend.findRunning().size()
             return CommunicationGroupSend.findRunning().size() == 0
         }
-        assertTrueWithRetry( allDone, null, 10, 10 )
+        assertTrueWithRetryFindRunning( allDone, null, 10, 10 )
     }
 
     @Test
