@@ -16,6 +16,7 @@ import net.hedtech.banner.service.ServiceBase
 
 import java.sql.Connection
 import java.sql.SQLException
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class CommunicationFieldService extends ServiceBase {
@@ -153,9 +154,10 @@ class CommunicationFieldService extends ServiceBase {
         }
     }
 
-    List<String> fieldParameterNameList(CommunicationField field) {
-        def regex = Pattern.compile(":(\\w+)", Pattern.DOTALL); //get all words between a colon and a space including new lines
-        return (field?.ruleContent =~ regex) as List
+    Matcher fieldParameterNameList(CommunicationField field) {
+        //get all words between a colon and a space including new lines, disregard any string that is enclosed by single quotes
+        def regex = Pattern.compile("\\'[^']+\\'|:(\\w+)", Pattern.DOTALL);
+        return (field?.ruleContent =~ regex)
     }
 
     void updateFieldParameterAssociation(CommunicationField communicationField) {
