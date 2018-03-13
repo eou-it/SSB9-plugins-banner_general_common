@@ -215,8 +215,22 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             println "Came out of the if else statement: "+i
         }
         println "Now out of the for loop"
-        return result
-      //  assertTrue("The result is false ", result )
+        if (!result) {
+            for (int i=0; i<maxAttempts; i++ ) {
+                println "inside the for loop: value of i is "+i
+                result = booleanClosure.call( arguments )
+                if (result) {
+                    println "The result is true"
+                    break
+                } else {
+                    println "The result is false and so sleep for some time"
+                    TimeUnit.SECONDS.sleep( pauseBetweenAttemptsInSeconds )
+                }
+                println "Came out of the if else statement: "+i
+            }
+        }
+
+        assertTrue("The result is false ", result )
         println "After asserting the result"
     }
 

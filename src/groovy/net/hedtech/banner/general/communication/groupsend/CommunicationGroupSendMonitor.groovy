@@ -63,6 +63,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 
     @Override
     void destroy() throws Exception {
+        println "IN THE DESTROY OF THE MONITOR THREAD"
         log.info("Calling disposable bean method.");
         if (monitorThread) {
             monitorThread.stopRunning()
@@ -80,14 +81,17 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 
 
     public void shutdown() {
+        println "SHUTTING DOWN THE MONITOR THREAD"
         log.debug("Shutting down.");
         if (monitorThread) {
             monitorThread.stopRunning();
             try {
-                this.monitorThread.join();
+                println "Now joining the thread and waiting"
+                this.monitorThread.join(10000);
             } catch (InterruptedException e) {
             }
         }
+        println "The monitor thread has been stopped"
         monitorThread = null
     }
 
