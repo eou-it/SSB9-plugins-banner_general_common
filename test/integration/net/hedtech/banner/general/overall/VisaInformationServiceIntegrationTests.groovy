@@ -190,6 +190,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testFetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList() {
         def visaInformation = newValidForCreateVisaInformationForParameterPassed("1",(new Date()-1), (new Date()+1), "B1")
+        println "The visa information is "+visaInformation
         def map = [domainModel: visaInformation]
         visaInformation = visaInformationService.create(map)
         assertNotNull visaInformation.id
@@ -197,6 +198,7 @@ class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
         List pidms =[]
         pidms.add(pidm)
         List<VisaInformation> visaInformationList = visaInformationService.fetchAllWithMaxSeqNumByIssuingNationCodeAndPidmInList(pidms,"1")
+        println "The visainformationlist is: "+visaInformationList
         assertEquals(1, visaInformationList.size())
         List<GlobalUniqueIdentifier> globalUniqueIdentifier = GlobalUniqueIdentifier.fetchByLdmNameAndDomainKey(GeneralValidationCommonConstants.VISA_TYPES_LDM_NAME, visaInformationList[0].visaType.code)
         assertEquals(1, globalUniqueIdentifier.size())

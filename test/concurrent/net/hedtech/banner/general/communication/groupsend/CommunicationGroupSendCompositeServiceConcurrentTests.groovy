@@ -59,8 +59,11 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     public void tearDown() {
         println "IN the teardown of the communicationgroupsendcompositeserviceconcurrenttests"
         communicationGroupSendMonitor.shutdown()
+        println "Group send monitor has been shutdown"
         communicationGroupSendItemProcessingEngine.stopRunning()
+        println "Processing engine has been shut down"
         communicationJobProcessingEngine.stopRunning()
+        println "job processing engine has been shutdown"
         println "everything has been shutdown"
         super.tearDown()
 //        sessionFactory.currentSession?.close()
@@ -505,7 +508,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             println "TestFindRunning: inside the closure allDone with size = "+ CommunicationGroupSend.findRunning().size()
             return CommunicationGroupSend.findRunning().size() == 0
         }
-        assertTrueWithRetryFindRunning( allDone, null, 10, 10 )
+        assertTrue("The test has failed.",assertTrueWithRetryFindRunning( allDone, null, 10, 10 ))
         println "End of the test find running"
     }
 

@@ -199,7 +199,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         assertTrue( result )
     }
 
-    public void assertTrueWithRetryFindRunning( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {
+    public Boolean assertTrueWithRetryFindRunning( Closure booleanClosure, Object arguments, long maxAttempts, int pauseBetweenAttemptsInSeconds = 5 ) {
         boolean result = false
         println "Inside the assertTrueWithRetry: "+"**maxAttempts is: "+maxAttempts+" **** pause is: "+pauseBetweenAttemptsInSeconds
         for (int i=0; i<maxAttempts; i++ ) {
@@ -215,7 +215,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             println "Came out of the if else statement: "+i
         }
         println "Now out of the for loop"
-        assertTrue( result )
+        return result
+      //  assertTrue("The result is false ", result )
         println "After asserting the result"
     }
 
