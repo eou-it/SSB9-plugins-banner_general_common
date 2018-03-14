@@ -135,6 +135,8 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.ThirdPartyAccess"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInformation"/>
         <mapping class="net.hedtech.banner.general.overall.VisaInternationalInformation"/>
+        <mapping class="net.hedtech.banner.general.overall.FlexibleWorkWeek" />
+        <mapping class="net.hedtech.banner.general.overall.FlexibleWorkWeekReadOnly" />
         <mapping class="net.hedtech.banner.general.utility.Mail"/>
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
         <mapping class="net.hedtech.banner.general.ledger.GeneralFeed" />
