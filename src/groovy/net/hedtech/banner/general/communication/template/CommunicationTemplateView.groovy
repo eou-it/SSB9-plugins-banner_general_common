@@ -65,7 +65,7 @@ public class CommunicationTemplateView implements Serializable {
     Boolean personal
 
     /**
-     * Indicates if the datafield was created through the seeded data set and should not be deleted or modified in any way.
+     * Indicates if the template was created through the seeded data set and should not be deleted or modified in any way.
      */
     @Type(type = "yes_no")
     @Column(name = "SYSTEM_IND")

@@ -131,6 +131,13 @@ class CommunicationPopulation implements Serializable {
     @Column(name = "GCBPOPL_CHANGED_IND")
     Boolean changesPending = false
 
+    /**
+     * Indicates if the population was generated as part of a backend API call and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCBPOPL_SYSTEM_IND")
+    Boolean systemIndicator = false
+
     static constraints = {
         name(nullable: false)
         description(nullable:true)
@@ -141,6 +148,7 @@ class CommunicationPopulation implements Serializable {
         dataOrigin(nullable: true, maxSize: 30)
         includeList(nullable: true)
         changesPending(nullable: false)
+        systemIndicator(nullable:false)
     }
 
     public static CommunicationPopulation fetchById(Long id) {

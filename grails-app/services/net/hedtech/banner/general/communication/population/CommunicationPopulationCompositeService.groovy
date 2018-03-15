@@ -65,7 +65,7 @@ class CommunicationPopulationCompositeService {
         return CommunicationPopulationListView.findByNameWithPagingAndSortParams( filterData, pagingAndSortParams )
     }
 
-    public CommunicationPopulation createPopulation( CommunicationFolder folder, String name, String description = "" ) {
+    public CommunicationPopulation createPopulation( CommunicationFolder folder, String name, String description = "" , boolean systemIndicator = false) {
         log.trace( "createPopulation called" )
         CommunicationPopulation population = new CommunicationPopulation()
         population.folder = folder

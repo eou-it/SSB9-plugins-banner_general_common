@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
 import javax.persistence.*
@@ -193,12 +194,19 @@ class CommunicationPopulationListView implements Serializable {
     @Column(name = "QUERY_VERSION_SELECTED")
     String useRecentOrCurrent
 
+    /**
+     * Indicates if the population was generated as part of a backend API call and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "POPULATION_SYSTEM_IND")
+    Boolean systemIndicator = false
 
     static constraints = {
         name(nullable: false)
         populationQueryId(nullable: false)
         calculatedBy(nullable: true, maxSize: 30)
         lastCalculatedTime(nullable: true)
+        systemIndicator(nullable: false)
     }
 
     // Read Only fields that should be protected against update
@@ -263,16 +271,18 @@ class CommunicationPopulationListView implements Serializable {
         def queryCriteria = CommunicationPopulationListView.createCriteria()
         def results
 
-        String name = filterData?.params?.populationName ?: ""
-        if (name.equals( "%" ) || name.equals( "*" )) {
+        String createdBy = filterData?.params?.createdBy
+        String name = CommunicationCommonUtility.getScrubbedInput(filterData?.params?.populationName ?: "")
+        if (createdBy.equals( "%" )) {
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                ilike("name", name)
                 ilike("createdBy", filterData?.params?.createdBy)
                 order((isAscending ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
             }
         } else {
-            String scrubbedName = CommunicationCommonUtility.getScrubbedInput( name )
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-                ilike("name", scrubbedName)
+                ilike("name", name)
+                eq("systemIndicator", false)
                 ilike("createdBy", filterData?.params?.createdBy)
                 order((isAscending ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
             }
@@ -288,6 +298,7 @@ class CommunicationPopulationListView implements Serializable {
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toUpperCase())
             gt("lastCalculatedCount",0L)
+            eq("systemIndicator", false)
             and {
                 or {
                     ilike("name", searchName)

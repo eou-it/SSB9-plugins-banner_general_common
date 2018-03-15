@@ -133,10 +133,10 @@ class CommunicationGroupSendCompositeService {
 
         if(bannerIDs == null || bannerIDs.isEmpty())
         {
-                throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
         }
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, uniqueName)
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, uniqueName, "", true)
         CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList(population, bannerIDs, false)
 
         CommunicationGroupSendRequest groupSendRequest = new CommunicationGroupSendRequest()

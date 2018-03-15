@@ -56,6 +56,7 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
         assertNotNull population.version
         assertNotNull population.dataOrigin
         assertNotNull population.lastModified
+        assertFalse population.systemIndicator
 
     }
 
@@ -206,6 +207,7 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
                 name: populationName,
                 createDate: new Date(),
                 createdBy: getUser(),
+                systemIndicator: false,
                 // Nullable fields
                 description: "Population Description",
         )

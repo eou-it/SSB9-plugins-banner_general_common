@@ -67,6 +67,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         assertEquals getUser(), population.createdBy
         assertEquals "Population Description", population.description
         assertEquals "TEST", population.name
+        assertFalse population.systemIndicator
     }
 
 
@@ -85,6 +86,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         assertEquals 'BCMUSER', population.createdBy
         assertEquals "Population Description", population.description
         assertEquals "TEST", population.name
+        assertFalse population.systemIndicator
     }
 
 
@@ -211,6 +213,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
                 // Required fields
                 folder: testFolder,
                 name: populationName,
+                systemIndicator: false,
                 // Nullable fields
                 description: "Population Description",
         )

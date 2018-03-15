@@ -150,7 +150,7 @@ public abstract class CommunicationTemplate implements Serializable {
     CommunicationChannel communicationChannel
 
     /**
-     * Indicates if the datafield was created through the seeded data set and should not be deleted or modified in any way.
+     * Indicates if the template was created through the seeded data set and should not be deleted or modified in any way.
      */
     @Type(type = "yes_no")
     @Column(name = "GCBTMPL_SYSTEM_IND")
