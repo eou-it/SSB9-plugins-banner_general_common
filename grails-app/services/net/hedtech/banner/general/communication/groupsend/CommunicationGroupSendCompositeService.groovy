@@ -123,6 +123,9 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventCodeInvalid@@" )
         }
 
+        //Make a unique name for group send and population by adding timeinmillis to event code
+        String uniqueName = eventCode + "_" +System.currentTimeMillis()
+
         CommunicationTemplate template = CommunicationTemplate.get(templateID)
         if(template.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
@@ -133,11 +136,11 @@ class CommunicationGroupSendCompositeService {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
         }
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, eventCode)
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, uniqueName)
         CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList(population, bannerIDs, false)
 
         CommunicationGroupSendRequest groupSendRequest = new CommunicationGroupSendRequest()
-        groupSendRequest.name = eventCode
+        groupSendRequest.name = uniqueName
         groupSendRequest.populationId = population.id
         groupSendRequest.templateId = templateID
         groupSendRequest.organizationId = organizationID
