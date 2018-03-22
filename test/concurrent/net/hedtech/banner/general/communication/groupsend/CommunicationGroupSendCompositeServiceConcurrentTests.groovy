@@ -51,20 +51,15 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         communicationGroupSendMonitor.startMonitoring()
         communicationGroupSendItemProcessingEngine.startRunning()
         communicationJobProcessingEngine.startRunning()
-        println "in the setup and all background processes started"
     }
 
 
     @After
     public void tearDown() {
-        println "IN the teardown of the communicationgroupsendcompositeserviceconcurrenttests"
         communicationGroupSendMonitor.shutdown()
-        println "Group send monitor has been shutdown"
         communicationGroupSendItemProcessingEngine.stopRunning()
-        println "Processing engine has been shut down"
         communicationJobProcessingEngine.stopRunning()
-        println "job processing engine has been shutdown"
-        println "everything has been shutdown"
+
         super.tearDown()
 //        sessionFactory.currentSession?.close()
         logout()
@@ -492,24 +487,18 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
 
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning1" ))
         assertNotNull(groupSend)
-        println "testFindRunning test has sent testFindRunning 1"
         CommunicationGroupSend groupSendB = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning2" ))
         assertNotNull(groupSendB)
-        println "testFindRunning test has sent testFindRunning 2"
         CommunicationGroupSend groupSendC = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(createGroupSendRequest( "testFindRunning3" ))
         assertNotNull(groupSendC)
-        println "testFindRunning test has sent testFindRunning 3"
 
         List runningList = CommunicationGroupSend.findRunning()
         assertEquals( 3, runningList.size() )
 
-        println "TestFindRunning test has found 3 running group sends"
         def allDone = {
-            println "TestFindRunning: inside the closure allDone with size = "+ CommunicationGroupSend.findRunning().size()
             return CommunicationGroupSend.findRunning().size() == 0
         }
-        assertTrue("The test has failed.",assertTrueWithRetryFindRunning( allDone, null, 10, 10 ))
-        println "End of the test find running"
+        assertTrueWithRetry( allDone, null, 10, 10 )
     }
 
     @Test
