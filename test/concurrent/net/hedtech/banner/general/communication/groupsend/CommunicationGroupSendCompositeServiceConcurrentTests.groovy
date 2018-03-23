@@ -8,6 +8,7 @@ import net.hedtech.banner.DateUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
+import net.hedtech.banner.general.communication.event.CommunicationEventMapping
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationRuleStatementType
@@ -320,12 +321,21 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         emailTemplate = communicationEmailTemplateService.publish( emailTemplate )
         assertEquals( 2, CommunicationTemplateFieldAssociation.countByTemplate( emailTemplate ))
 
+        //Create the Event Mapping
+        CommunicationEventMapping eventMapping = new CommunicationEventMapping(
+                eventName: "TEST_EVENT",
+                organizationId: defaultOrganization.id,
+                templateId: emailTemplate.id
+        )
+        eventMapping = communicationEventMappingService.create( eventMapping )
+        assertNotNull(eventMapping?.id)
+
         Map parameterNameValuesMap = new HashMap()
         parameterNameValuesMap.put( "testTextParameter", new CommunicationParameterValue( [ value: "Friday", type: CommunicationParameterType.TEXT ] ) )
         parameterNameValuesMap.put( "testNumberParameter", new CommunicationParameterValue( [ value: 20, type: CommunicationParameterType.NUMBER ] ) )
         parameterNameValuesMap.put( "testDateParameter", new CommunicationParameterValue( [ value: DateUtility.parseDateString( "05-30-2013", "MM-dd-yyyy"), type: CommunicationParameterType.DATE ] ) )
 
-        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createMessageAndPopulationForGroupSend("Test Event", ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'], defaultOrganization.id, emailTemplate.id, parameterNameValuesMap)
+        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createMessageAndPopulationForGroupSend("TEST_EVENT", ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'], parameterNameValuesMap)
         assertNotNull(groupSend)
 
         def checkExpectedGroupSendItemsCreated = {

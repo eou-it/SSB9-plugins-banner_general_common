@@ -168,18 +168,26 @@ class CommunicationFieldService extends ServiceBase {
         }
 
         // for each extracted parameter create a parmaeter field association
-        fieldParameterNameList(communicationField)?.each { m ->
-            if (m[1] != 'pidm') { //dont create association for the pidm
-
-                def param = CommunicationParameter.fetchByName(m[1])
-                if (param == null || param?.id == null) {
-                    throw new ApplicationException( CommunicationField, "@@r1:parameter.does.not.exist@@" )
-                }
-                if (!CommunicationParameterFieldAssociation.fetchByFieldAndParameter(communicationField, param)) {
-                    def cfa = new CommunicationParameterFieldAssociation()
-                    cfa.field = communicationField
-                    cfa.parameter = param
-                    communicationParameterFieldAssociationService.create(cfa)
+        Matcher regexMatcher = fieldParameterNameList(communicationField)
+        List<String> group1Caps = new ArrayList<String>();
+        while (regexMatcher.find()) {
+            if(regexMatcher.group(1) != null) {
+                group1Caps.add(regexMatcher.group(1));
+            }
+        }
+        if(group1Caps.size()>0) {
+            for (String match : group1Caps) {
+                if (match != 'pidm') {
+                    def param = CommunicationParameter.fetchByName(match)
+                    if (param == null || param?.id == null) {
+                        throw new ApplicationException(CommunicationField, "@@r1:parameter.does.not.exist@@")
+                    }
+                    if (!CommunicationParameterFieldAssociation.fetchByFieldAndParameter(communicationField, param)) {
+                        def cfa = new CommunicationParameterFieldAssociation()
+                        cfa.field = communicationField
+                        cfa.parameter = param
+                        communicationParameterFieldAssociationService.create(cfa)
+                    }
                 }
             }
         }

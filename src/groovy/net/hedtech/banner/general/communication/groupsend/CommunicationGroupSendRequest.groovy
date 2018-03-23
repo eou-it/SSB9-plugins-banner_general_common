@@ -15,6 +15,7 @@ class CommunicationGroupSendRequest implements Serializable {
     Long populationId
     Long templateId
     Long organizationId
+    Long eventId
     String referenceId
     Date scheduledStartDate
     Boolean recalculateOnSend

@@ -7,6 +7,7 @@ import grails.util.GrailsNameUtils
 import net.hedtech.banner.configuration.ConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplateService
+import net.hedtech.banner.general.communication.event.CommunicationEventMappingService
 import net.hedtech.banner.general.communication.field.CommunicationFieldService
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.folder.CommunicationFolderService
@@ -85,6 +86,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationFieldService communicationFieldService
     CommunicationSendMobileNotificationService CommunicationSendMobileNotificationService
     CommunicationParameterService communicationParameterService
+    CommunicationEventMappingService communicationEventMappingService
 
     protected CommunicationOrganization defaultOrganization
     protected CommunicationFolder defaultFolder
@@ -259,6 +261,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBEMTL")
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBLTPL")
+                sql.executeUpdate("Delete from GCBEVMP")
                 sql.executeUpdate("Delete from GCBTMPL")
                 sql.executeUpdate("Delete from GCRFLPM")
                 sql.executeUpdate("Delete from GCRCFLD")

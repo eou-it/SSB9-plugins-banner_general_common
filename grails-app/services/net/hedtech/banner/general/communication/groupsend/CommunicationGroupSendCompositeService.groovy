@@ -7,7 +7,9 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.event.CommunicationEventMapping
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.general.communication.population.CommunicationPopulation
@@ -75,6 +77,7 @@ class CommunicationGroupSendCompositeService {
 
         // do lookup for population version
         groupSend.organizationId = request.getOrganizationId()
+        groupSend.eventId = request.eventId
         groupSend.name = jobName
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
@@ -117,20 +120,25 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-    public CommunicationGroupSend createMessageAndPopulationForGroupSend(String eventCode, List<String> bannerIDs, Long organizationID, Long templateID, Map parameterNameValuesMap) {
+    public CommunicationGroupSend createMessageAndPopulationForGroupSend(String eventCode, List<String> bannerIDs, Map parameterNameValuesMap) {
 
         if(!eventCode || eventCode.isEmpty()) {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventCodeInvalid@@" )
         }
 
+        CommunicationEventMapping eventMapping = CommunicationEventMapping.fetchByName(eventCode)
         //Make a unique name for group send and population by adding timeinmillis to event code
         String uniqueName = eventCode + "_" +System.currentTimeMillis()
 
-        CommunicationTemplate template = CommunicationTemplate.get(templateID)
+        CommunicationTemplate template = CommunicationTemplate.get(eventMapping.templateId)
         if(template.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
         }
 
+        CommunicationOrganization organization = CommunicationOrganization.get(eventMapping.organizationId)
+        if (organization.id == null) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationIsRequired")
+        }
         if(bannerIDs == null || bannerIDs.isEmpty())
         {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
@@ -142,8 +150,9 @@ class CommunicationGroupSendCompositeService {
         CommunicationGroupSendRequest groupSendRequest = new CommunicationGroupSendRequest()
         groupSendRequest.name = uniqueName
         groupSendRequest.populationId = population.id
-        groupSendRequest.templateId = templateID
-        groupSendRequest.organizationId = organizationID
+        groupSendRequest.templateId = template.id
+        groupSendRequest.organizationId = organization.id
+        groupSendRequest.eventId = eventMapping.id
         groupSendRequest.referenceId = UUID.randomUUID().toString()
         groupSendRequest.recalculateOnSend = false
         groupSendRequest.parameterNameValueMap = parameterNameValuesMap

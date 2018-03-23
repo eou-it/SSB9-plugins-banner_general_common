@@ -144,7 +144,7 @@ class CommunicationEventMapping implements Serializable {
 
         def queryCriteria = CommunicationEventMapping.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("eventName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
+            ilike("eventName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.eventName))
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results

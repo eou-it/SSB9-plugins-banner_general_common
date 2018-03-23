@@ -104,6 +104,9 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_TEMPLATE_ID")
     Long templateId;
 
+    @Column(name = "GCBGSND_EVENT_ID")
+    Long eventId;
+
     @Column(name = "GCBGSND_STARTED_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     Date startedDate;
@@ -174,6 +177,7 @@ class CommunicationGroupSend implements Serializable {
         populationCalculationId(nullable: true)
         organizationId(nullable: false)
         templateId(nullable: false)
+        eventId(nullable:true)
         createdBy(nullable: false, maxSize: 30)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
