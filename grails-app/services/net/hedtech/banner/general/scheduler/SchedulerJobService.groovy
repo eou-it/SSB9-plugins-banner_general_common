@@ -55,6 +55,7 @@ class SchedulerJobService {
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
+    //For future use when we do the recurring scheduling user story
     /**
      * Schedules calling a recurring service method using the quartz scheduler CRON schedule.
      * The service method invoked should take a single map as a parameter.
@@ -68,7 +69,7 @@ class SchedulerJobService {
      * @param parameters an optional map to pass to to the service method
      * @return a scheduler job receipt with the jobId and the a groupId consisting of the service and method named concatenated together
      */
-    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
+/*    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
         SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
@@ -76,7 +77,7 @@ class SchedulerJobService {
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
-    }
+    }*/
 
     /**
      * Schedules calling a service method using the quartz scheduler to run immediately.

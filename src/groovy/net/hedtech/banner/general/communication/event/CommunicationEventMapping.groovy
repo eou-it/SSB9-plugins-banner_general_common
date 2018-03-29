@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
 import org.hibernate.FlushMode
+import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
 import javax.persistence.Column
@@ -73,6 +74,14 @@ class CommunicationEventMapping implements Serializable {
     @Column(name = "GCBEVMP_QUERY_ID")
     Long queryId
 
+
+    /**
+     * Indicates if the event mapping was created through the seeded data set and should not be deleted or modified in any way.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCBEVMP_SYSTEM_IND")
+    Boolean systemIndicator = false
+
     /**
      *  Optimistic lock token.
      */
@@ -101,9 +110,10 @@ class CommunicationEventMapping implements Serializable {
 
     static constraints = {
         eventName(nullable: false, maxSize: 255)
-        organizationId(nullable:false)
+        organizationId(nullable:true)
         templateId(nullable: false)
         queryId(nullable: true)
+        systemIndicator(nullable: false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)

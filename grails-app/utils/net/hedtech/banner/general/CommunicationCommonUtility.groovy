@@ -117,6 +117,7 @@ class CommunicationCommonUtility {
         def isAuthor = false
         def isAdmin = false
         def canExecuteQuery = false
+        def canCreatePopulation = false
 
         try {
             def authorities = SecurityContextHolder?.context?.authentication?.principal?.authorities
@@ -136,11 +137,16 @@ class CommunicationCommonUtility {
             if (authorities.any { it.objectName == "CMQUERYEXECUTE" } && authorities.any {it.objectName == "CMQUERY"}) {
                 canExecuteQuery = true
             }
+            if (authorities.any { it.objectName == "CMQUERYEXECUTE" } ) {
+                //Used for manual population creation from the backend API when there is no query involved
+                canCreatePopulation = true
+            }
 
             map.put("isUser", isUser)
             map.put("isAuthor", isAuthor)
             map.put("isAdmin", isAdmin)
             map.put("canExecuteQuery", canExecuteQuery)
+            map.put("canCreatePopulation", canCreatePopulation)
 
 //get the oracle userid associated with the login banner id.  If there is a gobeacc record, that oracle user will be
 //returned. If no gobeacc record then the username associated with the bannerSsbDataSource will be returned
@@ -174,7 +180,7 @@ class CommunicationCommonUtility {
     public static userCanCreatePopulation() {
         try {
             def usermap = getCommunicationUserRoleMap()
-            return usermap.isUser && usermap.canExecuteQuery
+            return usermap.isUser && (usermap.canExecuteQuery || usermap.canCreatePopulation)
         } catch (Exception e) {
             log.error("principal lacks authorities - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
             log.error(e)

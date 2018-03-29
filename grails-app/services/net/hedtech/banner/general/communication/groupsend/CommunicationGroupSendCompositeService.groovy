@@ -9,6 +9,7 @@ import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.event.CommunicationEventMapping
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
@@ -133,12 +134,24 @@ class CommunicationGroupSendCompositeService {
         CommunicationTemplate template = CommunicationTemplate.get(eventMapping.templateId)
         if(template.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
+        } else if(!template.published)
+        {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateNotPublished")
         }
 
         CommunicationOrganization organization = CommunicationOrganization.get(eventMapping.organizationId)
         if (organization.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationIsRequired")
+        } else if(!organization.isAvailable) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationNotAvailable")
         }
+        CommunicationOrganization rootOrganization = CommunicationOrganization.fetchRoot()
+        if ((template.communicationChannel == CommunicationChannel.EMAIL) &&
+                !((organization?.senderMailboxAccount && organization?.replyToMailboxAccount) &&
+                (organization?.sendEmailServerProperties || rootOrganization?.sendEmailServerProperties))) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationEmailServerSettingsNotAvailable")
+        }
+
         if(bannerIDs == null || bannerIDs.isEmpty())
         {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
@@ -443,7 +456,8 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-    private CommunicationGroupSend scheduleRecurringGroupSend( CommunicationGroupSend groupSend, String cronSchedule, String bannerUser ) {
+    //For future use when we do the recurring scheduling user story
+/*    private CommunicationGroupSend scheduleRecurringGroupSend( CommunicationGroupSend groupSend, String cronSchedule, String bannerUser ) {
         if(!CronExpression.isValidExpression(cronSchedule)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidCronExpression")
         }
@@ -466,7 +480,7 @@ class CommunicationGroupSendCompositeService {
         groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
         return groupSend
-    }
+    }*/
 
     private CommunicationGroupSend generateGroupSendItemsImpl( CommunicationGroupSend groupSend ) {
         // We'll created the group send items synchronously for now until we have support for scheduling.
