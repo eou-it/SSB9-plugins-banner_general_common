@@ -452,7 +452,7 @@ class DirectoryProfileCompositeService {
                 try {
                     def result = sql.firstRow(sqlStatement)
 
-                    if (result.FTVORGN_TITLE) {
+                    if (result?.FTVORGN_TITLE) {
                         orgnDesc = result.FTVORGN_TITLE
                     }
                 } catch (e) {
