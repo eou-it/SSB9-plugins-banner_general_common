@@ -4,9 +4,13 @@
 
 package net.hedtech.banner.general.communication.letter.pdf
 
+import com.lowagie.text.pdf.BaseFont
 import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSize
 import net.hedtech.banner.general.communication.letter.CommunicationLetterUnitOfMeasure
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.io.support.ClassPathResource
+import org.springframework.context.i18n.LocaleContextHolder as LCH
+import org.xhtmlrenderer.pdf.ITextFontResolver
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 /**
@@ -18,6 +22,7 @@ class CommunicationLetterPdfBuilder {
     private ITextRenderer renderer
     private int documentCount
     private boolean finished
+    private URL font_path
 
     CommunicationLetterPageSize pageSize = CommunicationLetterPageSize.LETTER
     CommunicationLetterUnitOfMeasure unitOfMeasure = CommunicationLetterUnitOfMeasure.INCH
@@ -33,6 +38,32 @@ class CommunicationLetterPdfBuilder {
     public void reset() {
         outputStream = new ByteArrayOutputStream()
         renderer = new ITextRenderer()
+
+        if (LCH.getLocale().getLanguage().equalsIgnoreCase("ar")) {
+            ITextFontResolver fontResolver = renderer.getFontResolver();
+            try {
+                font_path = this.class.classLoader.getResource("fonts");
+                File f = new File(font_path.getPath());
+                if (f.isDirectory()) {
+                    File[] files = f.listFiles(new FilenameFilter() {
+                        public boolean accept(File dir, String name) {
+                            String lower = name.toLowerCase();
+                            return lower.endsWith(".otf") || lower.endsWith(".ttf");
+                        }
+                    });
+                    for (int i = 0; i < files.length; i++) {
+                        try {
+                            fontResolver.addFont(files[i].getAbsolutePath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                            log.debug("Added font " + files[i].getAbsolutePath());
+                        } catch (Exception e) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace()
+            }
+        }
         documentCount = 0
         finished = false
     }
@@ -68,7 +99,11 @@ class CommunicationLetterPdfBuilder {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" );
         stringBuilder.append( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" );
-        stringBuilder.append( "<html xmlns=\"http://www.w3.org/1999/xhtml\">" );
+        if (LCH.getLocale().getLanguage().equalsIgnoreCase("ar")) {
+            stringBuilder.append( "<html xmlns=\"http://www.w3.org/1999/xhtml\" dir=\"rtl\">" );
+        } else {
+            stringBuilder.append( "<html xmlns=\"http://www.w3.org/1999/xhtml\">" );
+        }
         stringBuilder.append( "<head><title></title>" );
         stringBuilder.append( getStyleDeclaration() );
         stringBuilder.append( "</head>" );
@@ -97,7 +132,19 @@ class CommunicationLetterPdfBuilder {
         stringBuilder.append( "margin-bottom: " ).append( bottomMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
         stringBuilder.append( "margin-left: " ).append( leftMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
         stringBuilder.append( "margin-right: " ).append( rightMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
-        stringBuilder.append( "}\n" );
+        stringBuilder.append( "} " );
+
+        if (LCH.getLocale().getLanguage().equalsIgnoreCase("ar")) {
+            stringBuilder.append("body { font-family: Geeza Pro; } ");
+
+            stringBuilder.append("@font-face { ");
+            stringBuilder.append("src: url('");
+            stringBuilder.append(new ClassPathResource("fonts").getURL().toExternalForm());
+            stringBuilder.append("/geeza-pro-webfont.ttf'); ");
+            stringBuilder.append("-fs-pdf-font-embed: embed; ");
+            stringBuilder.append("-fs-pdf-font-encoding: Identity-H; ");
+            stringBuilder.append("}\n");
+        }
         stringBuilder.append( "</style>\n" );
 
         return stringBuilder.toString();
