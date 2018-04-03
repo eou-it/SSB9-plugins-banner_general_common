@@ -131,14 +131,14 @@ class CommunicationGroupSendCompositeService {
         //Make a unique name for group send and population by adding timeinmillis to event code
         String uniqueName = eventCode + "_" +System.currentTimeMillis()
 
-        CommunicationTemplate template = CommunicationTemplate.get(eventMapping.templateId)
+        CommunicationTemplate template = CommunicationTemplate.get(eventMapping.template.id)
         if(template.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
         } else if(!template.published) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateNotPublished")
         }
 
-        CommunicationOrganization organization = CommunicationOrganization.get(eventMapping.organizationId)
+        CommunicationOrganization organization = CommunicationOrganization.get(eventMapping.organization.id)
         if (organization.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationIsRequired")
         } else if(!organization.isAvailable) {

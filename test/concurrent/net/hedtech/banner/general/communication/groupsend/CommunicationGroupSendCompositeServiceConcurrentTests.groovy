@@ -4,8 +4,10 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import grails.gorm.PagedResultList
+import grails.util.Holders
 import net.hedtech.banner.DateUtility
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.event.CommunicationEventMapping
@@ -41,6 +43,7 @@ import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestC
 class CommunicationGroupSendCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
+    def AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer = Holders.grailsApplication.mainContext.getBean('asynchronousBannerAuthenticationSpoofer')
 
     @Before
     public void setUp() {
@@ -319,8 +322,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         //Create the Event Mapping
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
-                organizationId: defaultOrganization.id,
-                templateId: emailTemplate.id
+                organization: defaultOrganization,
+                template: emailTemplate
         )
         eventMapping = communicationEventMappingService.create( eventMapping )
         assertNotNull(eventMapping?.id)
@@ -329,6 +332,8 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         parameterNameValuesMap.put( "testTextParameter", new CommunicationParameterValue( [ value: "Friday", type: CommunicationParameterType.TEXT ] ) )
         parameterNameValuesMap.put( "testNumberParameter", new CommunicationParameterValue( [ value: 20, type: CommunicationParameterType.NUMBER ] ) )
         parameterNameValuesMap.put( "testDateParameter", new CommunicationParameterValue( [ value: DateUtility.parseDateString( "05-30-2013", "MM-dd-yyyy"), type: CommunicationParameterType.DATE ] ) )
+
+        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
 
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createMessageAndPopulationForGroupSend("TEST_EVENT", ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'], parameterNameValuesMap)
         assertNotNull(groupSend)

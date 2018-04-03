@@ -294,6 +294,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             defaultOrganization.mobileApplicationName = "StudentSuccess"
             defaultOrganization.clearMobileApplicationKey = "ss-key-value"
+            defaultOrganization.isAvailable = true
+            defaultOrganization.parent = null
 
             def cma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',
@@ -302,6 +304,14 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                     type: CommunicationMailboxAccountType.Sender
             )
             defaultOrganization.senderMailboxAccount = cma
+
+            def rma = new CommunicationMailboxAccount(
+                    emailAddress: 'rasul.shishehbor@ellucian.com',
+                    encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
+                    userName: 'rshishehbor',
+                    type: CommunicationMailboxAccountType.ReplyTo
+            )
+            defaultOrganization.replyToMailboxAccount = rma
 
             def cesp = new CommunicationEmailServerProperties(
                     securityProtocol: CommunicationEmailServerConnectionSecurity.None,
@@ -316,6 +326,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
 
         assertNotNull( defaultOrganization.senderMailboxAccount )
+        assertNotNull( defaultOrganization.replyToMailboxAccount )
         assertNotNull( defaultOrganization.sendEmailServerProperties)
     }
 
