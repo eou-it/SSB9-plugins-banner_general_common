@@ -6,6 +6,8 @@ package net.hedtech.banner.general.communication.event
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.CommunicationCommonUtility
+import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
@@ -15,6 +17,8 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
 import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 import javax.persistence.SequenceGenerator
@@ -58,15 +62,19 @@ class CommunicationEventMapping implements Serializable {
     /**
      * ID of the organization to be used for sending messages for this event.
      */
-    @Column(name = "GCBEVMP_ORGANIZATION_ID")
-    Long organizationId
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "GCBEVMP_ORGANIZATION_ID", referencedColumnName = "GCRORAN_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBEVMP_INV_GCRORAN")
+    CommunicationOrganization organization
 
 
     /**
      * ID of the template to be used for sending messages for this event.
      */
-    @Column(name = "GCBEVMP_TEMPLATE_ID")
-    Long templateId
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "GCBEVMP_TEMPLATE_ID", referencedColumnName = "GCBTMPL_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBEVMP_INV_GCBTMPL")
+    CommunicationTemplate template
 
     /**
      * ID of the query to be used for calculating the population for this event.
@@ -110,8 +118,8 @@ class CommunicationEventMapping implements Serializable {
 
     static constraints = {
         eventName(nullable: false, maxSize: 255)
-        organizationId(nullable:true)
-        templateId(nullable: false)
+        organization(nullable:true)
+        template(nullable: false)
         queryId(nullable: true)
         systemIndicator(nullable: false)
         lastModified(nullable: true)

@@ -134,8 +134,7 @@ class CommunicationGroupSendCompositeService {
         CommunicationTemplate template = CommunicationTemplate.get(eventMapping.templateId)
         if(template.id == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
-        } else if(!template.published)
-        {
+        } else if(!template.published) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateNotPublished")
         }
 
@@ -152,8 +151,7 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationEmailServerSettingsNotAvailable")
         }
 
-        if(bannerIDs == null || bannerIDs.isEmpty())
-        {
+        if(bannerIDs == null || bannerIDs.isEmpty()) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
         }
 

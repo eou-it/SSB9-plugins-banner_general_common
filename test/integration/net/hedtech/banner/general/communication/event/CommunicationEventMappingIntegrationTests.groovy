@@ -75,8 +75,8 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         //Create an event mapping
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
-                organizationId: organization.id,
-                templateId: emailTemplate.id
+                organization: organization,
+                template: emailTemplate
         )
         eventMapping.save(failOnError: true, flush: true)
         assertNotNull eventMapping?.id
@@ -121,8 +121,8 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         //Create an event mapping
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
-                organizationId: organization.id,
-                templateId: emailTemplate.id
+                organization: organization,
+                template: emailTemplate
         )
         eventMapping.save(failOnError: true, flush: true)
         assertNotNull eventMapping?.id
@@ -141,10 +141,10 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         emailTemplate2 = emailTemplate2.save(failOnError: true, flush: true)
         assertNotNull emailTemplate2?.id
 
-        eventMapping.templateId = emailTemplate2.id
+        eventMapping.template = emailTemplate2
         eventMapping.save()
         def updatedEventMapping = eventMapping.get(eventMapping.id)
-        assertEquals (updatedEventMapping.templateId,emailTemplate2.id)
+        assertEquals (updatedEventMapping.template.id,emailTemplate2.id)
     }
 
     @Test
@@ -186,8 +186,8 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         //Create an event mapping
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
-                organizationId: organization.id,
-                templateId: emailTemplate.id
+                organization: organization,
+                template: emailTemplate
         )
         eventMapping.save(failOnError: true, flush: true)
         assertNotNull eventMapping?.id
@@ -199,8 +199,8 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         //Create an event mapping
         CommunicationEventMapping eventMapping2 = new CommunicationEventMapping(
                 eventName: "TEST_EVENT2",
-                organizationId: organization.id,
-                templateId: emailTemplate.id
+                organization: organization,
+                template: emailTemplate
         )
         eventMapping2.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -249,8 +249,8 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         //Create an event mapping
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
-                organizationId: organization.id,
-                templateId: emailTemplate.id
+                organization: organization,
+                template: emailTemplate
         )
         eventMapping.save(failOnError: true, flush: true)
         assertNotNull eventMapping?.id

@@ -103,8 +103,8 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
 
         CommunicationEventMapping eventMapping = new CommunicationEventMapping()
         eventMapping.eventName = "test-integration"
-        eventMapping.organizationId = createdOrganization.id
-        eventMapping.templateId = createdEmailTemplate.id
+        eventMapping.organization = createdOrganization
+        eventMapping.template = createdEmailTemplate
         CommunicationEventMapping createdEventMapping = communicationEventMappingService.create(eventMapping)
         assertNotNull(createdEventMapping)
         assertNotNull createdEventMapping?.id
@@ -168,8 +168,8 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
 
         CommunicationEventMapping eventMapping = new CommunicationEventMapping()
         eventMapping.eventName = "test-integration"
-        eventMapping.organizationId = createdOrganization.id
-        eventMapping.templateId = createdEmailTemplate.id
+        eventMapping.organization = createdOrganization
+        eventMapping.template = createdEmailTemplate
         CommunicationEventMapping createdEventMapping = communicationEventMappingService.create(eventMapping)
         assertNotNull(createdEventMapping)
         assertNotNull createdEventMapping?.id
@@ -242,8 +242,8 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
 
         CommunicationEventMapping eventMapping = new CommunicationEventMapping()
         eventMapping.eventName = "test-integration"
-        eventMapping.organizationId = createdOrganization.id
-        eventMapping.templateId = createdEmailTemplate.id
+        eventMapping.organization = createdOrganization
+        eventMapping.template = createdEmailTemplate
         CommunicationEventMapping createdEventMapping = communicationEventMappingService.create(eventMapping)
         assertNotNull(createdEventMapping)
         assertNotNull createdEventMapping?.id
@@ -264,17 +264,17 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
         CommunicationEmailTemplate createdEmailTemplate2 = communicationEmailTemplateService.create(emailTemplate2)
         assertNotNull createdEmailTemplate2?.id
 
-        createdEventMapping.templateId = createdEmailTemplate2.id
+        createdEventMapping.template = createdEmailTemplate2
         CommunicationEventMapping updatedEventMapping = communicationEventMappingService.update(createdEventMapping)
         assertNotNull updatedEventMapping.id
-        assertEquals(updatedEventMapping.templateId, createdEmailTemplate2.id)
+        assertEquals(updatedEventMapping.template.id, createdEmailTemplate2.id)
 
 
 
         CommunicationEventMapping eventMapping2 = new CommunicationEventMapping()
         eventMapping2.eventName = "test-integration-new"
-        eventMapping2.organizationId = createdOrganization.id
-        eventMapping2.templateId = createdEmailTemplate.id
+        eventMapping2.organization = createdOrganization
+        eventMapping2.template = createdEmailTemplate
         CommunicationEventMapping createdEventMapping2 = communicationEventMappingService.create(eventMapping2)
         assertNotNull createdEventMapping2.id
 
@@ -341,8 +341,8 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
 
         CommunicationEventMapping eventMapping = new CommunicationEventMapping()
         eventMapping.eventName = "test-integration"
-        eventMapping.organizationId = createdOrganization.id
-        eventMapping.templateId = createdEmailTemplate.id
+        eventMapping.organization = createdOrganization
+        eventMapping.template = createdEmailTemplate
         CommunicationEventMapping createdEventMapping = communicationEventMappingService.create(eventMapping)
         assertNotNull(createdEventMapping)
         assertNotNull createdEventMapping?.id
