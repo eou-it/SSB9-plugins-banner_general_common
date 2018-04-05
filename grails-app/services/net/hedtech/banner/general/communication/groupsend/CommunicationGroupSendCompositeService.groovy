@@ -128,6 +128,10 @@ class CommunicationGroupSendCompositeService {
         }
 
         CommunicationEventMapping eventMapping = CommunicationEventMapping.fetchByName(eventCode)
+        if(!eventMapping) {
+            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventMappingDoesNotExist@@" )
+        }
+
         //Make a unique name for group send and population by adding timeinmillis to event code
         String uniqueName = eventCode + "_" +System.currentTimeMillis()
 

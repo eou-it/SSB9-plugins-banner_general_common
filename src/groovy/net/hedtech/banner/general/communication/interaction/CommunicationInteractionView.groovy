@@ -108,12 +108,12 @@ class CommunicationInteractionView implements Serializable {
                     ilike( "organizationName", subSearchString )
                     ilike( "creatorId", subSearchString )
                 }
-                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
             }
         } else {
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
                 eq("bannerId", constituentId)
-                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+                order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
             }
         }
 
@@ -128,7 +128,7 @@ class CommunicationInteractionView implements Serializable {
         def queryCriteria = CommunicationInteractionView.createCriteria()
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
                 eq("bannerId", searchName)
-            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }

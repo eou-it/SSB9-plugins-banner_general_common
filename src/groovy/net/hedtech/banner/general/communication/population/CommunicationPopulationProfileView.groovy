@@ -135,7 +135,7 @@ class CommunicationPopulationProfileView implements Serializable {
                  ilike("firstName", searchName)
                  ilike("bannerId", searchName)
              }
-            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }
@@ -188,7 +188,7 @@ class CommunicationPopulationProfileView implements Serializable {
             projections {
                 distinct(["pidm","bannerId","lastName","firstName","middleName","surnamePrefix","confidential","deceased"])
             }
-            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }

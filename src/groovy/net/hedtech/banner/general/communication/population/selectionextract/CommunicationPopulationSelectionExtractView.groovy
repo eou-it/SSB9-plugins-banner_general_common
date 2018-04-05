@@ -57,7 +57,7 @@ class CommunicationPopulationSelectionExtractView {
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
             ilike("application", application)
             ilike("selection",selection)
-            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }
@@ -97,7 +97,7 @@ class CommunicationPopulationSelectionExtractView {
                 distinct("application")
                 property("applicationDesc")
             }
-            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+            order((ascdir ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }

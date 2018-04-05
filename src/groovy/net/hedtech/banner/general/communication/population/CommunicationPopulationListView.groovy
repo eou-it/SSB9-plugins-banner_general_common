@@ -277,14 +277,14 @@ class CommunicationPopulationListView implements Serializable {
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
                 ilike("name", name)
                 ilike("createdBy", filterData?.params?.createdBy)
-                order((isAscending ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+                order((isAscending ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
             }
         } else {
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
                 ilike("name", name)
                 eq("systemIndicator", false)
                 ilike("createdBy", filterData?.params?.createdBy)
-                order((isAscending ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)))
+                order((isAscending ? Order.asc(pagingAndSortParams?.sortColumn) : Order.desc(pagingAndSortParams?.sortColumn)).ignoreCase())
             }
         }
 
