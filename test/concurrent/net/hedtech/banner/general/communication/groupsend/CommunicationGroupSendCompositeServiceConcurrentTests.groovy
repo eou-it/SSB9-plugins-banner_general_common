@@ -8,7 +8,6 @@ import grails.util.Holders
 import net.hedtech.banner.DateUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
-import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.event.CommunicationEventMapping
 import net.hedtech.banner.general.communication.field.CommunicationField

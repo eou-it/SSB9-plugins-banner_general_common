@@ -123,7 +123,8 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
             fail( "Expected MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_UNKNOWN_HOST." )
         } catch( CommunicationApplicationException e ) {
             assertTrue( CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_UNKNOWN_HOST.toString() == e.type ||
-                e.type == CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_SSL_UNVERIFIED .toString())
+                e.type == CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_SSL_UNVERIFIED .toString() ||
+                e.type == CommunicationErrorCode.MOBILE_NOTIFICATION_APPLICATION_ENDPOINT_HOST_REFUSED.toString())
         }
     }
 
