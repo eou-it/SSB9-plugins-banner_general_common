@@ -109,7 +109,8 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCRQRYV")
                 sql.executeUpdate("Delete from GCBQURY")
                 sql.executeUpdate("Delete from GCRITPE")
-                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.gcbactm_gcrfldr_id FROM gcbactm a WHERE a.gcbactm_gcrfldr_id = gcrfldr_surrogate_id)")
+                sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.GCBACTM_GCRFLDR_ID FROM gcbactm a WHERE a.GCBACTM_GCRFLDR_ID = gcrfldr_surrogate_id) AND \
+                                                             NOT EXISTS (SELECT b.GCBAGRP_GCRFLDR_ID FROM gcbagrp b WHERE b.GCBAGRP_GCRFLDR_ID = gcrfldr_surrogate_id)")
                 sql.executeUpdate("Delete from GCRORAN")
                 sql.executeUpdate("Delete from GCBSPRP")
                 sql.executeUpdate("Delete from GCRMBAC")
