@@ -224,21 +224,10 @@ class CommunicationField implements Serializable {
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
         def queryCriteria = CommunicationField.createCriteria()
 
-        String prefixAlias = "_ALIAS_";
-        String sortColumn = pagingAndSortParams?.sortColumn;
-        String propertyName
-
-        if (sortColumn.contains("."))
-        {
-            propertyName = sortColumn.substring(0, sortColumn.indexOf('.'));
-            String aliasForOrdering = prefixAlias + propertyName; //get the alias as _ALIASORDER_nameOfProperty
-            sortColumn = aliasForOrdering + "." + sortColumn.substring(sortColumn.indexOf('.') + 1); //replace the sort column with the replacing alias
-        }
-
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            createAlias("folder", "_ALIAS_folder")
+            createAlias("folder", "folder")
             ilike("name", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.name))
-            order((descdir ? Order.desc(sortColumn) : Order.asc(sortColumn)).ignoreCase())
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }

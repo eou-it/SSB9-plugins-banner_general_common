@@ -161,22 +161,11 @@ class CommunicationEventMapping implements Serializable {
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
         def queryCriteria = CommunicationEventMapping.createCriteria()
 
-        String prefixAlias = "_ALIAS_";
-        String sortColumn = pagingAndSortParams?.sortColumn;
-        String propertyName
-
-        if (sortColumn.contains("."))
-        {
-            propertyName = sortColumn.substring(0, sortColumn.indexOf('.'));
-            String aliasForOrdering = prefixAlias + propertyName; //get the alias as _ALIASORDER_nameOfProperty
-            sortColumn = aliasForOrdering + "." + sortColumn.substring(sortColumn.indexOf('.') + 1); //replace the sort column with the replacing alias
-        }
-
         def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            createAlias("template", "_ALIAS_template")
-            createAlias("organization", "_ALIAS_organization")
+            createAlias("template", "template")
+            createAlias("organization", "organization")
             ilike("eventName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.eventName))
-            order((descdir ? Order.desc(sortColumn) : Order.asc(sortColumn)).ignoreCase())
+            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
         }
         return results
     }
