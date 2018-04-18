@@ -19,10 +19,7 @@ class CommunicationOrganizationCompositeService {
     }
 
     def getOrganization( id ) {
-        CommunicationOrganization co = communicationOrganizationService.get(id)
-        co?.senderMailboxAccount?.encryptedPassword = null
-        co?.replyToMailboxAccount?.encryptedPassword = null
-        return co
+        return communicationOrganizationService.get( id )
     }
 
     CommunicationOrganization createOrganization( CommunicationOrganization organization ) {
