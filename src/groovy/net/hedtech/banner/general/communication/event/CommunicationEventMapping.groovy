@@ -82,6 +82,12 @@ class CommunicationEventMapping implements Serializable {
     @Column(name = "GCBEVMP_QUERY_ID")
     Long queryId
 
+    /**
+     * Indicates if the event mapping is active for use.
+     */
+    @Type(type = "yes_no")
+    @Column(name = "GCBEVMP_ACTIVE_IND")
+    Boolean isActive = false
 
     /**
      * Indicates if the event mapping was created through the seeded data set and should not be deleted or modified in any way.
@@ -122,6 +128,7 @@ class CommunicationEventMapping implements Serializable {
         template(nullable: false)
         queryId(nullable: true)
         systemIndicator(nullable: false)
+        isActive(nullable:false)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
