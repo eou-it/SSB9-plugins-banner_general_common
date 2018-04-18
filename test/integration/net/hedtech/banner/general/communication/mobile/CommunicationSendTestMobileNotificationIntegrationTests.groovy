@@ -113,7 +113,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
             organization.encryptedMobileApplicationKey = communicationMailboxAccountService.encryptPassword("ss-key-value")
             organization = communicationOrganizationCompositeService.createOrganization(organization) as CommunicationOrganization
         } else {
-            organization = organizations.get(0) as CommunicationOrganization
+            organization = CommunicationOrganization.fetchRoot() as CommunicationOrganization
             organization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
             organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             organization.mobileApplicationName = "StudentSuccess"
