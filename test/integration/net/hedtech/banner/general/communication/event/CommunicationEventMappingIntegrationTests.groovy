@@ -76,10 +76,12 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
                 organization: organization,
-                template: emailTemplate
+                template: emailTemplate,
+                isActive: true
         )
         eventMapping.save(failOnError: true, flush: true)
         assertNotNull eventMapping?.id
+        assertTrue( eventMapping?.isActive)
     }
 
     @Test
@@ -122,10 +124,12 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         CommunicationEventMapping eventMapping = new CommunicationEventMapping(
                 eventName: "TEST_EVENT",
                 organization: organization,
-                template: emailTemplate
+                template: emailTemplate,
+                isActive: true
         )
         eventMapping.save(failOnError: true, flush: true)
         assertNotNull eventMapping?.id
+        assertTrue( eventMapping?.isActive)
 
         //Create a second template
         CommunicationEmailTemplate emailTemplate2 = new CommunicationEmailTemplate(
@@ -142,9 +146,11 @@ class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase
         assertNotNull emailTemplate2?.id
 
         eventMapping.template = emailTemplate2
+        eventMapping.isActive = false
         eventMapping.save()
         def updatedEventMapping = eventMapping.get(eventMapping.id)
         assertEquals (updatedEventMapping.template.id,emailTemplate2.id)
+        assertFalse( updatedEventMapping.isActive )
     }
 
     @Test
