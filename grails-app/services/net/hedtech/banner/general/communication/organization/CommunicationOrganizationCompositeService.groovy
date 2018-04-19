@@ -140,7 +140,7 @@ class CommunicationOrganizationCompositeService {
         }
     }
 
-    private void removeDependentMailboxAccountsAndEmailServerProperties(CommunicationOrganization fetched, CommunicationOrganization neworg) {
+    private void removeDependentMailboxAccountsAndEmailServerProperties(CommunicationOrganization fetched, CommunicationOrganization neworg=null) {
 
         if (fetched.senderMailboxAccount && !(neworg && neworg.senderMailboxAccount && neworg.senderMailboxAccount.id && neworg.senderMailboxAccount.id == fetched.senderMailboxAccount.id) ) {
             communicationMailboxAccountService.delete(fetched.senderMailboxAccount)
