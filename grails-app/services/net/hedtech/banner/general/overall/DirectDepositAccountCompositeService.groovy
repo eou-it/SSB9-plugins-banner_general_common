@@ -1,15 +1,12 @@
 /********************************************************************************
-  Copyright 2016-2017 Ellucian Company L.P. and its affiliates.
+  Copyright 2016-2018 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import grails.converters.JSON
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
-import net.hedtech.banner.general.system.InstitutionalDescription
 import org.codehaus.groovy.grails.web.json.JSONObject
-import org.codehaus.groovy.runtime.InvokerHelper
 import org.springframework.web.context.request.RequestContextHolder
 import net.hedtech.banner.general.system.InstitutionalDescription
 import org.codehaus.groovy.runtime.InvokerHelper
@@ -19,6 +16,7 @@ class DirectDepositAccountCompositeService {
     def directDepositAccountService
     def bankRoutingInfoService
     def currencyFormatService
+    def userRoleService
     def sessionFactory
 
 
@@ -674,6 +672,36 @@ class DirectDepositAccountCompositeService {
         directDepositAccountService.create(toBeUpdated)
 
         directDepositAccountService.getActiveHrAccounts(map.pidm)
+    }
+
+    public def fetchEmployeeUpdatableSetting () {
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def ddUpdatableIndRec
+
+        def ddUpdatableIndSql = """SELECT PTRINST_DD_WEB_UPDATE_IND FROM PTRINST"""
+
+        try {
+            ddUpdatableIndRec = sql.firstRow(ddUpdatableIndSql)
+        } finally {
+            sql?.close()
+        }
+        return ddUpdatableIndRec?.PTRINST_DD_WEB_UPDATE_IND
+    }
+
+    /**
+     * Accounts are always updatable for students, who only have access to AP accounts.
+     * Accounts are updatable for employees in the following two cases:
+     *   1) the Banner admin pages PTRINST "Employee May Update Direct Deposit Records" indicator is checked
+     *   2) the HR product is not installed
+     * @return True or false
+     */
+    def areAccountsUpdatable() {
+        if (userRoleService.hasUserRole('EMPLOYEE') && checkIfHrInstalled()) {
+            def updatable = fetchEmployeeUpdatableSetting()
+            return updatable ? updatable == 'Y' : true
+        } else {
+            return true
+        }
     }
 
 }
