@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertTrue
 
 class CommunicationPopulationCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
@@ -146,7 +147,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertEquals( 0, results.ignoredCount)
         assertEquals( 0, results.duplicateCount)
 
-        persons = [ 'CMOORE', '710000051' ]
+        persons = [ 'CMOORE', '710000029' ]
         results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
         entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )
         assertEquals( 4, entryCount )
@@ -168,7 +169,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
                 folder: defaultFolder,
                 name: "testQuery",
                 description: "test description",
-                queryString: "select SPRIDEN_PIDM from SPRIDEN where SPRIDEN_CHANGE_IND is not null and rownum < 6"
+                queryString: "select SPRIDEN_PIDM from SPRIDEN where SPRIDEN_CHANGE_IND is null and rownum < 6"
         )
 
         populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )

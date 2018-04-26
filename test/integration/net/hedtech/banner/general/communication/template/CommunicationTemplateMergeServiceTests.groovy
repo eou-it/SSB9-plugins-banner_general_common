@@ -56,7 +56,8 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def i_valid_folder_internal = true
     def i_valid_folder_name1 = "Valid Folder1 Name"
     def i_valid_folder_name2 = "Valid Folder2 Name"
-    def i_valid_pidm = 2
+    def i_valid_pidm = 1
+    def i_valid_bannerId = 'HOSWEB003'
     def CommunicationFolder folder1
     def CommunicationFolder folder2
     def CommunicationOrganization i_valid_Organization
@@ -162,9 +163,9 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         /* Now merge the recipient data into the template */
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
         assertNotNull( communicationMergedEmailTemplate )
-        assertEquals( "Hi Robert Jones", communicationMergedEmailTemplate.toList )
-        assertEquals( "Hi Robert Jones", communicationMergedEmailTemplate.subject )
-        assertEquals( "Hi Robert Jones", communicationMergedEmailTemplate.content )
+        assertEquals( "Hi Shawn McCall", communicationMergedEmailTemplate.toList )
+        assertEquals( "Hi Shawn McCall", communicationMergedEmailTemplate.subject )
+        assertEquals( "Hi Shawn McCall", communicationMergedEmailTemplate.content )
 
 
     }
@@ -177,7 +178,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         emailTemplate.save( failOnError: true, flush: true )
 
         // do not set up any fields, you should not get any exception
-        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, "710000001" )
+        CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.calculateTemplateByBannerId( emailTemplate.id, i_valid_bannerId )
         //CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
         assertNotNull( communicationMergedEmailTemplate )
         /* No errors expect, just nulls returned */

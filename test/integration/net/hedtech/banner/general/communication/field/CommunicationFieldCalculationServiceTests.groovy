@@ -167,7 +167,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         communicationField = communicationFieldService.create( [domainModel: communicationField] )
         assertNotNull communicationField.immutableId
 
-        final Long pidm = 2L
+        final Long pidm = 1L
         String result = communicationFieldCalculationService.calculateFieldByPidm(
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,
@@ -175,7 +175,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             [:],
             (Long) pidm
         )
-        assertEquals( "Hello Robert Jones", result )
+        assertEquals( "Hello Shawn McCall", result )
 
         communicationField.formatString = "\$firstname\$"
         communicationField = communicationFieldService.update( communicationField )
@@ -186,7 +186,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
             [:],
             (Long) pidm
         )
-        assertEquals( "Robert", result )
+        assertEquals( "Shawn", result )
 
         communicationField.formatString = "\$empty_string\$"
         communicationField = communicationFieldService.update( communicationField )

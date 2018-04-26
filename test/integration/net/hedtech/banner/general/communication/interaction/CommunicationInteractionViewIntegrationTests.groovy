@@ -56,7 +56,7 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
         assertNotNull interactions
         CommunicationInteractionView interaction = interactions.get(0)
         assertNotNull interaction?.surrogateId
-        assertEquals(2L, interaction.interacteePidm)
+        assertEquals(1L, interaction.interacteePidm)
         assertEquals "Class Schedule", interaction.subject
         assertEquals organization.name, interaction.organizationName
         assertEquals interactionType.folder.name, interaction.folderName
@@ -67,13 +67,13 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
     private def newValidForCreateCommunicationManualInteraction() {
         def manualInteraction = new CommunicationManualInteraction(
                 // Required fields
-                constituentPidm: 2L,
+                constituentPidm: 1L,
                 organization: organization,
                 interactionType: interactionType,
                 aSubject: "Class Schedule",
                 // Nullable fields
                 description: "Tom stopped by today to have a discussion on his electives class schedule",
-                interactorPidm: 3L,
+                interactorPidm: 11L,
                 interactionDate: new Date(),
                 createDate: new Date(),
                 createdBy: "BCMADMIN"
