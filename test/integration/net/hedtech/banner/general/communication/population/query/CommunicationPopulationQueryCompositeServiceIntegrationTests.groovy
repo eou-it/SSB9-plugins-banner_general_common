@@ -396,8 +396,8 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testFetchPopulationSelectionExtractQueryCount() {
-        int count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'ADMISSIONS', '199610_APPLICANTS', 'SAISUSR', 'SAISUSR' )
-        assertEquals( 4, count )
+        int count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'GENERAL', 'ALL', 'BANNER', 'GRAILS' )
+        assertEquals( 2, count )
 
         count = communicationPopulationQueryCompositeService.fetchPopulationSelectionExtractQueryCount( 'WHATEVER', 'WHATEVER', 'WHATEVER', 'WHATEVER' )
         assertEquals( 0, count )

@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2018 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.communication.organization
 
@@ -34,7 +34,7 @@ class CommunicationOrganizationCompositeService {
 
         CommunicationOrganization oldOrganization = CommunicationOrganization.fetchById( newOrganization.id )
         createDependentMailboxAccountAndEmailServerProperties( newOrganization, oldOrganization )
-        removeDependentMailboxAccountsAndEmailServerProperties( oldOrganization )
+        removeDependentMailboxAccountsAndEmailServerProperties( oldOrganization, newOrganization )
 
         // Default the mobile application key to its previous value if mobile settings present during an
         // update but no clear password passed in.
@@ -43,6 +43,9 @@ class CommunicationOrganizationCompositeService {
             oldOrganization?.encryptedMobileApplicationKey) {
 
             newOrganization.encryptedMobileApplicationKey  = oldOrganization.encryptedMobileApplicationKey
+        } else if (newOrganization.parent == null && newOrganization.mobileApplicationName != null && newOrganization.mobileEndPointUrl != null && oldOrganization.encryptedMobileApplicationKey == null &&
+                   newOrganization.clearMobileApplicationKey == null) {
+            throw new ApplicationException(CommunicationOrganization, "@@r1:notExists.mobileApplicationKey@@")
         }
 
         newOrganization = communicationOrganizationService.update( newOrganization )
@@ -101,7 +104,11 @@ class CommunicationOrganizationCompositeService {
                 throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
             }
 
-            newOrganization.senderMailboxAccount = communicationMailboxAccountService.create(newOrganization.senderMailboxAccount)
+            if (newOrganization?.senderMailboxAccount?.id != null) {
+                newOrganization.senderMailboxAccount = communicationMailboxAccountService.update(newOrganization.senderMailboxAccount)
+            } else  {
+                newOrganization.senderMailboxAccount = communicationMailboxAccountService.create(newOrganization.senderMailboxAccount)
+            }
         }
 
         if (newOrganization.replyToMailboxAccount) {
@@ -115,34 +122,39 @@ class CommunicationOrganizationCompositeService {
                     && ((oldOrganization?.sendEmailServerProperties?.getSmtpPropertiesAsMap()?.auth) || (!newOrganization.parent))){
                 throw new ApplicationException(CommunicationOrganization, "@@r1:mailbox.nameAndAddress.required@@")
             }
-            newOrganization.replyToMailboxAccount = communicationMailboxAccountService.create(newOrganization.replyToMailboxAccount)
+            if (newOrganization.replyToMailboxAccount?.id != null) {
+                newOrganization.replyToMailboxAccount = communicationMailboxAccountService.update(newOrganization.replyToMailboxAccount)
+            } else {
+                newOrganization.replyToMailboxAccount = communicationMailboxAccountService.create(newOrganization.replyToMailboxAccount)
+            }
         }
 
-        if (newOrganization.sendEmailServerProperties) {
+        if (newOrganization.sendEmailServerProperties && (newOrganization.sendEmailServerProperties?.id == null)) {
             newOrganization.sendEmailServerProperties.type = CommunicationEmailServerPropertiesType.Send
             newOrganization.sendEmailServerProperties = communicationEmailServerPropertiesService.create(newOrganization.sendEmailServerProperties)
         }
 
-        if (newOrganization.receiveEmailServerProperties) {
+        if (newOrganization.receiveEmailServerProperties && (newOrganization.receiveEmailServerProperties.id == null)) {
             newOrganization.receiveEmailServerProperties.type = CommunicationEmailServerPropertiesType.Receive
             newOrganization.receiveEmailServerProperties = communicationEmailServerPropertiesService.create(newOrganization.receiveEmailServerProperties)
         }
     }
 
-    private void removeDependentMailboxAccountsAndEmailServerProperties(CommunicationOrganization fetched) {
-        if (fetched.senderMailboxAccount) {
+    private void removeDependentMailboxAccountsAndEmailServerProperties(CommunicationOrganization fetched, CommunicationOrganization neworg=null) {
+
+        if (fetched.senderMailboxAccount && !(neworg && neworg.senderMailboxAccount && neworg.senderMailboxAccount.id && neworg.senderMailboxAccount.id == fetched.senderMailboxAccount.id) ) {
             communicationMailboxAccountService.delete(fetched.senderMailboxAccount)
         }
 
-        if (fetched.replyToMailboxAccount) {
+        if (fetched.replyToMailboxAccount && !(neworg && neworg.replyToMailboxAccount && neworg.replyToMailboxAccount.id && neworg.replyToMailboxAccount.id == fetched.replyToMailboxAccount.id)) {
             communicationMailboxAccountService.delete(fetched.replyToMailboxAccount)
         }
 
-        if (fetched.sendEmailServerProperties) {
+        if (fetched.sendEmailServerProperties && !(neworg && neworg.sendEmailServerProperties && neworg.sendEmailServerProperties.id && neworg.sendEmailServerProperties.id == fetched.sendEmailServerProperties)) {
             communicationEmailServerPropertiesService.delete(fetched.sendEmailServerProperties)
         }
 
-        if (fetched.receiveEmailServerProperties) {
+        if (fetched.receiveEmailServerProperties && !(neworg && neworg.receiveEmailServerProperties && neworg.receiveEmailServerProperties.id && neworg.receiveEmailServerProperties.id == fetched.receiveEmailServerProperties.id)) {
             communicationEmailServerPropertiesService.delete(fetched.receiveEmailServerProperties)
         }
     }

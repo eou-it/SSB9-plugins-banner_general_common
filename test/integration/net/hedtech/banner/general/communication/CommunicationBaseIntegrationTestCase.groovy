@@ -1,5 +1,5 @@
 /********************************************************************************
-  Copyright 2017 Ellucian Company L.P. and its affiliates.
+  Copyright 2017-2018 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 package net.hedtech.banner.general.communication
 
@@ -81,6 +81,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
+                sql.executeUpdate("Delete from GCBEVMP")
                 sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")

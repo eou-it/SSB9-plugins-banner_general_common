@@ -12,6 +12,7 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
+import net.sf.json.JSONArray
 import net.sf.json.util.JSONUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -148,10 +149,12 @@ class CommunicationSendMobileNotificationMethod {
 
                 response.success = { theResponse, reader ->
                     def jsonResponse = reader?.notifications
-                    serverResponse = JSONUtils.valueToString( jsonResponse, 2, 0 )
+                    JSONArray interimJSON = new JSONArray()
+                    interimJSON.addAll(jsonResponse[0])
+                    serverResponse = JSONUtils.valueToString( interimJSON, 2, 0 )
                     // in case error message comes back
-                    if (jsonResponse[0].messages[0]?:"" != "")
-                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,new RuntimeException((String) jsonResponse[0].messages[0]), CommunicationErrorCode.MOBILE_NOTIFICATION_POSSIBLE_SEND_ERROR.name())
+                    if (jsonResponse[0].messages.size() != 0)
+                        throw CommunicationExceptionFactory.createApplicationException(CommunicationSendMobileNotificationMethod.class,new RuntimeException((String) jsonResponse[0].messages.get(0)), CommunicationErrorCode.MOBILE_NOTIFICATION_POSSIBLE_SEND_ERROR.name())
 
                     if (log.isDebugEnabled()) {
                         log.debug( "Response is: " + serverResponse )
