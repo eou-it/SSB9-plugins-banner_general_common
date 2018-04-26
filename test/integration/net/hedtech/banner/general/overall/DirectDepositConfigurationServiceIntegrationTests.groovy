@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2018 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -44,7 +44,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
      */
 
     @Test
-    void testGetDirectDepositParamsFromWebTailorWithOneKeyAndNoDefaultValue() {
+    void testGetDirectDepositParams() {
         def retParams = []
 
         def testParams = [
@@ -58,7 +58,17 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
 
         directDepositConfigurationService.directDepositConfigParams = origParams
 
+        // Params should include:
+
+        // 1) Web Tailor Params
         assertEquals "Banner", params[testParams[0].paramKey]
+
+        // 2) User roles
+        assertNotNull params.roles
+        assertTrue params.roles.size() > 2
+
+        // 3) "Are accounts updatable" indicator
+        assertTrue params.areAccountsUpdatable
     }
 
 

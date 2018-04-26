@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2017 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2018 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -31,6 +31,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     def directDepositAccountCompositeService
     def selfServiceBannerAuthenticationProvider
+    def userRoleService
     private static final log = Logger.getLogger(DirectDepositAccountCompositeServiceIntegrationTests.class)
 
     def testBankRoutingInfo0 = [
@@ -76,6 +77,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @After
     public void tearDown() {
         super.tearDown()
+        super.logout()
     }
 
     @Test
@@ -747,6 +749,29 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         catch (ApplicationException ae) {
             assertApplicationException ae, "apAccountAlreadyExists"
         }
+    }
+
+    @Test
+    void testFetchEmployeeUpdatableSetting() {
+        def updatable = directDepositAccountCompositeService.fetchEmployeeUpdatableSetting()
+
+        assertNotNull updatable
+        assertEquals "Y", updatable
+    }
+
+    @Test
+    void testAreAccountsUpdatableWithStudent() {
+        assertTrue userRoleService.hasUserRole('STUDENT')
+        assertTrue directDepositAccountCompositeService.areAccountsUpdatable()
+    }
+
+    @Test
+    void testAreAccountsUpdatableWithEmployee() {
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('HOP510001', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
+        assertTrue userRoleService.hasUserRole('EMPLOYEE')
+        assertTrue directDepositAccountCompositeService.areAccountsUpdatable()
     }
 
 

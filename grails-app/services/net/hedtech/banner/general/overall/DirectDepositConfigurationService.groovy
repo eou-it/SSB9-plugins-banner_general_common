@@ -1,3 +1,6 @@
+/********************************************************************************
+  Copyright 2018 Ellucian Company L.P. and its affiliates.
+ ********************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
@@ -10,6 +13,9 @@ class DirectDepositConfigurationService extends ServiceBase {
 
     static final def SHOW_USER_PRENOTE_STATUS = 'SHOW_USER_PRENOTE_STATUS'
     static final def MAX_USER_PAYROLL_ALLOCATIONS = 'MAX_USER_PAYROLL_ALLOCATIONS'
+
+    def userRoleService
+    def directDepositAccountCompositeService
 
     /**
      * Direct Deposit app configuration parameters to retrieve
@@ -27,6 +33,7 @@ class DirectDepositConfigurationService extends ServiceBase {
         def retParams = [:]
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
 
+        // Gather Web Tailor params
         try {
             directDepositConfigParams.each {
                 def param = getParamFromWebTailor(sql, it)
@@ -36,7 +43,13 @@ class DirectDepositConfigurationService extends ServiceBase {
             sql?.close()
         }
 
-        retParams;
+        // Add role params
+        retParams.roles = userRoleService.getRoles();
+
+        // Add "are accounts updatable" param
+        retParams.areAccountsUpdatable = directDepositAccountCompositeService.areAccountsUpdatable()
+
+        retParams
     }
 
     /**
