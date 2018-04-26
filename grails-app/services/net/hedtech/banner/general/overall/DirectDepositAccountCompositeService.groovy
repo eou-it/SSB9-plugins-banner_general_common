@@ -674,7 +674,7 @@ class DirectDepositAccountCompositeService {
         directDepositAccountService.getActiveHrAccounts(map.pidm)
     }
 
-    public def fetchEmployeeUpdatableSetting () {
+    def fetchEmployeeUpdatableSetting () {
         Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
         def ddUpdatableIndRec
 
