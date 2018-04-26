@@ -104,7 +104,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
         assertEquals( 4, results.duplicateCount)
         assertEquals( 5, results.ignoredCount )
 
-        persons = ['111111111']  //With new vagrant, this id is just a non person id, but the current one. With new vagrant 042018, we do not have updated IDs in the seed data
+        persons = ['EVT00029']  //With new vagrant, this id is just a non person id, but the current one. With new vagrant 042018, we do not have updated IDs in the seed data
         // Previous test was for the condition - this id is both an older id and a non-person id so testing both cases at the same time
         results = communicationPopulationCompositeService.addPersonsToIncludeList( population, persons )
         entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( results.population.includeList )

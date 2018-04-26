@@ -56,7 +56,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def i_valid_folder_internal = true
     def i_valid_folder_name1 = "Valid Folder1 Name"
     def i_valid_folder_name2 = "Valid Folder2 Name"
-    def i_valid_pidm = 1
+    def i_valid_pidm = 29001
     def i_valid_bannerId = 'HOSWEB003'
     def CommunicationFolder folder1
     def CommunicationFolder folder2
@@ -163,9 +163,9 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         /* Now merge the recipient data into the template */
         CommunicationMergedEmailTemplate communicationMergedEmailTemplate = communicationTemplateMergeService.mergeEmailTemplate( emailTemplate, communicationRecipientData )
         assertNotNull( communicationMergedEmailTemplate )
-        assertEquals( "Hi Shawn McCall", communicationMergedEmailTemplate.toList )
-        assertEquals( "Hi Shawn McCall", communicationMergedEmailTemplate.subject )
-        assertEquals( "Hi Shawn McCall", communicationMergedEmailTemplate.content )
+        assertEquals( "Hi Cliff Starr", communicationMergedEmailTemplate.toList )
+        assertEquals( "Hi Cliff Starr", communicationMergedEmailTemplate.subject )
+        assertEquals( "Hi Cliff Starr", communicationMergedEmailTemplate.content )
 
 
     }

@@ -33,13 +33,13 @@ class CommunicationInteractionCompositeServiceTests extends BaseIntegrationTestC
     @Test
     void testFetchPersonOrNonPersonByNameOrBannerId() {
         Map pagingAndSortParams = [sortColumn:"lastName", sortDirection:"ASC", max:20, offset:0]
-        Map found = communicationInteractionCompositeService.fetchPersonOrNonPersonByNameOrBannerId( "111111111", pagingAndSortParams )
+        Map found = communicationInteractionCompositeService.fetchPersonOrNonPersonByNameOrBannerId( "EVT00029", pagingAndSortParams )
         assertNotNull( found )
         assertEquals( 1, found.totalCount )
         assertNotNull( found.list )
 
         PersonIdentificationName identity = found.list.get( 0 )
-        assertEquals( "111111111", identity.bannerId )
+        assertEquals( "EVT00029", identity.bannerId )
         assertEquals( "C", identity.entityIndicator )
 //        assertEquals( "I", identity.changeIndicator )
 
@@ -62,9 +62,9 @@ class CommunicationInteractionCompositeServiceTests extends BaseIntegrationTestC
 
     @Test
     void testGetPersonOrNonPerson() {
-        PersonIdentificationName found = communicationInteractionCompositeService.getPersonOrNonPerson( "111111111" )
+        PersonIdentificationName found = communicationInteractionCompositeService.getPersonOrNonPerson( "EVT00029" )
         assertNotNull( found )
-        assertEquals( "111111111", found.bannerId )
+        assertEquals( "EVT00029", found.bannerId )
         assertEquals( "C", found.entityIndicator )
         assertNull( found.changeIndicator )
 
