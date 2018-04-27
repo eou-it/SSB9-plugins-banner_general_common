@@ -22,6 +22,7 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.context.i18n.LocaleContextHolder
 import org.apache.log4j.Logger
+import org.springframework.web.context.request.RequestContextHolder
 
 
 /**
@@ -754,6 +755,25 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @Test
     void testFetchEmployeeUpdatableSetting() {
         def updatable = directDepositAccountCompositeService.fetchEmployeeUpdatableSetting()
+
+        assertNotNull updatable
+        assertEquals "Y", updatable
+    }
+
+    @Test
+    void testGetEmployeeUpdatableSettingWhenNotAlreadyStoredInSession() {
+        def updatable = directDepositAccountCompositeService.getEmployeeUpdatableSetting()
+
+        assertNotNull updatable
+        assertEquals "Y", updatable
+    }
+
+    @Test
+    void testGetEmployeeUpdatableSettingWhenStoredInSession() {
+        def updatable = directDepositAccountCompositeService.fetchEmployeeUpdatableSetting()
+        def session = RequestContextHolder.currentRequestAttributes().request.session
+        session.setAttribute('EMPLOYEE_UPDATABLE_SETTING', updatable)
+        updatable = directDepositAccountCompositeService.getEmployeeUpdatableSetting()
 
         assertNotNull updatable
         assertEquals "Y", updatable

@@ -685,10 +685,28 @@ class DirectDepositAccountCompositeService {
         } finally {
             sql?.close()
         }
-        return ddUpdatableIndRec?.PTRINST_DD_WEB_UPDATE_IND
+
+        ddUpdatableIndRec?.PTRINST_DD_WEB_UPDATE_IND
     }
 
     /**
+     * Obtain from session cache if available, otherwise fetch from database.
+     * @return
+     */
+    def getEmployeeUpdatableSetting () {
+        def EMPLOYEE_UPDATABLE_SETTING = 'EMPLOYEE_UPDATABLE_SETTING'
+        def session = RequestContextHolder.currentRequestAttributes().request.session
+        def updatable = session.getAttribute(EMPLOYEE_UPDATABLE_SETTING)
+
+        if (!updatable) {
+            updatable = fetchEmployeeUpdatableSetting()
+            session.setAttribute(EMPLOYEE_UPDATABLE_SETTING, updatable)
+        }
+
+        updatable
+    }
+
+        /**
      * Accounts are always updatable for students, who only have access to AP accounts.
      * Accounts are updatable for employees in the following two cases:
      *   1) the Banner admin pages PTRINST "Employee May Update Direct Deposit Records" indicator is checked
@@ -697,7 +715,7 @@ class DirectDepositAccountCompositeService {
      */
     def areAccountsUpdatable() {
         if (userRoleService.hasUserRole('EMPLOYEE') && checkIfHrInstalled()) {
-            def updatable = fetchEmployeeUpdatableSetting()
+            def updatable = getEmployeeUpdatableSetting()
             return updatable ? updatable == 'Y' : true
         } else {
             return true
