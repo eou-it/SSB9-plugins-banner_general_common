@@ -47,6 +47,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.job.CommunicationJob"/>
 
         <mapping class="net.hedtech.banner.general.communication.event.CommunicationEventMapping"/>
+        <mapping class="net.hedtech.banner.general.communication.event.CommunicationEventMappingView"/>
 
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionConstant"/>
         <mapping class="net.hedtech.banner.general.communication.field.CommunicationFieldDataFunctionStatement"/>

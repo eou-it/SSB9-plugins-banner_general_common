@@ -5,13 +5,10 @@ package net.hedtech.banner.general.communication.event
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
-import org.hibernate.criterion.Order
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -63,7 +60,7 @@ class CommunicationEventMapping implements Serializable {
     /**
      * ID of the organization to be used for sending messages for this event.
      */
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "GCBEVMP_ORGANIZATION_ID", referencedColumnName = "GCRORAN_SURROGATE_ID")
     @org.hibernate.annotations.ForeignKey(name = "FK1_GCBEVMP_INV_GCRORAN")
     CommunicationOrganization organization
@@ -162,35 +159,5 @@ class CommunicationEventMapping implements Serializable {
             }
         }
         return (query != null)
-    }
-
-    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-
-        def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
-        def queryCriteria = CommunicationEventMapping.createCriteria()
-
-        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            createAlias("template", "template")
-            createAlias("organization", "organization")
-            ilike("eventName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.eventName))
-            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
-        }
-        return results
-    }
-
-    public boolean availableForUse() {
-
-        if(!this.isActive && !this.template && !this.template.published && !this.organization && !organization.isAvailable) {
-            return false;
-        }
-
-        CommunicationOrganization rootOrganization = CommunicationOrganization.fetchRoot()
-        if ((this.template.communicationChannel == CommunicationChannel.EMAIL) &&
-                !((this.organization?.senderMailboxAccount && this.organization?.replyToMailboxAccount) &&
-                        (this.organization?.sendEmailServerProperties || rootOrganization?.sendEmailServerProperties))) {
-            return false;
-        }
-
-        return true;
     }
 }

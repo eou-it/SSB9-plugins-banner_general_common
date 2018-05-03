@@ -7,8 +7,9 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
-import net.hedtech.banner.general.communication.event.CommunicationEventMapping
+import net.hedtech.banner.general.communication.event.CommunicationEventMappingView
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
+import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
@@ -22,7 +23,6 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
-import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
@@ -33,7 +33,6 @@ import org.apache.commons.lang.NotImplementedException
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.quartz.CronExpression
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
@@ -127,29 +126,31 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventCodeInvalid@@" )
         }
 
-        CommunicationEventMapping eventMapping = CommunicationEventMapping.fetchByName(eventCode)
-        if(!eventMapping) {
+        CommunicationEventMappingView eventMappingView = CommunicationEventMappingView.fetchByName(eventCode)
+        if(!eventMappingView) {
             throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventMappingDoesNotExist@@" )
         }
 
         //Make a unique name for group send and population by adding timeinmillis to event code
         String uniqueName = eventCode + "_" +System.currentTimeMillis()
 
-        CommunicationTemplate template = CommunicationTemplate.get(eventMapping.template.id)
-        if(template.id == null) {
+        if(eventMappingView.templateId == null) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateIsRequired")
-        } else if(!template.published) {
+        } else if(!eventMappingView.publishInd) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateNotPublished")
+        } else if(!eventMappingView.templateActiveInd) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "templateNotActive")
         }
 
-        CommunicationOrganization organization = CommunicationOrganization.get(eventMapping.organization.id)
-        if (organization.id == null) {
+        if (!eventMappingView.organizationId) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationIsRequired")
-        } else if(!organization.isAvailable) {
+        } else if(!eventMappingView.organizationAvailableIndicator) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationNotAvailable")
         }
+
+        CommunicationOrganization organization = CommunicationOrganization.get(eventMappingView.organizationId)
         CommunicationOrganization rootOrganization = CommunicationOrganization.fetchRoot()
-        if ((template.communicationChannel == CommunicationChannel.EMAIL) &&
+        if ((eventMappingView.communicationChannel == CommunicationChannel.EMAIL) &&
                 !((organization?.senderMailboxAccount && organization?.replyToMailboxAccount) &&
                 (organization?.sendEmailServerProperties || rootOrganization?.sendEmailServerProperties))) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationEmailServerSettingsNotAvailable")
@@ -159,15 +160,16 @@ class CommunicationGroupSendCompositeService {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "PIDM(s)IsRequired")
         }
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(template?.folder, uniqueName, "", true)
+        CommunicationFolder templateFolder = CommunicationFolder.get(eventMappingView.templateFolderId)
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulation(templateFolder, uniqueName, "", true)
         CommunicationPopulationSelectionListBulkResults results = communicationPopulationCompositeService.addPersonsToIncludeList(population, bannerIDs, false)
 
         CommunicationGroupSendRequest groupSendRequest = new CommunicationGroupSendRequest()
         groupSendRequest.name = uniqueName
         groupSendRequest.populationId = population.id
-        groupSendRequest.templateId = template.id
+        groupSendRequest.templateId = eventMappingView.templateId
         groupSendRequest.organizationId = organization.id
-        groupSendRequest.eventId = eventMapping.id
+        groupSendRequest.eventId = eventMappingView.surrogateId
         groupSendRequest.referenceId = UUID.randomUUID().toString()
         groupSendRequest.recalculateOnSend = false
         groupSendRequest.parameterNameValueMap = parameterNameValuesMap
