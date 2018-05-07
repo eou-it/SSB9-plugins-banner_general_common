@@ -49,7 +49,7 @@ class DirectDepositAccountCompositeService {
 
         if(setPriority){
             validateOnlyOneAP(account)
-            validateNotDuplicate(account)
+            directDepositAccountService.validateNotDuplicate(account)
             account = setNextPriority(account)
         }
         else {
@@ -158,12 +158,6 @@ class DirectDepositAccountCompositeService {
         }
 
         routingInfo.first()
-    }
-
-    private def validateNotDuplicate(account) {
-        if(DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.accountType, account.apIndicator, account.hrIndicator)) {
-            throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
-        }
     }
 
     def validateOnlyOneAP(account) {
@@ -525,7 +519,7 @@ class DirectDepositAccountCompositeService {
         if (!itemBeingAdjusted.containsKey("id") || itemBeingAdjusted?.id == null) {
             itemBeingAdjusted.priority = setNextPriority(itemBeingAdjusted).priority
             itemBeingAdjusted.id = -1
-            validateNotDuplicate(itemBeingAdjusted)
+            directDepositAccountService.validateNotDuplicate(itemBeingAdjusted)
             newAcct = true
             domainObject.id = -1
             domainObject.priority = itemBeingAdjusted.priority
