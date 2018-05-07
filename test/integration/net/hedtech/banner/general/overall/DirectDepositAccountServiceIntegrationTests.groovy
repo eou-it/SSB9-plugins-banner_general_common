@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private final DEFAULT_SESSION_PIDM = 95999
+    private final RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
+
     def directDepositAccountService
     
     @Before
@@ -715,7 +717,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testValidateNotDuplicateWithCreatingAccountHavingOneDuplicate() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
         def existingDirectDepositAccount = newDirectDepositAccount()
         directDepositAccountService.create([domainModel: existingDirectDepositAccount])
 
@@ -732,7 +733,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testValidateNotDuplicateWithCreatingAccountHavingTwoDuplicates() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
         def existingDirectDepositAccount = newDirectDepositAccount()
         directDepositAccountService.create([domainModel: existingDirectDepositAccount]) // Duplicate #1
 
@@ -752,7 +752,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testValidateNotDuplicateWithCreatingAccountHavingNoDuplicates() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
         def existingDirectDepositAccount = newDirectDepositAccount()
         directDepositAccountService.create([domainModel: existingDirectDepositAccount])
 
@@ -770,8 +769,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testPreUpdateWithAccountHavingOneDuplicate() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
-
         // Reset session PIDM
         SecurityContextHolder?.context?.authentication?.principal?.pidm = DEFAULT_SESSION_PIDM
 
@@ -798,8 +795,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testPreUpdateWithAccountAsMapHavingOneDuplicate() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
-
         // Reset session PIDM
         SecurityContextHolder?.context?.authentication?.principal?.pidm = DEFAULT_SESSION_PIDM
 
@@ -827,7 +822,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testPreUpdateWithAccountHavingNoDuplicates() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
         def existingDirectDepositAccount = newDirectDepositAccount()
         existingDirectDepositAccount = directDepositAccountService.create([domainModel: existingDirectDepositAccount])
 
@@ -852,7 +846,6 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testPreUpdateWithAccountAsMapHavingNoDuplicates() {
-        def RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
         def existingDirectDepositAccount = newDirectDepositAccount()
         existingDirectDepositAccount = directDepositAccountService.create([domainModel: existingDirectDepositAccount])
 
