@@ -108,6 +108,9 @@ class DirectDepositAccountService extends ServiceBase{
 
     void preUpdate(map) {
         verifyAccountBelongsToPidm(map)
+
+        def account = (map instanceof Map) ? (map?.domainModel ?: map) : map
+        validateNotDuplicate(account)
     }
 
     def getActiveApAccounts(pidm) {
@@ -210,6 +213,16 @@ class DirectDepositAccountService extends ServiceBase{
                     "Surrogate ID of account targeted for delete (if available): ${existingAccount?.id}.")
 
             throw new ApplicationException(DirectDepositAccountService, "@@r1:operation.not.authorized@@")
+        }
+    }
+
+    def validateNotDuplicate(account) {
+        def existingAccounts = DirectDepositAccount.fetchByPidmAndAccountInfo(account.pidm, account.bankRoutingInfo.bankRoutingNum, account.bankAccountNum, account.accountType, account.apIndicator, account.hrIndicator)
+
+        if(existingAccounts) {
+            if (existingAccounts.size() > 1 || existingAccounts[0].id != account.id) {
+                throw new ApplicationException(DirectDepositAccount, "@@r1:recordAlreadyExists@@")
+            }
         }
     }
 

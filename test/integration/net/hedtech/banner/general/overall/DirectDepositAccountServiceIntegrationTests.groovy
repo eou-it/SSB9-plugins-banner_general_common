@@ -19,6 +19,9 @@ import org.springframework.security.core.context.SecurityContextHolder
  */
 class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCase {
 
+    private final DEFAULT_SESSION_PIDM = 95999
+    private final RECORD_ALREADY_EXISTS_EXCEPTION = '@@r1:recordAlreadyExists@@'
+
     def directDepositAccountService
     
     @Before
@@ -712,7 +715,163 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         }
     }
 
-    private def newDirectDepositAccount(pidm=95999) {
+    @Test
+    void testValidateNotDuplicateWithCreatingAccountHavingOneDuplicate() {
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        directDepositAccountService.create([domainModel: existingDirectDepositAccount])
+
+        // "Newly created" account
+        def newDirectDepositAccount = newDirectDepositAccount()
+
+        try {
+            directDepositAccountService.validateNotDuplicate(newDirectDepositAccount)
+            fail("Should have received an error, but it passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+        }
+    }
+
+    @Test
+    void testValidateNotDuplicateWithCreatingAccountHavingTwoDuplicates() {
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        directDepositAccountService.create([domainModel: existingDirectDepositAccount]) // Duplicate #1
+
+        existingDirectDepositAccount.priority = 17 // Satisfies the GXRDIRD_KEY_INDEX2 constraint
+        directDepositAccountService.create([domainModel: existingDirectDepositAccount]) // Duplicate #2
+
+        // "Newly created" account
+        def newDirectDepositAccount = newDirectDepositAccount()
+
+        try {
+            directDepositAccountService.validateNotDuplicate(newDirectDepositAccount)
+            fail("Should have received an error, but it passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+        }
+    }
+
+    @Test
+    void testValidateNotDuplicateWithCreatingAccountHavingNoDuplicates() {
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        directDepositAccountService.create([domainModel: existingDirectDepositAccount])
+
+        // "Newly created" account
+        def newDirectDepositAccount = newDirectDepositAccount()
+        newDirectDepositAccount.accountType = 'S' // Make it not a duplicate to the one created above
+
+        try {
+            directDepositAccountService.validateNotDuplicate(newDirectDepositAccount)
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+            fail("Received an error, but it should have passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        }
+    }
+
+    @Test
+    void testPreUpdateWithAccountHavingOneDuplicate() {
+        // Reset session PIDM
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = DEFAULT_SESSION_PIDM
+
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        directDepositAccountService.create([domainModel: existingDirectDepositAccount])
+
+        def newDirectDepositAccount = newDirectDepositAccount()
+        newDirectDepositAccount.accountType = 'S'
+        newDirectDepositAccount.priority = 17 // Satisfies the GXRDIRD_KEY_INDEX2 constraint
+        newDirectDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        // Make change to be updated
+        newDirectDepositAccount.accountType = 'C'
+
+        try {
+            // Rather than calling preUpdate directly, update is called.  This is because there is logic in
+            // ServiceBase, e.g. invokeServicePreUpdate, which needs to be executed before preUpdate is called.
+            directDepositAccountService.update(newDirectDepositAccount)
+            fail("Should have received an error, but it passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+        }
+    }
+
+    @Test
+    void testPreUpdateWithAccountAsMapHavingOneDuplicate() {
+        // Reset session PIDM
+        SecurityContextHolder?.context?.authentication?.principal?.pidm = DEFAULT_SESSION_PIDM
+
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        directDepositAccountService.create([domainModel: existingDirectDepositAccount])
+
+        def newDirectDepositAccount = newDirectDepositAccount()
+        newDirectDepositAccount.accountType = 'S'
+        newDirectDepositAccount.priority = 17 // Satisfies the GXRDIRD_KEY_INDEX2 constraint
+        newDirectDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        // Converting DirectDepositAccount object to map exercises preUpdate logic dealing with map vs. object
+        def map = convertDirectDepositAccountToMap(newDirectDepositAccount)
+        map.accountType = 'C'
+
+        try {
+            // Rather than calling preUpdate directly, update is called.  This is because there is logic in
+            // ServiceBase, e.g. invokeServicePreUpdate, which needs to be executed before preUpdate is called.
+            directDepositAccountService.update(map)
+            fail("Should have received an error, but it passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        } catch (ApplicationException ae) {
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+        }
+    }
+
+    @Test
+    void testPreUpdateWithAccountHavingNoDuplicates() {
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        existingDirectDepositAccount = directDepositAccountService.create([domainModel: existingDirectDepositAccount])
+
+        def newDirectDepositAccount = newDirectDepositAccount()
+        newDirectDepositAccount.accountType = 'S'
+        newDirectDepositAccount.priority = 17
+        newDirectDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        // Make change to be updated
+        newDirectDepositAccount.percent = 12
+
+        try {
+            // Rather than calling preUpdate directly, update is called.  This is because there is logic in
+            // ServiceBase, e.g. invokeServicePreUpdate, which needs to be executed before preUpdate is called.
+            directDepositAccountService.update(newDirectDepositAccount)
+        } catch (ApplicationException ae) {
+            ae.printStackTrace()
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+            fail("Received an error, but it should have passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        }
+    }
+
+    @Test
+    void testPreUpdateWithAccountAsMapHavingNoDuplicates() {
+        def existingDirectDepositAccount = newDirectDepositAccount()
+        existingDirectDepositAccount = directDepositAccountService.create([domainModel: existingDirectDepositAccount])
+
+        def newDirectDepositAccount = newDirectDepositAccount()
+        newDirectDepositAccount.accountType = 'S'
+        newDirectDepositAccount.priority = 17
+        newDirectDepositAccount = directDepositAccountService.create([domainModel: newDirectDepositAccount])
+
+        // Converting DirectDepositAccount object to map exercises preUpdate logic dealing with map vs. object
+        def map = convertDirectDepositAccountToMap(newDirectDepositAccount)
+
+        // Make change to be updated
+        newDirectDepositAccount.percent = 12
+
+        try {
+            // Rather than calling preUpdate directly, update is called.  This is because there is logic in
+            // ServiceBase, e.g. invokeServicePreUpdate, which needs to be executed before preUpdate is called.
+            directDepositAccountService.update(map)
+        } catch (ApplicationException ae) {
+            ae.printStackTrace()
+            assertApplicationException ae, RECORD_ALREADY_EXISTS_EXCEPTION
+            fail("Received an error, but it should have passed: ${RECORD_ALREADY_EXISTS_EXCEPTION}")
+        }
+    }
+
+    private def newDirectDepositAccount(pidm=DEFAULT_SESSION_PIDM) {
         def bankRoutingInfo = new BankRoutingInfo()
 
         bankRoutingInfo.bankRoutingNum = 234798944
@@ -741,5 +900,24 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         )
 
         return domain
+    }
+
+    private def convertDirectDepositAccountToMap(account) {
+        // Note that bankAccountNum and bankRoutingInfo are not included, as this is currently used for cases which
+        // UpdateAccountController.updateAccount would exercise, and that action removes the aforementioned properties.
+        [
+                id: account.id,
+                version: account.version,
+                pidm: account.pidm,
+                status: account.status,
+                documentType: account.documentType,
+                priority: account.priority,
+                apIndicator: account.apIndicator,
+                hrIndicator: account.hrIndicator,
+                amount: account.amount,
+                percent: account.percent,
+                accountType: account.accountType,
+                intlAchTransactionIndicator: account.intlAchTransactionIndicator
+        ]
     }
 }
