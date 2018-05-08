@@ -102,6 +102,11 @@ class DirectDepositAccountService extends ServiceBase{
         return model;
     }
 
+    void preCreate(map) {
+        def account = (map instanceof Map) ? (map?.domainModel ?: map) : map
+        validateNotDuplicate(account)
+    }
+
     void preDelete(map) {
         verifyAccountBelongsToPidm(map)
     }
