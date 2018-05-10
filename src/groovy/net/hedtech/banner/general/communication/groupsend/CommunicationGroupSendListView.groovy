@@ -98,7 +98,7 @@ class CommunicationGroupSendListView implements Serializable {
     boolean recalculateOnSend
 
 
-    public static def findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
+    public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
 

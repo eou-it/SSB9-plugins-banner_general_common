@@ -352,6 +352,39 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 2, recipientData.fieldValues.size() )
         assertEquals( "05-30-2013", recipientData.fieldValues.get( "dateField" ).value )
         assertEquals( "testTextParameter = Friday and testNumberParameter = 20", recipientData.fieldValues.get( "textNumberField" ).value )
+
+        // Confirm group send view returns the correct results
+        def sendViewDetails = CommunicationGroupSendDetailView.findAll()
+        assertEquals(1, sendViewDetails.size())
+
+        def sendListView = CommunicationGroupSendListView.findAll()
+        assertEquals(1, sendListView.size())
+
+        // Confirm group send item view returns the correct results
+        def sendItemViewDetails = CommunicationGroupSendItemView.findAll()
+        assertEquals(3, sendItemViewDetails.size())
+
+        sleepUntilGroupSendItemsComplete( groupSend, 60 )
+
+        int countCompleted = CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend( groupSend ).size()
+        assertEquals( 3, countCompleted )
+
+        sleepUntilCommunicationJobsComplete( 10 * 60 )
+        countCompleted = CommunicationJob.fetchCompleted().size()
+        assertEquals( 3, countCompleted )
+
+        sleepUntilGroupSendComplete( groupSend, 3 * 60 )
+
+        // test delete group send
+        assertEquals( 1, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 3, fetchGroupSendItemCount( groupSend.id ) )
+        assertEquals( 3, CommunicationJob.findAll().size() )
+        assertEquals( 3, CommunicationRecipientData.findAll().size() )
+        communicationGroupSendCompositeService.deleteGroupSend( groupSend.id )
+        assertEquals( 0, fetchGroupSendCount( groupSend.id ) )
+        assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
+        assertEquals( 0, CommunicationJob.findAll().size() )
+        assertEquals( 0, CommunicationRecipientData.findAll().size() )
     }
 
     @Test
