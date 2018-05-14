@@ -54,6 +54,10 @@ class CommunicationGroupSendListView implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date scheduledStartDate;
 
+    @Column(name = "group_send_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date groupSendDate
+
     @Column(name = "group_send_name")
     String groupSendName;
 
