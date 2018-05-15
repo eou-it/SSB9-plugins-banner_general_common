@@ -23,6 +23,7 @@ class CommunicationSendMobileNotificationService {
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
     def testOverride
+    def communicationInteractionCompositeService
 
 
     /**
@@ -174,8 +175,12 @@ class CommunicationSendMobileNotificationService {
     }
 
     // helper method to get external ID  for display on testMobileNotification modal
-    def fetchExternalId (Long pidm) {
-        return CommunicationMessageGenerator.fetchExternalLoginIdByPidm(pidm)
+    def fetchExternalId (String bannerId) {
+        def person = communicationInteractionCompositeService.getPersonOrNonPerson(bannerId)
+        if (person.pidm == null || person.pidm <= 0) {
+            throw new ApplicationException(CommunicationSendMobileNotificationService,"@@r1:idInvalid@@")
+        }
+        return CommunicationMessageGenerator.fetchExternalLoginIdByPidm(person.pidm)
     }
 
 }

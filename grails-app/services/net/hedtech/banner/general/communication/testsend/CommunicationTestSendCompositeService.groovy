@@ -40,23 +40,26 @@ class CommunicationTestSendCompositeService  {
     def communicationSendEmailService
     def communicationSendMobileNotificationService
     def communicationGenerateLetterService
+    def communicationInteractionCompositeService
 
     def recipientData
     def channel
 
-    def sendTest (Long pidm, Long organizationId, Long templateId, Map parameterNameValuesMap) {
-        if (pidm == null || pidm <= 0) {
+    def sendTest (String bannerId, Long organizationId, Long templateId, Map parameterNameValuesMap) {
+
+        def person = communicationInteractionCompositeService.getPersonOrNonPerson(bannerId)
+        if (person.pidm == null || person.pidm <= 0) {
             throw new ApplicationException(CommunicationFieldCalculationService,"@@r1:idInvalid@@")
         }
         switch (channel) {
             case CommunicationChannel.MOBILE_NOTIFICATION:
-                sendTestMobileNotification(pidm, organizationId, templateId, parameterNameValuesMap)
+                sendTestMobileNotification(person.pidm, organizationId, templateId, parameterNameValuesMap)
                 break
             case CommunicationChannel.EMAIL:
-                sendTestEmail(pidm, organizationId, templateId, parameterNameValuesMap)
+                sendTestEmail(person.pidm, organizationId, templateId, parameterNameValuesMap)
                 break
             case CommunicationChannel.LETTER:
-                return sendTestLetter(pidm, organizationId, templateId, parameterNameValuesMap)
+                return sendTestLetter(person.pidm, organizationId, templateId, parameterNameValuesMap)
                 break
             default:
                 throw CommunicationExceptionFactory.createApplicationException(this.class, new RuntimeException("communication.error.message.templateErrorUnknown"), CommunicationErrorCode.TEMPLATE_ERROR_UNKNOWN.name())
