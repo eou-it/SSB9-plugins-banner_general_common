@@ -91,7 +91,7 @@ class CommunicationEventMapping implements Serializable {
      * Indicates if the event mapping was created through the seeded data set and should not be deleted or modified in any way.
      */
     @Type(type = "yes_no")
-    @Column(name = "GCBEVMP_SYSTEM_IND")
+    @Column(name = "GCBEVMP_SYSTEM_REQ_IND")
     Boolean systemIndicator = false
 
     /**

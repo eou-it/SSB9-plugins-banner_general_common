@@ -135,7 +135,7 @@ class CommunicationPopulation implements Serializable {
      * Indicates if the population was generated as part of a backend API call and should not be deleted or modified in any way.
      */
     @Type(type = "yes_no")
-    @Column(name = "GCBPOPL_SYSTEM_IND")
+    @Column(name = "GCBPOPL_SYSTEM_REQ_IND")
     Boolean systemIndicator = false
 
     static constraints = {
