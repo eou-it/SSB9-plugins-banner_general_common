@@ -34,6 +34,7 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 import java.sql.Connection
@@ -120,6 +121,7 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
     public CommunicationGroupSend createMessageAndPopulationForGroupSend(String eventCode, List<String> bannerIDs, Map parameterNameValuesMap) {
 
         if(!eventCode || eventCode.isEmpty()) {
