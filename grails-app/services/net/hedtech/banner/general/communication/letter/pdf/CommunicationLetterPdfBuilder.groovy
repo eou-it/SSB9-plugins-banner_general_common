@@ -90,6 +90,10 @@ class CommunicationLetterPdfBuilder {
         return outputStream.toByteArray()
     }
 
+    public getXHTMLString(String content) {
+        return getHTMLHeader() + content + getHTMLFooter()
+    }
+
     /**
      * Returns a portion of HTML header.
      *
