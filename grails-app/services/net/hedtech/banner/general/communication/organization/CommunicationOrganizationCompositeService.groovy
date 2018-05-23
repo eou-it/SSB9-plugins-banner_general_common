@@ -150,7 +150,7 @@ class CommunicationOrganizationCompositeService {
             communicationMailboxAccountService.delete(fetched.replyToMailboxAccount)
         }
 
-        if (fetched.sendEmailServerProperties && !(neworg && neworg.sendEmailServerProperties && neworg.sendEmailServerProperties.id && neworg.sendEmailServerProperties.id == fetched.sendEmailServerProperties)) {
+        if (fetched.sendEmailServerProperties && !(neworg && neworg.sendEmailServerProperties && neworg.sendEmailServerProperties.id && neworg.sendEmailServerProperties.id == fetched.sendEmailServerProperties.id)) {
             communicationEmailServerPropertiesService.delete(fetched.sendEmailServerProperties)
         }
 
