@@ -27,6 +27,7 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotifi
 import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
+import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesService
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
@@ -73,6 +74,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationLetterItemService communicationLetterItemService
     CommunicationGroupSendCompositeService communicationGroupSendCompositeService
     CommunicationMailboxAccountService communicationMailboxAccountService
+    CommunicationEmailServerPropertiesService communicationEmailServerPropertiesService
     CommunicationGroupSendService communicationGroupSendService
     CommunicationGroupSendItemService communicationGroupSendItemService
     CommunicationPopulationQueryCompositeService communicationPopulationQueryCompositeService
@@ -321,7 +323,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                     userName: 'rshishehbor',
                     type: CommunicationMailboxAccountType.Sender
             )
-            defaultOrganization.senderMailboxAccount = communicationMailboxAccountService.create(cma)
+            cma = communicationMailboxAccountService.create(cma)
 
             def rma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',
@@ -330,7 +332,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                     userName: 'rshishehbor',
                     type: CommunicationMailboxAccountType.ReplyTo
             )
-            defaultOrganization.replyToMailboxAccount = communicationMailboxAccountService.create(rma)
+            rma = communicationMailboxAccountService.create(rma)
 
             def cesp = new CommunicationEmailServerProperties(
                     securityProtocol: CommunicationEmailServerConnectionSecurity.None,
@@ -338,8 +340,11 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                     port: smtp_port,
                     type: CommunicationEmailServerPropertiesType.Send
             )
-            defaultOrganization.sendEmailServerProperties = cesp
+            cesp = communicationEmailServerPropertiesService.create(cesp)
 
+            defaultOrganization.senderMailboxAccount = cma
+            defaultOrganization.replyToMailboxAccount = rma
+            defaultOrganization.sendEmailServerProperties = cesp
             defaultOrganization = communicationOrganizationCompositeService.updateOrganization(defaultOrganization)
 
         assertNotNull( defaultOrganization.senderMailboxAccount )

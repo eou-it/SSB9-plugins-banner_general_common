@@ -149,13 +149,14 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testFetchMailBoxAccountByOrganizationId() {
+        def mbxInitialCount =   CommunicationMailboxAccount.findAll()?.size()
         def organization = newValidForCreateOrganization()
         organization.senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender )
         organization.replyToMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.ReplyTo )
         organization.save(failOnError: true, flush: true)
 
         def mailboxAccountList = CommunicationMailboxAccount.findAll()
-        assertEquals(2, mailboxAccountList.size())
+        assertEquals(mbxInitialCount+2, mailboxAccountList.size())
     }
 
 
