@@ -121,16 +121,16 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly = true, rollbackFor = Throwable.class )
+    @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public CommunicationGroupSend createMessageAndPopulationForGroupSend(String eventCode, List<String> bannerIDs, Map parameterNameValuesMap) {
 
         if(!eventCode || eventCode.isEmpty()) {
-            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventCodeInvalid@@" )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService, "eventCodeNotSpecified" )
         }
 
         CommunicationEventMappingView eventMappingView = CommunicationEventMappingView.fetchByName(eventCode)
         if(!eventMappingView) {
-            throw CommunicationExceptionFactory.createNotFoundException( CommunicationGroupSendCompositeService, "@@r1:eventMappingDoesNotExist@@" )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendCompositeService, "eventMappingDoesNotExist:${eventCode}" )
         }
 
         //Make a unique name for group send and population by adding timeinmillis to event code
@@ -154,7 +154,7 @@ class CommunicationGroupSendCompositeService {
         CommunicationOrganization rootOrganization = CommunicationOrganization.fetchRoot()
         if ((eventMappingView.communicationChannel == CommunicationChannel.EMAIL) &&
                 !((organization?.senderMailboxAccount && organization?.replyToMailboxAccount) &&
-                (organization?.sendEmailServerProperties || rootOrganization?.sendEmailServerProperties))) {
+                        (organization?.sendEmailServerProperties || rootOrganization?.sendEmailServerProperties))) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendCompositeService, "organizationEmailServerSettingsNotAvailable")
         }
 
@@ -423,11 +423,11 @@ class CommunicationGroupSendCompositeService {
 
     private CommunicationGroupSend scheduleGroupSendImmediately( CommunicationGroupSend groupSend, String bannerUser ) {
         SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString() )
-            .setBannerUser( bannerUser )
-            .setMepCode( groupSend.mepCode )
-            .setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
-            .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
-            .setParameter( "groupSendId", groupSend.id )
+                .setBannerUser( bannerUser )
+                .setMepCode( groupSend.mepCode )
+                .setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
+                .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
+                .setParameter( "groupSendId", groupSend.id )
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
         groupSend.markQueued( jobReceipt.jobId, jobReceipt.groupId )
@@ -443,17 +443,17 @@ class CommunicationGroupSendCompositeService {
         }
 
         SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId )
-            .setBannerUser( bannerUser )
-            .setMepCode( groupSend.mepCode )
-            .setScheduledStartDate( groupSend.scheduledStartDate )
-            .setParameter( "groupSendId", groupSend.id )
+                .setBannerUser( bannerUser )
+                .setMepCode( groupSend.mepCode )
+                .setScheduledStartDate( groupSend.scheduledStartDate )
+                .setParameter( "groupSendId", groupSend.id )
 
         if(groupSend.recalculateOnSend) {
             jobContext.setJobHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFired" )
-                .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
+                    .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
         } else {
             jobContext.setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
-                .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
+                    .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
         }
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleServiceMethod( jobContext )
@@ -596,12 +596,12 @@ class CommunicationGroupSendCompositeService {
             sql = new Sql(session.connection())
 
             sql.execute(
-            [
-                state:CommunicationGroupSendItemExecutionState.Ready.toString(),
-                group_send_key:groupSend.id,
-                current_time:new Date().toTimestamp()
-            ],
-            """
+                    [
+                            state:CommunicationGroupSendItemExecutionState.Ready.toString(),
+                            group_send_key:groupSend.id,
+                            current_time:new Date().toTimestamp()
+                    ],
+                    """
             INSERT INTO gcrgsim (gcrgsim_group_send_id, gcrgsim_pidm, gcrgsim_creationdatetime
                                             ,gcrgsim_current_state, gcrgsim_reference_id, gcrgsim_user_id, gcrgsim_activity_date, gcrgsim_started_date)
                     select
