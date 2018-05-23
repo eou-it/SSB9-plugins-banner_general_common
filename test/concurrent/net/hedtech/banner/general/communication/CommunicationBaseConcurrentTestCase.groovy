@@ -292,29 +292,45 @@ class CommunicationBaseConcurrentTestCase extends Assert {
 
     protected void setUpDefaultOrganization() {
         List organizations = communicationOrganizationCompositeService.listOrganizations()
+        def rootorg
         if (organizations.size() == 0) {
-            defaultOrganization = new CommunicationOrganization(name: "Test Org")
+            defaultOrganization = new CommunicationOrganization(name: "Grails Test Org")
             defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             defaultOrganization.mobileApplicationName = "StudentSuccess"
             defaultOrganization.clearMobileApplicationKey = "ss-key-value"
             defaultOrganization.isAvailable = true
             defaultOrganization.parent = null
+            defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
+        } else {
+            rootorg = CommunicationOrganization.fetchRoot()
+            rootorg.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootorg.mobileApplicationName = "StudentSuccess"
+            rootorg.clearMobileApplicationKey = "ss-key-value"
+            rootorg.isAvailable = true
+            rootorg = communicationOrganizationCompositeService.updateOrganization(rootorg)
+            defaultOrganization = new CommunicationOrganization(name: "Grails Test Org")
+            defaultOrganization.isAvailable = true
+            defaultOrganization.parent = rootorg.id
+            defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
+        }
 
             def cma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',
-                    encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
+                    clearTextPassword: "changeit",
+                    //encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
                     userName: 'rshishehbor',
                     type: CommunicationMailboxAccountType.Sender
             )
-            defaultOrganization.senderMailboxAccount = cma
+            defaultOrganization.senderMailboxAccount = communicationMailboxAccountService.create(cma)
 
             def rma = new CommunicationMailboxAccount(
                     emailAddress: 'rasul.shishehbor@ellucian.com',
-                    encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
+                    clearTextPassword: "changeit",
+                    //encryptedPassword: communicationMailboxAccountService.encryptPassword( "changeit" ),
                     userName: 'rshishehbor',
                     type: CommunicationMailboxAccountType.ReplyTo
             )
-            defaultOrganization.replyToMailboxAccount = rma
+            defaultOrganization.replyToMailboxAccount = communicationMailboxAccountService.create(rma)
 
             def cesp = new CommunicationEmailServerProperties(
                     securityProtocol: CommunicationEmailServerConnectionSecurity.None,
@@ -323,10 +339,8 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                     type: CommunicationEmailServerPropertiesType.Send
             )
             defaultOrganization.sendEmailServerProperties = cesp
-            defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
-        } else {
-            defaultOrganization = organizations.get(0) as CommunicationOrganization
-        }
+
+            defaultOrganization = communicationOrganizationCompositeService.updateOrganization(defaultOrganization)
 
         assertNotNull( defaultOrganization.senderMailboxAccount )
         assertNotNull( defaultOrganization.replyToMailboxAccount )

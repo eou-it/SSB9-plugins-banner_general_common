@@ -81,7 +81,6 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
-                sql.executeUpdate("Delete from GCBEVMP where gcbevmp_system_req_ind = 'N'")
                 sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")
@@ -92,6 +91,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("Delete from GCBRDAT")
                 sql.executeUpdate("Delete from GCRGSIM")
                 sql.executeUpdate("Delete from GCBGSND")
+                sql.executeUpdate("Delete from GCBEVMP where gcbevmp_system_req_ind = 'N'")
                 sql.executeUpdate("Delete from GCRTPFL")
                 sql.executeUpdate("Delete from GCBEMTL WHERE EXISTS (SELECT gcbtmpl_surrogate_id FROM gcbtmpl WHERE gcbtmpl_surrogate_id = gcbemtl_surrogate_id AND gcbtmpl_system_req_ind = 'N')")
                 sql.executeUpdate("Delete from GCBMNTL")
@@ -113,10 +113,10 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 sql.executeUpdate("DELETE FROM gcrfldr WHERE NOT EXISTS (SELECT a.GCBACTM_GCRFLDR_ID FROM gcbactm a WHERE a.GCBACTM_GCRFLDR_ID = gcrfldr_surrogate_id) AND \
                                                              NOT EXISTS (SELECT b.GCBAGRP_GCRFLDR_ID FROM gcbagrp b WHERE b.GCBAGRP_GCRFLDR_ID = gcrfldr_surrogate_id) AND \
                                                              gcrfldr_system_ind = 'N'")
-                sql.executeUpdate("Delete from GCRORAN")
-                sql.executeUpdate("Delete from GCBSPRP")
-                sql.executeUpdate("Delete from GCRMBAC")
-
+                sql.executeUpdate("Delete from GCRORAN WHERE NOT EXISTS (SELECT E.GCBEVMP_ORGANIZATION_ID FROM GCBEVMP E WHERE E.GCBEVMP_ORGANIZATION_ID = GCRORAN_SURROGATE_ID) AND GCRORAN_PARENT_ID IS NOT NULL")
+                sql.executeUpdate("Delete from GCBSPRP WHERE NOT EXISTS (SELECT S.GCRORAN_SEND_EMAILPROP_ID FROM GCRORAN S WHERE S.GCRORAN_SEND_EMAILPROP_ID = GCBSPRP_SURROGATE_ID)")
+                sql.executeUpdate("Delete from GCRMBAC WHERE NOT EXISTS (SELECT S.GCRORAN_SEND_MAILBOX_ID FROM GCRORAN S WHERE S.GCRORAN_SEND_MAILBOX_ID = GCRMBAC_SURROGATE_ID) AND \
+                                                             NOT EXISTS (SELECT R.GCRORAN_REPLY_MAILBOX_ID FROM GCRORAN R WHERE R.GCRORAN_REPLY_MAILBOX_ID = GCRMBAC_SURROGATE_ID)")
                 tx.commit()
             }
         } finally {
