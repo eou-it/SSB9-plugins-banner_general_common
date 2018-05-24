@@ -56,6 +56,14 @@ public class AsynchronousBannerAuthenticationSpoofer implements AuthenticationPr
         }
     }
 
+    public authenticateAndSetFormContextForExecuteFromApplication(String username = null, String mepCode = null) {
+        List<String> originalFormContext = FormContext.get()
+        Authentication originalAuthentication = SecurityContextHolder.getContext().getAuthentication()
+        FormContext.set(['SELFSERVICE'])
+        Authentication auth = authenticate(username ?: CommunicationCommonUtility.getUserOracleUserName(), mepCode)
+        SecurityContextHolder.getContext().setAuthentication(auth)
+        return [originalFormContext: originalFormContext, originalAuthentication: originalAuthentication]
+    }
 
     public authenticateAndSetFormContextForExecuteAndSave(String username = null, String mepCode = null) {
         List<String> originalFormContext = FormContext.get()

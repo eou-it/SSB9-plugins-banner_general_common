@@ -137,7 +137,7 @@ class CommunicationCommonUtility {
             if (authorities.any { it.objectName == "CMQUERYEXECUTE" } && authorities.any {it.objectName == "CMQUERY"}) {
                 canExecuteQuery = true
             }
-            if (authorities.any { it.objectName == "CMQUERYEXECUTE" } ) {
+            if (authorities.any { it.objectName == "CMQUERYEXECUTE" } && SecurityContextHolder?.context?.authentication?.principal?.pidm == null ) {
                 //Used for manual population creation from the backend API when there is no query involved
                 canCreatePopulation = true
             }
@@ -180,7 +180,7 @@ class CommunicationCommonUtility {
     public static userCanCreatePopulation() {
         try {
             def usermap = getCommunicationUserRoleMap()
-            return usermap.isUser && (usermap.canExecuteQuery || usermap.canCreatePopulation)
+            return (usermap.isUser && usermap.canExecuteQuery) || usermap.canCreatePopulation
         } catch (Exception e) {
             log.error("principal lacks authorities - may be unauthenticated or session expired. Principal: ${SecurityContextHolder?.context?.authentication?.principal}")
             log.error(e)
@@ -215,6 +215,8 @@ class CommunicationCommonUtility {
             else if (usermap.isUser && (usermap.userId).equals(createdBy.toUpperCase()))
                 return true;
             else if (usermap.isUser && (usermap.bannerId).equals(createdBy.toUpperCase()))
+                return true;
+            else if (usermap.canCreatePopulation)
                 return true;
             return false;
         } catch (Exception e) {

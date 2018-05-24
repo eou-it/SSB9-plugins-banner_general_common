@@ -332,11 +332,12 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         parameterNameValuesMap.put( "testNumberParameter", new CommunicationParameterValue( [ value: 20, type: CommunicationParameterType.NUMBER ] ) )
         parameterNameValuesMap.put( "testDateParameter", new CommunicationParameterValue( [ value: DateUtility.parseDateString( "05-30-2013", "MM-dd-yyyy"), type: CommunicationParameterType.DATE ] ) )
 
-        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
+        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteFromApplication("COMMHRMGR")
 
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createMessageAndPopulationForGroupSend("TEST_EVENT", ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR'], parameterNameValuesMap)
         assertNotNull(groupSend)
 
+        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave("COMMMGR")
         def checkExpectedGroupSendItemsCreated = {
             CommunicationGroupSend each = CommunicationGroupSend.get( it )
             return CommunicationGroupSendItem.fetchByGroupSend( each ).size() == 3
@@ -347,7 +348,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         assertEquals( 3, items.size() )
 
         CommunicationRecipientData recipientData = CommunicationRecipientData.findByReferenceId( items.get( 0 ).referenceId )
-        recipientData.refresh()
+        recipientData?.refresh()
         assertNotNull( recipientData )
         assertEquals( 2, recipientData.fieldValues.size() )
         assertEquals( "05-30-2013", recipientData.fieldValues.get( "dateField" ).value )
@@ -460,15 +461,15 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
         parameterNameValuesMap.put( "testNumberParameter", new CommunicationParameterValue( [ value: 20, type: CommunicationParameterType.NUMBER ] ) )
         parameterNameValuesMap.put( "testDateParameter", new CommunicationParameterValue( [ value: DateUtility.parseDateString( "05-30-2013", "MM-dd-yyyy"), type: CommunicationParameterType.DATE ] ) )
 
-        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
+
 
         List bannerIds = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
 
         for(String bannerId : bannerIds) {
-
+            asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteFromApplication("COMMHRMGR")
             CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createMessageAndPopulationForGroupSend("TEST_EVENT", [bannerId], parameterNameValuesMap)
             assertNotNull(groupSend)
-
+            asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
             def checkExpectedGroupSendItemsCreated = {
                 CommunicationGroupSend each = CommunicationGroupSend.get(it)
                 return CommunicationGroupSendItem.fetchByGroupSend(each).size() == 1
