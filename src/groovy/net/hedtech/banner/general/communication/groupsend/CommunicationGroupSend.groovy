@@ -207,28 +207,23 @@ class CommunicationGroupSend implements Serializable {
                         rawNameValueMap.keySet().each { String name ->
                             Map valueType = rawNameValueMap.get( name )
                             CommunicationParameterType type = CommunicationParameterType.valueOf( (String) valueType.type )
-                            if (!(type == CommunicationParameterType.DATE || type == CommunicationParameterType.NUMBER || type == CommunicationParameterType.TEXT )) {
-                                throw new NotImplementedException("Unhandled parameter type")
-                            }
-                            if (valueType.value == null) {
-                                rawNameValueMap.put(name, new CommunicationParameterValue([value: valueType.value, type: type]))
-                            } else {
-                                if (type == CommunicationParameterType.DATE) {
-                                    Date d = DateUtility.parseDateString(valueType.value, 'yyyy-MM-dd')
-                                    rawNameValueMap.put(name, new CommunicationParameterValue([value: d, type: type]))
-                                } else if (type == CommunicationParameterType.NUMBER) {
-                                    Number number = null
-                                    try {
-                                        number = Long.parseLong(valueType.value)
-                                    } catch (NumberFormatException e) {
-                                        number = Double.parseDouble(valueType.value)
-                                    }
-                                    if (number != null) {
-                                        rawNameValueMap.put(name, new CommunicationParameterValue([value: number, type: type]))
-                                    }
-                                } else if (type == CommunicationParameterType.TEXT) {
-                                    rawNameValueMap.put(name, new CommunicationParameterValue([value: valueType.value, type: type]))
+                            if (type == CommunicationParameterType.DATE) {
+                                Date d = DateUtility.parseDateString( valueType.value, 'yyyy-MM-dd' )
+                                rawNameValueMap.put( name, new CommunicationParameterValue( [ value: d, type: type ] ) )
+                            } else if (type == CommunicationParameterType.NUMBER) {
+                                Number number = null
+                                try {
+                                    number = Long.parseLong( valueType.value )
+                                } catch (NumberFormatException e) {
+                                    number = Double.parseDouble( valueType.value )
                                 }
+                                if (number != null) {
+                                    rawNameValueMap.put( name, new CommunicationParameterValue( [ value: number, type: type ] ) )
+                                }
+                            } else if (type == CommunicationParameterType.TEXT) {
+                                rawNameValueMap.put( name, new CommunicationParameterValue( [ value: valueType.value, type: type ] ) )
+                            } else {
+                                throw new NotImplementedException( "Unhandled parameter type" )
                             }
                         }
                     }
