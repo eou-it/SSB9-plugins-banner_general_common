@@ -1,12 +1,9 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.*
 
 import javax.persistence.*
@@ -16,6 +13,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "GOTCMME")
+@EqualsAndHashCode(includeFields = true)
 class CommonMatchingMatchEntryGlobalTemporary implements Serializable {
 
     /**
@@ -292,90 +290,6 @@ class CommonMatchingMatchEntryGlobalTemporary implements Serializable {
 					state=$state, 
 					nation=$nation, 
 					county=$county]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof CommonMatchingMatchEntryGlobalTemporary)) return false
-        CommonMatchingMatchEntryGlobalTemporary that = (CommonMatchingMatchEntryGlobalTemporary) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (lastName != that.lastName) return false
-        if (entity != that.entity) return false
-        if (firstName != that.firstName) return false
-        if (middleInitial != that.middleInitial) return false
-        if (commonMatchingMatchEntryGlobalTemporaryId != that.commonMatchingMatchEntryGlobalTemporaryId) return false
-        if (streetLine1 != that.streetLine1) return false
-        if (streetLine2 != that.streetLine2) return false
-        if (streetLine3 != that.streetLine3) return false
-        if (city != that.city) return false
-        if (zip != that.zip) return false
-        if (phoneArea != that.phoneArea) return false
-        if (phoneNumber != that.phoneNumber) return false
-        if (phoneExtension != that.phoneExtension) return false
-        if (ssn != that.ssn) return false
-        if (birthDay != that.birthDay) return false
-        if (birthMonday != that.birthMonday) return false
-        if (birthYear != that.birthYear) return false
-        if (sex != that.sex) return false
-        if (emailAddress != that.emailAddress) return false
-        if (countryPhone != that.countryPhone) return false
-        if (houseNumber != that.houseNumber) return false
-        if (streetLine4 != that.streetLine4) return false
-        if (surnamePrefix != that.surnamePrefix) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (addressType != that.addressType) return false
-        if (telephoneType != that.telephoneType) return false
-        if (emailType != that.emailType) return false
-        if (addressSource != that.addressSource) return false
-        if (state != that.state) return false
-        if (nation != that.nation) return false
-        if (county != that.county) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (lastName != null ? lastName.hashCode() : 0)
-        result = 31 * result + (entity != null ? entity.hashCode() : 0)
-        result = 31 * result + (firstName != null ? firstName.hashCode() : 0)
-        result = 31 * result + (middleInitial != null ? middleInitial.hashCode() : 0)
-        result = 31 * result + (commonMatchingMatchEntryGlobalTemporaryId != null ? commonMatchingMatchEntryGlobalTemporaryId.hashCode() : 0)
-        result = 31 * result + (streetLine1 != null ? streetLine1.hashCode() : 0)
-        result = 31 * result + (streetLine2 != null ? streetLine2.hashCode() : 0)
-        result = 31 * result + (streetLine3 != null ? streetLine3.hashCode() : 0)
-        result = 31 * result + (city != null ? city.hashCode() : 0)
-        result = 31 * result + (zip != null ? zip.hashCode() : 0)
-        result = 31 * result + (phoneArea != null ? phoneArea.hashCode() : 0)
-        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0)
-        result = 31 * result + (phoneExtension != null ? phoneExtension.hashCode() : 0)
-        result = 31 * result + (ssn != null ? ssn.hashCode() : 0)
-        result = 31 * result + (birthDay != null ? birthDay.hashCode() : 0)
-        result = 31 * result + (birthMonday != null ? birthMonday.hashCode() : 0)
-        result = 31 * result + (birthYear != null ? birthYear.hashCode() : 0)
-        result = 31 * result + (sex != null ? sex.hashCode() : 0)
-        result = 31 * result + (emailAddress != null ? emailAddress.hashCode() : 0)
-        result = 31 * result + (countryPhone != null ? countryPhone.hashCode() : 0)
-        result = 31 * result + (houseNumber != null ? houseNumber.hashCode() : 0)
-        result = 31 * result + (streetLine4 != null ? streetLine4.hashCode() : 0)
-        result = 31 * result + (surnamePrefix != null ? surnamePrefix.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (addressType != null ? addressType.hashCode() : 0)
-        result = 31 * result + (telephoneType != null ? telephoneType.hashCode() : 0)
-        result = 31 * result + (emailType != null ? emailType.hashCode() : 0)
-        result = 31 * result + (addressSource != null ? addressSource.hashCode() : 0)
-        result = 31 * result + (state != null ? state.hashCode() : 0)
-        result = 31 * result + (nation != null ? nation.hashCode() : 0)
-        result = 31 * result + (county != null ? county.hashCode() : 0)
-        return result
     }
 
 

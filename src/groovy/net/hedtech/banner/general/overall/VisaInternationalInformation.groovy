@@ -1,8 +1,9 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.*
 
 import javax.persistence.*
@@ -12,6 +13,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "GOBINTL")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
         @NamedQuery(name = "VisaInternationalInformation.fetchAllByPidmInList",
                 query = """FROM VisaInternationalInformation a
@@ -235,74 +237,6 @@ class VisaInternationalInformation implements Serializable {
 					language=$language,
 					internationalSponsor=$internationalSponsor,
 					employmentType=$employmentType]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof VisaInternationalInformation)) return false
-        VisaInternationalInformation that = (VisaInternationalInformation) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (pidm != that.pidm) return false
-        if (spouseIndicator != that.spouseIndicator) return false
-        if (signatureIndicator != that.signatureIndicator) return false
-        if (passportId != that.passportId) return false
-        if (nationIssue != that.nationIssue) return false
-        if (passportExpenditureDate != that.passportExpenditureDate) return false
-        if (i94Status != that.i94Status) return false
-        if (i94Date != that.i94Date) return false
-        if (registrationNumber != that.registrationNumber) return false
-        if (duration != that.duration) return false
-        if (certificateNumber != that.certificateNumber) return false
-        if (certificateDateIssue != that.certificateDateIssue) return false
-        if (certificateDateReceipt != that.certificateDateReceipt) return false
-        if (nationBirth != that.nationBirth) return false
-        if (nationLegal != that.nationLegal) return false
-        if (foreignSsn != that.foreignSsn) return false
-        if (childNumber != that.childNumber) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (certificationOfEligibility != that.certificationOfEligibility) return false
-        if (admissionRequest != that.admissionRequest) return false
-        if (language != that.language) return false
-        if (internationalSponsor != that.internationalSponsor) return false
-        if (employmentType != that.employmentType) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (spouseIndicator != null ? spouseIndicator.hashCode() : 0)
-        result = 31 * result + (signatureIndicator != null ? signatureIndicator.hashCode() : 0)
-        result = 31 * result + (passportId != null ? passportId.hashCode() : 0)
-        result = 31 * result + (nationIssue != null ? nationIssue.hashCode() : 0)
-        result = 31 * result + (passportExpenditureDate != null ? passportExpenditureDate.hashCode() : 0)
-        result = 31 * result + (i94Status != null ? i94Status.hashCode() : 0)
-        result = 31 * result + (i94Date != null ? i94Date.hashCode() : 0)
-        result = 31 * result + (registrationNumber != null ? registrationNumber.hashCode() : 0)
-        result = 31 * result + (duration != null ? duration.hashCode() : 0)
-        result = 31 * result + (certificateNumber != null ? certificateNumber.hashCode() : 0)
-        result = 31 * result + (certificateDateIssue != null ? certificateDateIssue.hashCode() : 0)
-        result = 31 * result + (certificateDateReceipt != null ? certificateDateReceipt.hashCode() : 0)
-        result = 31 * result + (nationBirth != null ? nationBirth.hashCode() : 0)
-        result = 31 * result + (nationLegal != null ? nationLegal.hashCode() : 0)
-        result = 31 * result + (foreignSsn != null ? foreignSsn.hashCode() : 0)
-        result = 31 * result + (childNumber != null ? childNumber.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (certificationOfEligibility != null ? certificationOfEligibility.hashCode() : 0)
-        result = 31 * result + (admissionRequest != null ? admissionRequest.hashCode() : 0)
-        result = 31 * result + (language != null ? language.hashCode() : 0)
-        result = 31 * result + (internationalSponsor != null ? internationalSponsor.hashCode() : 0)
-        result = 31 * result + (employmentType != null ? employmentType.hashCode() : 0)
-        return result
     }
 
 

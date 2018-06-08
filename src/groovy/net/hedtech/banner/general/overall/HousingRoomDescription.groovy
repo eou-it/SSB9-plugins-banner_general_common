@@ -1,7 +1,9 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.service.DatabaseModifiesState
 
@@ -11,6 +13,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SV_SLBRDEF")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "HousingRoomDescription.fetchAllByBuilding",
         query = """FROM  HousingRoomDescription a
@@ -298,82 +301,6 @@ class HousingRoomDescription implements Serializable {
 					roomRate=$roomRate,
 					phoneRate=$phoneRate,
 					college=$college]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof HousingRoomDescription)) return false
-        HousingRoomDescription that = (HousingRoomDescription) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (roomNumber != that.roomNumber) return false
-        if (termEffective != that.termEffective) return false
-        if (description != that.description) return false
-        if (capacity != that.capacity) return false
-        if (maximumCapacity != that.maximumCapacity) return false
-        if (utilityRate != that.utilityRate) return false
-        if (utilityRatePeriod != that.utilityRatePeriod) return false
-        if (phoneArea != that.phoneArea) return false
-        if (phoneNumber != that.phoneNumber) return false
-        if (phoneExtension != that.phoneExtension) return false
-        if (benefitCategory != that.benefitCategory) return false
-        if (sex != that.sex) return false
-        if (roomType != that.roomType) return false
-        if (priority != that.priority) return false
-        if (keyNumber != that.keyNumber) return false
-        if (width != that.width) return false
-        if (length != that.length) return false
-        if (area != that.area) return false
-        if (countryPhone != that.countryPhone) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (department != that.department) return false
-        if (partition != that.partition) return false
-        if (building != that.building) return false
-        if (roomStatus != that.roomStatus) return false
-        if (roomRate != that.roomRate) return false
-        if (phoneRate != that.phoneRate) return false
-        if (college != that.college) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0)
-        result = 31 * result + (termEffective != null ? termEffective.hashCode() : 0)
-        result = 31 * result + (description != null ? description.hashCode() : 0)
-        result = 31 * result + (capacity != null ? capacity.hashCode() : 0)
-        result = 31 * result + (maximumCapacity != null ? maximumCapacity.hashCode() : 0)
-        result = 31 * result + (utilityRate != null ? utilityRate.hashCode() : 0)
-        result = 31 * result + (utilityRatePeriod != null ? utilityRatePeriod.hashCode() : 0)
-        result = 31 * result + (phoneArea != null ? phoneArea.hashCode() : 0)
-        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0)
-        result = 31 * result + (phoneExtension != null ? phoneExtension.hashCode() : 0)
-        result = 31 * result + (benefitCategory != null ? benefitCategory.hashCode() : 0)
-        result = 31 * result + (sex != null ? sex.hashCode() : 0)
-        result = 31 * result + (roomType != null ? roomType.hashCode() : 0)
-        result = 31 * result + (priority != null ? priority.hashCode() : 0)
-        result = 31 * result + (keyNumber != null ? keyNumber.hashCode() : 0)
-        result = 31 * result + (width != null ? width.hashCode() : 0)
-        result = 31 * result + (length != null ? length.hashCode() : 0)
-        result = 31 * result + (area != null ? area.hashCode() : 0)
-        result = 31 * result + (countryPhone != null ? countryPhone.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (department != null ? department.hashCode() : 0)
-        result = 31 * result + (partition != null ? partition.hashCode() : 0)
-        result = 31 * result + (building != null ? building.hashCode() : 0)
-        result = 31 * result + (roomStatus != null ? roomStatus.hashCode() : 0)
-        result = 31 * result + (roomRate != null ? roomRate.hashCode() : 0)
-        result = 31 * result + (phoneRate != null ? phoneRate.hashCode() : 0)
-        result = 31 * result + (college != null ? college.hashCode() : 0)
-        return result
     }
 
 

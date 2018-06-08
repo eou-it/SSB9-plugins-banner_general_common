@@ -1,8 +1,9 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.service.DatabaseModifiesState
 
@@ -13,6 +14,7 @@ import javax.persistence.*
  */
 @Entity
 @Table( name = "SV_SLBBLDG" )
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries( value = [
 @NamedQuery( name = "HousingLocationBuildingDescription.fetchAllByBuilding",
              query = """FROM  HousingLocationBuildingDescription a
@@ -287,80 +289,6 @@ class HousingLocationBuildingDescription implements Serializable {
 					college=$college,
 					department=$department,
 					partition=$partition]"""
-	}
-
-
-	boolean equals(o) {
-	    if (this.is(o)) return true
-	    if (!(o instanceof HousingLocationBuildingDescription)) return false
-	    HousingLocationBuildingDescription that = (HousingLocationBuildingDescription) o
-        if(id != that.id) return false
-        if(version != that.version) return false
-        if(capacity != that.capacity) return false
-        if(maximumCapacity != that.maximumCapacity) return false
-        if(streetLine1 != that.streetLine1) return false
-        if(streetLine2 != that.streetLine2) return false
-        if(streetLine3 != that.streetLine3) return false
-        if(city != that.city) return false
-        if(zip != that.zip) return false
-        if(phoneArea != that.phoneArea) return false
-        if(phoneNumber != that.phoneNumber) return false
-        if(phoneExtension != that.phoneExtension) return false
-        if(sex != that.sex) return false
-        if(keyNumber != that.keyNumber) return false
-        if(countryPhone != that.countryPhone) return false
-        if(houseNumber != that.houseNumber) return false
-        if(streetLine4 != that.streetLine4) return false
-        if(lastModified != that.lastModified) return false
-        if(lastModifiedBy != that.lastModifiedBy) return false
-        if(dataOrigin != that.dataOrigin) return false
-        if(building != that.building) return false
-        if(campus != that.campus) return false
-        if(roomRate != that.roomRate) return false
-        if(phoneRate != that.phoneRate) return false
-        if(site != that.site) return false
-        if(state != that.state) return false
-        if(county != that.county) return false
-        if(college != that.college) return false
-        if(department != that.department) return false
-        if(partition != that.partition) return false
-        return true
-    }
-
-
-	int hashCode() {
-		int result
-	    result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (capacity != null ? capacity.hashCode() : 0)
-        result = 31 * result + (maximumCapacity != null ? maximumCapacity.hashCode() : 0)
-        result = 31 * result + (streetLine1 != null ? streetLine1.hashCode() : 0)
-        result = 31 * result + (streetLine2 != null ? streetLine2.hashCode() : 0)
-        result = 31 * result + (streetLine3 != null ? streetLine3.hashCode() : 0)
-        result = 31 * result + (city != null ? city.hashCode() : 0)
-        result = 31 * result + (zip != null ? zip.hashCode() : 0)
-        result = 31 * result + (phoneArea != null ? phoneArea.hashCode() : 0)
-        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0)
-        result = 31 * result + (phoneExtension != null ? phoneExtension.hashCode() : 0)
-        result = 31 * result + (sex != null ? sex.hashCode() : 0)
-        result = 31 * result + (keyNumber != null ? keyNumber.hashCode() : 0)
-        result = 31 * result + (countryPhone != null ? countryPhone.hashCode() : 0)
-        result = 31 * result + (houseNumber != null ? houseNumber.hashCode() : 0)
-        result = 31 * result + (streetLine4 != null ? streetLine4.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (building != null ? building.hashCode() : 0)
-        result = 31 * result + (campus != null ? campus.hashCode() : 0)
-        result = 31 * result + (roomRate != null ? roomRate.hashCode() : 0)
-        result = 31 * result + (phoneRate != null ? phoneRate.hashCode() : 0)
-        result = 31 * result + (site != null ? site.hashCode() : 0)
-        result = 31 * result + (state != null ? state.hashCode() : 0)
-        result = 31 * result + (county != null ? county.hashCode() : 0)
-        result = 31 * result + (college != null ? college.hashCode() : 0)
-        result = 31 * result + (department != null ? department.hashCode() : 0)
-        result = 31 * result + (partition != null ? partition.hashCode() : 0)
-        return result
 	}
 
 	static constraints = {

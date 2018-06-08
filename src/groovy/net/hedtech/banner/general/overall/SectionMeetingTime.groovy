@@ -1,8 +1,9 @@
 /*********************************************************************************
- Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.service.DatabaseModifiesState
 import net.hedtech.banner.general.system.*
 import javax.persistence.*
@@ -12,6 +13,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SV_SSRMEET")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "SectionMeetingTime.fetchCountOfSchedulesByDateTimeAndLocation",
         query = """select count(smt.id) from SectionMeetingTime smt
@@ -371,84 +373,6 @@ class SectionMeetingTime implements Serializable {
                     committee=$committee,
                     scheduleToolStatus=$scheduleToolStatus,
                     meetingType=$meetingType]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof SectionMeetingTime)) return false
-        SectionMeetingTime that = (SectionMeetingTime) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (courseReferenceNumber != that.courseReferenceNumber) return false
-        if (dayNumber != that.dayNumber) return false
-        if (beginTime != that.beginTime) return false
-        if (endTime != that.endTime) return false
-        if (room != that.room) return false
-        if (startDate != that.startDate) return false
-        if (endDate != that.endDate) return false
-        if (category != that.category) return false
-        if (sunday != that.sunday) return false
-        if (monday != that.monday) return false
-        if (tuesday != that.tuesday) return false
-        if (wednesday != that.wednesday) return false
-        if (thursday != that.thursday) return false
-        if (friday != that.friday) return false
-        if (saturday != that.saturday) return false
-        if (override != that.override) return false
-        if (creditHourSession != that.creditHourSession) return false
-        if (meetNumber != that.meetNumber) return false
-        if (hoursWeek != that.hoursWeek) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (term != that.term) return false
-        if (dayOfWeek != that.dayOfWeek) return false
-        if (building != that.building) return false
-        if (scheduleType != that.scheduleType) return false
-        if (function != that.function) return false
-        if (committee != that.committee) return false
-        if (scheduleToolStatus != that.scheduleToolStatus) return false
-        if (meetingType != that.meetingType) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (courseReferenceNumber != null ? courseReferenceNumber.hashCode() : 0)
-        result = 31 * result + (dayNumber != null ? dayNumber.hashCode() : 0)
-        result = 31 * result + (beginTime != null ? beginTime.hashCode() : 0)
-        result = 31 * result + (endTime != null ? endTime.hashCode() : 0)
-        result = 31 * result + (room != null ? room.hashCode() : 0)
-        result = 31 * result + (startDate != null ? startDate.hashCode() : 0)
-        result = 31 * result + (endDate != null ? endDate.hashCode() : 0)
-        result = 31 * result + (category != null ? category.hashCode() : 0)
-        result = 31 * result + (sunday != null ? sunday.hashCode() : 0)
-        result = 31 * result + (monday != null ? monday.hashCode() : 0)
-        result = 31 * result + (tuesday != null ? tuesday.hashCode() : 0)
-        result = 31 * result + (wednesday != null ? wednesday.hashCode() : 0)
-        result = 31 * result + (thursday != null ? thursday.hashCode() : 0)
-        result = 31 * result + (friday != null ? friday.hashCode() : 0)
-        result = 31 * result + (saturday != null ? saturday.hashCode() : 0)
-        result = 31 * result + (override != null ? override.hashCode() : 0)
-        result = 31 * result + (creditHourSession != null ? creditHourSession.hashCode() : 0)
-        result = 31 * result + (meetNumber != null ? meetNumber.hashCode() : 0)
-        result = 31 * result + (hoursWeek != null ? hoursWeek.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (term != null ? term.hashCode() : 0)
-        result = 31 * result + (dayOfWeek != null ? dayOfWeek.hashCode() : 0)
-        result = 31 * result + (building != null ? building.hashCode() : 0)
-        result = 31 * result + (scheduleType != null ? scheduleType.hashCode() : 0)
-        result = 31 * result + (function != null ? function.hashCode() : 0)
-        result = 31 * result + (committee != null ? committee.hashCode() : 0)
-        result = 31 * result + (scheduleToolStatus != null ? scheduleToolStatus.hashCode() : 0)
-        result = 31 * result + (meetingType != null ? meetingType.hashCode() : 0)
-        return result
     }
 
 
