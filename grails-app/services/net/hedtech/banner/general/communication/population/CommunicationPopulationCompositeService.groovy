@@ -72,6 +72,7 @@ class CommunicationPopulationCompositeService {
         population.name = name
         population.description = description
         population.changesPending = true
+        population.setSystemIndicator(systemIndicator)
         population = communicationPopulationService.create( population )
         return population
     }

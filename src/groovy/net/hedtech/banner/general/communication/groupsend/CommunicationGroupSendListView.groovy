@@ -105,12 +105,23 @@ class CommunicationGroupSendListView implements Serializable {
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
 
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
+        def sortColumn = pagingAndSortParams?.sortColumn
 
         def queryCriteria = CommunicationGroupSendListView.createCriteria()
-        def results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
-            ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
-            ilike("createdBy", filterData?.params?.createdBy)
-            order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
+        def results
+        if(sortColumn.equalsIgnoreCase("groupSendDate")) {
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
+                ilike("createdBy", filterData?.params?.createdBy)
+                order((descdir ? Order.desc(sortColumn) : Order.asc(sortColumn)).ignoreCase())
+            }
+        } else {
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
+                ilike("createdBy", filterData?.params?.createdBy)
+                order((descdir ? Order.desc(sortColumn) : Order.asc(sortColumn)).ignoreCase())
+                order(Order.desc("groupSendDate").ignoreCase())
+            }
         }
         return results
     }

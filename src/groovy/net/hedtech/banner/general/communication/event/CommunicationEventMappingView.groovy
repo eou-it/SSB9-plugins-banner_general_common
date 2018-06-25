@@ -82,7 +82,7 @@ class CommunicationEventMappingView implements Serializable {
 
     @Type(type = "yes_no")
     @Column(name = "SYSTEM_IND")
-    Boolean systemInd
+    Boolean systemIndicator
 
     @Column(name = "VERSION")
     Long version
