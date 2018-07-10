@@ -8,7 +8,7 @@ import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.Campus
 import net.hedtech.banner.general.system.MeetingType
 
-class MeetingTimeDecorator {
+class MeetingTimeDecorator implements Serializable {
 
     String courseReferenceNumber
     String term
