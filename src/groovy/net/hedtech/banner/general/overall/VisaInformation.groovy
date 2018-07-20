@@ -1,8 +1,9 @@
 /*******************************************************************************
- Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.PortOfEntry
 import net.hedtech.banner.general.system.VisaIssuingAuthority
 import net.hedtech.banner.general.system.VisaType
@@ -46,6 +47,7 @@ query = """FROM VisaInformation a
 
 @Entity
 @Table(name = "GV_GORVISA")
+@EqualsAndHashCode(includeFields = true)
 class VisaInformation implements Serializable {
 
     /**
@@ -202,56 +204,6 @@ class VisaInformation implements Serializable {
 					visaType=$visaType,
 					visaIssuingAuthority=$visaIssuingAuthority,
 					portOfEntry=$portOfEntry]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof VisaInformation)) return false
-        VisaInformation that = (VisaInformation) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (pidm != that.pidm) return false
-        if (sequenceNumber != that.sequenceNumber) return false
-        if (visaNumber != that.visaNumber) return false
-        if (nationIssue != that.nationIssue) return false
-        if (visaStartDate != that.visaStartDate) return false
-        if (visaExpireDate != that.visaExpireDate) return false
-        if (entryIndicator != that.entryIndicator) return false
-        if (visaRequiredDate != that.visaRequiredDate) return false
-        if (visaIssueDate != that.visaIssueDate) return false
-        if (numberEntries != that.numberEntries) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (visaType != that.visaType) return false
-        if (visaIssuingAuthority != that.visaIssuingAuthority) return false
-        if (portOfEntry != that.portOfEntry) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (sequenceNumber != null ? sequenceNumber.hashCode() : 0)
-        result = 31 * result + (visaNumber != null ? visaNumber.hashCode() : 0)
-        result = 31 * result + (nationIssue != null ? nationIssue.hashCode() : 0)
-        result = 31 * result + (visaStartDate != null ? visaStartDate.hashCode() : 0)
-        result = 31 * result + (visaExpireDate != null ? visaExpireDate.hashCode() : 0)
-        result = 31 * result + (entryIndicator != null ? entryIndicator.hashCode() : 0)
-        result = 31 * result + (visaRequiredDate != null ? visaRequiredDate.hashCode() : 0)
-        result = 31 * result + (visaIssueDate != null ? visaIssueDate.hashCode() : 0)
-        result = 31 * result + (numberEntries != null ? numberEntries.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (visaType != null ? visaType.hashCode() : 0)
-        result = 31 * result + (visaIssuingAuthority != null ? visaIssuingAuthority.hashCode() : 0)
-        result = 31 * result + (portOfEntry != null ? portOfEntry.hashCode() : 0)
-        return result
     }
 
 

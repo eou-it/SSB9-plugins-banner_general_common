@@ -1,11 +1,9 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.College
 import net.hedtech.banner.general.system.Degree
 import net.hedtech.banner.general.system.InstitutionalHonor
@@ -43,6 +41,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "SV_SORDEGR")
+@EqualsAndHashCode(includeFields = true)
 class PriorCollegeDegree implements Serializable {
 
     /**
@@ -212,60 +211,6 @@ class PriorCollegeDegree implements Serializable {
 					college=$college,
 					institutionalHonor=$institutionalHonor,
 					educationGoal=$educationGoal]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof PriorCollegeDegree)) return false
-        PriorCollegeDegree that = (PriorCollegeDegree) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (pidm != that.pidm) return false
-        if (degreeSequenceNumber != that.degreeSequenceNumber) return false
-        if (attendenceFrom != that.attendenceFrom) return false
-        if (attendenceTo != that.attendenceTo) return false
-        if (hoursTransferred != that.hoursTransferred) return false
-        if (gpaTransferred != that.gpaTransferred) return false
-        if (degreeDate != that.degreeDate) return false
-        if (degreeYear != that.degreeYear) return false
-        if (termDegree != that.termDegree) return false
-        if (primaryIndicator != that.primaryIndicator) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
-        if (degree != that.degree) return false
-        if (college != that.college) return false
-        if (institutionalHonor != that.institutionalHonor) return false
-        if (educationGoal != that.educationGoal) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (degreeSequenceNumber != null ? degreeSequenceNumber.hashCode() : 0)
-        result = 31 * result + (attendenceFrom != null ? attendenceFrom.hashCode() : 0)
-        result = 31 * result + (attendenceTo != null ? attendenceTo.hashCode() : 0)
-        result = 31 * result + (hoursTransferred != null ? hoursTransferred.hashCode() : 0)
-        result = 31 * result + (gpaTransferred != null ? gpaTransferred.hashCode() : 0)
-        result = 31 * result + (degreeDate != null ? degreeDate.hashCode() : 0)
-        result = 31 * result + (degreeYear != null ? degreeYear.hashCode() : 0)
-        result = 31 * result + (termDegree != null ? termDegree.hashCode() : 0)
-        result = 31 * result + (primaryIndicator != null ? primaryIndicator.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
-        result = 31 * result + (degree != null ? degree.hashCode() : 0)
-        result = 31 * result + (college != null ? college.hashCode() : 0)
-        result = 31 * result + (institutionalHonor != null ? institutionalHonor.hashCode() : 0)
-        result = 31 * result + (educationGoal != null ? educationGoal.hashCode() : 0)
-        return result
     }
 
 

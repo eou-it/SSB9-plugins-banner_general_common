@@ -1,8 +1,9 @@
 /*******************************************************************************
- Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.County
 import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
@@ -23,6 +24,7 @@ query = """  FROM SourceBackgroundInstitutionBase a
 
 @Entity
 @Table(name = "SOBSBGI")
+@EqualsAndHashCode(includeFields = true)
 @DatabaseModifiesState
 class SourceBackgroundInstitutionBase implements Serializable {
 
@@ -159,52 +161,6 @@ class SourceBackgroundInstitutionBase implements Serializable {
 					state=$state, 
 					county=$county,
 					nation=$nation]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof SourceBackgroundInstitutionBase)) return false
-        SourceBackgroundInstitutionBase that = (SourceBackgroundInstitutionBase) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (streetLine1 != that.streetLine1) return false
-        if (streetLine2 != that.streetLine2) return false
-        if (streetLine3 != that.streetLine3) return false
-        if (city != that.city) return false
-        if (zip != that.zip) return false
-        if (houseNumber != that.houseNumber) return false
-        if (streetLine4 != that.streetLine4) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
-        if (state != that.state) return false
-        if (county != that.county) return false
-        if (nation != that.nation) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (streetLine1 != null ? streetLine1.hashCode() : 0)
-        result = 31 * result + (streetLine2 != null ? streetLine2.hashCode() : 0)
-        result = 31 * result + (streetLine3 != null ? streetLine3.hashCode() : 0)
-        result = 31 * result + (city != null ? city.hashCode() : 0)
-        result = 31 * result + (zip != null ? zip.hashCode() : 0)
-        result = 31 * result + (houseNumber != null ? houseNumber.hashCode() : 0)
-        result = 31 * result + (streetLine4 != null ? streetLine4.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
-        result = 31 * result + (state != null ? state.hashCode() : 0)
-        result = 31 * result + (county != null ? county.hashCode() : 0)
-        result = 31 * result + (nation != null ? nation.hashCode() : 0)
-        return result
     }
 
 

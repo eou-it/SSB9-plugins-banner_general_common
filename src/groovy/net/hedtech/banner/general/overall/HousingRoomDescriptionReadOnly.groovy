@@ -1,14 +1,16 @@
 /*********************************************************************************
- Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2018 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.Term
 
 import javax.persistence.*
 
 @Entity
 @Table(name = "SVQ_SLBRDEF_SLBBLDG")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
         @NamedQuery(name = "HousingRoomDescriptionReadOnly.fetchByGuid",
                 query = """FROM  HousingRoomDescriptionReadOnly a WHERE a.roomGUID = :guid""")
@@ -148,58 +150,6 @@ class HousingRoomDescriptionReadOnly {
                     roomGUID=$roomGUID,
                     buildingGUID=$buildingGUID,
                     siteGUID=$siteGUID]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof HousingRoomDescriptionReadOnly)) return false
-        HousingRoomDescriptionReadOnly that = (HousingRoomDescriptionReadOnly) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (roomNumber != that.roomNumber) return false
-        if (termEffective != that.termEffective) return false
-        if (description != that.description) return false
-        if (capacity != that.capacity) return false
-        if (sex != that.sex) return false
-        if (roomType != that.roomType) return false
-        if (roomStatusCode != that.roomStatusCode) return false
-        if (roomStatusInactiveIndicator != that.roomStatusInactiveIndicator) return false
-        if (buildingCode != that.buildingCode) return false
-        if (campusCode != that.campusCode) return false
-        if (siteCode != that.siteCode) return false
-        if (roomGUID != that.roomGUID) return false
-        if (buildingGUID != that.buildingGUID) return false
-        if (siteGUID != that.siteGUID) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0)
-        result = 31 * result + (termEffective != null ? termEffective.hashCode() : 0)
-        result = 31 * result + (description != null ? description.hashCode() : 0)
-        result = 31 * result + (capacity != null ? capacity.hashCode() : 0)
-        result = 31 * result + (sex != null ? sex.hashCode() : 0)
-        result = 31 * result + (roomType != null ? roomType.hashCode() : 0)
-        result = 31 * result + (roomStatusCode != null ? roomStatusCode.hashCode() : 0)
-        result = 31 * result + (roomStatusInactiveIndicator != null ? roomStatusInactiveIndicator.hashCode() : 0)
-        result = 31 * result + (buildingCode != null ? buildingCode.hashCode() : 0)
-        result = 31 * result + (campusCode != null ? campusCode.hashCode() : 0)
-        result = 31 * result + (siteCode != null ? siteCode.hashCode() : 0)
-        result = 31 * result + (roomGUID != null ? roomGUID.hashCode() : 0)
-        result = 31 * result + (buildingGUID != null ? buildingGUID.hashCode() : 0)
-        result = 31 * result + (siteGUID != null ? siteGUID.hashCode() : 0)
-        return result
     }
 
 }

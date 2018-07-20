@@ -1,7 +1,9 @@
 /*********************************************************************************
- Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -46,6 +48,7 @@ import net.hedtech.banner.general.system.EntriesForSql
  */
 @Entity
 @Table(name = "GORRSQL")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "SqlProcess.fetchSqlForExecutionByEntriesForSqlProcesssCodeAndEntriesForSqlCode",
         query = """select a.parsedSql
@@ -209,54 +212,6 @@ class SqlProcess implements Serializable {
 					dataOrigin=$dataOrigin,
 					entriesForSqlProcess=$entriesForSqlProcess,
 					entriesForSql=$entriesForSql]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof SqlProcess)) return false
-        SqlProcess that = (SqlProcess) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (sequenceNumber != that.sequenceNumber) return false
-        if (activeIndicator != that.activeIndicator) return false
-        if (validatedIndicator != that.validatedIndicator) return false
-        if (startDate != that.startDate) return false
-        if (selectFrom != that.selectFrom) return false
-        if (selectValue != that.selectValue) return false
-        if (whereClause != that.whereClause) return false
-        if (endDate != that.endDate) return false
-        if (parsedSql != that.parsedSql) return false
-        if (systemRequiredIndicator != that.systemRequiredIndicator) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (entriesForSqlProcess != that.entriesForSqlProcess) return false
-        if (entriesForSql != that.entriesForSql) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (sequenceNumber != null ? sequenceNumber.hashCode() : 0)
-        result = 31 * result + (activeIndicator != null ? activeIndicator.hashCode() : 0)
-        result = 31 * result + (validatedIndicator != null ? validatedIndicator.hashCode() : 0)
-        result = 31 * result + (startDate != null ? startDate.hashCode() : 0)
-        result = 31 * result + (selectFrom != null ? selectFrom.hashCode() : 0)
-        result = 31 * result + (selectValue != null ? selectValue.hashCode() : 0)
-        result = 31 * result + (whereClause != null ? whereClause.hashCode() : 0)
-        result = 31 * result + (endDate != null ? endDate.hashCode() : 0)
-        result = 31 * result + (parsedSql != null ? parsedSql.hashCode() : 0)
-        result = 31 * result + (systemRequiredIndicator != null ? systemRequiredIndicator.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (entriesForSqlProcess != null ? entriesForSqlProcess.hashCode() : 0)
-        result = 31 * result + (entriesForSql != null ? entriesForSql.hashCode() : 0)
-        return result
     }
 
 

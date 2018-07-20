@@ -1,8 +1,9 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.Document
 import net.hedtech.banner.general.system.VisaSource
 import net.hedtech.banner.general.system.VisaType
@@ -33,6 +34,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "GORDOCM")
+@EqualsAndHashCode(includeFields = true)
 class DocumentInformation implements Serializable {
 
     /**
@@ -152,48 +154,6 @@ class DocumentInformation implements Serializable {
 					document=$document, 
 					visaSource=$visaSource, 
 					visaType=$visaType]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof DocumentInformation)) return false
-        DocumentInformation that = (DocumentInformation) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (pidm != that.pidm) return false
-        if (sequenceNumber != that.sequenceNumber) return false
-        if (visaNumber != that.visaNumber) return false
-        if (disposition != that.disposition) return false
-        if (requestDate != that.requestDate) return false
-        if (receivedDate != that.receivedDate) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (document != that.document) return false
-        if (visaSource != that.visaSource) return false
-        if (visaType != that.visaType) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (sequenceNumber != null ? sequenceNumber.hashCode() : 0)
-        result = 31 * result + (visaNumber != null ? visaNumber.hashCode() : 0)
-        result = 31 * result + (disposition != null ? disposition.hashCode() : 0)
-        result = 31 * result + (requestDate != null ? requestDate.hashCode() : 0)
-        result = 31 * result + (receivedDate != null ? receivedDate.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (document != null ? document.hashCode() : 0)
-        result = 31 * result + (visaSource != null ? visaSource.hashCode() : 0)
-        result = 31 * result + (visaType != null ? visaType.hashCode() : 0)
-        return result
     }
 
 

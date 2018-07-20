@@ -1,8 +1,9 @@
 /*********************************************************************************
- Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.Building
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -26,6 +27,7 @@ import javax.persistence.NamedQuery
  */
 @Entity
 @Table(name = "SLRRUSE")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "HousingRoomUsageRestriction.fetchCountOfUsageRestrictionsByDateAndLocation",
         query = """ select count(hrur.id) from HousingRoomUsageRestriction hrur where hrur.building.code = :buildingCode
@@ -178,56 +180,6 @@ class HousingRoomUsageRestriction implements Serializable {
 					lastModifiedBy=$lastModifiedBy,
 					dataOrigin=$dataOrigin,
 					building=$building]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof HousingRoomUsageRestriction)) return false
-        HousingRoomUsageRestriction that = (HousingRoomUsageRestriction) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (roomNumber != that.roomNumber) return false
-        if (startDate != that.startDate) return false
-        if (endDate != that.endDate) return false
-        if (beginTime != that.beginTime) return false
-        if (endTime != that.endTime) return false
-        if (sunday != that.sunday) return false
-        if (monday != that.monday) return false
-        if (tuesday != that.tuesday) return false
-        if (wednesday != that.wednesday) return false
-        if (thursday != that.thursday) return false
-        if (friday != that.friday) return false
-        if (saturday != that.saturday) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (building != that.building) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0)
-        result = 31 * result + (startDate != null ? startDate.hashCode() : 0)
-        result = 31 * result + (endDate != null ? endDate.hashCode() : 0)
-        result = 31 * result + (beginTime != null ? beginTime.hashCode() : 0)
-        result = 31 * result + (endTime != null ? endTime.hashCode() : 0)
-        result = 31 * result + (sunday != null ? sunday.hashCode() : 0)
-        result = 31 * result + (monday != null ? monday.hashCode() : 0)
-        result = 31 * result + (tuesday != null ? tuesday.hashCode() : 0)
-        result = 31 * result + (wednesday != null ? wednesday.hashCode() : 0)
-        result = 31 * result + (thursday != null ? thursday.hashCode() : 0)
-        result = 31 * result + (friday != null ? friday.hashCode() : 0)
-        result = 31 * result + (saturday != null ? saturday.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (building != null ? building.hashCode() : 0)
-        return result
     }
 
 

@@ -1,7 +1,9 @@
 /*********************************************************************************
- Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2018 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import javax.persistence.*
 import net.hedtech.banner.service.DatabaseModifiesState
@@ -12,6 +14,7 @@ import net.hedtech.banner.service.DatabaseModifiesState
 
 @Entity
 @Table(name = "GV_GOBTPAC")
+@EqualsAndHashCode(includeFields = true)
 @DatabaseModifiesState
 class ThirdPartyAccess implements Serializable {
 
@@ -158,50 +161,6 @@ class ThirdPartyAccess implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof ThirdPartyAccess)) return false
-        ThirdPartyAccess that = (ThirdPartyAccess) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (pidm != that.pidm) return false
-        if (pinDisabledIndicator != that.pinDisabledIndicator) return false
-        if (termsOfUsageIndicator != that.termsOfUsageIndicator) return false
-        if (personalIdentificationNumber != that.personalIdentificationNumber) return false
-        if (externalUser != that.externalUser) return false
-        if (pinResetQuestion != that.pinResetQuestion) return false
-        if (pinResetResponse != that.pinResetResponse) return false
-        if (activitySource != that.activitySource) return false
-        if (ldapUserMapping != that.ldapUserMapping) return false
-        if (salt != that.salt) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (pinDisabledIndicator != null ? pinDisabledIndicator.hashCode() : 0)
-        result = 31 * result + (termsOfUsageIndicator != null ? termsOfUsageIndicator.hashCode() : 0)
-        result = 31 * result + (personalIdentificationNumber != null ? personalIdentificationNumber.hashCode() : 0)
-        result = 31 * result + (externalUser != null ? externalUser.hashCode() : 0)
-        result = 31 * result + (pinResetQuestion != null ? pinResetQuestion.hashCode() : 0)
-        result = 31 * result + (pinResetResponse != null ? pinResetResponse.hashCode() : 0)
-        result = 31 * result + (activitySource != null ? activitySource.hashCode() : 0)
-        result = 31 * result + (ldapUserMapping != null ? ldapUserMapping.hashCode() : 0)
-        result = 31 * result + (salt != null ? salt.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        return result
     }
 
 
