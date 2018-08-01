@@ -9,10 +9,12 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.springframework.jdbc.UncategorizedSQLException
+
 import static org.junit.Assert.*
 
-
 class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
+
 
     @Before
     void setUp() {
@@ -33,9 +35,14 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
         def actionItemPidm = getPidmBySpridenId("CSRSTU001")
         assertNotNull actionItemPidm
 
+        def listOfActionItems = UserActiveActionItem.findAllByPidm(actionItemPidm);
+        assertNotNull listOfActionItems
+        assertNotEquals 0,listOfActionItems.size()
+
         Boolean hasActiveActionItem = UserActiveActionItem.checkIfActionItemPresent(actionItemPidm)
         assert hasActiveActionItem
     }
+
 
     @Test
     void testFetchUserActionItemForExistingPidmNoActionItems() {
@@ -43,10 +50,44 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
         def actionItemPidm = getPidmBySpridenId("AIPADM001")
         assertNotNull actionItemPidm
 
+        def listOfActionItems = UserActiveActionItem.findAllByPidm(actionItemPidm);
+        assertNotNull listOfActionItems
+        assertEquals 0,listOfActionItems.size()
+
         Boolean hasActiveActionItem = UserActiveActionItem.checkIfActionItemPresent(actionItemPidm)
         assertFalse("AIPADM001 Shuld not have any action items",hasActiveActionItem)
     }
 
+
+    @Test
+    public void testSave()
+    {
+        UserActiveActionItem userActiveActionItem = new UserActiveActionItem();
+        userActiveActionItem.id=10
+        userActiveActionItem.pidm=10001
+        userActiveActionItem.displayStartDate= new Date()
+        userActiveActionItem.displayEndDate=new Date()+20
+
+        shouldFail(UncategorizedSQLException) {
+        userActiveActionItem.save(flush :true , ailOnError: true)}
+    }
+
+
+    @Test
+    public void testDelete()
+    {
+        def actionItemPidm = getPidmBySpridenId("CSRSTU001")
+        assertNotNull actionItemPidm
+
+        def listOfActionItems = UserActiveActionItem.findAllByPidm(actionItemPidm);
+        assertNotNull listOfActionItems
+        assertNotEquals 0,listOfActionItems.size()
+
+        def userActiveActionItem=listOfActionItems[0]
+
+        shouldFail(UncategorizedSQLException) {
+            userActiveActionItem.delete(flush :true , failOnError: true)}
+    }
 
 
     private Integer getPidmBySpridenId(def spridenId) {
