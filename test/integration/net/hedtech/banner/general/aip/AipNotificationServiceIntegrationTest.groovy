@@ -4,6 +4,8 @@
 package net.hedtech.banner.general.aip
 
 import groovy.sql.Sql
+import net.hedtech.banner.general.overall.IntegrationConfiguration
+import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -39,13 +41,14 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
 
     @Test
     void testHasActiveActionItemsForUserWithActionItems() {
-
         Integer pidm = getPidmBySpridenId("CSRSTU001");
         assertNotNull pidm
 
-        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm);
-        assertTrue hasActiveItme
+        def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm);
+        assertNotNull hasActiveRows
 
+        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm);
+        assertEquals hasActiveRows,hasActiveItme
     }
 
     @Test
@@ -54,9 +57,11 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
         Integer pidm = getPidmBySpridenId("AIPADM001");
         assertNotNull pidm
 
-        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm);
-        assertFalse hasActiveItme
+        def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm);
+        assertNotNull hasActiveRows
 
+        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm);
+        assertEquals hasActiveRows,hasActiveItme
     }
 
     @Test
@@ -65,95 +70,43 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
         def oldValue = getGoriicrValue(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS,);
         assertNotNull oldValue
 
-        assertTrue updateGoriccrRule(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS, NO)
+        updateGoriccrRule(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS, NO)
+
         String flag = aipNotificationService.getGoriicrFlag()
         assertNotNull flag
-        assertEquals( DISABLED, flag)
-
-        //Restoring old value so other test will not be impacted
-        assertTrue updateGoriccrRule( SQPR_CODE_GENERAL_SSB,  ICSN_CODE_ENABLE_ACTION_ITEMS, oldValue)
-        def valueAfterUpdate = getGoriicrValue( SQPR_CODE_GENERAL_SSB,  ICSN_CODE_ENABLE_ACTION_ITEMS);
-        assertEquals oldValue,valueAfterUpdate
+        assertEquals(DISABLED, flag)
     }
 
     @Test
     void testGetGoriccrFlagForEnable() {
-        //Checking for goriccr value before updating it
-        def oldValue = getGoriicrValue( SQPR_CODE_GENERAL_SSB,  ICSN_CODE_ENABLE_ACTION_ITEMS);
+        def oldValue = getGoriicrValue(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS);
         assertNotNull oldValue
 
-        assertTrue updateGoriccrRule( SQPR_CODE_GENERAL_SSB,  ICSN_CODE_ENABLE_ACTION_ITEMS,  YES)
+        updateGoriccrRule(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS, YES)
+
         String flag = aipNotificationService.getGoriicrFlag()
         assertNotNull flag
-        assertEquals( ENABLED, flag)
-
-        //restoring value so that other
-        assertTrue updateGoriccrRule( SQPR_CODE_GENERAL_SSB,  ICSN_CODE_ENABLE_ACTION_ITEMS, oldValue)
-        def valueAfterUpdate = getGoriicrValue( SQPR_CODE_GENERAL_SSB,  ICSN_CODE_ENABLE_ACTION_ITEMS);
-        assertEquals oldValue,valueAfterUpdate
-
+        assertEquals(ENABLED, flag)
     }
 
 
     private Integer getPidmBySpridenId(def spridenId) {
-        Sql sqlObj
-        Integer pidmValue
-        try {
-            sqlObj = new Sql(sessionFactory.getCurrentSession().connection())
-            def query = "SELECT SPRIDEN_PIDM pidm FROM SPRIDEN WHERE SPRIDEN_ID=:spridenId"
-            pidmValue = sqlObj?.firstRow(query,spridenId:spridenId)?.pidm
-        } catch (Exception e) {
-            return null;
-        }
-        finally{
-            sqlObj.close()
-        }
-        return pidmValue
+        def pidm = PersonUtility.getPerson(spridenId)?.pidm
+        pidm
     }
 
-    private def getGoriicrValue(def sqpr_code, def icsn_code) {
-        Sql sqlObj
-        def gorriccrValue
-        try {
-            sqlObj = new Sql(sessionFactory.getCurrentSession().connection())
-            def sqlQuery = """
-                            select g.goriccr_value
-                              from GORICCR g
-                             where g.goriccr_sqpr_code = :sqpr_code
-                               and g.goriccr_icsn_code = :icsn_code
-                           """
-            gorriccrValue = sqlObj?.firstRow(sqlQuery,sqpr_code:sqpr_code,icsn_code:icsn_code).goriccr_value
 
-        } catch (Exception Ex) {
-           return null
-        }
-        finally{
-            sqlObj.close()
-        }
-        gorriccrValue
+    private def getGoriicrValue(def sqpr_code, def icsn_code) {
+        IntegrationConfiguration integrationConfiguration = IntegrationConfiguration.fetchByProcessCodeAndSettingName(sqpr_code, icsn_code)
+        integrationConfiguration?.value
     }
     /*
     * This method will set the GORRICCR Rule
     * */
 
-    private def updateGoriccrRule(def sqpr_code, def icsn_code, def value) {
-        Sql sqlObj
-        Boolean retValue=false
-        try {
-            sqlObj = new Sql(sessionFactory.getCurrentSession().connection())
-            def sqlQuery = """update GORICCR
-                                 set goriccr_value = :value
-                               where goriccr_sqpr_code = :sqpr
-                                 and goriccr_icsn_code = :icsn
-                            """
-            sqlObj.executeUpdate(sqlQuery,sqpr:sqpr_code,icsn:icsn_code,value:value)
-            retValue=true;
-        } catch (Exception ex) {
-            return retValue
-        }
-        finally{
-            sqlObj.close()
-        }
-        retValue
+    private void updateGoriccrRule(def sqpr_code, def icsn_code, def value) {
+        IntegrationConfiguration integrationConfiguration = IntegrationConfiguration.fetchByProcessCodeAndSettingName(sqpr_code, icsn_code)
+        integrationConfiguration.value = value
+        integrationConfiguration.save(flush: true, failOnError: true)
     }
 }
