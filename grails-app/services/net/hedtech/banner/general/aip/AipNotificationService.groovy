@@ -6,11 +6,11 @@ package net.hedtech.banner.general.aip
 import org.apache.log4j.Logger
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
-import static net.hedtech.banner.general.aip.AipNotificationUtil.YES
-import static net.hedtech.banner.general.aip.AipNotificationUtil.ENABLED
-import static net.hedtech.banner.general.aip.AipNotificationUtil.DISABLED
-import static net.hedtech.banner.general.aip.AipNotificationUtil.SQPR_CODE_GENERAL_SSB
-import static net.hedtech.banner.general.aip.AipNotificationUtil.ICSN_CODE_ENABLE_ACTION_ITEMS
+import static net.hedtech.banner.general.aip.AipNotificationConstants.YES
+import static net.hedtech.banner.general.aip.AipNotificationConstants.ENABLED
+import static net.hedtech.banner.general.aip.AipNotificationConstants.DISABLED
+import static net.hedtech.banner.general.aip.AipNotificationConstants.SQPR_CODE_GENERAL_SSB
+import static net.hedtech.banner.general.aip.AipNotificationConstants.ICSN_CODE_ENABLE_ACTION_ITEMS
 
 
 /**
@@ -27,6 +27,7 @@ public class AipNotificationService extends ServiceBase {
      * @return Boolean
      * */
     public Boolean hasActiveActionItems(Integer pidm) {
+        println " hasActiveActionItems function ------"
         return UserActiveActionItem.checkIfActionItemPresent(pidm);
     }
 
@@ -35,8 +36,14 @@ public class AipNotificationService extends ServiceBase {
      * @return String
      * */
     public String getGoriicrFlag() {
-        def aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES ? ENABLED : DISABLED
-        LOGGER.debug("AIP Enabled status [GENERAL_SSB,ENABLE.ACTION.ITEMS]=" + aipEnabledStatus);
+        def aipEnabledStatus
+        try{
+            aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES ? ENABLED : DISABLED
+            LOGGER.debug("AIP Enabled status [GENERAL_SSB,ENABLE.ACTION.ITEMS]=" + aipEnabledStatus);
+        }catch (Exception e){
+            aipEnabledStatus = ""
+        }
+
         return aipEnabledStatus;
     }
 

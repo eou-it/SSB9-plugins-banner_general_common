@@ -6,7 +6,7 @@ package net.hedtech.banner.general.aip
 /**
  * Utility class for aip notification feature
  **/
-public class AipNotificationUtil {
+public class AipNotificationConstants {
     public static final String ENABLED = 'ENABLED'
     public static final String DISABLED = 'DISABLED'
     public static final String YES = 'Y'

@@ -17,15 +17,15 @@ import javax.persistence.Table
 @NamedQueries(value = [
         @NamedQuery(name = "UserActiveActionItem.checkIfUserActionItemsPresentByPidmAndCurrentDate",
                 query = """select count (a.id) FROM UserActiveActionItem a
-                            WHERE a.pidm = :myPidm
+                            WHERE a.pidm = :pidm
                              AND trunc(sysdate) BETWEEN trunc(sysdate) AND trunc(a.displayEndDate)
                             """)
 ])
 
 @Entity
+@Table(name = "GVQ_GCRACPN")
 @ToString(includeNames = true, ignoreNulls = true)
 @EqualsAndHashCode(includeFields = true)
-@Table(name = "GVQ_GCRACPN")
 public class UserActiveActionItem implements Serializable {
     @Id
     @Column(name = "GCRAACT_GCBACTM_ID")
@@ -54,14 +54,15 @@ public class UserActiveActionItem implements Serializable {
      * @param pidm
      * @return
      */
-   static def checkIfActionItemPresent(Long pidm) {
-        UserActiveActionItem.withSession { session ->
-            session.getNamedQuery('UserActiveActionItem.checkIfUserActionItemsPresentByPidmAndCurrentDate')
-                    .setLong('myPidm', pidm)
-                    .uniqueResult() > 0
+   static def checkIfActionItemPresent(Integer pidm) {
 
-        }
-    }
+       def result = UserActiveActionItem.withSession { session ->
+           session.getNamedQuery('UserActiveActionItem.checkIfUserActionItemsPresentByPidmAndCurrentDate')
+                   .setInteger('pidm', pidm)
+                   .uniqueResult()
+       }
+       return result
+   }
 
 
 }

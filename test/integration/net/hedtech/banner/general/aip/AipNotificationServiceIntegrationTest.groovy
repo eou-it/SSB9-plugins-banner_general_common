@@ -11,12 +11,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-import static net.hedtech.banner.general.aip.AipNotificationUtil.YES
-import static net.hedtech.banner.general.aip.AipNotificationUtil.NO
-import static net.hedtech.banner.general.aip.AipNotificationUtil.ENABLED
-import static net.hedtech.banner.general.aip.AipNotificationUtil.DISABLED
-import static net.hedtech.banner.general.aip.AipNotificationUtil.SQPR_CODE_GENERAL_SSB
-import static net.hedtech.banner.general.aip.AipNotificationUtil.ICSN_CODE_ENABLE_ACTION_ITEMS
+import static net.hedtech.banner.general.aip.AipNotificationConstants.YES
+import static net.hedtech.banner.general.aip.AipNotificationConstants.NO
+import static net.hedtech.banner.general.aip.AipNotificationConstants.ENABLED
+import static net.hedtech.banner.general.aip.AipNotificationConstants.DISABLED
+import static net.hedtech.banner.general.aip.AipNotificationConstants.SQPR_CODE_GENERAL_SSB
+import static net.hedtech.banner.general.aip.AipNotificationConstants.ICSN_CODE_ENABLE_ACTION_ITEMS
 import static org.junit.Assert.*
 
 
