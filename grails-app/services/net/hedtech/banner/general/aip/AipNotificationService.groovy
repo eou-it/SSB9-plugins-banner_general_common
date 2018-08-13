@@ -27,7 +27,6 @@ public class AipNotificationService extends ServiceBase {
      * @return Boolean
      * */
     public Boolean hasActiveActionItems(Integer pidm) {
-        println " hasActiveActionItems function ------"
         return UserActiveActionItem.checkIfActionItemPresent(pidm);
     }
 
