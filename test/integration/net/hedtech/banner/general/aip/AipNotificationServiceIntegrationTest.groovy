@@ -3,7 +3,6 @@
  *******************************************************************************/
 package net.hedtech.banner.general.aip
 
-import groovy.sql.Sql
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -41,50 +40,50 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
 
     @Test
     void testHasActiveActionItemsForUserWithActionItems() {
-        Integer pidm = getPidmBySpridenId("CSRSTU001");
+        Integer pidm = getPidmBySpridenId("CSRSTU001")
         assertNotNull pidm
 
-        def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm);
+        def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm)
         assertNotNull hasActiveRows
 
-        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm);
+        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm)
         assertEquals hasActiveRows,hasActiveItme
     }
 
     @Test
     void testHasActiveActionItemsForUserWithOutActionItems() {
         //AIPADM001 is admin user who does not have action items
-        Integer pidm = getPidmBySpridenId("AIPADM001");
+        Integer pidm = getPidmBySpridenId("AIPADM001")
         assertNotNull pidm
 
-        def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm);
+        def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm)
         assertNotNull hasActiveRows
 
-        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm);
+        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm)
         assertEquals hasActiveRows,hasActiveItme
     }
 
     @Test
     void testGetGoriccrFlagForDisabled() {
         //Checking for goriccr value before updating it
-        def oldValue = getGoriicrValue(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS,);
+        def oldValue = getGoriicrValue(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)
         assertNotNull oldValue
 
         updateGoriccrRule(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS, NO)
 
-        String flag = aipNotificationService.getGoriicrFlag()
+        String flag = aipNotificationService.getAipEnabledFlag()
         assertNotNull flag
         assertEquals(DISABLED, flag)
     }
 
     @Test
     void testGetGoriccrFlagForEnable() {
-        def oldValue = getGoriicrValue(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS);
+        def oldValue = getGoriicrValue(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)
         assertNotNull oldValue
 
         updateGoriccrRule(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS, YES)
 
-        String flag = aipNotificationService.getGoriicrFlag()
+        String flag = aipNotificationService.getAipEnabledFlag()
         assertNotNull flag
         assertEquals(ENABLED, flag)
     }

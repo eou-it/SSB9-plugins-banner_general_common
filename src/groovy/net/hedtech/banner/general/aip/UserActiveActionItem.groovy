@@ -13,7 +13,6 @@ import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 import javax.persistence.Table
 
-
 @NamedQueries(value = [
         @NamedQuery(name = "UserActiveActionItem.checkIfUserActionItemsPresentByPidmAndCurrentDate",
                 query = """select count (a.id) FROM UserActiveActionItem a
@@ -21,6 +20,10 @@ import javax.persistence.Table
                              AND trunc(sysdate) BETWEEN trunc(sysdate) AND trunc(a.displayEndDate)
                             """)
 ])
+
+/**
+ * Active and pending action items assigned to a person.
+ */
 
 @Entity
 @Table(name = "GVQ_GCRACPN")
