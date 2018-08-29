@@ -17,7 +17,7 @@ import javax.persistence.*
  *
  */
 @Entity
-@Table(name = "GVQ_GCBGSND_LIST")
+@Table(name = "GVQ_JOBS_LIST")
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
@@ -88,6 +88,9 @@ class CommunicationGroupSendListView implements Serializable {
 
     @Column(name = "group_send_current_state")
     String currentExecutionState
+
+    @Column(name = "group_send_cumulative_state")
+    String cumulativeExecutionState
 
     @Type(type="yes_no")
     @Column(name = "errors_exist")

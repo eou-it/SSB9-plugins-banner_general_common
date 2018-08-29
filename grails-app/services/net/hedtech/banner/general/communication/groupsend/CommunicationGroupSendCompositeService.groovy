@@ -330,6 +330,8 @@ class CommunicationGroupSendCompositeService {
         }
 
         groupSend.setCurrentExecutionState(CommunicationGroupSendExecutionState.Error)
+        groupSend.setCumulativeExecutionState(CommunicationGroupSendExecutionState.Error)
+
         if (errorContext.cause) {
             groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
             groupSend.errorText = errorContext.cause.message
@@ -375,6 +377,8 @@ class CommunicationGroupSendCompositeService {
 
                 if (!groupSend.populationCalculationId && hasQuery) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+                    groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
+
                     CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
                     shouldUpdateGroupSend = true
@@ -493,6 +497,7 @@ class CommunicationGroupSendCompositeService {
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems(groupSend)
         groupSend.markProcessing()
+        //TODO Add cumulative status also as Processing
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         return groupSend
     }

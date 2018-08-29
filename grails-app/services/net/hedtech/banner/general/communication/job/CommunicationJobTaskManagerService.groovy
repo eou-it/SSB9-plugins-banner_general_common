@@ -8,8 +8,11 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
+import org.apache.catalina.servlets.CGIServlet
 import org.apache.commons.lang.NotImplementedException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional
 class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
     private final Log log = LogFactory.getLog(this.getClass());
 
+    def communicationGroupSendService
     def communicationJobService
     def communicationJobProcessorService
 
@@ -96,6 +100,12 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
         CommunicationJob job = task as CommunicationJob
         log.info( "Marking completed communication job id = ${job.id}." )
         communicationJobService.markCompleted( job.id )
+
+        //Update the group send cumulative status as failed
+        CommunicationGroupSendItem groupSendItem = CommunicationGroupSendItem.fetchByReferenceId(job.referenceId)
+        CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
+        groupSend.updateCumulativeStatus( CommunicationGroupSendExecutionState.Complete )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
     }
 
 
@@ -147,6 +157,13 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
         job.setErrorText( StringHelper.stackTraceToString( cause ) )
         job.setErrorCode(CommunicationErrorCode.valueOf(errorCode))
         communicationJobService.update( job )
+
+        //Update the group send cumulative status as failed
+        CommunicationGroupSendItem groupSendItem = CommunicationGroupSendItem.fetchByReferenceId(job.referenceId)
+        CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
+        groupSend.updateCumulativeStatus( CommunicationGroupSendExecutionState.Error )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+
         if (cause) {
             log.info( "Marked job with id = ${job.id} as failed; cause = ${cause.toString()}." )
         } else {

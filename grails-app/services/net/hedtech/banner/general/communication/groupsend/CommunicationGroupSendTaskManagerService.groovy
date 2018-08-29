@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import org.apache.commons.lang.NotImplementedException
 import org.apache.commons.logging.Log
@@ -136,6 +137,10 @@ class CommunicationGroupSendTaskManagerService implements AsynchronousTaskManage
     public void markFailed( AsynchronousTask task, String errorCode, Throwable cause ) throws ApplicationException {
         CommunicationGroupSend groupSend = (CommunicationGroupSend) task
         communicationGroupSendItemProcessorService.failGroupSendItem( groupSend.getId(), errorCode, StringHelper.stackTraceToString( cause ) );
+        //Update the group send cumulative status as failed
+        groupSend.updateCumulativeStatus( CommunicationGroupSendExecutionState.Error )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+
         if (log.isDebugEnabled()) {
             log.debug( "Marking failed group send id = ${task.id}." );
         }
