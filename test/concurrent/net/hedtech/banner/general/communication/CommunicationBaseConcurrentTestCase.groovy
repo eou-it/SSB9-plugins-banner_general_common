@@ -297,7 +297,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         def rootorg
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Grails Test Org")
-            defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            defaultOrganization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             defaultOrganization.mobileApplicationName = "StudentSuccess"
             defaultOrganization.clearMobileApplicationKey = "ss-key-value"
             defaultOrganization.isAvailable = true
@@ -305,7 +305,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
         } else {
             rootorg = CommunicationOrganization.fetchRoot()
-            rootorg.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootorg.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             rootorg.mobileApplicationName = "StudentSuccess"
             rootorg.clearMobileApplicationKey = "ss-key-value"
             rootorg.isAvailable = true

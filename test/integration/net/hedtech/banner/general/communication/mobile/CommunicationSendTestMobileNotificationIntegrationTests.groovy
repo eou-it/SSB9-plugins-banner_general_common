@@ -83,7 +83,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
         def orgID = organization.id
         def sendTo = validPerson
         service.sendTest(orgID, sendTo, messageData)
-        organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+        organization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
     }
 
     @Test
@@ -107,7 +107,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
             organization = new CommunicationOrganization(name: "Test Org")
 
             organization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-            organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            organization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             organization.mobileApplicationName = "StudentSuccess"
             organization.clearMobileApplicationKey = "ss-key-value"
             organization.encryptedMobileApplicationKey = communicationMailboxAccountService.encryptPassword("ss-key-value")
@@ -115,7 +115,7 @@ class CommunicationSendTestMobileNotificationIntegrationTests extends BaseIntegr
         } else {
             organization = CommunicationOrganization.fetchRoot() as CommunicationOrganization
             organization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-            organization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            organization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             organization.mobileApplicationName = "StudentSuccess"
             organization.clearMobileApplicationKey = "ss-key-value"
             organization.encryptedMobileApplicationKey = communicationMailboxAccountService.encryptPassword("ss-key-value")
