@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationParameter
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.apache.commons.lang.NotImplementedException
+import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 import org.junit.Assert
 
