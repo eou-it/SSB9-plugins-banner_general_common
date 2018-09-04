@@ -100,12 +100,6 @@ class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
         CommunicationJob job = task as CommunicationJob
         log.info( "Marking completed communication job id = ${job.id}." )
         communicationJobService.markCompleted( job.id )
-
-        //Update the group send cumulative status as failed
-        CommunicationGroupSendItem groupSendItem = CommunicationGroupSendItem.fetchByReferenceId(job.referenceId)
-        CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
-        groupSend.updateCumulativeStatus( CommunicationGroupSendExecutionState.Complete )
-        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
     }
 
 
