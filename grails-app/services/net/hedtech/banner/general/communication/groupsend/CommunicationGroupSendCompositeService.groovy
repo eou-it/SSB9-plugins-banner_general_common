@@ -110,7 +110,9 @@ class CommunicationGroupSendCompositeService {
 
         groupSend = (CommunicationGroupSend) communicationGroupSendService.create( groupSend )
 
-        if (request.scheduledStartDate) {
+        if(request.recurrentMessageId && request.recalculateOnSend) {
+            groupSend = scheduleGroupSendImmediatelyForRecalculate( groupSend, bannerUser )
+        } else if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend( groupSend, bannerUser )
         } else {
             if (hasQuery) {
@@ -464,6 +466,21 @@ class CommunicationGroupSendCompositeService {
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleServiceMethod( jobContext )
         groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
+        return groupSend
+    }
+
+    //To be used when performing a recalculate on send which is part of a recurrent message
+    private CommunicationGroupSend scheduleGroupSendImmediatelyForRecalculate( CommunicationGroupSend groupSend, String bannerUser ) {
+        SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString() )
+                .setBannerUser( bannerUser )
+                .setMepCode( groupSend.mepCode )
+                .setJobHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFired" )
+                .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
+                .setParameter( "groupSendId", groupSend.id )
+
+        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
+        groupSend.markQueued( jobReceipt.jobId, jobReceipt.groupId )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         return groupSend
     }
 

@@ -9,23 +9,7 @@ import net.hedtech.banner.general.communication.item.CommunicationChannel
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
 
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.Lob
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
-import javax.persistence.Transient
-import javax.persistence.Version
-
+import javax.persistence.*
 
 @Entity
 @Table(name = "GVQ_GCBCREC")
@@ -90,7 +74,7 @@ class CommunicationRecurrentMessageView {
     @Column(name = "VPDI_CODE")
     String mepCode
 
-    @Column(name = "POPL_ID")
+    @Column(name = "POPLULATION_ID")
     Long populationId;
 
     @Column(name = "POPULATION_NAME")
@@ -175,7 +159,7 @@ class CommunicationRecurrentMessageView {
     @Column(name = "TOTAL_COUNT")
     Long totalCount;
 
-    @Column(name = "GCBREC_SUCCESS_COUNT")
+    @Column(name = "SUCCESS_COUNT")
     Long successCount;
 
     @Column(name = "FAILURE_COUNT")
