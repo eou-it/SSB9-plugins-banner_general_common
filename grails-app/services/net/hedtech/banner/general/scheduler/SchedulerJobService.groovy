@@ -4,14 +4,19 @@
 package net.hedtech.banner.general.scheduler
 
 import grails.util.Holders
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.quartz.CronScheduleBuilder
+import org.quartz.CronTrigger
 import org.quartz.JobDetail
 import org.quartz.JobKey
+import org.quartz.SchedulerException
 import org.quartz.SimpleTrigger
+import org.quartz.Trigger
+import org.quartz.TriggerBuilder
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate;
@@ -47,15 +52,17 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-            withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
-            startAt( evenMinuteDate( jobContext.scheduledStartDate ) ).build()
+        TriggerBuilder builder = newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+                withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
+        if(jobContext.scheduledStartDate != null) {
+            builder.startAt(evenMinuteDate(jobContext.scheduledStartDate))
+        }
+        SimpleTrigger trigger = builder.build()
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
-    //For future use when we do the recurring scheduling user story
     /**
      * Schedules calling a recurring service method using the quartz scheduler CRON schedule.
      * The service method invoked should take a single map as a parameter.
@@ -69,15 +76,22 @@ class SchedulerJobService {
      * @param parameters an optional map to pass to to the service method
      * @return a scheduler job receipt with the jobId and the a groupId consisting of the service and method named concatenated together
      */
-/*    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
+    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-                withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule).withMisfireHandlingInstructionFireAndProceed()).build()
+        TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+                .startAt( evenMinuteDate( jobContext.scheduledStartDate ) )
+                .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule).withMisfireHandlingInstructionDoNothing())
+
+        if(jobContext.endDate != null) {
+            builder.endTime = jobContext.endDate
+        }
+        CronTrigger trigger =  builder.build()
+
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
-    }*/
+    }
 
     /**
      * Schedules calling a service method using the quartz scheduler to run immediately.
@@ -152,7 +166,7 @@ class SchedulerJobService {
     }
 
 
-    private Date scheduleJob(JobDetail jobDetail, SimpleTrigger trigger) {
+    private Date scheduleJob(JobDetail jobDetail, Trigger trigger) {
         try {
             return quartzScheduler.scheduleJob(jobDetail, trigger)
         } catch (NoClassDefFoundError e) {
@@ -162,6 +176,9 @@ class SchedulerJobService {
             } else {
                 throw e
             }
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
         }
     }
 
@@ -179,6 +196,7 @@ class SchedulerJobService {
         }
         jobDetail.getJobDataMap().put( "scheduledStartDate", jobContext.scheduledStartDate)
         jobDetail.getJobDataMap().put( "cronSchedule", jobContext.cronSchedule)
+        jobDetail.getJobDataMap().put( "endDate", jobContext.endDate)
         assignParameters( jobDetail, jobContext.parameters )
         return jobDetail
     }

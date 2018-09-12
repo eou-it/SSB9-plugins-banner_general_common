@@ -83,6 +83,7 @@ class CommunicationGroupSendCompositeService {
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.jobId = request.referenceId
+        groupSend.recurrentMessageId = request.recurrentMessageId
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
         groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )

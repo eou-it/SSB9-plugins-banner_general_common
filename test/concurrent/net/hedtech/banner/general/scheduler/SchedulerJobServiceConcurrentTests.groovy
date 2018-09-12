@@ -186,4 +186,48 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         assertTrue( SchedulerTestOperation.didOperationFail() )
     }
 
+    @Test
+    public void testScheduleCronServiceMethod() {
+        String jobId = "testScheduleCronTestJob-" + UUID.randomUUID().toString()
+
+        String mepCode = null
+
+        //Cron expression set to run every 5 seconds
+        SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
+                .setCronSchedule("0/5 * * ? * *")
+                .setBannerUser( 'BCMADMIN' )
+                .setJobHandle( "schedulerJobService", "testOperationFired" )
+                .setMepCode( mepCode )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleCronServiceMethod( jobContext )
+
+        JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
+
+        JobDetail jobDetail = quartzScheduler.getJobDetail( jobKey ) // JobDetailImpl
+        assertNotNull( jobDetail )
+
+        TriggerKey triggerKey = new TriggerKey( receipt.jobId, receipt.groupId )
+        Trigger trigger = quartzScheduler.getTrigger( triggerKey ) // SimpleTriggerImpl
+        assertNotNull( trigger )
+
+        int retries = 20
+        while (retries > 0) {
+            retries--;
+            TimeUnit.SECONDS.sleep( 5 );
+
+            jobDetail = quartzScheduler.getJobDetail( jobKey )
+
+            if (!jobDetail) {
+                break;
+            }
+        }
+
+        assertNull( jobDetail )
+        trigger = quartzScheduler.getTrigger( triggerKey )
+        assertNull( trigger )
+
+        assertTrue( SchedulerTestOperation.didOperationFire() )
+        assertTrue( SchedulerTestOperation.didOperationComplete() )
+        assertFalse( SchedulerTestOperation.didOperationFail() )
+    }
+
 }

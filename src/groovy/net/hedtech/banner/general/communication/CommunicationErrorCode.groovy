@@ -70,6 +70,9 @@ enum CommunicationErrorCode implements Serializable {
     CERTIFICATION_PATH_NOT_FOUND,
     CERTIFICATION_FAILED,
 
+    /** Quartz Scheduler Errors**/
+    SCHEDULER_ERROR,
+
     UNKNOWN_ERROR_EMAIL,
     UNKNOWN_ERROR_MOBILE,
     UNKNOWN_ERROR; //Unknown Error

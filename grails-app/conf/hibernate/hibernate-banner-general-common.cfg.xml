@@ -64,6 +64,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendListView"/>
 
         <mapping class="net.hedtech.banner.general.communication.recurrence.CommunicationRecurrentMessage"/>
+        <mapping class="net.hedtech.banner.general.communication.recurrence.CommunicationRecurrentMessageView"/>
 
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItem"/>
         <mapping class="net.hedtech.banner.general.communication.item.CommunicationItemView"/>

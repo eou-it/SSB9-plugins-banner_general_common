@@ -17,7 +17,11 @@ class CommunicationGroupSendRequest implements Serializable {
     Long organizationId
     Long eventId
     String referenceId
+    String cronExpression
+    Long recurrentMessageId
     Date scheduledStartDate
+    Date endDate
+    Long noOfOccurrences
     Boolean recalculateOnSend
     Map parameterNameValueMap = [:]
 

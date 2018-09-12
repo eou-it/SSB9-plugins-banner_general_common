@@ -9,14 +9,12 @@ import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.apache.commons.lang.NotImplementedException
 import org.hibernate.annotations.Type
 import org.hibernate.criterion.Order
-import org.junit.Assert
 
 import javax.persistence.*
 
@@ -90,9 +88,9 @@ class CommunicationRecurrentMessage implements Serializable {
     @Column(name = "GCBCREC_EVENT_ID")
     Long eventId;
 
-    @Column(name = "GCBCREC_STARTED_DATE", nullable = true)
+    @Column(name = "GCBCREC_START_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
-    Date startedDate;
+    Date startDate;
 
     @Column(name = "GCBCREC_CREATIONDATETIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -102,9 +100,9 @@ class CommunicationRecurrentMessage implements Serializable {
     @Enumerated(EnumType.STRING)
     CommunicationGroupSendExecutionState currentExecutionState = CommunicationGroupSendExecutionState.New;
 
-    @Column(name = "GCBCREC_STOP_DATE", nullable = true)
+    @Column(name = "GCBCREC_STOPPED_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
-    Date stopDate;
+    Date stoppedDate;
 
     @Column(name = "GCBCREC_DELETED", nullable = false)
     @Type(type = "yes_no")
@@ -113,6 +111,13 @@ class CommunicationRecurrentMessage implements Serializable {
     @Type(type = "yes_no")
     @Column(name = "GCBCREC_RECALC_ON_SEND")
     Boolean recalculateOnSend
+
+    /**
+     * Error Code: The error code for the error scenario that failed
+     */
+    @Column(name = "GCBCREC_ERROR_CODE")
+    @Enumerated(EnumType.STRING)
+    CommunicationErrorCode errorCode
 
     @Lob
     @Column(name = "GCBCREC_ERROR_TEXT")
@@ -140,6 +145,13 @@ class CommunicationRecurrentMessage implements Serializable {
     @Column(name = "GCBCREC_CRON_STRING")
     String cronExpression
 
+    @Column(name = "GCBCREC_END_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date endDate
+
+    @Column(name = "GCBCREC_NUM_OCCURRENCES")
+    Long noOfOccurrences;
+
     @Column(name = "GCBCREC_TOTAL_COUNT")
     Long totalCount;
 
@@ -164,16 +176,19 @@ class CommunicationRecurrentMessage implements Serializable {
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
-        startedDate(nullable: true)
-        stopDate(nullable: true)
+        startDate(nullable: true)
+        endDate(nullable: true)
+        stoppedDate(nullable: true)
         creationDateTime(nullable: false)
         currentExecutionState(nullable: false)
         recalculateOnSend(nullable:false)
+        errorCode(nullable:true)
         errorText(nullable:true)
         jobId(nullable:true)
         groupId(nullable:true)
         parameterValues(nullable:true)
         cronExpression(nullable:false)
+        noOfOccurrences(nullable:true)
         totalCount(nullable:false)
         successCount(nullable:false)
         failureCount(nullable:false)
