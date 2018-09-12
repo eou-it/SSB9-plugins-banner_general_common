@@ -141,7 +141,6 @@ class CommunicationRecurrentMessageCompositeService {
     private CommunicationRecurrentMessage generateGroupSendImpl( CommunicationRecurrentMessage recurrentMessage ) {
         // The individual group sends will still be processed asynchronously via the framework.
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest()
-        //TODO
         request.referenceId = UUID.randomUUID().toString()
         request.name = recurrentMessage.name
         request.populationId = recurrentMessage.populationId
@@ -149,14 +148,14 @@ class CommunicationRecurrentMessageCompositeService {
         request.organizationId = recurrentMessage.organizationId
         request.eventId = recurrentMessage.eventId
         request.cronExpression = recurrentMessage.cronExpression
+        request.scheduledStartDate = recurrentMessage.startDate
         request.recalculateOnSend = recurrentMessage.recalculateOnSend
         request.parameterNameValueMap = recurrentMessage.parameterNameValueMap
         request.recurrentMessageId = recurrentMessage.id
 
         CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
 
-//        //Get the recurrent message again as the job delete trigger would update the recurrent message object
-//        CommunicationRecurrentMessage recurrentMessage1 = CommunicationRecurrentMessage.get(recurrentMessage.id)
+//      Get the recurrent message again as the job delete trigger would update the recurrent message object
         if(!recurrentMessage.currentExecutionState.isTerminal()) {
             recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
         }

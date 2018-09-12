@@ -91,6 +91,7 @@ class CommunicationGroupSendCompositeService {
 
         CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
         boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0)
+//                                        recalculate false || no scheduled date
         boolean useCurrentReplica = (!groupSend.recalculateOnSend || !request.scheduledStartDate)
 
         if (hasQuery && useCurrentReplica) {
@@ -110,6 +111,7 @@ class CommunicationGroupSendCompositeService {
 
         groupSend = (CommunicationGroupSend) communicationGroupSendService.create( groupSend )
 
+        //For a recurrent scheduled message that has recalculate on send
         if(request.recurrentMessageId && request.recalculateOnSend) {
             groupSend = scheduleGroupSendImmediatelyForRecalculate( groupSend, bannerUser )
         } else if (request.scheduledStartDate) {
@@ -311,7 +313,7 @@ class CommunicationGroupSendCompositeService {
             populationVersion = communicationPopulationCompositeService.createPopulationVersion( population )
             population.changesPending = false
             communicationPopulationCompositeService.updatePopulation(population)
-            // Todo: Should we delete population versions no longer in use by any group sends aside from he one we just created
+            // Todo: Should we delete population versions no longer in use by any group sends aside from the one we just created
             // We would need to remove all the associated objects.
         } else {
             populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( groupSend.populationId )

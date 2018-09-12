@@ -96,19 +96,18 @@ class CommunicationRecurrentMessageView {
     @Column(name = "EVENT_NAME")
     String eventName
 
-    @Column(name = "START_DATE", nullable = true)
+    @Column(name = "START_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date startDate;
 
-    @Column(name = "CREATIONDATETIME", nullable = false)
+    @Column(name = "CREATIONDATETIME")
     @Temporal(TemporalType.TIMESTAMP)
     Date creationDateTime;
 
-    @Column(name = "CURRENT_STATE", nullable = false)
-    @Enumerated(EnumType.STRING)
-    CommunicationGroupSendExecutionState currentExecutionState = CommunicationGroupSendExecutionState.New;
+    @Column(name = "CURRENT_STATE")
+    String currentExecutionState;
 
-    @Column(name = "STOPPED_DATE", nullable = true)
+    @Column(name = "STOPPED_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date stoppedDate;
 
