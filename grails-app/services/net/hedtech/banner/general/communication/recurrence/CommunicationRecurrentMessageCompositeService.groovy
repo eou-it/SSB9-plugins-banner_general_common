@@ -180,7 +180,7 @@ class CommunicationRecurrentMessageCompositeService {
         }
 
         CommunicationRecurrentMessage recurrentMessage = CommunicationRecurrentMessage.get(recurrentMessageId)
-        if (!recurrentMessageId) {
+        if (!recurrentMessage) {
             throw new ApplicationException("recurrentMessage", new NotFoundException())
         }
 
@@ -194,7 +194,7 @@ class CommunicationRecurrentMessageCompositeService {
         }
         recurrentMessage.failureCount = recurrentMessage.failureCount + 1;
         recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
-        recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessageId)
+        recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
         return recurrentMessage
     }
 
