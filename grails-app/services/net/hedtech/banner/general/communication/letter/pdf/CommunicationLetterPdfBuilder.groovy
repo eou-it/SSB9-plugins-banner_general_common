@@ -106,7 +106,12 @@ class CommunicationLetterPdfBuilder {
         stringBuilder.append( "margin-bottom: " ).append( bottomMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
         stringBuilder.append( "margin-left: " ).append( leftMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
         stringBuilder.append( "margin-right: " ).append( rightMargin ).append( unitOfMeasure.getSymbol() ).append( "; " );
+        stringBuilder.append( "@top-left { content: element(pageHeader); } ");
+        stringBuilder.append( "@bottom-left { content: element(pageFooter); } ");
         stringBuilder.append( "} " );
+
+        stringBuilder.append( " #pageHeader{ position: running(pageHeader); } ");
+        stringBuilder.append( " #pageFooter{ position: running(pageFooter); } ");
         stringBuilder.append( "</style>\n" );
 
         return stringBuilder.toString();
