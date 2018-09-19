@@ -111,9 +111,14 @@ class CommunicationGroupSendCompositeService {
 
         groupSend = (CommunicationGroupSend) communicationGroupSendService.create( groupSend )
 
-        //For a recurrent scheduled message that has recalculate on send
-        if(request.recurrentMessageId && request.recalculateOnSend) {
-            groupSend = scheduleGroupSendImmediatelyForRecalculate( groupSend, bannerUser )
+        //For a recurrent scheduled message
+        if(request.recurrentMessageId) {
+            //recalculate on send
+            if( request.recalculateOnSend) {
+                groupSend = scheduleGroupSendImmediatelyForRecalculate(groupSend, bannerUser)
+            } else {
+                groupSend = scheduleGroupSendImmediately( groupSend, bannerUser )
+            }
         } else if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend( groupSend, bannerUser )
         } else {
