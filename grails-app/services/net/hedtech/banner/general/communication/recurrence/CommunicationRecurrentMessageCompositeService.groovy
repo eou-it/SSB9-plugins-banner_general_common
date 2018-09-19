@@ -58,6 +58,7 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.name = jobName
         recurrentMessage.description = jobName
         recurrentMessage.cronExpression = request.cronExpression
+        recurrentMessage.cronTimezone = request.cronTimezone
         recurrentMessage.startDate = request.scheduledStartDate
         recurrentMessage.endDate = request.endDate
         recurrentMessage.noOfOccurrences = request.noOfOccurrences
@@ -83,6 +84,7 @@ class CommunicationRecurrentMessageCompositeService {
                 .setBannerUser( bannerUser )
                 .setMepCode( recurrentMessage.mepCode )
                 .setCronSchedule( recurrentMessage.cronExpression )
+                .setCronScheduleTimezone(recurrentMessage.cronTimezone)
                 .setScheduledStartDate(recurrentMessage.startDate)
                 .setEndDate(recurrentMessage.endDate)
                 .setParameter( "recurrentMessageId", recurrentMessage.id )

@@ -79,17 +79,29 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
-                .startAt( evenMinuteDate( jobContext.scheduledStartDate ) )
-                .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule).withMisfireHandlingInstructionDoNothing())
+        try {
+            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+                    .startAt(evenMinuteDate(jobContext.scheduledStartDate))
+                    .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
+                        .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
+                        .withMisfireHandlingInstructionDoNothing())
 
-        if(jobContext.endDate != null) {
-            builder.endTime = jobContext.endDate
+            if (jobContext.endDate != null) {
+                builder.endTime = jobContext.endDate
+            }
+            CronTrigger trigger = builder.build()
+
+            scheduleJob(jobDetail, trigger)
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        } catch(Throwable t) {
+            log.error(t)
+            throw CommunicationExceptionFactory.createFriendlyApplicationException(SchedulerJobService.class,
+                    CommunicationErrorCode.UNKNOWN_ERROR,
+                    "invalidCronExpression"
+            )
         }
-        CronTrigger trigger =  builder.build()
-
-        scheduleJob( jobDetail, trigger )
-
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 

@@ -18,6 +18,7 @@ class CommunicationGroupSendRequest implements Serializable {
     Long eventId
     String referenceId
     String cronExpression
+    String cronTimezone
     Long recurrentMessageId
     Date scheduledStartDate
     Date endDate

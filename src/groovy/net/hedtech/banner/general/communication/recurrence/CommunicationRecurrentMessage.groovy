@@ -145,6 +145,9 @@ class CommunicationRecurrentMessage implements Serializable {
     @Column(name = "GCBCREC_CRON_STRING")
     String cronExpression
 
+    @Column(name = "GCBCREC_CRON_TIMEZONE")
+    String cronTimezone
+
     @Column(name = "GCBCREC_END_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     Date endDate
@@ -188,6 +191,7 @@ class CommunicationRecurrentMessage implements Serializable {
         groupId(nullable:true)
         parameterValues(nullable:true)
         cronExpression(nullable:false)
+        cronTimezone(nullable:false)
         noOfOccurrences(nullable:true)
         totalCount(nullable:false)
         successCount(nullable:false)

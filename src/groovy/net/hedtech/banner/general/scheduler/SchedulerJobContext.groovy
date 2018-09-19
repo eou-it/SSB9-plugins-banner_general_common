@@ -19,6 +19,7 @@ class SchedulerJobContext implements Serializable {
     private Date scheduledStartDate
     private Date endDate
     private String cronSchedule
+    private String cronScheduleTimezone
 
     public SchedulerJobContext( String jobId ) {
         this.jobId = jobId
@@ -80,6 +81,15 @@ class SchedulerJobContext implements Serializable {
 
     public String getCronSchedule() {
         return cronSchedule
+    }
+
+    public SchedulerJobContext setCronScheduleTimezone(String cronScheduleTimezone) {
+        this.cronScheduleTimezone = cronScheduleTimezone
+        return this
+    }
+
+    public String getCronScheduleTimezone() {
+        return cronScheduleTimezone
     }
 
     public SchedulerJobContext setJobHandle( String service, String method ) {
