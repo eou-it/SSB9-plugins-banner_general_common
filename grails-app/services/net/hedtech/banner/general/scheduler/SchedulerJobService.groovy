@@ -81,7 +81,7 @@ class SchedulerJobService {
 
         try {
             TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
-                    .startAt(evenMinuteDate(jobContext.scheduledStartDate))
+                    .startAt(evenSecondDate(jobContext.scheduledStartDate))
                     .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
                         .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
                         .withMisfireHandlingInstructionDoNothing())

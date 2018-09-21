@@ -12,6 +12,8 @@ import org.hibernate.annotations.Type
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -98,6 +100,21 @@ class CommunicationPopulation implements Serializable {
     String createdBy
 
     /**
+     * SCHEDULED_DATE: The date when the population is scheduled to be calculated for the first time.
+     */
+    @Column(name = "GCBPOPL_SCHEDULED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date scheduledDate
+
+    /**
+     * Population status: SCHEDULED, PENDING_EXECUTION, ERROR, AVAILABLE.
+     * Mostly used here only for SCHEDULED population, rest of the statuses are available via the Population Calculation
+     */
+    @Column(name = "GCBPOPL_STATUS")
+    @Enumerated(EnumType.STRING)
+    CommunicationPopulationCalculationStatus status
+
+    /**
      * VERSION: Optimistic lock token
      */
     @Version
@@ -116,6 +133,9 @@ class CommunicationPopulation implements Serializable {
      */
     @Column(name = "GCBPOPL_USER_ID")
     String lastModifiedBy
+
+    @Column(name = "GCBPOPL_VPDI_CODE")
+    String mepCode
 
     /**
      * DATA ORIGIN: Source system that created or updated the data.
@@ -145,10 +165,13 @@ class CommunicationPopulation implements Serializable {
         createdBy(nullable: false, maxSize: 30)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
+        mepCode(nullable:true)
         dataOrigin(nullable: true, maxSize: 30)
         includeList(nullable: true)
         changesPending(nullable: false)
         systemIndicator(nullable:false)
+        scheduledDate(nullable:true)
+        status(nullable:true)
     }
 
     public static CommunicationPopulation fetchById(Long id) {

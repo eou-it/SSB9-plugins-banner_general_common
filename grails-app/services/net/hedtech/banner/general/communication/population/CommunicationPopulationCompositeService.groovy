@@ -347,10 +347,10 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description = "" ) {
+    public CommunicationPopulation createPopulationFromQuery( Long populationQueryId, String name, String description = "", Date scheduledDate = null ) {
         log.trace( "createPopulationFromQuery called" )
         CommunicationPopulationQuery communicationPopulationQuery = CommunicationPopulationQuery.fetchById( populationQueryId )
-        return createPopulationFromQuery( communicationPopulationQuery, name, description )
+        return createPopulationFromQuery( communicationPopulationQuery, name, description, scheduledDate )
     }
 
 
@@ -359,13 +359,17 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description = "" ) {
+    public CommunicationPopulation createPopulationFromQuery( CommunicationPopulationQuery populationQuery, String name, String description = "", Date scheduledDate ) {
         log.trace( "createPopulationFromQuery( populationQuery, name, description ) called" )
 
         CommunicationPopulation population = new CommunicationPopulation()
         population.name = name
         population.description = description
         population.folder = populationQuery.folder
+        if(scheduledDate) {
+            population.scheduledDate = scheduledDate
+            population.status = CommunicationPopulationCalculationStatus.SCHEDULED
+        }
         population = communicationPopulationService.create( population )
 
         CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
@@ -385,10 +389,10 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQueryVersion( Long queryVersionId, String name, String description ) {
+    public CommunicationPopulation createPopulationFromQueryVersion( Long queryVersionId, String name, String description, Date scheduledDate = null ) {
         log.trace( "createPopulationFromQueryVersion( queryVersionId, name, description ) called" )
         CommunicationPopulationQueryVersion queryVersion = CommunicationPopulationQueryVersion.fetchById( queryVersionId )
-        return createPopulationFromQueryVersion( queryVersion, name, description )
+        return createPopulationFromQueryVersion( queryVersion, name, description, scheduledDate )
     }
 
 
@@ -397,7 +401,7 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population to persist
      */
-    public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description ) {
+    public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description, Date scheduledDate ) {
         log.trace( "createPopulationFromQueryVersion( populationVersion, name, d`escription ) called" )
         assert(populationQueryVersion)
 
@@ -405,6 +409,10 @@ class CommunicationPopulationCompositeService {
         population.name = name
         population.description = description
         population.folder = populationQueryVersion.query.folder
+        if(scheduledDate) {
+            population.scheduledDate = scheduledDate
+            population.status = CommunicationPopulationCalculationStatus.SCHEDULED
+        }
         population = communicationPopulationService.create( population )
 
         CommunicationPopulationQueryAssociation populationQueryAssociation = new CommunicationPopulationQueryAssociation()
@@ -415,7 +423,12 @@ class CommunicationPopulationCompositeService {
         if (log.isDebugEnabled()) log.debug( "Created population association with id = ${populationQueryAssociation.id}")
 
         CommunicationPopulationVersion populationVersion = createPopulationVersion( population )
-        calculatePopulationVersionForUser( populationVersion )
+
+        if(population.scheduledDate){
+            scheduleCalculatePopulationVersionForUser(populationVersion, population.scheduledDate)
+        } else {
+            calculatePopulationVersionForUser(populationVersion)
+        }
         return population
     }
 
@@ -553,7 +566,11 @@ class CommunicationPopulationCompositeService {
             return null
         } else {
             CommunicationPopulationVersion populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( population.id )
-            return calculatePopulationVersionForUser( populationVersion, oracleName )
+            if(population.scheduledDate && population.status == CommunicationPopulationCalculationStatus.SCHEDULED){
+                return scheduleCalculatePopulationVersionForUser(populationVersion, population.scheduledDate)
+            } else {
+                return calculatePopulationVersionForUser(populationVersion, oracleName)
+            }
         }
     }
 
@@ -587,7 +604,43 @@ class CommunicationPopulationCompositeService {
         }
     }
 
-    public CommunicationPopulationCalculation calculatePopulationVersionForGroupSend(CommunicationPopulationVersion populationVersion) {
+    /**
+     * Calculates the population by creating a read only copy of the intrinsic properties of the population
+     * into a population version table and executing the queries to produce a resultant set of person id's (pidm's).
+     *
+     * @param id the primary key of the population query
+     * @param version the optimistic lock counter
+     */
+    public CommunicationPopulationCalculation scheduleCalculatePopulationVersionForUser(CommunicationPopulationVersion populationVersion, Date scheduledDateTime, String oracleName = getCurrentUserBannerId() ) {
+        log.trace( "scheduleCalculatePopulationVersionForUser( population ) called" )
+        try {
+            assert( populationVersion.id != null )
+            assert( oracleName )
+
+            Date now = new Date(System.currentTimeMillis())
+            if (now.after(scheduledDateTime)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationPopulationService.class, "invalidScheduledDate")
+            }
+
+            removeObsoleteCalculationIfNecessaryForUser( populationVersion, oracleName )
+            CommunicationPopulationCalculation populationCalculation = createNewCalculation( populationVersion, oracleName, true )
+
+            SchedulerJobContext jobContext = new SchedulerJobContext( populationCalculation.jobId )
+                    .setBannerUser( oracleName )
+                    .setMepCode( populationCalculation.mepCode )
+                    .setScheduledStartDate( scheduledDateTime )
+                    .setJobHandle( "communicationPopulationCompositeService", "processPendingPopulationCalculationFired" )
+                    .setErrorHandle( "communicationPopulationCompositeService", "processPendingPopulationCalculationFailed" )
+                    .setParameter( "populationCalculationId", populationCalculation.id )
+
+            SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleServiceMethod( jobContext )
+            return populationCalculation
+        } finally {
+            log.trace( "exiting scheduleCalculatePopulationVersionForUser( population )")
+        }
+    }
+
+     public CommunicationPopulationCalculation calculatePopulationVersionForGroupSend(CommunicationPopulationVersion populationVersion) {
         assert( populationVersion )
         CommunicationPopulationCalculation populationCalculation = createNewCalculation( populationVersion, AsynchronousBannerAuthenticationSpoofer.monitorOracleUserName, false )
         return processPendingPopulationCalculation(["populationCalculationId": populationCalculation.id])
@@ -639,7 +692,7 @@ class CommunicationPopulationCompositeService {
     public CommunicationPopulationCalculation processPendingPopulationCalculationFailed( SchedulerErrorContext errorContext ) {
         Long populationCalculationId = errorContext.jobContext.getParameter( "populationCalculationId" )
         if (log.isDebugEnabled()) {
-            log.debug("${errorContext.jobContext.errorHandle} called for groupSendId = ${groupSendId} with message = ${errorContext?.cause?.message}")
+            log.debug("${errorContext.jobContext.errorHandle} called for populationCalculationId = ${populationCalculationId} with message = ${errorContext?.cause?.message}")
         }
 
         CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.fetchById( populationCalculationId )
@@ -703,6 +756,12 @@ class CommunicationPopulationCompositeService {
         calculation.status = errorFound ? CommunicationPopulationCalculationStatus.ERROR : CommunicationPopulationCalculationStatus.AVAILABLE
         calculation.jobId = null
         calculation.save( failOnError: true, flush: true )
+
+        //Set the population status same as Calculation status
+        CommunicationPopulation population = calculation.populationVersion.population
+        population.status = null
+        population = communicationPopulationService.update(population)
+
         return calculation
     }
 
