@@ -85,8 +85,10 @@ class CommunicationRecurrentMessageCompositeService {
         if (now.after(recurrentMessage.startDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
         }
-        if (now.after(recurrentMessage.endDate)) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleEndDate")
+        if (recurrentMessage.endDate) {
+            if (now.after(recurrentMessage.endDate)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleEndDate")
+            }
         }
 
         SchedulerJobContext jobContext = new SchedulerJobContext( recurrentMessage.jobId )
