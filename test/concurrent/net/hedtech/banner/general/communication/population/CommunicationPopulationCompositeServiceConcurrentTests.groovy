@@ -203,6 +203,47 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 
     }
 
+    @Test
+    public void testScheduledAllSpridenPopulationFromQuery() {
+        CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
+                folder: defaultFolder,
+                name: "testAllSpridenPopulationFromQuery",
+                description: "test description",
+                queryString: "select SPRIDEN_PIDM from SPRIDEN"
+        )
+
+        populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery( populationQuery )
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery( populationQuery )
+        assertFalse( populationQuery.changesPending )
+
+        Calendar now = Calendar.getInstance()
+        now.add(Calendar.SECOND, 10)
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", now.getTime() )
+        assertNotNull( population.id )
+        assertEquals( "testAllSpridenPopulationFromQuery", population.name )
+        assertEquals( "", population.description )
+        assertEquals( CommunicationPopulationCalculationStatus.SCHEDULED, population.status)
+
+        List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
+        assertEquals( 1, associations.size() )
+        CommunicationPopulationQueryAssociation association = associations.get( 0 ) as CommunicationPopulationQueryAssociation
+        assertNotNull( association.id )
+        assertEquals( population.id, association.population.id )
+        assertEquals( populationQuery.id, association.populationQuery.id )
+        assertNull( association.populationQueryVersion )
+
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy( population.id, 'BCMADMIN' )
+        assertEquals( populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION )
+        def isAvailable = {
+            def theCalculation = CommunicationPopulationCalculation.get( it )
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry( isAvailable, populationCalculation.id, 15, 5 )
+        assertTrue( populationCalculation.calculatedCount >= 1000 )
+    }
+
     private void waitForPopulationCalculationToFinish(CommunicationPopulation population, String calculatedByBannerId) {
         CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(population.id, calculatedByBannerId)
         def isAvailable = {

@@ -80,6 +80,15 @@ class CommunicationRecurrentMessageCompositeService {
 
 
     private CommunicationRecurrentMessage scheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
+
+        Date now = new Date(System.currentTimeMillis())
+        if (now.after(recurrentMessage.startDate)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
+        }
+        if (now.after(recurrentMessage.endDate)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleEndDate")
+        }
+
         SchedulerJobContext jobContext = new SchedulerJobContext( recurrentMessage.jobId )
                 .setBannerUser( bannerUser )
                 .setMepCode( recurrentMessage.mepCode )
