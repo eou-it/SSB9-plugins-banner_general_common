@@ -19,7 +19,8 @@ import org.quartz.Trigger
 import org.quartz.TriggerBuilder
 import org.springframework.transaction.annotation.Propagation
 
-import static org.quartz.DateBuilder.evenMinuteDate;
+import static org.quartz.DateBuilder.evenMinuteDate
+import static org.quartz.DateBuilder.evenSecondDate;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
