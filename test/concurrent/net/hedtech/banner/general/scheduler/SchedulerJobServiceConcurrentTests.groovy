@@ -190,11 +190,19 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
     public void testScheduleCronServiceMethod() {
         String jobId = "testScheduleCronTestJob-" + UUID.randomUUID().toString()
 
+        Calendar calendar = Calendar.getInstance() // gets a calendar using the default time zone and locale.
+        Date requestedRunTime = calendar.getTime()
         String mepCode = null
 
-        //Cron expression set to run every 5 seconds
+        calendar.add(Calendar.SECOND, 30)
+        int month = calendar.get(Calendar.MONTH) + 1;
+        //Cron expression set to run 30 seconds from current time
+        String cronExpression = "" + calendar.get(Calendar.SECOND) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " " + month + " ? " + calendar.get(Calendar.YEAR);
+
         SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
-                .setCronSchedule("0/5 * * ? * *")
+                .setScheduledStartDate( requestedRunTime )
+                .setCronSchedule(cronExpression)
+                .setCronScheduleTimezone(calendar.getTimeZone().getID())
                 .setBannerUser( 'BCMADMIN' )
                 .setJobHandle( "schedulerJobService", "testOperationFired" )
                 .setMepCode( mepCode )

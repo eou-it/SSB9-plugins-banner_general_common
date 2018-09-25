@@ -1,3 +1,6 @@
+/*******************************************************************************
+ Copyright 2018 Ellucian Company L.P. and its affiliates.
+ *******************************************************************************/
 package net.hedtech.banner.general.communication.recurrence
 
 import net.hedtech.banner.exceptions.ApplicationException
@@ -104,7 +107,6 @@ class CommunicationRecurrentMessageCompositeService {
                 .setErrorHandle( "communicationRecurrentMessageCompositeService", "generateGroupSendFailed" )
 
         SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleCronServiceMethod( jobContext )
-//        groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
         recurrentMessage.jobId = jobReceipt.jobId
         recurrentMessage.groupId = jobReceipt.groupId
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )

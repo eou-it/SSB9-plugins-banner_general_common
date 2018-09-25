@@ -98,10 +98,7 @@ class SchedulerJobService {
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
         } catch(Throwable t) {
             log.error(t)
-            throw CommunicationExceptionFactory.createFriendlyApplicationException(SchedulerJobService.class,
-                    CommunicationErrorCode.UNKNOWN_ERROR,
-                    "invalidCronExpression"
-            )
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
         }
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }

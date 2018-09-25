@@ -90,10 +90,13 @@ class CommunicationRecurrentMessageCompositeServiceConcurrentTests extends Commu
 
 
         Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
-        calendar.add(Calendar.SECOND, 5);
-        Date date = calendar.getTime()
-        String cronExpression = generateCronExpressionNow(Integer.toString(date.getSeconds()),Integer.toString(date.getMinutes()),
-                Integer.toString(date.getHours()),Integer.toString(date.getDate()), Integer.toString(date.getMonth()+1), "?", Integer.toString(date.getYear()+1900));
+        calendar.add(Calendar.SECOND, 30)
+        Date requestedRunTime = calendar.getTime()
+
+        calendar.add(Calendar.SECOND, 30)
+        int month = calendar.get(Calendar.MONTH) + 1;
+        //Cron expression set to run 30 seconds from current time
+        String cronExpression = "" + calendar.get(Calendar.SECOND) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " " + month + " ? " + calendar.get(Calendar.YEAR);
 
         CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
                 name: "testRecurrentMessageRequestByTemplateByPopulation",
@@ -101,7 +104,9 @@ class CommunicationRecurrentMessageCompositeServiceConcurrentTests extends Commu
                 templateId: defaultEmailTemplate.id,
                 organizationId: defaultOrganization.id,
                 referenceId: UUID.randomUUID().toString(),
+                scheduledStartDate: requestedRunTime,
                 cronExpression: cronExpression,
+                cronTimezone: calendar.getTimeZone().getID(),
                 recalculateOnSend: false
         )
 

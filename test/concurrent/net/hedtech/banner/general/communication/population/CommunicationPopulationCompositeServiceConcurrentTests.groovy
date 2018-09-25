@@ -219,7 +219,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         Calendar now = Calendar.getInstance()
         now.add(Calendar.SECOND, 10)
 
-        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", now.getTime() )
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", "", now.getTime() )
         assertNotNull( population.id )
         assertEquals( "testAllSpridenPopulationFromQuery", population.name )
         assertEquals( "", population.description )
