@@ -281,10 +281,11 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetCurrentListingForDirectoryItemforCollege() {
-        // Update college code for the purposes of this test -- only for current session's connection.
-        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_PIDM =?", 29329
-
         def pidm = PersonUtility.getPerson("STUAFR329").pidm
+
+        // Update college code for the purposes of this test -- only for current session's connection.
+        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_PIDM =?", pidm
+
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'COLLEGE'
 
@@ -299,10 +300,11 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testGetCurrentListingForDirectoryItemforGradYear() {
-        // Update college code for the purposes of this test -- only for current session's connection.
-        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_PIDM =?", 29329
-
         def pidm = PersonUtility.getPerson("STUAFR329").pidm
+
+        // Update college code for the purposes of this test -- only for current session's connection.
+        executeUpdateSQL "update SGBSTDN set SGBSTDN_COLL_CODE_1 = 'BU' where SGBSTDN_PIDM =?", pidm
+
         def profileItem = directoryProfileCompositeService.fetchAllDirectoryProfileItems()[0]
         profileItem.code = 'GRD_YEAR'
 
