@@ -46,6 +46,6 @@ class CommunicationTextMessageTemplate extends CommunicationTemplate implements 
 
     @Override
     final CommunicationTemplateVisitor accept(CommunicationTemplateVisitor visitor) {
-        visitor.visitTextMessage( this )
+//        visitor.visitTextMessage( this )
     }
 }
