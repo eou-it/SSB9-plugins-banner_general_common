@@ -89,36 +89,4 @@ class CommunicationTextMessageTemplateServiceIntegrationTests extends BaseIntegr
         assertEquals( "Updated description", template.description )
     }
 
-    @Test
-    void testDurationCannotBeNull() {
-        CommunicationTextMessageTemplate template = new CommunicationTextMessageTemplate(
-                name: "testUpdateTemplate",
-                validFrom: new Date(),
-                validTo: null,
-                folder: defaultFolder,
-                message: null
-        )
-
-        try {
-            template = (CommunicationTextMessageTemplate) communicationTextMessageTemplateService.create([domainModel: template])
-            fail( "Expected application exception from validate exception on creation." )
-        } catch (ApplicationException ae ) {
-            assertEquals( "ValidationException", ae.wrappedException.getClass().simpleName )
-        }
-
-        template.message = "test message"
-        template = (CommunicationTextMessageTemplate) communicationTextMessageTemplateService.create([domainModel: template])
-        assertNotNull template.id
-
-        template.message = null
-        try {
-            template = (CommunicationTextMessageTemplate) communicationTextMessageTemplateService.update([domainModel: template])
-            fail( "Expected application exception from validate exception on update." )
-        } catch (ApplicationException ae) {
-            assertEquals( "ValidationException", ae.wrappedException.getClass().simpleName )
-        }
-
-        template.message = "test message"
-        communicationTextMessageTemplateService.update([domainModel: template])
-    }
 }
