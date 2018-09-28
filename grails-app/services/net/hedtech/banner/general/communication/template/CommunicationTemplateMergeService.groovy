@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.letter.CommunicationMergedLetter
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.NumberRenderer
@@ -349,6 +350,32 @@ class CommunicationTemplateMergeService {
             templateVariables << it
         }
         extractTemplateVariables( communicationMobileNotificationTemplate.destinationLabel ).each {
+        }
+
+        return templateVariables.toList()
+    }
+
+    /**
+     * Extracts all the template variables from the currently supported parts of a text message template
+     * @param communicationTextMessageTemplate the text message template
+     */
+    List<String> extractTemplateVariables(CommunicationTextMessageTemplate communicationTextMessageTemplate ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "Extracting template variables from CommunicationTextMessageTemplate ${communicationTextMessageTemplate.name}." )
+        }
+
+        def templateVariables = new HashSet()
+
+        extractTemplateVariables( communicationTextMessageTemplate.message ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationTextMessageTemplate.footer ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationTextMessageTemplate.destinationLink ).each {
+            templateVariables << it
+        }
+        extractTemplateVariables( communicationTextMessageTemplate.destinationLabel ).each {
         }
 
         return templateVariables.toList()

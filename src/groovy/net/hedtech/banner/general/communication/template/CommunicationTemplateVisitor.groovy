@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.template
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
 
 /**
  * Communication Template Visitor allows subclasses of CommunicationTemplate a call
@@ -23,4 +24,5 @@ public interface CommunicationTemplateVisitor {
 
     void visitLetter( CommunicationLetterTemplate template )
 
+    void visitTextMessage(CommunicationTextMessageTemplate template )
 }

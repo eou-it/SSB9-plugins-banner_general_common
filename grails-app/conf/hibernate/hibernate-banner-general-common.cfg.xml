@@ -43,6 +43,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.email.CommunicationEmailTemplate"/>
         <mapping class="net.hedtech.banner.general.communication.letter.CommunicationLetterTemplate"/>
         <mapping class="net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate"/>
+        <mapping class="net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate"/>
         <mapping class="net.hedtech.banner.general.communication.template.CommunicationTemplateView"/>
         <mapping class="net.hedtech.banner.general.communication.job.CommunicationJob"/>
 
@@ -72,6 +73,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.communication.letter.CommunicationLetterItem"/>
         <mapping class="net.hedtech.banner.general.communication.letter.CommunicationLetterItemView"/>
         <mapping class="net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItem"/>
+        <mapping class="net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageItem"/>
 
         <mapping class="net.hedtech.banner.general.overall.HousingRoomDescriptionReadOnly"/>
         <mapping class="net.hedtech.banner.general.communication.CommunicationErrorCode"/>

@@ -10,6 +10,7 @@ public enum CommunicationChannel implements CommunicationEnum {
     EMAIL,
     MOBILE_NOTIFICATION,
     LETTER,
+    TEXT_MESSAGE,
     ERROR, // reserved
     MANUAL_INTERACTION
 
