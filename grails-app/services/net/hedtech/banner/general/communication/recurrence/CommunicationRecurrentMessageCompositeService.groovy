@@ -180,7 +180,7 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
 
         //if no of occurences <= total count, delete the cron_trigger entry
-        if(recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
+        if(recurrentMessage.noOfOccurrences && recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
             if( recurrentMessage.jobId != null ) {
                 schedulerJobService.deleteScheduledJob( recurrentMessage.jobId, recurrentMessage.groupId )
             }
