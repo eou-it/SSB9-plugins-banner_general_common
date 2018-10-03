@@ -186,11 +186,11 @@ class DirectDepositAccountCompositeService {
     /**
      * Formats a Double or BigDecimal to currency.  This is null safe.
      */
-    private formatCurrency(amount) {
+    def formatCurrency(amount) {
         def formattedAmount
 
         if (amount instanceof BigDecimal
-                || amount instanceof Double) {
+                || amount instanceof Number) {
             formattedAmount = currencyFormatService.format(getCurrencyCode(),
                     (amount instanceof BigDecimal ? amount : BigDecimal.valueOf(amount)))
         }
