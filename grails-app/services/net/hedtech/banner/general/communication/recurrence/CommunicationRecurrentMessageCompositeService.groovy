@@ -163,7 +163,6 @@ class CommunicationRecurrentMessageCompositeService {
         request.organizationId = recurrentMessage.organizationId
         request.eventId = recurrentMessage.eventId
         request.cronExpression = recurrentMessage.cronExpression
-        request.scheduledStartDate = recurrentMessage.startDate
         request.recalculateOnSend = recurrentMessage.recalculateOnSend
         request.parameterNameValueMap = recurrentMessage.parameterNameValueMap
         request.recurrentMessageId = recurrentMessage.id

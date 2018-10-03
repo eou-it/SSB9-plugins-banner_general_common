@@ -85,7 +85,7 @@ class SchedulerJobService {
                     .startAt(evenSecondDate(jobContext.scheduledStartDate))
                     .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
                         .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
-                        .withMisfireHandlingInstructionDoNothing())
+                        .withMisfireHandlingInstructionFireAndProceed())
 
             if (jobContext.endDate != null) {
                 builder.endTime = jobContext.endDate
