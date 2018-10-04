@@ -794,43 +794,6 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         assertTrue directDepositAccountCompositeService.areAccountsUpdatable()
     }
 
-    @Test
-    void testFormatCurrency() {
-        BigDecimal value = new BigDecimal(1.8)
-        def result = directDepositAccountCompositeService.formatCurrency(value)
-
-        assertEquals '$1.80', result
-    }
-
-    @Test
-    void testFormatCurrencyInt() {
-        Integer value = new Integer(21)
-        def result = directDepositAccountCompositeService.formatCurrency(value)
-
-        assertEquals '$21.00', result
-    }
-
-    @Test
-    void testFormatCurrencyDouble() {
-        Double value = new Double(92.01)
-        def result = directDepositAccountCompositeService.formatCurrency(value)
-
-        assertEquals '$92.01', result
-    }
-
-    @Test
-    void testFormatCurrencyString() {
-        def result = directDepositAccountCompositeService.formatCurrency('$1,000.00')
-
-        assertNull result
-    }
-
-    @Test
-    void testFormatCurrencyNull() {
-        def result = directDepositAccountCompositeService.formatCurrency(null)
-
-        assertNull result
-    }
 
     private executeCustomSQL( String updateStatement, id = null ) {
         def sql

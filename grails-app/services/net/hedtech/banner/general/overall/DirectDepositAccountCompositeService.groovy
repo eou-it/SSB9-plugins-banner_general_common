@@ -15,7 +15,7 @@ class DirectDepositAccountCompositeService {
 
     def directDepositAccountService
     def bankRoutingInfoService
-    def currencyFormatService
+    def currencyFormatHelperService
     def userRoleService
     def sessionFactory
 
@@ -183,21 +183,6 @@ class DirectDepositAccountCompositeService {
         account
     }
 
-    /**
-     * Formats a Double or BigDecimal to currency.  This is null safe.
-     */
-    def formatCurrency(amount) {
-        def formattedAmount
-
-        if (amount instanceof BigDecimal
-                || amount instanceof Number) {
-            formattedAmount = currencyFormatService.format(getCurrencyCode(),
-                    (amount instanceof BigDecimal ? amount : BigDecimal.valueOf(amount)))
-        }
-
-        return formattedAmount
-    }
-
     private boolean isAccountsMatch(acct1, acct2) {
         if (!(acct1 && acct2)) {
             return false
@@ -217,22 +202,8 @@ class DirectDepositAccountCompositeService {
         priorityMatch && amountMatch && percentMatch
     }
 
-    public static getCurrencyCode() {
-        def currencyCode
-        def session = RequestContextHolder?.currentRequestAttributes()?.request?.session
-
-        if (session?.getAttribute("baseCurrencyCode")) {
-            currencyCode = session.getAttribute("baseCurrencyCode")
-        } else {
-            currencyCode = InstitutionalDescription.fetchByKey()?.baseCurrCode
-            session.setAttribute("baseCurrencyCode", currencyCode)
-        }
-
-        return currencyCode
-    }
-
     def getCurrencySymbol() {
-        def zeroAmt = formatCurrency(0.0).toString()
+        def zeroAmt = currencyFormatHelperService.formatCurrency(0.0).toString()
         def currencySymbol = ""
 
         if(zeroAmt.charAt(0) == '0'){
@@ -434,7 +405,7 @@ class DirectDepositAccountCompositeService {
 
                         model.totalNet += acct.phrdocm_net
 
-                        model.docAccts[i].net = formatCurrency(model.docAccts[i].net)
+                        model.docAccts[i].net = currencyFormatHelperService.formatCurrency(model.docAccts[i].net)
                     }
                 } else {
 
