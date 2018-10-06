@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2017 Ellucian Company L.P. and its affiliates.
+ Copyright 2017 - 2018 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -227,7 +227,7 @@ class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTe
         assertEquals 1, result.size()
         assertNotNull result[0]
         assertEquals 1, result[0].size()
-        assertEquals 'Delihia Gaddis', result[0][0]
+        assertEquals 'Dennis Gaddis', result[0][0]
     }
 
     @Test

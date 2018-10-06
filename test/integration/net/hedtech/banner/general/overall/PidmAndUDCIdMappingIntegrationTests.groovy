@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013 - 2018 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 import org.junit.Before
@@ -21,17 +21,17 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     //Valid test data (For success tests)
 
     def i_success_udcId = "TTTTT"
-    def i_success_pidm = 1
+    def i_success_pidm
     def i_success_createDate = new Date()
     def i_success_udcId_2 = "ZZZZZ"
-    def i_success_pidm_2 = 2
-	def banner_ids = ["HOS00001","HOS00002"]
+    def i_success_pidm_2
+    def banner_ids = ["HOS00001","HOS00002"]
 
     //Test data for creating updating domain instance
     //Valid test data (For success tests)
 
     def u_success_udcId = "TTTTT"
-    def u_success_pidm = 2
+    def u_success_pidm
     def u_success_createDate = new Date()
 
 
@@ -45,6 +45,9 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     //This method is used to initialize test data for references.
     //A method is required to execute database calls as it requires a active transaction
     void initializeTestDataForReferences() {
+        i_success_pidm = PersonUtility.getPerson("HOS00001").pidm
+        i_success_pidm_2 = PersonUtility.getPerson("HOS00002").pidm
+        u_success_pidm = PersonUtility.getPerson("HOS00002").pidm
 		[i_success_pidm, i_success_pidm_2].each { pidm ->
 			def deleteMe = PidmAndUDCIdMapping.findByPidm(pidm)
 			if (deleteMe) {
