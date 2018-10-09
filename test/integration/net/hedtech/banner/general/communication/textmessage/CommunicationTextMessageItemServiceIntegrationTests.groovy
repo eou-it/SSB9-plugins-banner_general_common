@@ -67,6 +67,8 @@ class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegratio
         textMessageItem.referenceId = referenceId
         textMessageItem.createdBy = createdBy
         textMessageItem.recipientPidm = recipientPidm
+        textMessageItem.content = "This is a test message"
+        textMessageItem.toList = "123456789"
         textMessageItem = (CommunicationTextMessageItem) communicationTextMessageItemService.create( textMessageItem )
 
         assertNotNull( textMessageItem.id )
@@ -88,6 +90,8 @@ class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegratio
         textMessageItem.referenceId = UUID.randomUUID().toString()
         textMessageItem.createdBy = 'MBRZYCKI'
         textMessageItem.recipientPidm = 49152
+        textMessageItem.content = "This is a test message"
+        textMessageItem.toList = "123456789"
         textMessageItem = (CommunicationTextMessageItem) communicationTextMessageItemService.create( textMessageItem )
 
         assertNotNull( communicationTextMessageItemService.get( textMessageItem.id ) )
