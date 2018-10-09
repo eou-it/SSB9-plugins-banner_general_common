@@ -24,5 +24,5 @@ public interface CommunicationTemplateVisitor {
 
     void visitLetter( CommunicationLetterTemplate template )
 
-//    void visitTextMessage(CommunicationTextMessageTemplate template )
+    void visitTextMessage(CommunicationTextMessageTemplate template )
 }

@@ -25,6 +25,12 @@ class CommunicationTextMessageItem extends CommunicationItem implements Serializ
     @Column(name = "GCRTITM_RESPONSE", nullable = true)
     String serverResponse
 
+    @Column(name = "GCRTITM_TOLIST", nullable = true)
+    String toList
+
+    @Column(name = "GCRTITM_CONTENT")
+    String content
+
     static constraints = {
         serverResponse(nullable: true)
     }

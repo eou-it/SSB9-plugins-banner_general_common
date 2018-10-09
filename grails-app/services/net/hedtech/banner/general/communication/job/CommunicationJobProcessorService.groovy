@@ -22,6 +22,7 @@ class CommunicationJobProcessorService {
     def communicationSendMobileNotificationService
     def communicationTemplateService
     def communicationGenerateLetterService
+    def communicationSendTextMessageService
 
     public void performCommunicationJob( Long jobId ) {
         log.debug( "performed communication job with job id = ${jobId}." )
@@ -42,8 +43,8 @@ class CommunicationJobProcessorService {
         CommunicationMessageDispatcher messageDispatcher = new CommunicationMessageDispatcher(
             communicationSendEmailService: communicationSendEmailService,
             communicationSendMobileNotificationService: communicationSendMobileNotificationService,
-            communicationGenerateLetterService: communicationGenerateLetterService
-
+            communicationGenerateLetterService: communicationGenerateLetterService,
+            communicationSendTextMessageService: communicationSendTextMessageService
         )
         messageDispatcher.dispatch( template, recipientData, message )
     }

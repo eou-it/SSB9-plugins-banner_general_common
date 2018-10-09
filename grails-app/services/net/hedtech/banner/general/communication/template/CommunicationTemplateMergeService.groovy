@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.letter.CommunicationMergedLetter
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
+import net.hedtech.banner.general.communication.textmessage.CommunicationMergedTextMessageTemplate
 import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -177,6 +178,26 @@ class CommunicationTemplateMergeService {
         return mergedMessage
     }
 
+    /**
+     * Merges each of the test message specific template fields with the recipient data previously calculated
+     *
+     * @param template The template containing the tokens
+     * @param data the map of values that will be substituted for each matching token
+     * @return CommunicationMergedTextMessageTemplate
+     */
+    CommunicationMergedTextMessageTemplate mergeTextMessageTemplate( CommunicationTextMessageTemplate communicationTextMessageTemplate, CommunicationRecipientData recipientData ) {
+        if (log.isDebugEnabled())
+            log.debug( "Merging recipient data into a CommunicationEmailTemplate " )
+
+        CommunicationMergedTextMessageTemplate communicationMergedTextMessageTemplate = new CommunicationMergedTextMessageTemplate()
+        communicationMergedTextMessageTemplate.toList = merge( communicationTextMessageTemplate.toList, recipientData.fieldValues )
+        communicationMergedTextMessageTemplate.footer = merge( communicationTextMessageTemplate.footer, recipientData.fieldValues )
+        communicationMergedTextMessageTemplate.message = merge( communicationTextMessageTemplate.message, recipientData.fieldValues )
+        communicationMergedTextMessageTemplate.destinationLink = merge( communicationTextMessageTemplate.destinationLink, recipientData.fieldValues )
+        communicationMergedTextMessageTemplate.destinationLabel = merge( communicationTextMessageTemplate.destinationLabel, recipientData.fieldValues )
+        return communicationMergedTextMessageTemplate
+    }
+
 /**
  * Returns the preview values for all the fields in the template rather than executing the data function.
  * These serve in the place of recipient data when a preview is requested.
@@ -235,6 +256,17 @@ class CommunicationTemplateMergeService {
         mergedTemplate.messageDescription = mergeForPreview( communicationMobileNotificationTemplate.messageDescription ?: "", renderPreviewValues( communicationMobileNotificationTemplate.messageDescription ?: "" ) )
         mergedTemplate.destinationLink = mergeForPreview( communicationMobileNotificationTemplate.destinationLink ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLink ?: "" ) )
         mergedTemplate.destinationLabel = mergeForPreview( communicationMobileNotificationTemplate.destinationLabel ?: "", renderPreviewValues( communicationMobileNotificationTemplate.destinationLabel ?: "" ) )
+        return mergedTemplate
+    }
+
+    CommunicationMergedTextMessageTemplate renderMergedTextMessageTemplate( CommunicationTextMessageTemplate communicationTextMessageTemplate ) {
+        if (log.isDebugEnabled()) log.debug( "Rendering CommunicationTextMessageTemplate with preview values only." )
+        CommunicationMergedTextMessageTemplate mergedTemplate = new CommunicationMergedTextMessageTemplate()
+        mergedTemplate.toList = mergeForPreview( communicationTextMessageTemplate.toList ?: "", renderPreviewValues( communicationTextMessageTemplate.toList ?: "" ) )
+        mergedTemplate.footer = mergeForPreview( communicationTextMessageTemplate.footer ?: "", renderPreviewValues( communicationTextMessageTemplate.footer ?: "" ) )
+        mergedTemplate.message = mergeForPreview( communicationTextMessageTemplate.message ?: "", renderPreviewValues( communicationTextMessageTemplate.message ?: "" ) )
+        mergedTemplate.destinationLink = mergeForPreview( communicationTextMessageTemplate.destinationLink ?: "", renderPreviewValues( communicationTextMessageTemplate.destinationLink ?: "" ) )
+        mergedTemplate.destinationLabel = mergeForPreview( communicationTextMessageTemplate.destinationLabel ?: "", renderPreviewValues( communicationTextMessageTemplate.destinationLabel ?: "" ) )
         return mergedTemplate
     }
 

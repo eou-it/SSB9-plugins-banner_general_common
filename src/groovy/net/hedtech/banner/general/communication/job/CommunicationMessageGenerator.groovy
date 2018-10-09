@@ -15,6 +15,9 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobile
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationMessage
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.template.*
+import net.hedtech.banner.general.communication.textmessage.CommunicationMergedTextMessageTemplate
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessage
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import org.apache.log4j.Logger
 
@@ -98,6 +101,20 @@ class CommunicationMessageGenerator implements CommunicationTemplateVisitor {
         message = mobileNotificationMessage
     }
 
+    @Override
+    void visitTextMessage(CommunicationTextMessageTemplate template) {
+        CommunicationMergedTextMessageTemplate mergedTextMessageTemplate = communicationTemplateMergeService.mergeTextMessageTemplate( template, recipientData )
+
+        CommunicationTextMessage textMessage = new CommunicationTextMessage();
+
+        textMessage.toList = mergedTextMessageTemplate.toList
+        textMessage.messageContent = mergedTextMessageTemplate.message
+        textMessage.footer = mergedTextMessageTemplate.footer
+        textMessage.destinationLabel = mergedTextMessageTemplate.destinationLabel
+        textMessage.destinationLink = mergedTextMessageTemplate.destinationLink
+
+        message = textMessage
+    }
     /**
      * Returns the login id that will be submitted to the mobile server.
      *

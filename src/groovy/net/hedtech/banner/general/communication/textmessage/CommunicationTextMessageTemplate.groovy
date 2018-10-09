@@ -21,6 +21,9 @@ import javax.persistence.Table
 @ToString
 class CommunicationTextMessageTemplate extends CommunicationTemplate implements Serializable {
 
+    @Column(name = "GCBTMTL_TOLIST")
+    String toList
+
     @Column(name = "GCBTMTL_FOOTER", nullable = true)
     String footer
 
@@ -38,6 +41,7 @@ class CommunicationTextMessageTemplate extends CommunicationTemplate implements 
     }
 
     static constraints = {
+        toList(nullable: true, maxSize: 1020)
         footer(nullable: true)
         message(nullable: true)
         destinationLink(nullable: true)
@@ -46,6 +50,6 @@ class CommunicationTextMessageTemplate extends CommunicationTemplate implements 
 
     @Override
     final CommunicationTemplateVisitor accept(CommunicationTemplateVisitor visitor) {
-//        visitor.visitTextMessage( this )
+        visitor.visitTextMessage( this )
     }
 }

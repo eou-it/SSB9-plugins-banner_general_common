@@ -5,24 +5,17 @@ package net.hedtech.banner.general.communication.textmessage
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import net.hedtech.banner.general.communication.template.CommunicationMessage
 
 /**
- * Represents a Text Message entity with placeholders for attributes of a typical message
- * as sent from communication management.
+ * Represents the final merged template after all the recipient data is applied to the template.
+ * This is the object that will be send to the SMS service.
  */
-@SuppressWarnings("serial")
-@EqualsAndHashCode
 @ToString
-class CommunicationTextMessage extends CommunicationMessage {
-
+@EqualsAndHashCode
+class CommunicationMergedTextMessageTemplate {
     String toList
-
-    String messageContent
-
     String footer
-
+    String message
     String destinationLink
-
     String destinationLabel
 }
