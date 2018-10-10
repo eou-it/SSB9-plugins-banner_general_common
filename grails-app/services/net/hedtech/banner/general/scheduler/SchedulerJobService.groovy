@@ -17,6 +17,7 @@ import org.quartz.SchedulerException
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
 import org.quartz.TriggerBuilder
+import org.quartz.TriggerKey
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate
@@ -82,7 +83,7 @@ class SchedulerJobService {
 
         try {
             TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
-                    .startAt(evenSecondDate(jobContext.scheduledStartDate))
+                    .startAt(jobContext.scheduledStartDate)
                     .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
                         .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
                         .withMisfireHandlingInstructionFireAndProceed())
@@ -189,6 +190,21 @@ class SchedulerJobService {
         } catch(SchedulerException e) {
             log.error(e)
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        }
+    }
+
+    public boolean unScheduleJob(String jobId, String service, String method) {
+        String groupId = service + "." + method
+        unScheduleJob( jobId, groupId )
+    }
+
+    public boolean unScheduleJob(String jobId, String groupId) {
+        TriggerKey triggerKey = new TriggerKey(jobId, groupId)
+        boolean result
+        try {
+            result = quartzScheduler.unscheduleJob(triggerKey)
+        } catch(Throwable t) {
+            log.error(t.getMessage())
         }
     }
 

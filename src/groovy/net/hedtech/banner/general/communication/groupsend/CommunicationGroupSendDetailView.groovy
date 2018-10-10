@@ -15,7 +15,7 @@ import javax.persistence.*
  *
  */
 @Entity
-@Table(name = "GVQ_GCBGSND_DETAIL")
+@Table(name = "GVQ_JOBS_DETAIL")
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
@@ -87,6 +87,9 @@ class CommunicationGroupSendDetailView implements Serializable {
 
     @Column(name = "organization_name")
     String organizationName;
+
+    @Column(name = "recurrent_message_id")
+    Long recurrentMessageId
 
     @Column(name = "population_calculation_date")
     @Temporal(TemporalType.TIMESTAMP)

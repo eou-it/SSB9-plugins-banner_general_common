@@ -4,10 +4,12 @@
 package net.hedtech.banner.general.communication.recurrence
 
 import grails.util.Holders
+import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendDetailView
+import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemView
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendListView
@@ -148,16 +150,108 @@ class CommunicationRecurrentMessageCompositeServiceConcurrentTests extends Commu
 
         sleepUntilGroupSendComplete(groupSend, 3 * 60)
 
-        // test delete group send
+        // test delete recurrent message
         assertEquals(1, fetchGroupSendCount(groupSend.id))
         assertEquals(5, fetchGroupSendItemCount(groupSend.id))
         assertEquals(5, CommunicationJob.findAll().size())
         assertEquals(5, CommunicationRecipientData.findAll().size())
-        communicationGroupSendCompositeService.deleteGroupSend(groupSend.id)
+        communicationRecurrentMessageCompositeService.deleteRecurrentMessage( recurrentMessage.id )
         assertEquals(0, fetchGroupSendCount(groupSend.id))
         assertEquals(0, fetchGroupSendItemCount(groupSend.id))
         assertEquals(0, CommunicationJob.findAll().size())
         assertEquals(0, CommunicationRecipientData.findAll().size())
+    }
+
+    @Test
+    void testStopStoppedRecurrentMessage() {
+        println "testStopStoppedRecurrentMessage"
+
+        CommunicationGroupSendRequest request = createRecurrentMessageRequest( "testStopStoppedRecurrentMessage" )
+        CommunicationRecurrentMessage recurrentMessage = communicationRecurrentMessageCompositeService.sendRecurrentMessageCommunication(request)
+        assertNotNull(recurrentMessage)
+
+        recurrentMessage = communicationRecurrentMessageCompositeService.stopRecurrentMessage( recurrentMessage.id )
+        assertTrue( recurrentMessage.currentExecutionState.equals( CommunicationGroupSendExecutionState.Stopped ) )
+        assertTrue( recurrentMessage.currentExecutionState.isTerminal() )
+
+        try{
+            communicationRecurrentMessageCompositeService.stopRecurrentMessage( recurrentMessage.id )
+            fail( "Shouldn't be able to stop a recurrent message that has already concluded." )
+        } catch( ApplicationException e ) {
+            assertEquals( "@@r1:cannotStopConcludedRecurrentMessage@@", e.getWrappedException().getMessage() )
+        }
+    }
+
+    @Test
+    void testStopCompletedRecurrentMessage() {
+        println "testStopCompletedRecurrentMessage"
+
+        CommunicationGroupSendRequest request = createRecurrentMessageRequest( "testStopCompletedRecurrentMessage" )
+        CommunicationRecurrentMessage recurrentMessage = communicationRecurrentMessageCompositeService.sendRecurrentMessageCommunication(request)
+        assertNotNull(recurrentMessage)
+
+        def isCompleted = {
+            def recurrentMsg = CommunicationRecurrentMessage.get(it)
+            recurrentMsg.refresh()
+            return recurrentMsg.currentExecutionState == CommunicationGroupSendExecutionState.Complete
+        }
+        assertTrueWithRetry(isCompleted, recurrentMessage.id, 30, 5)
+
+        assertTrue( recurrentMessage.currentExecutionState.equals( CommunicationGroupSendExecutionState.Complete ) )
+
+        try {
+            communicationRecurrentMessageCompositeService.stopRecurrentMessage( recurrentMessage.id )
+            fail("Shouldn't be able to stop a recurrent message that has already concluded.")
+        } catch (ApplicationException e) {
+            assertEquals( "@@r1:cannotStopConcludedRecurrentMessage@@", e.getWrappedException().getMessage() )
+        }
+    }
+
+    private CommunicationGroupSendRequest createRecurrentMessageRequest( String defaultName ) {
+        CommunicationPopulationQuery populationQuery = communicationPopulationQueryCompositeService.createPopulationQuery(newPopulationQuery("testPop"))
+        CommunicationPopulationQueryVersion queryVersion = communicationPopulationQueryCompositeService.publishPopulationQuery(populationQuery)
+        populationQuery = queryVersion.query
+
+        CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery(populationQuery, "testPopulation")
+        CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(population.id, 'BCMADMIN')
+        assertEquals(populationCalculation.status, CommunicationPopulationCalculationStatus.PENDING_EXECUTION)
+        def isAvailable = {
+            def theCalculation = CommunicationPopulationCalculation.get(it)
+            theCalculation.refresh()
+            return theCalculation.status == CommunicationPopulationCalculationStatus.AVAILABLE
+        }
+        assertTrueWithRetry(isAvailable, populationCalculation.id, 15, 5)
+
+        List queryAssociations = CommunicationPopulationVersionQueryAssociation.findByPopulationVersion(populationCalculation.populationVersion)
+        assertEquals(1, queryAssociations.size())
+
+        def selectionListEntryList = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(populationCalculation.selectionList.id)
+        assertNotNull(selectionListEntryList)
+        assertEquals(5, selectionListEntryList.size())
+
+
+        Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
+        calendar.add(Calendar.SECOND, 30)
+        Date requestedRunTime = calendar.getTime()
+
+        calendar.add(Calendar.SECOND, 30)
+        int month = calendar.get(Calendar.MONTH) + 1;
+        //Cron expression set to run 30 seconds from current time
+        String cronExpression = "" + calendar.get(Calendar.SECOND) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " " + month + " ? " + calendar.get(Calendar.YEAR);
+
+        CommunicationGroupSendRequest request = new CommunicationGroupSendRequest(
+                name: "testRecurrentMessageRequestByTemplateByPopulation",
+                populationId: population.id,
+                templateId: defaultEmailTemplate.id,
+                organizationId: defaultOrganization.id,
+                referenceId: UUID.randomUUID().toString(),
+                scheduledStartDate: requestedRunTime,
+                cronExpression: cronExpression,
+                cronTimezone: calendar.getTimeZone().getID(),
+                recalculateOnSend: false
+        )
+
+        return request
     }
 
     private String generateCronExpressionNow(final  String seconds,final String minutes, final String hours, final String dayOfMonth, final String month, final String dayOfWeek, final String year) {

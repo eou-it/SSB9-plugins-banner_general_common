@@ -11,12 +11,7 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendCompositeService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendRequest
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
-import net.hedtech.banner.general.communication.recurrence.CommunicationRecurrentMessage
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendRequest
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
-import net.hedtech.banner.general.communication.population.CommunicationPopulation
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
@@ -210,6 +205,69 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
         return recurrentMessage
+    }
+
+    /**
+     * Stops a recurrent message. The recurrent message must be running otherwise an application exception will be thrown.
+     * @param recurrentMessageId the long id of the recurrent message
+     * @return the updated (stopped) recurrent message
+     */
+    public CommunicationRecurrentMessage stopRecurrentMessage( Long recurrentMessageId ) {
+        if (log.isDebugEnabled()) log.debug( "Stopping recurrent message with id = ${recurrentMessageId}." )
+
+        CommunicationRecurrentMessage recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.get( recurrentMessageId )
+
+        if (recurrentMessage.currentExecutionState.isTerminal()) {
+            log.warn( "Recurrent message with id = ${recurrentMessage.id} has already concluded with execution state ${recurrentMessage.currentExecutionState.toString()}." )
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationRecurrentMessageService.class, "cannotStopConcludedRecurrentMessage" )
+        }
+
+        if (recurrentMessage.jobId != null) {
+            this.schedulerJobService.deleteScheduledJob( recurrentMessage.jobId, recurrentMessage.groupId )
+        }
+
+        //Refresh the recuurent message as the delete scheduled job runs the DB trigger to update the recurrent message status to Complete
+        recurrentMessage.refresh()
+        recurrentMessage.stoppedDate = new Date()
+        recurrentMessage.currentExecutionState = CommunicationGroupSendExecutionState.Stopped
+        recurrentMessage = communicationRecurrentMessageService.update(recurrentMessage)
+
+        return recurrentMessage
+    }
+
+    /**
+     * Deletes a recurrent message and it's dependent objects. The recurrent messages must not be running otherwise an
+     * application exception will be thrown.
+     *
+     * @param recurrentMessageId the long id of the recurrent message
+     */
+    public void deleteRecurrentMessage( Long recurrentMessageId ) {
+        if (log.isDebugEnabled()) {
+            log.debug( "deleteRecurrentMessage for id = ${recurrentMessageId}." )
+        }
+
+        CommunicationRecurrentMessage recurrentMessage = CommunicationRecurrentMessage.get(recurrentMessageId)
+        if (!recurrentMessage) {
+            throw CommunicationExceptionFactory.createNotFoundException( recurrentMessageId, CommunicationRecurrentMessage.class )
+        }
+
+        if (!recurrentMessage.currentExecutionState.equals(CommunicationGroupSendExecutionState.New) && !recurrentMessage.currentExecutionState.terminal) {
+            throw CommunicationExceptionFactory.createApplicationException( CommunicationRecurrentMessageCompositeService.class, "cannotDeleteRunningRecurrentMessage" )
+        }
+
+        if(recurrentMessage.jobId != null) {
+            schedulerJobService.deleteScheduledJob(recurrentMessage.jobId, recurrentMessage.groupId)
+        }
+
+        //delete all group sends belonging to this recurrent message. For each group send, then remove job and recipient data
+        List<CommunicationGroupSend> groupSends = CommunicationGroupSend.findByRecurrentMessageId(recurrentMessageId)
+        for(CommunicationGroupSend groupSend : groupSends) {
+            communicationGroupSendCompositeService.deleteGroupSend(groupSend.id)
+        }
+
+        //Refresh the recuurent message as the delete scheduled job runs the DB trigger to update the recurrent message status to Complete
+        recurrentMessage.refresh()
+        communicationRecurrentMessageService.delete( recurrentMessage )
     }
 
     private void validateTemplateAndParameters(CommunicationRecurrentMessage recurrentMessage) {
