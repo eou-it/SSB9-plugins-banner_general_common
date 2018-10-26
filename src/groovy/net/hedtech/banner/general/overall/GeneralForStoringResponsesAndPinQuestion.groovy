@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- Copyright 2013-2017 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 /**
  Banner Automator Version: 1.29
@@ -8,6 +8,7 @@
  */
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import javax.persistence.*
 
 /**
@@ -16,6 +17,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "GV_GOBANSR")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm",
         query = """select count(a.answerDescription)
@@ -133,41 +135,6 @@ class GeneralForStoringResponsesAndPinQuestion implements Serializable {
 					pinQuestion=$pinQuestion]"""
 	}
 
-
-	boolean equals(o) {
-	    if (this.is(o)) return true
-	    if (!(o instanceof GeneralForStoringResponsesAndPinQuestion)) return false
-	    GeneralForStoringResponsesAndPinQuestion that = (GeneralForStoringResponsesAndPinQuestion) o
-        if(id != that.id) return false
-        if(version != that.version) return false
-        if(pidm != that.pidm) return false
-        if(number != that.number) return false
-        if(questionDescription != that.questionDescription) return false
-        if(answerDescription != that.answerDescription) return false
-        if(answerSalt != that.answerSalt) return false
-        if(lastModified != that.lastModified) return false
-        if(lastModifiedBy != that.lastModifiedBy) return false
-        if(dataOrigin != that.dataOrigin) return false
-        if(pinQuestion != that.pinQuestion) return false
-        return true
-    }
-
-
-	int hashCode() {
-		int result
-	    result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (number != null ? number.hashCode() : 0)
-        result = 31 * result + (questionDescription != null ? questionDescription.hashCode() : 0)
-        result = 31 * result + (answerDescription != null ? answerDescription.hashCode() : 0)
-        result = 31 * result + (answerSalt != null ? answerSalt.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (pinQuestion != null ? pinQuestion.hashCode() : 0)
-        return result
-	}
 
 	static constraints = {
 		pidm(nullable:false, min: -99999999, max: 99999999 )

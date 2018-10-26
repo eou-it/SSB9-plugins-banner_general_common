@@ -1,8 +1,9 @@
 /*********************************************************************************
-  Copyright 2010-2014 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.Degree
 import net.hedtech.banner.general.system.MajorMinorConcentration
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
@@ -31,6 +32,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "SV_SORMINR")
+@EqualsAndHashCode(includeFields = true)
 class PriorCollegeMinor implements Serializable {
 
     /**
@@ -120,42 +122,6 @@ class PriorCollegeMinor implements Serializable {
 					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution,
 					degree=$degree,
 					majorMinorConcentrationMinor=$majorMinorConcentrationMinor]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof PriorCollegeMinor)) return false
-        PriorCollegeMinor that = (PriorCollegeMinor) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (pidm != that.pidm) return false
-        if (degreeSequenceNumber != that.degreeSequenceNumber) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
-        if (degree != that.degree) return false
-        if (majorMinorConcentrationMinor != that.majorMinorConcentrationMinor) return false
-//        if (beforeUpdate != that.beforeUpdate) return false;
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (pidm != null ? pidm.hashCode() : 0)
-        result = 31 * result + (degreeSequenceNumber != null ? degreeSequenceNumber.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
-        result = 31 * result + (degree != null ? degree.hashCode() : 0)
-        result = 31 * result + (majorMinorConcentrationMinor != null ? majorMinorConcentrationMinor.hashCode() : 0)
-//        result = 31 * result + (beforeUpdate != null ? beforeUpdate.hashCode() : 0);
-        return result
     }
 
 

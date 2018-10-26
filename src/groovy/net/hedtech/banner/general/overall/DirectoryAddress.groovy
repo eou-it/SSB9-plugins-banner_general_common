@@ -1,7 +1,9 @@
 /*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2018 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import net.hedtech.banner.general.system.AddressType
 import net.hedtech.banner.general.system.DirectoryOption
@@ -29,6 +31,7 @@ import javax.persistence.ManyToOne
  */
 @Entity
 @Table(name = "GORDADD")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "DirectoryAddress.fetchByDirectoryOptionOrderByPriority",
         query = """FROM  DirectoryAddress a
@@ -117,38 +120,6 @@ class DirectoryAddress implements Serializable {
 					directoryOption=$directoryOption, 
 					addressType=$addressType, 
 					telephoneType=$telephoneType]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof DirectoryAddress)) return false
-        DirectoryAddress that = (DirectoryAddress) o
-        if(id != that.id) return false
-        if(version != that.version) return false
-        if(priorityNumber != that.priorityNumber) return false
-        if(lastModified != that.lastModified) return false
-        if(lastModifiedBy != that.lastModifiedBy) return false
-        if(dataOrigin != that.dataOrigin) return false
-        if(directoryOption != that.directoryOption) return false
-        if(addressType != that.addressType) return false
-        if(telephoneType != that.telephoneType) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (priorityNumber != null ? priorityNumber.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (directoryOption != null ? directoryOption.hashCode() : 0)
-        result = 31 * result + (addressType != null ? addressType.hashCode() : 0)
-        result = 31 * result + (telephoneType != null ? telephoneType.hashCode() : 0)
-        return result
     }
 
 

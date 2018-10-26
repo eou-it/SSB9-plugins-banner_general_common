@@ -1,7 +1,9 @@
 /*********************************************************************************
- Copyright 2017 Ellucian Company L.P. and its affiliates.
+ Copyright 2017-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.BuildingAndRoomAttribute
@@ -13,6 +15,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SLRRDEF")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
         @NamedQuery(name = "HousingRoomAttributesDefinition.fetchByBuildingRoomNumberAndTermEffective",
                 query = """FROM HousingRoomAttributesDefinition hrad WHERE
@@ -113,40 +116,6 @@ class HousingRoomAttributesDefinition implements Serializable {
 					dataOrigin=$dataOrigin,
 					building=$building,
 					buildingAndRoomAttribute=$buildingAndRoomAttribute]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof HousingRoomAttributesDefinition)) return false
-        HousingRoomAttributesDefinition that = (HousingRoomAttributesDefinition) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (roomNumber != that.roomNumber) return false
-        if (termEffective != that.termEffective) return false
-        if (mustMatch != that.mustMatch) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (building != that.building) return false
-        if (buildingAndRoomAttribute != that.buildingAndRoomAttribute) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0)
-        result = 31 * result + (termEffective != null ? termEffective.hashCode() : 0)
-        result = 31 * result + (mustMatch != null ? mustMatch.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (building != null ? building.hashCode() : 0)
-        result = 31 * result + (buildingAndRoomAttribute != null ? buildingAndRoomAttribute.hashCode() : 0)
-        return result
     }
 
 

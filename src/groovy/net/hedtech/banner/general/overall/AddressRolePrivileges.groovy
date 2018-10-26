@@ -1,8 +1,10 @@
 /*********************************************************************************
- Copyright 2009-2013 Ellucian Company L.P. and its affiliates.
+ Copyright 2009-2018 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import net.hedtech.banner.general.system.AddressType
 import net.hedtech.banner.service.DatabaseModifiesState
@@ -28,6 +30,7 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "GORADRL")
+@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "AddressRolePrivileges.fetchPrivilegedByRole",
         query = """FROM AddressRolePrivileges a
@@ -118,37 +121,6 @@ class AddressRolePrivileges  implements Serializable{
             dataOrigin=${dataOrigin},
             addressType=${addressType}
         ]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof AddressRolePrivileges)) return false
-        AddressRolePrivileges that = (AddressRolePrivileges)o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (role != that.role) return false
-        if (privilegeIndicator != that.privilegeIndicator) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (addressType != that.addressType) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (role != null ? role.hashCode() : 0)
-        result = 31 * result + (privilegeIndicator != null ? privilegeIndicator.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (addressType != null ? addressType.hashCode() : 0)
-        return result
     }
 
 

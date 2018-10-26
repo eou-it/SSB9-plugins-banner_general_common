@@ -1,10 +1,9 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.query.DynamicFinder
@@ -16,6 +15,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SORBDMO")
+@EqualsAndHashCode(includeFields = true)
 class SourceBackgroundInstitutionDemographic implements Serializable {
 
     /**
@@ -106,42 +106,6 @@ class SourceBackgroundInstitutionDemographic implements Serializable {
 					lastModifiedBy=$lastModifiedBy, 
 					dataOrigin=$dataOrigin, 
 					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof SourceBackgroundInstitutionDemographic)) return false
-        SourceBackgroundInstitutionDemographic that = (SourceBackgroundInstitutionDemographic) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (demographicYear != that.demographicYear) return false
-        if (enrollment != that.enrollment) return false
-        if (numberOfSeniors != that.numberOfSeniors) return false
-        if (meanFamilyIncome != that.meanFamilyIncome) return false
-        if (percentCollegeBound != that.percentCollegeBound) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (demographicYear != null ? demographicYear.hashCode() : 0)
-        result = 31 * result + (enrollment != null ? enrollment.hashCode() : 0)
-        result = 31 * result + (numberOfSeniors != null ? numberOfSeniors.hashCode() : 0)
-        result = 31 * result + (meanFamilyIncome != null ? meanFamilyIncome.hashCode() : 0)
-        result = 31 * result + (percentCollegeBound != null ? percentCollegeBound.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
-        return result
     }
 
 

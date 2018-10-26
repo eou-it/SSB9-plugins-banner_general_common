@@ -1,10 +1,9 @@
 /*********************************************************************************
-  Copyright 2010-2013 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
-/*******************************************************************************
- Copyright 2013 Ellucian Company L.P. and its affiliates.
- ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import groovy.transform.EqualsAndHashCode
 
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.query.DynamicFinder
@@ -30,6 +29,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "SORBCMT")
+@EqualsAndHashCode(includeFields = true)
 class SourceBackgroundInstitutionComment implements Serializable {
 
     /**
@@ -99,36 +99,6 @@ class SourceBackgroundInstitutionComment implements Serializable {
 					lastModifiedBy=$lastModifiedBy, 
 					dataOrigin=$dataOrigin, 
 					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution]"""
-    }
-
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof SourceBackgroundInstitutionComment)) return false
-        SourceBackgroundInstitutionComment that = (SourceBackgroundInstitutionComment) o
-        if (id != that.id) return false
-        if (version != that.version) return false
-        if (sequenceNumber != that.sequenceNumber) return false
-        if (commentData != that.commentData) return false
-        if (lastModified != that.lastModified) return false
-        if (lastModifiedBy != that.lastModifiedBy) return false
-        if (dataOrigin != that.dataOrigin) return false
-        if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
-        return true
-    }
-
-
-    int hashCode() {
-        int result
-        result = (id != null ? id.hashCode() : 0)
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (sequenceNumber != null ? sequenceNumber.hashCode() : 0)
-        result = 31 * result + (commentData != null ? commentData.hashCode() : 0)
-        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
-        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
-        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
-        result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
-        return result
     }
 
 
