@@ -30,7 +30,7 @@ import javax.persistence.Version
  */
 @Entity
 @Table(name = "GORADRL")
-@EqualsAndHashCode(includeFields = true)
+@EqualsAndHashCode
 @NamedQueries(value = [
 @NamedQuery(name = "AddressRolePrivileges.fetchPrivilegedByRole",
         query = """FROM AddressRolePrivileges a
