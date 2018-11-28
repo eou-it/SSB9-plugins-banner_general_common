@@ -40,7 +40,7 @@ class CommunicationRecurrentMessageCompositeService {
      * @param request the communication to initiate
      */
     public CommunicationRecurrentMessage sendRecurrentMessageCommunication(CommunicationGroupSendRequest request ) {
-        if (log.isDebugEnabled()) log.debug( "Method sendAsynchronousGroupCommunication reached." );
+        if (log.isDebugEnabled()) log.debug( "Method sendRecurrentMessageCommunication reached." );
         if (!request) throw new IllegalArgumentException( "request may not be null!" )
 
         String jobName = request.getName();
@@ -106,6 +106,33 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.groupId = jobReceipt.groupId
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )
         return recurrentMessage
+    }
+
+    private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
+
+        Date now = new Date(System.currentTimeMillis())
+        if (now.after(recurrentMessage.startDate)) {
+            throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
+        }
+        if (recurrentMessage.endDate) {
+            if (now.after(recurrentMessage.endDate)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleEndDate")
+            }
+        }
+
+        SchedulerJobContext jobContext = new SchedulerJobContext( recurrentMessage.jobId )
+                .setBannerUser( bannerUser )
+                .setMepCode( recurrentMessage.mepCode )
+                .setCronSchedule( recurrentMessage.cronExpression )
+                .setCronScheduleTimezone(recurrentMessage.cronTimezone)
+                .setScheduledStartDate(recurrentMessage.startDate)
+                .setEndDate(recurrentMessage.endDate)
+                .setParameter( "recurrentMessageId", recurrentMessage.id )
+
+        jobContext.setJobHandle( "communicationRecurrentMessageCompositeService", "generateGroupSendFired" )
+                .setErrorHandle( "communicationRecurrentMessageCompositeService", "generateGroupSendFailed" )
+
+        SchedulerJobReceipt jobReceipt = schedulerJobService.reScheduleCronServiceMethod( jobContext )
     }
 
     public CommunicationRecurrentMessage generateGroupSendFired( SchedulerJobContext jobContext ) {
@@ -268,6 +295,38 @@ class CommunicationRecurrentMessageCompositeService {
         //Refresh the recuurent message as the delete scheduled job runs the DB trigger to update the recurrent message status to Complete
         recurrentMessage.refresh()
         communicationRecurrentMessageService.delete( recurrentMessage )
+    }
+
+    public CommunicationRecurrentMessage updateRecurrentMessageCommunication(CommunicationRecurrentMessage recurrentMessage ) {
+        if (log.isDebugEnabled()) log.debug( "Method updateRecurrentMessageCommunication reached." );
+
+        boolean rescheduleNeeded = false;
+        CommunicationRecurrentMessage oldRecurrentMessage = CommunicationRecurrentMessage.get(recurrentMessage.id)
+        if(!oldRecurrentMessage.cronExpression.equalsIgnoreCase(recurrentMessage.cronExpression)) {
+            rescheduleNeeded = true;
+        }
+        if(oldRecurrentMessage.startDate.compareTo(recurrentMessage.startDate) != 0) {
+            rescheduleNeeded = true;
+        }
+        if(oldRecurrentMessage.endDate.compareTo(recurrentMessage.endDate) != 0) {
+            rescheduleNeeded = true;
+        }
+
+        recurrentMessage.createdBy = oldRecurrentMessage.createdBy
+        recurrentMessage.creationDateTime = oldRecurrentMessage.creationDateTime
+        recurrentMessage.parameterNameValueMap = oldRecurrentMessage.parameterNameValueMap
+        recurrentMessage.jobId = oldRecurrentMessage.jobId
+        recurrentMessage.groupId = oldRecurrentMessage.groupId
+        recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )
+
+        if(rescheduleNeeded) {
+            String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
+
+            reScheduleRecurrentMessage(recurrentMessage, bannerUser)
+        }
+
+
+        return recurrentMessage
     }
 
     private void validateTemplateAndParameters(CommunicationRecurrentMessage recurrentMessage) {

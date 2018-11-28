@@ -122,6 +122,42 @@ class SchedulerJobService {
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
+    /**
+     * Re-Schedules calling a recurring service method using the quartz scheduler CRON schedule. Used when the recurring schedule needs to be updated.
+     * The service method invoked should take a single map as a parameter.
+     *
+     * @param runTime the date to wait until starting the task
+     * @param jobId a job identifier; a uuid is one way to go
+     * @param bannerUser a banner id to proxy as before invoking the method
+     * @param mepCode mep or vpdi code, may be null if the db is not a mep database
+     * @param service the name of the service to call
+     * @param method the method of the service to invoke
+     * @param parameters an optional map to pass to to the service method
+     */
+    public void reScheduleCronServiceMethod( SchedulerJobContext jobContext ) {
+        JobDetail jobDetail = createJobDetail( jobContext )
+
+        try {
+            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+                    .startAt(jobContext.scheduledStartDate)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
+                    .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
+                    .withMisfireHandlingInstructionFireAndProceed())
+
+            if (jobContext.endDate != null) {
+                builder.endTime = jobContext.endDate
+            }
+            CronTrigger trigger = builder.build()
+
+            rescheduleJob(jobContext.jobId, jobContext.groupId, trigger)
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        } catch(Throwable t) {
+            log.error(t)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
+        }
+    }
 
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public Object invokeServiceMethodInNewTransaction( String serviceName, String method, context ) {
@@ -180,6 +216,23 @@ class SchedulerJobService {
     private Date scheduleJob(JobDetail jobDetail, Trigger trigger) {
         try {
             return quartzScheduler.scheduleJob(jobDetail, trigger)
+        } catch (NoClassDefFoundError e) {
+            log.error( e )
+            if ("weblogic/jdbc/vendor/oracle/OracleThinBlob".equals( e.message ) && isConfiguredForWeblogic()) {
+                throw CommunicationExceptionFactory.createApplicationException( SchedulerJobService.class, "weblogicOracleDriverNotFound" )
+            } else {
+                throw e
+            }
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        }
+    }
+
+    private Date rescheduleJob(String jobId, String groupId, Trigger newTrigger) {
+        TriggerKey triggerKey = new TriggerKey(jobId, groupId)
+        try {
+            return quartzScheduler.rescheduleJob(triggerKey, newTrigger)
         } catch (NoClassDefFoundError e) {
             log.error( e )
             if ("weblogic/jdbc/vendor/oracle/OracleThinBlob".equals( e.message ) && isConfiguredForWeblogic()) {
