@@ -212,7 +212,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 }
             }
 
-            return merge( formatString ?: "", attributeMap )
+            return merge( formatString.toLowerCase() ?: "", attributeMap )
         } catch (ApplicationException e) {
             if (log.debugEnabled) log.debug("Application exception while calculating field", e);
             throw e;
