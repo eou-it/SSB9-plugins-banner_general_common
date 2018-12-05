@@ -79,7 +79,27 @@ class CommunicationRecurrentMessageCompositeService {
 
     private CommunicationRecurrentMessage scheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
 
-        Date now = new Date(System.currentTimeMillis())
+        Calendar todayCalendar = Calendar.getInstance()
+        todayCalendar.set(Calendar.SECOND, 0)
+        todayCalendar.set(Calendar.MILLISECOND, 0)
+        //Get the current date and time
+        Date now = todayCalendar.getTime()
+
+        todayCalendar.set(Calendar.HOUR_OF_DAY, 0)
+        todayCalendar.set(Calendar.MINUTE, 0)
+        //Get todays date only
+        Date today = todayCalendar.getTime()
+
+        if(recurrentMessage.startDate.compareTo(today) == 0) {
+            Calendar startDateCalendar = Calendar.getInstance()
+            startDateCalendar.setTime(recurrentMessage.startDate)
+            startDateCalendar.set(Calendar.HOUR_OF_DAY, now.getHours())
+            startDateCalendar.set(Calendar.MINUTE, now.getMinutes())
+            startDateCalendar.set(Calendar.SECOND, 0)
+            startDateCalendar.set(Calendar.MILLISECOND, 0)
+            recurrentMessage.startDate = startDateCalendar.getTime()
+        }
+
         if (now.after(recurrentMessage.startDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
         }
@@ -110,7 +130,27 @@ class CommunicationRecurrentMessageCompositeService {
 
     private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
 
-        Date now = new Date(System.currentTimeMillis())
+        Calendar todayCalendar = Calendar.getInstance()
+        todayCalendar.set(Calendar.SECOND, 0)
+        todayCalendar.set(Calendar.MILLISECOND, 0)
+        //Get the current date and time
+        Date now = todayCalendar.getTime()
+
+        todayCalendar.set(Calendar.HOUR_OF_DAY, 0)
+        todayCalendar.set(Calendar.MINUTE, 0)
+        //Get todays date only
+        Date today = todayCalendar.getTime()
+
+        if(recurrentMessage.startDate.compareTo(today) == 0) {
+            Calendar startDateCalendar = Calendar.getInstance()
+            startDateCalendar.setTime(recurrentMessage.startDate)
+            startDateCalendar.set(Calendar.HOUR_OF_DAY, now.getHours())
+            startDateCalendar.set(Calendar.MINUTE, now.getMinutes())
+            startDateCalendar.set(Calendar.SECOND, 0)
+            startDateCalendar.set(Calendar.MILLISECOND, 0)
+            recurrentMessage.startDate = startDateCalendar.getTime()
+        }
+
         if (now.after(recurrentMessage.startDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
         }
@@ -302,14 +342,22 @@ class CommunicationRecurrentMessageCompositeService {
 
         boolean rescheduleNeeded = false;
         CommunicationRecurrentMessage oldRecurrentMessage = CommunicationRecurrentMessage.get(recurrentMessage.id)
-        if(!oldRecurrentMessage.cronExpression.equalsIgnoreCase(recurrentMessage.cronExpression)) {
+        if(recurrentMessage.cronExpression != null && !oldRecurrentMessage.cronExpression.equalsIgnoreCase(recurrentMessage.cronExpression)) {
             rescheduleNeeded = true;
         }
-        if(oldRecurrentMessage.startDate.compareTo(recurrentMessage.startDate) != 0) {
+        if(recurrentMessage.startDate != null && oldRecurrentMessage.startDate.compareTo(recurrentMessage.startDate) != 0) {
             rescheduleNeeded = true;
         }
-        if(oldRecurrentMessage.endDate.compareTo(recurrentMessage.endDate) != 0) {
-            rescheduleNeeded = true;
+        if(recurrentMessage.endDate != null) {
+            if(oldRecurrentMessage.endDate != null) {
+                //there was an update to existing end date, so compare them
+                if(oldRecurrentMessage.endDate.compareTo(recurrentMessage.endDate) != 0) {
+                    rescheduleNeeded = true;
+                }
+            }  else {
+                //new end date added
+                rescheduleNeeded = true;
+            }
         }
 
         recurrentMessage.createdBy = oldRecurrentMessage.createdBy
