@@ -99,10 +99,6 @@ class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskMa
             CommunicationGroupSendItem groupSendItem = task as CommunicationGroupSendItem
             log.info( "Marking completed group send item id = " + groupSendItem.getId() + ", pidm = " + groupSendItem.recipientPidm + "." )
 
-            //Update the group send cumulative status as Complete
-            CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
-            groupSend.updateCumulativeStatus( CommunicationGroupSendExecutionState.Complete )
-            groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         }
     }
 

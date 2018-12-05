@@ -179,7 +179,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 int maxRows = (!returnsArrayArguments) ? 1 : 50
                 Connection conn = (Connection) sessionFactory.getCurrentSession().connection()
                 asynchronousBannerAuthenticationSpoofer.setMepContext(conn, mepCode)
-                sql = new Sql( (Connection) sessionFactory.getCurrentSession().connection() )
+                sql = new Sql(conn)
                 List<GroovyRowResult> resultSet
                 if (parameterNameValueMap && parameterNameValueMap.size() > 0) {
                     resultSet = sql.rows( sqlStatement, parameterNameValueMap, 0, maxRows )
@@ -212,7 +212,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 }
             }
 
-            return merge( formatString.toLowerCase() ?: "", attributeMap )
+            return merge( formatString.replaceAll( /\$\w+\$/) {m  ->  m.toString().toLowerCase()} ?: "", attributeMap )
         } catch (ApplicationException e) {
             if (log.debugEnabled) log.debug("Application exception while calculating field", e);
             throw e;
