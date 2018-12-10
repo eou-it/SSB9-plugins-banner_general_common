@@ -21,6 +21,8 @@ import org.apache.commons.lang.NotImplementedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Transactional
 
+import java.text.SimpleDateFormat
+
 /**
  * Communication Recurrent Message Composite Service is responsible for initiating and processing recurrent communications.
  * Controllers and other client code should generally work through this service for interacting with recurrent message
@@ -79,28 +81,13 @@ class CommunicationRecurrentMessageCompositeService {
 
     private CommunicationRecurrentMessage scheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
 
-        Calendar todayCalendar = Calendar.getInstance()
-        todayCalendar.set(Calendar.SECOND, 0)
-        todayCalendar.set(Calendar.MILLISECOND, 0)
-        //Get the current date and time
-        Date now = todayCalendar.getTime()
+        Date now = new Date()
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+        Date today = sdf.parse(sdf.format(now))
 
-        todayCalendar.set(Calendar.HOUR_OF_DAY, 0)
-        todayCalendar.set(Calendar.MINUTE, 0)
-        //Get todays date only
-        Date today = todayCalendar.getTime()
+        Date scheduledDate = sdf.parse(sdf.format(recurrentMessage.startDate))
 
-        if(recurrentMessage.startDate.compareTo(today) == 0) {
-            Calendar startDateCalendar = Calendar.getInstance()
-            startDateCalendar.setTime(recurrentMessage.startDate)
-            startDateCalendar.set(Calendar.HOUR_OF_DAY, now.getHours())
-            startDateCalendar.set(Calendar.MINUTE, now.getMinutes())
-            startDateCalendar.set(Calendar.SECOND, 0)
-            startDateCalendar.set(Calendar.MILLISECOND, 0)
-            recurrentMessage.startDate = startDateCalendar.getTime()
-        }
-
-        if (now.after(recurrentMessage.startDate)) {
+        if (!today.compareTo(scheduledDate) == 0 && now.after(recurrentMessage.startDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
         }
         if (recurrentMessage.endDate) {
@@ -130,28 +117,13 @@ class CommunicationRecurrentMessageCompositeService {
 
     private void reScheduleRecurrentMessage( CommunicationRecurrentMessage recurrentMessage, String bannerUser ) {
 
-        Calendar todayCalendar = Calendar.getInstance()
-        todayCalendar.set(Calendar.SECOND, 0)
-        todayCalendar.set(Calendar.MILLISECOND, 0)
-        //Get the current date and time
-        Date now = todayCalendar.getTime()
+        Date now = new Date()
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+        Date today = sdf.parse(sdf.format(now))
 
-        todayCalendar.set(Calendar.HOUR_OF_DAY, 0)
-        todayCalendar.set(Calendar.MINUTE, 0)
-        //Get todays date only
-        Date today = todayCalendar.getTime()
+        Date scheduledDate = sdf.parse(sdf.format(recurrentMessage.startDate))
 
-        if(recurrentMessage.startDate.compareTo(today) == 0) {
-            Calendar startDateCalendar = Calendar.getInstance()
-            startDateCalendar.setTime(recurrentMessage.startDate)
-            startDateCalendar.set(Calendar.HOUR_OF_DAY, now.getHours())
-            startDateCalendar.set(Calendar.MINUTE, now.getMinutes())
-            startDateCalendar.set(Calendar.SECOND, 0)
-            startDateCalendar.set(Calendar.MILLISECOND, 0)
-            recurrentMessage.startDate = startDateCalendar.getTime()
-        }
-
-        if (now.after(recurrentMessage.startDate)) {
+        if (!today.compareTo(scheduledDate) == 0 && now.after(recurrentMessage.startDate)) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
         }
         if (recurrentMessage.endDate) {
@@ -345,9 +317,27 @@ class CommunicationRecurrentMessageCompositeService {
         if(recurrentMessage.cronExpression != null && !oldRecurrentMessage.cronExpression.equalsIgnoreCase(recurrentMessage.cronExpression)) {
             rescheduleNeeded = true;
         }
+
+        Date now = new Date()
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+        Date today = sdf.parse(sdf.format(now))
+
+        Date scheduledDate = sdf.parse(sdf.format(recurrentMessage.startDate))
+        Date oldScheduledDate = sdf.parse(sdf.format(oldRecurrentMessage.startDate))
+
+        if(today.compareTo(scheduledDate)== 0) {
+            if(today.compareTo(oldScheduledDate) == 0) {
+                //no change to start date as it the scheduled date is for today
+                recurrentMessage.startDate = oldRecurrentMessage.startDate
+            } else {
+                recurrentMessage.startDate = now
+            }
+        }
+
         if(recurrentMessage.startDate != null && oldRecurrentMessage.startDate.compareTo(recurrentMessage.startDate) != 0) {
             rescheduleNeeded = true;
         }
+
         if(recurrentMessage.endDate != null) {
             if(oldRecurrentMessage.endDate != null) {
                 //there was an update to existing end date, so compare them

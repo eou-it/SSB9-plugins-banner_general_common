@@ -9,6 +9,8 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
 
+import java.text.SimpleDateFormat
+
 class CommunicationRecurrentMessageService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
@@ -16,9 +18,28 @@ class CommunicationRecurrentMessageService extends ServiceBase {
         if (recurrentMessage.getCreatedBy() == null) {
             recurrentMessage.setCreatedBy( SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() )
         }
+
+        Date now = new Date()
         if (recurrentMessage.getCreationDateTime() == null) {
-            recurrentMessage.setCreationDateTime( new Date() )
+            recurrentMessage.setCreationDateTime( now )
         }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date today = sdf.parse(sdf.format(now));
+        if(today.compareTo(recurrentMessage.startDate) == 0) {
+            //Today's date
+            recurrentMessage.setStartDate(now)
+        } else if(today.compareTo(recurrentMessage.startDate) < 0) {
+            //future date
+            Calendar startDateCalendar = Calendar.getInstance()
+            startDateCalendar.setTime(recurrentMessage.startDate)
+            startDateCalendar.set(Calendar.HOUR_OF_DAY, 0)
+            startDateCalendar.set(Calendar.MINUTE, 0)
+            startDateCalendar.set(Calendar.SECOND, 0)
+            startDateCalendar.set(Calendar.MILLISECOND, 0)
+            recurrentMessage.setStartDate(startDateCalendar.getTime())
+        }
+
         if (recurrentMessage.getName() == null) {
             recurrentMessage.setName(CommunicationTemplate.get(recurrentMessage.templateId).getName())
         }
@@ -45,6 +66,25 @@ class CommunicationRecurrentMessageService extends ServiceBase {
             throw new ApplicationException(CommunicationRecurrentMessage, "@@r1:nameCannotBeNull@@")
         }
 
+        if(recurrentMessage.startDate.compareTo(oldRecurrentMessage.startDate) != 0) {
+            Date now = new Date()
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = sdf.parse(sdf.format(now));
+
+            if (today.compareTo(recurrentMessage.startDate) == 0) {
+                //Today's date
+                recurrentMessage.setStartDate(now)
+            } else if (today.compareTo(recurrentMessage.startDate) < 0) {
+                //future date
+                Calendar startDateCalendar = Calendar.getInstance()
+                startDateCalendar.setTime(recurrentMessage.startDate)
+                startDateCalendar.set(Calendar.HOUR_OF_DAY, 0)
+                startDateCalendar.set(Calendar.MINUTE, 0)
+                startDateCalendar.set(Calendar.SECOND, 0)
+                startDateCalendar.set(Calendar.MILLISECOND, 0)
+                recurrentMessage.setStartDate(startDateCalendar.getTime())
+            }
+        }
         recurrentMessage.setDeleted( false );
     }
 }
