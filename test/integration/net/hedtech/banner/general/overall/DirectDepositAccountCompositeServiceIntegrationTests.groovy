@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.exceptions.ApplicationException
@@ -781,17 +782,42 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     @Test
     void testAreAccountsUpdatableWithStudent() {
+        setupHoldersConfigWithRolesAllowingUpdates()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('CSRSTU002', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
         assertTrue userRoleService.hasUserRole('STUDENT')
         assertTrue directDepositAccountCompositeService.areAccountsUpdatable()
     }
 
     @Test
     void testAreAccountsUpdatableWithEmployee() {
+        setupHoldersConfigWithRolesAllowingUpdates()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('HOP510001', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
 
         assertTrue userRoleService.hasUserRole('EMPLOYEE')
         assertTrue directDepositAccountCompositeService.areAccountsUpdatable()
+    }
+
+    @Test
+    void testAreAccountsUpdatableWithStudentWithRolesNotAllowingUpdates() {
+        setupHoldersConfigWithRolesNotAllowingUpdates()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('CSRSTU002', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
+        assertTrue userRoleService.hasUserRole('STUDENT')
+        assertFalse directDepositAccountCompositeService.areAccountsUpdatable()
+    }
+
+    @Test
+    void testAreAccountsUpdatableWithEmployeeWithRolesNotAllowingUpdates() {
+        setupHoldersConfigWithRolesNotAllowingUpdates()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('HOP510001', '111111'))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+
+        assertTrue userRoleService.hasUserRole('EMPLOYEE')
+        assertFalse directDepositAccountCompositeService.areAccountsUpdatable()
     }
 
 
@@ -808,5 +834,41 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
         } finally {
             sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
+    }
+
+    private setupHoldersConfigWithRolesAllowingUpdates() {
+        Holders.config = [
+                grails: [
+                        plugin: [
+                                springsecurity: [
+                                        interceptUrlMap: [
+                                                '/ssb/UpdateAccount/**': [
+                                                        'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M',
+                                                        'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M'
+                                                ]
+                                        ]
+                                ]
+                        ]
+                ]
+        ]
+
+    }
+
+    private setupHoldersConfigWithRolesNotAllowingUpdates() {
+        Holders.config = [
+                grails: [
+                        plugin: [
+                                springsecurity: [
+                                        interceptUrlMap: [
+                                                '/ssb/UpdateAccount/**': [
+                                                        'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q',
+                                                        'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q'
+                                                ]
+                                        ]
+                                ]
+                        ]
+                ]
+        ]
+
     }
 }

@@ -3,10 +3,14 @@
 ********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
+import net.hedtech.banner.security.BannerAccessDecisionVoter
 import org.codehaus.groovy.grails.web.json.JSONObject
+import org.springframework.security.access.AccessDecisionVoter
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import net.hedtech.banner.general.system.InstitutionalDescription
 import org.codehaus.groovy.runtime.InvokerHelper
@@ -671,7 +675,23 @@ class DirectDepositAccountCompositeService {
         updatable
     }
 
-        /**
+    def areAccountsUpdatablePerUrlRoleMapping() {
+        def urlMap = Holders.config.grails.plugin.springsecurity.interceptUrlMap
+        String updateUrl = '/ssb/UpdateAccount/**'
+        def updateList = []
+
+        urlMap.get(updateUrl).each {
+            // role config items should act like a ConfigAttribute
+            updateList << [attribute: it]
+        }
+
+        def voter = new BannerAccessDecisionVoter()
+        return AccessDecisionVoter.ACCESS_GRANTED == voter.vote(SecurityContextHolder?.context?.authentication, updateUrl, updateList);
+    }
+
+    /**
+     * If the URL-to-role mappings do not allow access to update accounts, then, of course, accounts are not updatable.
+     * Otherwise:
      * Accounts are always updatable for students, who only have access to AP accounts.
      * Accounts are updatable for employees in the following two cases:
      *   1) the Banner admin pages PTRINST "Employee May Update Direct Deposit Records" indicator is checked
@@ -679,6 +699,10 @@ class DirectDepositAccountCompositeService {
      * @return True or false
      */
     def areAccountsUpdatable() {
+        if (!areAccountsUpdatablePerUrlRoleMapping()) {
+            return false
+        }
+
         if (userRoleService.hasUserRole('EMPLOYEE') && checkIfHrInstalled()) {
             def updatable = getEmployeeUpdatableSetting()
             return updatable ? updatable == 'Y' : true
