@@ -37,9 +37,19 @@ import javax.persistence.*
                           gs.currentExecutionState = :queued_ or
                           gs.currentExecutionState = :calculating_"""
         ),
+        @NamedQuery(name = "CommunicationGroupSend.findByRecurrentMessageId",
+                query = """ FROM CommunicationGroupSend gs
+                    WHERE gs.recurrentMessageId =   :recurrentMessageId """
+        ),
         @NamedQuery(name = "CommunicationGroupSend.fetchCompleted",
                 query = """ FROM CommunicationGroupSend gs
                 WHERE gs.currentExecutionState = :complete_ """
+        ),
+        @NamedQuery(name = "CommunicationGroupSend.fetchCompletedByRecurrentMessageId",
+                query = """ FROM CommunicationGroupSend gs
+                WHERE gs.currentExecutionState = :complete_ 
+                      and gs.recurrentMessageId =   :recurrentMessageId 
+                ORDER BY gs.id DESC"""
         )
 ])
 class CommunicationGroupSend implements Serializable {
@@ -119,6 +129,10 @@ class CommunicationGroupSend implements Serializable {
     @Enumerated(EnumType.STRING)
     CommunicationGroupSendExecutionState currentExecutionState = CommunicationGroupSendExecutionState.New;
 
+    @Column(name = "GCBGSND_CUMULATIVE_STATE", nullable = true)
+    @Enumerated(EnumType.STRING)
+    CommunicationGroupSendExecutionState cumulativeExecutionState = CommunicationGroupSendExecutionState.New;
+
     @Column(name = "gcbgsnd_STOP_DATE", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     Date stopDate;
@@ -158,6 +172,9 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_GROUP_ID")
     String groupId
 
+    @Column(name = "GCBGSND_CREC_ID")
+    Long recurrentMessageId
+
     /**
      * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
      */
@@ -192,6 +209,7 @@ class CommunicationGroupSend implements Serializable {
         errorCode(nullable:true)
         jobId(nullable:true)
         groupId(nullable:true)
+        recurrentMessageId(nullable:true)
         parameterValues(nullable:true)
     }
 
@@ -264,26 +282,31 @@ class CommunicationGroupSend implements Serializable {
         assert jobId != null
         assert groupId != null
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Scheduled, jobId, groupId )
+        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Scheduled
     }
 
     public void markQueued( String jobId, String groupId ) {
         assert jobId != null
         assert groupId != null
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Queued, jobId, groupId )
+        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Queued
     }
 
     public void markStopped( Date stopDate = new Date() ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Stopped )
+        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Stopped
         this.stopDate = stopDate
     }
 
     public void markComplete( Date stopDate = new Date() ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Complete )
+        updateCumulativeStatus( CommunicationGroupSendExecutionState.Complete )
         this.stopDate = stopDate
     }
 
     public void markProcessing() {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Processing )
+        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Processing
         if (this.startedDate == null) {
             this.startedDate = new Date()
         }
@@ -291,9 +314,16 @@ class CommunicationGroupSend implements Serializable {
 
     public void markError( CommunicationErrorCode errorCode, String errorText ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Error )
+        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Error
         this.errorCode = errorCode
         this.errorText = errorText
         this.stopDate = stopDate
+    }
+
+    public void updateCumulativeStatus( CommunicationGroupSendExecutionState executionState ) {
+        if(this.cumulativeExecutionState != CommunicationGroupSendExecutionState.Error) {
+            this.cumulativeExecutionState = executionState
+        }
     }
 
     private void assignGroupSendExecutionState( CommunicationGroupSendExecutionState executionState, String jobId = null, String groupId = null ) {
@@ -328,6 +358,17 @@ class CommunicationGroupSend implements Serializable {
         return results
     }
 
+    public static CommunicationGroupSend fetchCompletedByRecurrentMessageId( Long recurrentMessageId ) {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery('CommunicationGroupSend.fetchCompletedByRecurrentMessageId')
+                    .setParameter('complete_', CommunicationGroupSendExecutionState.Complete)
+                    .setParameter('recurrentMessageId', recurrentMessageId)
+                    .list()
+        }
+        return results[0]
+    }
+
     public static int findCountByPopulationCalculationId( Long populationCalculationId) {
         return CommunicationGroupSend.createCriteria().list {
             projections {
@@ -335,6 +376,16 @@ class CommunicationGroupSend implements Serializable {
             }
             eq( 'populationCalculationId', populationCalculationId )
         }[0]
+    }
+
+    public static List findByRecurrentMessageId( Long recurrentMessageId ) {
+        def query
+        CommunicationGroupSend.withSession { session ->
+            query = session.getNamedQuery('CommunicationGroupSend.findByRecurrentMessageId')
+                    .setParameter('recurrentMessageId', recurrentMessageId)
+                    .list()
+        }
+        return query
     }
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {

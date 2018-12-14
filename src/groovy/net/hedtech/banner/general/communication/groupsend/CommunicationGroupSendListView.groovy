@@ -17,7 +17,7 @@ import javax.persistence.*
  *
  */
 @Entity
-@Table(name = "GVQ_GCBGSND_LIST")
+@Table(name = "GVQ_JOBS_LIST")
 @EqualsAndHashCode
 @ToString
 @NamedQueries(value = [
@@ -89,6 +89,9 @@ class CommunicationGroupSendListView implements Serializable {
     @Column(name = "group_send_current_state")
     String currentExecutionState
 
+    @Column(name = "group_send_cumulative_state")
+    String cumulativeExecutionState
+
     @Type(type="yes_no")
     @Column(name = "errors_exist")
     boolean errors_exist
@@ -114,6 +117,14 @@ class CommunicationGroupSendListView implements Serializable {
                 ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
                 ilike("createdBy", filterData?.params?.createdBy)
                 order((descdir ? Order.desc(sortColumn) : Order.asc(sortColumn)).ignoreCase())
+            }
+        } else if (sortColumn.equalsIgnoreCase("currentExecutionState")){
+            results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {
+                ilike("groupSendName", CommunicationCommonUtility.getScrubbedInput(filterData?.params?.groupSendName))
+                ilike("createdBy", filterData?.params?.createdBy)
+                order((descdir ? Order.desc("errors_exist") : Order.asc("errors_exist")).ignoreCase())
+                order((descdir ? Order.desc(sortColumn) : Order.asc(sortColumn)).ignoreCase())
+                order(Order.desc("groupSendDate").ignoreCase())
             }
         } else {
             results = queryCriteria.list(max: pagingAndSortParams.max, offset: pagingAndSortParams.offset) {

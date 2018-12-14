@@ -159,7 +159,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
         CommunicationOrganization badOrganization = new CommunicationOrganization()
         badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+        badOrganization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = "StudentSuccess"
 
         CommunicationSendMobileNotificationMethod sendMethod = new CommunicationSendMobileNotificationMethod( communicationOrganizationService: communicationOrganizationService )
@@ -204,7 +204,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
         CommunicationOrganization badOrganization = new CommunicationOrganization()
         badOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-        badOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+        badOrganization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
         badOrganization.mobileApplicationName = ""
         badOrganization.clearMobileApplicationKey = "ss-key-value"
         badOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
@@ -280,14 +280,14 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         if (rootOrganization == null) {
             rootOrganization = new CommunicationOrganization()
             rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-            rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootOrganization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             rootOrganization.mobileApplicationName = "StudentSuccess"
             rootOrganization.clearMobileApplicationKey = "ss-key-value"
             rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )
             communicationOrganizationCompositeService.createOrganization( rootOrganization )
         } else {
             rootOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
-            rootOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootOrganization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             rootOrganization.mobileApplicationName = "StudentSuccess"
             rootOrganization.clearMobileApplicationKey = "ss-key-value"
             rootOrganization.encryptedMobileApplicationKey = communicationOrganizationService.encryptPassword( rootOrganization.clearMobileApplicationKey )

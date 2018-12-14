@@ -45,6 +45,7 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import com.icegreen.greenmail.util.*
 import groovy.sql.Sql
+import net.hedtech.banner.general.communication.recurrence.CommunicationRecurrentMessageCompositeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
@@ -73,6 +74,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     CommunicationGenerateLetterService communicationGenerateLetterService
     CommunicationLetterItemService communicationLetterItemService
     CommunicationGroupSendCompositeService communicationGroupSendCompositeService
+    CommunicationRecurrentMessageCompositeService communicationRecurrentMessageCompositeService
     CommunicationMailboxAccountService communicationMailboxAccountService
     CommunicationEmailServerPropertiesService communicationEmailServerPropertiesService
     CommunicationGroupSendService communicationGroupSendService
@@ -245,10 +247,12 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql = new Sql(session.connection())
                 def tx = session.beginTransaction()
                 sql.executeUpdate("Delete from GCRQRTZ_SIMPLE_TRIGGERS")
+                sql.executeUpdate("Delete from GCRQRTZ_CRON_TRIGGERS")
                 sql.executeUpdate("Delete from GCRQRTZ_TRIGGERS")
                 sql.executeUpdate("Delete from GCRQRTZ_JOB_DETAILS")
                 sql.executeUpdate("Delete from GCRQRTZ_LOCKS")
                 sql.executeUpdate("Delete from GCRQRTZ_SCHEDULER_STATE")
+                sql.executeUpdate("Delete from GCRTITM")
                 sql.executeUpdate("Delete from GCRLETM")
                 sql.executeUpdate("Delete from GCRMITM")
                 sql.executeUpdate("Delete from GCREITM")
@@ -259,11 +263,13 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBRDAT")
                 sql.executeUpdate("Delete from GCRGSIM")
                 sql.executeUpdate("Delete from GCBGSND")
+                sql.executeUpdate("Delete from GCBCREC")
                 sql.executeUpdate("Delete from GCBEVMP where gcbevmp_system_req_ind = 'N'")
                 sql.executeUpdate("Delete from GCRTPFL")
                 sql.executeUpdate("Delete from GCBEMTL WHERE EXISTS (SELECT gcbtmpl_surrogate_id FROM gcbtmpl WHERE gcbtmpl_surrogate_id = gcbemtl_surrogate_id AND gcbtmpl_system_req_ind = 'N')")
                 sql.executeUpdate("Delete from GCBMNTL")
                 sql.executeUpdate("Delete from GCBLTPL")
+                sql.executeUpdate("Delete from GCBTMTL")
                 sql.executeUpdate("Delete from GCBTMPL  WHERE gcbtmpl_system_req_ind = 'N'")
                 sql.executeUpdate("Delete from GCRFLPM a WHERE a.gcrflpm_field_id IN (SELECT gcrcfld_surrogate_id FROM gcrcfld WHERE gcrcfld_system_ind = 'N')")
                 sql.executeUpdate("Delete from GCRCFLD WHERE gcrcfld_system_ind = 'N'")
@@ -297,7 +303,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         def rootorg
         if (organizations.size() == 0) {
             defaultOrganization = new CommunicationOrganization(name: "Grails Test Org")
-            defaultOrganization.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            defaultOrganization.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             defaultOrganization.mobileApplicationName = "StudentSuccess"
             defaultOrganization.clearMobileApplicationKey = "ss-key-value"
             defaultOrganization.isAvailable = true
@@ -305,7 +311,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             defaultOrganization = communicationOrganizationCompositeService.createOrganization(defaultOrganization) as CommunicationOrganization
         } else {
             rootorg = CommunicationOrganization.fetchRoot()
-            rootorg.mobileEndPointUrl = "http://mobiledev3.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
+            rootorg.mobileEndPointUrl = "http://mobiledev1.ellucian.com/colleague-internal-mobileserver/api/notification/notifications/"
             rootorg.mobileApplicationName = "StudentSuccess"
             rootorg.clearMobileApplicationKey = "ss-key-value"
             rootorg.isAvailable = true

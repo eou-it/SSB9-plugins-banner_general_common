@@ -58,6 +58,7 @@ class BannerServiceMethodJob implements Job {
         .setMepCode( jobDetailMap.get( "mepCode" ) )
         .setJobHandle( jobDetailMap.get("service"), jobDetailMap.get("method") )
         .setScheduledStartDate( jobDetailMap.get( "scheduledStartDate" ) )
+        .setCronSchedule( jobDetailMap.get( "cronSchedule" ))
 
         if (jobDetailMap.containsKey("errorService")) {
             schedulerJobContext.setErrorHandle( jobDetailMap.get("errorService"), jobDetailMap.get("errorMethod") )

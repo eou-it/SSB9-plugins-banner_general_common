@@ -14,6 +14,9 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotifi
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationSendMobileNotificationService
 import net.hedtech.banner.general.communication.template.*
+import net.hedtech.banner.general.communication.textmessage.CommunicationSendTextMessageService
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessage
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
 import org.apache.log4j.Logger
 
 /**
@@ -27,7 +30,7 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
     CommunicationSendEmailService communicationSendEmailService
     CommunicationSendMobileNotificationService communicationSendMobileNotificationService
     CommunicationGenerateLetterService communicationGenerateLetterService
-
+    CommunicationSendTextMessageService communicationSendTextMessageService
     private CommunicationMessage message
     private CommunicationRecipientData recipientData
 
@@ -35,6 +38,7 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
         assert( communicationSendEmailService )
         assert( communicationSendMobileNotificationService )
         assert( communicationGenerateLetterService )
+        assert( communicationSendTextMessageService )
 
         assert( template )
         assert( recipientData )
@@ -58,5 +62,10 @@ class CommunicationMessageDispatcher implements CommunicationTemplateVisitor {
     @Override
     void visitMobileNotification(CommunicationMobileNotificationTemplate template) {
         communicationSendMobileNotificationService.send( recipientData.organizationId, message as CommunicationMobileNotificationMessage, recipientData )
+    }
+
+    @Override
+    void visitTextMessage(CommunicationTextMessageTemplate template) {
+        communicationSendTextMessageService.send( recipientData.organizationId, message as CommunicationTextMessage, recipientData, recipientData.pidm )
     }
 }

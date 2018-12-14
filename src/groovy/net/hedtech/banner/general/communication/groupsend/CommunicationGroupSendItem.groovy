@@ -25,9 +25,14 @@ import javax.persistence.*
         query = """ FROM CommunicationGroupSendItem gsi
                     WHERE gsi.communicationGroupSend = :groupSend """
     ),
+    @NamedQuery( name = "CommunicationGroupSendItem.fetchByReferenceId",
+            query = """ FROM CommunicationGroupSendItem gsi
+                WHERE gsi.referenceId = :referenceId """
+    ),
     @NamedQuery(name = "CommunicationGroupSendItem.fetchByExecutionState",
             query = """ FROM CommunicationGroupSendItem gsi
                      WHERE gsi.currentExecutionState = :executionState
+                     and gsi.creationDateTime > to_date( '2005-01-01 01:00:00', 'yyyy-mm-dd   hh24:mi:ss ')   
                      ORDER by gsi.creationDateTime asc"""
     ),
     @NamedQuery(name = "CommunicationGroupSendItem.fetchByCompleteExecutionStateAndGroupSend",
@@ -151,6 +156,15 @@ class CommunicationGroupSendItem implements AsynchronousTask {
         return results
     }
 
+    public static CommunicationGroupSendItem fetchByReferenceId( String referenceId ) {
+        def results
+        CommunicationGroupSendItem.withSession { session ->
+            results = session.getNamedQuery( 'CommunicationGroupSendItem.fetchByReferenceId' )
+                    .setParameter( 'referenceId', referenceId )
+                    .list()[0]
+        }
+        return results
+    }
 
     public static List fetchByCompleteExecutionStateAndGroupSend( CommunicationGroupSend groupSend, Integer max = Integer.MAX_VALUE ) {
         def results

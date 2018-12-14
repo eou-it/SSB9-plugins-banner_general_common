@@ -53,4 +53,7 @@ enum CommunicationGroupSendExecutionState implements Serializable {
         return this == New || this == Scheduled || this == Queued
     }
 
+    boolean isTerminalWithoutErrors() {
+        return this == Stopped || this == Complete
+    }
 }

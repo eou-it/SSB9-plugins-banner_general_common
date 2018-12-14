@@ -4,17 +4,24 @@
 package net.hedtech.banner.general.scheduler
 
 import grails.util.Holders
+import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.quartz.CronScheduleBuilder
+import org.quartz.CronTrigger
 import org.quartz.JobDetail
 import org.quartz.JobKey
+import org.quartz.SchedulerException
 import org.quartz.SimpleTrigger
+import org.quartz.Trigger
+import org.quartz.TriggerBuilder
+import org.quartz.TriggerKey
 import org.springframework.transaction.annotation.Propagation
 
-import static org.quartz.DateBuilder.evenMinuteDate;
+import static org.quartz.DateBuilder.evenMinuteDate
+import static org.quartz.DateBuilder.evenSecondDate;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.*;
 import static org.quartz.SimpleScheduleBuilder.*;
@@ -47,15 +54,17 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-            withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
-            startAt( evenMinuteDate( jobContext.scheduledStartDate ) ).build()
+        TriggerBuilder builder = newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+                withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
+        if(jobContext.scheduledStartDate != null) {
+            builder.startAt(evenMinuteDate(jobContext.scheduledStartDate))
+        }
+        SimpleTrigger trigger = builder.build()
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
-    //For future use when we do the recurring scheduling user story
     /**
      * Schedules calling a recurring service method using the quartz scheduler CRON schedule.
      * The service method invoked should take a single map as a parameter.
@@ -69,15 +78,31 @@ class SchedulerJobService {
      * @param parameters an optional map to pass to to the service method
      * @return a scheduler job receipt with the jobId and the a groupId consisting of the service and method named concatenated together
      */
-/*    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
+    public SchedulerJobReceipt scheduleCronServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-                withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule).withMisfireHandlingInstructionFireAndProceed()).build()
-        scheduleJob( jobDetail, trigger )
+        try {
+            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+                    .startAt(jobContext.scheduledStartDate)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
+                        .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
+                        .withMisfireHandlingInstructionFireAndProceed())
 
+            if (jobContext.endDate != null) {
+                builder.endTime = jobContext.endDate
+            }
+            CronTrigger trigger = builder.build()
+
+            scheduleJob(jobDetail, trigger)
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        } catch(Throwable t) {
+            log.error(t)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
+        }
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
-    }*/
+    }
 
     /**
      * Schedules calling a service method using the quartz scheduler to run immediately.
@@ -97,6 +122,42 @@ class SchedulerJobService {
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )
     }
 
+    /**
+     * Re-Schedules calling a recurring service method using the quartz scheduler CRON schedule. Used when the recurring schedule needs to be updated.
+     * The service method invoked should take a single map as a parameter.
+     *
+     * @param runTime the date to wait until starting the task
+     * @param jobId a job identifier; a uuid is one way to go
+     * @param bannerUser a banner id to proxy as before invoking the method
+     * @param mepCode mep or vpdi code, may be null if the db is not a mep database
+     * @param service the name of the service to call
+     * @param method the method of the service to invoke
+     * @param parameters an optional map to pass to to the service method
+     */
+    public void reScheduleCronServiceMethod( SchedulerJobContext jobContext ) {
+        JobDetail jobDetail = createJobDetail( jobContext )
+
+        try {
+            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+                    .startAt(jobContext.scheduledStartDate)
+                    .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
+                    .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
+                    .withMisfireHandlingInstructionFireAndProceed())
+
+            if (jobContext.endDate != null) {
+                builder.endTime = jobContext.endDate
+            }
+            CronTrigger trigger = builder.build()
+
+            rescheduleJob(jobContext.jobId, jobContext.groupId, trigger)
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        } catch(Throwable t) {
+            log.error(t)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
+        }
+    }
 
     @Transactional(propagation=Propagation.REQUIRES_NEW, rollbackFor = Throwable.class )
     public Object invokeServiceMethodInNewTransaction( String serviceName, String method, context ) {
@@ -152,7 +213,7 @@ class SchedulerJobService {
     }
 
 
-    private Date scheduleJob(JobDetail jobDetail, SimpleTrigger trigger) {
+    private Date scheduleJob(JobDetail jobDetail, Trigger trigger) {
         try {
             return quartzScheduler.scheduleJob(jobDetail, trigger)
         } catch (NoClassDefFoundError e) {
@@ -162,6 +223,41 @@ class SchedulerJobService {
             } else {
                 throw e
             }
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        }
+    }
+
+    private Date rescheduleJob(String jobId, String groupId, Trigger newTrigger) {
+        TriggerKey triggerKey = new TriggerKey(jobId, groupId)
+        try {
+            return quartzScheduler.rescheduleJob(triggerKey, newTrigger)
+        } catch (NoClassDefFoundError e) {
+            log.error( e )
+            if ("weblogic/jdbc/vendor/oracle/OracleThinBlob".equals( e.message ) && isConfiguredForWeblogic()) {
+                throw CommunicationExceptionFactory.createApplicationException( SchedulerJobService.class, "weblogicOracleDriverNotFound" )
+            } else {
+                throw e
+            }
+        } catch(SchedulerException e) {
+            log.error(e)
+            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+        }
+    }
+
+    public boolean unScheduleJob(String jobId, String service, String method) {
+        String groupId = service + "." + method
+        unScheduleJob( jobId, groupId )
+    }
+
+    public boolean unScheduleJob(String jobId, String groupId) {
+        TriggerKey triggerKey = new TriggerKey(jobId, groupId)
+        boolean result
+        try {
+            result = quartzScheduler.unscheduleJob(triggerKey)
+        } catch(Throwable t) {
+            log.error(t.getMessage())
         }
     }
 
@@ -179,6 +275,7 @@ class SchedulerJobService {
         }
         jobDetail.getJobDataMap().put( "scheduledStartDate", jobContext.scheduledStartDate)
         jobDetail.getJobDataMap().put( "cronSchedule", jobContext.cronSchedule)
+        jobDetail.getJobDataMap().put( "endDate", jobContext.endDate)
         assignParameters( jobDetail, jobContext.parameters )
         return jobDetail
     }

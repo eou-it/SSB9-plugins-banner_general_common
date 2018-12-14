@@ -83,6 +83,7 @@ class CommunicationGroupSendCompositeService {
         groupSend.scheduledStartDate = request.scheduledStartDate
         groupSend.recalculateOnSend = request.getRecalculateOnSend()
         groupSend.jobId = request.referenceId
+        groupSend.recurrentMessageId = request.recurrentMessageId
         String bannerUser = SecurityContextHolder.context.authentication.principal.getOracleUserName()
 
         groupSend.setParameterNameValueMap( request.getParameterNameValueMap() )
@@ -90,6 +91,7 @@ class CommunicationGroupSendCompositeService {
 
         CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
         boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0)
+//                                        recalculate false || no scheduled date
         boolean useCurrentReplica = (!groupSend.recalculateOnSend || !request.scheduledStartDate)
 
         if (hasQuery && useCurrentReplica) {
@@ -109,7 +111,15 @@ class CommunicationGroupSendCompositeService {
 
         groupSend = (CommunicationGroupSend) communicationGroupSendService.create( groupSend )
 
-        if (request.scheduledStartDate) {
+        //For a recurrent scheduled message
+        if(request.recurrentMessageId) {
+            //recalculate on send
+            if( request.recalculateOnSend) {
+                groupSend = scheduleGroupSendImmediatelyForRecalculate(groupSend, bannerUser)
+            } else {
+                groupSend = scheduleGroupSendImmediately( groupSend, bannerUser )
+            }
+        } else if (request.scheduledStartDate) {
             groupSend = scheduleGroupSend( groupSend, bannerUser )
         } else {
             if (hasQuery) {
@@ -308,7 +318,7 @@ class CommunicationGroupSendCompositeService {
             populationVersion = communicationPopulationCompositeService.createPopulationVersion( population )
             population.changesPending = false
             communicationPopulationCompositeService.updatePopulation(population)
-            // Todo: Should we delete population versions no longer in use by any group sends aside from he one we just created
+            // Todo: Should we delete population versions no longer in use by any group sends aside from the one we just created
             // We would need to remove all the associated objects.
         } else {
             populationVersion = CommunicationPopulationVersion.findLatestByPopulationId( groupSend.populationId )
@@ -330,6 +340,8 @@ class CommunicationGroupSendCompositeService {
         }
 
         groupSend.setCurrentExecutionState(CommunicationGroupSendExecutionState.Error)
+        groupSend.setCumulativeExecutionState(CommunicationGroupSendExecutionState.Error)
+
         if (errorContext.cause) {
             groupSend.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
             groupSend.errorText = errorContext.cause.message
@@ -375,6 +387,8 @@ class CommunicationGroupSendCompositeService {
 
                 if (!groupSend.populationCalculationId && hasQuery) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
+                    groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
+
                     CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
                     shouldUpdateGroupSend = true
@@ -462,6 +476,21 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
+    //To be used when performing a recalculate on send which is part of a recurrent message
+    private CommunicationGroupSend scheduleGroupSendImmediatelyForRecalculate( CommunicationGroupSend groupSend, String bannerUser ) {
+        SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId != null ? groupSend.jobId : UUID.randomUUID().toString() )
+                .setBannerUser( bannerUser )
+                .setMepCode( groupSend.mepCode )
+                .setJobHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFired" )
+                .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
+                .setParameter( "groupSendId", groupSend.id )
+
+        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleNowServiceMethod( jobContext )
+        groupSend.markQueued( jobReceipt.jobId, jobReceipt.groupId )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+        return groupSend
+    }
+
     //For future use when we do the recurring scheduling user story
 /*    private CommunicationGroupSend scheduleRecurringGroupSend( CommunicationGroupSend groupSend, String cronSchedule, String bannerUser ) {
         if(!CronExpression.isValidExpression(cronSchedule)) {
@@ -493,6 +522,7 @@ class CommunicationGroupSendCompositeService {
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems(groupSend)
         groupSend.markProcessing()
+        //TODO Add cumulative status also as Processing
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         return groupSend
     }

@@ -11,6 +11,7 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotifi
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateVisitor
+import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
 import org.apache.log4j.Logger
 
 /**
@@ -79,6 +80,28 @@ class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor 
             fieldNames << it
         }
         communicationTemplateMergeService.extractTemplateVariables(template.messageDescription?.toString()).each {
+            fieldNames << it
+        }
+        communicationTemplateMergeService.extractTemplateVariables(template.destinationLink?.toString()).each {
+            fieldNames << it
+        }
+        communicationTemplateMergeService.extractTemplateVariables(template.destinationLabel?.toString()).each {
+            fieldNames << it
+        }
+        fieldNames = fieldNames.unique()
+        recipientData = createCommunicationRecipientData( template, fieldNames )
+    }
+
+    void visitTextMessage(CommunicationTextMessageTemplate template) {
+        // Can this list be cached somewhere for similar processing on the same template but different user
+        List<String> fieldNames = communicationTemplateMergeService.extractTemplateVariables(template.toList?.toString())
+        communicationTemplateMergeService.extractTemplateVariables(template.toList?.toString()).each {
+            fieldNames << it
+        }
+        communicationTemplateMergeService.extractTemplateVariables(template.message?.toString()).each {
+            fieldNames << it
+        }
+        communicationTemplateMergeService.extractTemplateVariables(template.footer?.toString()).each {
             fieldNames << it
         }
         communicationTemplateMergeService.extractTemplateVariables(template.destinationLink?.toString()).each {

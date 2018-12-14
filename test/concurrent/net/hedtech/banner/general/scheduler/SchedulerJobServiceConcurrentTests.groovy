@@ -186,4 +186,56 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         assertTrue( SchedulerTestOperation.didOperationFail() )
     }
 
+    @Test
+    public void testScheduleCronServiceMethod() {
+        String jobId = "testScheduleCronTestJob-" + UUID.randomUUID().toString()
+
+        Calendar calendar = Calendar.getInstance() // gets a calendar using the default time zone and locale.
+        Date requestedRunTime = calendar.getTime()
+        String mepCode = null
+
+        calendar.add(Calendar.SECOND, 30)
+        int month = calendar.get(Calendar.MONTH) + 1;
+        //Cron expression set to run 30 seconds from current time
+        String cronExpression = "" + calendar.get(Calendar.SECOND) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.DAY_OF_MONTH) + " " + month + " ? " + calendar.get(Calendar.YEAR);
+
+        SchedulerJobContext jobContext = new SchedulerJobContext( jobId )
+                .setScheduledStartDate( requestedRunTime )
+                .setCronSchedule(cronExpression)
+                .setCronScheduleTimezone(calendar.getTimeZone().getID())
+                .setBannerUser( 'BCMADMIN' )
+                .setJobHandle( "schedulerJobService", "testOperationFired" )
+                .setMepCode( mepCode )
+        SchedulerJobReceipt receipt = schedulerJobService.scheduleCronServiceMethod( jobContext )
+
+        JobKey jobKey = new JobKey( receipt.jobId, receipt.groupId )
+
+        JobDetail jobDetail = quartzScheduler.getJobDetail( jobKey ) // JobDetailImpl
+        assertNotNull( jobDetail )
+
+        TriggerKey triggerKey = new TriggerKey( receipt.jobId, receipt.groupId )
+        Trigger trigger = quartzScheduler.getTrigger( triggerKey ) // SimpleTriggerImpl
+        assertNotNull( trigger )
+
+        int retries = 20
+        while (retries > 0) {
+            retries--;
+            TimeUnit.SECONDS.sleep( 5 );
+
+            jobDetail = quartzScheduler.getJobDetail( jobKey )
+
+            if (!jobDetail) {
+                break;
+            }
+        }
+
+        assertNull( jobDetail )
+        trigger = quartzScheduler.getTrigger( triggerKey )
+        assertNull( trigger )
+
+        assertTrue( SchedulerTestOperation.didOperationFire() )
+        assertTrue( SchedulerTestOperation.didOperationComplete() )
+        assertFalse( SchedulerTestOperation.didOperationFail() )
+    }
+
 }

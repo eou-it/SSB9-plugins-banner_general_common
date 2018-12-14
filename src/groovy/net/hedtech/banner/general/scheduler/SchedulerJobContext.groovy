@@ -17,7 +17,9 @@ class SchedulerJobContext implements Serializable {
     private String bannerUser
     private String mepCode
     private Date scheduledStartDate
+    private Date endDate
     private String cronSchedule
+    private String cronScheduleTimezone
 
     public SchedulerJobContext( String jobId ) {
         this.jobId = jobId
@@ -63,6 +65,15 @@ class SchedulerJobContext implements Serializable {
         return scheduledStartDate
     }
 
+    public SchedulerJobContext setEndDate(Date endDate) {
+        this.endDate = endDate
+        return this
+    }
+
+    public Date getEndDate() {
+        return endDate
+    }
+
     public SchedulerJobContext setCronSchedule(String cronSchedule) {
         this.cronSchedule = cronSchedule
         return this
@@ -70,6 +81,15 @@ class SchedulerJobContext implements Serializable {
 
     public String getCronSchedule() {
         return cronSchedule
+    }
+
+    public SchedulerJobContext setCronScheduleTimezone(String cronScheduleTimezone) {
+        this.cronScheduleTimezone = cronScheduleTimezone
+        return this
+    }
+
+    public String getCronScheduleTimezone() {
+        return cronScheduleTimezone
     }
 
     public SchedulerJobContext setJobHandle( String service, String method ) {

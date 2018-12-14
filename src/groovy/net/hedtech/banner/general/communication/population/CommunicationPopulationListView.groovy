@@ -121,6 +121,13 @@ class CommunicationPopulationListView implements Serializable {
     String calculationStatus
 
     /**
+     * Scheduled calculation date
+     */
+    @Column(name = "SCHEDULED_DATE")
+    @Temporal(TemporalType.TIMESTAMP)
+    Date scheduledDate
+
+    /**
      *
      */
     @Column(name = "POPULATION_SELECTION_LIST_ID")
@@ -207,6 +214,7 @@ class CommunicationPopulationListView implements Serializable {
         calculatedBy(nullable: true, maxSize: 30)
         lastCalculatedTime(nullable: true)
         systemIndicator(nullable: false)
+        scheduledDate(nullable:true)
     }
 
     // Read Only fields that should be protected against update

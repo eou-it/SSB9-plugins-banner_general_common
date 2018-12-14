@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskManager {
     private final Log log = LogFactory.getLog(this.getClass());
 
+    def communicationGroupSendService
     def communicationGroupSendItemService;
     def communicationGroupSendItemProcessorService
 
@@ -97,6 +98,7 @@ class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskMa
         if (log.isInfoEnabled()) {
             CommunicationGroupSendItem groupSendItem = task as CommunicationGroupSendItem
             log.info( "Marking completed group send item id = " + groupSendItem.getId() + ", pidm = " + groupSendItem.recipientPidm + "." )
+
         }
     }
 
@@ -147,6 +149,12 @@ class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskMa
     public void markFailed( AsynchronousTask task, String errorCode, Throwable cause ) throws ApplicationException {
         CommunicationGroupSendItem groupSendItem = (CommunicationGroupSendItem) task
         communicationGroupSendItemProcessorService.failGroupSendItem( groupSendItem.getId(), errorCode, StringHelper.stackTraceToString( cause ) );
+
+        //Update the group send cumulative status as failed
+        CommunicationGroupSend groupSend = groupSendItem.communicationGroupSend
+        groupSend.updateCumulativeStatus( CommunicationGroupSendExecutionState.Error )
+        groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+
         if (log.isDebugEnabled()) {
             log.debug( "GroupSendItemManager.markFailed(task=" + groupSendItem.getId() + ") has marked the task as failed " );
         }
