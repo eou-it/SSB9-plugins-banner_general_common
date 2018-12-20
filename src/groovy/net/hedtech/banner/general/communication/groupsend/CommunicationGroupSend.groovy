@@ -37,6 +37,15 @@ import javax.persistence.*
                           gs.currentExecutionState = :queued_ or
                           gs.currentExecutionState = :calculating_"""
         ),
+        @NamedQuery(name = "CommunicationGroupSend.findWithRunningCumulativeStatus",
+                query = """ FROM CommunicationGroupSend gs
+                    WHERE gs.cumulativeExecutionState = :new_ or
+                          gs.cumulativeExecutionState = :processing_ or
+                          gs.cumulativeExecutionState = :scheduled_ or
+                          gs.cumulativeExecutionState = :queued_ or
+                          gs.cumulativeExecutionState = :calculating_
+                    AND   gs.currentExecutionState = :complete_"""
+        ),
         @NamedQuery(name = "CommunicationGroupSend.findByRecurrentMessageId",
                 query = """ FROM CommunicationGroupSend gs
                     WHERE gs.recurrentMessageId =   :recurrentMessageId """
@@ -300,7 +309,7 @@ class CommunicationGroupSend implements Serializable {
 
     public void markComplete( Date stopDate = new Date() ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Complete )
-        updateCumulativeStatus( CommunicationGroupSendExecutionState.Complete )
+        //We do not update the cumulative status at this point, as we need monitor thread to make sure all items and jobs are completed as well
         this.stopDate = stopDate
     }
 
@@ -341,6 +350,23 @@ class CommunicationGroupSend implements Serializable {
                     .setParameter('scheduled_', CommunicationGroupSendExecutionState.Scheduled)
                     .setParameter('queued_', CommunicationGroupSendExecutionState.Queued)
                     .setParameter('calculating_', CommunicationGroupSendExecutionState.Calculating)
+                    .setFirstResult( 0 )
+                    .setMaxResults( max )
+                    .list()
+        }
+        return query
+    }
+
+    public static List findWithRunningCumulativeStatus( Integer max = Integer.MAX_VALUE ) {
+        def query
+        CommunicationGroupSend.withSession { session ->
+            query = session.getNamedQuery('CommunicationGroupSend.findWithRunningCumulativeStatus')
+                    .setParameter('new_', CommunicationGroupSendExecutionState.New)
+                    .setParameter('processing_', CommunicationGroupSendExecutionState.Processing)
+                    .setParameter('scheduled_', CommunicationGroupSendExecutionState.Scheduled)
+                    .setParameter('queued_', CommunicationGroupSendExecutionState.Queued)
+                    .setParameter('calculating_', CommunicationGroupSendExecutionState.Calculating)
+                    .setParameter('complete_', CommunicationGroupSendExecutionState.Complete)
                     .setFirstResult( 0 )
                     .setMaxResults( max )
                     .list()

@@ -87,8 +87,10 @@ class CommunicationRecurrentMessageCompositeService {
 
         Date scheduledDate = sdf.parse(sdf.format(recurrentMessage.startDate))
 
-        if (!today.compareTo(scheduledDate) == 0 && now.after(recurrentMessage.startDate)) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
+        if (today.compareTo(scheduledDate) != 0 ) {
+            if(now.after(recurrentMessage.startDate)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
+            }
         }
         if (recurrentMessage.endDate) {
             if (now.after(recurrentMessage.endDate)) {
@@ -123,8 +125,10 @@ class CommunicationRecurrentMessageCompositeService {
 
         Date scheduledDate = sdf.parse(sdf.format(recurrentMessage.startDate))
 
-        if (!today.compareTo(scheduledDate) == 0 && now.after(recurrentMessage.startDate)) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
+        if (today.compareTo(scheduledDate) != 0 ) {
+            if(now.after(recurrentMessage.startDate)) {
+                throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
+            }
         }
         if (recurrentMessage.endDate) {
             if (now.after(recurrentMessage.endDate)) {

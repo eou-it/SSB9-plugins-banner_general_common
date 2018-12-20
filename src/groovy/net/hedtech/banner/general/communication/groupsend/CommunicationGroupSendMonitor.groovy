@@ -4,6 +4,8 @@
 package net.hedtech.banner.general.communication.groupsend
 
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
+import net.hedtech.banner.general.communication.job.CommunicationJob
+import net.hedtech.banner.general.communication.job.CommunicationJobStatus
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.DisposableBean
@@ -108,6 +110,31 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                     }
                 }
             }
+
+            List<CommunicationGroupSend> completedGroupSendList = CommunicationGroupSend.findWithRunningCumulativeStatus()
+            for (CommunicationGroupSend groupSend : completedGroupSendList) {
+                    List<CommunicationGroupSendItem> groupSendItemList = CommunicationGroupSendItem.fetchByGroupSend(groupSend);
+                    boolean groupSendCompleted = true;
+                    for (CommunicationGroupSendItem groupSendItem : groupSendItemList) {
+                        if (groupSendItem.currentExecutionState.equals(CommunicationGroupSendItemExecutionState.Complete)) {
+                            //Both gcbgsnd and gcrgsim are Complete, so check to if the actual job completed.
+                            CommunicationJob job = CommunicationJob.findByReferenceId(groupSendItem.referenceId)
+                            if (job.status.equals(CommunicationJobStatus.DISPATCHED) || job.status.equals(CommunicationJobStatus.PENDING)) {
+                                //Set flag to false if job not Completed
+                                groupSendCompleted = false;
+                            }
+                        } else {
+                            //Set flag to false if item not Completed
+                            groupSendCompleted = false;
+                        }
+                    }
+                if(groupSendCompleted) {
+                    //Update cumulative status to Complete
+                    groupSend.updateCumulativeStatus(CommunicationGroupSendExecutionState.Complete);
+                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+                }
+            }
+
         } catch (Throwable t) {
             t.printStackTrace()
             log.error(t)
