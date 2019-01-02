@@ -45,7 +45,7 @@ class CommunicationPopulationQueryExecutionService {
      * @param queryVersionId
      * @returns the population selection list id
      */
-    CommunicationPopulationQueryExecutionResult execute(Long queryVersionId) {
+    CommunicationPopulationQueryExecutionResult execute(Long queryVersionId, String requestedBy=null) {
         assert queryVersionId != null
         try {
             //throw exception if the banner security for query execution is not setup for this user
@@ -68,8 +68,8 @@ class CommunicationPopulationQueryExecutionService {
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
 
-            def stmt = "{call gckextr.p_execute_pop_queryVersion(?,?,?,?,?)}"
-            def params = [sqlStatement, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
+            def stmt = "{call gckextr.p_execute_pop_queryVersion(?,?,?,?,?,?)}"
+            def params = [sqlStatement, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR, requestedBy]
 
             CommunicationPopulationQueryExecutionResult result
             sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
@@ -107,7 +107,7 @@ class CommunicationPopulationQueryExecutionService {
      * @param populationQueryId
      * @returns the population selection list id
      */
-    CommunicationPopulationQueryExecutionResult executeQuery(Long populationQueryId) {
+    CommunicationPopulationQueryExecutionResult executeQuery(Long populationQueryId, String requestedBy=null) {
 
         try {
             //throw exception if the banner security for query execution is not setup for this user
@@ -149,8 +149,8 @@ class CommunicationPopulationQueryExecutionService {
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
 
-            def stmt = "{call gckextr.p_execute_pop_query(?,?,?,?,?)}"
-            def params = [sqlStatement, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR]
+            def stmt = "{call gckextr.p_execute_pop_query(?,?,?,?,?,?)}"
+            def params = [sqlStatement, Sql.INTEGER, Sql.INTEGER, Sql.VARCHAR, Sql.VARCHAR, requestedBy]
 
             CommunicationPopulationQueryExecutionResult result
             sql.call stmt, params, { selectionListId, calculatedCount, calculatedBy, errorString ->
