@@ -98,6 +98,9 @@ class DirectDepositAccountService extends ServiceBase{
                 }
             }
         }
+
+        // Ensure that current username, not Oracle user, is used for audit logging upon delete
+        setSessionContextToCurrentUser()
         
         return model;
     }
@@ -239,6 +242,17 @@ class DirectDepositAccountService extends ServiceBase{
             log.error(it)
             throw it
         }
+    }
+
+    /**
+     * Force session context to current user.
+     * Prevents Oracle user from being logged rather than actual user in certain operations.
+     */
+    def setSessionContextToCurrentUser() {
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def idIn = 'OVERRIDE'
+        def nameIn = SecurityContextHolder?.context?.authentication?.principal?.username
+        sql.call("{call goksels.p_set_ssb_id_and_name_context(${idIn},${nameIn})}")
     }
 
 }
