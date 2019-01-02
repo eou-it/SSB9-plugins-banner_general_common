@@ -37,11 +37,6 @@ class CommunicationInteractionTypeService extends ServiceBase {
         if (CommunicationInteractionType.fetchByInteractionTypeNameAndFolderName(interactionType.name, interactionType.folder.name))
             throw new ApplicationException(CommunicationInteractionType, "@@r1:not.unique.message@@")
 
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
-        if (creatorId == null) {
-            def config = Holders.config
-            creatorId = config?.bannerSsbDataSource?.username
-        }
     }
 
 

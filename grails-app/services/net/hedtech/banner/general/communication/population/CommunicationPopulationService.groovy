@@ -37,12 +37,8 @@ class CommunicationPopulationService extends ServiceBase {
         if (CommunicationPopulation.fetchByPopulationNameAndFolderName(population.name, population.folder.name))
             throw new ApplicationException(CommunicationPopulation, "@@r1:not.unique.message:" + population.getFolder().name  +"@@")
 
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
-        if (creatorId == null) {
-            def config = Holders.config
-            creatorId = config?.bannerSsbDataSource?.username
-        }
-        population.setCreatedBy(creatorId.toUpperCase())
+        def creatorId = CommunicationCommonUtility.getUserOracleUserName();
+        population.setCreatedBy(creatorId)
         population.setCreateDate(new Date())
     }
 

@@ -37,12 +37,8 @@ class CommunicationPopulationQueryService extends ServiceBase {
         if (CommunicationPopulationQuery.fetchByQueryNameAndFolderName(populationQuery.name, populationQuery.folder.name))
             throw new ApplicationException(CommunicationPopulationQuery, "@@r1:not.unique.message@@")
 
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
-        if (creatorId == null) {
-            def config = Holders.config
-            creatorId = config?.bannerSsbDataSource?.username
-        }
-        populationQuery.setCreatedBy(creatorId.toUpperCase())
+        def creatorId = CommunicationCommonUtility.getUserOracleUserName()
+        populationQuery.setCreatedBy(creatorId)
         populationQuery.setCreateDate(new Date())
     }
 

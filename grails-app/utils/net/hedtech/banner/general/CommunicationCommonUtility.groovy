@@ -104,9 +104,10 @@ class CommunicationCommonUtility {
     }
 
 //get the oracle userid associated with the login banner id.  If there is a gobeacc record, that oracle user will be
-//returned. If no gobeacc record then the username associated with the bannerSsbDataSource will be returned
+//returned. If no gobeacc record then the banner id will be returned.  Creating queries, templates and datafields needs a oracle user id associated with it
+    // as this involves sql statements which need specific banner table permissions.
     def static getUserOracleUserName() {
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: Holders.config?.bannerSsbDataSource?.username
+        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: SecurityContextHolder?.context?.authentication?.principal?.username
         return creatorId.toUpperCase()
     }
 
@@ -149,8 +150,8 @@ class CommunicationCommonUtility {
             map.put("canCreatePopulation", canCreatePopulation)
 
 //get the oracle userid associated with the login banner id.  If there is a gobeacc record, that oracle user will be
-//returned. If no gobeacc record then the username associated with the bannerSsbDataSource will be returned
-            map.put("userId", (SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: Holders.config?.bannerSsbDataSource?.username)?.toUpperCase())
+//returned. If no gobeacc record then the banner id will be returned
+            map.put("userId", getUserOracleUserName())
             map.put("bannerId", (SecurityContextHolder?.context?.authentication?.principal?.username?.toUpperCase()))
 
             return map
