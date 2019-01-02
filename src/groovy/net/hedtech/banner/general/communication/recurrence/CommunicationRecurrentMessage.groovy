@@ -161,7 +161,7 @@ class CommunicationRecurrentMessage implements Serializable {
     @Column(name = "GCBCREC_TOTAL_COUNT")
     Long totalCount;
 
-    @Column(name = "GCBREC_SUCCESS_COUNT")
+    @Column(name = "GCBCREC_SUCCESS_COUNT")
     Long successCount;
 
     @Column(name = "GCBCREC_FAILURE_COUNT")
