@@ -43,7 +43,6 @@ class CommunicationRecurrentMessageService extends ServiceBase {
         if (recurrentMessage.getName() == null) {
             recurrentMessage.setName(CommunicationTemplate.get(recurrentMessage.templateId).getName())
         }
-        recurrentMessage.setDeleted( false );
     }
 
     def preUpdate( domainModelOrMap ) {
@@ -85,6 +84,5 @@ class CommunicationRecurrentMessageService extends ServiceBase {
                 recurrentMessage.setStartDate(startDateCalendar.getTime())
             }
         }
-        recurrentMessage.setDeleted( false );
     }
 }
