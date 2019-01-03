@@ -47,7 +47,7 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
         assertNotNull hasActiveRows
 
         Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm)
-        assertEquals hasActiveRows,hasActiveItme
+        assertEquals hasActiveRows>0,hasActiveItme
     }
 
     @Test
@@ -60,7 +60,7 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
         assertNotNull hasActiveRows
 
         Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm)
-        assertEquals hasActiveRows,hasActiveItme
+        assertEquals hasActiveRows>0,hasActiveItme
     }
 
     @Test

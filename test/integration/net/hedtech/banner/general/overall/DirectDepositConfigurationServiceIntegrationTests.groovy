@@ -16,6 +16,7 @@ import org.junit.Test
 class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def directDepositConfigurationService
+    def userRoleService
     Sql sql
     
     @Before
@@ -68,7 +69,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         assertTrue params.roles.size() > 2
 
         // 3) "Are accounts updatable" indicator
-        assertTrue params.areAccountsUpdatable
+        assertEquals userRoleService.hasUserRole("EMPLOYEE") ? true : false, params.areAccountsUpdatable
     }
 
 

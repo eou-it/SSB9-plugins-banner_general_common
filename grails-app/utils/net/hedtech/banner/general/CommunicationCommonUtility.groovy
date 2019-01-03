@@ -108,7 +108,7 @@ class CommunicationCommonUtility {
     // as this involves sql statements which need specific banner table permissions.
     def static getUserOracleUserName() {
         def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName() ?: SecurityContextHolder?.context?.authentication?.principal?.username
-        return creatorId.toUpperCase()
+        return creatorId?.toUpperCase()
     }
 
 
@@ -195,9 +195,9 @@ class CommunicationCommonUtility {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAdmin)
                 return true;
-            else if (usermap.isAuthor && (usermap.userId)?.equals(createdBy.toUpperCase()))
+            else if (usermap.isAuthor && (usermap.userId)?.equals(createdBy?.toUpperCase()))
                 return true;
-            else if (usermap.isAuthor && (usermap.bannerId)?.equals(createdBy.toUpperCase()))
+            else if (usermap.isAuthor && (usermap.bannerId)?.equals(createdBy?.toUpperCase()))
                 return true;
             return false;
         } catch (Exception e) {
@@ -213,9 +213,9 @@ class CommunicationCommonUtility {
             def usermap = getCommunicationUserRoleMap()
             if (usermap.isAdmin)
                 return true;
-            else if (usermap.isUser && (usermap.userId).equals(createdBy.toUpperCase()))
+            else if (usermap.isUser && (usermap.userId)?.equals(createdBy?.toUpperCase()))
                 return true;
-            else if (usermap.isUser && (usermap.bannerId).equals(createdBy.toUpperCase()))
+            else if (usermap.isUser && (usermap.bannerId)?.equals(createdBy?.toUpperCase()))
                 return true;
             else if (usermap.canCreatePopulation)
                 return true;

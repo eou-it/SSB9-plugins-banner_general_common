@@ -107,10 +107,6 @@ class CommunicationRecurrentMessage implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     Date stoppedDate;
 
-    @Column(name = "GCBCREC_DELETED", nullable = false)
-    @Type(type = "yes_no")
-    boolean deleted = false;
-
     @Type(type = "yes_no")
     @Column(name = "GCBCREC_RECALC_ON_SEND")
     Boolean recalculateOnSend
