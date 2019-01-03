@@ -52,13 +52,9 @@ class CommunicationManualInteractionService extends ServiceBase {
             }
         }
 
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
-        if (creatorId == null) {
-            def config = Holders.config
-            creatorId = config?.bannerSsbDataSource?.username
-        }
+        def creatorId = CommunicationCommonUtility.getUserOracleUserName();
 
-        manualInteraction.setCreatedBy(creatorId.toUpperCase())
+        manualInteraction.setCreatedBy(creatorId)
         manualInteraction.setCreateDate(new Date())
     }
 

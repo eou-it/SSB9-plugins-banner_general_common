@@ -48,11 +48,7 @@ class CommunicationPopulationVersionService extends ServiceBase {
      * Returns the banner id of the current session in uppercase.
      */
     private String getCurrentUserBannerId() {
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
-        if (creatorId == null) {
-            def config = Holders.config
-            creatorId = config?.bannerSsbDataSource?.username
-        }
-        return creatorId.toUpperCase()
+
+        return CommunicationCommonUtility.getUserOracleUserName()
     }
 }

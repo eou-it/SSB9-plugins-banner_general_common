@@ -8,6 +8,7 @@ import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
@@ -737,7 +738,7 @@ class CommunicationPopulationCompositeService {
         long totalCount = 0
         CommunicationPopulationQueryExecutionResult result
         try {
-            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id )
+            result = communicationPopulationQueryExecutionService.execute( calculation.populationQueryVersion.id, calculation.calculatedBy )
             if (result.selectionListId && !result.errorString) {
                 calculation.selectionList = CommunicationPopulationSelectionList.fetchById( result.selectionListId )
                 totalCount += result.calculatedCount
@@ -849,12 +850,7 @@ class CommunicationPopulationCompositeService {
      * Returns the banner id of the current session in uppercase.
      */
     private String getCurrentUserBannerId() {
-        def creatorId = SecurityContextHolder?.context?.authentication?.principal?.getOracleUserName()
-        if (creatorId == null) {
-            def config = Holders.config
-            creatorId = config?.bannerSsbDataSource?.username
-        }
-        return creatorId.toUpperCase()
+        return CommunicationCommonUtility.getUserOracleUserName()
     }
 
     private CommunicationPopulationQueryVersion getQueryVersionForNewCalculation(CommunicationPopulationVersion populationVersion) {
