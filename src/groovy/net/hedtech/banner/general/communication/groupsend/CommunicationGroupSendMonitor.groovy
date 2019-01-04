@@ -88,6 +88,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
             try {
                 this.monitorThread.join();
             } catch (InterruptedException e) {
+                log.debug("Exception when Shutting down."+e.getMessage());
             }
         }
         monitorThread = null

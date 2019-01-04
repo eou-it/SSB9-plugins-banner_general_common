@@ -491,31 +491,6 @@ class CommunicationGroupSendCompositeService {
         return groupSend
     }
 
-    //For future use when we do the recurring scheduling user story
-/*    private CommunicationGroupSend scheduleRecurringGroupSend( CommunicationGroupSend groupSend, String cronSchedule, String bannerUser ) {
-        if(!CronExpression.isValidExpression(cronSchedule)) {
-            throw CommunicationExceptionFactory.createApplicationException(CommunicationGroupSendService.class, "invalidCronExpression")
-        }
-
-        SchedulerJobContext jobContext = new SchedulerJobContext( groupSend.jobId )
-                .setBannerUser( bannerUser )
-                .setMepCode( groupSend.mepCode )
-                .setCronSchedule("") //Add a column to group send domain to hold the cron schedule string
-                .setParameter( "groupSendId", groupSend.id )
-
-        if(groupSend.recalculateOnSend) {
-            jobContext.setJobHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFired" )
-                    .setErrorHandle( "communicationGroupSendCompositeService", "calculatePopulationVersionForGroupSendFailed" )
-        } else {
-            jobContext.setJobHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFired" )
-                    .setErrorHandle( "communicationGroupSendCompositeService", "generateGroupSendItemsFailed" )
-        }
-
-        SchedulerJobReceipt jobReceipt = schedulerJobService.scheduleCronServiceMethod( jobContext )
-        groupSend.markScheduled( jobReceipt.jobId, jobReceipt.groupId )
-        groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
-        return groupSend
-    }*/
 
     private CommunicationGroupSend generateGroupSendItemsImpl( CommunicationGroupSend groupSend ) {
         // We'll created the group send items synchronously for now until we have support for scheduling.
