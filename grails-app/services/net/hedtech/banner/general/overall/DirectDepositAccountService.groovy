@@ -99,9 +99,6 @@ class DirectDepositAccountService extends ServiceBase{
             }
         }
 
-        // Ensure that current username, not Oracle user, is used for audit logging upon delete
-        setSessionContextToCurrentUser()
-        
         return model;
     }
 
@@ -112,6 +109,9 @@ class DirectDepositAccountService extends ServiceBase{
 
     void preDelete(map) {
         verifyAccountBelongsToPidm(map)
+
+        // Ensure that current username, not Oracle user, is used for audit logging upon delete
+        setSessionContextToCurrentUser()
     }
 
     void preUpdate(map) {
