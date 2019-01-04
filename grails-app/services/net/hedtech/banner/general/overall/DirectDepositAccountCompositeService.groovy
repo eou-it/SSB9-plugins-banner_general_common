@@ -676,7 +676,10 @@ class DirectDepositAccountCompositeService {
     }
 
     def areAccountsUpdatablePerUrlRoleMapping() {
-        def urlMap = Holders.config.grails.plugins.springsecurity.interceptUrlMap
+        def urlMap = Holders.config.grails.plugin?.springsecurity?.interceptUrlMap
+        if (urlMap == null) {
+            urlMap = Holders.config.grails.plugins?.springsecurity?.interceptUrlMap
+        }
         String updateUrl = '/ssb/UpdateAccount/**'
         def updateList = []
 
