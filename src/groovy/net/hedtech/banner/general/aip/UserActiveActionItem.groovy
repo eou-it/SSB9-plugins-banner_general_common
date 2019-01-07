@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.aip
 
@@ -62,7 +62,7 @@ public class UserActiveActionItem implements Serializable {
        def result = UserActiveActionItem.withSession { session ->
            session.getNamedQuery('UserActiveActionItem.checkIfUserActionItemsPresentByPidmAndCurrentDate')
                    .setInteger('pidm', pidm)
-                   .uniqueResult()
+                   .uniqueResult() >0
        }
        return result
    }
