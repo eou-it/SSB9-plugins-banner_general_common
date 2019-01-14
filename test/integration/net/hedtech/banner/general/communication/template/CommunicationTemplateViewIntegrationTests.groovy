@@ -59,6 +59,14 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
         emailTemplate = communicationEmailTemplateService.create( emailTemplate )
         assertNotNull emailTemplate?.id
 
+        def results = CommunicationTemplateView.findByNameWithPagingAndSortParams( [params: ["name": ("testEmailTemplate")]], [sortColumn: "name", sortDirection: "asc", max: 20, offset: 0])
+        assertNotNull results
+        assertEquals  "testEmailTemplate", results[0].name
+
+        results = CommunicationTemplateView.findByNameWithPagingAndSortParams( [params: ["name": ("testEMAIL")]], [sortColumn: "name", sortDirection: "asc", max: 20, offset: 0])
+        assertNotNull results
+        assertEquals  "testEmailTemplate", results[0].name
+
         CommunicationTemplateView templateView = CommunicationTemplateView.get( emailTemplate.id )
         assertNotNull( templateView )
         assertEquals( emailTemplate.name, templateView.name )

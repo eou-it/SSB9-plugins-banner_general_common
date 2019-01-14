@@ -80,6 +80,31 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
 
         }
 
+        CommunicationFolder differentCaseFolder = new CommunicationFolder()
+        differentCaseFolder.name = "TEST-integration"
+        differentCaseFolder.description = "another folder with same name different case"
+        try {
+            communicationFolderService.create(differentCaseFolder)
+            Assert.fail "Expected different case folder to fail because of name unique constraint."
+        } catch (ApplicationException e) {
+            assertTrue(e.getMessage().toString().contains("folderExists"))
+
+        }
+
+        CommunicationFolder differentNameFolder = new CommunicationFolder()
+        differentNameFolder.name = "TEST-integration12"
+        differentNameFolder.description = "another folder with different name different case"
+        try {
+            differentNameFolder = communicationFolderService.create(differentNameFolder)
+            assertNotNull(differentNameFolder)
+            assertEquals("TEST-integration12", differentNameFolder.name)
+            assertEquals("another folder with different name different case", differentNameFolder.description)
+            assertEquals(false, createdFolder.internal)
+            assertFalse createdFolder.systemIndicator
+
+        } catch (ApplicationException e) {
+            Assert.fail "Expected different case folder to pass."
+        }
     }
 
 
@@ -107,6 +132,14 @@ class CommunicationFolderServiceIntegrationTests extends BaseIntegrationTestCase
             Assert.fail "Expected sameNameFolder to fail because of name unique constraint."
         } catch (ApplicationException e) {
             assertEquals("@@r1:folderExists:" + folder2.name  + "@@", e.message)
+        }
+
+        folder1.name = folder2.name.toUpperCase()
+        try {
+            communicationFolderService.update(folder1)
+            Assert.fail "Expected different case folder to fail because of name unique constraint."
+        } catch (ApplicationException e) {
+            assertEquals("@@r1:folderExists:" + folder2.name.toUpperCase()  + "@@", e.message)
         }
     }
 

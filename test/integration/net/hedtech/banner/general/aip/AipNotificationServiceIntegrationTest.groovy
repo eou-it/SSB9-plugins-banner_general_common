@@ -46,8 +46,8 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
         def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm)
         assertNotNull hasActiveRows
 
-        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm)
-        assertEquals hasActiveRows>0,hasActiveItme
+        Boolean hasActiveItem = aipNotificationService.hasActiveActionItems(pidm)
+        assertEquals hasActiveRows,hasActiveItem
     }
 
     @Test
@@ -59,8 +59,8 @@ class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
         def hasActiveRows = UserActiveActionItem.checkIfActionItemPresent(pidm)
         assertNotNull hasActiveRows
 
-        Boolean hasActiveItme = aipNotificationService.hasActiveActionItems(pidm)
-        assertEquals hasActiveRows>0,hasActiveItme
+        Boolean hasActiveItem = aipNotificationService.hasActiveActionItems(pidm)
+        assertEquals hasActiveRows,hasActiveItem
     }
 
     @Test

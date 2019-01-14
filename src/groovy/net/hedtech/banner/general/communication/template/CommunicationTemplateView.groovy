@@ -93,7 +93,7 @@ public class CommunicationTemplateView implements Serializable {
      * @return
      */
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {
-
+//commenting out ignore case for creator id as the view stores in upper case and utility returns in upper case
         def descdir = pagingAndSortParams?.sortDirection?.toLowerCase() == 'desc'
 
         def queryCriteria = CommunicationTemplateView.createCriteria()
@@ -102,7 +102,7 @@ public class CommunicationTemplateView implements Serializable {
             and {
                 or {
                     eq("personal",false)
-                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(),[ignoreCase: true])
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName())
                 }
             }
             order((descdir ? Order.desc(pagingAndSortParams?.sortColumn) : Order.asc(pagingAndSortParams?.sortColumn)).ignoreCase())
@@ -126,7 +126,7 @@ public class CommunicationTemplateView implements Serializable {
             and {
                 or {
                     eq("personal", false)
-                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName().toLowerCase(), [ignoreCase: true])
+                    eq("createdBy", CommunicationCommonUtility.getUserOracleUserName())
                 }
             }
             and {
