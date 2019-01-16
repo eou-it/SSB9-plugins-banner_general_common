@@ -7,6 +7,7 @@ import org.apache.log4j.Logger
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import org.springframework.dao.InvalidDataAccessResourceUsageException
+import org.springframework.security.core.context.SecurityContextHolder
 
 import java.sql.SQLException
 
@@ -49,7 +50,7 @@ public class AipNotificationService extends ServiceBase {
     public String getAipEnabledFlag() {
         def aipEnabledStatus
         try {
-            aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES ? ENABLED : DISABLED
+            aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES && !SecurityContextHolder?.context?.authentication?.principal?.gidm ? ENABLED : DISABLED
             LOGGER.debug("AIP Enabled status [GENERAL_SSB,ENABLE.ACTION.ITEMS]=" + aipEnabledStatus)
         } catch (SQLException e) {
             aipEnabledStatus = ""
