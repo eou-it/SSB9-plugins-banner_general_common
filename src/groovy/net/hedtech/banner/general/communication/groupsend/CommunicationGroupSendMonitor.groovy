@@ -163,6 +163,8 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                 if (retries == 0) {
                     throw e
                 }
+            } catch(Throwable t) {
+                log.error(t)
             }
         }
     }
