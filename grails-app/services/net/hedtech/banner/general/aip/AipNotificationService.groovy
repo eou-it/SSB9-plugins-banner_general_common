@@ -7,7 +7,6 @@ import org.apache.log4j.Logger
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import org.springframework.dao.InvalidDataAccessResourceUsageException
-import org.springframework.security.core.context.SecurityContextHolder
 
 import java.sql.SQLException
 
@@ -33,7 +32,7 @@ public class AipNotificationService extends ServiceBase {
      * */
     public Boolean hasActiveActionItems(Integer pidm) {
         try {
-            return UserActiveActionItem.checkIfActionItemPresent(pidm)
+            return pidm?UserActiveActionItem.checkIfActionItemPresent(pidm):false //gidm user will not have action items
         } catch (SQLException e) {
             LOGGER.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
             return false
@@ -50,7 +49,7 @@ public class AipNotificationService extends ServiceBase {
     public String getAipEnabledFlag() {
         def aipEnabledStatus
         try {
-            aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES && !SecurityContextHolder?.context?.authentication?.principal?.gidm ? ENABLED : DISABLED
+            aipEnabledStatus = IntegrationConfiguration.fetchByProcessCodeAndSettingName(SQPR_CODE_GENERAL_SSB, ICSN_CODE_ENABLE_ACTION_ITEMS)?.value == YES ? ENABLED : DISABLED
             LOGGER.debug("AIP Enabled status [GENERAL_SSB,ENABLE.ACTION.ITEMS]=" + aipEnabledStatus)
         } catch (SQLException e) {
             aipEnabledStatus = ""
