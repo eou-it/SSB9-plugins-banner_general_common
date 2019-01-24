@@ -205,22 +205,27 @@ class CommunicationRecurrentMessageCompositeService {
         request.parameterNameValueMap = recurrentMessage.parameterNameValueMap
         request.recurrentMessageId = recurrentMessage.id
 
-        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        try {
+            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
 
 //      Get the recurrent message again as the job delete trigger would update the recurrent message object
-        if(!recurrentMessage.currentExecutionState.isTerminal()) {
-            recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
-        }
-        recurrentMessage.successCount = recurrentMessage.successCount + 1;
-        recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
-
-        recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
-
-        //if no of occurences <= total count, delete the cron_trigger entry
-        if(recurrentMessage.noOfOccurrences && recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
-            if( recurrentMessage.jobId != null ) {
-                schedulerJobService.deleteScheduledJob( recurrentMessage.jobId, recurrentMessage.groupId )
+            if (!recurrentMessage.currentExecutionState.isTerminal()) {
+                recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
             }
+            recurrentMessage.successCount = recurrentMessage.successCount + 1;
+            recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
+
+            recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
+
+            //if no of occurences <= total count, delete the cron_trigger entry
+            if (recurrentMessage.noOfOccurrences && recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
+                if (recurrentMessage.jobId != null) {
+                    schedulerJobService.deleteScheduledJob(recurrentMessage.jobId, recurrentMessage.groupId)
+                }
+            }
+        }catch(Throwable t) {
+            log.error("Error occurred when creating group send from recurrent message " + t.printStackTrace())
+            throw t;
         }
         return recurrentMessage
     }
