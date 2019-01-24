@@ -157,6 +157,42 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
     }
 
     @Test
+    void testPopulateTelephoneUpdateableStatus() {
+        setupTelephoneRule()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def telephones = [
+                [
+                    telephoneType: [code: 'T2'],
+                    pidm: pidm
+                ]
+        ]
+
+        personalInformationCompositeService.populateTelephoneUpdateableStatus(telephones, roles)
+
+        assertTrue telephones[0].isUpdateable
+    }
+
+    @Test
+    void testPopulateTelephoneUpdateableStatusWhereNotUpdateable() {
+        setupTelephoneRule()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def telephones = [
+                [
+                    telephoneType: [code: 'T4'],
+                    pidm: pidm
+                ]
+        ]
+
+        personalInformationCompositeService.populateTelephoneUpdateableStatus(telephones, roles)
+
+        assertFalse telephones[0].isUpdateable
+    }
+
+    @Test
     void testFetchUpdateableTelephoneTypeList() {
         setupTelephoneRule()
 
@@ -204,6 +240,42 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         catch (ApplicationException ae) {
             assertApplicationException ae, "invalidEmailTypeUpdate"
         }
+    }
+
+    @Test
+    void testPopulateEmailUpdateableStatus() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def emails = [
+                [
+                        emailType: [code: 'DORM'],
+                        pidm: pidm
+                ]
+        ]
+
+        personalInformationCompositeService.populateEmailUpdateableStatus(emails, roles)
+
+        assertTrue emails[0].isUpdateable
+    }
+
+    @Test
+    void testPopulateEmailUpdateableStatusWhereNotUpdateable() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def emails = [
+                [
+                        emailType: [code: 'HOME'],
+                        pidm: pidm
+                ]
+        ]
+
+        personalInformationCompositeService.populateEmailUpdateableStatus(emails, roles)
+
+        assertFalse emails[0].isUpdateable
     }
 
     @Test
