@@ -24,6 +24,15 @@ class CommunicationMailboxAccountService extends ServiceBase {
     def decryptPassword(String encryptedPassword) {
         def decryptedPassword
         println "In the decrypt password method of mailbox account service"
+
+        try {
+            println "The holders value is "+Holders.config
+            println "communication: "+Holders.config.communication
+            println "The different values are: "+Holders.config.communication.security.password
+            println "The comunication is : " + Holders.config.communication.security.password.encKey
+        } catch (Exception e){
+            println "I GOT AN exception: "+e.getMessage()
+        }
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
         println "The encryption key used is:***"+encryptionKey+"***"
         if (encryptionKey == null)
