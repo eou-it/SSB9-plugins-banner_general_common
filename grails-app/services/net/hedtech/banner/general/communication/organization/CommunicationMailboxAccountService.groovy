@@ -23,13 +23,18 @@ class CommunicationMailboxAccountService extends ServiceBase {
 
     def decryptPassword(String encryptedPassword) {
         def decryptedPassword
+        println "In the decrypt password method of mailbox account service"
         String encryptionKey = Holders.config.communication?.security?.password?.encKey
+        println "The encryption key used is:***"+encryptionKey+"***"
         if (encryptionKey == null)
             throw new ApplicationException(CommunicationOrganization, "@@r1:security.keyMissing@@")
+        println "The encryption key is not null as it has passed the exception"
+        println "The password is "+encryptedPassword
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
         sql.call("{$Sql.VARCHAR = call gckencr.decrypt_string (${encryptionKey},${encryptedPassword})}") {
             result -> decryptedPassword = result
         }
+        println "Executed the method successfully: "+decryptedPassword
         decryptedPassword
     }
 
