@@ -5,6 +5,7 @@ package net.hedtech.banner.general.scheduler
 
 import grails.util.Holders
 import net.hedtech.banner.general.communication.CommunicationErrorCode
+import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
 import org.apache.commons.logging.Log
@@ -94,9 +95,9 @@ class SchedulerJobService {
             CronTrigger trigger = builder.build()
 
             scheduleJob(jobDetail, trigger)
-        } catch(SchedulerException e) {
+        } catch(CommunicationApplicationException e) {
             log.error(e)
-            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+            throw e
         } catch(Throwable t) {
             log.error(t)
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
@@ -150,9 +151,9 @@ class SchedulerJobService {
             CronTrigger trigger = builder.build()
 
             rescheduleJob(jobContext.jobId, jobContext.groupId, trigger)
-        } catch(SchedulerException e) {
+        } catch(CommunicationApplicationException e) {
             log.error(e)
-            throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, e, CommunicationErrorCode.SCHEDULER_ERROR.name())
+            throw e
         } catch(Throwable t) {
             log.error(t)
             throw CommunicationExceptionFactory.createApplicationException(SchedulerJobService.class, t, CommunicationErrorCode.UNKNOWN_ERROR.name())
