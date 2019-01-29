@@ -1,9 +1,10 @@
 /*********************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.personalinformation
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.system.EmailType
 
 class PersonalInformationCompositeService {
 
@@ -70,7 +71,7 @@ class PersonalInformationCompositeService {
 
     def populateEmailUpdateableStatus(emails, roles) {
         emails.each { email ->
-            email.isUpdateable = true
+            email.isUpdateable = EmailType.fetchByCodeAndWebDisplayable(email.emailType.code).size() > 0
 
             try {
                 validateEmailTypeRule(email.emailType, email.pidm, roles)

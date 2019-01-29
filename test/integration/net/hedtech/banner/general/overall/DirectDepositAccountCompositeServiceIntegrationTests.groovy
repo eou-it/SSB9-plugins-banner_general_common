@@ -36,6 +36,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     def userRoleService
     private static final log = Logger.getLogger(DirectDepositAccountCompositeServiceIntegrationTests.class)
 
+    def oldHoldersConfig = Holders.config
     def testBankRoutingInfo0 = [
         bankRoutingNum: '234798944'
     ]
@@ -79,6 +80,9 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @After
     public void tearDown() {
         super.tearDown()
+        println "THE BEFORE ONE IS "+Holders.config
+        Holders.config = oldHoldersConfig
+        println "THE new one is now: "+Holders.config
         super.logout()
     }
 

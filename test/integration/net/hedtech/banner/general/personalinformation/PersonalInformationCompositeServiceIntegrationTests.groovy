@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.personalinformation
 
@@ -250,7 +250,7 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         def pidm = PersonUtility.getPerson("GDP000005").pidm
         def emails = [
                 [
-                        emailType: [code: 'DORM'],
+                        emailType: [code: 'MA'],
                         pidm: pidm
                 ]
         ]
@@ -269,6 +269,24 @@ class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegratio
         def emails = [
                 [
                         emailType: [code: 'HOME'],
+                        pidm: pidm
+                ]
+        ]
+
+        personalInformationCompositeService.populateEmailUpdateableStatus(emails, roles)
+
+        assertFalse emails[0].isUpdateable
+    }
+
+    @Test
+    void testPopulateEmailUpdateableStatusNoWebInd() {
+        setupEmailRules()
+
+        def roles = ['EMPLOYEE', 'STUDENT']
+        def pidm = PersonUtility.getPerson("GDP000005").pidm
+        def emails = [
+                [
+                        emailType: [code: 'SCHL'],
                         pidm: pidm
                 ]
         ]
