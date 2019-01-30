@@ -80,9 +80,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @After
     public void tearDown() {
         super.tearDown()
-        println "THE BEFORE ONE IS "+Holders.config
         Holders.config = oldHoldersConfig
-        println "THE new one is now: "+Holders.config
         super.logout()
     }
 

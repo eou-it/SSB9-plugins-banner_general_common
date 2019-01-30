@@ -7,6 +7,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -167,7 +168,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         communicationField = communicationFieldService.create( [domainModel: communicationField] )
         assertNotNull communicationField.immutableId
 
-        final Long pidm = 29001L
+        final Long pidm = (PersonIdentificationNameCurrent.fetchByBannerId('STUAFR001')).pidm
         String result = communicationFieldCalculationService.calculateFieldByPidm(
             (String) communicationField.ruleContent,
             (Boolean) communicationField.returnsArrayArguments,

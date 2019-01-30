@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -50,7 +51,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     def i_valid_folder_internal = true
     def i_valid_folder_name1 = "Valid Folder1 Name"
     def i_valid_folder_name2 = "Valid Folder2 Name"
-    def i_valid_pidm = 29001
+    def i_valid_pidm
     def i_valid_bannerId = 'HOSWEB003'
     def CommunicationFolder folder1
     def CommunicationFolder folder2
@@ -87,6 +88,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         assertNotNull folder2.id
         cleanUp()
         i_valid_Organization = createNewCommunicationOrganization()
+        i_valid_pidm = (PersonIdentificationNameCurrent.fetchByBannerId('STUAFR001')).pidm
     }
 
 
