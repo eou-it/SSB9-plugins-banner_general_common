@@ -1,5 +1,5 @@
 /********************************************************************************
-  Copyright 2016-2018 Ellucian Company L.P. and its affiliates.
+  Copyright 2016-2019 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 package net.hedtech.banner.general.scheduler
 
@@ -136,11 +136,11 @@ class SchedulerJobService {
      * @param parameters an optional map to pass to to the service method
      */
     public void reScheduleCronServiceMethod( SchedulerJobContext jobContext ) {
-        JobDetail jobDetail = createJobDetail( jobContext )
+        Trigger oldTrigger = quartzScheduler.getTrigger( new TriggerKey(jobContext.jobId, jobContext.groupId));
+        TriggerBuilder builder = oldTrigger.getTriggerBuilder();
 
         try {
-            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
-                    .startAt(jobContext.scheduledStartDate)
+            builder = builder.startAt(jobContext.scheduledStartDate)
                     .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
                     .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
                     .withMisfireHandlingInstructionFireAndProceed())
@@ -148,9 +148,9 @@ class SchedulerJobService {
             if (jobContext.endDate != null) {
                 builder.endTime = jobContext.endDate
             }
-            CronTrigger trigger = builder.build()
 
-            rescheduleJob(jobContext.jobId, jobContext.groupId, trigger)
+            Trigger newTrigger = builder.build()
+            rescheduleJob(oldTrigger.getKey(), newTrigger)
         } catch(CommunicationApplicationException e) {
             log.error(e)
             throw e
@@ -230,8 +230,7 @@ class SchedulerJobService {
         }
     }
 
-    private Date rescheduleJob(String jobId, String groupId, Trigger newTrigger) {
-        TriggerKey triggerKey = new TriggerKey(jobId, groupId)
+    private Date rescheduleJob(TriggerKey triggerKey, Trigger newTrigger) {
         try {
             return quartzScheduler.rescheduleJob(triggerKey, newTrigger)
         } catch (NoClassDefFoundError e) {
