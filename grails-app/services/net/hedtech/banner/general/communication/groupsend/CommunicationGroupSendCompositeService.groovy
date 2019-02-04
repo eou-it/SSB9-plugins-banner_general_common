@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014-2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
@@ -92,7 +92,15 @@ class CommunicationGroupSendCompositeService {
         CommunicationPopulation population = communicationPopulationCompositeService.fetchPopulation( groupSend.populationId )
         boolean hasQuery = (CommunicationPopulationQueryAssociation.countByPopulation( population ) > 0)
 //                                        recalculate false || no scheduled date
-        boolean useCurrentReplica = (!groupSend.recalculateOnSend || !request.scheduledStartDate)
+        boolean useCurrentReplica
+
+        //if group send came from recurrent message, it becomes a send now with possibility of having a re-calculate
+        if(groupSend.recurrentMessageId) {
+            useCurrentReplica = !groupSend.recalculateOnSend
+        } else {
+            //assign population calculation if there is no recalculate for one-time schedule or if it is a send now
+            useCurrentReplica  = (!groupSend.recalculateOnSend || !request.scheduledStartDate)
+        }
 
         if (hasQuery && useCurrentReplica) {
             // this will need to be updated once we allow queries to be added to existing manual only populations
@@ -287,6 +295,7 @@ class CommunicationGroupSendCompositeService {
         if (log.isDebugEnabled()) log.debug( "Completing group send with id = " + groupSendId + "." )
 
         CommunicationGroupSend aGroupSend = (CommunicationGroupSend) communicationGroupSendService.get( groupSendId )
+        aGroupSend.updateCumulativeStatus(CommunicationGroupSendExecutionState.Processing)
         aGroupSend.markComplete()
         return saveGroupSend( aGroupSend )
     }
@@ -504,7 +513,11 @@ class CommunicationGroupSendCompositeService {
 
     private CommunicationGroupSend saveGroupSend( CommunicationGroupSend groupSend ) {
         //TODO: Figure out why ServiceBase.update is not working with this domain.
-        return groupSend.save( flush:true ) //update( groupSend )
+        try {
+            return groupSend.save(flush: true) //update( groupSend )
+        } catch(Throwable t) {
+            log.error( t )
+        }
     }
 
     /**

@@ -1,9 +1,10 @@
 /*********************************************************************************
- Copyright 2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.personalinformation
 
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.system.EmailType
 
 class PersonalInformationCompositeService {
 
@@ -44,6 +45,18 @@ class PersonalInformationCompositeService {
         }
     }
 
+    def populateTelephoneUpdateableStatus(telephones, roles) {
+        telephones.each { telephone ->
+            telephone.isUpdateable = true
+
+            try {
+                validateTelephoneTypeRule(telephone.telephoneType, telephone.pidm, roles)
+            } catch (ApplicationException e) {
+                telephone.isUpdateable = false
+            }
+        }
+    }
+
     def fetchUpdateableEmailTypeList(pidm, roles, int max = 10, int offset = 0, String searchString = '') {
         return fetchUpdateableTypesList('EMAIL', pidm, roles, max, offset, searchString)
     }
@@ -53,6 +66,18 @@ class PersonalInformationCompositeService {
         params.EMAIL_TYPE = emailType.code
         if(!sqlProcessCompositeService.getSsbRuleResult('SSB_EMAIL_UPDATE', params)) {
             throw new ApplicationException(net.hedtech.banner.general.system.EmailType, "@@r1:invalidEmailTypeUpdate@@")
+        }
+    }
+
+    def populateEmailUpdateableStatus(emails, roles) {
+        emails.each { email ->
+            email.isUpdateable = EmailType.fetchByCodeAndWebDisplayable(email.emailType.code).size() > 0
+
+            try {
+                validateEmailTypeRule(email.emailType, email.pidm, roles)
+            } catch (ApplicationException e) {
+                email.isUpdateable = false
+            }
         }
     }
 

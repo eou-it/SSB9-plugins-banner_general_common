@@ -1,5 +1,5 @@
 /********************************************************************************
-  Copyright 2017 Ellucian Company L.P. and its affiliates.
+  Copyright 2017-2019 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 /** *****************************************************************************
  © 2014 SunGard Higher Education.  All Rights Reserved.
@@ -212,7 +212,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
                 }
             }
 
-            return merge( formatString.replaceAll( /\$\w+\$/) {m  ->  m.toString().toLowerCase()} ?: "", attributeMap )
+            return merge( formatString?.replaceAll( /\$\w+\$/) {m  ->  m.toString().toLowerCase()} ?: "", attributeMap )
         } catch (ApplicationException e) {
             if (log.debugEnabled) log.debug("Application exception while calculating field", e);
             throw e;

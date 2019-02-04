@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
@@ -18,6 +18,7 @@ import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureExcep
 class CommunicationGroupSendMonitor implements DisposableBean {
     private Log log = LogFactory.getLog(this.getClass())
     private CommunicationGroupSendMonitorThread monitorThread
+    private CommunicationGroupSendCumulativeMonitorThread cumulativeMonitorThread
     private CommunicationGroupSendService communicationGroupSendService
     private CommunicationGroupSendItemService communicationGroupSendItemService
     private CommunicationGroupSendCompositeService communicationGroupSendCompositeService
@@ -69,6 +70,9 @@ class CommunicationGroupSendMonitor implements DisposableBean {
         if (monitorThread) {
             monitorThread.stopRunning()
         }
+         if(cumulativeMonitorThread) {
+             cumulativeMonitorThread.stopRunning()
+         }
     }
 
 
@@ -78,20 +82,39 @@ class CommunicationGroupSendMonitor implements DisposableBean {
             monitorThread = new CommunicationGroupSendMonitorThread(this);
         }
         monitorThread.start();
+
+        if(!cumulativeMonitorThread) {
+            cumulativeMonitorThread = new CommunicationGroupSendCumulativeMonitorThread(this);
+        }
+        cumulativeMonitorThread.start();
     }
 
 
     public void shutdown() {
-        log.debug("Shutting down.");
+        log.error("Shutting down.");
         if (monitorThread) {
             monitorThread.stopRunning();
             try {
                 this.monitorThread.join();
             } catch (InterruptedException e) {
-                log.debug("Exception when Shutting down."+e.getMessage());
+                log.error("Exception when Shutting down group send monitor."+e.getMessage());
+            } catch( Throwable t) {
+                log.error("Exception when Shutting down group send monitor."+t.getMessage());
             }
         }
         monitorThread = null
+
+        if (cumulativeMonitorThread) {
+            cumulativeMonitorThread.stopRunning();
+            try {
+                this.cumulativeMonitorThread.join();
+            } catch (InterruptedException e) {
+                log.error("Exception when Shutting down group send cumulative monitor."+e.getMessage());
+            }  catch( Throwable t) {
+                log.error("Exception when Shutting down group send cumulative monitor."+t.getMessage());
+            }
+        }
+        cumulativeMonitorThread = null
     }
 
 
@@ -111,28 +134,40 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                     }
                 }
             }
+        } catch (Throwable t) {
+            t.printStackTrace()
+            log.error(t)
+        }
+    }
 
+    public void monitorGroupSendsCumulativeStatus() {
+        if (log.isDebugEnabled()) log.debug("Checking group sends for cumulative status updates.")
+        // begin setup
+        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
+        try {
             boolean groupSendCompleted = false;
             List<CommunicationGroupSend> completedGroupSendList = CommunicationGroupSend.findWithRunningCumulativeStatus()
+            if (log.isDebugEnabled()) log.debug("Group send count wirh runnning cumulative status = " + completedGroupSendList.size() + ".");
+
             for (CommunicationGroupSend groupSend : completedGroupSendList) {
-                    List<CommunicationGroupSendItem> groupSendItemList = CommunicationGroupSendItem.fetchByGroupSend(groupSend);
-                    //If the group send items are created, only then set the status flag to true. Otherwise the Scheduled group send might be waiting to be fired at a future date
-                    if(groupSendItemList) {
-                        groupSendCompleted = true;
-                    }
-                    for (CommunicationGroupSendItem groupSendItem : groupSendItemList) {
-                        if (groupSendItem.currentExecutionState.equals(CommunicationGroupSendItemExecutionState.Complete)) {
-                            //Both gcbgsnd and gcrgsim are Complete, so check to if the actual job completed.
-                            CommunicationJob job = CommunicationJob.findByReferenceId(groupSendItem.referenceId)
-                            if (job.status.equals(CommunicationJobStatus.DISPATCHED) || job.status.equals(CommunicationJobStatus.PENDING)) {
-                                //Set flag to false if job not Completed
-                                groupSendCompleted = false;
-                            }
-                        } else {
-                            //Set flag to false if item not Completed
+                List<CommunicationGroupSendItem> groupSendItemList = CommunicationGroupSendItem.fetchByGroupSend(groupSend);
+                //If the group send items are created, only then set the status flag to true. Otherwise the Scheduled group send might be waiting to be fired at a future date
+                if(groupSendItemList) {
+                    groupSendCompleted = true;
+                }
+                for (CommunicationGroupSendItem groupSendItem : groupSendItemList) {
+                    if (groupSendItem.currentExecutionState.equals(CommunicationGroupSendItemExecutionState.Complete)) {
+                        //Both gcbgsnd and gcrgsim are Complete, so check to if the actual job completed.
+                        CommunicationJob job = CommunicationJob.findByReferenceId(groupSendItem.referenceId)
+                        if (job.status.equals(CommunicationJobStatus.DISPATCHED) || job.status.equals(CommunicationJobStatus.PENDING)) {
+                            //Set flag to false if job not Completed
                             groupSendCompleted = false;
                         }
+                    } else {
+                        //Set flag to false if item not Completed
+                        groupSendCompleted = false;
                     }
+                }
                 if(groupSendCompleted) {
                     //Update cumulative status to Complete
                     groupSend.updateCumulativeStatus(CommunicationGroupSendExecutionState.Complete);
@@ -163,6 +198,8 @@ class CommunicationGroupSendMonitor implements DisposableBean {
                 if (retries == 0) {
                     throw e
                 }
+            } catch(Throwable t) {
+                log.error(t)
             }
         }
     }

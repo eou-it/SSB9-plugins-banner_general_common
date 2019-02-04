@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2016-2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2016-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
@@ -663,7 +663,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
     }
 
     //Commenting out this test for the time being as it is hanging the CI build. Will look into how to move on if the thread dies and later uncomment the same.
-/*    @Test
+    @Test
     void testFindRunning() {
         println "testFindRunning"
 
@@ -681,7 +681,7 @@ class CommunicationGroupSendCompositeServiceConcurrentTests extends Communicatio
             return CommunicationGroupSend.findRunning().size() == 0
         }
         assertTrueWithRetry( allDone, null, 10, 10 )
-    }*/
+    }
 
     @Test
     void testStopStoppedGroupSend() {

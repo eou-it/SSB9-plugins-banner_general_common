@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2018-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.recurrence
 
@@ -125,7 +125,7 @@ class CommunicationRecurrentMessageCompositeService {
 
         Date scheduledDate = sdf.parse(sdf.format(recurrentMessage.startDate))
 
-        if (today.compareTo(scheduledDate) != 0 ) {
+        if (today.compareTo(scheduledDate) != 0 && recurrentMessage.currentExecutionState.equals(CommunicationGroupSendExecutionState.New)) {
             if(now.after(recurrentMessage.startDate)) {
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationRecurrentMessageService.class, "invalidScheduleStartDate")
             }
@@ -205,22 +205,27 @@ class CommunicationRecurrentMessageCompositeService {
         request.parameterNameValueMap = recurrentMessage.parameterNameValueMap
         request.recurrentMessageId = recurrentMessage.id
 
-        CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
+        try {
+            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
 
 //      Get the recurrent message again as the job delete trigger would update the recurrent message object
-        if(!recurrentMessage.currentExecutionState.isTerminal()) {
-            recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
-        }
-        recurrentMessage.successCount = recurrentMessage.successCount + 1;
-        recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
-
-        recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
-
-        //if no of occurences <= total count, delete the cron_trigger entry
-        if(recurrentMessage.noOfOccurrences && recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
-            if( recurrentMessage.jobId != null ) {
-                schedulerJobService.deleteScheduledJob( recurrentMessage.jobId, recurrentMessage.groupId )
+            if (!recurrentMessage.currentExecutionState.isTerminal()) {
+                recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
             }
+            recurrentMessage.successCount = recurrentMessage.successCount + 1;
+            recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
+
+            recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
+
+            //if no of occurences <= total count, delete the cron_trigger entry
+            if (recurrentMessage.noOfOccurrences && recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
+                if (recurrentMessage.jobId != null) {
+                    schedulerJobService.deleteScheduledJob(recurrentMessage.jobId, recurrentMessage.groupId)
+                }
+            }
+        }catch(Throwable t) {
+            log.error("Error occurred when creating group send from recurrent message " + t.printStackTrace())
+            throw t;
         }
         return recurrentMessage
     }
@@ -247,6 +252,14 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.failureCount = recurrentMessage.failureCount + 1;
         recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
+
+        //if no of occurences <= total count, delete the cron_trigger entry
+        if (recurrentMessage.noOfOccurrences && recurrentMessage.noOfOccurrences <= recurrentMessage.totalCount) {
+            if (recurrentMessage.jobId != null) {
+                schedulerJobService.deleteScheduledJob(recurrentMessage.jobId, recurrentMessage.groupId)
+            }
+        }
+
         return recurrentMessage
     }
 
@@ -335,14 +348,16 @@ class CommunicationRecurrentMessageCompositeService {
                 recurrentMessage.startDate = oldRecurrentMessage.startDate
             } else {
                 recurrentMessage.startDate = now
+                rescheduleNeeded = true;
             }
         }
 
-        if(recurrentMessage.startDate != null && oldRecurrentMessage.startDate.compareTo(recurrentMessage.startDate) != 0) {
+        if(recurrentMessage.startDate != null && oldRecurrentMessage.startDate.compareTo(recurrentMessage.startDate) != 0
+            && recurrentMessage.currentExecutionState.equals(CommunicationGroupSendExecutionState.New)) {
             rescheduleNeeded = true;
         }
 
-        if(recurrentMessage.endDate != null) {
+        if(recurrentMessage.endDate != null && !recurrentMessage.currentExecutionState.isTerminal()) {
             if(oldRecurrentMessage.endDate != null) {
                 //there was an update to existing end date, so compare them
                 if(oldRecurrentMessage.endDate.compareTo(recurrentMessage.endDate) != 0) {

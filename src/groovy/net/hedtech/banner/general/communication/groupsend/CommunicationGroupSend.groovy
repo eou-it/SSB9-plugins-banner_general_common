@@ -1,5 +1,5 @@
 /*********************************************************************************
- Copyright 2014-2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2019 Ellucian Company L.P. and its affiliates.
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.groupsend
 
@@ -39,11 +39,12 @@ import javax.persistence.*
         ),
         @NamedQuery(name = "CommunicationGroupSend.findWithRunningCumulativeStatus",
                 query = """ FROM CommunicationGroupSend gs
-                    WHERE gs.cumulativeExecutionState = :new_ or
+                    WHERE (gs.cumulativeExecutionState = null or
+                          gs.cumulativeExecutionState = :new_ or
                           gs.cumulativeExecutionState = :processing_ or
                           gs.cumulativeExecutionState = :scheduled_ or
                           gs.cumulativeExecutionState = :queued_ or
-                          gs.cumulativeExecutionState = :calculating_
+                          gs.cumulativeExecutionState = :calculating_)
                     AND   gs.currentExecutionState = :complete_"""
         ),
         @NamedQuery(name = "CommunicationGroupSend.findByRecurrentMessageId",
@@ -212,6 +213,7 @@ class CommunicationGroupSend implements Serializable {
         stopDate(nullable: true)
         creationDateTime(nullable: false)
         currentExecutionState(nullable: false)
+        cumulativeExecutionState(nullable:true)
         scheduledStartDate(nullable:true)
         recalculateOnSend(nullable:false)
         errorText(nullable:true)

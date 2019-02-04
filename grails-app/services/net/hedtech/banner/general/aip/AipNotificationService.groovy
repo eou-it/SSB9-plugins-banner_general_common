@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2018-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.aip
 
@@ -32,7 +32,7 @@ public class AipNotificationService extends ServiceBase {
      * */
     public Boolean hasActiveActionItems(Integer pidm) {
         try {
-            return UserActiveActionItem.checkIfActionItemPresent(pidm)
+            return pidm?UserActiveActionItem.checkIfActionItemPresent(pidm):false //gidm user will not have action items
         } catch (SQLException e) {
             LOGGER.warn("Exception while fetching aip enabled flag from goriccr" + e.getMessage())
             return false
