@@ -211,7 +211,7 @@ class CommunicationRecurrentMessageCompositeService {
         try {
             originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(recurrentMessage.createdBy, recurrentMessage.mepCode)
 
-            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.createGroupSendCommunicationForRecurrentMessage(request, recurrentMessage.createdBy)
+            CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request, recurrentMessage.createdBy)
 
 //      Get the recurrent message again as the job delete trigger would update the recurrent message object
             if (!recurrentMessage.currentExecutionState.isTerminalWithoutErrors()) {
