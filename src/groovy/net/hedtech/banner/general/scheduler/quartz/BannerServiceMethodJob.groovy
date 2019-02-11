@@ -76,7 +76,11 @@ class BannerServiceMethodJob implements Job {
         def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
         def originalMap = null
         try {
-            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(oracleUserName, mepCode)
+            if (methodHandle.service.contains("RecurrentMessageCompositeService")) {
+                originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
+            } else {
+                originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(oracleUserName, mepCode)
+            }
             SchedulerJobService schedulerJobService = Holders.applicationContext.getBean("schedulerJobService")
             schedulerJobService.invokeServiceMethodInNewTransaction(methodHandle.service, methodHandle.method, context)
         } finally {
