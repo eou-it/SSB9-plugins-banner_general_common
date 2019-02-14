@@ -398,12 +398,12 @@ class CommunicationGroupSendCompositeService {
 
                 boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion( populationVersion ) > 0)
                 boolean populationCalculationSuccessful = true
-
+                CommunicationPopulationCalculation calculation
                 if (!groupSend.populationCalculationId && hasQuery) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
                     groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
 
-                    CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
+                    calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
                     if(calculation.errorCode || calculation.errorText) {
                         populationCalculationSuccessful = false
@@ -414,8 +414,13 @@ class CommunicationGroupSendCompositeService {
                 if (shouldUpdateGroupSend) {
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
                 }
+
                 if(populationCalculationSuccessful) {
-                    groupSend = generateGroupSendItemsImpl(groupSend)
+                    boolean calculationHasProfiles = calculation.calculatedCount > 0;
+                    boolean inculdeListExists = populationVersion.includeList
+                    if(calculationHasProfiles || inculdeListExists) {
+                        groupSend = generateGroupSendItemsImpl(groupSend)
+                    }
                 }
             } catch (Throwable t) {
                 log.error( t.getMessage() )
