@@ -415,9 +415,9 @@ class CommunicationGroupSendCompositeService {
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
                 }
 
-                if(populationCalculationSuccessful) {
-                    boolean calculationHasProfiles = calculation.calculatedCount > 0;
-                    boolean inculdeListExists = populationVersion.includeList
+                boolean inculdeListExists = populationVersion.includeList
+                if(populationCalculationSuccessful || inculdeListExists) {
+                    boolean calculationHasProfiles = calculation?.calculatedCount > 0;
                     if(calculationHasProfiles || inculdeListExists) {
                         groupSend = generateGroupSendItemsImpl(groupSend)
                     }
