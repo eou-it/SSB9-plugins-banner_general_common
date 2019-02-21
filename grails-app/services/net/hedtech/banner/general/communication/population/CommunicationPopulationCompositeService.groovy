@@ -56,6 +56,7 @@ class CommunicationPopulationCompositeService {
     CommunicationPopulationQueryExecutionService communicationPopulationQueryExecutionService
     CommunicationPopulationSelectionListEntryService communicationPopulationSelectionListEntryService
     CommunicationPopulationSelectionListService communicationPopulationSelectionListService
+    AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
     def sessionFactory
     SchedulerJobService schedulerJobService
 
@@ -403,7 +404,7 @@ class CommunicationPopulationCompositeService {
      * @param population the population to persist
      */
     public CommunicationPopulation createPopulationFromQueryVersion( CommunicationPopulationQueryVersion populationQueryVersion, String name, String description, Date scheduledDate ) {
-        log.trace( "createPopulationFromQueryVersion( populationVersion, name, d`escription ) called" )
+        log.trace( "createPopulationFromQueryVersion( populationVersion, name, description ) called" )
         assert(populationQueryVersion)
 
         CommunicationPopulation population = new CommunicationPopulation()
@@ -696,6 +697,7 @@ class CommunicationPopulationCompositeService {
             log.debug("${errorContext.jobContext.errorHandle} called for populationCalculationId = ${populationCalculationId} with message = ${errorContext?.cause?.message}")
         }
 
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),errorContext.jobContext?.parameters?.get("mepCode"))
         CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.fetchById( populationCalculationId )
         if (!calculation) {
             // Calculation may have been deleted in which case silently return
@@ -724,6 +726,7 @@ class CommunicationPopulationCompositeService {
         }
 
         Long populationCalculationId = parameters.get( "populationCalculationId" )
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),parameters.get("mepCode"))
         CommunicationPopulationCalculation calculation = CommunicationPopulationCalculation.fetchById( populationCalculationId )
         if (!calculation) {
             // Calculation may have been deleted in which case silently return

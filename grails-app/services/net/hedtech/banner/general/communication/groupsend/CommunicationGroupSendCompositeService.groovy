@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.groupsend
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.event.CommunicationEventMappingView
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
@@ -54,6 +55,7 @@ class CommunicationGroupSendCompositeService {
     CommunicationPopulationSelectionListService communicationPopulationSelectionListService
     CommunicationOrganizationService communicationOrganizationService
     CommunicationPopulationCompositeService communicationPopulationCompositeService
+    AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
     SchedulerJobService schedulerJobService
     def sessionFactory
     def dataSource
@@ -343,6 +345,7 @@ class CommunicationGroupSendCompositeService {
             log.debug("${errorContext.jobContext.errorHandle} called for groupSendId = ${groupSendId} with message = ${errorContext?.cause?.message}")
         }
 
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),errorContext.jobContext?.parameters?.get("mepCode"))
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
         if (!groupSend) {
             throw new ApplicationException("groupSend", new NotFoundException())
@@ -372,6 +375,7 @@ class CommunicationGroupSendCompositeService {
             log.debug( "Calling calculatePopulationVersionForGroupSend for groupSendId = ${groupSendId}.")
         }
 
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),parameters.get("mepCode"))
         CommunicationGroupSend groupSend = CommunicationGroupSend.get( groupSendId )
         if (!groupSend) {
             throw new ApplicationException("groupSend", new NotFoundException())
@@ -393,19 +397,31 @@ class CommunicationGroupSendCompositeService {
                 }
 
                 boolean hasQuery = (CommunicationPopulationVersionQueryAssociation.countByPopulationVersion( populationVersion ) > 0)
-
+                boolean populationCalculationSuccessful = true
+                CommunicationPopulationCalculation calculation
                 if (!groupSend.populationCalculationId && hasQuery) {
                     groupSend.currentExecutionState = CommunicationGroupSendExecutionState.Calculating
                     groupSend.cumulativeExecutionState = CommunicationGroupSendExecutionState.Calculating
 
-                    CommunicationPopulationCalculation calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
+                    calculation = communicationPopulationCompositeService.calculatePopulationVersionForGroupSend( populationVersion )
                     groupSend.populationCalculationId = calculation.id
+                    if(calculation.errorCode || calculation.errorText) {
+                        populationCalculationSuccessful = false
+                        groupSend.markError(calculation.errorCode, calculation.errorText)
+                    }
                     shouldUpdateGroupSend = true
                 }
                 if (shouldUpdateGroupSend) {
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update( groupSend )
                 }
-                groupSend = generateGroupSendItemsImpl(groupSend)
+
+                boolean inculdeListExists = populationVersion.includeList
+                if(populationCalculationSuccessful || inculdeListExists) {
+                    boolean calculationHasProfiles = calculation?.calculatedCount > 0;
+                    if(calculationHasProfiles || inculdeListExists) {
+                        groupSend = generateGroupSendItemsImpl(groupSend)
+                    }
+                }
             } catch (Throwable t) {
                 log.error( t.getMessage() )
                 groupSend.refresh()
@@ -427,6 +443,7 @@ class CommunicationGroupSendCompositeService {
         if (log.isDebugEnabled()) {
             log.debug( "Calling generateGroupSendItems for groupSendId = ${groupSendId}.")
         }
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),parameters.get("mepCode"))
         CommunicationGroupSend groupSend = CommunicationGroupSend.get(groupSendId)
         if (!groupSend) {
             throw new ApplicationException("groupSend", new NotFoundException())
@@ -506,7 +523,7 @@ class CommunicationGroupSendCompositeService {
         // The individual group send items will still be processed asynchronously via the framework.
         createGroupSendItems(groupSend)
         groupSend.markProcessing()
-        //TODO Add cumulative status also as Processing
+
         groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
         return groupSend
     }

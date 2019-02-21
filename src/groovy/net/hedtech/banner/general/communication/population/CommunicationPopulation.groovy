@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 
@@ -31,6 +32,7 @@ import javax.persistence.Version
 @Entity
 @EqualsAndHashCode
 @ToString
+@DatabaseModifiesState
 @Table(name = "GCBPOPL")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulation.fetchById",
