@@ -1,3 +1,6 @@
+/********************************************************************************
+  Copyright 2016-2019 Ellucian Company L.P. and its affiliates.
+********************************************************************************/
 package net.hedtech.banner.general.scheduler
 
 import net.hedtech.banner.security.FormContext

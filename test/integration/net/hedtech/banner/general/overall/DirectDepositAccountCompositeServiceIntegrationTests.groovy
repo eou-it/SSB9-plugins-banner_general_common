@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2015-2018 Ellucian Company L.P. and its affiliates.
+ Copyright 2015-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
@@ -36,6 +36,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     def userRoleService
     private static final log = Logger.getLogger(DirectDepositAccountCompositeServiceIntegrationTests.class)
 
+    def oldHoldersConfig = Holders.config
     def testBankRoutingInfo0 = [
         bankRoutingNum: '234798944'
     ]
@@ -79,6 +80,7 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     @After
     public void tearDown() {
         super.tearDown()
+        Holders.config = oldHoldersConfig
         super.logout()
     }
 

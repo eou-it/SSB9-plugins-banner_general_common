@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2014 Ellucian Company L.P. and its affiliates.
+ Copyright 2014-2019 Ellucian Company L.P. and its affiliates.
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
@@ -91,13 +91,15 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 
 
     public void shutdown() {
-        log.debug("Shutting down.");
+        log.error("Shutting down.");
         if (monitorThread) {
             monitorThread.stopRunning();
             try {
                 this.monitorThread.join();
             } catch (InterruptedException e) {
-                log.debug("Exception when Shutting down."+e.getMessage());
+                log.error("Exception when Shutting down group send monitor."+e.getMessage());
+            } catch( Throwable t) {
+                log.error("Exception when Shutting down group send monitor."+t.getMessage());
             }
         }
         monitorThread = null
@@ -107,7 +109,9 @@ class CommunicationGroupSendMonitor implements DisposableBean {
             try {
                 this.cumulativeMonitorThread.join();
             } catch (InterruptedException e) {
-                log.debug("Exception when Shutting down."+e.getMessage());
+                log.error("Exception when Shutting down group send cumulative monitor."+e.getMessage());
+            }  catch( Throwable t) {
+                log.error("Exception when Shutting down group send cumulative monitor."+t.getMessage());
             }
         }
         cumulativeMonitorThread = null
