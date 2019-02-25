@@ -387,6 +387,8 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.parameterNameValueMap = oldRecurrentMessage.parameterNameValueMap
         recurrentMessage.jobId = oldRecurrentMessage.jobId
         recurrentMessage.groupId = oldRecurrentMessage.groupId
+        recurrentMessage.mepCode ?: oldRecurrentMessage.mepCode
+        recurrentMessage.dataOrigin ?: oldRecurrentMessage.dataOrigin
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )
 
         if(rescheduleNeeded) {
