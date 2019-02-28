@@ -3,8 +3,10 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.recurrence
 
+import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
@@ -33,6 +35,7 @@ class CommunicationRecurrentMessageCompositeService {
 
     CommunicationRecurrentMessageService communicationRecurrentMessageService
     CommunicationGroupSendCompositeService communicationGroupSendCompositeService
+    AsynchronousBannerAuthenticationSpoofer asynchronousBannerAuthenticationSpoofer
     SchedulerJobService schedulerJobService
     def sessionFactory
     def dataSource
@@ -170,6 +173,7 @@ class CommunicationRecurrentMessageCompositeService {
         if (log.isDebugEnabled()) {
             log.debug( "Calling generateGroupSend for recurrentMessageId = ${recurrentMessageId}.")
         }
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),parameters.get("mepCode"))
         CommunicationRecurrentMessage recurrentMessage = CommunicationRecurrentMessage.get(recurrentMessageId)
         if (!recurrentMessage) {
             throw new ApplicationException("recurrentMessage", new NotFoundException())
@@ -205,11 +209,15 @@ class CommunicationRecurrentMessageCompositeService {
         request.parameterNameValueMap = recurrentMessage.parameterNameValueMap
         request.recurrentMessageId = recurrentMessage.id
 
+        def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
+        def originalMap = null
         try {
+            originalMap = asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecuteAndSave(recurrentMessage.createdBy, recurrentMessage.mepCode)
+
             CommunicationGroupSend groupSend = communicationGroupSendCompositeService.sendAsynchronousGroupCommunication(request)
 
 //      Get the recurrent message again as the job delete trigger would update the recurrent message object
-            if (!recurrentMessage.currentExecutionState.isTerminal()) {
+            if (!recurrentMessage.currentExecutionState.isTerminalWithoutErrors()) {
                 recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Scheduled)
             }
             recurrentMessage.successCount = recurrentMessage.successCount + 1;
@@ -226,6 +234,10 @@ class CommunicationRecurrentMessageCompositeService {
         }catch(Throwable t) {
             log.error("Error occurred when creating group send from recurrent message " + t.printStackTrace())
             throw t;
+        } finally {
+            if (originalMap) {
+                asynchronousBannerAuthenticationSpoofer.resetAuthAndFormContext( originalMap )
+            }
         }
         return recurrentMessage
     }
@@ -236,6 +248,7 @@ class CommunicationRecurrentMessageCompositeService {
             log.debug("${errorContext.jobContext.errorHandle} called for recurrentMessageId = ${recurrentMessageId} with message = ${errorContext?.cause?.message}")
         }
 
+        asynchronousBannerAuthenticationSpoofer.setMepContext(sessionFactory.getCurrentSession().connection(),errorContext.jobContext?.parameters?.get("mepCode"))
         CommunicationRecurrentMessage recurrentMessage = CommunicationRecurrentMessage.get(recurrentMessageId)
         if (!recurrentMessage) {
             throw new ApplicationException("recurrentMessage", new NotFoundException())
@@ -273,7 +286,7 @@ class CommunicationRecurrentMessageCompositeService {
 
         CommunicationRecurrentMessage recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.get( recurrentMessageId )
 
-        if (recurrentMessage.currentExecutionState.isTerminal()) {
+        if (recurrentMessage.currentExecutionState.isTerminalWithoutErrors()) {
             log.warn( "Recurrent message with id = ${recurrentMessage.id} has already concluded with execution state ${recurrentMessage.currentExecutionState.toString()}." )
             throw CommunicationExceptionFactory.createApplicationException( CommunicationRecurrentMessageService.class, "cannotStopConcludedRecurrentMessage" )
         }
@@ -374,6 +387,8 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.parameterNameValueMap = oldRecurrentMessage.parameterNameValueMap
         recurrentMessage.jobId = oldRecurrentMessage.jobId
         recurrentMessage.groupId = oldRecurrentMessage.groupId
+        recurrentMessage.mepCode = oldRecurrentMessage.mepCode
+        recurrentMessage.dataOrigin = oldRecurrentMessage.dataOrigin
         recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update( recurrentMessage )
 
         if(rescheduleNeeded) {

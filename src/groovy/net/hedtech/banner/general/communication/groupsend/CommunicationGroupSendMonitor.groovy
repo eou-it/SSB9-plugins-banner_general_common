@@ -151,9 +151,14 @@ class CommunicationGroupSendMonitor implements DisposableBean {
 
             for (CommunicationGroupSend groupSend : completedGroupSendList) {
                 List<CommunicationGroupSendItem> groupSendItemList = CommunicationGroupSendItem.fetchByGroupSend(groupSend);
-                //If the group send items are created, only then set the status flag to true. Otherwise the Scheduled group send might be waiting to be fired at a future date
+                //If the group send items are created, only then set the status flag to true. Otherwise the Scheduled group send might be waiting to be fired at a future date.
                 if(groupSendItemList) {
                     groupSendCompleted = true;
+                } else {
+                    //count of gcrgsim is 0 as population did not return any results
+                    if(groupSend.currentExecutionState.equals(CommunicationGroupSendExecutionState.Complete)){
+                        groupSendCompleted = true;
+                    }
                 }
                 for (CommunicationGroupSendItem groupSendItem : groupSendItemList) {
                     if (groupSendItem.currentExecutionState.equals(CommunicationGroupSendItemExecutionState.Complete)) {

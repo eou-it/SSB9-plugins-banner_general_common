@@ -76,7 +76,6 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery" )
         assertNotNull( population.id )
         assertEquals( "testAllSpridenPopulationFromQuery", population.name )
-        assertEquals( "", population.description )
 
         List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )
         assertEquals( 1, associations.size() )
@@ -222,7 +221,6 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( populationQuery, "testAllSpridenPopulationFromQuery", "", now.getTime() )
         assertNotNull( population.id )
         assertEquals( "testAllSpridenPopulationFromQuery", population.name )
-        assertEquals( "", population.description )
         assertEquals( CommunicationPopulationCalculationStatus.SCHEDULED, population.status)
 
         List associations = CommunicationPopulationQueryAssociation.findAllByPopulation( population )

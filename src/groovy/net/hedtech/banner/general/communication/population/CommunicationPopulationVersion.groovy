@@ -6,12 +6,14 @@ package net.hedtech.banner.general.communication.population
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
+import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.*
 
 @Entity
 @EqualsAndHashCode
 @ToString
+@DatabaseModifiesState
 @Table(name = "GCRPOPV")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationVersion.findByPopulationId",
