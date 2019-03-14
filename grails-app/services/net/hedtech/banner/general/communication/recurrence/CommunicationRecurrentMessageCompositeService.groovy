@@ -186,7 +186,7 @@ class CommunicationRecurrentMessageCompositeService {
                 log.error(t.getMessage())
                 recurrentMessage.setCurrentExecutionState(CommunicationGroupSendExecutionState.Error)
                 recurrentMessage.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
-                recurrentMessage.errorText = t.getMessage()
+                recurrentMessage.errorText = t.printStackTrace()
                 recurrentMessage.failureCount = recurrentMessage.failureCount + 1;
                 recurrentMessage.totalCount = recurrentMessage.totalCount + 1;
                 recurrentMessage = (CommunicationRecurrentMessage) communicationRecurrentMessageService.update(recurrentMessage)
@@ -258,7 +258,7 @@ class CommunicationRecurrentMessageCompositeService {
 
         if (errorContext.cause) {
             recurrentMessage.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
-            recurrentMessage.errorText = errorContext.cause.message
+            recurrentMessage.errorText = errorContext.cause.printStackTrace()
         } else {
             recurrentMessage.errorCode = CommunicationErrorCode.UNKNOWN_ERROR
         }
