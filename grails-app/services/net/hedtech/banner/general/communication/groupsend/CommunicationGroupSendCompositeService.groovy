@@ -24,6 +24,7 @@ import net.hedtech.banner.general.communication.population.CommunicationPopulati
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
 import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
+import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
@@ -451,7 +452,18 @@ class CommunicationGroupSendCompositeService {
 
         if(!groupSend.currentExecutionState.isTerminal()) {
             try {
-                groupSend = generateGroupSendItemsImpl(groupSend)
+                //Check if organization is active
+                CommunicationOrganization organization = CommunicationOrganization.get(groupSend.organizationId)
+                CommunicationTemplate template = CommunicationTemplate.get(groupSend.templateId)
+                if(!organization.isAvailable || !template.isActive())
+                {
+                    String message = organization.isAvailable?"Inactive template selected for job":"Inactive organization selected for job"
+                    log.error(message)
+                    groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, message )
+                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+                } else {
+                    groupSend = generateGroupSendItemsImpl(groupSend)
+                }
             } catch (Throwable t) {
                 log.error(t.getMessage())
                 groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, t.getMessage() )
