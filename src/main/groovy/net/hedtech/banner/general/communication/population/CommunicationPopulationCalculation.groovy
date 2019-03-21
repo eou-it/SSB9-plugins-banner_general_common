@@ -8,7 +8,6 @@ import groovy.transform.ToString
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
-import net.hedtech.banner.service.DatabaseModifiesState
 import org.hibernate.annotations.Type
 
 import javax.persistence.*
@@ -16,7 +15,6 @@ import javax.persistence.*
 @Entity
 @EqualsAndHashCode
 @ToString
-@DatabaseModifiesState
 @Table(name = "GCRPOPC")
 @NamedQueries(value = [
         @NamedQuery(name = "CommunicationPopulationCalculation.fetchById",

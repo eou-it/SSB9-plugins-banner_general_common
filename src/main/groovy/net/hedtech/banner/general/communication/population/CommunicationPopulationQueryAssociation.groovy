@@ -7,7 +7,6 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.service.DatabaseModifiesState
 
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -28,7 +27,6 @@ import javax.persistence.Version
 @EqualsAndHashCode
 @ToString
 @Table(name = "GCRPQID")
-@DatabaseModifiesState
 @NamedQueries(value = [
     @NamedQuery(name = "CommunicationPopulationQueryAssociation.findAllByPopulation",
             query = """ FROM CommunicationPopulationQueryAssociation a

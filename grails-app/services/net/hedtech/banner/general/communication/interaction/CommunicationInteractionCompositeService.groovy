@@ -3,22 +3,16 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.interaction
 
-import grails.util.Holders
-import net.hedtech.banner.exceptions.ApplicationException
-import net.hedtech.banner.exceptions.NotFoundException
-import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import net.hedtech.banner.general.person.PersonIdentificationName
-import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Transactional
 
+import groovy.util.logging.Slf4j
+import net.hedtech.banner.general.person.PersonIdentificationName
+import grails.gorm.transactions.Transactional
+
+@Slf4j
 @Transactional
 class CommunicationInteractionCompositeService {
 
-    private static final log = Logger.getLogger(CommunicationInteractionCompositeService.class)
+    //private static final log = Logger.getLogger(CommunicationInteractionCompositeService.class)
 
     public static PersonIdentificationName getPersonOrNonPerson(String bannerId) {
         def person = fetchPersonOrNonPersonByAlternativeBannerId(bannerId)

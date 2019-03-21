@@ -3,17 +3,16 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
-import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
 
+@Slf4j
 class CommunicationPopulationQueryVersionService extends ServiceBase {
 
     def communicationPopulationQueryStatementParseService
-    private static final log = Logger.getLogger(CommunicationPopulationQueryVersionService.class)
+    //private static final log = Logger.getLogger(CommunicationPopulationQueryVersionService.class)
 
 
     def preCreate(domainModelOrMap) {

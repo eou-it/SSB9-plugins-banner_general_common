@@ -3,15 +3,17 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall.ldm.v2
 
-import groovy.transform.EqualsAndHashCode
+import grails.validation.Validateable
 import net.hedtech.banner.general.overall.IntegrationPartnerSystemRule
 import net.hedtech.banner.general.system.ldm.v1.Metadata
+import org.grails.datastore.gorm.GormValidateable
+import org.grails.datastore.mapping.dirty.checking.DirtyCheckable
 
 /**
  * Decorator for Instructional Platforms HeDM
  */
 //@EqualsAndHashCode(includeFields = true)
-class InstructionalPlatform {
+class InstructionalPlatform implements GormValidateable, DirtyCheckable, Validateable {
 
     @Delegate
     private final IntegrationPartnerSystemRule integrationPartnerSystemRule

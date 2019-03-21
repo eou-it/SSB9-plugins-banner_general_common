@@ -6,6 +6,7 @@ package net.hedtech.banner.general.communication.population
 import grails.orm.PagedResultList
 import grails.util.Holders
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -15,26 +16,19 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.interaction.CommunicationInteractionCompositeService
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionResult
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionService
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryService
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersionService
+import net.hedtech.banner.general.communication.population.query.*
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntryService
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.person.PersonIdentificationName
-import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.commons.lang.StringUtils
-import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -43,6 +37,7 @@ import java.sql.SQLException
  * A service for driving interaction with Communication population objects and their
  * dependent objects and services.
  */
+@Slf4j
 @Transactional
 class CommunicationPopulationCompositeService {
 
@@ -60,7 +55,7 @@ class CommunicationPopulationCompositeService {
     def sessionFactory
     SchedulerJobService schedulerJobService
 
-    private static final log = Logger.getLogger(CommunicationPopulationCompositeService.class)
+    //private static final log = Logger.getLogger(CommunicationPopulationCompositeService.class)
 
 
     public PagedResultList findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {

@@ -4,12 +4,11 @@
 package net.hedtech.banner.general.scheduler
 
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.quartz.CronScheduleBuilder
 import org.quartz.CronTrigger
 import org.quartz.JobDetail
@@ -34,8 +33,9 @@ import org.springframework.transaction.annotation.Transactional
  * Service for scheduling a quartz job that runs in the background. This service relies on
  * the quartzScheduler bean being configured in the host grails app.
  */
+@Slf4j
 class SchedulerJobService {
-    private Log log = LogFactory.getLog( this.getClass() )
+  //  private Log log = LogFactory.getLog( this.getClass() )
     static transactional = false
     StdScheduler quartzScheduler
 

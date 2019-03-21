@@ -4,13 +4,12 @@
 package net.hedtech.banner.general.communication.email
 
 import com.sun.mail.smtp.SMTPAddressFailedException
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import sun.security.provider.certpath.SunCertPathBuilderException
 
 import javax.mail.AuthenticationFailedException
@@ -18,8 +17,9 @@ import javax.mail.AuthenticationFailedException
 /**
  * Email Service provides low level email send capability.
  */
+@Slf4j
 class CommunicationSendEmailService {
-    private Log log = LogFactory.getLog(this.getClass())
+  //  private Log log = LogFactory.getLog(this.getClass())
     def communicationEmailItemService
     def communicationMailboxAccountService
     def sessionFactory

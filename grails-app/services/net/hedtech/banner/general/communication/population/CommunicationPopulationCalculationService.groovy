@@ -3,15 +3,16 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
 
+@Slf4j
 class CommunicationPopulationCalculationService extends ServiceBase {
 
-    private static final log = Logger.getLogger(CommunicationPopulationCalculationService.class)
+    //private static final log = Logger.getLogger(CommunicationPopulationCalculationService.class)
 
 
     def preCreate(domainModelOrMap) {

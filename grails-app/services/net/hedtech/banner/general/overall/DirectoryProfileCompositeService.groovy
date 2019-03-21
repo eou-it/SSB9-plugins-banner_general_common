@@ -3,6 +3,7 @@ Copyright 2017 Ellucian Company L.P. and its affiliates.
 **********************************************************************************/
  package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonAddress
 import net.hedtech.banner.general.person.PersonAddressUtility
@@ -10,14 +11,13 @@ import net.hedtech.banner.general.person.PersonTelephone
 import net.hedtech.banner.general.system.DirectoryOption
 import net.hedtech.banner.general.system.InstitutionalDescription
 import net.hedtech.banner.person.PersonTelephoneDecorator
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
+import org.grails.plugins.web.taglib.ValidationTagLib
 import org.springframework.web.context.request.RequestContextHolder
 
 import java.sql.Timestamp
 
+@Transactional
 class DirectoryProfileCompositeService {
-
-    boolean transactional = true
 
     private static final String DIRECTORY_PROFILE_SESSION_CACHE_NAME = 'directoryProfileSessionCache'
     private static final String COLLEGE_DESCRIPTION = 'collegeDescription'

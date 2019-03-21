@@ -3,6 +3,7 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.job
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
@@ -12,20 +13,18 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
-import org.apache.catalina.servlets.CGIServlet
 import org.apache.commons.lang.NotImplementedException
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 /**
  * CommunicationJobTaskManagerService implements asynchronous job engine life cycle
  * methods for manipulating group send item tasks.
  *
  */
+@Slf4j
 class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
-    private final Log log = LogFactory.getLog(this.getClass());
+    //private final Log log = LogFactory.getLog(this.getClass());
 
     def communicationGroupSendService
     def communicationJobService

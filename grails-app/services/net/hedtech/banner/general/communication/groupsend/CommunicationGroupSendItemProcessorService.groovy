@@ -3,11 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientDataFactory
-import org.apache.log4j.Logger
 
 import java.sql.SQLException
 
@@ -15,9 +16,11 @@ import java.sql.SQLException
  * Process a group send item to the point of creating recipient merge data values and submitting an individual communication job
  * for the recipient.
  */
+@Slf4j
+ @Transactional
 class CommunicationGroupSendItemProcessorService {
-    boolean transactional = true
-    private static final log = Logger.getLogger(CommunicationGroupSendItemProcessorService.class)
+   
+    //private static final log = Logger.getLogger(CommunicationGroupSendItemProcessorService.class)
     def communicationGroupSendItemService
     def communicationTemplateMergeService
     def communicationFieldCalculationService

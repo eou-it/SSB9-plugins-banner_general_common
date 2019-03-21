@@ -5,12 +5,13 @@
 package net.hedtech.banner.general.jobsub
 
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.BusinessLogicValidationException
-import org.apache.log4j.Logger
 
+@Slf4j
 class JobsubOutputCompositeService {
-    private static final log = Logger.getLogger(JobsubOutputCompositeService.class)
+    //private static final log = Logger.getLogger(JobsubOutputCompositeService.class)
     def jobsubSavedOutputService
     def sessionFactory
 

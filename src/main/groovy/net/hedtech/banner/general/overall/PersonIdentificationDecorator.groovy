@@ -5,9 +5,12 @@ Copyright 2009-2012 Ellucian Company L.P. and its affiliates.
 
 package net.hedtech.banner.general.overall
 
+import grails.validation.Validateable
 import net.hedtech.banner.general.person.PersonIdentificationName
+import org.grails.datastore.gorm.GormValidateable
+import org.grails.datastore.mapping.dirty.checking.DirtyCheckable
 
-class PersonIdentificationDecorator {
+class PersonIdentificationDecorator implements GormValidateable, DirtyCheckable, Validateable{
 
     @Delegate private final PersonIdentificationName personIdentificationName
     ThirdPartyAccess thirdPartyAccess

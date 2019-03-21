@@ -30,5 +30,4 @@ messages_ar_SA.properties
 /.classpath
 /.project
 grails-synch-jvm-options.txt
-*en_PS.properties
-
+build/

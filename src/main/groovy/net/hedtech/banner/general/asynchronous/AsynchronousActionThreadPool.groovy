@@ -3,8 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.asynchronous
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.plugins.support.aware.GrailsApplicationAware
+import grails.core.GrailsApplication;
+import grails.core.support.GrailsApplicationAware
+
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;

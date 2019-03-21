@@ -2,24 +2,21 @@
  Copyright 2015-2019 Ellucian Company L.P. and its affiliates.
  *********************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
-
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTask
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import org.apache.commons.lang.NotImplementedException
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
-
+import grails.transaction.Transactional
 /**
  * CommunicationGroupSendItemTaskManagerService implements asynchronous job engine life cycle
  * methods for manipulating group send item tasks.
  */
+@Slf4j
 class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskManager {
-    private final Log log = LogFactory.getLog(this.getClass());
+   // private final Log log = LogFactory.getLog(this.getClass());
 
     def communicationGroupSendService
     def communicationGroupSendItemService;
@@ -98,7 +95,6 @@ class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskMa
         if (log.isInfoEnabled()) {
             CommunicationGroupSendItem groupSendItem = task as CommunicationGroupSendItem
             log.info( "Marking completed group send item id = " + groupSendItem.getId() + ", pidm = " + groupSendItem.recipientPidm + "." )
-
         }
     }
 

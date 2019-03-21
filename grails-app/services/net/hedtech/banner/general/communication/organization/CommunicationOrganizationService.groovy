@@ -6,9 +6,9 @@ package net.hedtech.banner.general.communication.organization
 
 import grails.util.Holders
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
 
 import java.text.SimpleDateFormat
 
@@ -16,9 +16,10 @@ import java.text.SimpleDateFormat
  * Service for providing basic crud services on
  * Folder domain objects.
  */
+@Slf4j
 class CommunicationOrganizationService extends ServiceBase {
 
-    private static final log = Logger.getLogger(CommunicationOrganizationService.class)
+    //private static final log = Logger.getLogger(CommunicationOrganizationService.class)
 
     def preCreate(domainModelOrMap) {
         CommunicationOrganization communicationOrganization = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationOrganization

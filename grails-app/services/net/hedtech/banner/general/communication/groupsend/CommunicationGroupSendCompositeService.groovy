@@ -3,7 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.web.context.ServletContextHolder
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
@@ -15,14 +17,7 @@ import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationService
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
-import net.hedtech.banner.general.communication.population.CommunicationPopulation
-import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculation
-import net.hedtech.banner.general.communication.population.CommunicationPopulationCalculationStatus
-import net.hedtech.banner.general.communication.population.CommunicationPopulationCompositeService
-import net.hedtech.banner.general.communication.population.CommunicationPopulationQueryAssociation
-import net.hedtech.banner.general.communication.population.CommunicationPopulationSelectionListBulkResults
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersion
-import net.hedtech.banner.general.communication.population.CommunicationPopulationVersionQueryAssociation
+import net.hedtech.banner.general.communication.population.*
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListService
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateParameterView
@@ -32,12 +27,9 @@ import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.commons.lang.NotImplementedException
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -47,10 +39,11 @@ import java.sql.SQLException
  * Controllers and other client code should generally work through this service for interacting with group send
  * behavior and objects.
  */
+@Slf4j
 @Transactional
 class CommunicationGroupSendCompositeService {
 
-    private static final log = Logger.getLogger(CommunicationGroupSendCompositeService.class)
+    //private static final log = Logger.getLogger(CommunicationGroupSendCompositeService.class)
     CommunicationGroupSendService communicationGroupSendService
     CommunicationTemplateService communicationTemplateService
     CommunicationPopulationSelectionListService communicationPopulationSelectionListService
@@ -637,7 +630,7 @@ class CommunicationGroupSendCompositeService {
         if (log.isDebugEnabled()) log.debug( "Generating group send item records for group send with id = " + groupSend?.id );
         def sql
         try {
-            def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+            def ctx = Holders.grailsApplication.getMainContext()
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             sql = new Sql(session.connection())

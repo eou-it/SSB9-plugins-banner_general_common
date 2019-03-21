@@ -4,7 +4,6 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
-import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder

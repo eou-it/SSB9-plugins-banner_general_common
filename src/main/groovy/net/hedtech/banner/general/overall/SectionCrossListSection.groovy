@@ -3,7 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import groovy.transform.EqualsAndHashCode
 import net.hedtech.banner.general.system.Term
 import javax.persistence.*
 
@@ -20,7 +19,6 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SSRXLST")
-@EqualsAndHashCode(includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "SectionCrossListSection.fetchByTermAndXlstGroup",
 query = """FROM  SectionCrossListSection a
@@ -123,6 +121,37 @@ class SectionCrossListSection implements Serializable {
 					lastModifiedBy=$lastModifiedBy, 
 					dataOrigin=$dataOrigin, 
 					term=$term]"""
+    }
+
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof SectionCrossListSection)) return false
+        SectionCrossListSection that = (SectionCrossListSection) o
+        if (id != that.id) return false
+        if (xlstGroup != that.xlstGroup) return false
+        if (courseReferenceNumber != that.courseReferenceNumber) return false
+        if (lastModified != that.lastModified) return false
+        if (version != that.version) return false
+        if (lastModifiedBy != that.lastModifiedBy) return false
+        if (dataOrigin != that.dataOrigin) return false
+        if (term != that.term) return false
+        return true
+    }
+
+
+    int hashCode() {
+        int result
+        result = (id != null ? id.hashCode() : 0)
+        result = 31 * result + (id != null ? id.hashCode() : 0)
+        result = 31 * result + (xlstGroup != null ? xlstGroup.hashCode() : 0)
+        result = 31 * result + (courseReferenceNumber != null ? courseReferenceNumber.hashCode() : 0)
+        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
+        result = 31 * result + (version != null ? version.hashCode() : 0)
+        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
+        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
+        result = 31 * result + (term != null ? term.hashCode() : 0)
+        return result
     }
 
 

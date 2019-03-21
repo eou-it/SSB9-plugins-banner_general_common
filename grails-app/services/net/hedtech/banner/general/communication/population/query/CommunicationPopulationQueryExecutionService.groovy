@@ -8,8 +8,8 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import grails.web.context.ServletContextHolder
+import grails.util.Holders
 
 import java.sql.SQLException
 import java.util.regex.Matcher
@@ -63,7 +63,7 @@ class CommunicationPopulationQueryExecutionService {
 
             String sqlStatement = getSqlStatement( queryVersion )
 
-            def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+            def ctx = Holders.grailsApplication.getMainContext()
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
@@ -144,7 +144,7 @@ class CommunicationPopulationQueryExecutionService {
                 }
             }
 
-            def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+            def ctx = Holders.grailsApplication.getMainContext()
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())

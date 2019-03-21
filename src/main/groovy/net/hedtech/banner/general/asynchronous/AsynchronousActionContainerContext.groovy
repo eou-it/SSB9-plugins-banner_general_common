@@ -3,7 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.asynchronous
 
-import org.codehaus.groovy.grails.commons.GrailsApplication;
+import grails.core.GrailsApplication;
 
 
 /**

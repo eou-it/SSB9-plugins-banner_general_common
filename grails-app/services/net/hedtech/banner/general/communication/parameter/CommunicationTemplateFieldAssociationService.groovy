@@ -3,14 +3,15 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.parameter
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
 
+@Slf4j
 class CommunicationTemplateFieldAssociationService extends ServiceBase {
 
-    private static final log = Logger.getLogger(CommunicationTemplateFieldAssociationService.class)
+    //private static final log = Logger.getLogger(CommunicationTemplateFieldAssociationService.class)
 
     def preCreate(domainModelOrMap) {
         if (!CommunicationCommonUtility.userCanAuthorContent()) {

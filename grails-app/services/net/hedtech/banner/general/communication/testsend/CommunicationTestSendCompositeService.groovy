@@ -3,6 +3,7 @@
 ********************************************************************************/
 package net.hedtech.banner.general.communication.testsend
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
@@ -22,15 +23,13 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotifi
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.template.CommunicationMessage
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
-import org.apache.commons.lang.StringUtils
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
+@Slf4j
 class CommunicationTestSendCompositeService  {
 
-    private Log log = LogFactory.getLog( this.getClass() )
+    //private Log log = LogFactory.getLog( this.getClass() )
 
     def service
     def communicationTemplateMergeService

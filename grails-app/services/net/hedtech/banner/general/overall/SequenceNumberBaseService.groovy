@@ -4,11 +4,13 @@
 
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class SequenceNumberBaseService extends ServiceBase {
 
-    boolean transactional = true
+    
 
     /**
      * Function to get next sequence numbers(used for ids) for multiple domains

@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import groovy.sql.Sql
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.DateUtility
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.general.system.Term
@@ -11,6 +12,7 @@ import net.hedtech.banner.exceptions.ApplicationException
 
 import java.sql.SQLException
 
+@Transactional
 class SectionMeetingTimeService extends ServiceBase {
 
     private static final String[] numericCategorySequence
@@ -28,7 +30,6 @@ class SectionMeetingTimeService extends ServiceBase {
         }
     }
 
-    boolean transactional = true
     def sessionFactory
 
 

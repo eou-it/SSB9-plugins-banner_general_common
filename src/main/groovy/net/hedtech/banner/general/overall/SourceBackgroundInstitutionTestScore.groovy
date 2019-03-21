@@ -3,8 +3,6 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import groovy.transform.EqualsAndHashCode
-
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.general.system.TestScore
 import net.hedtech.banner.query.DynamicFinder
@@ -16,7 +14,6 @@ import javax.persistence.*
  */
 @Entity
 @Table(name = "SORBTST")
-@EqualsAndHashCode(includeFields = true)
 class SourceBackgroundInstitutionTestScore implements Serializable {
 
     /**
@@ -96,6 +93,38 @@ class SourceBackgroundInstitutionTestScore implements Serializable {
 					dataOrigin=$dataOrigin,
 					sourceAndBackgroundInstitution=$sourceAndBackgroundInstitution,
 					testScore=$testScore]"""
+    }
+
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof SourceBackgroundInstitutionTestScore)) return false
+        SourceBackgroundInstitutionTestScore that = (SourceBackgroundInstitutionTestScore) o
+        if (id != that.id) return false
+        if (version != that.version) return false
+        if (demographicYear != that.demographicYear) return false
+        if (meanTestScore != that.meanTestScore) return false
+        if (lastModified != that.lastModified) return false
+        if (lastModifiedBy != that.lastModifiedBy) return false
+        if (dataOrigin != that.dataOrigin) return false
+        if (sourceAndBackgroundInstitution != that.sourceAndBackgroundInstitution) return false
+        if (testScore != that.testScore) return false
+        return true
+    }
+
+
+    int hashCode() {
+        int result
+        result = (id != null ? id.hashCode() : 0)
+        result = 31 * result + (version != null ? version.hashCode() : 0)
+        result = 31 * result + (demographicYear != null ? demographicYear.hashCode() : 0)
+        result = 31 * result + (meanTestScore != null ? meanTestScore.hashCode() : 0)
+        result = 31 * result + (lastModified != null ? lastModified.hashCode() : 0)
+        result = 31 * result + (lastModifiedBy != null ? lastModifiedBy.hashCode() : 0)
+        result = 31 * result + (dataOrigin != null ? dataOrigin.hashCode() : 0)
+        result = 31 * result + (sourceAndBackgroundInstitution != null ? sourceAndBackgroundInstitution.hashCode() : 0)
+        result = 31 * result + (testScore != null ? testScore.hashCode() : 0)
+        return result
     }
 
 

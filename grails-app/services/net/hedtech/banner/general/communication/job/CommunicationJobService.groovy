@@ -4,15 +4,15 @@
 package net.hedtech.banner.general.communication.job
 
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.service.ServiceBase
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 /**
  *  DAO service interface for communication group send item objects.
  */
+@Slf4j
 class CommunicationJobService extends ServiceBase {
-    private final Log log = LogFactory.getLog(this.getClass());
+   // private final Log log = LogFactory.getLog(this.getClass());
 
     def preCreate( domainModelOrMap ) {
         CommunicationJob job = (domainModelOrMap instanceof Map ? domainModelOrMap?.domainModel : domainModelOrMap) as CommunicationJob

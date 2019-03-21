@@ -5,6 +5,7 @@
 package net.hedtech.banner.general.communication.field
 
 import groovy.sql.Sql
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -19,8 +20,9 @@ import java.sql.SQLException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Transactional
 class CommunicationFieldService extends ServiceBase {
-    boolean transactional = true
+
     def communicationPopulationQueryStatementParseService
     def communicationFieldCalculationService
     def asynchronousBannerAuthenticationSpoofer

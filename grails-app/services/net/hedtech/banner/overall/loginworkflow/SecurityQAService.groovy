@@ -3,18 +3,21 @@
  *******************************************************************************/
 package net.hedtech.banner.overall.loginworkflow
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuestion
 import net.hedtech.banner.general.overall.PinQuestion
-import org.apache.log4j.Logger
 
 import java.sql.SQLException
 
+@Slf4j
+@Transactional
 class SecurityQAService {
-    static transactional = true
+    //static transactional = true
     def sessionFactory
 
     def generalForStoringResponsesAndPinQuestionService
@@ -22,7 +25,6 @@ class SecurityQAService {
     /* Dummy value for answer salt as the domain expects a not null and non empty value.
     This will be updated in domain with correct salt by the backed up triggers and api's for the domain */
     private final static String ANSWER_SALT_DUMMY = "ML3MTB80"
-    private static final log = Logger.getLogger(SecurityQAService.class)
 
     public def getNumberOfQuestionsAnswered(Integer pidm) {
         return GeneralForStoringResponsesAndPinQuestion.fetchCountOfAnswersForPidm(pidm)

@@ -10,6 +10,7 @@ import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
 
 import java.sql.SQLException
+import groovy.util.logging.Slf4j
 
 /*********************************************************************************
  Copyright 2012 Ellucian Company L.P. and its affiliates.
@@ -17,7 +18,7 @@ import java.sql.SQLException
 /**
  * Created by edelaney on 3/26/14.
  */
-
+@Slf4j
 class CommunicationPopulationQueryStatementParseService {
 
     def sessionFactory

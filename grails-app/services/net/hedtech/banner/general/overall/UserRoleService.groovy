@@ -4,13 +4,14 @@
 
 package net.hedtech.banner.general.overall
 
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
-import org.apache.log4j.Logger
 import org.springframework.security.core.context.SecurityContextHolder
 
+@Slf4j
 class UserRoleService {
 
-    def log = Logger.getLogger(this.getClass())
+    //def log = Logger.getLogger(this.getClass())
 
     def hasUserRole( String role ) {
         try {

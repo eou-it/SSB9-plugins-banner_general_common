@@ -3,7 +3,7 @@
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import org.codehaus.groovy.grails.commons.DefaultGrailsDomainClass
+import org.grails.core.DefaultGrailsDomainClass
 import org.hibernate.annotations.Type
 
 import javax.persistence.*

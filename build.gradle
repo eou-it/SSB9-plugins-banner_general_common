@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-version "0.1"
+version "1.0.10"
 group "banner.general.common"
 
 apply plugin:"eclipse"
@@ -22,6 +22,12 @@ apply plugin:"org.grails.grails-gsp"
 repositories {
     mavenLocal()
     maven { url "https://repo.grails.org/grails/core" }
+    maven { url "http://central.maven.org/maven2/"}
+    maven { url "https://build.shibboleth.net/nexus/content/repositories/releases"}
+    maven { url "https://build.shibboleth.net/nexus/content/groups/public/"}
+    maven { url "https://code.lds.org/nexus/content/groups/main-repo"}
+    maven { url "http://repository.jboss.org/maven2/"}
+    maven { url "http://repo.spring.io/milestone/" }
 }
 
 dependencies {
@@ -50,6 +56,30 @@ dependencies {
     testCompile "org.grails:grails-gorm-testing-support"
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails:grails-web-testing-support"
+
+
+    //Quartz
+    compile 'org.grails.plugins:quartz:2.0.13'
+
+    //Added for BannerXE For FileUtils and others
+    compile 'commons-io:commons-io:2.6'
+
+  //  compile 'org.grails.plugins:quartz:1.0.2'
+    compile('org.grails:grails-docs:3.3.2') {
+        exclude group:"itext", module:"core-renderer"
+
+    }
+    // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
+    // runtime 'mysql:mysql-connector-java:5.1.5'
+    compile 'org.xhtmlrenderer:flying-saucer-core:9.0.8'
+    compile 'org.xhtmlrenderer:flying-saucer-pdf:9.0.8'
+    compile 'com.lowagie:itext:2.1.7'
+    compile 'org.antlr:ST4:4.0.8'
+    compile "javax.mail:javax.mail-api:1.5.5"
+    runtime "com.sun.mail:javax.mail:1.5.5"
+    compile 'com.icegreen:greenmail:1.5.0'
+    compile 'org.apache.commons:commons-email:1.4'
+    compile 'org.quartz-scheduler:quartz:2.2.1'
 }
 
 bootRun {
@@ -76,4 +106,12 @@ grailsPublish {
 
 assets {
     packagePlugin = true
+}
+
+// TODO :grails_332_change, needs to revisit
+// Added for BannerXE - Internal plugin dependency
+grails {
+    plugins {
+        compile project(":banner-general-person")
+    }
 }

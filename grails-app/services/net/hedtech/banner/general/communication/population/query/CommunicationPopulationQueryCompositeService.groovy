@@ -5,13 +5,12 @@ package net.hedtech.banner.general.communication.population.query
 
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
-import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import org.apache.commons.lang.NotImplementedException
-import org.apache.log4j.Logger
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -19,13 +18,14 @@ import java.sql.SQLException
 /**
  * Service for creating and manipulating a population query and query versions.
  */
+@Slf4j
 class CommunicationPopulationQueryCompositeService {
 
     def communicationPopulationQueryService
     def communicationPopulationQueryVersionService
     def communicationPopulationQueryStatementParseService
     def sessionFactory
-    private static final log = Logger.getLogger(CommunicationPopulationQueryCompositeService.class)
+    //private static final log = Logger.getLogger(CommunicationPopulationQueryCompositeService.class)
 
 
     /**

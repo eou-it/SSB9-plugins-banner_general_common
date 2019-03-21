@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.recurrence
 
+import groovy.util.logging.Slf4j
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
@@ -21,7 +22,7 @@ import net.hedtech.banner.general.scheduler.SchedulerJobReceipt
 import net.hedtech.banner.general.scheduler.SchedulerJobService
 import org.apache.commons.lang.NotImplementedException
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 import java.text.SimpleDateFormat
 
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat
  * Controllers and other client code should generally work through this service for interacting with recurrent message
  * behavior and objects.
  */
+@Slf4j
 @Transactional
 class CommunicationRecurrentMessageCompositeService {
 
