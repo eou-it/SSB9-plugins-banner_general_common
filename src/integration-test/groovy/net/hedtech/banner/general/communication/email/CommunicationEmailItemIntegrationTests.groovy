@@ -5,14 +5,19 @@ package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
-import net.hedtech.banner.testing.BaseIntegrationTestCase
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 
-class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
+
+@Integration
+@Rollback
+class CommunicationEmailItemIntegrationTests extends CommunicationBaseIntegrationTestCase {
     //folder
     def i_valid_folder_name = "Valid Folder Nname"
     def i_valid_folder_description = "Valid older description"
@@ -46,8 +51,8 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        formContext = ['GUAGMNU']
-        super.setUp()
+
+        super.setUp('BCMADMIN', '111111')
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
 

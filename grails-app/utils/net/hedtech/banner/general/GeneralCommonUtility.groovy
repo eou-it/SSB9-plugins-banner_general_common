@@ -86,7 +86,7 @@ class GeneralCommonUtility {
                 isValidPin = false;
             }
         } finally {
-            connection.close()
+            //connection.close()
         }
         return isValidPin
     }

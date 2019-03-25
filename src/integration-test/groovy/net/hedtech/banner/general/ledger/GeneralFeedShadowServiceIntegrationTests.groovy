@@ -5,7 +5,7 @@ package net.hedtech.banner.general.ledger
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
+//import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +25,7 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-    @Test
+/*    @Test
     public void testCreate() {
         GeneralFeedShadow generalFeedShadow = generalFeedShadowService.create(createNewGenerealFeed())
         assertNotNull(generalFeedShadow)
@@ -136,5 +136,5 @@ class GeneralFeedShadowServiceIntegrationTests extends BaseIntegrationTestCase {
             def seedDataLoader = new net.hedtech.banner.seeddata.SeedDataLoader(inputData)
             seedDataLoader.execute()
         }
-    }
+    }*/
 }

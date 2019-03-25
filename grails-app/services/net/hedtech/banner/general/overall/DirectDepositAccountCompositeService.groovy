@@ -8,7 +8,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.security.BannerAccessDecisionVoter
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDecisionVoter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder

@@ -5,7 +5,7 @@ package net.hedtech.banner.general.ledger
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
+//import org.codehaus.groovy.grails.plugins.GrailsPluginUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +25,7 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-    @Test
+/*    @Test
     public void testCreate() {
         GeneralFeed generalFeed = generalFeedService.create(createNewGenerealFeed())
         assertNotNull(generalFeed)
@@ -136,5 +136,5 @@ class GeneralFeedServiceIntegrationTests extends BaseIntegrationTestCase {
         }
 
         return generalFeed
-    }
+    }*/
 }

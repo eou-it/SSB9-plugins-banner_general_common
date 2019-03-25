@@ -97,7 +97,8 @@ class SqlProcessCompositeService {
                     }
                 }
                 finally {
-                    conn?.close()
+                    //Grails 3.x Fix
+                   // conn?.close()
                 }
 
             }

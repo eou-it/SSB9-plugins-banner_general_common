@@ -47,7 +47,7 @@ class SecurityQAService {
             log.debug ae.stackTrace
             throw ae
         } finally {
-            connection.close()
+            //connection.close()
         }
     }
 

@@ -4,7 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import grails.web.servlet.mvc.GrailsParameterMap
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

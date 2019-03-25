@@ -25,7 +25,7 @@ import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.apache.commons.lang.StringUtils
 import org.springframework.transaction.annotation.Propagation
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 import org.stringtemplate.v4.AttributeRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST

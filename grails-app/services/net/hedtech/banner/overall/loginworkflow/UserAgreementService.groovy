@@ -31,7 +31,7 @@ class UserAgreementService {
             log.debug ae.stackTrace
             throw ae
         }finally{
-            connection.close()
+            //connection.close()
         }
 
     }

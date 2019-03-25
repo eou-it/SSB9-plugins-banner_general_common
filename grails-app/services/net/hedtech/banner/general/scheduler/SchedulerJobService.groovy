@@ -21,13 +21,10 @@ import org.quartz.TriggerKey
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate
-import static org.quartz.DateBuilder.evenSecondDate;
 import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.*;
-import static org.quartz.SimpleScheduleBuilder.*;
 
 import org.quartz.impl.StdScheduler
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 /**
  * Service for scheduling a quartz job that runs in the background. This service relies on
@@ -36,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional
 @Slf4j
 class SchedulerJobService {
   //  private Log log = LogFactory.getLog( this.getClass() )
-    static transactional = false
     StdScheduler quartzScheduler
 
     /**

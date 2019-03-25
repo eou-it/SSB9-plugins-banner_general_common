@@ -9,12 +9,14 @@ import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskManager
 import net.hedtech.banner.general.asynchronous.task.AsynchronousTaskMonitorRecord
 import net.hedtech.banner.general.communication.groupsend.automation.StringHelper
 import org.apache.commons.lang.NotImplementedException
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
+import org.springframework.transaction.annotation.Propagation
 /**
  * CommunicationGroupSendItemTaskManagerService implements asynchronous job engine life cycle
  * methods for manipulating group send item tasks.
  */
 @Slf4j
+@Transactional
 class CommunicationGroupSendItemTaskManagerService implements AsynchronousTaskManager {
    // private final Log log = LogFactory.getLog(this.getClass());
 

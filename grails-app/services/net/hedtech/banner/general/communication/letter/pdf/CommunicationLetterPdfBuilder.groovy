@@ -7,7 +7,7 @@ package net.hedtech.banner.general.communication.letter.pdf
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSize
 import net.hedtech.banner.general.communication.letter.CommunicationLetterUnitOfMeasure
-import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.xhtmlrenderer.pdf.ITextRenderer
 
 /**
  * Builds a pdf from a letter html fragment.

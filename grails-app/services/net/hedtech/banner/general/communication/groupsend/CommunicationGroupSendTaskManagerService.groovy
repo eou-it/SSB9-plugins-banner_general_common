@@ -18,6 +18,7 @@ import grails.gorm.transactions.Transactional
  * methods for manipulating group send item tasks.
  */
 @Slf4j
+@Transactional
 class CommunicationGroupSendTaskManagerService implements AsynchronousTaskManager {
     //private final Log log = LogFactory.getLog(this.getClass());
 

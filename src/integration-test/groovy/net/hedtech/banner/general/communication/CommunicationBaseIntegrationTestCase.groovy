@@ -7,7 +7,6 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
-import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesService
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerPropertiesType
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccount
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountService
@@ -18,7 +17,11 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import com.icegreen.greenmail.util.*
-
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 /**
  * A BaseIntegrationTestCase with added test support for communication artifacts.
  */
@@ -27,22 +30,12 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     def communicationGroupSendMonitor
     def communicationGroupSendCompositeService
     CommunicationMailboxAccountService communicationMailboxAccountService
-    CommunicationEmailServerPropertiesService communicationEmailServerPropertiesService
-    def communicationGroupSendService
-    def communicationGroupSendItemService
-    def communicationPopulationQueryService
-    def communicationPopulationQueryExecutionService
-    def communicationPopulationSelectionListService
     def communicationFolderService
     def communicationTemplateService
     def communicationEmailTemplateService
     def communicationOrganizationCompositeService
     def communicationGroupSendItemProcessingEngine
     def communicationJobProcessingEngine
-    def communicationRecipientDataService
-    def communicationJobService
-    def communicationItemService
-    def communicationEmailItemService
     def communicationFieldService
 
     protected CommunicationOrganization defaultOrganization
@@ -53,7 +46,9 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-        super.setUp()
+//        super.setUp()
+        formContext = ['GUAGMNU']
+        webAppCtx = new GrailsWebApplicationContext()
 
         deleteAll()
         setUpDefaultOrganization()
@@ -67,12 +62,29 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
     }
 
+    public void setUp(bannerId, password = "111111") {
+        setUp()
+        login(bannerId, password)
+    }
+
+    public void login(bannerId, password = "111111") {
+        logout()
+        mockRequest()
+    }
+
     @After
     public void tearDown() {
         if (mailServer) mailServer.stop()
 
         deleteAll()
+        logout()
         super.tearDown()
+    }
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
     protected void deleteAll() {

@@ -535,7 +535,7 @@ class CommunicationPopulationCompositeService {
      *
      * @param population the population
      */
-    public CommunicationPopulationCalculation calculatePopulationForUser( Long id, Long version, String oracleUserName = SecurityContextHolder.context.authentication.principal.getOracleUserName() ) {
+    public CommunicationPopulationCalculation calculatePopulationForUser( Long id, Long version, String oracleUserName = getOracleUserName() ) {
         CommunicationPopulation population = CommunicationPopulation.fetchById( id )
         if (!population) {
             throw new ApplicationException(
@@ -849,6 +849,10 @@ class CommunicationPopulationCompositeService {
      */
     private String getCurrentUserBannerId() {
         return CommunicationCommonUtility.getUserOracleUserName()
+    }
+
+    private String getOracleUserName() {
+        return SecurityContextHolder.context.authentication.principal.getOracleUserName()
     }
 
     private CommunicationPopulationQueryVersion getQueryVersionForNewCalculation(CommunicationPopulationVersion populationVersion) {
