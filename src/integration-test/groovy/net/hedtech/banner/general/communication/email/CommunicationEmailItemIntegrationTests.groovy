@@ -7,19 +7,19 @@ import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 
 
 @Integration
 @Rollback
-class CommunicationEmailItemIntegrationTests extends CommunicationBaseIntegrationTestCase {
+class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     //folder
-    def i_valid_folder_name = "Valid Folder Nname"
+    def i_valid_folder_name = "Valid Folder Name"
     def i_valid_folder_description = "Valid older description"
     def i_valid_folder_internal = true
 
@@ -51,15 +51,10 @@ class CommunicationEmailItemIntegrationTests extends CommunicationBaseIntegratio
 
     @Before
     public void setUp() {
-
-        super.setUp('BCMADMIN', '111111')
+        formContext = ['GUAGMNU']
+        super.setUp()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        folder = newValidForCreateFolder()
-        folder.save(failOnError: true, flush: true)
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
 
     }
 
@@ -70,12 +65,19 @@ class CommunicationEmailItemIntegrationTests extends CommunicationBaseIntegratio
         logout()
     }
 
+    void setUpFolder() {
+        folder = newValidForCreateFolder()
+        folder.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder.id
+    }
 
     @Test
     void testCreateEmailItem() {
 
         def originalList = CommunicationEmailTemplate.findAll()
 
+        setUpFolder()
         def emailTemplate = newValidForCreateEmailTemplate(folder)
         emailTemplate.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -127,6 +129,7 @@ class CommunicationEmailItemIntegrationTests extends CommunicationBaseIntegratio
 
         def originalList = CommunicationEmailTemplate.findAll()
 
+        setUpFolder()
         def emailTemplate = newValidForCreateEmailTemplate(folder)
         emailTemplate.save(failOnError: true, flush: true)
 

@@ -16,7 +16,7 @@ import net.hedtech.banner.general.system.Nation
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.general.system.State
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 import java.text.SimpleDateFormat
 

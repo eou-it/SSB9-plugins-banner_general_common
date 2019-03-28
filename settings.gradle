@@ -4,12 +4,12 @@ project(':banner-general-person').projectDir = new File('../banner_general_perso
 include ':banner-general-validation-common'
 project(':banner-general-validation-common').projectDir = new File('../banner_general_validation_common.git')
 
-
-
 // Added these plugins due to Banner-Core plugin is dependent on these plugins.
 
 //include ':banner-seeddata-catalog'
 //project(':banner-seeddata-catalog').projectDir = new File('../banner_seeddata_catalog.git')
+include ':banner-ui-ss'
+project(':banner-ui-ss').projectDir = new File('../banner_ui_ss.git')
 
 include ':banner-core'
 project(':banner-core').projectDir = new File('../banner_core.git')
@@ -31,4 +31,3 @@ project(':banner-spring-security-cas').projectDir = new File('../banner_spring_s
 
 include ':banner-spring-security-saml'
 project(':banner-spring-security-saml').projectDir = new File('../banner_spring_security_saml.git')
-

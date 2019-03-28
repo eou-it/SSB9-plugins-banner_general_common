@@ -15,7 +15,7 @@ import net.hedtech.banner.general.system.EntriesForSql
 import net.hedtech.banner.general.system.EntriesForSqlProcesss
 import net.hedtech.banner.general.system.SqlProcessParameter
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 

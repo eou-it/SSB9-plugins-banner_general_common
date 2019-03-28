@@ -11,7 +11,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 import java.text.SimpleDateFormat
 

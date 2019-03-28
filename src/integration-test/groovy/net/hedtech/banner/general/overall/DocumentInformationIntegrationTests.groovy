@@ -13,7 +13,7 @@ import net.hedtech.banner.general.system.Document
 import net.hedtech.banner.general.system.VisaSource
 import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 import java.text.SimpleDateFormat
 

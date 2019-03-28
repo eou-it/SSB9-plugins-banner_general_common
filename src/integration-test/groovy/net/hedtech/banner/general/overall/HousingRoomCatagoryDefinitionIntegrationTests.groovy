@@ -12,7 +12,7 @@ import groovy.sql.Sql
 import java.text.SimpleDateFormat
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 class HousingRoomCatagoryDefinitionIntegrationTests extends BaseIntegrationTestCase {
 

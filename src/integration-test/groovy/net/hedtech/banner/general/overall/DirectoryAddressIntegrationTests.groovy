@@ -9,7 +9,7 @@ import org.junit.After
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import grails.validation.ValidationException
 import groovy.sql.Sql
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import net.hedtech.banner.general.system.DirectoryOption
 import net.hedtech.banner.general.system.AddressType
 import net.hedtech.banner.general.system.TelephoneType

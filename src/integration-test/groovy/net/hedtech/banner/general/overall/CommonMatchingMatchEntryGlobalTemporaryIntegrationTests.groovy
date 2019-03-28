@@ -10,7 +10,7 @@ import grails.validation.ValidationException
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 class CommonMatchingMatchEntryGlobalTemporaryIntegrationTests extends BaseIntegrationTestCase {
 

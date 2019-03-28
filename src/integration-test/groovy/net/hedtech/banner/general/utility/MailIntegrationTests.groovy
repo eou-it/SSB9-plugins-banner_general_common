@@ -9,7 +9,7 @@ import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import net.hedtech.banner.general.system.Term
 import net.hedtech.banner.general.system.LetterProcessLetter
 import net.hedtech.banner.general.system.Initials

@@ -48,11 +48,11 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.communication.recurrence.CommunicationRecurrentMessageCompositeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.security.FormContext
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
+import org.grails.plugins.web.taglib.ValidationTagLib
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -65,7 +65,7 @@ import static org.junit.Assert.*
  * A BaseIntegrationTestCase with added test support for communication artifacts.
  */
 class CommunicationBaseConcurrentTestCase extends Assert {
-    static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
+//    static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
 
     def communicationGroupSendMonitor
     def communicationGroupSendItemProcessingEngine

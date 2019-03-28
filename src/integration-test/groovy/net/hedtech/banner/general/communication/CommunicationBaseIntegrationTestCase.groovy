@@ -46,9 +46,9 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
     @Before
     public void setUp() {
-//        super.setUp()
         formContext = ['GUAGMNU']
-        webAppCtx = new GrailsWebApplicationContext()
+        super.setUp()
+        login('BCMADMIN', '111111')
 
         deleteAll()
         setUpDefaultOrganization()
@@ -62,15 +62,15 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
     }
 
-    public void setUp(bannerId, password = "111111") {
-        setUp()
-        login(bannerId, password)
-    }
-
-    public void login(bannerId, password = "111111") {
-        logout()
-        mockRequest()
-    }
+//    public void setUp(bannerId, password = "111111") {
+//        setUp()
+//
+//    }
+//
+//    public void login(bannerId, password = "111111") {
+//        logout()
+//        mockRequest()
+//    }
 
     @After
     public void tearDown() {
@@ -81,11 +81,11 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
-    public GrailsWebRequest mockRequest() {
-        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
-        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
-        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
-    }
+//    public GrailsWebRequest mockRequest() {
+//        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+//        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+//        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+//    }
 
     protected void deleteAll() {
         def sql
@@ -135,7 +135,7 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
                 tx.commit()
             }
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 

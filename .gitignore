@@ -24,10 +24,10 @@ src/ddl/horizon_upgrade_bgc.lis
 web-app/css/views/securityQA/securityQA-rtl.css
 web-app/css/views/survey/survey-rtl.css
 web-app/css/views/userAgreement/policy-rtl.css
-messages_ar_SA.properties
 /.settings
 /target-eclipse
 /.classpath
 /.project
 grails-synch-jvm-options.txt
 build/
+.gradle

@@ -12,7 +12,7 @@ import net.hedtech.banner.general.system.AddressType
 import net.hedtech.banner.general.system.CommonMatchingSource
 import net.hedtech.banner.general.system.TelephoneType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
 

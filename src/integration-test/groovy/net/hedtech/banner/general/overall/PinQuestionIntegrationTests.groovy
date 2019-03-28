@@ -15,7 +15,7 @@ import grails.validation.ValidationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.general.GeneralCommonUtility
 import groovy.sql.Sql
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 
 import java.text.SimpleDateFormat
 

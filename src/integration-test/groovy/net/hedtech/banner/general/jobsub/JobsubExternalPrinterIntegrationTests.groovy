@@ -11,7 +11,7 @@ import grails.validation.ValidationException
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.jdbc.UncategorizedSQLException
 
 class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {

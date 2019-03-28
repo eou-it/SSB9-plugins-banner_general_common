@@ -81,12 +81,32 @@ dependencies {
     compile 'org.apache.commons:commons-email:1.4'
     compile 'org.quartz-scheduler:quartz:2.2.1'
 
+    compile "org.grails.plugins:hibernate5"
+    compile "org.hibernate:hibernate-core:5.1.5.Final"
+    compile "org.hibernate:hibernate-ehcache:5.1.5.Final"
+
 }
 
 bootRun {
     jvmArgs('-Dspring.output.ansi.enabled=always')
     addResources = true
 }
+
+//sourceSets {
+//    concurrentTest {
+//        compileClasspath += sourceSets.main.output
+//        runtimeClasspath += sourceSets.main.output
+//    }
+//}
+//
+//task concurrentTest(type:Test) {
+//    description = 'Runs the concurrent tests.'
+//    group = 'verification'
+//    testClassesDirs = sourceSets.concurrentTest.output.classesDirs
+//    classpath = sourceSets.concurrentTest.runtimeClasspath
+//    outputs.upToDateWhen { false }
+//    shouldRunAfter integrationTest
+//}
 
 // enable if you wish to package this plugin as a standalone application
 bootRepackage.enabled = false
@@ -114,5 +134,9 @@ assets {
 grails {
     plugins {
         compile project(":banner-general-person")
+        compile project(":banner-ui-ss")
+//        compile project(":banner-core")
+//        compile project(":banner-general-utility")
+//        compile project(":i18n-core")
     }
 }

@@ -24,6 +24,9 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 
+import grails.testing.mixin.integration.Integration
+
+@Integration
 class CommunicationPopulationCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
     def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider

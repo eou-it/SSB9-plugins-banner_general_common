@@ -45,16 +45,17 @@ hibernate {
 // set per-environment serverURL stem for creating absolute links
 environments {
     development {
-        dataSource {
-        }
+
     }
     test {
-        dataSource {
-        }
+        ssbEnabled = true
+        ssbOracleUsersProxied = true
+        commmgrDataSourceEnabled = true
+        grails.plugin.springsecurity.interceptUrlMap = [
+                '/': ['IS_AUTHENTICATED_ANONYMOUSLY'] ]
     }
     production {
-        dataSource {
-        }
+
     }
 }
 

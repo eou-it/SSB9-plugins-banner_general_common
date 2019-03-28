@@ -8,7 +8,7 @@ import groovy.sql.Sql
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 import java.text.SimpleDateFormat
