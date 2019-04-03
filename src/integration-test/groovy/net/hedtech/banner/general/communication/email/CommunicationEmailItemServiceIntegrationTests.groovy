@@ -11,10 +11,19 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Tests crud methods provided by communication item service.
  */
+@Integration
+@Rollback
 class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestCase {
     def i_valid_emailTemplate_active = true
 
@@ -69,7 +78,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     def communicationEmailItemService
 
     def CommunicationFolder folder1
-    def CommunicationFolder folder2
+//    def CommunicationFolder folder2
 
     def selfServiceBannerAuthenticationProvider
     def communicationTemplateService
@@ -81,18 +90,10 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
         formContext = ['GUAGMNU']
         super.setUp()
 
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        folder1 = newValidForCreateFolder( i_valid_folder_name1 )
-        folder1.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder1.id
-        folder2 = newValidForCreateFolder( i_valid_folder_name2 )
-        folder2.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder2.id
-
     }
 
 
@@ -102,11 +103,27 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        folder1 = newValidForCreateFolder( i_valid_folder_name1 )
+        folder1.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder1.id
+//        folder2 = newValidForCreateFolder( i_valid_folder_name2 )
+//        folder2.save( failOnError: true, flush: true )
+//        //Test if the generated entity now has an id assigned
+//        assertNotNull folder2.id
+    }
 
     @Test
     void testCreateEmailItem() {
         def originalListCount = communicationTemplateService.list().size()
-        def template = newValidForCreateEmailTemplate( folder1 )
+        def template = newValidForCreateEmailTemplate()
         def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
         assertNotNull newTemplate.createDate
@@ -126,8 +143,8 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
 @Test
    void testDeleteEmailItem() {
-       def originalListCount = communicationTemplateService.list().size()
-       def template = newValidForCreateEmailTemplate( folder1 )
+    def originalListCount = communicationTemplateService.list().size()
+       def template = newValidForCreateEmailTemplate()
        def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
        //Test if the service set the created date, and the infrastructure set the modifiedby and date
        assertNotNull newTemplate.createDate
@@ -160,7 +177,8 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     }
 
 
-    private def newValidForCreateEmailTemplate( CommunicationFolder folder ) {
+    private def newValidForCreateEmailTemplate() {
+        setUpData()
         def communicationTemplate = new CommunicationEmailTemplate(
                 description: i_valid_emailTemplate_description,
                 personal: i_valid_emailTemplate_personal,
@@ -171,7 +189,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
                 createDate: i_valid_emailTemplate_createDate,
                 validFrom: i_valid_emailTemplate_validFrom,
                 validTo: i_valid_emailTemplate_validTo,
-                folder: folder,
+                folder: folder1,
                 bccList: i_valid_emailTemplate_bccList,
                 ccList: i_valid_emailTemplate_ccList,
                 content: i_valid_emailTemplate_content,

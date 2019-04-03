@@ -14,6 +14,8 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import org.junit.After
 import org.junit.Before
 import com.icegreen.greenmail.util.*
@@ -27,7 +29,7 @@ import grails.web.servlet.context.GrailsWebApplicationContext
  */
 class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
-    def communicationGroupSendMonitor
+/*    def communicationGroupSendMonitor
     def communicationGroupSendCompositeService
     CommunicationMailboxAccountService communicationMailboxAccountService
     def communicationFolderService
@@ -42,52 +44,58 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
     protected CommunicationFolder defaultFolder
     protected CommunicationEmailTemplate defaultEmailTemplate
     protected GreenMail mailServer
-    protected static final int smtp_port = 4025
+    protected static final int smtp_port = 4025*/
+
+    def userName = 'BCMADMIN'
+    def password = '111111'
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        login('BCMADMIN', '111111')
-
-        deleteAll()
-        setUpDefaultOrganization()
-        setUpDefaultFolder()
-        setUpDefaultEmailTemplate()
-
-        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
-        mailServer = new GreenMail( smtpServerSetup)
-
-        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.sendEmailServerProperties
-        String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
     }
 
-//    public void setUp(bannerId, password = "111111") {
-//        setUp()
-//
-//    }
-//
-//    public void login(bannerId, password = "111111") {
-//        logout()
-//        mockRequest()
-//    }
+    public void setUp(bannerId, password) {
+        this.setUp()
+
+    }
+
+    protected void login(bannerId, password) {
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
+        def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken( userName, password ))
+        SecurityContextHolder.getContext().setAuthentication(auth)
+    }
 
     @After
     public void tearDown() {
-        if (mailServer) mailServer.stop()
+//        if (mailServer) mailServer.stop()
 
-        deleteAll()
+//        deleteAll()
         logout()
         super.tearDown()
     }
 
-//    public GrailsWebRequest mockRequest() {
-//        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
-//        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
-//        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+//    public void dataAndMailServerSetUp() {
+//        deleteAll()
+//        setUpDefaultOrganization()
+//        setUpDefaultFolder()
+//        setUpDefaultEmailTemplate()
+//
+//        ServerSetup smtpServerSetup = new ServerSetup( smtp_port, "127.0.0.1", ServerSetup.PROTOCOL_SMTP);
+//        mailServer = new GreenMail( smtpServerSetup)
+//
+//        CommunicationEmailServerProperties sendEmailServerProperties = defaultOrganization.sendEmailServerProperties
+//        String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
 //    }
 
-    protected void deleteAll() {
+/*    protected void deleteAll() {
         def sql
         try {
             sessionFactory.currentSession.with { session ->
@@ -139,10 +147,10 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         }
     }
 
-/*
+*//*
 
 
-     */
+     *//*
 
 
     protected void setUpDefaultOrganization() {
@@ -202,6 +210,6 @@ class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
         service.findAll().each {
             service.delete( it )
         }
-    }
+    }*/
 
 }

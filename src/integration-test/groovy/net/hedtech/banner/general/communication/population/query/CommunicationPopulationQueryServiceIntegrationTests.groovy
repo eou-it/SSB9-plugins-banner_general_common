@@ -13,10 +13,20 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationQueryService service
  */
+@Integration
+@Rollback
 class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def selfServiceBannerAuthenticationProvider
@@ -29,10 +39,10 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
 
@@ -42,6 +52,15 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+    }
 
     @Test
     void testList() {
@@ -71,6 +90,7 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testCreatePopulationSelectionExtractQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
             name: "testCreatePopulationSelectionExtractQuery",
             folder: testFolder,
@@ -85,12 +105,17 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testCreateWithMissingFolder() {
-        def populationQuery = newPopulationQuery( true, true, "TTTTTTTTTT" )
+        def populationQuery = new CommunicationPopulationQuery(
+                changesPending: false,
+                description: "TTTTTTTTTT",
+                name: "TTTTTTTTTT",
+                type: CommunicationPopulationQueryType.POPULATION_SELECTION_EXTRACT
+        )
         populationQuery.folder = null
-        def message = shouldFail( ApplicationException ) {
+        def applicationException = shouldFail( ApplicationException ) {
             communicationPopulationQueryService.create( [domainModel: populationQuery] )
         }
-        assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", message
+        assertEquals "Incorrect failure message returned", "@@r1:folderCannotBeNull@@", applicationException.wrappedException.message
     }
 
 
@@ -213,6 +238,10 @@ class CommunicationPopulationQueryServiceIntegrationTests extends BaseIntegratio
 
 
     private def newPopulationQuery( boolean locked, boolean published, String queryName ) {
+        if(!testFolder) {
+            setUpData()
+        }
+
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: testFolder,

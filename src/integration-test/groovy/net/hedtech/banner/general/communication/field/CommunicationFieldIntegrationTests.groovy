@@ -10,10 +10,15 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
 
 /**
  * Integration tests for CommunicationField entity
  */
+@Integration
+@Rollback
 class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder folder
@@ -24,11 +29,6 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        folder = newValidForCreateFolder()
-        folder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
-        validImmutableId = UUID.randomUUID().toString()
     }
 
 
@@ -37,6 +37,13 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
         super.tearDown()
     }
 
+    void setUpData() {
+        folder = newValidForCreateFolder()
+        folder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder.id
+        validImmutableId = UUID.randomUUID().toString()
+    }
 
     @Test
     void testCreateCommunicationField() {
@@ -175,7 +182,7 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( "UPDATE gcrcfld SET gcrcfld_version = 999 WHERE gcrcfld_surrogate_id = ?", [communicationField.id] )
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         // Update the entity
@@ -207,6 +214,9 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
     }
 
     private def newCommunicationField() {
+        if(!folder) {
+            setUpData()
+        }
         def communicationField = new CommunicationField(
                 // Required fields
                 folder: folder,
@@ -222,7 +232,7 @@ class CommunicationFieldIntegrationTests extends BaseIntegrationTestCase {
                 renderAsHtml: true,
                 ruleUri: "TTTTTTTTTT",
                 status: CommunicationFieldStatus.DEVELOPMENT,
-                statmentType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
+                statementType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
                 ruleContent: "Select max(term_code) from stvterm"
         )
 

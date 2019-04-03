@@ -14,7 +14,20 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
+/**
+ * Tests crud methods provided by field calculation service.
+ */
+@Integration
+@Rollback
 class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase {
     def CommunicationFolder validFolder
     CommunicationFieldService communicationFieldService
@@ -26,14 +39,10 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     public void setUp() {
         formContext = ['GUAGMNU','SELFSERVICE']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        validFolder = newValidForCreateFolder()
-        validFolder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull validFolder
-
     }
 
 
@@ -43,6 +52,18 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        validFolder = newValidForCreateFolder()
+        validFolder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull validFolder
+    }
 
     @Test
     void testExecuteCommunicationField() {
@@ -145,6 +166,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
 
     @Test
     void testCalculateFieldByPidm() {
+        setUpData()
         CommunicationField communicationField = new CommunicationField(
             folder: validFolder,
             name: "testCalculateFieldByPidm",
@@ -241,6 +263,7 @@ class CommunicationFieldCalculationServiceTests extends BaseIntegrationTestCase 
     }
 
     private def newCommunicationField() {
+        setUpData()
         def communicationField = new CommunicationField(
                 // Required           fields
                 folder: validFolder,

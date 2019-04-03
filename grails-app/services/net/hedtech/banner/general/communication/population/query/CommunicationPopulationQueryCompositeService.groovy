@@ -318,7 +318,7 @@ class CommunicationPopulationQueryCompositeService {
             log.error( "Failed to execute fetchPopulationSelectionExtractQueryCount with (application, selection, creatorId, userId) = (${application}, ${selection}, ${creatorId}, ${userId}).", e )
             throw e
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 

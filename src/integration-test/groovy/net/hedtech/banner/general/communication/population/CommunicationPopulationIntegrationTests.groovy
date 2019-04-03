@@ -9,13 +9,23 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for Population entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
 
     def testFolder
@@ -25,11 +35,10 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
-        testFolder.save()
     }
 
 
@@ -39,6 +48,16 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
+        testFolder.save()
+    }
 
     @Test
     void testCreatePopulation() {
@@ -184,7 +203,7 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("UPDATE gcbpopl SET gcbpopl_version = 999 WHERE gcbpopl_surrogate_id = ?", [population.id])
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
@@ -201,6 +220,7 @@ class CommunicationPopulationIntegrationTests  extends BaseIntegrationTestCase {
 
 
     private def newPopulation(String populationName) {
+        setUpData()
         def population = new CommunicationPopulation(
                 // Required fields
                 folder: testFolder,

@@ -4,7 +4,11 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
 
+@Integration
+@Rollback
 class CommunicationParameterIntegrationTests extends BaseIntegrationTestCase {
 
     def i_valid_name = "firstName"

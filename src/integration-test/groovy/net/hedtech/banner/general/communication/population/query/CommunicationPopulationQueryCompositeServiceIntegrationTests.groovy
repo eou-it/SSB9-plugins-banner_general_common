@@ -12,13 +12,23 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationQueryService service
  */
+@Integration
+@Rollback
 class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
-    def selfServiceBannerAuthenticationProvider
+//    def selfServiceBannerAuthenticationProvider
     def communicationPopulationQueryCompositeService
     def CommunicationFolder testFolder
 
@@ -27,9 +37,10 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken( getUser(), '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
     @After
@@ -38,8 +49,19 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+    }
+
     @Test
     void testCreatePopulationQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
             name: "testCreatePopulationQuery",
             description: "testCreatePopulationQuery description",
@@ -64,6 +86,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
         extractStatement.userId = 'SAISUSR'
         String extractQueryString = extractStatement.getQueryString()
 
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testCreatePopulationSelectionExtractQuery",
                 description: "testCreatePopulationSelectionExtractQuery description",
@@ -83,6 +106,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testCreatePopulationSelectionExtractInvalidQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testCreatePopulationSelectionExtractQuery",
                 description: "testCreatePopulationSelectionExtractQuery description",
@@ -158,6 +182,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testUpdatePopulationQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
             name: "testUpdatePopulationQuery",
             description: "testUpdatePopulationQuery description",
@@ -188,6 +213,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testPublishQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
@@ -207,6 +233,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testDeleteQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
@@ -225,6 +252,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testDeleteQueryWithCurrentVersion() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
@@ -241,6 +269,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testDeleteQueryWithOnePublishedVersion() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
@@ -262,6 +291,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testDeleteQueryWithOnePublishedAndCurrentVersion() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testPublishQuery",
                 folder: testFolder,
@@ -289,6 +319,7 @@ class CommunicationPopulationQueryCompositeServiceIntegrationTests extends BaseI
 
     @Test
     void testValidatePopulationQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 name: "testCreatePopulationQuery",
                 description: "testCreatePopulationQuery description",

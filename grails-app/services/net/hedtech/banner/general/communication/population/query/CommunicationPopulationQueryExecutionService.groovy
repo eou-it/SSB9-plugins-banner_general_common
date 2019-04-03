@@ -93,12 +93,12 @@ class CommunicationPopulationQueryExecutionService {
             throw ae
         }
         finally {
-            try {
-                if (sql) sql.close()
-            }
-            catch (SQLException af) {
-                // ignore
-            }
+//            try {
+//                if (sql) sql.close()
+//            }
+//            catch (SQLException af) {
+//                // ignore
+//            }
         }
     }
 

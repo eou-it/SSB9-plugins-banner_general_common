@@ -13,10 +13,20 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationService service
  */
+@Integration
+@Rollback
 class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def selfServiceBannerAuthenticationProvider
@@ -29,12 +39,11 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
-
 
     @After
     public void tearDown() {
@@ -42,6 +51,15 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
+    }
 
     @Test
     void testList() {
@@ -79,7 +97,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
         def population = newPopulation("TEST" )
         population = communicationPopulationService.create( [domainModel: population] )
-
+        System.err.println(population)
         // Assert domain values
         assertNotNull population?.id
         assertEquals testFolder.name, population.folder.name
@@ -209,6 +227,7 @@ class CommunicationPopulationServiceIntegrationTests extends BaseIntegrationTest
 
 
     private def newPopulation(String populationName) {
+        setUpData()
         def population = new CommunicationPopulation(
                 // Required fields
                 folder: testFolder,

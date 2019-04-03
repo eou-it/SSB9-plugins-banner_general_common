@@ -5,21 +5,25 @@ package net.hedtech.banner.general.communication.email
 
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
-import grails.gorm.transactions.Rollback
-import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 @Integration
 @Rollback
 class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     //folder
-    def i_valid_folder_name = "Valid Folder Name"
+    def i_valid_folder_name = "Valid Folder Nname"
     def i_valid_folder_description = "Valid older description"
     def i_valid_folder_internal = true
 
@@ -53,11 +57,21 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
 
+
+
     }
 
+    public void setUpData() {
+        folder = newValidForCreateFolder()
+        folder.save(failOnError: true, flush: true)
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder.id
+    }
 
     @After
     public void tearDown() {
@@ -65,19 +79,18 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
         logout()
     }
 
-    void setUpFolder() {
-        folder = newValidForCreateFolder()
-        folder.save(failOnError: true, flush: true)
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
     @Test
     void testCreateEmailItem() {
 
+        setUpData()
         def originalList = CommunicationEmailTemplate.findAll()
 
-        setUpFolder()
         def emailTemplate = newValidForCreateEmailTemplate(folder)
         emailTemplate.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -127,9 +140,9 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testDeleteEmailItem() {
 
+        setUpData()
         def originalList = CommunicationEmailTemplate.findAll()
 
-        setUpFolder()
         def emailTemplate = newValidForCreateEmailTemplate(folder)
         emailTemplate.save(failOnError: true, flush: true)
 

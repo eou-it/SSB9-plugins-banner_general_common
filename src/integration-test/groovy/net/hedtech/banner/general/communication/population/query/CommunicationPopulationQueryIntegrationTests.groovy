@@ -11,13 +11,23 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationQuery entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCase {
 
     def testFolder
@@ -27,11 +37,10 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
-        testFolder.save()
     }
 
 
@@ -41,6 +50,17 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         logout()
     }
 
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolder()
+        testFolder.save()
+    }
 
     @Test
     void testCreatePopulationQuery() {
@@ -52,7 +72,7 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
         assertEquals getUser(), populationQuery.createdBy
         assertEquals "TTTTTTTTTT", populationQuery.description
         assertEquals "TTTTTTTTTT", populationQuery.name
-        assertNull populationQuery.queryString
+        assertEquals "", populationQuery.queryString
         assertNotNull populationQuery.id
         assertNotNull populationQuery.createDate
         assertNotNull populationQuery.lastModifiedBy
@@ -142,9 +162,9 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
     void testDynamicFinder() {
 
         def populationQuery = newPopulationQuery("TestName1")
-        populationQuery.save([domainModel: populationQuery])
+        populationQuery.save(failOnError: true, flush: true)
         populationQuery = newPopulationQuery("TestName2")
-        populationQuery.save([domainModel: populationQuery])
+        populationQuery.save(failOnError: true, flush: true)
         // Find the domain
         def List<CommunicationPopulationQuery> populationQueries = CommunicationPopulationQuery.findAllByNameLike("TestName%")
         assertNotNull populationQueries
@@ -183,7 +203,7 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("UPDATE gcbqury SET gcbqury_version = 999 WHERE gcbqury_surrogate_id = ?", [populationQuery.id])
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
@@ -219,6 +239,10 @@ class CommunicationPopulationQueryIntegrationTests extends BaseIntegrationTestCa
 
 
     private def newPopulationQuery(String queryName) {
+        if(!testFolder) {
+            setUpData()
+        }
+
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: testFolder,

@@ -302,7 +302,7 @@ class CommunicationFieldService extends ServiceBase {
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldService, e)
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 }

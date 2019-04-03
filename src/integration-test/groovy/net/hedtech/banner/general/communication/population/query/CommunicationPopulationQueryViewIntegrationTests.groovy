@@ -12,10 +12,20 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationQueryView entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder testFolder
@@ -26,10 +36,10 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
 
@@ -39,6 +49,16 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+    }
 
     @Test
     void testPopulationQueryView() {
@@ -53,7 +73,7 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
         assertEquals "TTTTTTTTTT", populationQuery.createdBy
         assertEquals "TTTTTTTTTT", populationQuery.description
         assertEquals "MyTestPop", populationQuery.name
-        assertNull populationQuery.queryString
+        assertEquals "", populationQuery.queryString
 
         CommunicationPopulationQueryView queryView
         queryView = CommunicationPopulationQueryView.fetchById(populationQuery?.id)
@@ -122,6 +142,7 @@ class CommunicationPopulationQueryViewIntegrationTests extends BaseIntegrationTe
 
 
     private def newPopulationQuery(String popName) {
+        setUpData()
         def populationQuery = new CommunicationPopulationQuery(
                 // Required fields
                 folder: testFolder,

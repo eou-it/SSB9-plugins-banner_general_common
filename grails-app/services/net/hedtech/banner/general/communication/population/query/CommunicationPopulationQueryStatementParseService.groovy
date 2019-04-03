@@ -30,8 +30,8 @@ class CommunicationPopulationQueryStatementParseService {
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
 
         if (statement == null || statement == "") {
-            sql?.close()
-            conn?.close()
+            //sql?.close()
+            //conn?.close()
             return
         }
 
@@ -77,8 +77,8 @@ class CommunicationPopulationQueryStatementParseService {
             throw ae
         } finally {
             //close the sql and the connection as it was for just this parse
-            sql?.close()
-            conn?.close()
+            //sql?.close()
+            //conn?.close()
         }
 
         return populationQueryParseResult
