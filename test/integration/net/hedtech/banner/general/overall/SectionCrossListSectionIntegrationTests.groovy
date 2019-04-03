@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
@@ -75,6 +75,55 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         assertEquals "UUUUU", sectionCrossListSection.courseReferenceNumber
     }
 
+    @Test
+    void testValidateSectionCrossListXlstGroup() {
+        def sectionCrossListSection = newSectionCrossListXlstGroupWithFifteenChar()
+        sectionCrossListSection.save(flush: true, failOnError: true)
+
+        assertNotNull sectionCrossListSection.id
+        assertEquals 0L, sectionCrossListSection.version
+        assertEquals "WWWWWWWWWWWWWWW", sectionCrossListSection.xlstGroup
+        assertEquals "TTTTT", sectionCrossListSection.courseReferenceNumber
+
+        //Update the entity
+        def testDate = new Date()
+        sectionCrossListSection.xlstGroup = "123456789ABCDEF"
+        sectionCrossListSection.courseReferenceNumber = "UUUUU"
+        sectionCrossListSection.lastModified = testDate
+        sectionCrossListSection.lastModifiedBy = "test"
+        sectionCrossListSection.dataOrigin = "Banner"
+        sectionCrossListSection.save(flush: true, failOnError: true)
+
+        sectionCrossListSection = SectionCrossListSection.get(sectionCrossListSection.id)
+        assertEquals 1L, sectionCrossListSection?.version
+        assertEquals "123456789ABCDEF", sectionCrossListSection.xlstGroup
+        assertEquals "UUUUU", sectionCrossListSection.courseReferenceNumber
+    }
+
+    @Test
+    void testUpdateSectionCrossListXlstGroupToMaxLength() {
+        def sectionCrossListSection = newSectionCrossListXlstGroupWithTwoChar()
+        sectionCrossListSection.save(flush: true, failOnError: true)
+
+        assertNotNull sectionCrossListSection.id
+        assertEquals 0L, sectionCrossListSection.version
+        assertEquals "A1", sectionCrossListSection.xlstGroup
+        assertEquals "TTTTT", sectionCrossListSection.courseReferenceNumber
+
+        //Update the entity
+        def testDate = new Date()
+        sectionCrossListSection.xlstGroup = "WWWWWWWWWWWWWWW"
+        sectionCrossListSection.courseReferenceNumber = "UUUUU"
+        sectionCrossListSection.lastModified = testDate
+        sectionCrossListSection.lastModifiedBy = "test"
+        sectionCrossListSection.dataOrigin = "Banner"
+        sectionCrossListSection.save(flush: true, failOnError: true)
+
+        sectionCrossListSection = SectionCrossListSection.get(sectionCrossListSection.id)
+        assertEquals 1L, sectionCrossListSection?.version
+        assertEquals "WWWWWWWWWWWWWWW", sectionCrossListSection.xlstGroup
+        assertEquals "UUUUU", sectionCrossListSection.courseReferenceNumber
+    }
 
     @Test
     void testOptimisticLock() {
@@ -134,7 +183,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
     @Test
     void testMaxSizeValidationFailures() {
         def sectionCrossListSection = new SectionCrossListSection(
-                xlstGroup: 'XXX',
+                xlstGroup: 'XXXXXXXXXXXXXXXX',
                 courseReferenceNumber: 'XXXXXX')
         assertFalse "SectionCrossListSection should have failed validation", sectionCrossListSection.validate()
         assertErrorsFor sectionCrossListSection, 'maxSize',
@@ -156,5 +205,26 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
         return sectionCrossListSection
     }
 
+    private def newSectionCrossListXlstGroupWithFifteenChar() {
+        def term = Term.findByCode ( "201842")
+
+        def sectionCrossListSection = new SectionCrossListSection(
+                xlstGroup: "WWWWWWWWWWWWWWW",
+                courseReferenceNumber: "TTTTT",
+                term: term
+        )
+        return sectionCrossListSection
+    }
+
+    private def newSectionCrossListXlstGroupWithTwoChar() {
+        def term = Term.findByCode ( "201842")
+
+        def sectionCrossListSection = new SectionCrossListSection(
+                xlstGroup: "A1",
+                courseReferenceNumber: "TTTTT",
+                term: term
+        )
+        return sectionCrossListSection
+    }
 
 }
