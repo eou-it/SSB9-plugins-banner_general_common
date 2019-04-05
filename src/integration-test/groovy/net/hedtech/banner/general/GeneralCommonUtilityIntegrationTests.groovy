@@ -3,12 +3,17 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
+@Integration
+@Rollback
 class GeneralCommonUtilityIntegrationTests extends BaseIntegrationTestCase {
 
 

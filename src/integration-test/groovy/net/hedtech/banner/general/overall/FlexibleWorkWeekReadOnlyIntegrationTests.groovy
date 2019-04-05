@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
@@ -12,6 +14,8 @@ import org.springframework.jdbc.UncategorizedSQLException
 /**
  * Integration tests for FlexibleWorkWeekReadOnly entity
  */
+@Integration
+@Rollback
 class FlexibleWorkWeekReadOnlyIntegrationTests extends BaseIntegrationTestCase {
 
     @Before

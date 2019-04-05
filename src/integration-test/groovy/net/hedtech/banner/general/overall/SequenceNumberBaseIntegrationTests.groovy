@@ -2,6 +2,9 @@
   Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -12,6 +15,8 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 import grails.validation.ValidationException
 
 
+@Integration
+@Rollback
 class SequenceNumberBaseIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance

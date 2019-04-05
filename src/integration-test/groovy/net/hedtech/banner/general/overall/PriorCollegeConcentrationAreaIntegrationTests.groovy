@@ -3,7 +3,9 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
-import org.junit.Before
+ import grails.gorm.transactions.Rollback
+ import grails.testing.mixin.integration.Integration
+ import org.junit.Before
 import org.junit.Test
 import org.junit.After
 import net.hedtech.banner.exceptions.ApplicationException
@@ -13,6 +15,8 @@ import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import java.text.SimpleDateFormat
 
+@Integration
+@Rollback
 class PriorCollegeConcentrationAreaIntegrationTests extends BaseIntegrationTestCase {
 
     @Before

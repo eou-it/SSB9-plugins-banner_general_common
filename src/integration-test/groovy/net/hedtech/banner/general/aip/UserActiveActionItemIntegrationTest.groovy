@@ -4,6 +4,8 @@
 
 package net.hedtech.banner.general.aip
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -12,7 +14,10 @@ import org.junit.Test
 import org.springframework.jdbc.UncategorizedSQLException
 
 import static org.junit.Assert.*
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
 
 

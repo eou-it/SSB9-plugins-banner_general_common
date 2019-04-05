@@ -3,6 +3,9 @@ Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
 **********************************************************************************/
 
 package net.hedtech.banner.overall.loginworkflow
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -11,7 +14,10 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonIdentificationName
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class SurveyServiceIntegrationTests extends BaseIntegrationTestCase {
     String i_success_ethnicity = "1"
 

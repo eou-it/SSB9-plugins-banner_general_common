@@ -2,6 +2,9 @@
  Copyright 2013-2014 Ellucian Company L.P. and its affiliates.
  ******************************************************************************/
 package net.hedtech.banner.overall.loginworkflow
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -12,7 +15,10 @@ import net.hedtech.banner.general.overall.GeneralForStoringResponsesAndPinQuesti
 import net.hedtech.banner.general.overall.PinQuestion
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class SecurityQAServiceIntegrationTests extends BaseIntegrationTestCase{
     def securityQAService
     def i_success_pidm

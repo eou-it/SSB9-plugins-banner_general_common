@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -12,6 +14,8 @@ import org.junit.Test
 /**
  * Integration tests for FlexibleWorkWeekService service
  */
+@Integration
+@Rollback
 class FlexibleWorkWeekServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def flexibleWorkWeekService

@@ -7,6 +7,9 @@
  Generated: Thu Aug 01 15:13:07 IST 2013
  */
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -15,6 +18,8 @@ import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
 
+@Integration
+@Rollback
 class GeneralForStoringResponsesAndPinQuestionServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def generalForStoringResponsesAndPinQuestionService

@@ -2,13 +2,18 @@
   Copyright 2016 Ellucian Company L.P. and its affiliates.
 ********************************************************************************/
 package net.hedtech.banner.general.lettergeneration
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import static groovy.test.GroovyAssert.*
 
-
+@Integration
+@Rollback
 class PopulationSelectionExtractServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def populationSelectionExtractService

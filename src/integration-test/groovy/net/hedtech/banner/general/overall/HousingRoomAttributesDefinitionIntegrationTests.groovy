@@ -5,6 +5,9 @@
  Copyright 2009-2016 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -15,8 +18,11 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 import net.hedtech.banner.general.system.Building
 import net.hedtech.banner.general.system.BuildingAndRoomAttribute
 import org.junit.Ignore
+import static groovy.test.GroovyAssert.*
 
 
+@Integration
+@Rollback
 class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance

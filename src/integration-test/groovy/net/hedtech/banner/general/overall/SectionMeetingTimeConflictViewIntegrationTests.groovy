@@ -3,12 +3,17 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
 
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 
+@Integration
+@Rollback
 class SectionMeetingTimeConflictViewIntegrationTests extends net.hedtech.banner.testing.BaseIntegrationTestCase {
 
     @Before

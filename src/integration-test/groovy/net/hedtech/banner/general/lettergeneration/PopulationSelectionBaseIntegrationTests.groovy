@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.lettergeneration
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import groovy.sql.Sql
 import org.junit.After
@@ -12,7 +14,10 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 
 import java.text.SimpleDateFormat
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class PopulationSelectionBaseIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance

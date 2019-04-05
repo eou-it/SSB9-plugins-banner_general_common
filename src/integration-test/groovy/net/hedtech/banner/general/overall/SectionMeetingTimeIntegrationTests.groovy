@@ -3,6 +3,9 @@
  Copyright 2009-2016 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -11,7 +14,10 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class SectionMeetingTimeIntegrationTests extends BaseIntegrationTestCase {
     //Test data for creating new domain instance
     //Valid test data (For success tests)

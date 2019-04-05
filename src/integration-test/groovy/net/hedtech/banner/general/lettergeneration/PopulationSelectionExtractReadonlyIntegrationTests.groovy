@@ -3,13 +3,18 @@
  *******************************************************************************/
 package net.hedtech.banner.general.lettergeneration
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.dao.InvalidDataAccessResourceUsageException
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class PopulationSelectionExtractReadonlyIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance

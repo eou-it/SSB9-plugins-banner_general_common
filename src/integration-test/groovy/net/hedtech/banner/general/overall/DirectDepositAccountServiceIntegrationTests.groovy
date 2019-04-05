@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.general.person.PersonUtility
 import org.junit.Before
@@ -17,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  *
  */
+@Integration
+@Rollback
 class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCase {
 
     private final DEFAULT_SESSION_PIDM = 95999

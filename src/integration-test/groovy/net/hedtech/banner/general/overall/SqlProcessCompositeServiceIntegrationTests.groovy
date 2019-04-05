@@ -6,6 +6,8 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import net.hedtech.banner.general.overall.ldm.NonLdmService
 import net.hedtech.banner.general.person.PersonUtility
@@ -16,6 +18,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@Integration
+@Rollback
 class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def sqlProcessCompositeService

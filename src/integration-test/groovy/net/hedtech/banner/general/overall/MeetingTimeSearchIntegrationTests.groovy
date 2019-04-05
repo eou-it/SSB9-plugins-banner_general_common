@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -10,6 +13,8 @@ import org.junit.After
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.jdbc.UncategorizedSQLException
 
+@Integration
+@Rollback
 class MeetingTimeSearchIntegrationTests extends BaseIntegrationTestCase {
 
     @Before

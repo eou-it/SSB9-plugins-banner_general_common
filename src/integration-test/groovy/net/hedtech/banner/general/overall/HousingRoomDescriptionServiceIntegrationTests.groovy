@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -17,6 +20,8 @@ import net.hedtech.banner.exceptions.ApplicationException
 
 
 
+@Integration
+@Rollback
 class HousingRoomDescriptionServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def housingRoomDescriptionService

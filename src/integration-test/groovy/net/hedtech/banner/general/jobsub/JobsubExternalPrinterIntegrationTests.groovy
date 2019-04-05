@@ -3,6 +3,8 @@
  **********************************************************************************/
 package net.hedtech.banner.general.jobsub
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -13,7 +15,10 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.jdbc.UncategorizedSQLException
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class JobsubExternalPrinterIntegrationTests extends BaseIntegrationTestCase {
 
     //Valid test data (For success tests)

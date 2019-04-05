@@ -5,6 +5,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -13,7 +16,10 @@ import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.system.BackgroundInstitutionCharacteristic
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class SourceBackgroundInstitutionCharacteristicServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def sourceBackgroundInstitutionCharacteristicService

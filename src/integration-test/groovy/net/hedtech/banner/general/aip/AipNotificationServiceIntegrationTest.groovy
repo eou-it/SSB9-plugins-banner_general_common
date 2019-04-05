@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.aip
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.general.overall.IntegrationConfiguration
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -19,6 +21,8 @@ import static net.hedtech.banner.general.aip.AipNotificationConstants.ICSN_CODE_
 import static org.junit.Assert.*
 
 
+@Integration
+@Rollback
 class AipNotificationServiceIntegrationTest extends BaseIntegrationTestCase {
 
     def aipNotificationService

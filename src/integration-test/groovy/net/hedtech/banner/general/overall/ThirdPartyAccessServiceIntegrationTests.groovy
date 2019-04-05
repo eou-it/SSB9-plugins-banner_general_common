@@ -4,6 +4,8 @@
 
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.Before
 import org.junit.Test
@@ -11,6 +13,8 @@ import org.junit.Test
 /**
  * Integration test cases for ThirdPartyAccessService
  */
+@Integration
+@Rollback
 class ThirdPartyAccessServiceIntegrationTests extends BaseIntegrationTestCase {
 
     ThirdPartyAccessService thirdPartyAccessService

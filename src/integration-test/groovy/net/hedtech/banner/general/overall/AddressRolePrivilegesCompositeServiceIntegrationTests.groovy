@@ -1,5 +1,7 @@
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.AddressRolePrivileges
 import net.hedtech.banner.service.ServiceBase
@@ -8,6 +10,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@Integration
+@Rollback
 class AddressRolePrivilegesCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def addressRolePrivilegesCompositeService

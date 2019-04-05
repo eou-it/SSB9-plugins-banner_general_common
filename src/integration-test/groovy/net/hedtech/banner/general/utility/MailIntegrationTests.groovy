@@ -2,6 +2,9 @@
  Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.utility
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -15,8 +18,10 @@ import net.hedtech.banner.general.system.LetterProcessLetter
 import net.hedtech.banner.general.system.Initials
 import java.text.SimpleDateFormat
 import grails.validation.ValidationException
+import static groovy.test.GroovyAssert.*
 
-
+@Integration
+@Rollback
 class MailIntegrationTests extends BaseIntegrationTestCase {
 
     //Valid test data (For success tests)

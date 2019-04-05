@@ -4,6 +4,8 @@
 
 package net.hedtech.banner.general.commonmatching
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.CommonMatchingSource
@@ -12,7 +14,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.dao.InvalidDataAccessResourceUsageException
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class CommonMatchingPersonResultIntegrationTests extends BaseIntegrationTestCase {
 
     @Before

@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -12,6 +14,8 @@ import org.junit.Test
 import org.springframework.context.ApplicationContext
 import org.springframework.context.i18n.LocaleContextHolder
 
+@Integration
+@Rollback
 class DirectoryProfileCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def directoryProfileCompositeService

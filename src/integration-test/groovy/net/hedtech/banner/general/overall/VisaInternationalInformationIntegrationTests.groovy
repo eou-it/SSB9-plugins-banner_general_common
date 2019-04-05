@@ -2,6 +2,9 @@
  Copyright 2013 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -15,6 +18,8 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 
 import java.text.SimpleDateFormat
 
+@Integration
+@Rollback
 class VisaInternationalInformationIntegrationTests extends BaseIntegrationTestCase {
 
     @Before

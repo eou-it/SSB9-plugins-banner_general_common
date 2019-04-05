@@ -3,6 +3,9 @@
  **********************************************************************************/
 
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -14,6 +17,8 @@ import net.hedtech.banner.general.system.Term
 import groovy.sql.Sql
 
 
+@Integration
+@Rollback
 class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def sectionCrossListSectionService

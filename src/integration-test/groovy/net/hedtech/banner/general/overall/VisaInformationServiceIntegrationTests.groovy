@@ -3,6 +3,8 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.general.common.GeneralValidationCommonConstants
 import net.hedtech.banner.general.overall.ldm.GlobalUniqueIdentifier
 import org.junit.Before
@@ -15,7 +17,10 @@ import net.hedtech.banner.general.system.PortOfEntry
 import net.hedtech.banner.general.system.VisaIssuingAuthority
 import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class VisaInformationServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def visaInformationService

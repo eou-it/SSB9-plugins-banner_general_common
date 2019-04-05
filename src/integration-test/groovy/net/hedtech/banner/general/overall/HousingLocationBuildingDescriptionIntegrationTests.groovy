@@ -2,6 +2,9 @@
   Copyright 2010-2016 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
+
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
@@ -13,6 +16,8 @@ import net.hedtech.banner.general.system.*
 import org.junit.Test
 import org.apache.commons.lang.StringUtils
 
+@Integration
+@Rollback
 class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegrationTestCase {
 
     //Test data for creating new domain instance

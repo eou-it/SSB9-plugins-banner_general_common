@@ -3,6 +3,8 @@
  *******************************************************************************/
 package net.hedtech.banner.general.personalinformation
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.overall.SqlProcess
 import net.hedtech.banner.general.person.PersonUtility
@@ -13,6 +15,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@Integration
+@Rollback
 class PersonalInformationCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def personalInformationCompositeService
