@@ -14,10 +14,15 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+
 /**
  * Tests basic CRUD operations on an CommunicationRecurrentMessage entity object
  * and any field level validation.
  */
+@Integration
+@Rollback
 class CommunicationRecurrentMessageIntegrationTests extends BaseIntegrationTestCase {
 
     def i_valid_folder_name = "My Folder"

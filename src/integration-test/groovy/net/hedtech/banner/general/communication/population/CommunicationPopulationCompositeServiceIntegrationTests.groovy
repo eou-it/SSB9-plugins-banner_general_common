@@ -14,10 +14,20 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationQueryService service
  */
+@Integration
+@Rollback
 class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def selfServiceBannerAuthenticationProvider
@@ -29,9 +39,10 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken( getUser(), '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
 
     @After
@@ -40,8 +51,19 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+    }
+
     @Test
     public void testCreateEmptyPopulation() {
+        setUpData()
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
         assertNotNull population.id
         assertEquals( testFolder, population.folder )
@@ -51,7 +73,9 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
     }
 
     @Test void testAddPersonToIncludeList() {
+        setUpData()
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
+        System.err.println(population)
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMADMIN' )
         assertNotNull( population.includeList )
 
@@ -69,6 +93,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
     }
 
     @Test void testAddPersonsToIncludeList() {
+        setUpData()
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
         List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
 
@@ -126,6 +151,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
     }
 
     @Test void testRemovePersonFromIncludeList() {
+        setUpData()
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMADMIN' )
         population = communicationPopulationCompositeService.addPersonToIncludeList( population, 'BCMUSER' )
@@ -154,6 +180,7 @@ class CommunicationPopulationCompositeServiceIntegrationTests extends BaseIntegr
     }
 
     @Test void testRemoveAllPersonsFromIncludeList() {
+        setUpData()
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( testFolder, "testPopulation", "testPopulation description" )
         population = communicationPopulationCompositeService.removeAllPersonsFromIncludeList( population )
         def entryCount = CommunicationPopulationSelectionListEntry.countByPopulationSelectionList( population.includeList )

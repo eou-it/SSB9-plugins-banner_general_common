@@ -3,15 +3,24 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.mobile
 
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.general.communication.job.CommunicationMessageGenerator
 import net.hedtech.banner.general.overall.ThirdPartyAccess
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 
+@Integration
+@Rollback
 class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestCase {
 
     def selfServiceBannerAuthenticationProvider
@@ -20,6 +29,8 @@ class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestC
     @Before
     public void setUp() {
         formContext = ['SELFSERVICE']
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def authentication = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( authentication )
         super.setUp()
@@ -30,6 +41,12 @@ class CommunicationMessageGeneratorIntegrationTests extends BaseIntegrationTestC
     public void tearDown() {
         super.tearDown()
         logout()
+    }
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
     /**

@@ -3,11 +3,18 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.mobile
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.organization.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.apache.commons.logging.LogFactory
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Test sending basic mobile notification.
  */
+@Integration
+@Rollback
 class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseIntegrationTestCase {
 
     def log = LogFactory.getLog(this.class)
@@ -30,9 +39,10 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        setUpTestOrganization()
     }
 
 
@@ -42,9 +52,15 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
 
     @Test
     public void testSend() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "Test Send from BCM"
         message.headline = "Test Send from BCM at " + new Date()
@@ -62,6 +78,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendChildOrganization() {
+        setUpTestOrganization()
         // test that child organization inherits endpoint from root organization
         CommunicationOrganization childOrganization = new CommunicationOrganization()
         childOrganization.name = "CommunicationSendMobileNotificationMethodIntegrationTests Organization"
@@ -90,6 +107,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendBadEndpoint() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendBadEndpoint"
         message.referenceId = UUID.randomUUID().toString()
@@ -131,6 +149,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendMissingExternalId() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendMissingExternalId"
         message.referenceId = UUID.randomUUID().toString()
@@ -150,6 +169,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendBadApplicationName() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendBadApplicationName"
         message.referenceId = UUID.randomUUID().toString()
@@ -195,6 +215,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendBadApplicationKey() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.mobileHeadline = "testSendBadApplicationKey"
         message.referenceId = UUID.randomUUID().toString()
@@ -232,6 +253,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendDuration() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.expirationPolicy = CommunicationMobileNotificationExpirationPolicy.DURATION
         message.duration = 1
@@ -252,6 +274,7 @@ class CommunicationSendMobileNotificationMethodIntegrationTests extends BaseInte
 
     @Test
     public void testSendDateTime() {
+        setUpTestOrganization()
         CommunicationMobileNotificationMessage message = new CommunicationMobileNotificationMessage()
         message.expirationPolicy = CommunicationMobileNotificationExpirationPolicy.DATE_TIME
 

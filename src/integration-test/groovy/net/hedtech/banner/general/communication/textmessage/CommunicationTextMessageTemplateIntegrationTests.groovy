@@ -3,6 +3,9 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.textmessage
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -13,6 +16,8 @@ import org.junit.Test
  * Tests basic CRUD operations on an CommunicationTextMessageTemplate entity object
  * and any field level validation.
  */
+@Integration
+@Rollback
 class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder defaultFolder
@@ -21,12 +26,6 @@ class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTe
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        defaultFolder = new CommunicationFolder(
-                name: "default folder"
-        )
-        defaultFolder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull defaultFolder.id
     }
 
     @After
@@ -35,8 +34,13 @@ class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTe
         logout()
     }
 
+    void setUpData() {
+        defaultFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave("default folder")
+    }
+
     @Test
     void testCreate() {
+        setUpData()
         CommunicationTextMessageTemplate template = new CommunicationTextMessageTemplate(
                 name: "create test",
                 createdBy: 'MIKE',
@@ -55,6 +59,7 @@ class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testUpdate() {
+        setUpData()
         CommunicationTextMessageTemplate template = new CommunicationTextMessageTemplate(
                 name: "update test",
                 description: "description",
@@ -84,6 +89,7 @@ class CommunicationTextMessageTemplateIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testDelete() {
+        setUpData()
         int templateCount = CommunicationTextMessageTemplate.findAll().size()
 
         CommunicationTextMessageTemplate template = new CommunicationTextMessageTemplate(

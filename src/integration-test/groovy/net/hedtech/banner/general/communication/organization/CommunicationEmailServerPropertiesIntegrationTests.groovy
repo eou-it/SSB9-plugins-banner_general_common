@@ -3,16 +3,20 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.organization
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
-
+import static groovy.test.GroovyAssert.*
 /**
  * Integration tests for communicationEmailServerProperties entity
  */
+@Integration
+@Rollback
 class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegrationTestCase {
     def organization
 
@@ -25,7 +29,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
                 sql.executeUpdate("Delete from GCRORAN")
             }
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 
@@ -34,7 +38,6 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        cleanUp()
     }
 
 
@@ -46,6 +49,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testCreateCommunicationEmailServerProperties() {
+        cleanUp()
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
         receiveProperties.save(failOnError: true, flush: true)
@@ -70,6 +74,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testUpdateCommunicationEmailServerProperties() {
+        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
         communicationEmailServerProperties.save(failOnError: true, flush: true)
 
@@ -98,6 +103,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testDeleteCommunicationEmailServerProperties() {
+        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         communicationEmailServerProperties.save(failOnError: true, flush: true)
 
@@ -120,6 +126,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testNullValidationFailure() {
+        cleanUp()
         // Instantiate an empty domain
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         // TODO: implement these assertions
@@ -142,6 +149,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testMaxSizeValidationFailure() {
+        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
 
         // Set domain values to exceed maximum allowed length
@@ -160,6 +168,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testOptimisticLock() {
+        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         communicationEmailServerProperties.save(failOnError: true, flush: true)
         assertNotNull communicationEmailServerProperties?.id

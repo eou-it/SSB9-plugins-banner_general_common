@@ -3,6 +3,8 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.merge
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.communication.organization.CommunicationOrganizationCompositeService
@@ -15,6 +17,8 @@ import org.junit.Test
 /**
  * Integration tests for CommunicationRecipientData entity
  */
+@Integration
+@Rollback
 class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder folder
@@ -50,6 +54,15 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+    }
+
+
+    @After
+    public void tearDown() {
+        super.tearDown()
+    }
+
+    void setUpData() {
         folder = newValidForCreateFolder()
         folder.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -61,6 +74,9 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
         assertNotNull emailTemplate.id
 
         fieldValue1 = newFieldValue("FieldValue1")
+    }
+
+    void setUpOrganizationData() {
         organization = new CommunicationOrganization(name: "Test Org")
         def orgList = communicationOrganizationCompositeService.listOrganizations()
         if (orgList.size() > 0) {
@@ -70,16 +86,10 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
         }
     }
 
-
-    @After
-    public void tearDown() {
-        super.tearDown()
-    }
-
-
     @Test
     void testCreateCommunicationRecipientData() {
         def communicationRecipientData = newCommunicationRecipientData()
+        setUpOrganizationData()
         communicationRecipientData.setOrganizationId( organization.id )
         communicationRecipientData.save(failOnError: true, flush: true)
 
@@ -93,6 +103,7 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
 
 
     private def newCommunicationRecipientData() {
+        setUpData()
         def communicationRecipientData = new CommunicationRecipientData(
                 // Required fields
                 pidm: 99990001,

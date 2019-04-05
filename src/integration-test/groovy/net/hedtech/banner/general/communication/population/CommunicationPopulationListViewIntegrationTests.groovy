@@ -15,37 +15,35 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationSelectionListEntry entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTestCase {
-    def CommunicationPopulationQuery globalTestPopulationQuery
     def CommunicationPopulationSelectionList globalTestPopulationSelectionList
     def CommunicationFolder folder
     def i_valid_foldername = "TestFolderName"
     def selfServiceBannerAuthenticationProvider
 
-
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        folder = newValidForCreateFolder()
-        folder.save(failOnError: true, flush: true)
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
-        globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
-        globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
-        globalTestPopulationSelectionList.save(failOnError: true, flush: true)
-        assertNotNull(globalTestPopulationSelectionList.id)
-
     }
-
 
     @After
     public void tearDown() {
@@ -53,10 +51,26 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpFolderData() {
+        folder = CommunicationManagementTestingSupport.newValidForCreateFolder()
+        folder.save()
+    }
+
+    void setUpPopulationData() {
+        globalTestPopulationSelectionList = new CommunicationPopulationSelectionList()
+        globalTestPopulationSelectionList.save(failOnError: true, flush: true)
+    }
 
     @Test
     void testCreatePopulationSelectionListEntry() {
 
+        setUpPopulationData()
         def populationSelectionListEntry = newPopulationSelectionListEntry()
         populationSelectionListEntry.populationSelectionList = globalTestPopulationSelectionList
         populationSelectionListEntry.save(failOnError: true, flush: true)
@@ -70,55 +84,11 @@ class CommunicationPopulationListViewIntegrationTests extends BaseIntegrationTes
 
     }
 
-
     private def newPopulationSelectionListEntry() {
         def populationSelectionListEntry = new CommunicationPopulationSelectionListEntry(
                 // Required fields
                 pidm: 9199999999999999999,
-
         )
-
         return populationSelectionListEntry
     }
-
-
-    private def newPopulationQuery() {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
-                createDate: new Date(),
-                createdBy: "TTTTTTTTTT",
-                name: "TTTTTTTTTT",
-                changesPending: true,
-
-                // Nullable fields
-                description: "TTTTTTTTTT",
-                queryString: "",
-        )
-
-        return populationQuery
-    }
-
-
-    private def newPopulationSelectionList(String popname) {
-        def populationSelectionList = new CommunicationPopulationSelectionList(
-                // Required fields
-                // Nullable fields
-                name: popname,
-                status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
-        )
-
-        return populationSelectionList
-    }
-
-
-    private def newValidForCreateFolder() {
-        def folder = new CommunicationFolder(
-                description: "Test Folder",
-                internal: false,
-                name: i_valid_foldername
-        )
-        return folder
-    }
-
 }

@@ -10,11 +10,16 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import static groovy.test.GroovyAssert.*
 
 /**
  * Integration tests for CommunicationManualInteraction entity
  */
+@Integration
+@Rollback
 class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationOrganization organization
@@ -25,10 +30,23 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+    }
+
+
+    @After
+    public void tearDown() {
+        super.tearDown()
+    }
+
+
+    void setUpOrganizationData() {
         organization = newValidForCreateOrganization()
         organization.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull organization.id
+    }
+
+    void setUpInteractionTypeData() {
         folder = newValidForCreateFolder()
         folder.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
@@ -37,12 +55,6 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
         interactionType.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull interactionType.id
-    }
-
-
-    @After
-    public void tearDown() {
-        super.tearDown()
     }
 
     @Test
@@ -65,6 +77,7 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
 
     @Test
     void testNullValidationFailure() {
+        setUpInteractionTypeData()
         // Instantiate an empty domain
         def manualInteraction = new CommunicationManualInteraction()
 
@@ -100,7 +113,7 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( "UPDATE gcrmint SET gcrmint_version = 999 WHERE gcrmint_surrogate_id = ?", [manualInteraction.id] )
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
@@ -111,6 +124,8 @@ class CommunicationManualInteractionIntegrationTests extends BaseIntegrationTest
     }
 
     private def newCommunicationManualInteraction() {
+        setUpOrganizationData()
+        setUpInteractionTypeData()
         def manualInteraction = new CommunicationManualInteraction(
                 // Required fields
                 constituentPidm: 1353L,

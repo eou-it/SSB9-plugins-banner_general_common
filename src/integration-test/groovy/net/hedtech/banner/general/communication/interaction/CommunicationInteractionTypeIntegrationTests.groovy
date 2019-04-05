@@ -9,11 +9,16 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
 
 /**
  * Integration tests for CommunicationInteractionType entity
  */
+@Integration
+@Rollback
 class CommunicationInteractionTypeIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder folder
@@ -22,16 +27,19 @@ class CommunicationInteractionTypeIntegrationTests extends BaseIntegrationTestCa
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        folder = newValidForCreateFolder()
-        folder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
     }
 
 
     @After
     public void tearDown() {
         super.tearDown()
+    }
+
+    void setUpData() {
+        folder = newValidForCreateFolder()
+        folder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder.id
     }
 
     @Test
@@ -146,7 +154,7 @@ class CommunicationInteractionTypeIntegrationTests extends BaseIntegrationTestCa
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( "UPDATE gcritpe SET gcritpe_version = 999 WHERE gcritpe_surrogate_id = ?", [interactionType.id] )
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
@@ -158,15 +166,27 @@ class CommunicationInteractionTypeIntegrationTests extends BaseIntegrationTestCa
 
     @Test
     void testExistsAnotherNameFolder() {
-        def interactionType = newCommunicationInteractionType()
+        setUpData()
+        def interactionType = new CommunicationInteractionType(
+                // Required fields
+                folder: folder,
+                name: "Face to Face",
+                // Nullable fields
+                description: "This is an interaction that happens face to face",
+        )
         interactionType.save( failOnError: true, flush: true )
         assertNotNull interactionType?.id
 
         Boolean falseResult = CommunicationInteractionType.existsAnotherNameFolder(interactionType.id, interactionType.name, interactionType.folder.name)
         assertFalse(falseResult)
 
-        def interactionType2 = newCommunicationInteractionType()
-        interactionType2.name = "Duplicate Interaction Type"
+        def interactionType2 = new CommunicationInteractionType(
+                // Required fields
+                folder: folder,
+                name: "Duplicate Interaction Type",
+                // Nullable fields
+                description: "This is an interaction that happens face to face",
+        )
         interactionType2.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
         assertNotNull interactionType2.id
@@ -176,6 +196,7 @@ class CommunicationInteractionTypeIntegrationTests extends BaseIntegrationTestCa
     }
 
     private def newCommunicationInteractionType() {
+        setUpData()
         def interactionType = new CommunicationInteractionType(
                 // Required fields
                 folder: folder,

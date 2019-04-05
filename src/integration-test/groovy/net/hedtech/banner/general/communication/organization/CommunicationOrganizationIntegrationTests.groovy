@@ -3,6 +3,8 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.organization
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -12,6 +14,8 @@ import org.junit.Test
 /**
  * OrganizationTest.
  */
+@Integration
+@Rollback
 class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase {
 
     def i_valid_name = "My Organization"
@@ -34,7 +38,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
                 sql.executeUpdate("Delete from GCRORAN")
             }
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 
@@ -43,7 +47,6 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        cleanUp()
     }
 
 
@@ -55,6 +58,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testCreateValidOrganization() {
+        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.isAvailable = true
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
@@ -73,6 +77,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testDelete() {
+        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -85,6 +90,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testUpdate() {
+        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.save()
         //Test if the generated entity now has an id assigned
@@ -113,6 +119,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testPassword() {
+        cleanUp()
         def organization = newValidForCreateOrganization()
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
         def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send )
@@ -134,6 +141,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testCreateInValidOrganization() {
+        cleanUp()
         def organization = newValidForCreateOrganization()
 
         organization = newValidForCreateOrganization()
@@ -149,6 +157,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testFetchMailBoxAccountByOrganizationId() {
+        cleanUp()
         def mbxInitialCount =   CommunicationMailboxAccount.findAll()?.size()
         def organization = newValidForCreateOrganization()
         organization.senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender )
@@ -162,6 +171,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testList() {
+        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.senderMailboxAccount = newCommunicationMailBox( CommunicationMailboxAccountType.Sender )
         organization.save(failOnError: true, flush: true)

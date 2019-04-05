@@ -4,6 +4,10 @@
 
 package net.hedtech.banner.general.communication.template
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import groovy.sql.Sql
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
@@ -16,12 +20,17 @@ import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.general.person.PersonIdentificationNameCurrent
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
+@Integration
+@Rollback
 class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     def communicationTemplateMergeService
@@ -66,7 +75,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
                 sql.executeUpdate( "Delete from GCRORAN" )
             }
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 
@@ -75,9 +84,26 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
+    }
 
+
+    @After
+    public void tearDown() {
+        super.tearDown()
+        logout()
+    }
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
         folder1 = newValidForCreateFolder( i_valid_folder_name1 )
         folder1.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
@@ -91,17 +117,10 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         i_valid_pidm = (PersonIdentificationNameCurrent.fetchByBannerId('STUAFR001')).pidm
     }
 
-
-    @After
-    public void tearDown() {
-        super.tearDown()
-        logout()
-    }
-
-
     @Test
     /* The sunny day test */
     void testMergeTemplate() {
+        setUpData()
         /* create the template */
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         /* it doesn't matter what we set them to, as long as they contain personalization fields, we can test that they get rendered */
@@ -169,6 +188,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     @Test
     void testInvalidDataFields() {
+        setUpData()
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         emailTemplate.content = """Hi \$firstname\$ \$lastname\$"""
         emailTemplate.save( failOnError: true, flush: true )
@@ -184,6 +204,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     @Test
     void testRenderPreviewTemplate() {
+        setUpData()
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         def CommunicationField testCommunicationField
         def expectedContent = """
@@ -226,6 +247,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
 
     @Test
     void testRenderPreviewTemplateWithEscapeButNoFields() {
+        setUpData()
         /* create the template */
         CommunicationEmailTemplate emailTemplate = newValidForCreateEmailTemplate()
         /* it doesn't matter what we set them to, as long as they contain personalization fields, we can test that they get rendered */

@@ -3,12 +3,20 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.textmessage
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
+import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.folder.CommunicationFolderService
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -18,6 +26,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests crud methods provided by communication text message item service.
  */
+@Integration
+@Rollback
 class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegrationTestCase {
 
     CommunicationTextMessageItemService communicationTextMessageItemService
@@ -32,10 +42,25 @@ class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegratio
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
+    }
 
+    @After
+    public void tearDown() {
+        super.tearDown()
+        logout()
+    }
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
         folder = new CommunicationFolder()
         folder.name = "test folder"
         folder = (CommunicationFolder) communicationFolderService.create( folder )
@@ -49,14 +74,9 @@ class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegratio
         textMessageTemplate = (CommunicationTextMessageTemplate) communicationTextMessageTemplateService.publish( textMessageTemplate )
     }
 
-    @After
-    public void tearDown() {
-        super.tearDown()
-        logout()
-    }
-
     @Test
     void testCreate() {
+        setUpData()
         Long recipientPidm = 49152
         String createdBy = 'MBRZYCKI'
         String referenceId = UUID.randomUUID().toString()
@@ -84,6 +104,7 @@ class CommunicationTextMessageItemServiceIntegrationTests extends BaseIntegratio
 
     @Test
     void testDelete() {
+        setUpData()
         CommunicationTextMessageItem textMessageItem = new CommunicationTextMessageItem()
         textMessageItem.serverResponse = "test Server Response"
         textMessageItem.templateId = textMessageTemplate.id

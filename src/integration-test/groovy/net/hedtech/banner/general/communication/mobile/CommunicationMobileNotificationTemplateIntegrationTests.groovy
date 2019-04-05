@@ -3,6 +3,8 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.mobile
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import groovy.time.DatumDependentDuration
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
@@ -15,21 +17,16 @@ import org.junit.Test
  * Tests basic CRUD operations on an CommunicationMobileNotificationTemplate entity object
  * and any field level validation.
  */
+@Integration
+@Rollback
 class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder defaultFolder
-
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        defaultFolder = new CommunicationFolder(
-            name: "default folder"
-        )
-        defaultFolder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull defaultFolder.id
     }
 
     @After
@@ -38,8 +35,18 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
         logout()
     }
 
+    void setUpData() {
+        defaultFolder = new CommunicationFolder(
+                name: "default folder"
+        )
+        defaultFolder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull defaultFolder.id
+    }
+
     @Test
     void testCreate() {
+        setUpData()
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
             name: "create test",
             createdBy: 'MIKE',
@@ -58,6 +65,7 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
 
     @Test
     void testUpdate() {
+        setUpData()
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
                 name: "update test",
                 description: "description",
@@ -89,6 +97,7 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
 
     @Test
     void testDelete() {
+        setUpData()
         int templateCount = CommunicationMobileNotificationTemplate.findAll().size()
 
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
@@ -104,13 +113,14 @@ class CommunicationMobileNotificationTemplateIntegrationTests extends BaseIntegr
 
         assertEquals( templateCount + 1, CommunicationMobileNotificationTemplate.findAll().size() )
 
-        template.delete()
+        template.delete( failOnError: true, flush: true )
 
         assertEquals( templateCount, CommunicationMobileNotificationTemplate.findAll().size() )
     }
 
     @Test
     void testExpires() {
+        setUpData()
         CommunicationMobileNotificationTemplate template = new CommunicationMobileNotificationTemplate(
                 name: "testExpires",
                 createdBy: 'MIKE',

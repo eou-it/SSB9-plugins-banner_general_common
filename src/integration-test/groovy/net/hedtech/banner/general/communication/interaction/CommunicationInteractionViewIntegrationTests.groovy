@@ -9,10 +9,13 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 /**
  * Integration tests for CommunicationInteractionView entity
  */
+@Integration
+@Rollback
 class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationOrganization organization
@@ -24,22 +27,6 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        organization = newValidForCreateOrganization()
-        organization.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull organization.id
-        folder = newValidForCreateFolder()
-        folder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
-        interactionType = newValidForCreateCommunicationInteractionType()
-        interactionType.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull interactionType.id
-        interaction = newValidForCreateCommunicationManualInteraction()
-        interaction.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull interaction.id
     }
 
 
@@ -49,8 +36,32 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
     }
 
 
+    void setUpOrganizationData() {
+        organization = newValidForCreateOrganization()
+        organization.save( failOnError: true, flush: true )
+    }
+
+    void setUpFolderData() {
+        folder = newValidForCreateFolder()
+        folder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull folder.id
+    }
+
+    void setUpInteractionTypeData() {
+        interactionType = newValidForCreateCommunicationInteractionType()
+        interactionType.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull interactionType.id
+    }
+
     @Test
     void testCommunicationInteractionView() {
+        interaction = newValidForCreateCommunicationManualInteraction()
+        interaction.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull interaction.id
+
         List interactions = CommunicationInteractionView.findByConstituentNameOrBannerId('%');
         // Assert domain values
         assertNotNull interactions
@@ -65,6 +76,8 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
     }
 
     private def newValidForCreateCommunicationManualInteraction() {
+        setUpOrganizationData()
+        setUpInteractionTypeData()
         def manualInteraction = new CommunicationManualInteraction(
                 // Required fields
                 constituentPidm: 1L,
@@ -91,6 +104,7 @@ class CommunicationInteractionViewIntegrationTests extends BaseIntegrationTestCa
     }
 
     private def newValidForCreateCommunicationInteractionType() {
+        setUpFolderData()
         def interactionType = new CommunicationInteractionType(
                 // Required fields
                 folder: folder,

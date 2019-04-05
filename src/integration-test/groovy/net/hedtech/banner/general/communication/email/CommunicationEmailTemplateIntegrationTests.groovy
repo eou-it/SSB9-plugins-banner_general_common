@@ -3,17 +3,19 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.email
 
+import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase {
-    //folder
-    def i_valid_folder_name = "Valid Folder Nname"
-    def i_valid_folder_description = "Valid older description"
-    def i_valid_folder_internal = true
 
     // template
     def i_valid_emailTemplate_name = """Valid Name"""
@@ -25,10 +27,6 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     def i_valid_emailTemplate_fromList = """Valid Emailtemplate Fromlist"""
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
     def i_valid_emailTemplate_toList = """Valid Emailtemplate Tolist"""
-    def i_valid_emailTemplate_lastModifiedBy = """Valid Emailtemplate Lastmodifiedby"""
-    def i_valid_emailTemplate_lastModified = new Date()
-    def i_valid_emailTemplate_dataOrigin = """Valid Emailtemplate Dataorigin"""
-    def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_published = true
     def i_valid_emailTemplate_validFrom = new Date()
@@ -53,8 +51,18 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        folder = newValidForCreateFolder()
-        folder.save( failOnError: true, flush: true )
+    }
+
+
+    @After
+    public void tearDown() {
+        super.tearDown()
+        logout()
+    }
+
+
+    void setUpData() {
+        folder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
         //Test if the generated entity now has an id assigned
         assertNotNull folder.id
         // Force the validTo into the future
@@ -67,20 +75,12 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
         i_valid_emailTemplate_validFrom = c.getTime()
     }
 
-
-    @After
-    public void tearDown() {
-        super.tearDown()
-        logout()
-    }
-
-
     @Test
     void testCreateEmailTemplate() {
 
         def originalList = CommunicationEmailTemplate.findAll()
 
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        def emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull emailTemplate.id
@@ -114,7 +114,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testUpdate() {
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        def emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull emailTemplate.id
@@ -140,36 +140,36 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
     @Test
     void testCreateInValidEmailTemplate() {
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        def emailTemplate = newValidForCreateEmailTemplate(  )
 
         emailTemplate.bccList = i_invalid_emailTemplate_bccList
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
-        emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.ccList = i_invalid_emailTemplate_ccList
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
 
-        emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.fromList = i_invalid_emailTemplate_fromList
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
 
-        emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.subject = i_invalid_emailTemplate_subject
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
 
-        emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.toList = i_invalid_emailTemplate_toList
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
 
-        emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.lastModifiedBy = i_invalid_emailTemplate_lastModifiedBy
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
-        emailTemplate = newValidForCreateEmailTemplate( folder )
+        emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.dataOrigin = i_invalid_emailTemplate_dataOrigin
         shouldFail { emailTemplate.save( failOnError: true, flush: true ) }
 
@@ -181,7 +181,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
         def originalList = CommunicationEmailTemplate.findAll()
 
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        def emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull emailTemplate.id
@@ -221,7 +221,7 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
         def originalList = CommunicationEmailTemplate.findAll()
 
-        def emailTemplate = newValidForCreateEmailTemplate( folder )
+        def emailTemplate = newValidForCreateEmailTemplate(  )
         emailTemplate.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull emailTemplate.id
@@ -256,18 +256,8 @@ class CommunicationEmailTemplateIntegrationTests extends BaseIntegrationTestCase
 
     }
 
-    private def newValidForCreateFolder() {
-        def folder = new CommunicationFolder(
-                description: i_valid_folder_description,
-                internal: i_valid_folder_internal,
-                name: i_valid_folder_name
-        )
-        return folder
-    }
-
-
-    private def newValidForCreateEmailTemplate( CommunicationFolder folder ) {
-
+    private def newValidForCreateEmailTemplate( ) {
+        setUpData()
         def communicationTemplate = new CommunicationEmailTemplate(
                 description: i_valid_emailTemplate_description,
                 personal: i_valid_emailTemplate_personal,

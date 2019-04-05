@@ -12,10 +12,14 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
 
 /**
  * Event Mapping Tests
  */
+@Integration
+@Rollback
 class CommunicationEventMappingIntegrationTests  extends BaseIntegrationTestCase {
 
     def i_valid_folder_name = "My Folder"

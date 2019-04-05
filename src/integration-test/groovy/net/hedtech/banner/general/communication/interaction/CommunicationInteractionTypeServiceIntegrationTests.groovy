@@ -3,6 +3,8 @@
  **********************************************************************************/
 package net.hedtech.banner.general.communication.interaction
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -12,7 +14,15 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationInteractionTypeService
@@ -24,13 +34,10 @@ class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegratio
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        validFolder = newValidForCreateFolder()
-        validFolder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull validFolder.id
     }
 
 
@@ -40,6 +47,18 @@ class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegratio
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        validFolder = newValidForCreateFolder()
+        validFolder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull validFolder.id
+    }
 
     @Test
     void testCreateCommunicationInteractionType() {
@@ -56,10 +75,10 @@ class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegratio
     void testCreateEmptyNameCommunicationInteractionType() {
         def newInteractionType = newCommunicationInteractionType()
         newInteractionType.name = "   "
-        def message = shouldFail( ApplicationException ) {
+        ApplicationException exception = shouldFail( ApplicationException ) {
             communicationInteractionTypeService.create( [domainModel: newInteractionType] )
         }
-        assertEquals "Incorrect failure message returned", "@@r1:nameCannotBeNull@@", message
+        assertEquals "Incorrect failure message returned", "@@r1:nameCannotBeNull@@", exception?.wrappedException?.message
     }
 
     @Test
@@ -125,13 +144,16 @@ class CommunicationInteractionTypeServiceIntegrationTests extends BaseIntegratio
         assertNotNull savedInteractionType?.id
         // Create new domain with same name
         def newInteractionType1 = newCommunicationInteractionType()
-        def message = shouldFail( ApplicationException ) {
+        ApplicationException exception = shouldFail( ApplicationException ) {
             communicationInteractionTypeService.create( [domainModel: newInteractionType1] )
         }
-        assertEquals "Incorrect failure message returned", "@@r1:not.unique.message@@", message
+        assertEquals "Incorrect failure message returned", "@@r1:not.unique.message@@", exception?.wrappedException?.message
     }
 
     private def newCommunicationInteractionType() {
+        if(!validFolder) {
+            setUpData()
+        }
         def interactionType = new CommunicationInteractionType(
                 // Required fields
                 folder: validFolder,

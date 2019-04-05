@@ -3,6 +3,10 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.template
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplateService
@@ -12,12 +16,17 @@ import net.hedtech.banner.general.communication.letter.CommunicationLetterTempla
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplateService
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
+@Integration
+@Rollback
 class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder testFolder
@@ -31,12 +40,11 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
     }
-
 
     @After
     public void tearDown() {
@@ -44,9 +52,19 @@ class CommunicationTemplateViewIntegrationTests extends BaseIntegrationTestCase 
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        testFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+    }
 
     @Test
     void testTemplateView() {
+        setUpData()
         def origTemplateList =  CommunicationTemplateView.list().size()
 
         CommunicationEmailTemplate emailTemplate = new CommunicationEmailTemplate(

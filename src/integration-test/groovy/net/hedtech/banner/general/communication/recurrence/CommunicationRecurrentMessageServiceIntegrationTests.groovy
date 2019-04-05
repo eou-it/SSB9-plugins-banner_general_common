@@ -3,6 +3,13 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.recurrence
 
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
@@ -21,6 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests crud methods provided by communication recurrent message service.
  */
+@Integration
+@Rollback
 class CommunicationRecurrentMessageServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationRecurrentMessageService
@@ -36,6 +45,8 @@ class CommunicationRecurrentMessageServiceIntegrationTests extends BaseIntegrati
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
     }
@@ -47,6 +58,11 @@ class CommunicationRecurrentMessageServiceIntegrationTests extends BaseIntegrati
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
 
     @Test
     void testList() {

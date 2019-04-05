@@ -9,10 +9,16 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+
+import static groovy.test.GroovyAssert.shouldFail
 
 /**
  * Integration tests for CommunicationJob entity
  */
+@Integration
+@Rollback
 class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
 
     @Before
@@ -125,21 +131,23 @@ class CommunicationJobIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testOptimisticLock() {
-        def CommunicationJob = newCommunicationJob()
-        CommunicationJob.save( failOnError: true, flush: true )
-        assertNotNull CommunicationJob?.id
+        def communicationJob = newCommunicationJob()
+        communicationJob.save( failOnError: true, flush: true )
+        assertNotNull communicationJob?.id
 
         def sql
         try {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
-            sql.executeUpdate( "UPDATE gcbcjob SET gcbcjob_version = 999 WHERE gcbcjob_surrogate_id = ?", [CommunicationJob.id] )
+            sql.executeUpdate( "UPDATE gcbcjob SET gcbcjob_version = 999 WHERE gcbcjob_surrogate_id = ?", [communicationJob.id] )
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
-        CommunicationJob.dataOrigin = "OPT_TEST"
-        shouldFail( HibernateOptimisticLockingFailureException ) { CommunicationJob.save( failOnError: true, flush: true ) }
+        communicationJob.dataOrigin = "OPT_TEST"
+        shouldFail( HibernateOptimisticLockingFailureException ) {
+            communicationJob.save( failOnError: true, flush: true )
+        }
     }
 
 

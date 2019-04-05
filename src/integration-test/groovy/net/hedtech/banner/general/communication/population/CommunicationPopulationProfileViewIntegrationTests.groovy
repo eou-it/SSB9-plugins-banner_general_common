@@ -4,9 +4,7 @@
 package net.hedtech.banner.general.communication.population
 
 import groovy.sql.Sql
-import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -15,31 +13,35 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationSelectionListEntry entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegrationTestCase {
     def CommunicationPopulationQuery globalTestPopulationQuery
     def CommunicationPopulationSelectionList globalTestPopulationSelectionList
     def Long globalPidm
     def selfServiceBannerAuthenticationProvider
 
-
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        newPerson()
-        globalTestPopulationQuery = newPopulationQuery().save(failOnError: true, flush: true)
-        globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
-        globalTestPopulationSelectionList = globalTestPopulationSelectionList.save(failOnError: true, flush: true)
-        assertNotNull(globalTestPopulationSelectionList.id)
     }
-
 
     @After
     public void tearDown() {
@@ -47,10 +49,21 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        newPerson()
+        globalTestPopulationSelectionList = new CommunicationPopulationSelectionList()
+        globalTestPopulationSelectionList = globalTestPopulationSelectionList.save(failOnError: true, flush: true)
+    }
 
     @Test
     void testCreatePopulationSelectionListEntry() {
-
+        setUpData()
         def populationSelectionListEntry = newPopulationSelectionListEntry()
         populationSelectionListEntry.populationSelectionList = globalTestPopulationSelectionList
         populationSelectionListEntry = populationSelectionListEntry.save(failOnError: true, flush: true)
@@ -72,7 +85,6 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
 
     }
 
-
     private def newPerson() {
         def sql = new Sql(sessionFactory.getCurrentSession().connection())
         String idSql = """select gb_common.f_generate_id bannerId, gb_common.f_generate_pidm pidm from dual """
@@ -92,47 +104,13 @@ class CommunicationPopulationProfileViewIntegrationTests extends BaseIntegration
 
     }
 
-
     private def newPopulationSelectionListEntry() {
         def populationSelectionListEntry = new CommunicationPopulationSelectionListEntry(
                 // Required fields
                 pidm: globalPidm,
 
         )
-
         return populationSelectionListEntry
-    }
-
-
-    private def newPopulationQuery() {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
-                createDate: new Date(),
-                createdBy: "TTTTTTTTTT",
-                name: "TTTTTTTTTT",
-                changesPending: true,
-
-                // Nullable fields
-                description: "TTTTTTTTTT",
-                queryString: "",
-        )
-
-        return populationQuery
-    }
-
-
-    private def newPopulationSelectionList(String popname) {
-        def populationSelectionList = new CommunicationPopulationSelectionList(
-                // Required fields
-                // Nullable fields
-                name: popname,
-                calculatedBy: "TTTTTTTTTT",
-                lastCalculatedTime: new Date(),
-                status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
-        )
-
-        return populationSelectionList
     }
 
 }

@@ -3,6 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.email
 
+import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -24,8 +25,6 @@ import grails.web.servlet.context.GrailsWebApplicationContext
 class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     //folder
     def i_valid_folder_name = "Valid Folder Nname"
-    def i_valid_folder_description = "Valid older description"
-    def i_valid_folder_internal = true
 
     // template
     def i_valid_emailTemplate_name = """Valid Name"""
@@ -37,10 +36,6 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     def i_valid_emailTemplate_fromList = """Valid Emailtemplate Fromlist"""
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
     def i_valid_emailTemplate_toList = """Valid Emailtemplate Tolist"""
-    def i_valid_emailTemplate_lastModifiedBy = """Valid Emailtemplate Lastmodifiedby"""
-    def i_valid_emailTemplate_lastModified = new Date()
-    def i_valid_emailTemplate_dataOrigin = """Valid Emailtemplate Dataorigin"""
-    def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_published = true
     def i_valid_emailTemplate_validFrom = new Date()
@@ -67,10 +62,7 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     }
 
     public void setUpData() {
-        folder = newValidForCreateFolder()
-        folder.save(failOnError: true, flush: true)
-        //Test if the generated entity now has an id assigned
-        assertNotNull folder.id
+        folder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(i_valid_folder_name)
     }
 
     @After

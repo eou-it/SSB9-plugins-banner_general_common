@@ -3,13 +3,21 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.textmessage
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import groovy.time.DatumDependentDuration
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationExpirationPolicy
 import net.hedtech.banner.general.communication.template.CommunicationDurationUnit
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -19,6 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Tests crud methods provided by communication template service.
  */
+@Integration
+@Rollback
 class CommunicationTextMessageTemplateServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationTemplateService
@@ -31,16 +41,11 @@ class CommunicationTextMessageTemplateServiceIntegrationTests extends BaseIntegr
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        defaultFolder = new CommunicationFolder(
-                name: "testFolder"
-        )
-        defaultFolder.save(failOnError: true, flush: true)
-        assertNotNull defaultFolder.id
     }
-
 
     @After
     public void tearDown() {
@@ -48,9 +53,19 @@ class CommunicationTextMessageTemplateServiceIntegrationTests extends BaseIntegr
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        defaultFolder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave("default folder")
+    }
 
     @Test
     void testCreate() {
+        setUpData()
         Date today = new Date()
         CommunicationTextMessageTemplate template = new CommunicationTextMessageTemplate(
                 name: "testCreate",
@@ -74,6 +89,7 @@ class CommunicationTextMessageTemplateServiceIntegrationTests extends BaseIntegr
 
     @Test
     void testUpdateTemplate() {
+        setUpData()
         CommunicationTextMessageTemplate template = new CommunicationTextMessageTemplate(
                 name: "testUpdateTemplate",
                 validFrom: new Date(),

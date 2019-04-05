@@ -4,22 +4,28 @@
 package net.hedtech.banner.general.communication.population.selectionlist
 
 import groovy.sql.Sql
-import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExecutionStatus
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationSelectionListEntry entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseIntegrationTestCase {
-    def CommunicationPopulationQuery globalTestPopulationQuery
     def CommunicationPopulationSelectionList globalTestPopulationSelectionList
     def selfServiceBannerAuthenticationProvider
 
@@ -28,13 +34,10 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        globalTestPopulationQuery = newPopulationQuery().save()
-        globalTestPopulationSelectionList = newPopulationSelectionList(globalTestPopulationQuery.name)
-        globalTestPopulationSelectionList.save()
-        assertNotNull(globalTestPopulationSelectionList.id)
     }
 
 
@@ -44,10 +47,21 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        globalTestPopulationSelectionList = new CommunicationPopulationSelectionList()
+        globalTestPopulationSelectionList.save(failOnError: true, flush: true)
+        assertNotNull(globalTestPopulationSelectionList.id)
+    }
 
     @Test
     void testCreatePopulationSelectionListEntry() {
-
+        setUpData()
         def populationSelectionListEntry = newPopulationSelectionListEntry()
         populationSelectionListEntry.populationSelectionList = globalTestPopulationSelectionList
         populationSelectionListEntry.save()
@@ -60,6 +74,7 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
 
     @Test
     void testDeletePopulationSelectionListEntry() {
+        setUpData()
         def populationSelectionListEntry = newPopulationSelectionListEntry()
         populationSelectionListEntry.populationSelectionList = globalTestPopulationSelectionList
         populationSelectionListEntry.save()
@@ -87,15 +102,18 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
 
     @Test
     void testFetchBySelectionListId() {
+        setUpData()
         def populationSelectionListEntry1 = newPopulationSelectionListEntry()
         populationSelectionListEntry1.populationSelectionList = globalTestPopulationSelectionList
-        populationSelectionListEntry1.save()
+        populationSelectionListEntry1.save(failOnError: true, flush: true)
+
         def populationSelectionListEntry2 = newPopulationSelectionListEntry()
         populationSelectionListEntry2.pidm = 14
         populationSelectionListEntry2.populationSelectionList = globalTestPopulationSelectionList
-        populationSelectionListEntry2.save()
+        populationSelectionListEntry2.save(failOnError: true, flush: true)
 
-        assertEquals(CommunicationPopulationSelectionListEntry.fetchBySelectionListId(globalTestPopulationSelectionList.id).size(), 2)
+        List entries = CommunicationPopulationSelectionListEntry.fetchBySelectionListId(globalTestPopulationSelectionList.id)
+        assertEquals(2, entries.size())
     }
 
 
@@ -118,6 +136,7 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
 
     @Test
     void testOptimisticLock() {
+        setUpData()
         def populationSelectionListEntry = newPopulationSelectionListEntry()
         populationSelectionListEntry.populationSelectionList = globalTestPopulationSelectionList
         populationSelectionListEntry.save(failOnError: true, flush: true)
@@ -128,7 +147,7 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("UPDATE gcrlent SET gcrlent_version = 999 WHERE gcrlent_surrogate_id = ?", [populationSelectionListEntry.id])
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
@@ -138,7 +157,6 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
         }
     }
 
-
     private def newPopulationSelectionListEntry() {
         def populationSelectionListEntry = new CommunicationPopulationSelectionListEntry(
                 // Required fields
@@ -147,39 +165,6 @@ class CommunicationPopulationSelectionListEntryIntegrationTests extends BaseInte
         )
 
         return populationSelectionListEntry
-    }
-
-
-    private def newPopulationQuery() {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
-                createDate: new Date(),
-                createdBy: "TTTTTTTTTT",
-                name: "TTTTTTTTTT",
-                changesPending: true,
-
-                // Nullable fields
-                description: "TTTTTTTTTT",
-                calculatedBy: "TTTTTTTTTT",
-                lastCalculatedTime: new Date(),
-                queryString: "",
-                syntaxErrors: "TTTTTTTTTT",
-        )
-
-        return populationQuery
-    }
-
-
-    private def newPopulationSelectionList(String popname) {
-        def populationSelectionList = new CommunicationPopulationSelectionList(
-                // Required fields
-                // Nullable fields
-                name: popname,
-                status: CommunicationPopulationQueryExecutionStatus.PENDING_EXECUTION,
-        )
-
-        return populationSelectionList
     }
 
 }

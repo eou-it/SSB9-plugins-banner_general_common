@@ -12,7 +12,17 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
+import static groovy.test.GroovyAssert.*
 
+@Integration
+@Rollback
 class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrationTestCase {
     def communicationManualInteractionService
     def CommunicationOrganization validOrganization
@@ -27,21 +37,10 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        validOrganization = newValidForCreateOrganization()
-        validOrganization.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull validOrganization.id
-        validFolder = newValidForCreateFolder()
-        validFolder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull validFolder.id
-        validInteractionType = newValidForCreateCommunicationInteractionType()
-        validInteractionType.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull validInteractionType.id
     }
 
 
@@ -51,6 +50,32 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpOrganizationData() {
+        validOrganization = newValidForCreateOrganization()
+        validOrganization.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull validOrganization.id
+    }
+
+    void setUpFolderData() {
+        validFolder = newValidForCreateFolder()
+        validFolder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull validFolder.id
+    }
+
+    void setUpInteractionData() {
+        validInteractionType = newValidForCreateCommunicationInteractionType()
+        validInteractionType.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull validInteractionType.id
+    }
 
     @Test
     void testCreateCommunicationManualInteraction() {
@@ -73,10 +98,10 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
     void testCreateEmptySubjectCommunicationManualInteraction() {
         def newManualInteraction = newCommunicationManualInteraction()
         newManualInteraction.aSubject = "   "
-        def message = shouldFail( ApplicationException ) {
+        ApplicationException exception = shouldFail( ApplicationException ) {
             communicationManualInteractionService.create( [domainModel: newManualInteraction] )
         }
-        assertEquals "Incorrect failure message returned", "@@r1:subjectCannotBeNull@@", message
+        assertEquals "Incorrect failure message returned", "@@r1:subjectCannotBeNull@@", exception.wrappedException.message
     }
 
     @Test
@@ -115,6 +140,8 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
     }
 
     private def newCommunicationManualInteraction() {
+        setUpOrganizationData()
+        setUpInteractionData()
         def manualInteraction = new CommunicationManualInteraction(
                 // Required fields
                 constituentPidm: 1353L,
@@ -141,6 +168,7 @@ class CommunicationManualInteractionServiceIntegrationTests extends BaseIntegrat
     }
     
     private def newValidForCreateCommunicationInteractionType() {
+        setUpFolderData()
         def manualInteraction = new CommunicationInteractionType(
                 // Required fields
                 folder: validFolder,

@@ -4,32 +4,39 @@
 package net.hedtech.banner.general.communication.population.selectionlist
 
 import groovy.sql.Sql
-import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
-import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException
+import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import static groovy.test.GroovyAssert.*
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Integration tests for PopulationSelectionList entity
  */
+@Integration
+@Rollback
 class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrationTestCase {
 
-    def CommunicationPopulationQuery globalTestPopulationQuery
     def selfServiceBannerAuthenticationProvider
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-
-        globalTestPopulationQuery = newPopulation().save()
     }
 
 
@@ -39,10 +46,15 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
 
     @Test
     void testCreatePopulationSelectionList() {
-        def populationSelectionList = newPopulationSelectionList()
+        def populationSelectionList = new CommunicationPopulationSelectionList()
         populationSelectionList.save(failOnError: true, flush: true)
 
         // Assert domain values
@@ -52,7 +64,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
     @Test
     void testUpdatePopulationSelectionList() {
-        def populationSelectionList = newPopulationSelectionList()
+        def populationSelectionList = new CommunicationPopulationSelectionList()
         populationSelectionList.save(failOnError: true, flush: true)
 
         // Assert domain values
@@ -77,7 +89,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
     @Test
     void testDeletePopulationSelectionList() {
-        def populationSelectionList = newPopulationSelectionList()
+        def populationSelectionList = new CommunicationPopulationSelectionList()
         populationSelectionList.save(failOnError: true, flush: true)
 
         // Assert domain values
@@ -99,7 +111,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
     @Test
     void testMaxSizeValidationFailure() {
-        def populationSelectionList = newPopulationSelectionList()
+        def populationSelectionList = new CommunicationPopulationSelectionList()
 
         // Set domain values to exceed maximum allowed length
 
@@ -118,7 +130,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
 
     @Test
     void testOptimisticLock() {
-        def populationSelectionList = newPopulationSelectionList()
+        def populationSelectionList = new CommunicationPopulationSelectionList()
         populationSelectionList.save(failOnError: true, flush: true)
         assertNotNull populationSelectionList?.id
 
@@ -127,7 +139,7 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("UPDATE gcrslis SET gcrslis_version = 999 WHERE gcrslis_surrogate_id = ?", [populationSelectionList.id])
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         // Update the entity
@@ -135,36 +147,6 @@ class CommunicationPopulationSelectionListIntegrationTests extends BaseIntegrati
         shouldFail(HibernateOptimisticLockingFailureException) {
             populationSelectionList.save(failOnError: true, flush: true)
         }
-    }
-
-
-    private def newPopulationSelectionList() {
-        def populationSelectionList = new CommunicationPopulationSelectionList(
-                // Required fields
-                // Nullable fields
-                executedsql: ""
-        )
-
-        return populationSelectionList
-    }
-
-
-    private def newPopulation() {
-        def populationQuery = new CommunicationPopulationQuery(
-                // Required fields
-                folder: CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(),
-                createDate: new Date(),
-                createdBy: "TTTTTTTTTT",
-                name: "TTTTTTTTTT",
-                changesPending: true,
-
-                // Nullable fields
-                description: "TTTTTTTTTT",
-                queryString: "",
-                syntaxErrors: "TTTTTTTTTT",
-        )
-
-        return populationQuery
     }
 
 }

@@ -3,6 +3,8 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.letter
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -13,6 +15,8 @@ import org.junit.Test
  * Tests basic CRUD operations on an CommunicationLetterTemplate entity object
  * and any field level validation.
  */
+@Integration
+@Rollback
 class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCase {
 
     def CommunicationFolder defaultFolder
@@ -22,12 +26,6 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        defaultFolder = new CommunicationFolder(
-            name: "default folder"
-        )
-        defaultFolder.save( failOnError: true, flush: true )
-        //Test if the generated entity now has an id assigned
-        assertNotNull defaultFolder.id
     }
 
     @After
@@ -36,8 +34,18 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
         logout()
     }
 
+    void setUpData(){
+        defaultFolder = new CommunicationFolder(
+                name: "default folder"
+        )
+        defaultFolder.save( failOnError: true, flush: true )
+        //Test if the generated entity now has an id assigned
+        assertNotNull defaultFolder.id
+    }
+
     @Test
     void testCreate() {
+        setUpData()
         CommunicationLetterTemplate template = new CommunicationLetterTemplate(
             name: "create test",
             createdBy: 'MIKE',
@@ -55,6 +63,7 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testUpdate() {
+        setUpData()
         CommunicationLetterTemplate template = new CommunicationLetterTemplate(
                 name: "update test",
                 description: "description",
@@ -79,6 +88,7 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
 
     @Test
     void testDelete() {
+        setUpData()
         int templateCount = CommunicationLetterTemplate.findAll().size()
 
         CommunicationLetterTemplate template = new CommunicationLetterTemplate(

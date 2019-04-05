@@ -3,6 +3,10 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.merge
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.general.communication.field.CommunicationField
 import net.hedtech.banner.general.communication.field.CommunicationFieldStatus
 import net.hedtech.banner.general.communication.field.CommunicationFieldView
@@ -19,83 +23,62 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 
+@Integration
+@Rollback
 class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationRecipientDataService
     def communicationTemplateMergeService
     def communicationPopulationQueryCompositeService
     def communicationPopulationQueryExecutionService
-    def communicationPopulationSelectionListService
     def communicationFieldCalculationService
     def communicationFieldService
     def selfServiceBannerAuthenticationProvider
     def communicationOrganizationCompositeService
-    def communicationTemplateService
     def communicationEmailTemplateService
     def communicationPopulationCompositeService
     def communicationParameterService
 
     def CommunicationFolder validFolder
     def CommunicationEmailTemplate emailTemplate
-    def CommunicationField field1
-    def CommunicationRecipientData recipientData
-
-    def String validImmutableId
-    def i_valid_emailTemplate_active = true
 
     def i_valid_emailTemplate_bccList = """Valid Emailtemplate Bcclist"""
-    def i_invalid_emailTemplate_bccList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_ccList = """Valid Emailtemplate Cclist"""
-    def i_invalid_emailTemplate_ccList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_content = """Valid Emailtemplate Content  \$PersonName\$"""
 
     def i_valid_emailTemplate_createDate = new Date()
 
     def i_valid_emailTemplate_createdBy = """Valid EmailTemplate createdBy"""
-    def i_invalid_emailTemplate_createdBy = """Valid EmailTemplate createdBy""".padLeft( 31 )
 
     def i_valid_emailTemplate_dataOrigin = """Valid Emailtemplate Dataorigin"""
-    def i_invalid_emailTemplate_dataOrigin = "XE Communication Manager".padLeft( 31 )
 
     def i_valid_emailTemplate_description = """Valid Template Description"""
-    def i_invalid_emailTemplate_description = """Valid Template Description""".padLeft( 4001 )
 
     def i_valid_emailTemplate_fromList = """Valid Emailtemplate Fromlist"""
-    def i_invalid_emailTemplate_fromList = "foo@bar.com".padLeft( 1021 )
-
-    def i_valid_emailTemplate_lastModified = new Date()
-
-    def i_valid_emailTemplate_lastModifiedBy = """Valid Emailtemplate Lastmodifiedby"""
-    def i_invalid_emailTemplate_lastModifiedBy = "BCMUSER".padLeft( 31 )
 
     def i_valid_emailTemplate_name = """Valid Name"""
-    def i_invalid_emailTemplate_name = """Valid Name""".padLeft( 2049 )
 
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_personal = true
     def i_valid_emailTemplate_published = true
 
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
-    def i_invalid_emailTemplate_subject = """You're a winner!""".padLeft( 1021 )
 
     def i_valid_emailTemplate_toList = """Valid Emailtemplate Tolist"""
-    def i_invalid_emailTemplate_toList = "foo@bar.com".padLeft( 1021 )
 
     def i_valid_emailTemplate_validFrom = new Date()-200
     def i_valid_emailTemplate_validTo = new Date()+200
-
-    def i_valid_folder_description = "Valid older description"
-    def i_valid_folder_internal = true
-    def i_valid_folder_name1 = "Valid Folder1 Name"
-    def i_valid_folder_name2 = "Valid Folder2 Name"
 
     def CommunicationPopulationQuery validQuery
     def CommunicationField validField1
@@ -108,10 +91,26 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( auth )
+    }
 
 
+    @After
+    public void tearDown() {
+        super.tearDown()
+        logout()
+    }
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
         /* Create folder to hold things */
         validFolder = newValidForCreateFolder( "Test Folder" )
         validFolder.save( failOnError: true, flush: true )
@@ -152,7 +151,7 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         assertEquals CommunicationFieldStatus.PRODUCTION,validField1.status
 
         /* create a template */
-        validTemplate = communicationEmailTemplateService.create( [domainModel: newValidForCreateEmailTemplate( validFolder )] )
+        validTemplate = communicationEmailTemplateService.create( newValidForCreateEmailTemplate( validFolder ) )
         assertNotNull( validTemplate.id )
 
         /* Create an organization */
@@ -163,20 +162,11 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         } else {
             organization = communicationOrganizationCompositeService.createOrganization(organization)
         }
-
     }
-
-
-    @After
-    public void tearDown() {
-        super.tearDown()
-        logout()
-    }
-
 
     @Test
     void testCreateCommunicationRecipientDataFromTemplate() {
-
+        setUpData()
         //execute the query to get a population
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulationFromQuery( validQuery.id, "TEST NAME", "TEST DESC" )
         CommunicationPopulationCalculation populationCalculation = CommunicationPopulationCalculation.findLatestByPopulationIdAndCalculatedBy(population.id, getUser())
@@ -200,12 +190,12 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
         CommunicationField tempField
         def testCommunicationField = newCommunicationField(validFolder, "firstname", "\$firstname\$",
                 "George", "Select spriden_first_name firstname from spriden where spriden_pidm = :pidm and spriden_change_ind is null")
-        tempField = communicationFieldService.create([domainModel: testCommunicationField])
+        tempField = communicationFieldService.create(testCommunicationField)
         assertNotNull tempField.immutableId
 
         testCommunicationField = newCommunicationField(validFolder, "lastname", "\$lastname\$",
                 "George", "Select spriden_last_name lastname from spriden where spriden_pidm = :pidm and spriden_change_ind is null")
-        tempField = communicationFieldService.create([domainModel: testCommunicationField])
+        tempField = communicationFieldService.create(testCommunicationField)
         assertNotNull tempField.immutableId
 
         // get all the fields from the template
@@ -377,7 +367,6 @@ class CommunicationRecipientDataServiceIntegrationTests extends BaseIntegrationT
                 renderAsHtml: true,
                 ruleUri: null,
                 status: CommunicationFieldStatus.PRODUCTION,
-                statmentType: CommunicationRuleStatementType.SQL_PREPARED_STATEMENT,
                 ruleContent: ruleContent
         )
 

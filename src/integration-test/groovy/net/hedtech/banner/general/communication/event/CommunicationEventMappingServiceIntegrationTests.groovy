@@ -17,10 +17,19 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import grails.testing.mixin.integration.Integration
+import grails.gorm.transactions.Rollback
+import grails.util.GrailsWebMockUtil
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
+import grails.web.servlet.context.GrailsWebApplicationContext
 
 /**
  * Tests crud methods provided by event mapping service.
  */
+@Integration
+@Rollback
 class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationEventMappingService
@@ -35,6 +44,8 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
     }
@@ -46,6 +57,11 @@ class CommunicationEventMappingServiceIntegrationTests extends BaseIntegrationTe
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
 
     @Test
     void testList() {

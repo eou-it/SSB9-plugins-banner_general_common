@@ -3,6 +3,8 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
 import net.hedtech.banner.testing.BaseIntegrationTestCase
@@ -10,6 +12,8 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import static org.junit.Assert.*
 import org.junit.*
 
+@Integration
+@Rollback
 class CommunicationStringTemplateErrorListenerIntegrationTests extends BaseIntegrationTestCase {
 
     def communicationTemplateMergeService
