@@ -222,7 +222,7 @@ class CommunicationPopulationCompositeService {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService.class, e )
         } finally {
             if(closeConnection) {
-                sql?.close()
+                //sql?.close()
             }
         }
         results.population = population
@@ -328,7 +328,7 @@ class CommunicationPopulationCompositeService {
         } catch (Throwable t) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationPopulationCompositeService, t )
         } finally {
-            sql?.close()
+            //sql?.close()
         }
 
         if (!population.changesPending) {
