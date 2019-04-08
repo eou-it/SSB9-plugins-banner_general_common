@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.system.Term
 import javax.persistence.*
 
@@ -21,6 +22,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "SSRXLST")
 @EqualsAndHashCode(includeFields = true)
+@ToString(includeNames = true, includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "SectionCrossListSection.fetchByTermAndXlstGroup",
 query = """FROM  SectionCrossListSection a
@@ -110,19 +112,6 @@ class SectionCrossListSection implements Serializable {
             sectionCrossListSections = session.getNamedQuery('SectionCrossListSection.fetchByTermAndCourseReferenceNumber').setString('term', termCode).setString('courseReferenceNumber', courseReferenceNumber).list()
         }
         return sectionCrossListSections
-    }
-
-
-    public String toString() {
-        """SectionCrossListSection[
-					id=$id, 
-					xlstGroup=$xlstGroup, 
-					courseReferenceNumber=$courseReferenceNumber, 
-					lastModified=$lastModified, 
-					version=$version, 
-					lastModifiedBy=$lastModifiedBy, 
-					dataOrigin=$dataOrigin, 
-					term=$term]"""
     }
 
 
