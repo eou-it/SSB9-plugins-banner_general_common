@@ -1,9 +1,10 @@
 /*********************************************************************************
-  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import net.hedtech.banner.general.system.Term
 import javax.persistence.*
 
@@ -21,6 +22,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "SSRXLST")
 @EqualsAndHashCode(includeFields = true)
+@ToString(includeNames = true, includeFields = true)
 @NamedQueries(value = [
 @NamedQuery(name = "SectionCrossListSection.fetchByTermAndXlstGroup",
 query = """FROM  SectionCrossListSection a
@@ -47,11 +49,11 @@ class SectionCrossListSection implements Serializable {
     /**
      * Cross List Group Identifier Number.
      */
-    @Column(name = "SSRXLST_XLST_GROUP", nullable = false, length = 2)
+    @Column(name = "SSRXLST_XLST_GROUP", nullable = false)
     String xlstGroup
 
     /**
-     * Corss List Section CRN.
+     * Cross List Section CRN.
      */
     @Column(name = "SSRXLST_CRN", nullable = false, length = 5)
     String courseReferenceNumber
@@ -113,21 +115,8 @@ class SectionCrossListSection implements Serializable {
     }
 
 
-    public String toString() {
-        """SectionCrossListSection[
-					id=$id, 
-					xlstGroup=$xlstGroup, 
-					courseReferenceNumber=$courseReferenceNumber, 
-					lastModified=$lastModified, 
-					version=$version, 
-					lastModifiedBy=$lastModifiedBy, 
-					dataOrigin=$dataOrigin, 
-					term=$term]"""
-    }
-
-
     static constraints = {
-        xlstGroup(nullable: false, maxSize: 2)
+        xlstGroup(nullable: false, maxSize: 15)
         courseReferenceNumber(nullable: false, maxSize: 5)
         lastModified(nullable: true)
         lastModifiedBy(nullable: true, maxSize: 30)
