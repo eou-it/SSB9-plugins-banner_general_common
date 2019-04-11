@@ -49,13 +49,13 @@ class SectionCrossListSection implements Serializable {
     /**
      * Cross List Group Identifier Number.
      */
-    @Column(name = "SSRXLST_XLST_GROUP", nullable = false)
+    @Column(name = "SSRXLST_XLST_GROUP")
     String xlstGroup
 
     /**
      * Cross List Section CRN.
      */
-    @Column(name = "SSRXLST_CRN", nullable = false, length = 5)
+    @Column(name = "SSRXLST_CRN")
     String courseReferenceNumber
 
     /**
@@ -69,19 +69,19 @@ class SectionCrossListSection implements Serializable {
      * Version column which is used as a optimistic lock token for SSRXLST
      */
     @Version
-    @Column(name = "SSRXLST_VERSION", length = 19)
+    @Column(name = "SSRXLST_VERSION")
     Long version
 
     /**
      * Last Modified By column for SSRXLST
      */
-    @Column(name = "SSRXLST_USER_ID", length = 30)
+    @Column(name = "SSRXLST_USER_ID")
     String lastModifiedBy
 
     /**
      * Data Origin column for SSRXLST
      */
-    @Column(name = "SSRXLST_DATA_ORIGIN", length = 30)
+    @Column(name = "SSRXLST_DATA_ORIGIN")
     String dataOrigin
 
     /**
