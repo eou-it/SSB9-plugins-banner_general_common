@@ -58,7 +58,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testCreateValidOrganization() {
-        cleanUp()
+//        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.isAvailable = true
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
@@ -77,7 +77,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testDelete() {
-        cleanUp()
+//        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -90,7 +90,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testUpdate() {
-        cleanUp()
+//        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.save()
         //Test if the generated entity now has an id assigned
@@ -119,7 +119,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testPassword() {
-        cleanUp()
+//        cleanUp()
         def organization = newValidForCreateOrganization()
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive )
         def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send )
@@ -141,7 +141,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testCreateInValidOrganization() {
-        cleanUp()
+//        cleanUp()
         def organization = newValidForCreateOrganization()
 
         organization = newValidForCreateOrganization()
@@ -157,7 +157,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testFetchMailBoxAccountByOrganizationId() {
-        cleanUp()
+//        cleanUp()
         def mbxInitialCount =   CommunicationMailboxAccount.findAll()?.size()
         def organization = newValidForCreateOrganization()
         organization.senderMailboxAccount = newCommunicationMailBox(CommunicationMailboxAccountType.Sender )
@@ -171,7 +171,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
 
     @Test
     void testList() {
-        cleanUp()
+//        cleanUp()
         def organization = newValidForCreateOrganization()
         organization.senderMailboxAccount = newCommunicationMailBox( CommunicationMailboxAccountType.Sender )
         organization.save(failOnError: true, flush: true)
@@ -211,8 +211,7 @@ class CommunicationOrganizationIntegrationTests extends BaseIntegrationTestCase 
     }
 
 
-    private
-    def newCommunicationMailBox(CommunicationMailboxAccountType communicationMailboxAccountType) {
+    private def newCommunicationMailBox(CommunicationMailboxAccountType communicationMailboxAccountType) {
 
 
         def communicationMailboxAccount = new CommunicationMailboxAccount(

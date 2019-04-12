@@ -19,7 +19,7 @@ import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.general.GeneralCommonUtility
 import groovy.sql.Sql
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
-
+import static groovy.test.GroovyAssert.*
 import java.text.SimpleDateFormat
 
 
@@ -155,7 +155,7 @@ class PinQuestionIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( "update GV_GOBQSTN set GOBQSTN_VERSION = 999 where GOBQSTN_SURROGATE_ID = ?", [ pinQuestion.id ] )
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

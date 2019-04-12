@@ -120,7 +120,7 @@ class CommonMatchingDisplayOptionIntegrationTests extends BaseIntegrationTestCas
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GV_GORCMDO set GORCMDO_VERSION = 999 where GORCMDO_SURROGATE_ID = ?", [commonMatchingDisplayOption.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

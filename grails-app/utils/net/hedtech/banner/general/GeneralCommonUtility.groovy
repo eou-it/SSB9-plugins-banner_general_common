@@ -102,8 +102,8 @@ class GeneralCommonUtility {
             sql = new Sql(connection)
             sql.eachRow("select sysdate from dual", { systemDate = it.sysdate })
         } finally {
-            if (sql) sql.close()
-            if (connection) connection.close()
+//            if (sql) sql.close()
+//            if (connection) connection.close()
         }
 
         return systemDate
@@ -153,7 +153,7 @@ class GeneralCommonUtility {
                 statusFlag = EXPIRED_PIN
             }
         } finally {
-            connection.close()
+            //connection.close()
         }
         return statusFlag
     }

@@ -87,7 +87,7 @@ class IntegrationPartnerSystemRuleIntegrationTests extends BaseIntegrationTestCa
             sql.executeUpdate("update gv_gorintg set gorintg_VERSION = 999, gorintg_data_origin = 'Margy'  where GORINTG_SURROGATE_ID = ${integrationPartnerSystemRule.id}")
 
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
         //Try to update the entity

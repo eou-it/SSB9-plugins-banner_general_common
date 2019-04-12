@@ -93,7 +93,7 @@ class SqlProcessCompositeServiceIntegrationTests extends BaseIntegrationTestCase
             testData = db.rows("SELECT SPRIDEN_PIDM, SPRIDEN_ID FROM SPRIDEN where SPRIDEN_ID in ('STUAFR251', 'STUAFR252', 'STUAFR253')")
         }
         finally {
-            db?.close()
+//            db?.close()
         }
 
         // Create three identical processes that act on a pidm. It will return the spriden_id of the person with the pidm

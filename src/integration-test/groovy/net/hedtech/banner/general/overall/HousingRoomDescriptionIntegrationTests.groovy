@@ -14,6 +14,7 @@ import net.hedtech.banner.general.system.*
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import static groovy.test.GroovyAssert.*
 
 @Integration
 @Rollback
@@ -350,7 +351,7 @@ class HousingRoomDescriptionIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update SV_SLBRDEF set SLBRDEF_VERSION = 999 where SLBRDEF_SURROGATE_ID = ?", [housingRoomDescription.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
         //Try to update the entity

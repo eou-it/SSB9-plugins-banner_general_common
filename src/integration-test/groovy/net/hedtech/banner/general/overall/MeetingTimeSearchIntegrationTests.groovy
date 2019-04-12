@@ -12,6 +12,7 @@ import org.junit.After
 
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.jdbc.UncategorizedSQLException
+import static groovy.test.GroovyAssert.*
 
 @Integration
 @Rollback

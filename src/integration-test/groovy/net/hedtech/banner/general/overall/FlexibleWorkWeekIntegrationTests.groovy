@@ -11,6 +11,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import static groovy.test.GroovyAssert.*
 
 /**
  * Integration tests for FlexibleWorkWeek entity
@@ -158,7 +159,7 @@ class FlexibleWorkWeekIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("UPDATE gurfwwk SET gurfwwk_version = 999 WHERE gurfwwk_surrogate_id = ?", [fww.id])
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         // Update the entity

@@ -74,7 +74,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCreateInvalidCommonMatchingSourceRule() {
-        def commonMatchingSource = new CommonMatchingSourceRule(code: i_success_commonMatchingSource)
+        def commonMatchingSource = new CommonMatchingSourceRule(entity: "X")
         shouldFail(ValidationException) {
             commonMatchingSource.save(failOnError: true, flush: true)
         }
@@ -151,7 +151,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GV_GORCMSC set GORCMSC_VERSION = 999 where GORCMSC_SURROGATE_ID = ?", [commonMatchingSourceRule.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
         commonMatchingSourceRule.entity = "C"
@@ -175,7 +175,7 @@ class CommonMatchingSourceRuleIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testValidation() {
-        def commonMatchingSourceRule = new CommonMatchingSourceRule(code: i_success_commonMatchingSource)
+        def commonMatchingSourceRule = new CommonMatchingSourceRule(entity: "X")
         assertFalse "CommonMatchingSourceRule could not be validated as expected due to ${commonMatchingSourceRule.errors}", commonMatchingSourceRule.validate()
     }
 

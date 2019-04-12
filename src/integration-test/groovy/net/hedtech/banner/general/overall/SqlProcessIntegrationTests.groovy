@@ -9,7 +9,7 @@ import net.hedtech.banner.general.GeneralCommonUtility
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
+import static groovy.test.GroovyAssert.*
 import grails.validation.ValidationException
 import groovy.sql.Sql
 import java.text.SimpleDateFormat
@@ -88,7 +88,6 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
-        initializeTestDataForReferences()
     }
 
     //This method is used to initialize test data for references.
@@ -128,6 +127,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testCreateValidSqlProcess() {
+        initializeTestDataForReferences()
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
         //Test if the generated entity now has an id assigned
@@ -146,6 +146,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testUpdateValidSqlProcess() {
+        initializeTestDataForReferences()
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
         assertNotNull sqlProcess.id
@@ -190,6 +191,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testUpdateInvalidSqlProcess() {
+        initializeTestDataForReferences()
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
         assertNotNull sqlProcess.id
@@ -224,6 +226,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testDates() {
+        initializeTestDataForReferences()
         def time = new SimpleDateFormat('HHmmss')
         def hour = new SimpleDateFormat('HH')
         def date = new SimpleDateFormat('yyyy-M-d')
@@ -252,6 +255,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testOptimisticLock() {
+        initializeTestDataForReferences()
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
 
@@ -260,7 +264,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GORRSQL set GORRSQL_VERSION = 999 where GORRSQL_SURROGATE_ID = ?", [sqlProcess.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity
@@ -281,6 +285,7 @@ class SqlProcessIntegrationTests extends BaseIntegrationTestCase {
 
     @Test
     void testDeleteSqlProcess() {
+        initializeTestDataForReferences()
         def sqlProcess = newValidForCreateSqlProcess()
         sqlProcess.save(failOnError: true, flush: true)
         def id = sqlProcess.id

@@ -137,7 +137,7 @@ class HousingRoomAttributesDefinitionIntegrationTests extends BaseIntegrationTes
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update SLRRDEF set SLRRDEF_VERSION = 999 where SLRRDEF_SURROGATE_ID = ?", [housingRoomAttributesDefinition.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

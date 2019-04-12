@@ -36,10 +36,6 @@ class CommunicationRecipientDataIntegrationTests extends BaseIntegrationTestCase
     def i_valid_emailTemplate_fromList = """Valid Emailtemplate Fromlist"""
     def i_valid_emailTemplate_subject = """Valid Emailtemplate Subject"""
     def i_valid_emailTemplate_toList = """Valid Emailtemplate Tolist"""
-    def i_valid_emailTemplate_lastModifiedBy = """Valid Emailtemplate Lastmodifiedby"""
-    def i_valid_emailTemplate_lastModified = new Date()
-    def i_valid_emailTemplate_dataOrigin = """Valid Emailtemplate Dataorigin"""
-    def i_valid_emailTemplate_active = true
     def i_valid_emailTemplate_oneOff = true
     def i_valid_emailTemplate_published = true
     def i_valid_emailTemplate_validFrom = new Date()

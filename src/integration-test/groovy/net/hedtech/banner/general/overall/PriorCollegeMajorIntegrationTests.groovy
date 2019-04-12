@@ -15,6 +15,7 @@ import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import java.text.SimpleDateFormat
+import static groovy.test.GroovyAssert.*
 
 @Integration
 @Rollback

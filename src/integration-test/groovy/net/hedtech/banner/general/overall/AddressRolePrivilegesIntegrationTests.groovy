@@ -15,6 +15,7 @@ import groovy.sql.Sql
 import net.hedtech.banner.general.system.AddressType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
+import static groovy.test.GroovyAssert.*
 
 /**
  * Tests for AddressRolePrivileges
@@ -103,7 +104,7 @@ class AddressRolePrivilegesIntegrationTests  extends BaseIntegrationTestCase{
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GORADRL set GORADRL_VERSION = 999 where GORADRL_SURROGATE_ID = ?", [myPriv.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
         myPriv.role = i_success_role + "l"

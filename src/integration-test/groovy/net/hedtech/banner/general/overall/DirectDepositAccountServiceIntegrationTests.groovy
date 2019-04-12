@@ -943,6 +943,8 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
         def bankRoutingInfo = new BankRoutingInfo()
 
         bankRoutingInfo.bankRoutingNum = 234798944
+        bankRoutingInfo.bankName = "TTTTT"
+        bankRoutingInfo.save( failOnError: true, flush: true )
 
         def domain = new DirectDepositAccount(
             pidm: pidm,

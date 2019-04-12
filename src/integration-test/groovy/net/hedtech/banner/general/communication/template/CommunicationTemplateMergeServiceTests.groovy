@@ -112,7 +112,7 @@ class CommunicationTemplateMergeServiceTests extends BaseIntegrationTestCase {
         folder2.save( failOnError: true, flush: true )
         //Test if the generated entity now has an id assigned
         assertNotNull folder2.id
-        cleanUp()
+//        cleanUp()
         i_valid_Organization = createNewCommunicationOrganization()
         i_valid_pidm = (PersonIdentificationNameCurrent.fetchByBannerId('STUAFR001')).pidm
     }

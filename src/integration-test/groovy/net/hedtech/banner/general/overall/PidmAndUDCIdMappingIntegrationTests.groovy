@@ -15,7 +15,7 @@ import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
-
+import static groovy.test.GroovyAssert.*
 import java.text.SimpleDateFormat
 
 @Integration
@@ -44,7 +44,6 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-        initializeTestDataForReferences()
     }
 
     //This method is used to initialize test data for references.
@@ -160,7 +159,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GV_GOBUMAP set GOBUMAP_VERSION = 999 where GOBUMAP_SURROGATE_ID = ?", [pidmAndUDCIdMapping.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity
@@ -239,6 +238,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 	
 
     private def newValidForCreatePidmAndUDCIdMapping() {
+        initializeTestDataForReferences()
         def pidmAndUDCIdMapping = new PidmAndUDCIdMapping(
             udcId: i_success_udcId,
             pidm: i_success_pidm,
@@ -249,6 +249,7 @@ class PidmAndUDCIdMappingIntegrationTests extends BaseIntegrationTestCase {
 
 
     private def newMultipleValidForCreatePidmAndUDCIdMapping() {
+        initializeTestDataForReferences()
         def pidmAndUDCIdMappings = []
         pidmAndUDCIdMappings.add(newValidForCreatePidmAndUDCIdMapping())
         pidmAndUDCIdMappings.add(new PidmAndUDCIdMapping(

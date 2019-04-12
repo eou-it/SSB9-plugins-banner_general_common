@@ -259,7 +259,7 @@ class SectionCrossListSectionServiceIntegrationTests extends BaseIntegrationTest
             foundCrn = sql.firstRow("select ssbsect_crn from ssbsect where ssbsect_crn = ? and ssbsect_term_code = ?", [crn, term])
 
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         return foundCrn
     }

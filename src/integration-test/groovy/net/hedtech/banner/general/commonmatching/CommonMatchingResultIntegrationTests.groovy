@@ -184,7 +184,7 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
             }
         }
         finally {
-            sql?.close()
+//            sql?.close()
         }
 
     }
@@ -264,7 +264,7 @@ class CommonMatchingResultIntegrationTests extends BaseIntegrationTestCase {
             }
         }
         finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 }

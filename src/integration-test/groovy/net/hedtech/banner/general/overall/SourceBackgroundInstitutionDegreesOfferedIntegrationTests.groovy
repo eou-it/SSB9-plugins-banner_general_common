@@ -11,7 +11,7 @@ import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
+import static groovy.test.GroovyAssert.*
 import grails.validation.ValidationException
 import net.hedtech.banner.general.system.Degree
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution

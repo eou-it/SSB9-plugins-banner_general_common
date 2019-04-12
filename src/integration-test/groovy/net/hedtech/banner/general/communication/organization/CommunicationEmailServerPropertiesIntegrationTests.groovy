@@ -49,7 +49,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testCreateCommunicationEmailServerProperties() {
-        cleanUp()
+//        cleanUp()
         def receiveProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         def sendProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
         receiveProperties.save(failOnError: true, flush: true)
@@ -74,7 +74,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testUpdateCommunicationEmailServerProperties() {
-        cleanUp()
+//        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Send)
         communicationEmailServerProperties.save(failOnError: true, flush: true)
 
@@ -103,7 +103,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testDeleteCommunicationEmailServerProperties() {
-        cleanUp()
+//        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         communicationEmailServerProperties.save(failOnError: true, flush: true)
 
@@ -126,7 +126,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testNullValidationFailure() {
-        cleanUp()
+//        cleanUp()
         // Instantiate an empty domain
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         // TODO: implement these assertions
@@ -149,7 +149,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testMaxSizeValidationFailure() {
-        cleanUp()
+//        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
 
         // Set domain values to exceed maximum allowed length
@@ -168,7 +168,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
 
     @Test
     void testOptimisticLock() {
-        cleanUp()
+//        cleanUp()
         def communicationEmailServerProperties = newCommunicationEmailServerProperties(CommunicationEmailServerPropertiesType.Receive)
         communicationEmailServerProperties.save(failOnError: true, flush: true)
         assertNotNull communicationEmailServerProperties?.id
@@ -178,7 +178,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("UPDATE gcbsprp SET gcbsprp_version = 999 WHERE gcbsprp_surrogate_id = ?", [communicationEmailServerProperties.id])
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         // Update the entity

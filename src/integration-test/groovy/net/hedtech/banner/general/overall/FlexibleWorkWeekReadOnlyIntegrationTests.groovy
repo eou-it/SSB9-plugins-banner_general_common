@@ -10,6 +10,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.springframework.jdbc.UncategorizedSQLException
+import static groovy.test.GroovyAssert.*
 
 /**
  * Integration tests for FlexibleWorkWeekReadOnly entity

@@ -9,7 +9,7 @@ import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
+import static groovy.test.GroovyAssert.*
 import java.text.SimpleDateFormat
 import org.springframework.dao.InvalidDataAccessResourceUsageException
 

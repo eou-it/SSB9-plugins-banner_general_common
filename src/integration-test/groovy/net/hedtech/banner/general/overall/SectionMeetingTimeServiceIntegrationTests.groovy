@@ -9,7 +9,6 @@ import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import net.hedtech.banner.general.system.*
@@ -602,7 +601,7 @@ class SectionMeetingTimeServiceIntegrationTests extends BaseIntegrationTestCase 
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate(isql)
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
 
 

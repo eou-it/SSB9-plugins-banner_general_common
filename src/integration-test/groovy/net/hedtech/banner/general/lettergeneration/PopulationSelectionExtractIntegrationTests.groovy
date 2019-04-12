@@ -184,7 +184,7 @@ class PopulationSelectionExtractIntegrationTests extends BaseIntegrationTestCase
             sql.executeUpdate("update GLBEXTR set GLBEXTR_VERSION = 999 where GLBEXTR_SURROGATE_ID = ?", [letterGenerationPopulationSelectionExtract.id])
         }
         finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

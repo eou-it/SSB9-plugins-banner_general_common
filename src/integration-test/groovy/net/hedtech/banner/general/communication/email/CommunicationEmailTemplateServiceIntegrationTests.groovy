@@ -3,10 +3,15 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.email
 
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationManagementTestingSupport
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -74,6 +79,8 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
     }
@@ -86,8 +93,12 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     }
 
     void setUpFolderData() {
-        folder1 = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
-        folder2 = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+        if(!folder1) {
+            folder1 = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+        }
+        if(!folder2) {
+            folder2 = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave()
+        }
     }
 
     void setUpData() {
@@ -101,12 +112,16 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         i_valid_emailTemplate_validFrom = c.getTime()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
     @Test
     void testCreateTemplate() {
-        setUpFolderData()
-        System.err.println(folder1)
         def originalListCount = communicationTemplateService.list().size()
-        def template = newValidForCreateEmailTemplate(folder1)
+        def template = newValidForCreateEmailTemplate()
         def newTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
         assertNotNull newTemplate.createDate
@@ -123,9 +138,8 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
     //
     @Test
     void testPublishTemplate() {
-        setUpFolderData()
         def originalListCount = communicationTemplateService.list().size()
-        def template = newValidForCreateEmailTemplate(folder1)
+        def template = newValidForCreateEmailTemplate()
         def newTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
         assertNotNull newTemplate.createDate
@@ -154,8 +168,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Test
     void testUpdateTemplate() {
-        setUpFolderData()
-        def template = newValidForCreateEmailTemplate(folder1)
+        def template = newValidForCreateEmailTemplate()
         def newTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the generated entity now has an id assigned
         assertNotNull newTemplate.id
@@ -163,7 +176,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         def updatedTemplate = communicationEmailTemplateService.update([domainModel: newTemplate])
         assertEquals("Updated description", updatedTemplate.description)
 
-        def template2 = newValidForCreateEmailTemplate(folder2)
+        def template2 = newValidForCreateEmailTemplate()
 
         def newTemplate2 = communicationEmailTemplateService.create([domainModel: template2])
         //Test if the generated entity now has an id assigned
@@ -180,8 +193,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Test
     void testUpdateTemplateFolder() {
-        setUpFolderData()
-        def template = newValidForCreateEmailTemplate(folder1)
+        def template = newValidForCreateEmailTemplate()
         def newTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the generated entity now has an id assigned
         assertNotNull newTemplate.id
@@ -193,9 +205,8 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Test
     void testDeleteTemplate() {
-        setUpFolderData()
         def originalListCount = communicationTemplateService.list().size()
-        def template = newValidForCreateEmailTemplate(folder1)
+        def template = newValidForCreateEmailTemplate()
         def createdTemplate = communicationEmailTemplateService.create([domainModel: template])
         //Test if the generated entity now has an id assigned
         assertNotNull createdTemplate.id
@@ -212,48 +223,48 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
 
     @Test
     void testCreateInValidCommunicationTemplate() {
-        setUpFolderData()
-        def communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        def communicationTemplate = newValidForCreateEmailTemplate()
 
         communicationTemplate.name = i_invalid_emailTemplate_name
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.description = i_invalid_emailTemplate_description
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.bccList = i_invalid_emailTemplate_bccList
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.ccList = i_invalid_emailTemplate_ccList
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.createdBy = i_invalid_emailTemplate_createdBy
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.dataOrigin = i_invalid_emailTemplate_dataOrigin
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.fromList = i_invalid_emailTemplate_fromList
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.subject = i_invalid_emailTemplate_subject
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
-        communicationTemplate = newValidForCreateEmailTemplate(folder1)
+        communicationTemplate = newValidForCreateEmailTemplate()
         communicationTemplate.toList = i_invalid_emailTemplate_toList
         shouldFail { communicationTemplate.save(failOnError: true, flush: true) }
 
 
     }
 
-    private def newValidForCreateEmailTemplate(CommunicationFolder folder) {
+    private def newValidForCreateEmailTemplate() {
+        setUpFolderData()
         setUpData()
         def communicationTemplate = new CommunicationEmailTemplate(
                 description: i_valid_emailTemplate_description,

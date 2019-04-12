@@ -163,7 +163,7 @@ class DirectoryAddressIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( "update GORDADD set GORDADD_VERSION = 999 where GORDADD_SURROGATE_ID = ?", [ directoryAddress.id ] )
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

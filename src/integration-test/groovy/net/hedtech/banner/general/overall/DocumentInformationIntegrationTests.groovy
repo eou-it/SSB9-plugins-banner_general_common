@@ -17,7 +17,7 @@ import net.hedtech.banner.general.system.VisaSource
 import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
-
+import static groovy.test.GroovyAssert.*
 import java.text.SimpleDateFormat
 
 @Integration
@@ -141,7 +141,7 @@ class DocumentInformationIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GORDOCM set GORDOCM_VERSION = 999 where GORDOCM_SURROGATE_ID = ?", [documentInformation.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

@@ -59,7 +59,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testList() {
-        cleanUp()
+//        cleanUp()
         long originalListCount = communicationOrganizationService.list().size()
         if (originalListCount == 0) {
             CommunicationOrganization organization = new CommunicationOrganization();
@@ -78,7 +78,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testCreate() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -110,7 +110,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testMobileSettings() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "Root"
         organization.description = "description"
@@ -143,7 +143,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testLargeInvalidPassword() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "Root"
         organization.description = "description"
@@ -173,7 +173,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testLargeValidPassword() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "Root"
         organization.description = "description"
@@ -201,7 +201,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testCreateMultiple() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -241,7 +241,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testUpdate() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization1 = new CommunicationOrganization()
         organization1.name = "organization1"
         organization1 = communicationOrganizationService.create(organization1)
@@ -259,7 +259,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testDelete() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization1 = new CommunicationOrganization();
         organization1.name = "test"
         organization1.description = "description"
@@ -286,7 +286,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testDeleteWithChildren() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
         organization.description = "description"
@@ -323,7 +323,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
     }
     @Test
     void testCreateWithServerSettings() {
-        cleanUp()
+//        cleanUp()
         def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
         CommunicationOrganization organization = new CommunicationOrganization()
         organization.name = "test"
@@ -347,7 +347,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testSetAndResetPassword() {
-        cleanUp()
+//        cleanUp()
         CommunicationOrganization organization = new CommunicationOrganization()
         def encryptedPassword = communicationMailboxAccountService.encryptPassword(clearTextPassword)
         organization.name = "test"
@@ -393,7 +393,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testPasswordEncryptAndDecrypt() {
-        cleanUp()
+//        cleanUp()
         def encryptedPassword = communicationOrganizationService.encryptPassword(clearTextPassword)
         def decryptedPassword = communicationOrganizationService.decryptPassword(encryptedPassword)
         assertEquals(clearTextPassword, decryptedPassword)
@@ -402,7 +402,7 @@ class CommunicationOrganizationServiceIntegrationTests extends BaseIntegrationTe
 
     @Test
     void testMaxPasswordEncryptAndDecrypt() {
-        cleanUp()
+//        cleanUp()
         def largepassword = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901"
         def encryptedPassword = communicationOrganizationService.encryptPassword(largepassword)
         def decryptedPassword = communicationOrganizationService.decryptPassword(encryptedPassword)

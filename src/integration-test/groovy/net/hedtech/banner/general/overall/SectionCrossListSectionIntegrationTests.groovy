@@ -9,7 +9,7 @@ import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
+import static groovy.test.GroovyAssert.*
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import groovy.sql.Sql
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
@@ -91,7 +91,7 @@ class SectionCrossListSectionIntegrationTests extends BaseIntegrationTestCase {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update SSRXLST set SSRXLST_VERSION = 999 where SSRXLST_SURROGATE_ID = ?", [sectionCrossListSection.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         sectionCrossListSection.xlstGroup = "UU"

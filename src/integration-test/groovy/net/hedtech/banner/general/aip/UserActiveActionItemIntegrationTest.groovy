@@ -106,7 +106,7 @@ class UserActiveActionItemIntegrationTest extends BaseIntegrationTestCase {
             return null;//Null will fail the assertion after this me
         }
         finally{
-            sqlObj.close()
+            //sqlObj.close()
         }
 
         return pidmValue

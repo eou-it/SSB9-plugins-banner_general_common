@@ -15,6 +15,7 @@ import net.hedtech.banner.general.system.Document
 import net.hedtech.banner.general.system.VisaSource
 import net.hedtech.banner.general.system.VisaType
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import static groovy.test.GroovyAssert.*
 
 @Integration
 @Rollback

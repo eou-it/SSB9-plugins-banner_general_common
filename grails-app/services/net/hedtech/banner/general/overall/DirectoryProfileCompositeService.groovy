@@ -245,7 +245,7 @@ class DirectoryProfileCompositeService {
             } catch (e) {
                 throw e
             } finally {
-                sql?.close()
+//                sql?.close()
             }
         }
 
@@ -306,7 +306,7 @@ class DirectoryProfileCompositeService {
                 } catch (e) {
                     throw e
                 } finally {
-                    sql?.close()
+//                    sql?.close()
                 }
             }
 
@@ -419,7 +419,7 @@ class DirectoryProfileCompositeService {
                 } catch (e) {
                     throw e
                 } finally {
-                    sql?.close()
+//                    sql?.close()
                 }
             }
 
@@ -458,7 +458,7 @@ class DirectoryProfileCompositeService {
                 } catch (e) {
                     throw e
                 } finally {
-                    sql?.close()
+//                    sql?.close()
                 }
             }
         } else if (InstitutionalDescription.fetchByKey()?.hrInstalled && tableExists('PTVORGN')) {
@@ -475,7 +475,7 @@ class DirectoryProfileCompositeService {
             } catch (e) {
                 throw e
             } finally {
-                sql?.close()
+//                sql?.close()
             }
         }
 
@@ -503,7 +503,7 @@ class DirectoryProfileCompositeService {
             } catch (e) {
                 throw e
             } finally {
-                sql?.close()
+//                sql?.close()
             }
         }
 
@@ -532,7 +532,7 @@ class DirectoryProfileCompositeService {
             } catch (e) {
                 throw e
             } finally {
-                sql?.close()
+//                sql?.close()
             }
         }
 
@@ -623,7 +623,7 @@ class DirectoryProfileCompositeService {
         } catch (e) {
             throw e
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         result != null

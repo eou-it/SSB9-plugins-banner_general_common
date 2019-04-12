@@ -11,7 +11,7 @@ import grails.testing.mixin.integration.Integration
 import org.junit.Before
 import org.junit.Test
 import org.junit.After
-
+import static groovy.test.GroovyAssert.*
 import grails.validation.ValidationException
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
@@ -134,7 +134,7 @@ class SourceBackgroundInstitutionDemographicIntegrationTests extends BaseIntegra
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update SORBDMO set SORBDMO_VERSION = 999 where SORBDMO_SURROGATE_ID = ?", [sourceBackgroundInstitutionDemographic.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

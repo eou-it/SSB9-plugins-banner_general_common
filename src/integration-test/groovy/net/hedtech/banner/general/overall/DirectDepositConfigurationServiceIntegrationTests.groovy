@@ -27,15 +27,13 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-
-        sql = new Sql(sessionFactory.getCurrentSession().connection())
     }
 
 
     @After
     public void tearDown() {
         super.tearDown()
-        sql?.close()
+//        sql?.close()
     }
 
 
@@ -118,7 +116,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         def params = [
                 [paramKey: "SYSTEM_NAME"]
         ]
-
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
         params.each {
             retParams.push directDepositConfigurationService.getParamFromWebTailor(sql, it)
         }
@@ -157,7 +155,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         def params = [
                 [paramKey: "SYSTEM_NAME", defaultValue: "default_val"]
         ]
-
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
         params.each {
             retParams.push directDepositConfigurationService.getParamFromWebTailor(sql, it)
         }
@@ -196,7 +194,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         def params = [
                 [paramKey: "key_does_not_exist", defaultValue: "default_val"]
         ]
-
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
         params.each {
             retParams.push directDepositConfigurationService.getParamFromWebTailor(sql, it)
         }
@@ -214,7 +212,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
                 [paramKey: "key_does_not_exist1", defaultValue: "default_val1"],
                 [paramKey: "key_does_not_exist2", defaultValue: "default_val2"]
         ]
-
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
         params.each {
             retParams.push directDepositConfigurationService.getParamFromWebTailor(sql, it)
         }
@@ -234,7 +232,7 @@ class DirectDepositConfigurationServiceIntegrationTests extends BaseIntegrationT
         def params = [
                 [paramKey: null]
         ]
-
+        sql = new Sql(sessionFactory.getCurrentSession().connection())
         params.each {
             retParams.push directDepositConfigurationService.getParamFromWebTailor(sql, it)
         }

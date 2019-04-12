@@ -141,7 +141,7 @@ class CommonMatchingSourcePriorityIntegrationTests extends BaseIntegrationTestCa
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update GV_GORCMSP set GORCMSP_VERSION = 999 where GORCMSP_SURROGATE_ID = ?", [commonMatchingSourcePriority.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

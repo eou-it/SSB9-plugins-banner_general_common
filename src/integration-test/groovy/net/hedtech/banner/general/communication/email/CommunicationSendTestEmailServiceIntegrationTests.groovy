@@ -4,6 +4,10 @@
 package net.hedtech.banner.general.communication.email
 
 import com.icegreen.greenmail.util.GreenMailUtil
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
@@ -13,6 +17,9 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.LogFactory
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.junit.Rule;
@@ -21,6 +28,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.rules.ExpectedException;
 
+@Integration
+@Rollback
 class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBaseIntegrationTestCase {
 
     @Rule
@@ -39,24 +48,37 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
     @Before
     public void setUp() {
         formContext = ['GUAGMNU','SELFSERVICE']
+        super.setUp()
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        super.setUp()
-        setUpEmailTestOrganization()
-        mailServer.start()
     }
-
 
     @After
     public void tearDown() {
         super.tearDown()
-        if (mailServer) mailServer.stop()
-        sessionFactory.currentSession?.close()
         logout()
+    }
+
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        setUpEmailTestOrganization()
+        mailServer.start()
+    }
+
+    void rollBackData() {
+        if (mailServer) mailServer.stop()
     }
 
     @Test  // works and doesnt throw exception
     public void testSendTestEmail() {
+        setUpData()
         // use receiverAddress for receiver
         def EMAIL_SUBJECT = "Test Subject SMTP"
         def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
@@ -76,10 +98,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
         assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailNullServer() {
+        setUpData()
         thrown.expect(ApplicationException)
         thrown.expectMessage( ('communication.error.message.server.hostNotFound'))
 
@@ -102,10 +126,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(0, receivedMessages.length)
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailInvalidServer() {
+        setUpData()
         thrown.expect(ApplicationException)
         thrown.expectMessage( "communication.error.message.server.failed")
         emailTestOrganization.sendEmailServerProperties.host = 'invalidHostName'
@@ -130,10 +156,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
         assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailInvalidPort() {
+        setUpData()
         thrown.expect(ApplicationException)
         thrown.expectMessage( "communication.error.message.server.failed")
         emailTestOrganization.sendEmailServerProperties.port += 1
@@ -155,12 +183,14 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 
         def receivedMessages = mailServer.getReceivedMessages()
         assertEquals(0, receivedMessages.length)
+        rollBackData()
     }
 
 
     // TODO: find out how to make incorrect username or password reject
     @Test
     public void testSendTestEmailInvalidPassword() {
+        setUpData()
         // use receiverAddress for receiver
         def EMAIL_SUBJECT = "Test Subject SMTP"
         def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
@@ -180,10 +210,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
         assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailInvalidAccount() {
+        setUpData()
         // use receiverAddress for receiver
         def EMAIL_SUBJECT = "Test Subject SMTP"
         def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
@@ -203,10 +235,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
         assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailInvalidEmail() {
+        setUpData()
         thrown.expect(ApplicationException)
         thrown.expectMessage('communication.error.message.invalidEmailGeneral')
 
@@ -230,10 +264,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(0, receivedMessages.length)
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailNullEmail() {
+        setUpData()
         thrown.expect(ApplicationException)
         thrown.expectMessage('communication.error.message.senderMailbox.emptySenderEmail')
         emailTestOrganization.senderMailboxAccount.emailAddress = null
@@ -256,10 +292,12 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         def receivedMessages = mailServer.getReceivedMessages()
 
         assertEquals(0, receivedMessages.length)
+        rollBackData()
     }
 
     @Test
     public void testSendTestEmailNullReceiverDisplayName() {
+        setUpData()
         receiverAddress.displayName = null
         // use receiverAddress for receiver
 
@@ -282,6 +320,8 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         assertEquals(1, receivedMessages.length)
         assertEquals(receivedMessages[0].getSubject(), EMAIL_SUBJECT)
         assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains(EMAIL_TEXT))
+
+        rollBackData()
     }
 
 //    @Test
@@ -311,18 +351,22 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
 
     protected void setUpEmailTestOrganization()
     {
-        emailTestOrganization = new CommunicationOrganization()
-        emailTestOrganization.id = defaultOrganization.id
-        emailTestOrganization.name = defaultOrganization.name
-        emailTestOrganization.parent = defaultOrganization.parent
-        emailTestOrganization.description = defaultOrganization.description
-        emailTestOrganization.dateFormat = defaultOrganization.dateFormat
-        emailTestOrganization.dayOfWeekFormat = defaultOrganization.dayOfWeekFormat
-        emailTestOrganization.timeOfDayFormat = defaultOrganization.timeOfDayFormat
-        emailTestOrganization.lastModifiedBy = defaultOrganization.lastModifiedBy
-        emailTestOrganization.lastModified = defaultOrganization.lastModified
-        emailTestOrganization.version = defaultOrganization.version
-        emailTestOrganization.dataOrigin = defaultOrganization.dataOrigin
+        List organizations = communicationOrganizationCompositeService.listOrganizations()
+        if (organizations.size() == 0) {
+            emailTestOrganization = new CommunicationOrganization(name: "Test Org")
+        }
+//        emailTestOrganization = new CommunicationOrganization(name: "Test Org")
+//        emailTestOrganization.id = defaultOrganization.id
+//        emailTestOrganization.name = defaultOrganization.name
+//        emailTestOrganization.parent = defaultOrganization.parent
+//        emailTestOrganization.description = defaultOrganization.description
+//        emailTestOrganization.dateFormat = defaultOrganization.dateFormat
+//        emailTestOrganization.dayOfWeekFormat = defaultOrganization.dayOfWeekFormat
+//        emailTestOrganization.timeOfDayFormat = defaultOrganization.timeOfDayFormat
+//        emailTestOrganization.lastModifiedBy = defaultOrganization.lastModifiedBy
+//        emailTestOrganization.lastModified = defaultOrganization.lastModified
+//        emailTestOrganization.version = defaultOrganization.version
+//        emailTestOrganization.dataOrigin = defaultOrganization.dataOrigin
 
         def cesp = new CommunicationEmailServerProperties(
                 securityProtocol: CommunicationEmailServerConnectionSecurity.None,
@@ -338,9 +382,10 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
                 encryptedPassword: null,
                 clearTextPassword: clearTextPassword,
                 userName: userName,
-                organization: defaultOrganization,
+                organization: emailTestOrganization,
                 type: CommunicationMailboxAccountType.Sender
         )
         emailTestOrganization.senderMailboxAccount = cma
     }
+
 }

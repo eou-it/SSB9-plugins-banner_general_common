@@ -100,9 +100,8 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
     @Test
     void testCreateEmailItem() {
-        setUpData()
         def originalListCount = communicationTemplateService.list().size()
-        def template = newValidForCreateEmailTemplate(folder1)
+        def template = newValidForCreateEmailTemplate()
         def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
         //Test if the service set the created date, and the infrastructure set the modifiedby and date
         assertNotNull newTemplate.createDate
@@ -122,9 +121,8 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
 
 @Test
    void testDeleteEmailItem() {
-    setUpData()
     def originalListCount = communicationTemplateService.list().size()
-       def template = newValidForCreateEmailTemplate(folder1)
+       def template = newValidForCreateEmailTemplate()
        def newTemplate = communicationEmailTemplateService.create( [domainModel: template] )
        //Test if the service set the created date, and the infrastructure set the modifiedby and date
        assertNotNull newTemplate.createDate

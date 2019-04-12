@@ -17,6 +17,7 @@ import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.system.AdmissionRequest
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 import net.hedtech.banner.testing.BaseIntegrationTestCase
+import static groovy.test.GroovyAssert.*
 
 @Integration
 @Rollback

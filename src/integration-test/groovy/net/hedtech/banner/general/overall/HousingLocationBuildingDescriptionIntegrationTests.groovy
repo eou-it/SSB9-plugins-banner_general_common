@@ -15,6 +15,7 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 import net.hedtech.banner.general.system.*
 import org.junit.Test
 import org.apache.commons.lang.StringUtils
+import static groovy.test.GroovyAssert.*
 
 @Integration
 @Rollback
@@ -393,7 +394,7 @@ class HousingLocationBuildingDescriptionIntegrationTests extends BaseIntegration
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             sql.executeUpdate("update SV_SLBBLDG set SLBBLDG_VERSION = 999 where SLBBLDG_SURROGATE_ID = ?", [housingLocationBuildingDescription.id])
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

@@ -4,6 +4,10 @@
 package net.hedtech.banner.general.communication.email
 
 import com.icegreen.greenmail.util.GreenMailUtil
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.general.communication.CommunicationBaseIntegrationTestCase
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerConnectionSecurity
 import net.hedtech.banner.general.communication.organization.CommunicationEmailServerProperties
@@ -12,6 +16,9 @@ import net.hedtech.banner.general.communication.organization.CommunicationMailbo
 import net.hedtech.banner.general.communication.organization.CommunicationMailboxAccountType
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import org.apache.commons.logging.LogFactory
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -21,6 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Test sending email using No Security settings
  */
+@Integration
+@Rollback
 class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseIntegrationTestCase {
 
     def log = LogFactory.getLog(this.class)
@@ -38,11 +47,12 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     public void setUp() {
         super.setUseTransactions( false )
         formContext = ['GUAGMNU','SELFSERVICE']
+        super.setUp()
+
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
-        super.setUp()
-        setUpEmailTestOrganization()
-        mailServer.start()
     }
 
 
@@ -51,13 +61,23 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
         super.tearDown()
 
         if (mailServer) mailServer.stop()
-        sessionFactory.currentSession?.close()
+//        sessionFactory.currentSession?.close()
         logout()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    void setUpData() {
+        setUpEmailTestOrganization()
+        mailServer.start()
+    }
     @Test
     public void testSendEmail() {
-
+        setUpData()
         def EMAIL_SUBJECT = "Test Subject SMTP"
         def EMAIL_TEXT = "Hello, this is test message for testing the SendEmail Method "
         //Create email message

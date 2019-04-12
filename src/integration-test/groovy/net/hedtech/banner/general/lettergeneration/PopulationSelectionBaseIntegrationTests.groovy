@@ -167,7 +167,7 @@ class PopulationSelectionBaseIntegrationTests extends BaseIntegrationTestCase {
             sql.executeUpdate("update GLBSLCT set GLBSLCT_VERSION = 999 where GLBSLCT_SURROGATE_ID = ?", [letterGenerationPopulationSelectionBase.id])
         }
         finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity

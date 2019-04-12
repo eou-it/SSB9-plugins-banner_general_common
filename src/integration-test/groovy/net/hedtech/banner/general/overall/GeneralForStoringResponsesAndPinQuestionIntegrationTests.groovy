@@ -20,7 +20,7 @@ import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.general.GeneralCommonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
-
+import static groovy.test.GroovyAssert.*
 import java.text.SimpleDateFormat
 
 @Integration
@@ -68,7 +68,6 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     public void setUp() {
         formContext = ['GUAGMNU'] // Since we are not testing a controller, we need to explicitly set this
         super.setUp()
-        initializeTestDataForReferences()
     }
 
     //This method is used to initialize test data for references.
@@ -113,6 +112,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
 
     @Test
     void testUpdateValidGeneralForStoringResponsesAndPinQuestion() {
+        initializeTestDataForReferences()
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
         assertNotNull generalForStoringResponsesAndPinQuestion.id
@@ -142,6 +142,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
 
     @Test
     void testUpdateInvalidGeneralForStoringResponsesAndPinQuestion() {
+        initializeTestDataForReferences()
         def generalForStoringResponsesAndPinQuestion = newValidForCreateGeneralForStoringResponsesAndPinQuestion()
         generalForStoringResponsesAndPinQuestion.save( failOnError: true, flush: true )
         assertNotNull generalForStoringResponsesAndPinQuestion.id
@@ -194,7 +195,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( "update GV_GOBANSR set GOBANSR_VERSION = 999 where GOBANSR_SURROGATE_ID = ?", [ generalForStoringResponsesAndPinQuestion.id ] )
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         //Try to update the entity
         //Update the entity
@@ -268,6 +269,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     }
 
     private def newValidForCreateGeneralForStoringResponsesAndPinQuestion() {
+        initializeTestDataForReferences()
         def pinQuestion = newValidForCreatePinQuestion()
         pinQuestion.save( failOnError: true, flush: true )
         def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
@@ -282,6 +284,7 @@ class GeneralForStoringResponsesAndPinQuestionIntegrationTests extends BaseInteg
     }
 
     private def newValidUserResponsesWithOutPinQuestion() {
+        initializeTestDataForReferences()
         def generalForStoringResponsesAndPinQuestion = new GeneralForStoringResponsesAndPinQuestion(
                 pidm: i_success_pidm,
                 number: i_success_number1,
