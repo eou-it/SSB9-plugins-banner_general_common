@@ -1,4 +1,4 @@
-package banner.communication.management.ssb.app
+package banner.general.common
 /*******************************************************************************
 Copyright 2014-2017 Ellucian Company L.P. and its affiliates.
 *******************************************************************************/
