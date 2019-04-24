@@ -124,15 +124,10 @@ assets {
     packagePlugin = true
 }
 
-// TODO :grails_332_change, needs to revisit
-// Added for BannerXE - Internal plugin dependency
 grails {
     plugins {
         compile project(":banner-general-person")
-//        compile project(":banner-ui-ss")
-//        compile project(":banner-core")
-//        compile project(":banner-general-utility")
-//        compile project(":i18n-core")
+        compile project(":banner-ui-ss")
     }
 }
 
