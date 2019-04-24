@@ -64,7 +64,7 @@ dependencies {
     //Added for BannerXE For FileUtils and others
     compile 'commons-io:commons-io:2.6'
 
-  //  compile 'org.grails.plugins:quartz:1.0.2'
+    compile 'org.grails.plugins:quartz:1.0.2'
     compile('org.grails:grails-docs:3.3.2') {
         exclude group:"itext", module:"core-renderer"
 
@@ -129,7 +129,7 @@ assets {
 grails {
     plugins {
         compile project(":banner-general-person")
-        compile project(":banner-ui-ss")
+//        compile project(":banner-ui-ss")
 //        compile project(":banner-core")
 //        compile project(":banner-general-utility")
 //        compile project(":i18n-core")
