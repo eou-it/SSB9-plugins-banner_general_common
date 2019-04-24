@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.job.CommunicationJob
 import net.hedtech.banner.general.communication.job.CommunicationJobStatus
@@ -15,6 +16,7 @@ import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureExcep
 /**
  * Created by mbrzycki on 12/5/14.
  */
+@Transactional
 class CommunicationGroupSendMonitor implements DisposableBean {
     private Log log = LogFactory.getLog(this.getClass())
     private CommunicationGroupSendMonitorThread monitorThread
