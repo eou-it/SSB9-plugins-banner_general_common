@@ -64,7 +64,6 @@ dependencies {
     //Added for BannerXE For FileUtils and others
     compile 'commons-io:commons-io:2.6'
 
-    compile 'org.grails.plugins:quartz:1.0.2'
     compile('org.grails:grails-docs:3.3.2') {
         exclude group:"itext", module:"core-renderer"
 
