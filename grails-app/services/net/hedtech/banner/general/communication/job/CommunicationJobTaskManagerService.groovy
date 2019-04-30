@@ -23,6 +23,7 @@ import grails.gorm.transactions.Transactional
  *
  */
 @Slf4j
+@Transactional
 class CommunicationJobTaskManagerService implements AsynchronousTaskManager {
     //private final Log log = LogFactory.getLog(this.getClass());
 

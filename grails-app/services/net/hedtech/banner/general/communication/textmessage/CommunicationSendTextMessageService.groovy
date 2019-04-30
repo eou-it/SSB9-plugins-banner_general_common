@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.textmessage
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import com.sun.mail.smtp.SMTPAddressFailedException
 import net.hedtech.banner.exceptions.ApplicationException
@@ -22,6 +23,7 @@ import javax.mail.AuthenticationFailedException
  * Provides a service for submitting a text message (SMS).
  */
 @Slf4j
+@Transactional
 class CommunicationSendTextMessageService {
     
     //private Log log = LogFactory.getLog(this.getClass())

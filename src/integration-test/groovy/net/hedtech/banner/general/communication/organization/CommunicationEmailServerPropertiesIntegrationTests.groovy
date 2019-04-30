@@ -68,7 +68,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         assertEquals "TTTTTTTTTT", sendProperties.host
         assertEquals 1234, sendProperties.port
         assertEquals CommunicationEmailServerPropertiesType.Send, sendProperties.type
-        assertNull sendProperties.smtpProperties
+        assertEquals '' , sendProperties.smtpProperties
     }
 
 
@@ -97,7 +97,7 @@ class CommunicationEmailServerPropertiesIntegrationTests extends BaseIntegration
         // Assert updated domain values
         assertNotNull communicationEmailServerProperties?.id
         assertEquals(CommunicationEmailServerConnectionSecurity.SSL, communicationEmailServerProperties.securityProtocol)
-        assertNull communicationEmailServerProperties.smtpProperties
+        assertEquals '' , communicationEmailServerProperties.smtpProperties
     }
 
 

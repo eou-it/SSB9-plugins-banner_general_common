@@ -21,10 +21,10 @@ class CommunicationManagementTestingSupport  {
 
 
     public void setUp() {
-        folder = newValidForCreateFolder()
-        folder.save(failOnError: true, flush: true)
-        //Test if the generated entity now has an id assigned
-        assert  folder.id
+//        folder = newValidForCreateFolder()
+//        folder.save(failOnError: true, flush: true)
+//        //Test if the generated entity now has an id assigned
+//        assert  folder.id
     }
 
 
@@ -52,7 +52,7 @@ class CommunicationManagementTestingSupport  {
                 internal: false,
                 name: fname
         )
-        folder.save()
+        folder.save(failOnError: true, flush: true)
         return folder
     }
 

@@ -29,22 +29,22 @@ import grails.web.servlet.context.GrailsWebApplicationContext
  */
 class CommunicationBaseIntegrationTestCase extends BaseIntegrationTestCase {
 
-/*    def communicationGroupSendMonitor
-    def communicationGroupSendCompositeService
-    CommunicationMailboxAccountService communicationMailboxAccountService
-    def communicationFolderService
-    def communicationTemplateService
-    def communicationEmailTemplateService
-    def communicationOrganizationCompositeService
-    def communicationGroupSendItemProcessingEngine
-    def communicationJobProcessingEngine
-    def communicationFieldService
-
-    protected CommunicationOrganization defaultOrganization
-    protected CommunicationFolder defaultFolder
-    protected CommunicationEmailTemplate defaultEmailTemplate
-    protected GreenMail mailServer
-    protected static final int smtp_port = 4025*/
+//    def communicationGroupSendMonitor
+//    def communicationGroupSendCompositeService
+//    CommunicationMailboxAccountService communicationMailboxAccountService
+//    def communicationFolderService
+//    def communicationTemplateService
+//    def communicationEmailTemplateService
+//    def communicationOrganizationCompositeService
+//    def communicationGroupSendItemProcessingEngine
+//    def communicationJobProcessingEngine
+//    def communicationFieldService
+//
+//    protected CommunicationOrganization defaultOrganization
+//    protected CommunicationFolder defaultFolder
+//    protected CommunicationEmailTemplate defaultEmailTemplate
+//    protected GreenMail mailServer
+//    protected static final int smtp_port = 4025
 
     def userName = 'BCMADMIN'
     def password = '111111'

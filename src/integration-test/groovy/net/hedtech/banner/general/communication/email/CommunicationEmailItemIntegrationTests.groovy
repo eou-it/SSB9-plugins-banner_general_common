@@ -62,7 +62,12 @@ class CommunicationEmailItemIntegrationTests extends BaseIntegrationTestCase {
     }
 
     public void setUpData() {
-        folder = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(i_valid_folder_name)
+        folder = new CommunicationFolder(
+                name: i_valid_folder_name,
+                description: "Test Folder",
+                internal: false
+        )
+        folder.save(failOnError: true, flush: true)
     }
 
     @After

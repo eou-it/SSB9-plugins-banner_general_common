@@ -3,6 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.job
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.service.ServiceBase
@@ -11,6 +12,7 @@ import net.hedtech.banner.service.ServiceBase
  *  DAO service interface for communication group send item objects.
  */
 @Slf4j
+@Transactional
 class CommunicationJobService extends ServiceBase {
    // private final Log log = LogFactory.getLog(this.getClass());
 

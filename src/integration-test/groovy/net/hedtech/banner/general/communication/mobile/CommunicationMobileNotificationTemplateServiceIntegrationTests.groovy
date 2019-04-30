@@ -240,7 +240,6 @@ class CommunicationMobileNotificationTemplateServiceIntegrationTests extends Bas
 
 
     private void assertCannotPublish( CommunicationTemplate template, String reason ) {
-        setUpData()
         Boolean originalPublished = template.published
         try {
             communicationMobileNotificationTemplateService.publish( template )

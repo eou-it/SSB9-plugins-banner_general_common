@@ -3,6 +3,7 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.email
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
@@ -12,7 +13,7 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.general.communication.template.CommunicationTemplateMergeService
 import net.hedtech.banner.general.communication.template.CommunicationTemplateService
 
-
+@Transactional
 class CommunicationEmailTemplateService extends CommunicationTemplateService {
 
     @Override

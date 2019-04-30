@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.letter
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
@@ -13,6 +14,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
  * Provides a service for generating a letter.
  */
 @Slf4j
+@Transactional
 class CommunicationGenerateLetterService {
     //private Log log = LogFactory.getLog( this.getClass() )
     def communicationLetterItemService

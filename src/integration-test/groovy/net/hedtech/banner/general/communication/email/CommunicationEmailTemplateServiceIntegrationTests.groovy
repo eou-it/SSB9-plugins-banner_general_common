@@ -176,7 +176,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         def updatedTemplate = communicationEmailTemplateService.update([domainModel: newTemplate])
         assertEquals("Updated description", updatedTemplate.description)
 
-        def template2 = newValidForCreateEmailTemplate()
+        def template2 = newValidForCreateEmailTemplateWithFolder2()
 
         def newTemplate2 = communicationEmailTemplateService.create([domainModel: template2])
         //Test if the generated entity now has an id assigned
@@ -276,7 +276,7 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
                 createDate: i_valid_emailTemplate_createDate,
                 validFrom: i_valid_emailTemplate_validFrom,
                 validTo: i_valid_emailTemplate_validTo,
-                folder: folder,
+                folder: folder1,
                 bccList: i_valid_emailTemplate_bccList,
                 ccList: i_valid_emailTemplate_ccList,
                 content: i_valid_emailTemplate_content,
@@ -289,4 +289,29 @@ class CommunicationEmailTemplateServiceIntegrationTests extends BaseIntegrationT
         return communicationTemplate
     }
 
+    private def newValidForCreateEmailTemplateWithFolder2() {
+        setUpFolderData()
+        setUpData()
+        def communicationTemplate = new CommunicationEmailTemplate(
+                description: i_valid_emailTemplate_description,
+                personal: i_valid_emailTemplate_personal,
+                name: i_valid_emailTemplate_name,
+                oneOff: i_valid_emailTemplate_oneOff,
+                published: i_valid_emailTemplate_published,
+                createdBy: i_valid_emailTemplate_createdBy,
+                createDate: i_valid_emailTemplate_createDate,
+                validFrom: i_valid_emailTemplate_validFrom,
+                validTo: i_valid_emailTemplate_validTo,
+                folder: folder2,
+                bccList: i_valid_emailTemplate_bccList,
+                ccList: i_valid_emailTemplate_ccList,
+                content: i_valid_emailTemplate_content,
+                fromList: i_valid_emailTemplate_fromList,
+                subject: i_valid_emailTemplate_subject,
+                toList: i_valid_emailTemplate_toList,
+                dataOrigin: i_valid_emailTemplate_dataOrigin,
+        )
+
+        return communicationTemplate
+    }
 }

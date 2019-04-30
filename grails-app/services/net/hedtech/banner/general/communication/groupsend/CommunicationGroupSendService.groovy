@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
 import net.hedtech.banner.service.ServiceBase
 import org.springframework.security.core.context.SecurityContextHolder
@@ -11,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 /**
  * Manages group send instances.
  */
+@Transactional
 class CommunicationGroupSendService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {

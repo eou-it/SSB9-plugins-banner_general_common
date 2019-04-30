@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.communication.email
 
 import com.sun.mail.smtp.SMTPAddressFailedException
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
@@ -18,6 +19,7 @@ import javax.mail.AuthenticationFailedException
  * Email Service provides low level email send capability.
  */
 @Slf4j
+@Transactional
 class CommunicationSendEmailService {
   //  private Log log = LogFactory.getLog(this.getClass())
     def communicationEmailItemService

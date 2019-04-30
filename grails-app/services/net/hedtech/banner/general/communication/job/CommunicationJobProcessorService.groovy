@@ -3,6 +3,7 @@
 ********************************************************************************/
 package net.hedtech.banner.general.communication.job
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.template.CommunicationMessage
@@ -12,6 +13,7 @@ import net.hedtech.banner.general.communication.template.CommunicationTemplate
  * CommunicationJobProcessorService is responsible for orchestrating the communication send in behalf of a communication job.
  */
 @Slf4j
+@Transactional
 class CommunicationJobProcessorService {
     //private final Log log = LogFactory.getLog(this.getClass());
     def communicationJobService

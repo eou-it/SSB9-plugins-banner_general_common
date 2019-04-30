@@ -4,9 +4,11 @@
 
 package net.hedtech.banner.general.communication.letter
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class CommunicationLetterItemService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {

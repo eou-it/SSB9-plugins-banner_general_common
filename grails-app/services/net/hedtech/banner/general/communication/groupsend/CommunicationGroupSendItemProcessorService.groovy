@@ -17,7 +17,7 @@ import java.sql.SQLException
  * for the recipient.
  */
 @Slf4j
- @Transactional
+@Transactional
 class CommunicationGroupSendItemProcessorService {
    
     //private static final log = Logger.getLogger(CommunicationGroupSendItemProcessorService.class)

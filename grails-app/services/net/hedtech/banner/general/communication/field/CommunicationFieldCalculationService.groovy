@@ -34,6 +34,7 @@ import org.stringtemplate.v4.STGroup
 import java.sql.Connection
 import java.sql.SQLException
 
+@Transactional
 class CommunicationFieldCalculationService extends ServiceBase {
 
     def asynchronousBannerAuthenticationSpoofer

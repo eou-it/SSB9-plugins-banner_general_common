@@ -104,7 +104,7 @@ class CommunicationLetterTemplateIntegrationTests extends BaseIntegrationTestCas
 
         assertEquals( templateCount + 1, CommunicationLetterTemplate.findAll().size() )
 
-        template.delete()
+        template.delete( failOnError: true, flush: true )
 
         assertEquals( templateCount, CommunicationLetterTemplate.findAll().size() )
     }

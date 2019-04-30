@@ -95,7 +95,12 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
     }
 
     void setUpData() {
-        folder1 = CommunicationManagementTestingSupport.newValidForCreateFolderWithSave(i_valid_folder_name1)
+        folder1 = new CommunicationFolder(
+                name: i_valid_folder_name1,
+                description: "Test Folder",
+                internal: false
+        )
+        folder1.save(failOnError: true, flush: true)
     }
 
     @Test
@@ -143,7 +148,7 @@ class CommunicationEmailItemServiceIntegrationTests extends BaseIntegrationTestC
        assertEquals(0, results.size())
    }
 
-    private def newValidForCreateEmailTemplate(CommunicationFolder folder1) {
+    private def newValidForCreateEmailTemplate() {
         setUpData()
         def communicationTemplate = new CommunicationEmailTemplate(
                 description: i_valid_emailTemplate_description,

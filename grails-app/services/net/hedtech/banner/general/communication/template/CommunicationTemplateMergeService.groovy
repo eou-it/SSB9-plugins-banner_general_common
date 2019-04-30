@@ -3,6 +3,7 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
@@ -29,7 +30,7 @@ import org.stringtemplate.v4.STGroup
  *
  */
 @Slf4j
-
+@Transactional
 class CommunicationTemplateMergeService {
     //private Log log = LogFactory.getLog( this.getClass() )
     def communicationFieldCalculationService
