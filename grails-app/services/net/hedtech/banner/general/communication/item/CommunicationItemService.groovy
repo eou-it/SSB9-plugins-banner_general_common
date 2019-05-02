@@ -4,8 +4,10 @@
 
 package net.hedtech.banner.general.communication.item
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class CommunicationItemService extends ServiceBase {
 
 }

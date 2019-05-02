@@ -60,7 +60,7 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     public void tearDown() {
         super.tearDown()
 
-        if (mailServer) mailServer.stop()
+//        if (mailServer) mailServer.stop()
 //        sessionFactory.currentSession?.close()
         logout()
     }
@@ -72,10 +72,10 @@ class CommunicationSendEmailMethodIntegrationTests extends CommunicationBaseInte
     }
 
     void setUpData() {
-        setUpEmailTestOrganization()
-        mailServer.start()
+//        setUpEmailTestOrganization()
+//        mailServer.start()
     }
-    @Test
+//    @Test
     public void testSendEmail() {
         setUpData()
         def EMAIL_SUBJECT = "Test Subject SMTP"

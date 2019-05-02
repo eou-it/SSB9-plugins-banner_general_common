@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.interaction
 
+import grails.gorm.transactions.Transactional
 import grails.util.Holders
 import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
@@ -13,6 +14,7 @@ import net.hedtech.banner.service.ServiceBase
 
 
 @Slf4j
+@Transactional
 class CommunicationInteractionTypeService extends ServiceBase {
 
     //private static final log = Logger.getLogger(CommunicationInteractionTypeService.class)

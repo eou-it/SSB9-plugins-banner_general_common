@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
@@ -19,6 +20,7 @@ import java.sql.SQLException
  * Service for creating and manipulating a population query and query versions.
  */
 @Slf4j
+@Transactional
 class CommunicationPopulationQueryCompositeService {
 
     def communicationPopulationQueryService

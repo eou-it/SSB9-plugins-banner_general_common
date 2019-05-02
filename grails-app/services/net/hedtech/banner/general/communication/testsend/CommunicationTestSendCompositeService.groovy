@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Propagation
 import grails.gorm.transactions.Transactional
 
 @Slf4j
+@Transactional
 class CommunicationTestSendCompositeService  {
 
     //private Log log = LogFactory.getLog( this.getClass() )

@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.population.query
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -15,6 +16,7 @@ import java.sql.SQLException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Transactional
 class CommunicationPopulationQueryExecutionService {
 
     def communicationPopulationQueryService

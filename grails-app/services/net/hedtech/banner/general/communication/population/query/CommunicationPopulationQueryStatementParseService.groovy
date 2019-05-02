@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.population.query
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -19,6 +20,7 @@ import groovy.util.logging.Slf4j
  * Created by edelaney on 3/26/14.
  */
 @Slf4j
+@Transactional
 class CommunicationPopulationQueryStatementParseService {
 
     def sessionFactory

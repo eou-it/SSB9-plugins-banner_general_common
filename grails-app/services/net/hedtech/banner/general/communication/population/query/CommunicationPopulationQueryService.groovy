@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.query
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
@@ -12,6 +13,7 @@ import net.hedtech.banner.service.ServiceBase
 import groovy.util.logging.Slf4j
 
 @Slf4j
+@Transactional
 class CommunicationPopulationQueryService extends ServiceBase {
 
    // private static final log = Logger.getLogger(CommunicationPopulationQueryService.class)

@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.organization
 
+import grails.gorm.transactions.Transactional
 import grails.util.Holders
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
@@ -17,6 +18,7 @@ import java.text.SimpleDateFormat
  * Folder domain objects.
  */
 @Slf4j
+@Transactional
 class CommunicationOrganizationService extends ServiceBase {
 
     //private static final log = Logger.getLogger(CommunicationOrganizationService.class)

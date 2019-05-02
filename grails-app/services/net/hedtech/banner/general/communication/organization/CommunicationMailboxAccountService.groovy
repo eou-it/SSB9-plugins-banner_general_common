@@ -3,12 +3,13 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.organization
 
+import grails.gorm.transactions.Transactional
 import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
 
-
+@Transactional
 class CommunicationMailboxAccountService extends ServiceBase {
 
     def sessionFactory

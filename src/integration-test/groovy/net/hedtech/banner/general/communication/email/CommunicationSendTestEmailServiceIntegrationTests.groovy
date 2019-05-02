@@ -67,6 +67,7 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
     }
 
+/*
     void setUpData() {
         setUpEmailTestOrganization()
         mailServer.start()
@@ -387,5 +388,6 @@ class CommunicationSendTestEmailServiceIntegrationTests extends CommunicationBas
         )
         emailTestOrganization.senderMailboxAccount = cma
     }
+*/
 
 }

@@ -14,6 +14,7 @@ import org.quartz.CronTrigger
 import org.quartz.JobDetail
 import org.quartz.JobKey
 import org.quartz.SchedulerException
+import org.quartz.SimpleScheduleBuilder
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
 import org.quartz.TriggerBuilder
@@ -51,8 +52,8 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        TriggerBuilder builder = newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-                withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
+        TriggerBuilder builder = TriggerBuilder.newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+                withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
         if(jobContext.scheduledStartDate != null) {
             builder.startAt(evenMinuteDate(jobContext.scheduledStartDate))
         }
@@ -79,7 +80,7 @@ class SchedulerJobService {
         JobDetail jobDetail = createJobDetail( jobContext )
 
         try {
-            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+            TriggerBuilder builder = TriggerBuilder.newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
                     .startAt(jobContext.scheduledStartDate)
                     .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
                         .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
@@ -111,8 +112,8 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleNowServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-            withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
+        SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+            withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
             startNow().build()
         scheduleJob( jobDetail, trigger )
 
