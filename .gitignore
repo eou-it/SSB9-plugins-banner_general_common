@@ -31,4 +31,4 @@ web-app/css/views/userAgreement/policy-rtl.css
 grails-synch-jvm-options.txt
 build/
 .gradle
-*.scss*
+*.scss*.*
