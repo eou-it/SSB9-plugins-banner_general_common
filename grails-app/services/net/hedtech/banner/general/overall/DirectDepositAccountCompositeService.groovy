@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.overall
 
 import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.InterceptedUrl
 import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
@@ -703,18 +704,25 @@ class DirectDepositAccountCompositeService {
         }
         String updateUrl = '/ssb/UpdateAccount/**'
         def updateList = []
+        def accessKeyName = null
 
-        urlList.find {
-            if (it.pattern == updateUrl) {
-                it.access.each { attr ->
-                    // role config items should act like a ConfigAttribute
-                    updateList << [attribute: attr]
+        if (urlList) {
+            accessKeyName = urlList[0] instanceof InterceptedUrl ? 'configAttributes' : urlList[0].containsKey('access') ? 'access' : null
+        }
+
+        if (accessKeyName) {
+            urlList.find {
+                if (it.pattern == updateUrl) {
+                    it[accessKeyName].each { attr ->
+                        // role config items should act like a ConfigAttribute
+                        updateList << [attribute: attr]
+                    }
+
+                    return true
                 }
 
-                return true
+                return false
             }
-
-            return false
         }
 
         def voter = new BannerAccessDecisionVoter()
