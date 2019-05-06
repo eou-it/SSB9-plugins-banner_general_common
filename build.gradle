@@ -132,37 +132,32 @@ grails {
 
 sourceSets {
     concurrentTest {
-        java.srcDir file('src/concurrent-test')
+        groovy {
+        srcDirs = ['src/concurrent-test'] 
+        compileClasspath += main.output 
+        runtimeClasspath += main.output    
+        }
     }
 }
 
-dependencies {
-//    testCompile 'junit:junit:4.12'
-//    concurrentTestCompile 'commons-collections:commons-collections:3.2.2'
-    concurrentTestCompile sourceSets.main.output
-    concurrentTestCompile sourceSets.test.output
+configurations {
+    concurrentTestCompile.extendsFrom testCompile
+    concurrentTestRuntime.extendsFrom testRuntime
 }
 
 task concurrentTest (type: Test) {
     group 'Verification'
     description 'Runs the concurrent tests.'
-    testClassesDir = sourceSets.concurrentTest.output.classesDir
-    classpath = sourceSets.concurrentTest.runtimeClasspath
+    testClassesDir = project.sourceSets.concurrentTest.output.classesDir
+    classpath += project.sourceSets.concurrentTest.runtimeClasspath
+
+    filter {
+        includeTestsMatching "*ConcurrentTests*"
+    }
 
     doFirst {
-        println 'doFirst of ConcurrentTest task'
     }
 
     doLast {
-//        def concurrentPhaseConfigurer = new IntegrationTestPhaseConfigurer(projectTestRunner.projectTestCompiler, projectLoader)
-//        projectTestRunner.testFeatureDiscovery.configurers.concurrent = concurrentPhaseConfigurer
-//
-//        def concurrentTestTypeName = "concurrent"
-//        def concurrentTestDirectory = "concurrent"
-//        def concurrentTestMode = new GrailsTestMode(autowire: true, wrapInTransaction: true, wrapInRequestEnvironment: true)
-//        def concurrentTestType = new JUnit4GrailsTestType(concurrentTestTypeName, concurrentTestDirectory, concurrentTestMode)
-//
-//        projectTestRunner.testFeatureDiscovery.testExecutionContext.concurrentTests = [concurrentTestType]
-        println 'doLast of ConcurrentTest Task'
     }
 }

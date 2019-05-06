@@ -29,7 +29,7 @@ class CommunicationGroupSendItemService extends ServiceBase {
                 count = row.totalCount
             }
         } finally {
-            sql?.close()
+//            sql?.close()
         }
         return count
     }

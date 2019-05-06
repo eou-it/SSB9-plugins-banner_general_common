@@ -22,6 +22,7 @@ import org.quartz.TriggerKey
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate
+import static org.quartz.DateBuilder.evenMinuteDateAfterNow
 import static org.quartz.JobBuilder.newJob;
 
 import org.quartz.impl.StdScheduler
@@ -114,7 +115,7 @@ class SchedulerJobService {
 
         SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
             withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
-            startNow().build()
+            startAt(evenMinuteDateAfterNow()).build()
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )

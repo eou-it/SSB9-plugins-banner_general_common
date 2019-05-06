@@ -294,7 +294,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 tx.commit()
             }
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 
@@ -455,7 +455,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( 'commit')
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         SecurityContextHolder.getContext().setAuthentication( null )
     }
@@ -501,7 +501,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.executeUpdate( updateStatement, [ id ] )
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
     }
 
@@ -660,7 +660,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             sql = new Sql(sessionFactory.getCurrentSession().connection())
             result = sql.firstRow( "select count(*) as rowcount from GCBGSND where GCBGSND_SURROGATE_ID = ${groupSendId}" )
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         return result.rowcount
     }
@@ -674,7 +674,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
             result = sql.firstRow( "select count(*) as rowcount from GCRGSIM where GCRGSIM_GROUP_SEND_ID = ${groupSendId}" )
 //            println( result.rowcount )
         } finally {
-            sql?.close() // note that the test will close the connection, since it's our current session's connection
+//            sql?.close() // note that the test will close the connection, since it's our current session's connection
         }
         return result.rowcount
     }

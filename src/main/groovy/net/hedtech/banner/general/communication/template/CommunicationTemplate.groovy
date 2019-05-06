@@ -241,6 +241,8 @@ public abstract class CommunicationTemplate implements Serializable {
 
     public boolean isActive() {
         Date today = new Date()
-        return this.published && this.validFrom.compareTo(today) <= 0 && this.validTo.compareTo(today) >= 0
+        boolean fromDateValid = this.validFrom?this.validFrom.compareTo(today) <= 0:false
+        boolean toDateValid = this.validTo?this.validTo.compareTo(today) >= 0:true
+        return this.published &&  fromDateValid && toDateValid
     }
 }

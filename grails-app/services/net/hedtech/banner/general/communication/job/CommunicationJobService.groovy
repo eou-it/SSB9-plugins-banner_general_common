@@ -52,7 +52,7 @@ class CommunicationJobService extends ServiceBase {
             log.error( e )
             throw e
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 
@@ -77,7 +77,7 @@ class CommunicationJobService extends ServiceBase {
             log.error( e )
             throw e
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 

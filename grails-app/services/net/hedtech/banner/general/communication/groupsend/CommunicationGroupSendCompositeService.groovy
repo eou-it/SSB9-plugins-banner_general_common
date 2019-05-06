@@ -30,6 +30,7 @@ import org.apache.commons.lang.NotImplementedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.transaction.annotation.Propagation
 import grails.gorm.transactions.Transactional
+import grails.util.Holders
 
 import java.sql.Connection
 import java.sql.SQLException
@@ -448,9 +449,13 @@ class CommunicationGroupSendCompositeService {
                 //Check if organization is active
                 CommunicationOrganization organization = CommunicationOrganization.get(groupSend.organizationId)
                 CommunicationTemplate template = CommunicationTemplate.get(groupSend.templateId)
-                if(!organization.isAvailable || !template.isActive())
-                {
-                    String message = organization.isAvailable?"Inactive template selected for job":"Inactive organization selected for job"
+                if(!organization.isAvailable) {
+                    String message = organization.isAvailable?:"Inactive organization selected for job"
+                    log.error(message)
+                    groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, message )
+                    groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
+                } else if(!template.isActive()) {
+                    String message = template.isActive()?:"Inactive template selected for job"
                     log.error(message)
                     groupSend.markError( CommunicationErrorCode.UNKNOWN_ERROR, message )
                     groupSend = (CommunicationGroupSend) communicationGroupSendService.update(groupSend)
@@ -562,7 +567,7 @@ class CommunicationGroupSendCompositeService {
             log.error( e )
             throw e
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 
@@ -587,7 +592,7 @@ class CommunicationGroupSendCompositeService {
             log.error( e )
             throw e
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 
@@ -605,7 +610,7 @@ class CommunicationGroupSendCompositeService {
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 
@@ -621,7 +626,7 @@ class CommunicationGroupSendCompositeService {
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException( CommunicationGroupSendService, e )
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 
@@ -682,7 +687,7 @@ class CommunicationGroupSendCompositeService {
             log.debug ae.stackTrace
             throw ae
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
     }

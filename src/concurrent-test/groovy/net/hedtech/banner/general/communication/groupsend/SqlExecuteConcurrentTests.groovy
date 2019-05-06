@@ -64,7 +64,7 @@ class SqlExecuteConcurrentTests extends CommunicationBaseConcurrentTestCase {
                     tx.commit()
                 }
             } finally {
-                sql?.close()
+//                sql?.close()
             }
         }
         long t1 = System.currentTimeMillis()
