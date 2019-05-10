@@ -55,7 +55,7 @@ class CommunicationSendEmailService {
         try {
             trackEmailMessage(organization, emailMessage, recipientData, pidm)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             throw t;
         } finally {
         }
@@ -69,7 +69,7 @@ class CommunicationSendEmailService {
          try {
              receiverAddress = new CommunicationEmailAddress(     mailAddress: sendTo    )
          } catch (Throwable e) {
-             log.error(e)
+             log.error(e.message)
              throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
          }
 
@@ -114,13 +114,13 @@ class CommunicationSendEmailService {
              sendTestImpl(organization, receiverAddress, messageData)
 
         } catch (ApplicationException e) {
-            log.error(e)
+            log.error(e.message)
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
             throw e
         } catch (Throwable e) {
             // catch unexpected exceptions
-            log.error(e)
+            log.error(e.message)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
         }
     }
@@ -145,7 +145,7 @@ class CommunicationSendEmailService {
         try {
             sendEmailMethod.execute()
         } catch (ApplicationException e) {
-            log.error('sendEmailMethod threw:',e)
+            log.error('sendEmailMethod threw:' + e.message)
             // catch email exception to give more user friendly name
             if (e.type == 'INVALID_EMAIL_ADDRESS' || e.message == "RFC 822 address format violation.")
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidEmailGeneral"), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
@@ -175,7 +175,7 @@ class CommunicationSendEmailService {
             throw e
         } catch (Throwable e) {
             // catch any unexpected error
-            log.error(e)
+            log.error(e.message)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
         }
     }

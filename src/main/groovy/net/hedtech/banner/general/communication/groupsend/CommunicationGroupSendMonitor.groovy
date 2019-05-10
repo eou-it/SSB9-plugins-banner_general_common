@@ -92,7 +92,7 @@ class CommunicationGroupSendMonitor implements DisposableBean {
             cumulativeMonitorThread = new CommunicationGroupSendCumulativeMonitorThread(this);
         }
 
-        if(!monitorThread.alive) {
+        if(!cumulativeMonitorThread.alive) {
             cumulativeMonitorThread.start();
         }
     }

@@ -4,17 +4,18 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import groovy.util.logging.Slf4j
 import org.apache.log4j.Logger
 
 /**
  * Thread class to monitor the group send cumulative status
  * and update it to Completed if all the corresponding items and jobs are completed.
  */
+@Slf4j
 class CommunicationGroupSendCumulativeMonitorThread extends Thread {
 
     private boolean keepRunning = true;
     private CommunicationGroupSendMonitor monitor
-    private static final log = Logger.getLogger(CommunicationGroupSendCumulativeMonitorThread.class)
 
 
     CommunicationGroupSendCumulativeMonitorThread(CommunicationGroupSendMonitor monitor ) {

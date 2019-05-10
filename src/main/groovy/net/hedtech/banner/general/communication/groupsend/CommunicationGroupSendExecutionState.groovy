@@ -27,7 +27,7 @@ enum CommunicationGroupSendExecutionState implements Serializable {
     }
 
     Set<CommunicationGroupSendExecutionState> set() {
-    	return EnumSet.range( Ready, Failed );
+    	return EnumSet.range( New, Error );
     }
 
     String toString() {

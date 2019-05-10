@@ -293,19 +293,19 @@ class CommunicationGroupSend implements Serializable {
         assert jobId != null
         assert groupId != null
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Scheduled, jobId, groupId )
-        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Scheduled
+        setCumulativeExecutionState(CommunicationGroupSendExecutionState.Scheduled)
     }
 
     public void markQueued( String jobId, String groupId ) {
         assert jobId != null
         assert groupId != null
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Queued, jobId, groupId )
-        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Queued
+        setCumulativeExecutionState(CommunicationGroupSendExecutionState.Queued)
     }
 
     public void markStopped( Date stopDate = new Date() ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Stopped )
-        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Stopped
+        setCumulativeExecutionState(CommunicationGroupSendExecutionState.Stopped)
         this.stopDate = stopDate
     }
 
@@ -317,7 +317,7 @@ class CommunicationGroupSend implements Serializable {
 
     public void markProcessing() {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Processing )
-        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Processing
+        setCumulativeExecutionState(CommunicationGroupSendExecutionState.Processing)
         if (this.startedDate == null) {
             this.startedDate = new Date()
         }
@@ -325,7 +325,7 @@ class CommunicationGroupSend implements Serializable {
 
     public void markError( CommunicationErrorCode errorCode, String errorText ) {
         assignGroupSendExecutionState( CommunicationGroupSendExecutionState.Error )
-        this.cumulativeExecutionState = CommunicationGroupSendExecutionState.Error
+        setCumulativeExecutionState(CommunicationGroupSendExecutionState.Error)
         this.errorCode = errorCode
         this.errorText = errorText
         this.stopDate = stopDate
@@ -333,12 +333,12 @@ class CommunicationGroupSend implements Serializable {
 
     public void updateCumulativeStatus( CommunicationGroupSendExecutionState executionState ) {
         if(this.cumulativeExecutionState != CommunicationGroupSendExecutionState.Error) {
-            this.cumulativeExecutionState = executionState
+            setCumulativeExecutionState(executionState)
         }
     }
 
     private void assignGroupSendExecutionState( CommunicationGroupSendExecutionState executionState, String jobId = null, String groupId = null ) {
-        this.currentExecutionState = executionState
+        setCurrentExecutionState(executionState)
         this.jobId = jobId
         this.groupId = groupId
     }

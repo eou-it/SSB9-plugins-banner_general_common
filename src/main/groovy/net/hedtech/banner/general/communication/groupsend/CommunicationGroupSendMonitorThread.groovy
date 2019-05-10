@@ -4,16 +4,17 @@
 
 package net.hedtech.banner.general.communication.groupsend
 
+import groovy.util.logging.Slf4j
 import org.apache.log4j.Logger
 
 /**
  * Created by mbrzycki on 12/5/14.
  */
+@Slf4j
 class CommunicationGroupSendMonitorThread extends Thread {
 
     private boolean keepRunning = true;
     private CommunicationGroupSendMonitor monitor
-    private static final log = Logger.getLogger(CommunicationGroupSendMonitorThread.class)
 
 
     CommunicationGroupSendMonitorThread( CommunicationGroupSendMonitor monitor ) {

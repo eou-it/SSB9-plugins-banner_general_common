@@ -61,7 +61,7 @@ class CommunicationRecipientData {
     String mepCode
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "GCRFVAL_canonicalForm", insertable = false, updatable = false)
+    @MapKeyColumn(name = "GCRFVAL_canonical_Form", insertable = false, updatable = false)
     @CollectionTable(
             name = "GCRFVAL",
             joinColumns = @JoinColumn(name = "GCRFVAL_RECIPIENT_DATA_ID")
@@ -103,6 +103,7 @@ class CommunicationRecipientData {
         lastModifiedBy(nullable: true, maxSize: 30)
         dataOrigin(nullable: true, maxSize: 30)
         mepCode(nullable:true)
+        fieldValues(nullable: true)
     }
 
     public static List fetchByTemplateId(templateId) {

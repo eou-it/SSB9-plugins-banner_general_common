@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.asynchronous.task
 
+import grails.gorm.transactions.Transactional
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
@@ -23,6 +24,7 @@ import java.util.concurrent.*
  *
  * @author charlie hardt (Very significantly based upon work by Shane Riddell)
  */
+@Transactional
 public class AsynchronousTaskProcessingEngineImpl implements AsynchronousTaskProcessingEngine, DisposableBean {
 
     private final Log log = LogFactory.getLog(this.getClass());
