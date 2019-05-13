@@ -3,18 +3,21 @@
 ********************************************************************************/
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.InterceptedUrl
 import grails.util.Holders
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.crossproduct.BankRoutingInfo
 import net.hedtech.banner.security.BannerAccessDecisionVoter
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 import org.springframework.security.access.AccessDecisionVoter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import net.hedtech.banner.general.system.InstitutionalDescription
 import org.codehaus.groovy.runtime.InvokerHelper
 
+@Transactional
 class DirectDepositAccountCompositeService {
 
     def directDepositAccountService
@@ -192,16 +195,22 @@ class DirectDepositAccountCompositeService {
             return false
         }
 
-        def acct1Priority = acct1.priority == JSONObject.NULL ? null : acct1.priority
-        def acct2Priority = acct2.priority == JSONObject.NULL ? null : acct2.priority
-        def acct1Amount = acct1.amount == JSONObject.NULL ? null : acct1.amount
-        def acct2Amount = acct2.amount == JSONObject.NULL ? null : acct2.amount
-        def acct1Percent = acct1.percent == JSONObject.NULL ? null : acct1.percent
-        def acct2Percent = acct2.percent == JSONObject.NULL ? null : acct2.percent
+        // TODO: ensure that the newly implemented code for Grails 3 below meets the intended functionality (commented)
+        // before clearing the commented lines.  JDC 4/19
+//        def acct1Priority = acct1.priority == JSONObject.NULL ? null : acct1.priority
+//        def acct2Priority = acct2.priority == JSONObject.NULL ? null : acct2.priority
+//        def acct1Amount = acct1.amount == JSONObject.NULL ? null : acct1.amount
+//        def acct2Amount = acct2.amount == JSONObject.NULL ? null : acct2.amount
+//        def acct1Percent = acct1.percent == JSONObject.NULL ? null : acct1.percent
+//        def acct2Percent = acct2.percent == JSONObject.NULL ? null : acct2.percent
+//
+//        def priorityMatch = acct1Priority == acct2Priority
+//        def amountMatch = acct1Amount == acct2Amount
+//        def percentMatch = acct1Percent == acct2Percent
 
-        def priorityMatch = acct1Priority == acct2Priority
-        def amountMatch = acct1Amount == acct2Amount
-        def percentMatch = acct1Percent == acct2Percent
+        def priorityMatch = (acct1.priority == acct2.priority)
+        def amountMatch = (acct1.amount == acct2.amount)
+        def percentMatch = (acct1.percent == acct2.percent)
 
         priorityMatch && amountMatch && percentMatch
     }
@@ -256,7 +265,7 @@ class DirectDepositAccountCompositeService {
         try {
             lastPayStubRec = sql.firstRow(lastPaySql, [pidm])
         } finally {
-            sql?.close()
+//            sql?.close()
         }
         return lastPayStubRec
     }
@@ -281,7 +290,7 @@ class DirectDepositAccountCompositeService {
         try {
             directDeposit = sql.firstRow(lastPayDDSql, [pidm,year,pictCode,payNo])?.ddInd
         } finally {
-            sql?.close()
+//            sql?.close()
         }
         return directDeposit
     }
@@ -326,7 +335,7 @@ class DirectDepositAccountCompositeService {
                 payDocs << row.toRowResult()
             }
         } finally {
-            sql?.close()
+//            sql?.close()
         }
         return payDocs
     }
@@ -362,7 +371,7 @@ class DirectDepositAccountCompositeService {
         try {
             lastPayAmtRec = sql.firstRow(lastPayAmtSql, [pidm])
         } finally {
-            sql?.close()
+//            sql?.close()
         }
         return lastPayAmtRec
     }
@@ -484,9 +493,22 @@ class DirectDepositAccountCompositeService {
         def domainObject = new DirectDepositAccount()
         def routingObject = new BankRoutingInfo()
 
+        // TODO: the below block was updated for grails 3 due to 'Cannot cast object... due to:
+        // "groovy.lang.ReadOnlyPropertyException: Cannot set readonly property: class for class:
+        // net.hedtech.banner.general.crossproduct.BankRoutingInfo"' exception in integration test.
+        // Perhaps the "JSON Converter changes" section in http://docs.grails.org/3.1.0.RC2/guide/upgrading.html#
+        // would be a help in reverting to the commented code here??  If not, use the newly implemented code below. JDC 4/19
+//        use(InvokerHelper) {
+//            domainObject.setProperties(itemBeingAdjusted)
+//            routingObject.setProperties(itemBeingAdjusted.bankRoutingInfo)
+//        }
         use(InvokerHelper) {
+            def bankRoutingInfo = itemBeingAdjusted.bankRoutingInfo
+            routingObject.setProperties(bankRoutingInfo)
+            itemBeingAdjusted.bankRoutingInfo = null
             domainObject.setProperties(itemBeingAdjusted)
-            routingObject.setProperties(itemBeingAdjusted.bankRoutingInfo)
+            domainObject.bankRoutingInfo = routingObject
+            itemBeingAdjusted.bankRoutingInfo = bankRoutingInfo
         }
 
         domainObject.bankRoutingInfo = routingObject
@@ -652,7 +674,7 @@ class DirectDepositAccountCompositeService {
         try {
             ddUpdatableIndRec = sql.firstRow(ddUpdatableIndSql)
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         ddUpdatableIndRec?.PTRINST_DD_WEB_UPDATE_IND
@@ -676,16 +698,31 @@ class DirectDepositAccountCompositeService {
     }
 
     def areAccountsUpdatablePerUrlRoleMapping() {
-        def urlMap = Holders.config.grails.plugin?.springsecurity?.interceptUrlMap
-        if (urlMap == null) {
-            urlMap = Holders.config.grails.plugins?.springsecurity?.interceptUrlMap
+        def urlList = Holders.config.grails.plugin?.springsecurity?.interceptUrlMap
+        if (urlList == null) {
+            urlList = Holders.config.grails.plugins?.springsecurity?.interceptUrlMap
         }
         String updateUrl = '/ssb/UpdateAccount/**'
         def updateList = []
+        def accessKeyName = null
 
-        urlMap.get(updateUrl).each {
-            // role config items should act like a ConfigAttribute
-            updateList << [attribute: it]
+        if (urlList) {
+            accessKeyName = urlList[0] instanceof InterceptedUrl ? 'configAttributes' : urlList[0].containsKey('access') ? 'access' : null
+        }
+
+        if (accessKeyName) {
+            urlList.find {
+                if (it.pattern == updateUrl) {
+                    it[accessKeyName].each { attr ->
+                        // role config items should act like a ConfigAttribute
+                        updateList << [attribute: attr]
+                    }
+
+                    return true
+                }
+
+                return false
+            }
         }
 
         def voter = new BannerAccessDecisionVoter()

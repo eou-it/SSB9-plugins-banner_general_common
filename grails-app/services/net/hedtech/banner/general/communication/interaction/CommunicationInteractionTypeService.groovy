@@ -3,18 +3,21 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.interaction
 
+import grails.gorm.transactions.Transactional
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
 
+
+@Slf4j
+@Transactional
 class CommunicationInteractionTypeService extends ServiceBase {
 
-    private static final log = Logger.getLogger(CommunicationInteractionTypeService.class)
+    //private static final log = Logger.getLogger(CommunicationInteractionTypeService.class)
 
 
     def preCreate(domainModelOrMap) {

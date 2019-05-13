@@ -3,11 +3,12 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class PersonGeographicAreaAddressService extends ServiceBase {
 
-    boolean transactional = true
 
     List<PersonGeographicAreaAddress> fetchActivePersonGeographicAreaAddress(Integer pidm) {
         List entities = PersonGeographicAreaAddress.withSession { session ->

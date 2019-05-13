@@ -3,12 +3,14 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.organization
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 /**
  * Service for providing basic crud services on
  * Communication Organization domain objects while also
  * handling dependent mailbox accounts and email server properties.
  */
+@Transactional
 class CommunicationOrganizationCompositeService {
     CommunicationOrganizationService communicationOrganizationService
     CommunicationEmailServerPropertiesService communicationEmailServerPropertiesService

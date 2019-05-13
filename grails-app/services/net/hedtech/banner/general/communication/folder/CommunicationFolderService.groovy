@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.communication.folder
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
@@ -12,6 +13,7 @@ import net.hedtech.banner.service.ServiceBase
  * Service for providing basic crud services on
  * Folder domain objects.
  */
+@Transactional
 class CommunicationFolderService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {

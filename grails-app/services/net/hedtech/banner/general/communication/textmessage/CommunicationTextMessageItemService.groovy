@@ -3,9 +3,11 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.textmessage
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.general.communication.item.CommunicationChannel
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class CommunicationTextMessageItemService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {

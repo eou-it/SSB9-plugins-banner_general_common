@@ -3,13 +3,11 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.overall
 
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 
 @Transactional
 class AddressGeographicAreasViewService {
-
-    boolean transactional = true
 
     def preCreate(map) {
         throwUnsupportedException()

@@ -3,6 +3,7 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.communication.parameter
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.service.ServiceBase
@@ -11,6 +12,7 @@ import net.hedtech.banner.service.ServiceBase
  * Service for providing basic crud services on
  * Parameter domain objects.
  */
+@Transactional
 class CommunicationParameterService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {

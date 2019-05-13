@@ -3,10 +3,12 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.general.system.SourceAndBackgroundInstitution
 
+@Transactional
 class SourceBackgroundInstitutionBaseCompositeService {
-    boolean transactional = true
+
 
     // Master (singular)
     def sourceBackgroundInstitutionBaseService

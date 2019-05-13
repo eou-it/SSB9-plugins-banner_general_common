@@ -7,11 +7,12 @@ package net.hedtech.banner.overall.loginworkflow
 import net.hedtech.banner.general.person.PersonBasicPersonBase
 import net.hedtech.banner.general.person.PersonRace
 import net.hedtech.banner.service.ServiceBase
+import grails.gorm.transactions.Transactional
 
 
+@Transactional
 class SurveyService extends ServiceBase {
 
-    boolean transactional = true
     def personRaceService
     def personBasicPersonBaseService
 

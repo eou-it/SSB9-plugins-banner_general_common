@@ -4,20 +4,17 @@
 
 package net.hedtech.banner.general.communication.letter.pdf
 
-import com.lowagie.text.pdf.BaseFont
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.letter.CommunicationLetterPageSize
 import net.hedtech.banner.general.communication.letter.CommunicationLetterUnitOfMeasure
-import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.io.support.ClassPathResource
-import org.springframework.context.i18n.LocaleContextHolder as LCH
-import org.xhtmlrenderer.pdf.ITextFontResolver
-import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.xhtmlrenderer.pdf.ITextRenderer
 
 /**
  * Builds a pdf from a letter html fragment.
  */
+@Slf4j
 class CommunicationLetterPdfBuilder {
-    private static final log = Logger.getLogger(CommunicationLetterPdfBuilder.class)
+   // private static final log = Logger.getLogger(CommunicationLetterPdfBuilder.class)
     private ByteArrayOutputStream outputStream
     private ITextRenderer renderer
     private int documentCount

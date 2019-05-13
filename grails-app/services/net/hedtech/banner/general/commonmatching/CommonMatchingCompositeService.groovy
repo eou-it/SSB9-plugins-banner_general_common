@@ -80,8 +80,8 @@ class CommonMatchingCompositeService {
             throw ae
         }
         finally {
-            sqlCall?.close()
-            cmmeCall?.close()
+//            sqlCall?.close()
+//            cmmeCall?.close()
         }
         def personList = CommonMatchingPersonResult.fetchAllMatchResults(map)
         def totalCount = CommonMatchingPersonResult.fetchCountMatchResults()
@@ -105,7 +105,7 @@ class CommonMatchingCompositeService {
             throw ae
         }
         finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 }

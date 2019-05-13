@@ -7,12 +7,12 @@
 
 package net.hedtech.banner.general
 
+import grails.util.Holders
+import grails.web.context.ServletContextHolder
+import grails.web.context.ServletContextHolder as SCH
 import groovy.sql.Sql
 import net.hedtech.banner.general.system.SdaCrosswalkConversion
 import net.hedtech.banner.service.ServiceBase
-import grails.util.Holders
-import grails.util.Holders as SCH
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 import java.sql.CallableStatement
 
@@ -60,9 +60,7 @@ class GeneralCommonUtility {
 
 
     public static Boolean validatePin( String pin, String pidm ) {
-        def ctx = SCH.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT )
-        def sessionFactory = ctx.sessionFactory
-
+        def sessionFactory = Holders.applicationContext.getBean('sessionFactory')
         def connection
         boolean isValidPin = false
         int funcRetValue
@@ -88,14 +86,14 @@ class GeneralCommonUtility {
                 isValidPin = false;
             }
         } finally {
-            connection.close()
+            //connection.close()
         }
         return isValidPin
     }
 
     public static Date getSystemDate() {
         Date systemDate
-        def ctx = SCH.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT )
+        def ctx = Holders.grailsApplication.getMainContext()
         def sessionFactory = ctx.sessionFactory
         def connection
         def Sql sql
@@ -104,8 +102,8 @@ class GeneralCommonUtility {
             sql = new Sql(connection)
             sql.eachRow("select sysdate from dual", { systemDate = it.sysdate })
         } finally {
-            if (sql) sql.close()
-            if (connection) connection.close()
+//            if (sql) sql.close()
+//            if (connection) connection.close()
         }
 
         return systemDate
@@ -122,7 +120,7 @@ class GeneralCommonUtility {
      *  3 - Expired Pin
      */
     public static int validateUserPin( String pin, String pidm ) {
-        def ctx = SCH.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT )
+        def ctx = Holders.grailsApplication.getMainContext()
         def sessionFactory = ctx.sessionFactory
         def connection
         int statusFlag = 0
@@ -155,7 +153,7 @@ class GeneralCommonUtility {
                 statusFlag = EXPIRED_PIN
             }
         } finally {
-            connection.close()
+            //connection.close()
         }
         return statusFlag
     }
@@ -169,14 +167,14 @@ class GeneralCommonUtility {
     public static List getDirtyProperties( def domainClass, def domainObj ) {
         def content = ServiceBase.extractParams( domainClass, domainObj )
         def domainObject = domainClass?.get( content?.id )
-        use(org.codehaus.groovy.runtime.InvokerHelper) { domainObject.setProperties(content)}
+        domainObject.properties = content
 
         return domainObject?.dirtyPropertyNames
     }
 
 
     public static void commit() {
-        def sql = new Sql( Holders?.servletContext.getAttribute( GrailsApplicationAttributes.APPLICATION_CONTEXT ).sessionFactory.getCurrentSession().connection() )
+        def sql = new Sql( Holders.grailsApplication.getMainContext().sessionFactory.getCurrentSession().connection() )
         try {
             sql.execute "{ call gb_common.p_commit() }"
         } finally {

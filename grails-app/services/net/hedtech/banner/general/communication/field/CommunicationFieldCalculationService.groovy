@@ -20,16 +20,13 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.merge.CommunicationFieldValue
-import net.hedtech.banner.general.communication.parameter.CommunicationParameter
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
-import net.hedtech.banner.general.utility.InformationText
 import net.hedtech.banner.service.ServiceBase
 import net.hedtech.banner.exceptions.ApplicationException
 import org.apache.commons.lang.StringUtils
 import org.springframework.transaction.annotation.Propagation
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 import org.stringtemplate.v4.AttributeRenderer
-import org.stringtemplate.v4.DateRenderer
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
@@ -37,6 +34,7 @@ import org.stringtemplate.v4.STGroup
 import java.sql.Connection
 import java.sql.SQLException
 
+@Transactional
 class CommunicationFieldCalculationService extends ServiceBase {
 
     def asynchronousBannerAuthenticationSpoofer
@@ -225,7 +223,7 @@ class CommunicationFieldCalculationService extends ServiceBase {
         } catch (Exception e) {
             throw CommunicationExceptionFactory.createApplicationException(CommunicationFieldCalculationService.class, e, CommunicationErrorCode.INVALID_DATA_FIELD.name())
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 

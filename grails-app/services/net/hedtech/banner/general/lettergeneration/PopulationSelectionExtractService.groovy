@@ -3,12 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.lettergeneration
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
-
+@Transactional
 class PopulationSelectionExtractService extends ServiceBase {
 
-    boolean transactional = true
 
 }
 

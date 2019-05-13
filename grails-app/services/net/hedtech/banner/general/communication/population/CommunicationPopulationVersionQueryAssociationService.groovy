@@ -3,11 +3,14 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
 
+@Slf4j
+@Transactional
 class CommunicationPopulationVersionQueryAssociationService extends ServiceBase {
 
-    private static final log = Logger.getLogger(CommunicationPopulationVersionQueryAssociationService.class)
+   // private static final log = Logger.getLogger(CommunicationPopulationVersionQueryAssociationService.class)
 
 }

@@ -40,7 +40,7 @@ class DirectDepositConfigurationService extends ServiceBase {
                 retParams[param.key] = param.value
             }
         } finally {
-            sql?.close()
+//            sql?.close()
         }
 
         // Add role params
@@ -70,7 +70,7 @@ class DirectDepositConfigurationService extends ServiceBase {
         try {
             getParamFromWebTailor(sql, requestedParam).value
         } finally {
-            sql?.close()
+//            sql?.close()
         }
     }
 

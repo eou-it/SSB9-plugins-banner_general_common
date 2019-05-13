@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.recurrence
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.template.CommunicationTemplate
@@ -11,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import java.text.SimpleDateFormat
 
+@Transactional
 class CommunicationRecurrentMessageService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {

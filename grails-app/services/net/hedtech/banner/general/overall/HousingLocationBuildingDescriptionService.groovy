@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
 // NOTE:
@@ -13,11 +14,10 @@ import net.hedtech.banner.service.ServiceBase
 // update and delete may throw net.hedtech.banner.exceptions.NotFoundException if the entity cannot be found in the database
 // update and delete may throw org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException a runtime exception if an optimistic lock failure occurs
 // create, update, and delete may throw grails.validation.ValidationException a runtime exception when there is a validation failure
-
+@Transactional
 class HousingLocationBuildingDescriptionService extends ServiceBase{
 
-    boolean transactional = true
-
+   
     /**
      * fetch By campus Codes
      * @param campusCodes

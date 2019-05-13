@@ -3,20 +3,20 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.interaction
 
-import grails.util.Holders
+import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.exceptions.NotFoundException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
 import net.hedtech.banner.service.ServiceBase
-import org.apache.log4j.Logger
-import org.springframework.security.core.context.SecurityContextHolder
 
+@Slf4j
+@Transactional
 class CommunicationManualInteractionService extends ServiceBase {
 
-    private static final log = Logger.getLogger(CommunicationManualInteractionService.class)
+   // private static final log = Logger.getLogger(CommunicationManualInteractionService.class)
 
     def preCreate(domainModelOrMap) {
 

@@ -4,13 +4,13 @@
 package net.hedtech.banner.general.communication.email
 
 import com.sun.mail.smtp.SMTPAddressFailedException
+import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import sun.security.provider.certpath.SunCertPathBuilderException
 
 import javax.mail.AuthenticationFailedException
@@ -18,8 +18,10 @@ import javax.mail.AuthenticationFailedException
 /**
  * Email Service provides low level email send capability.
  */
+@Slf4j
+@Transactional
 class CommunicationSendEmailService {
-    private Log log = LogFactory.getLog(this.getClass())
+  //  private Log log = LogFactory.getLog(this.getClass())
     def communicationEmailItemService
     def communicationMailboxAccountService
     def sessionFactory
@@ -53,7 +55,7 @@ class CommunicationSendEmailService {
         try {
             trackEmailMessage(organization, emailMessage, recipientData, pidm)
         } catch (Throwable t) {
-            log.error(t)
+            log.error(t.message)
             throw t;
         } finally {
         }
@@ -67,7 +69,7 @@ class CommunicationSendEmailService {
          try {
              receiverAddress = new CommunicationEmailAddress(     mailAddress: sendTo    )
          } catch (Throwable e) {
-             log.error(e)
+             log.error(e.message)
              throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidReceiverEmail"), CommunicationErrorCode.INVALID_RECEIVER_ADDRESS.name())
          }
 
@@ -112,13 +114,13 @@ class CommunicationSendEmailService {
              sendTestImpl(organization, receiverAddress, messageData)
 
         } catch (ApplicationException e) {
-            log.error(e)
+            log.error(e.message)
             if (e.type == 'UNKNOWN_ERROR')
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
             throw e
         } catch (Throwable e) {
             // catch unexpected exceptions
-            log.error(e)
+            log.error(e.message)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
         }
     }
@@ -143,7 +145,7 @@ class CommunicationSendEmailService {
         try {
             sendEmailMethod.execute()
         } catch (ApplicationException e) {
-            log.error('sendEmailMethod threw:',e)
+            log.error('sendEmailMethod threw:' + e.message)
             // catch email exception to give more user friendly name
             if (e.type == 'INVALID_EMAIL_ADDRESS' || e.message == "RFC 822 address format violation.")
                 throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.invalidEmailGeneral"), CommunicationErrorCode.INVALID_EMAIL_ADDRESS.name())
@@ -173,7 +175,7 @@ class CommunicationSendEmailService {
             throw e
         } catch (Throwable e) {
             // catch any unexpected error
-            log.error(e)
+            log.error(e.message)
             throw CommunicationExceptionFactory.createApplicationException(CommunicationSendEmailService.class, new RuntimeException("communication.error.message.unknownEmail"), CommunicationErrorCode.UNKNOWN_ERROR_EMAIL.name())
         }
     }

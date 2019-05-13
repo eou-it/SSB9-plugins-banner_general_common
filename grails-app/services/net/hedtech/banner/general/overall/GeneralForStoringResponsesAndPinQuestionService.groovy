@@ -3,11 +3,11 @@
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class GeneralForStoringResponsesAndPinQuestionService extends ServiceBase {
-
-    boolean transactional = true
 
     def fetchQuestionForPidm(int pidm) {
         GeneralForStoringResponsesAndPinQuestion.withSession { session ->

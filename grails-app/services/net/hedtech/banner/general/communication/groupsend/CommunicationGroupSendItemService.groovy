@@ -3,12 +3,14 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.groupsend
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import net.hedtech.banner.service.ServiceBase
 
 /**
  * DAO service interface for communication group send item objects.
  */
+@Transactional
 class CommunicationGroupSendItemService extends ServiceBase {
 
     def preCreate( domainModelOrMap ) {
@@ -27,7 +29,7 @@ class CommunicationGroupSendItemService extends ServiceBase {
                 count = row.totalCount
             }
         } finally {
-            sql?.close()
+//            sql?.close()
         }
         return count
     }

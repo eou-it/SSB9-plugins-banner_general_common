@@ -4,17 +4,19 @@
 
 package net.hedtech.banner.general.communication.population.query
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import grails.web.context.ServletContextHolder
+import grails.util.Holders
 
 import java.sql.SQLException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Transactional
 class CommunicationPopulationQueryExecutionService {
 
     def communicationPopulationQueryService
@@ -63,7 +65,7 @@ class CommunicationPopulationQueryExecutionService {
 
             String sqlStatement = getSqlStatement( queryVersion )
 
-            def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+            def ctx = Holders.grailsApplication.getMainContext()
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())
@@ -93,12 +95,12 @@ class CommunicationPopulationQueryExecutionService {
             throw ae
         }
         finally {
-            try {
-                if (sql) sql.close()
-            }
-            catch (SQLException af) {
-                // ignore
-            }
+//            try {
+//                if (sql) sql.close()
+//            }
+//            catch (SQLException af) {
+//                // ignore
+//            }
         }
     }
 
@@ -144,7 +146,7 @@ class CommunicationPopulationQueryExecutionService {
                 }
             }
 
-            def ctx = ServletContextHolder.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+            def ctx = Holders.grailsApplication.getMainContext()
             def sessionFactory = ctx.sessionFactory
             def session = sessionFactory.currentSession
             def sql = new Sql(session.connection())

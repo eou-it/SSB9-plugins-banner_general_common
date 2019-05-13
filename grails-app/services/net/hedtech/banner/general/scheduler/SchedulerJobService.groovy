@@ -4,17 +4,17 @@
 package net.hedtech.banner.general.scheduler
 
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationApplicationException
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.scheduler.quartz.BannerServiceMethodJob
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.quartz.CronScheduleBuilder
 import org.quartz.CronTrigger
 import org.quartz.JobDetail
 import org.quartz.JobKey
 import org.quartz.SchedulerException
+import org.quartz.SimpleScheduleBuilder
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
 import org.quartz.TriggerBuilder
@@ -22,21 +22,19 @@ import org.quartz.TriggerKey
 import org.springframework.transaction.annotation.Propagation
 
 import static org.quartz.DateBuilder.evenMinuteDate
-import static org.quartz.DateBuilder.evenSecondDate;
+import static org.quartz.DateBuilder.evenMinuteDateAfterNow
 import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.*;
-import static org.quartz.SimpleScheduleBuilder.*;
 
 import org.quartz.impl.StdScheduler
-import org.springframework.transaction.annotation.Transactional
+import grails.gorm.transactions.Transactional
 
 /**
  * Service for scheduling a quartz job that runs in the background. This service relies on
  * the quartzScheduler bean being configured in the host grails app.
  */
+@Slf4j
 class SchedulerJobService {
-    private Log log = LogFactory.getLog( this.getClass() )
-    static transactional = false
+  //  private Log log = LogFactory.getLog( this.getClass() )
     StdScheduler quartzScheduler
 
     /**
@@ -55,8 +53,8 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        TriggerBuilder builder = newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-                withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
+        TriggerBuilder builder = TriggerBuilder.newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+                withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow())
         if(jobContext.scheduledStartDate != null) {
             builder.startAt(evenMinuteDate(jobContext.scheduledStartDate))
         }
@@ -83,7 +81,7 @@ class SchedulerJobService {
         JobDetail jobDetail = createJobDetail( jobContext )
 
         try {
-            TriggerBuilder builder = newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
+            TriggerBuilder builder = TriggerBuilder.newTrigger().withIdentity(jobContext.jobId, jobContext.groupId)
                     .startAt(jobContext.scheduledStartDate)
                     .withSchedule(CronScheduleBuilder.cronSchedule(jobContext.cronSchedule)
                         .inTimeZone(TimeZone.getTimeZone(jobContext.cronScheduleTimezone))
@@ -115,9 +113,9 @@ class SchedulerJobService {
     public SchedulerJobReceipt scheduleNowServiceMethod( SchedulerJobContext jobContext ) {
         JobDetail jobDetail = createJobDetail( jobContext )
 
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
-            withSchedule(simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
-            startNow().build()
+        SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger().withIdentity( jobContext.jobId, jobContext.groupId ).
+            withSchedule(SimpleScheduleBuilder.simpleSchedule().withRepeatCount(0).withMisfireHandlingInstructionFireNow()).
+            startAt(evenMinuteDateAfterNow()).build()
         scheduleJob( jobDetail, trigger )
 
         return new SchedulerJobReceipt( groupId: jobContext.groupId, jobId: jobContext.jobId )

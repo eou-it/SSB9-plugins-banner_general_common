@@ -4,12 +4,14 @@
 
 package net.hedtech.banner.general.communication.population.query
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.field.CommunicationField
 
 import java.sql.SQLException
+import groovy.util.logging.Slf4j
 
 /*********************************************************************************
  Copyright 2012 Ellucian Company L.P. and its affiliates.
@@ -17,7 +19,8 @@ import java.sql.SQLException
 /**
  * Created by edelaney on 3/26/14.
  */
-
+@Slf4j
+@Transactional
 class CommunicationPopulationQueryStatementParseService {
 
     def sessionFactory
@@ -29,8 +32,8 @@ class CommunicationPopulationQueryStatementParseService {
         def populationQueryParseResult = new CommunicationPopulationQueryParseResult()
 
         if (statement == null || statement == "") {
-            sql?.close()
-            conn?.close()
+            //sql?.close()
+            //conn?.close()
             return
         }
 
@@ -76,8 +79,8 @@ class CommunicationPopulationQueryStatementParseService {
             throw ae
         } finally {
             //close the sql and the connection as it was for just this parse
-            sql?.close()
-            conn?.close()
+            //sql?.close()
+            //conn?.close()
         }
 
         return populationQueryParseResult

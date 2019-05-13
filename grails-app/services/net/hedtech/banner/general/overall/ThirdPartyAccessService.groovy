@@ -3,14 +3,13 @@
  ********************************************************************************* */
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.query.DynamicFinder
 import net.hedtech.banner.query.operators.Operators
 import net.hedtech.banner.service.ServiceBase
 
+@Transactional
 class ThirdPartyAccessService extends ServiceBase {
-
-    boolean transactional = true
-
 
     def fetchAllByCriteria(Map content, int max = 0, int offset = -1) {
 

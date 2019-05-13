@@ -4,13 +4,15 @@
 package net.hedtech.banner.overall.loginworkflow
 
 import groovy.sql.Sql
-import org.apache.log4j.Logger
+import groovy.util.logging.Slf4j
 import java.sql.SQLException
+import grails.gorm.transactions.Transactional
 
+@Slf4j
+@Transactional
 class UserAgreementService {
-    static transactional = true
+    //static transactional = true
     def sessionFactory
-    private static final log = Logger.getLogger(UserAgreementService.class)
 
     public void updateUsageIndicator(String pidm,String usageIndicator)
     {
@@ -29,7 +31,7 @@ class UserAgreementService {
             log.debug ae.stackTrace
             throw ae
         }finally{
-            connection.close()
+            //connection.close()
         }
 
     }

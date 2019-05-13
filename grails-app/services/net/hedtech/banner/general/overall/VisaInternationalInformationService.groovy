@@ -6,7 +6,6 @@ package net.hedtech.banner.general.overall
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 
 import java.sql.CallableStatement
 import java.sql.SQLException
@@ -58,7 +57,7 @@ class VisaInternationalInformationService extends ServiceBase {
 
 
     private void updateIntlChecklist(Integer pidm) {
-        def ctx = Holders?.servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
+        def ctx = Holders?.grailsApplication.getMainContext()
         def sessionFactory = ctx.sessionFactory
 
         def sqlStrList = "{call sakchkb.P_intl_UpdChecklist(?, null)}"

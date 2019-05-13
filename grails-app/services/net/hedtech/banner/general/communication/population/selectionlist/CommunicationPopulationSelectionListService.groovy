@@ -3,6 +3,7 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population.selectionlist
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.service.ServiceBase
 
@@ -13,10 +14,8 @@ import net.hedtech.banner.service.ServiceBase
 // update and delete may throw net.hedtech.banner.exceptions.NotFoundException if the entity cannot be found in the database
 // update and delete may throw org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException a runtime exception if an optimistic lock failure occurs
 // create, update, and delete may throw grails.validation.ValidationException a runtime exception when there is a validation failure
-
+@Transactional
 class CommunicationPopulationSelectionListService extends ServiceBase {
-
-    boolean transactional = true
 
 
     def preCreate(map) {

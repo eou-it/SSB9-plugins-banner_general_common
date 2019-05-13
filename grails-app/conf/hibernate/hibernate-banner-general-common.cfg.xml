@@ -153,7 +153,7 @@ there is no concept of an 'entity manager' within this project.
         <mapping class="net.hedtech.banner.general.overall.PersonGeographicAreaAddress"/>
         <mapping class="net.hedtech.banner.general.jobsub.JobsubExternalPrinter" />
         <mapping class="net.hedtech.banner.general.jobsub.JobsubSavedOutput"/>
-		<mapping class="net.hedtech.banner.general.aip.UserActiveActionItem"/>
+        <mapping class="net.hedtech.banner.general.aip.UserActiveActionItem"/>
 
     </session-factory>
 </hibernate-configuration>

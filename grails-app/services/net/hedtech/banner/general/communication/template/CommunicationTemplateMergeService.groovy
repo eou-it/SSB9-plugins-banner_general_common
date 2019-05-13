@@ -3,6 +3,8 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.template
 
+import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
 import net.hedtech.banner.general.communication.email.CommunicationMergedEmailTemplate
@@ -16,8 +18,6 @@ import net.hedtech.banner.general.communication.mobile.CommunicationMergedMobile
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationTemplate
 import net.hedtech.banner.general.communication.textmessage.CommunicationMergedTextMessageTemplate
 import net.hedtech.banner.general.communication.textmessage.CommunicationTextMessageTemplate
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.stringtemplate.v4.NumberRenderer
 import org.stringtemplate.v4.ST
 import org.stringtemplate.v4.STGroup
@@ -29,8 +29,10 @@ import org.stringtemplate.v4.STGroup
  * The individual String objects that can contain these delimited variables will therefore be called templateString(s).
  *
  */
+@Slf4j
+@Transactional
 class CommunicationTemplateMergeService {
-    private Log log = LogFactory.getLog( this.getClass() )
+    //private Log log = LogFactory.getLog( this.getClass() )
     def communicationFieldCalculationService
 
     /**

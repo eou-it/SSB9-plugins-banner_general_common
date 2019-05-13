@@ -4,6 +4,7 @@
 
 package net.hedtech.banner.general.overall
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.service.ServiceBase
 
 // NOTE:
@@ -14,9 +15,8 @@ import net.hedtech.banner.service.ServiceBase
 // update and delete may throw org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException a runtime exception if an optimistic lock failure occurs
 // create, update, and delete may throw grails.validation.ValidationException a runtime exception when there is a validation failure
 
+@Transactional
 class IntegrationPartnerSystemRuleService extends ServiceBase{
-
-    boolean transactional = true
 
     public List<IntegrationPartnerSystemRule> fetchAllByCode(List<String> codes){
         List<IntegrationPartnerSystemRule> integrationPartnerSystemRuleList = []
