@@ -14,6 +14,8 @@ import org.hibernate.criterion.Order
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.Id
 import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
@@ -54,6 +56,7 @@ class CommunicationEventMappingView implements Serializable {
     String templateName
 
     @Column(name = "COMMUNICATION_CHANNEL")
+    @Enumerated(value = EnumType.STRING)
     CommunicationChannel communicationChannel
 
     @Type(type = "yes_no")
