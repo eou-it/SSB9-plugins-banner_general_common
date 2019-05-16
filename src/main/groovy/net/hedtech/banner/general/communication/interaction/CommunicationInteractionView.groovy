@@ -12,6 +12,8 @@ import org.hibernate.criterion.Order
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.Id
 import javax.persistence.Table
 
@@ -65,6 +67,7 @@ class CommunicationInteractionView implements Serializable {
     Boolean deceased
 
     @Column(name = "CHANNEL")
+    @Enumerated(value = EnumType.STRING)
     CommunicationChannel channel
 
     @Column(name = "TEMPLATE_NAME")
