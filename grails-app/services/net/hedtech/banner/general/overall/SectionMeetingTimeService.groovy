@@ -1,5 +1,5 @@
 /*******************************************************************************
- Copyright 2013-2016 Ellucian Company L.P. and its affiliates.
+ Copyright 2013-2019 Ellucian Company L.P. and its affiliates.
  ****************************************************************************** */
 package net.hedtech.banner.general.overall
 
@@ -283,7 +283,7 @@ class SectionMeetingTimeService extends ServiceBase {
             }
             finally {
                 try {
-                    sql?.close()
+                   // sql?.close()
                 } catch (SQLException se) { /* squash it*/
                     log.trace getClass().simpleName + " : Sql Statement is already closed, no need to close it."
                 }
