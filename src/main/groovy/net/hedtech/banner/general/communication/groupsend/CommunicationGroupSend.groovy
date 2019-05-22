@@ -12,6 +12,7 @@ import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
+import net.hedtech.banner.general.system.LetterProcessLetter
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.apache.commons.lang.NotImplementedException
 import org.hibernate.annotations.Type
@@ -185,6 +186,9 @@ class CommunicationGroupSend implements Serializable {
     @Column(name = "GCBGSND_CREC_ID")
     Long recurrentMessageId
 
+    @Column(name = "GCBGSND_LETR_ID")
+    Long communicationCodeId
+
     /**
      * Parameter Values : the values entered by the user for the parameters in a chosen template for the given group send
      */
@@ -222,6 +226,7 @@ class CommunicationGroupSend implements Serializable {
         groupId(nullable:true)
         recurrentMessageId(nullable:true)
         parameterValues(nullable:true)
+        communicationCodeId(nullable: true, maxSize: 15)
     }
 
     public Map getParameterNameValueMap() {

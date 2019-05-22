@@ -14,6 +14,7 @@ import net.hedtech.banner.general.communication.exceptions.CommunicationExceptio
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationParameterValue
 import net.hedtech.banner.general.communication.parameter.CommunicationParameterType
+import net.hedtech.banner.general.system.LetterProcessLetter
 import net.hedtech.banner.service.DatabaseModifiesState
 import org.apache.commons.lang.NotImplementedException
 import org.hibernate.annotations.Type
@@ -163,6 +164,9 @@ class CommunicationRecurrentMessage implements Serializable {
     @Column(name = "GCBCREC_FAILURE_COUNT")
     Long failureCount;
 
+    @Column(name = "GCBCREC_LETR_ID")
+    Long communicationCodeId
+
     @Transient
     private Map parameterNameValueMap
 
@@ -195,6 +199,7 @@ class CommunicationRecurrentMessage implements Serializable {
         totalCount(nullable:false)
         successCount(nullable:false)
         failureCount(nullable:false)
+        communicationCodeId(nullable: true, maxSize: 15)
     }
 
     public Map getParameterNameValueMap() {

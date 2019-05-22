@@ -25,6 +25,7 @@ class CommunicationGroupSendRequest implements Serializable {
     Long noOfOccurrences
     Boolean recalculateOnSend
     Map parameterNameValueMap = [:]
+    Long communicationCodeId
 
     public void setParameter( CommunicationParameter parameter, Object value ) {
         setParameter( parameter.name, value, parameter.type )

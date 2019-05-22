@@ -7,6 +7,7 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import net.hedtech.banner.general.communication.folder.CommunicationFolder
 import net.hedtech.banner.general.communication.item.CommunicationChannel
+import net.hedtech.banner.general.system.LetterProcessLetter
 import org.hibernate.FlushMode
 import org.hibernate.annotations.Type
 
@@ -73,6 +74,11 @@ public abstract class CommunicationTemplate implements Serializable {
     @JoinColumn(name = "GCBTMPL_FOLDER_ID", referencedColumnName = "GCRFLDR_SURROGATE_ID")
     @org.hibernate.annotations.ForeignKey(name = "FK1_GCBTMPL_INV_GCRFLDR_KEY")
     CommunicationFolder folder
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "GCBTMPL_LETR_ID", referencedColumnName = "GTVLETR_SURROGATE_ID")
+    @org.hibernate.annotations.ForeignKey(name = "FK1_GCBTMPL_INV_GTVLETR_KEY")
+    LetterProcessLetter communicationCode
 
     /**
      * Indicates if this is a one-off version of the template (1=Yes or 0=No).
@@ -171,6 +177,7 @@ public abstract class CommunicationTemplate implements Serializable {
         mepCode(nullable: true)
         communicationChannel(nullable: false)
         systemIndicator(nullable:false)
+        communicationCode(nullable: true, maxSize: 15)
     }
 
     CommunicationTemplate( CommunicationChannel communicationChannel ) {

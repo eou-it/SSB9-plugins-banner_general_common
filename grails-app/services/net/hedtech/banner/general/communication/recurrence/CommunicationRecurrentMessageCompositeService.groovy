@@ -68,6 +68,7 @@ class CommunicationRecurrentMessageCompositeService {
         recurrentMessage.endDate = request.endDate
         recurrentMessage.noOfOccurrences = request.noOfOccurrences
         recurrentMessage.recalculateOnSend = request.getRecalculateOnSend()
+        recurrentMessage.communicationCodeId = request.communicationCodeId
         recurrentMessage.jobId = request.referenceId
         recurrentMessage.totalCount = 0;
         recurrentMessage.successCount = 0;
@@ -210,6 +211,7 @@ class CommunicationRecurrentMessageCompositeService {
         request.recalculateOnSend = recurrentMessage.recalculateOnSend
         request.parameterNameValueMap = recurrentMessage.parameterNameValueMap
         request.recurrentMessageId = recurrentMessage.id
+        request.communicationCodeId = recurrentMessage.communicationCodeId
 
         def asynchronousBannerAuthenticationSpoofer = Holders.applicationContext.getBean( "asynchronousBannerAuthenticationSpoofer" )
         def originalMap = null
