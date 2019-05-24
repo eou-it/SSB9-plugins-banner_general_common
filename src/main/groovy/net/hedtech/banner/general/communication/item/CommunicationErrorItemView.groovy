@@ -116,6 +116,7 @@ class CommunicationErrorItemView implements Serializable {
      * Email, Letter, etc
      */
     @Column(name = "communication_channel")
+    @Enumerated(value = EnumType.STRING)
     CommunicationChannel communicationChannel
 
     /**
@@ -135,6 +136,7 @@ class CommunicationErrorItemView implements Serializable {
      * The error code
      */
     @Column(name = "error_code")
+    @Enumerated(value = EnumType.STRING)
     CommunicationErrorCode errorCode
 
     public static findByNameWithPagingAndSortParams(filterData, pagingAndSortParams) {

@@ -61,7 +61,7 @@ class CommunicationRecipientData {
     String mepCode
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @MapKeyColumn(name = "GCRFVAL_canonical_Form", insertable = false, updatable = false)
+    @MapKeyColumn(name = "GCRFVAL_canonical_Form", insertable = true, updatable = false)
     @CollectionTable(
             name = "GCRFVAL",
             joinColumns = @JoinColumn(name = "GCRFVAL_RECIPIENT_DATA_ID")

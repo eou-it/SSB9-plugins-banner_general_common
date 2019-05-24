@@ -3,6 +3,7 @@
  *********************************************************************************/
 package net.hedtech.banner.general.communication.merge
 
+import grails.gorm.transactions.Transactional
 import net.hedtech.banner.general.communication.field.CommunicationFieldCalculationService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplate
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger
 /**
  * Creates a recipient data object.
  */
+@Transactional
 class CommunicationRecipientDataFactory implements CommunicationTemplateVisitor {
 
     private static final log = Logger.getLogger(CommunicationRecipientDataFactory.class)
