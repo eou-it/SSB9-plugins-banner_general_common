@@ -3,12 +3,11 @@
  ****************************************************************************** */
 package net.hedtech.banner.payment
 
-import grails.util.Holders
 import groovy.sql.Sql
-import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.ConfigurationData
+import net.hedtech.banner.general.common.GeneralInformationTextUtility
 import net.hedtech.banner.general.person.PersonUtility
-import net.hedtech.banner.general.utility.InformationTextUtility
 import org.springframework.context.i18n.LocaleContextHolder
 
 import java.text.NumberFormat
@@ -187,7 +186,7 @@ abstract class CommonProcessPaymentCompositeService {
      * @return
      */
     def getPaymentInfoTexts() {
-        InformationTextUtility.getMessages( 'PAYMENTPROCESSUPDATE' )
+        GeneralInformationTextUtility.getMessages( 'AR_PAYMENTPROCESSUPDATE' )
     }
 
     /**
@@ -196,7 +195,7 @@ abstract class CommonProcessPaymentCompositeService {
      * @return
      */
     public String getAppConfig( String name ) {
-        Holders.config.flatten()[name]
+        ConfigurationData.fetchByNameAndType( name, 'boolean', 'GENERAL_SS' )?.value
     }
 
     /**
@@ -413,10 +412,10 @@ abstract class CommonProcessPaymentCompositeService {
             createInfo = returnMessage
                       } )
         String amountStr = getLocaleBasedFormattedNumber( procedureParam.amount_in, 2 );
-        amountStr=encode( amountStr )
-        String transactionId = encode(getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ))
-        String procCodeDesc = encode(procedureParam.proc_code_desc_in?.trim())
-        String subCode = encode(procedureParam.sub_code_in)
+        amountStr = encode( amountStr )
+        String transactionId = encode( getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ) )
+        String procCodeDesc = encode( procedureParam.proc_code_desc_in?.trim() )
+        String subCode = encode( procedureParam.sub_code_in )
         String vendor = procedureParam.vendor_in
         def procCode = procedureParam.proc_code_in
         def finalUrl = "${procedureParam.vendor_url_in}TransactionId=$transactionId&TransactionAmount=$amountStr&TransactionDescription=$procCodeDesc&MerchantID=$subCode"

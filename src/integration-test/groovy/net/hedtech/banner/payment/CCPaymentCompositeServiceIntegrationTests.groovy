@@ -3,17 +3,15 @@
  ****************************************************************************** */
 package net.hedtech.banner.payment
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
-import grails.gorm.transactions.Rollback
-import grails.testing.mixin.integration.Integration
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-
-import static net.hedtech.banner.accountsreceivable.studentaccounts.common.AccountsReceivableCommonConstants.Tests.HOSARUSER1
 
 /**
  * Tests for Payment Process Composite Service
@@ -28,7 +26,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
     @Before
     public void setUp() {
         formContext = ['SELFSERVICE']
-        loginSSB( HOSARUSER1, '111111' )
+        loginSSB( 'HOSARUSR1', '111111' )
         super.setUp()
     }
 
@@ -126,7 +124,7 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         Map messageMap = creditCardPaymentCompositeService.getPaymentInfoTexts()
         Holders.config['banner.payment.vendor.url'] = '<UPDATE ME>'
         def vendorURL = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url' )
-        Integer pidm = PersonUtility.getPerson( HOSARUSER1 ).pidm
+        Integer pidm = PersonUtility.getPerson( 'HOSARUSR1' ).pidm
         def procedureParam = [sub_code_in       : '0',
                               term_select_in    : 'Y',
                               proc_code_in      : 'WEBCCREGFEES',
