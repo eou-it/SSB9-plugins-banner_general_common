@@ -1,10 +1,13 @@
 /*********************************************************************************
-  Copyright 2010-2018 Ellucian Company L.P. and its affiliates.
+  Copyright 2010-2019 Ellucian Company L.P. and its affiliates.
  **********************************************************************************/
 package net.hedtech.banner.general.overall
 
-import org.grails.core.DefaultGrailsDomainClass
 import org.hibernate.annotations.Type
+import grails.util.Holders
+import org.grails.datastore.mapping.model.PersistentEntity
+import org.grails.datastore.mapping.model.PersistentProperty
+import org.grails.datastore.mapping.model.types.OneToOne
 
 import javax.persistence.*
 
@@ -276,7 +279,7 @@ class MeetingTimeSearch {
     }
 
 
-    def static parseQuery(def meetingFilter, def orderBy) {
+    def static parseQuery(def meetingFilter, String orderBy) {
         String.metaClass.flattenString = {
             return delegate.replace("\n", "").replaceAll(/  */, " ")
         }
@@ -284,23 +287,25 @@ class MeetingTimeSearch {
         def stringKeys = ["courseReferenceNumber", "term", "category", "building", "termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-        def query = """FROM  MeetingTimeSearch a  """
+        String query = """FROM  MeetingTimeSearch a  """
         def cnt = 0
         meetingFilter.each { param ->
-            def grailsDomainClass = new DefaultGrailsDomainClass(MeetingTimeSearch)
-            def fields = grailsDomainClass.properties
+            // get meta data for the parameter to parse the condition
+            PersistentEntity grailsDomainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(MeetingTimeSearch)
+            PersistentProperty[] fields = grailsDomainClass.getPersistentProperties()
+
             def field = fields.find { it.name == param.key }
             def fieldType = null
             if (field?.type?.name) fieldType = field.type.name
             else fieldType = "java.lang.String"
-            if (field?.oneToOne) fieldType = "java.lang.String"
+            if (field instanceof OneToOne) fieldType = "java.lang.String"
 
             if (cnt > 0) query += " and "
             else query += " where "
             cnt += 1
             if (stringKeys.contains(param.key)) {
                 if (param.value instanceof Collection) {
-                    def inClause = null
+                    String inClause = null
                     if (fieldType == "java.lang.String") {
                         param.value.each { val ->
                             if (inClause) inClause += ",'" + val + "'"
@@ -312,7 +317,7 @@ class MeetingTimeSearch {
                             else inClause = val
                         }
                     }
-                    if (field?.oneToOne) {
+                    if (field instanceof OneToOne) {
                         query += " a.${param.key}.code  in (${inClause}) "
                     } else {
                         query += " a.${param.key} in (${inClause}) "
@@ -339,22 +344,24 @@ class MeetingTimeSearch {
         def stringKeys = ["courseReferenceNumber", "term", "category", "building", "termCourseReferenceNumber"]
         def booleanKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-        def query = ""
+        String query = ""
         def cnt = 0
         meetingFilter.each { param ->
-            def grailsDomainClass = new DefaultGrailsDomainClass(MeetingTimeSearch)
-            def fields = grailsDomainClass.properties
+            // get meta data for the parameter to parse the condition
+            PersistentEntity grailsDomainClass = Holders.getGrailsApplication().getMappingContext().getPersistentEntity(MeetingTimeSearch.name)
+            PersistentProperty[] fields = grailsDomainClass.getPersistentProperties()
+
             def field = fields.find { it.name == param.key }
             def fieldType = null
             if (field?.type?.name) fieldType = field.type.name
             else fieldType = "java.lang.String"
-            if (field?.oneToOne) fieldType = "java.lang.String"
+            if (field instanceof OneToOne) fieldType = "java.lang.String"
 
             if (cnt > 0) query += " and "
             cnt += 1
             if (stringKeys.contains(param.key)) {
                 if (param.value instanceof Collection) {
-                    def inClause = null
+                    String inClause = null
                     if (fieldType == "java.lang.String") {
                         param.value.each { val ->
                             if (inClause) inClause += ",'" + val + "'"
@@ -366,7 +373,7 @@ class MeetingTimeSearch {
                             else inClause = val
                         }
                     }
-                    if (field?.oneToOne) {
+                    if (field instanceof OneToOne) {
                         query += " ${prefix}.${param.key}.code  in (:${param.key}) "
                     } else {
                         query += " ${prefix}.${param.key} in (:${param.key}) "
