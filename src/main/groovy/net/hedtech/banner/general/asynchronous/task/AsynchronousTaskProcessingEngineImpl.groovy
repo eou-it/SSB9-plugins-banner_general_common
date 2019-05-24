@@ -4,7 +4,6 @@
 package net.hedtech.banner.general.asynchronous.task
 
 import grails.gorm.transactions.Transactional
-import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.asynchronous.AsynchronousActionPoolThreadFactory
 import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer

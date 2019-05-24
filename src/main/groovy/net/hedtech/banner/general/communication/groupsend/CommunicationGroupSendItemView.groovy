@@ -66,6 +66,7 @@ class CommunicationGroupSendItemView implements Serializable {
      * The error code
      */
     @Column(name = "error_code")
+    @Enumerated(value = EnumType.STRING)
     CommunicationErrorCode errorCode
 
     @Column(name="START_DATE")
