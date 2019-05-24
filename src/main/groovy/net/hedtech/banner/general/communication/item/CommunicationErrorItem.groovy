@@ -45,12 +45,14 @@ class CommunicationErrorItem implements Serializable {
      * The error code
      */
     @Column(name = "error_code")
+    @Enumerated(value = EnumType.STRING)
     CommunicationErrorCode errorCode
 
     /**
      * The error text or stacktrace
      */
     @Column(name = "error_text")
+    @Lob
     String errorText
 
     public static fetchByReferenceId(String referenceId) {

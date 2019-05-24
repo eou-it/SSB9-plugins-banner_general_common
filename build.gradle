@@ -140,7 +140,6 @@ assets {
 grails {
     plugins {
         compile project(":banner-general-person")
-        compile project(":banner-ui-ss")
     }
 }
 
