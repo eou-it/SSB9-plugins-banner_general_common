@@ -4,6 +4,7 @@
 package net.hedtech.banner.payment
 
 import groovy.sql.Sql
+import net.hedtech.banner.MessageUtility
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.ConfigurationData
 import net.hedtech.banner.general.common.GeneralInformationTextUtility
@@ -72,15 +73,16 @@ abstract class CommonProcessPaymentCompositeService {
      * @return
      */
     def commonValidation() {
-        boolean touchnetEnabled = getAppConfig( 'banner.student.touchnet.enabled' )
-        String nonTouchnetURL = getAppConfig( 'banner.student.nontouchnet.payment.gateway.url' )
+        boolean touchnetEnabled = getAppConfig( 'banner.pci.enabled.payment.gateway.available', 'boolean' )
+        String nonTouchnetURL = getAppConfig( 'banner.nonpci.payment.gateway.url', 'string' )
         if (!touchnetEnabled) {
             if (nonTouchnetURL) {
                 return nonTouchnetURL // Client might have maintained their own payment gateway model
             }
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.error.gateway.not.configured.nor.url' ) )
         }
-        def vendorURL = getAppConfig( 'banner.payment.vendor.url' )
+        def vendorURL = getAppConfig( 'banner.payment.vendor.url', 'string' )
+        println('Shiv' +vendorURL)
         if (!vendorURL) {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.no.vendor.url' ) )
         }
@@ -107,10 +109,10 @@ abstract class CommonProcessPaymentCompositeService {
                 failure_url_in    : param.failure_url_in, //should call the common failure page TODO Need to check more on this
                 success_url_in    : param.success_url_in,//should call the common Success page TODO Need to check more on this
                 id_in             : param.id_in ?: PersonUtility.getPerson( param.pidm )?.bannerId,
-                vendor_url_in     : getAppConfig( 'banner.payment.vendor.url' ),
+                vendor_url_in     : getAppConfig( 'banner.payment.vendor.url', 'string' ),
                 pidm_in           : param.pidm_in,
                 aidm_in           : param.aidm_in,
-                vendor_in         : getAppConfig( 'banner.payment.vendor' ),
+                vendor_in         : getAppConfig( 'banner.payment.vendor', 'string' ),
                 sub_code_in       : param.sub_code_in,
                 first_name_in     : param.first_name_in,
                 last_name_in      : param.last_name_in,
@@ -145,7 +147,7 @@ abstract class CommonProcessPaymentCompositeService {
                 transId = it.NEXTVAL
             }
         } finally {
-            sql?.close()
+            //sql?.close()
         }
         String.valueOf( transId )
     }
@@ -194,8 +196,8 @@ abstract class CommonProcessPaymentCompositeService {
      * @param name
      * @return
      */
-    public String getAppConfig( String name ) {
-        ConfigurationData.fetchByNameAndType( name, 'boolean', 'GENERAL_SS' )?.value
+    public String getAppConfig( String name, String type ) {
+        ConfigurationData.fetchByNameAndType( name, type, 'GENERAL_SS' )?.value
     }
 
     /**
@@ -240,7 +242,7 @@ abstract class CommonProcessPaymentCompositeService {
                           natn_in       : it.spraddr_natn_code]
             }
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 
@@ -264,7 +266,7 @@ abstract class CommonProcessPaymentCompositeService {
                           surname_prefix_in: it.spriden_surname_prefix, name_prefix_in: it.spbpers_name_prefix, name_suffix_in: it.spbpers_name_suffix]
             }
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 
@@ -413,15 +415,19 @@ abstract class CommonProcessPaymentCompositeService {
                       } )
         String amountStr = getLocaleBasedFormattedNumber( procedureParam.amount_in, 2 );
         amountStr = encode( amountStr )
+        println('TNX id before encode' + getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ))
+
         String transactionId = encode( getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ) )
+        println('TNX id After encode' + transactionId)
         String procCodeDesc = encode( procedureParam.proc_code_desc_in?.trim() )
         String subCode = encode( procedureParam.sub_code_in )
         String vendor = procedureParam.vendor_in
         def procCode = procedureParam.proc_code_in
         def finalUrl = "${procedureParam.vendor_url_in}TransactionId=$transactionId&TransactionAmount=$amountStr&TransactionDescription=$procCodeDesc&MerchantID=$subCode"
-        if (vendor.toUpperCase().replaceAll( ' ', '' ) == 'TOUCHNET') {
-            finalUrl += '&ProcessCode=' || encode( procCode )
+        if (vendor.toUpperCase().replaceAll( ' ', '' ) .equals('TOUCHNET')) {
+            finalUrl += '&ProcessCode=' + encode( procCode )
         }
+        println("Final URL 1" + finalUrl)
         finalUrl
     }
 
@@ -439,7 +445,7 @@ abstract class CommonProcessPaymentCompositeService {
             sql = new Sql( sessionFactory.getCurrentSession().connection() )
             sql.call( callFunction, params, resultClosure )
         } finally {
-            sql?.close()
+            //sql?.close()
         }
     }
 }

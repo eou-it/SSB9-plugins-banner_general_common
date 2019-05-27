@@ -173,7 +173,7 @@ class CreditCardPaymentCompositeService extends CommonProcessPaymentCompositeSer
                     }
 
                 } finally {
-                    sql?.close()
+                    //sql?.close()
                 }
             }
             if (!sub_code_out) {

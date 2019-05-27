@@ -117,7 +117,7 @@ class DepositProcessingPaymentCompositeService extends CommonProcessPaymentCompo
             }
             sql.call( """{call tb_pay_trans.p_delete_all( p_pay_trans_id => ?)}""", [transId] )
         } finally {
-            sql?.close()
+            //sql?.close()
         }
         param << [pay_trans_in: transId]
     }

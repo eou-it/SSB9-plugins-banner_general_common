@@ -79,7 +79,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
     @Test
     void testGetTwgParamVendorUrlCheck() {
         Holders.config['banner.payment.vendor.url'] = 'https://test.com'
-        def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url' )
+        def ret = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         assert ret == 'https://test.com'
     }
 
@@ -102,7 +102,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
     void testGetPaymentUrl() {
         Map messageMap = depositProcessingPaymentCompositeService.getPaymentInfoTexts()
         Holders.config['banner.payment.vendor.url'] = '<UPDATE ME>'
-        def vendorURL = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url' )
+        def vendorURL = depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor.url', 'string' )
         Integer pidm = PersonUtility.getPerson( 'HOSARUSR1' ).pidm
         def procedureParam = [sub_code_in       : '0',
                               term_select_in    : 'Y',
@@ -122,7 +122,7 @@ class DirectProcessingCompositeServiceIntegrationTests extends BaseIntegrationTe
                               id_in             : PersonUtility.getPerson( pidm )?.bannerId,
                               vendor_url_in     : vendorURL,
                               pidm_in           : pidm,
-                              vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor' ),
+                              vendor_in         : depositProcessingPaymentCompositeService.getAppConfig( 'banner.payment.vendor', string ),
                               pay_trans_in      : depositProcessingPaymentCompositeService.getTransactionId()]
         def ret = depositProcessingPaymentCompositeService.getPaymentUrl( procedureParam )
         assert ret.contains( '<UPDATE ME>TransactionId=' );
