@@ -110,8 +110,7 @@ class CreditCardPaymentCompositeService extends CommonProcessPaymentCompositeSer
                 tbrcolcCount = 1
                 tbrcolcAgencyDate = it.tbrcolc_colc_agency_date
             }
-            if (tbrcolcCount == 0) {
-            } else if (tbrcolcAgencyDate) {
+            if (tbrcolcAgencyDate) {
                 preventPayment = 'AC_REF_FOR_COLL.';
             } else {
                 allowCCPayment = getAppGtvsdax( 'WEBCCHOLDS', 'PAYMENTVENDOR' )?.gtvsdaxValue ?: 'Y'

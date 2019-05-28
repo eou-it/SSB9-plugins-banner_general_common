@@ -413,7 +413,7 @@ abstract class CommonProcessPaymentCompositeService {
                                                                   Sql.VARCHAR], {returnMessage ->
             createInfo = returnMessage
                       } )
-        String amountStr = getLocaleBasedFormattedNumber( procedureParam.amount_in, 2 );
+        String amountStr = procedureParam.amount_in;
         amountStr = encode( amountStr )
         println('TNX id before encode' + getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ))
 
