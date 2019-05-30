@@ -82,7 +82,6 @@ abstract class CommonProcessPaymentCompositeService {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.error.gateway.not.configured.nor.url' ) )
         }
         def vendorURL = getAppConfig( 'banner.payment.vendor.url', 'string' )
-        println('Shiv' +vendorURL)
         if (!vendorURL) {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, MessageUtility.message( 'banner.payment.message.no.vendor.url' ) )
         }
@@ -415,10 +414,8 @@ abstract class CommonProcessPaymentCompositeService {
                       } )
         String amountStr = procedureParam.amount_in;
         amountStr = encode( amountStr )
-        println('TNX id before encode' + getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ))
 
         String transactionId = encode( getSecuredEncodedTransactionId( procedureParam.pay_trans_in.toString() ) )
-        println('TNX id After encode' + transactionId)
         String procCodeDesc = encode( procedureParam.proc_code_desc_in?.trim() )
         String subCode = encode( procedureParam.sub_code_in )
         String vendor = procedureParam.vendor_in
@@ -427,7 +424,6 @@ abstract class CommonProcessPaymentCompositeService {
         if (vendor.toUpperCase().replaceAll( ' ', '' ) .equals('TOUCHNET')) {
             finalUrl += '&ProcessCode=' + encode( procCode )
         }
-        println("Final URL 1" + finalUrl)
         finalUrl
     }
 
