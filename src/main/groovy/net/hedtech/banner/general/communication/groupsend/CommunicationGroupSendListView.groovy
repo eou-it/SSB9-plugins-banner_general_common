@@ -68,6 +68,9 @@ class CommunicationGroupSendListView implements Serializable {
     @Enumerated(value = EnumType.STRING)
     CommunicationChannel communicationChannel
 
+    @Column(name = "communication_code")
+    String communicationCode
+
     @Column(name = "template_id")
     String templateId;
 

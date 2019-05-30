@@ -51,6 +51,8 @@ public class CommunicationTemplateView implements Serializable {
     @Column(name = "active")
     Boolean active
 
+    @Column(name = "communication_code")
+    String communicationCode
 
     @Column(name = "communication_channel")
     @Enumerated(EnumType.STRING)
