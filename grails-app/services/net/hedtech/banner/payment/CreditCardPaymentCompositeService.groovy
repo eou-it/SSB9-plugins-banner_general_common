@@ -36,7 +36,7 @@ class CreditCardPaymentCompositeService extends CommonProcessPaymentCompositeSer
                   term_code_in      : param.term,
                   pidm_in           : pidm,
                   amount_in         : param.amount,
-                  failure_url_in    : 'bwskpayg.P_DispFailure?transaction_id=',
+                  failure_url_in    : 'bwskwtrr.P_Failure_Page?transaction_id=',
                   success_url_in    : 'bwckcpmt.P_DispSigPage_cc?transaction_id=',
                   update_function_in: 'bwckcpmt.F_update_accounts',
                   pay_trans_in      : getTransactionId()]
