@@ -4,6 +4,7 @@
 package net.hedtech.banner.general.scheduler.quartz
 
 import grails.util.Holders
+import groovy.util.logging.Slf4j
 import net.hedtech.banner.general.scheduler.SchedulerErrorContext
 import net.hedtech.banner.general.scheduler.SchedulerJobContext
 import net.hedtech.banner.general.scheduler.SchedulerJobService
@@ -21,8 +22,9 @@ import static org.quartz.JobBuilder.newJob
  * A Quartz job which invokes a Grails / Spring service method
  * proxied as a specific Banner User.
  */
+@Slf4j
 class BannerServiceMethodJob implements Job {
-    private Log log = LogFactory.getLog( this.getClass() )
+//    private Log log = LogFactory.getLog( this.getClass() )
 
     static triggers = {
     }
@@ -41,11 +43,11 @@ class BannerServiceMethodJob implements Job {
         try{
             context.result = invokeServiceMethod( jobContext.jobHandle, jobContext, jobContext.bannerUser, jobContext.mepCode )
         } catch(JobExecutionException e){
-            log.error( e )
+            log.error( e.message )
             invokeErrorServiceMethod( jobContext, e, startTime )
             throw e
         } catch(Throwable e){
-            log.error( e )
+            log.error( e.message )
             invokeErrorServiceMethod( jobContext, e, startTime )
             throw new JobExecutionException(e)
         }
@@ -97,7 +99,7 @@ class BannerServiceMethodJob implements Job {
             errorContext.cause = originalSin
             invokeServiceMethod( jobContext.errorHandle, errorContext, jobContext.bannerUser, jobContext.mepCode )
         } catch (Throwable t) {
-            log.error( "Couldn't successfully complete error handler.", t )
+            log.error( "Couldn't successfully complete error handler.", t.message )
         }
     }
 

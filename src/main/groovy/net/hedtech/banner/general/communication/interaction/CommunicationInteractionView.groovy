@@ -73,6 +73,9 @@ class CommunicationInteractionView implements Serializable {
     @Column(name = "TEMPLATE_NAME")
     String templateName
 
+    @Column(name = "COMMUNICATION_CODE")
+    String communicationCode
+
     @Column(name = "FOLDER_NAME")
     String folderName
 

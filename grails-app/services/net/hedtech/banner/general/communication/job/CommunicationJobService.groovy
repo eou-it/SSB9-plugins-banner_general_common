@@ -49,7 +49,7 @@ class CommunicationJobService extends ServiceBase {
                 throw new RuntimeException( "CommunicationJobService.acquire aquire found ${rows} with job id = ${jobId} and status = ${CommunicationJobStatus.PENDING.toString()}." )
             }
         } catch (Exception e) {
-            log.error( e )
+            log.error( e.message )
             throw e
         } finally {
 //            sql?.close()
@@ -74,7 +74,7 @@ class CommunicationJobService extends ServiceBase {
                 throw new RuntimeException( "CommunicationJobService.markCompleted attempted to update ${rows} with job id = ${jobId}." )
             }
         } catch (Exception e) {
-            log.error( e )
+            log.error( e.message )
             throw e
         } finally {
 //            sql?.close()

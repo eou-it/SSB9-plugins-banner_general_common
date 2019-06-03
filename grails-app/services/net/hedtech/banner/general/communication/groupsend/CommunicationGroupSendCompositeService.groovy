@@ -691,6 +691,42 @@ class CommunicationGroupSendCompositeService {
 //            sql?.close()
         }
 
+        if(groupSend.communicationCodeId) {
+            try {
+                def ctx = Holders.grailsApplication.getMainContext()
+                def sessionFactory = ctx.sessionFactory
+                def session = sessionFactory.currentSession
+                sql = new Sql(session.connection())
+
+                sql.execute(
+                        [
+                                group_send_key: groupSend.id,
+                                current_time:new Date().toTimestamp()
+                        ],
+                        """
+            INSERT INTO gcrlmap (gcrlmap_reference_id, gcrlmap_letr_id, gcrlmap_user_id, gcrlmap_activity_date)
+                    select
+                        gcrgsim_reference_id,
+                        gcbgsnd_letr_id,
+                        gcbgsnd_user_id,
+                        :current_time
+                    from gcbgsnd, gcrgsim where gcbgsnd_surrogate_id = :group_send_key and gcbgsnd_surrogate_id = gcrgsim_group_send_id
+            """)
+
+                if (log.isDebugEnabled()) log.debug("Created " + sql.updateCount + " gcrlmap records for group send with id = " + groupSend.id)
+            } catch (SQLException ae) {
+                log.debug "SqlException in INSERT INTO gcrlmap ${ae}"
+                log.debug ae.stackTrace
+                throw ae
+            } catch (Exception ae) {
+                log.debug "Exception in INSERT INTO gcrlmap ${ae}"
+                log.debug ae.stackTrace
+                throw ae
+            } finally {
+//            sql?.close()
+            }
+        }
+
     }
 
     private void validateTemplateAndParameters(CommunicationGroupSend groupSend) {
