@@ -93,6 +93,9 @@ class CommunicationRecurrentMessageView {
     @Enumerated(value = EnumType.STRING)
     CommunicationChannel communicationChannel
 
+    @Column(name = "communication_code")
+    String communicationCode
+
     @Column(name = "EVENT_ID")
     Long eventId;
 
