@@ -110,6 +110,7 @@ class CommunicationLetterItemView implements Serializable {
      * Email, Letter, etc
      */
     @Column(name = "communication_channel")
+    @Enumerated(EnumType.STRING)
     CommunicationChannel communicationChannel
 
     /**
