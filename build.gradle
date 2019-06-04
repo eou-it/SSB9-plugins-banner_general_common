@@ -86,10 +86,11 @@ dependencies {
     }
     // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
     // runtime 'mysql:mysql-connector-java:5.1.5'
-    compile 'org.xhtmlrenderer:flying-saucer-core:9.0.8'
-    compile('org.xhtmlrenderer:flying-saucer-pdf:9.0.8') {
-        excludes 'itext', 'itext-rtf'
-    }
+    compile 'org.xhtmlrenderer:flying-saucer-core:9.1.18'
+    compile 'org.xhtmlrenderer:flying-saucer-pdf:9.1.18'
+//    compile('org.xhtmlrenderer:flying-saucer-pdf:9.0.8') {
+//        excludes 'itext', 'itext-rtf'
+//    }
 //    compile 'org.xhtmlrenderer:flying-saucer-pdf:9.0.8'
     compile 'com.lowagie:itext:2.1.7'
     compile 'org.antlr:ST4:4.0.8'
