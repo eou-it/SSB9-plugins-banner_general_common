@@ -4,11 +4,15 @@
 package net.hedtech.banner.general.communication.letter
 
 import grails.gorm.transactions.Transactional
+import grails.util.Holders
+import groovy.sql.Sql
 import groovy.util.logging.Slf4j
+import net.hedtech.banner.general.CommunicationCommonUtility
 import net.hedtech.banner.general.communication.CommunicationErrorCode
 import net.hedtech.banner.general.communication.exceptions.CommunicationExceptionFactory
 import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
 import net.hedtech.banner.general.communication.organization.CommunicationOrganization
+import net.hedtech.banner.general.system.LetterProcessLetter
 
 /**
  * Provides a service for generating a letter.
@@ -18,6 +22,7 @@ import net.hedtech.banner.general.communication.organization.CommunicationOrgani
 class CommunicationGenerateLetterService {
     //private Log log = LogFactory.getLog( this.getClass() )
     def communicationLetterItemService
+    def mailService
     def sessionFactory
     def asynchronousBannerAuthenticationSpoofer
     def testTemplate = false
@@ -82,9 +87,37 @@ class CommunicationGenerateLetterService {
         item.style = message.style
 
         item = communicationLetterItemService.create( item )
+
+        try {
+            //get the letter code for the reference id
+            // insert into gurmail table
+            if (Holders?.config.communication.bannerMailTrackingEnabled) {
+                mailService.create(CommunicationCommonUtility.newBannerMailObject(recipientData, message.dateSent, retrieveLetterCode(recipientData.getReferenceId()), item.id))
+            }
+        } catch (Exception e) {
+            log.debug("Could not insert into gurmail: ${e.getMessage()}")
+        }
         log.debug( "recorded letter item sent with item id = ${item.id}." )
         if (testTemplate)
             return item.id
+    }
+
+    private LetterProcessLetter retrieveLetterCode (refId) {
+        Sql sql = new Sql(sessionFactory.getCurrentSession().connection())
+        def letterid = ''
+        LetterProcessLetter letter
+        try {
+            sql.eachRow("""SELECT gcrlmap_letr_id letterID  FROM gcrlmap WHERE gcrlmap_reference_id = ?""", [refId]) { row ->
+                letterid = row.letterID
+            }
+        } catch (Exception le) {
+            log.debug("Could not retrieve letter code for the reference id: ${le.getMessage()}")
+        } finally {
+            if (letterid != null) {
+                letter = LetterProcessLetter.get(letterid)
+            }
+        }
+        return letter
     }
 
     private boolean isEmpty(String s) {

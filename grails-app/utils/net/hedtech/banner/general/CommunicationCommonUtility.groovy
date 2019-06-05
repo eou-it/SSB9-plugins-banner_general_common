@@ -4,6 +4,9 @@
 package net.hedtech.banner.general
 
 import grails.util.Holders
+import net.hedtech.banner.general.communication.merge.CommunicationRecipientData
+import net.hedtech.banner.general.system.LetterProcessLetter
+import net.hedtech.banner.general.utility.Mail
 import org.apache.commons.lang.StringUtils
 import org.apache.log4j.Logger
 import org.springframework.context.i18n.LocaleContextHolder
@@ -255,6 +258,20 @@ class CommunicationCommonUtility {
             log.debug "There was an exception while setting nls for locale ${userlocale}:" + e.getMessage()
         }
 
+    }
+
+    public static newBannerMailObject(CommunicationRecipientData crd, dateSent, LetterProcessLetter lpl, itemId) {
+        Mail bannerMail = new Mail();
+        bannerMail.setDatePrinted(dateSent)
+        bannerMail.setPidm(crd.pidm?.intValue())
+        bannerMail.setSystemIndicator('G');
+        bannerMail.setDateInitial(dateSent)
+        bannerMail.setUserData(crd.ownerId)
+        bannerMail.setOriginalIndicator('S')
+        bannerMail.setMiscellaneousVc2("BCM")
+        bannerMail.setMiscellaneousNumber(itemId.intValue())
+        bannerMail.setLetterProcessLetter(lpl)
+        return bannerMail
     }
 
 }
