@@ -421,7 +421,7 @@ abstract class CommonProcessPaymentCompositeService {
         String vendor = procedureParam.vendor_in
         def procCode = procedureParam.proc_code_in
         def finalUrl = "${procedureParam.vendor_url_in}TransactionId=$transactionId&TransactionAmount=$amountStr&TransactionDescription=$procCodeDesc&MerchantID=$subCode"
-        if (vendor.toUpperCase().replaceAll( ' ', '' ) .equals('TOUCHNET')) {
+        if (vendor.toUpperCase().replaceAll( ' ', '' ).equals( 'TOUCHNET' )) {
             finalUrl += '&ProcessCode=' + encode( procCode )
         }
         finalUrl
@@ -443,5 +443,18 @@ abstract class CommonProcessPaymentCompositeService {
         } finally {
             //sql?.close()
         }
+    }
+
+    /**
+     * Get Payment Configuration.
+     */
+    def getPaymentConfiguration() {
+        def pciEnabled = getAppConfig( 'banner.pci.enabled.payment.gateway.available', 'boolean' )
+        def paymentServiceURL = null
+        if (!pciEnabled?.toBoolean()) {
+            paymentServiceURL = getAppConfig( 'banner.nonpci.payment.gateway.url', 'string' )
+        }
+        [pciEnabled: pciEnabled?.toBoolean(),
+         nonPciURL : paymentServiceURL]
     }
 }

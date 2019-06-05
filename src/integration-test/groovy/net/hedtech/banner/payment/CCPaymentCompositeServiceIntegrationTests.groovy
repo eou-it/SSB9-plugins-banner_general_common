@@ -7,6 +7,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import net.hedtech.banner.exceptions.ApplicationException
+import net.hedtech.banner.general.ConfigurationData
 import net.hedtech.banner.general.person.PersonUtility
 import net.hedtech.banner.testing.BaseIntegrationTestCase
 import org.junit.After
@@ -21,6 +22,7 @@ import org.junit.Test
 class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase {
 
     def creditCardPaymentCompositeService
+    def configurationDataService
 
 
     @Before
@@ -217,5 +219,20 @@ class CCPaymentCompositeServiceIntegrationTests extends BaseIntegrationTestCase 
         Holders.config.banner.payment.vendor = 'TOUCHNET'
         def ret = creditCardPaymentCompositeService.getAppConfig( 'banner.payment.vendor' )
         assert ret == 'TOUCHNET'
+    }
+
+
+    @Test
+    void testGetPaymentConfiguration() {
+        ConfigurationData touchNetEnabled = creditCardPaymentCompositeService.getAppConfig( 'banner.pci.enabled.payment.gateway.available', 'boolean' )
+        touchNetEnabled.value = true
+        ConfigurationData paymentServiceURL = creditCardPaymentCompositeService.getAppConfig( 'banner.nonpci.payment.gateway.url', 'string' )
+        paymentServiceURL.value = 'testURL'
+        configurationDataService.update( touchNetEnabled )
+        configurationDataService.update( paymentServiceURL )
+        def config = creditCardPaymentCompositeService.getPaymentConfiguration()
+        assert [pciEnabled: true,
+                nonPciURL : 'testURL'] == config
+
     }
 }
