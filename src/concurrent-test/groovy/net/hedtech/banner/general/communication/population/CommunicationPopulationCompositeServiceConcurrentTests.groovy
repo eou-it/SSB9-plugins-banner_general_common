@@ -3,6 +3,12 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication.population
 
+import grails.gorm.transactions.Rollback
+import grails.gorm.transactions.Transactional
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
+import net.hedtech.banner.general.asynchronous.AsynchronousBannerAuthenticationSpoofer
 import net.hedtech.banner.general.communication.CommunicationBaseConcurrentTestCase
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQuery
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryExtractStatement
@@ -10,7 +16,9 @@ import net.hedtech.banner.general.communication.population.query.CommunicationPo
 import net.hedtech.banner.general.communication.population.query.CommunicationPopulationQueryVersion
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionList
 import net.hedtech.banner.general.communication.population.selectionlist.CommunicationPopulationSelectionListEntry
-import org.apache.commons.logging.LogFactory
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,22 +30,23 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertTrue
-
-import grails.testing.mixin.integration.Integration
 
 @Integration
+//@Rollback
 class CommunicationPopulationCompositeServiceConcurrentTests extends CommunicationBaseConcurrentTestCase {
-    def log = LogFactory.getLog(this.class)
     def selfServiceBannerAuthenticationProvider
     def quartzScheduler
+    def asynchronousBannerAuthenticationSpoofer;
 
     @Before
     public void setUp() {
         formContext = ['GUAGMNU','SELFSERVICE']
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         def auth = selfServiceBannerAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken('BCMADMIN', '111111'))
         SecurityContextHolder.getContext().setAuthentication(auth)
         super.setUp()
+        asynchronousBannerAuthenticationSpoofer.authenticateAndSetFormContextForExecute()
 
         for (String groupName : quartzScheduler.getJobGroupNames()) {
             for (JobKey jobKey : quartzScheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
@@ -51,6 +60,11 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         communicationJobProcessingEngine.startRunning()
     }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
 
     @After
     public void tearDown() {
@@ -58,13 +72,21 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         communicationGroupSendItemProcessingEngine.stopRunning()
         communicationJobProcessingEngine.stopRunning()
 
+        deleteAll()
         super.tearDown()
-//        sessionFactory.currentSession?.close()
+        sessionFactory.currentSession?.close()
         logout()
+    }
+
+    public void setUpData() {
+        deleteAll()
+//        setUpDefaultOrganization()
+        setUpDefaultFolder()
     }
 
     @Test
     public void testAllSpridenPopulationFromQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testAllSpridenPopulationFromQuery",
@@ -101,6 +123,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 
     @Test
     public void testCreatePopulationSelectionExtractQuery() {
+        setUpData()
         CommunicationPopulationQueryExtractStatement extractStatement = new CommunicationPopulationQueryExtractStatement()
         extractStatement.application = 'ADMISSIONS'
         extractStatement.selection = '199610_APPLICANTS'
@@ -136,7 +159,9 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         waitForPopulationCalculationToFinish( population, 'BCMADMIN' )
     }
 
-    @Test void testPopulationWithOnlyIncludeList() {
+    @Test
+    void testPopulationWithOnlyIncludeList() {
+        setUpData()
         CommunicationPopulation population = communicationPopulationCompositeService.createPopulation( defaultFolder, "testPopulation", "testPopulation description" )
         List<String> persons = ['BCMADMIN', 'BCMUSER', 'BCMAUTHOR']
 
@@ -166,7 +191,9 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
         assertNull( communicationPopulationCompositeService.calculatePopulationForUser( population ) )
     }
 
-    @Test void testPopulationWithQueryAndIncludeList() {
+    @Test
+    void testPopulationWithQueryAndIncludeList() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testQuery",
@@ -207,6 +234,7 @@ class CommunicationPopulationCompositeServiceConcurrentTests extends Communicati
 
     @Test
     public void testScheduledAllSpridenPopulationFromQuery() {
+        setUpData()
         CommunicationPopulationQuery populationQuery = new CommunicationPopulationQuery(
                 folder: defaultFolder,
                 name: "testAllSpridenPopulationFromQuery",

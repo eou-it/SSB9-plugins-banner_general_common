@@ -3,7 +3,10 @@
  *******************************************************************************/
 package net.hedtech.banner.general.communication
 
+import grails.gorm.transactions.Transactional
 import grails.util.GrailsNameUtils
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.configuration.ConfigurationUtils
 import net.hedtech.banner.exceptions.ApplicationException
 import net.hedtech.banner.general.communication.email.CommunicationEmailTemplateService
@@ -15,11 +18,8 @@ import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSend
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendCompositeService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendExecutionState
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItem
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendItemService
 import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendRequest
-import net.hedtech.banner.general.communication.groupsend.CommunicationGroupSendService
 import net.hedtech.banner.general.communication.job.CommunicationJob
-import net.hedtech.banner.general.communication.letter.CommunicationGenerateLetterService
 import net.hedtech.banner.general.communication.letter.CommunicationLetterItemService
 import net.hedtech.banner.general.communication.letter.CommunicationLetterTemplateService
 import net.hedtech.banner.general.communication.mobile.CommunicationMobileNotificationItemService
@@ -52,10 +52,12 @@ import org.grails.plugins.web.taglib.ValidationTagLib
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.context.WebApplicationContext
 
 import java.util.concurrent.TimeUnit
 
@@ -65,20 +67,44 @@ import static org.junit.Assert.*
  * A BaseIntegrationTestCase with added test support for communication artifacts.
  */
 class CommunicationBaseConcurrentTestCase extends Assert {
-//    static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
+
+    def transactional = false         // this turns off 'Grails' test framework management of transactions
+    def useTransactions = true        // and this enables our own management of transactions, which is what most tests will want
+//    def exposeTransactionAwareSessionFactory = false
+
+    def formContext = null              // This may be set within the subclass, prior to calling super.setUp(). If it isn't,
+    // it will be looked up automatically.
+
+    def bannerAuthenticationProvider    // injected
+//    def dataSource                      // injected via spring
+//    def transactionManager              // injected via spring
+    def sessionFactory                  // injected via spring
+//    def nativeJdbcExtractor             // injected via spring
+    def messageSource                   // injected via spring
+//    def codecLookup                     // injected via spring2
+    private validationTagLibInstance    // assigned lazily - see getValidationTagLib method
+
+    def controller = null               // assigned by subclasses, e.g., within the setUp()
+    def flash                           // Use this to look at the flash messages and errors
+    def params                          // Use this to set params in each test: MyController.metaClass.getParams = { -> params }
+    def renderMap                       // Use this to look at the rendered map: MyController.metaClass.render = { Map map -> renderMap = map }
+    def redirectMap                     // Use this to look at the rendered map: MyController.metaClass.redirect = { Map map -> redirectMap = map }
+
+    @Autowired
+    WebApplicationContext webAppCtx
 
     def communicationGroupSendMonitor
     def communicationGroupSendItemProcessingEngine
     def communicationJobProcessingEngine
 
-    CommunicationGenerateLetterService communicationGenerateLetterService
+//    CommunicationGenerateLetterService communicationGenerateLetterService
     CommunicationLetterItemService communicationLetterItemService
     CommunicationGroupSendCompositeService communicationGroupSendCompositeService
     CommunicationRecurrentMessageCompositeService communicationRecurrentMessageCompositeService
     CommunicationMailboxAccountService communicationMailboxAccountService
     CommunicationEmailServerPropertiesService communicationEmailServerPropertiesService
-    CommunicationGroupSendService communicationGroupSendService
-    CommunicationGroupSendItemService communicationGroupSendItemService
+//    CommunicationGroupSendService communicationGroupSendService
+//    CommunicationGroupSendItemService communicationGroupSendItemService
     CommunicationPopulationQueryCompositeService communicationPopulationQueryCompositeService
     CommunicationPopulationCompositeService communicationPopulationCompositeService
     CommunicationFolderService communicationFolderService
@@ -98,32 +124,57 @@ class CommunicationBaseConcurrentTestCase extends Assert {
     protected static GreenMail mailServer
     protected static final int smtp_port = 4025
 
-//    def transactional = false         // this turns off 'Grails' test framework management of transactions
-//    def useTransactions = true        // and this enables our own management of transactions, which is what most tests will want
-//    def exposeTransactionAwareSessionFactory = false
-
-    def formContext = null              // This may be set within the subclass, prior to calling super.setUp(). If it isn't,
-    // it will be looked up automatically.
-    def bannerAuthenticationProvider    // injected
-    def dataSource                      // injected via spring
-    def transactionManager              // injected via spring
-    def sessionFactory                  // injected via spring
-    def nativeJdbcExtractor             // injected via spring
-    def messageSource                   // injected via spring
-    def codecLookup                     // injected via spring2
-    private validationTagLibInstance    // assigned lazily - see getValidationTagLib method
-
-    def controller = null               // assigned by subclasses, e.g., within the setUp()
-    def flash                           // Use this to look at the flash messages and errors
-    def params                          // Use this to set params in each test: MyController.metaClass.getParams = { -> params }
-    def renderMap                       // Use this to look at the rendered map: MyController.metaClass.render = { Map map -> renderMap = map }
-    def redirectMap                     // Use this to look at the rendered map: MyController.metaClass.redirect = { Map map -> redirectMap = map }
 
 
+//    @After
+//    public void tearDown() {
+//        deleteAll()
+//        defaultTearDown()
+//    }
+
+    /**
+     * Performs a login for the standard 'grails_user' if necessary, and calls super.setUp().
+     * If you need to log in another user or ensure no user is logged in,
+     * then you must either NOT call super.setUp from your setUp method
+     * or you must not extend from this class (but extend from GroovyTestCase directly).
+     **/
     @Before
     public void setUp() {
-        defaultSetUp()
+        params = [:]
+        renderMap = [:]
+        redirectMap = [:]
+        flash = [:]
+        webAppCtx = new GrailsWebApplicationContext()
+//        formContext = ['SELFSERVICE']
+        if (formContext) {
+            FormContext.set( formContext )
+        } else if (controller) {
+            // the formContext wasn't set explicitly, but we should be able to set it automatically since we know the controller
+            def controllerName = controller?.class.simpleName.replaceAll( /Controller/, '' )
+            Map formControllerMap = getFormControllerMap() // note: getFormControllerMap() circumvents a current grails bug
+            def associatedFormsList = formControllerMap[ controllerName?.toLowerCase() ]
+            formContext = associatedFormsList
+            FormContext.set( associatedFormsList )
+        } else {
+            println "Warning: No FormContext has been set, and it cannot be set automatically without knowing the controller..."
+        }
 
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx)
+//        def webRequest = GrailsWebMockUtil.bindMockWebRequest(webAppCtx,new GrailsMockHttpServletRequest(), new GrailsMockHttpServletResponse())
+
+        if (controller) {
+            controller.class.metaClass.getParams = { -> params }
+            controller.class.metaClass.getFlash = { -> flash  }
+            controller.class.metaClass.redirect = { Map args -> redirectMap = args  }
+            controller.class.metaClass.render = { Map args -> renderMap = args  }
+        }
+
+        loginIfNecessary()
+
+//        setUpData()
+    }
+
+    public void setUpData() {
         deleteAll()
         setUpDefaultOrganization()
         setUpDefaultFolder()
@@ -141,54 +192,12 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         String userPassword = communicationMailboxAccountService.decryptPassword( defaultOrganization.senderMailboxAccount.encryptedPassword )
     }
 
-    @After
-    public void tearDown() {
-        deleteAll()
-        defaultTearDown()
-    }
-
-    /**
-     * Performs a login for the standard 'grails_user' if necessary, and calls super.setUp().
-     * If you need to log in another user or ensure no user is logged in,
-     * then you must either NOT call super.setUp from your setUp method
-     * or you must not extend from this class (but extend from GroovyTestCase directly).
-     **/
-    @Before
-    public void defaultSetUp() {
-        params = [:]
-        renderMap = [:]
-        redirectMap = [:]
-        flash = [:]
-        formContext = ['SELFSERVICE']
-        if (formContext) {
-            FormContext.set( formContext )
-        } else if (controller) {
-            // the formContext wasn't set explicitly, but we should be able to set it automatically since we know the controller
-            def controllerName = controller?.class.simpleName.replaceAll( /Controller/, '' )
-            Map formControllerMap = getFormControllerMap() // note: getFormControllerMap() circumvents a current grails bug
-            def associatedFormsList = formControllerMap[ controllerName?.toLowerCase() ]
-            formContext = associatedFormsList
-            FormContext.set( associatedFormsList )
-        } else {
-            println "Warning: No FormContext has been set, and it cannot be set automatically without knowing the controller..."
-        }
-
-        if (controller) {
-            controller.class.metaClass.getParams = { -> params }
-            controller.class.metaClass.getFlash = { -> flash  }
-            controller.class.metaClass.redirect = { Map args -> redirectMap = args  }
-            controller.class.metaClass.render = { Map args -> renderMap = args  }
-        }
-
-        loginIfNecessary()
-    }
-
     /**
      * Clears the hibernate session, but does not logout the user. If your test
      * needs to logout the user, it should do so by explicitly calling logout().
      **/
     @After
-    public void defaultTearDown() {
+    public void tearDown() {
         FormContext.clear()
     }
 
@@ -240,12 +249,15 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         println "After asserting the result"
     }
 
+    @Transactional
     protected void deleteAll() {
         def sql
         try {
             sessionFactory.currentSession.with { session ->
                 sql = new Sql(session.connection())
-                def tx = session.beginTransaction()
+//                def tx = session.beginTransaction()
+
+                System.err.println(session);
                 sql.executeUpdate("Delete from GCRQRTZ_SIMPLE_TRIGGERS")
                 sql.executeUpdate("Delete from GCRQRTZ_CRON_TRIGGERS")
                 sql.executeUpdate("Delete from GCRQRTZ_TRIGGERS")
@@ -291,13 +303,14 @@ class CommunicationBaseConcurrentTestCase extends Assert {
                 sql.executeUpdate("Delete from GCBSPRP WHERE NOT EXISTS (SELECT S.GCRORAN_SEND_EMAILPROP_ID FROM GCRORAN S WHERE S.GCRORAN_SEND_EMAILPROP_ID = GCBSPRP_SURROGATE_ID)")
                 sql.executeUpdate("Delete from GCRMBAC WHERE NOT EXISTS (SELECT S.GCRORAN_SEND_MAILBOX_ID FROM GCRORAN S WHERE S.GCRORAN_SEND_MAILBOX_ID = GCRMBAC_SURROGATE_ID) AND \
                                                              NOT EXISTS (SELECT R.GCRORAN_REPLY_MAILBOX_ID FROM GCRORAN R WHERE R.GCRORAN_REPLY_MAILBOX_ID = GCRMBAC_SURROGATE_ID)")
-                tx.commit()
+//                tx.commit()
             }
         } finally {
 //            sql?.close()
         }
     }
 
+    @Transactional
     protected void setUpDefaultOrganization() {
         List organizations = communicationOrganizationCompositeService.listOrganizations()
         def rootorg
@@ -392,7 +405,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         assertEquals( 0, fetchGroupSendItemCount( groupSend.id ) )
     }
 
-
+    @Transactional
     protected void setUpDefaultFolder() {
         defaultFolder = CommunicationFolder.findByName( "CommunicationGroupSendCompositeServiceTests" )
         if (!defaultFolder) {
@@ -401,6 +414,7 @@ class CommunicationBaseConcurrentTestCase extends Assert {
         }
     }
 
+    @Transactional
     protected void setUpDefaultEmailTemplate() {
         defaultEmailTemplate = CommunicationEmailTemplate.findByName( "CommunicationGroupSendCompositeServiceTests_template" )
         if (!defaultEmailTemplate) {

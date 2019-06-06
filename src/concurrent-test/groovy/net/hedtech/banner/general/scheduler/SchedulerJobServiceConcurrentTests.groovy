@@ -3,8 +3,15 @@
 ********************************************************************************/
 package net.hedtech.banner.general.scheduler
 
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import grails.util.GrailsWebMockUtil
+import grails.web.servlet.context.GrailsWebApplicationContext
 import net.hedtech.banner.security.FormContext
 import org.apache.commons.logging.LogFactory
+import org.grails.plugins.testing.GrailsMockHttpServletRequest
+import org.grails.plugins.testing.GrailsMockHttpServletResponse
+import org.grails.web.servlet.mvc.GrailsWebRequest
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -15,14 +22,18 @@ import org.quartz.Trigger
 import org.quartz.TriggerKey
 import org.quartz.impl.StdScheduler
 import org.quartz.impl.matchers.GroupMatcher
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.context.WebApplicationContext
 
 import java.util.concurrent.TimeUnit
 
 import static org.junit.Assert.assertNotNull
 
+
+@Integration
 public class SchedulerJobServiceConcurrentTests extends Assert {
     static transactional = false // set to false so that everything "autocommits" i.e. doesn't rollback at the end of the test
     def log = LogFactory.getLog(this.class)
@@ -30,13 +41,32 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
     StdScheduler quartzScheduler
     SchedulerJobService schedulerJobService
 
+    @Autowired
+    WebApplicationContext webAppCtx
 
     @Before
     public void setUp() {
         FormContext.set( ['GUAGMNU','SELFSERVICE'] )
+        webAppCtx = new GrailsWebApplicationContext()
+        mockRequest()
         Authentication authentication = selfServiceBannerAuthenticationProvider.authenticate( new UsernamePasswordAuthenticationToken( 'BCMADMIN', '111111' ) )
         SecurityContextHolder.getContext().setAuthentication( authentication )
+    }
 
+    public GrailsWebRequest mockRequest() {
+        GrailsMockHttpServletRequest mockRequest = new GrailsMockHttpServletRequest();
+        GrailsMockHttpServletResponse mockResponse = new GrailsMockHttpServletResponse();
+        GrailsWebMockUtil.bindMockWebRequest(webAppCtx, mockRequest, mockResponse)
+    }
+
+    @After
+    public void tearDown() {
+        FormContext.clear()
+        SecurityContextHolder.getContext().setAuthentication( null )
+        SchedulerTestOperation.reset()
+    }
+
+    public void setUpData() {
         for (String groupName : quartzScheduler.getJobGroupNames()) {
             for (JobKey jobKey : quartzScheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
                 quartzScheduler.unscheduleJob( TriggerKey.triggerKey( jobKey.getName(), jobKey.getGroup() ) )
@@ -47,17 +77,9 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
         SchedulerTestOperation.reset()
     }
 
-
-    @After
-    public void tearDown() {
-        FormContext.clear()
-        SecurityContextHolder.getContext().setAuthentication( null )
-        SchedulerTestOperation.reset()
-    }
-
-
     @Test
     public void testScheduleServiceMethod() {
+        setUpData()
         String jobId = "testScheduleTestJob-" + UUID.randomUUID().toString()
 
         Calendar calendar = Calendar.getInstance() // gets a calendar using the default time zone and locale.
@@ -105,6 +127,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
     @Test
     public void testScheduleNowServiceMethod() {
+        setUpData()
         String jobId = "testScheduleTestJob-" + UUID.randomUUID().toString()
 
         String mepCode = null
@@ -147,6 +170,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
     @Test
     public void testScheduleNowServiceMethodErrorHandling() {
+        setUpData()
         String jobId = "testScheduleTestJob-" + UUID.randomUUID().toString()
 
         String mepCode = null
@@ -191,6 +215,7 @@ public class SchedulerJobServiceConcurrentTests extends Assert {
 
     @Test
     public void testScheduleCronServiceMethod() {
+        setUpData()
         String jobId = "testScheduleCronTestJob-" + UUID.randomUUID().toString()
 
         Calendar calendar = Calendar.getInstance() // gets a calendar using the default time zone and locale.
