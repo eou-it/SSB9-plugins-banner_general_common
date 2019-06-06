@@ -42,7 +42,6 @@ class CommunicationPopulationService extends ServiceBase {
         def creatorId = CommunicationCommonUtility.getUserOracleUserName();
         population.setCreatedBy(creatorId)
         population.setCreateDate(new Date())
-        System.err.println(population)
     }
 
 
