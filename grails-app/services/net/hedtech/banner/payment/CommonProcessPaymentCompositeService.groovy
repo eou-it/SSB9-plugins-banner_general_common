@@ -28,7 +28,7 @@ abstract class CommonProcessPaymentCompositeService {
      * @return
      */
     def processPaymentCommon( Map param ) {
-        commonValidation()
+        commonValidation( param.pageName )
         def messageMap = getPaymentInfoTexts()
         preValidation( param, messageMap )
         assignProcessCode( param )
@@ -72,7 +72,7 @@ abstract class CommonProcessPaymentCompositeService {
      * Performs common validation
      * @return
      */
-    def commonValidation() {
+    def commonValidation( pageName = '' ) {
         boolean touchnetEnabled = getAppConfig( 'banner.pci.enabled.payment.gateway.available', 'boolean' )
         String nonTouchnetURL = getAppConfig( 'banner.nonpci.payment.gateway.url', 'string' )
         if (!touchnetEnabled) {
@@ -210,7 +210,7 @@ abstract class CommonProcessPaymentCompositeService {
         callFunction( "{? = call goksels.f_get_gormerc_count(merchant_id_in =>?, proc_code_in =>?, sysi_code_in =>?,  status_ind_in => ?)}",
                       [Sql.NUMERIC, params.sub_code_in, params.proc_code_in, params.sysi_code_in, 'Y'], {ret ->
             retCount = ret
-        } )
+                      } )
         if (retCount == 0) {
             throw new ApplicationException( CommonProcessPaymentCompositeService.class, messageMap['payment.process.goamred.record.not.found'] )
         }
@@ -294,7 +294,7 @@ abstract class CommonProcessPaymentCompositeService {
         callFunction( "{? = call GOKBSSF.F_ENCODE( str => ?)}",
                       [Sql.VARCHAR, tnxId], {ret ->
             encodedTnxId = ret
-        } )
+                      } )
         encodedTnxId
     }
 
@@ -448,7 +448,7 @@ abstract class CommonProcessPaymentCompositeService {
     /**
      * Get Payment Configuration.
      */
-    def getPaymentConfiguration() {
+    def getPaymentConfiguration( params = [:] ) {
         def pciEnabled = getAppConfig( 'banner.pci.enabled.payment.gateway.available', 'boolean' )
         def paymentServiceURL = null
         if (!pciEnabled?.toBoolean()) {
