@@ -940,11 +940,16 @@ class DirectDepositAccountServiceIntegrationTests extends BaseIntegrationTestCas
     }
 
     private def newDirectDepositAccount(pidm=DEFAULT_SESSION_PIDM) {
-        def bankRoutingInfo = new BankRoutingInfo()
-
-        bankRoutingInfo.bankRoutingNum = 234798944
-        bankRoutingInfo.bankName = "TTTTT"
-        bankRoutingInfo.save( failOnError: true, flush: true )
+        def bankinfo = BankRoutingInfo.fetchByRoutingNum("234798944")
+        def bankRoutingInfo
+        if (bankinfo != null && bankinfo.size() > 0) {
+            bankRoutingInfo = bankinfo[0]
+        } else {
+            bankRoutingInfo = new BankRoutingInfo()
+            bankRoutingInfo.bankRoutingNum = 234798944
+            bankRoutingInfo.bankName = "TTTTT"
+            bankRoutingInfo.save(failOnError: true, flush: true)
+        }
 
         def domain = new DirectDepositAccount(
             pidm: pidm,

@@ -42,7 +42,8 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
 
     def oldHoldersConfig = Holders.config
     def testBankRoutingInfo0 = [
-        bankRoutingNum: '234798944'
+        bankRoutingNum: '234798944',
+        bankName:'TTTT'
     ]
 
     def testAccountMap0 = [
@@ -77,7 +78,9 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     public void setUp() {
         formContext = ['GUAGMNU']
         super.setUp()
-
+        if (oldHoldersConfig == null && Holders.config != null) {
+            oldHoldersConfig = Holders.config
+        }
     }
 
 
@@ -843,38 +846,10 @@ class DirectDepositAccountCompositeServiceIntegrationTests extends BaseIntegrati
     }
 
     private setupHoldersConfigWithRolesAllowingUpdates() {
-        Holders.config = [
-                grails: [
-                        plugin: [
-                                springsecurity: [
-                                        interceptUrlMap: [
-                                                '/ssb/UpdateAccount/**': [
-                                                        'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M',
-                                                        'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M'
-                                                ]
-                                        ]
-                                ]
-                        ]
-                ]
-        ]
-
+        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: ['ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_M', 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_M']]]]))
     }
 
     private setupHoldersConfigWithRolesNotAllowingUpdates() {
-        Holders.config = [
-                grails: [
-                        plugin: [
-                                springsecurity: [
-                                        interceptUrlMap: [
-                                                '/ssb/UpdateAccount/**': [
-                                                        'ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q',
-                                                        'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q'
-                                                ]
-                                        ]
-                                ]
-                        ]
-                ]
-        ]
-
+        Holders.setConfig(oldHoldersConfig.merge(["grails.plugin.springsecurity.interceptUrlMap":[[pattern:'/ssb/UpdateAccount/**', access: ['ROLE_SELFSERVICE-EMPLOYEE_BAN_DEFAULT_Q', 'ROLE_SELFSERVICE-STUDENT_BAN_DEFAULT_Q']]]]))
     }
 }
